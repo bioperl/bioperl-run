@@ -1,13 +1,46 @@
 # $Id$
 #
+# BioPerl modules for Pise
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
-Bio::Tools::Run::PiseApplication
+Bio::Tools::Run::PiseApplication - A class manage Pise programs information, configuring parameters and submit jobs. 
 
 =head1 SYNOPSIS
 
-  #
+  use Bio::Tools::Run::AnalysisFactory::Pise;
+
+  # Build a Pise factory       
+  my $factory = new Bio::Tools::Run::AnalysisFactory::Pise();
+
+  # Then create an application object (Pise::Run::Tools::PiseApplication):
+  my $program = $factory->program('genscan');
+
+  # Set parameters
+  $program->seq($ARGV[0]);
+
+  # Next, run the program
+  # (notice that you can set some parameters at run time)
+  my $job = $program->run(-parameter_file => "Arabidopsis.smat");
+
+  # Test for submission errors:
+  if ($job->error) {
+     print "Job submission error (",$job->jobid,"):\n";
+     print $job->error_message,"\n";
+     exit;
+  }
+
+  # Get results
+  print STDERR $job->content('genscan.out');
+  # or:
+  my $result_file = $job->save('genscan.out');
+
 
 =head1 DESCRIPTION
 
@@ -18,8 +51,7 @@ Bio::Tools::Run::PiseApplication::program classes.
 This class is preferably created through the 
 Bio::Tools::Run::AnalysisFactory::Pise factory:
 
-  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
-                                              -email => 'me@myhome');
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
   my $program = $factory->program('mfold');
 
 By submitting a job, you create a Bio::Tools::Run::PiseJob instance with 
@@ -75,7 +107,7 @@ See Bio::Tools::Run::PiseJob for how to fetch results and chain programs.
 
 =head2 Remote and email parameters
 
-Email must be set at factory creation.
+Email can be set at factory creation.
 
 The remote parameter stands for the actual CGI location. There are default 
 values for most of Pise programs.
@@ -89,17 +121,64 @@ You can either set remote at:
   my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
                                  -remote = 'http://somewhere/Pise/cgi-bin',
 			       	 -email => 'me@myhome');
+
 =item 2 program creation
 
   my $program = $factory->program('water', 
 		    -remote = 'http://somewhere/Pise/cgi-bin/water.pl'
-					   )
+				  );
+
 =item 3 any time before running:
 
   $program->remote('http://somewhere/Pise/cgi-bin/water.pl');
   $program->run();
 
+=item 4 when running:
+
+  $job = $program->run(-remote => 'http://somewhere/Pise/cgi-bin/water.pl');
+
 =back
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+Bio::Tools::Run::AnalysisFactory::Pise
+Bio::Tools::Run::PiseJob
 
 =cut
 

@@ -1,13 +1,47 @@
 # $Id$
+# BioPerl modules for Pise
 #
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
-Bio::Tools::Run::PiseJob
+Bio::Tools::Run::PiseJob - A class to manage Pise jobs.
 
 =head1 SYNOPSIS
 
-  #
+  use Bio::Tools::Run::AnalysisFactory::Pise;
+
+  # Build a Pise factory       
+  my $factory = new Bio::Tools::Run::AnalysisFactory::Pise();
+
+  # Then create an application object (Pise::Run::Tools::PiseApplication):
+  my $program = $factory->program('genscan');
+
+  # Set parameters
+  $program->seq($ARGV[0]);
+
+  # Next, run the program
+  # (notice that you can set some parameters at run time)
+  my $job = $program->run(-parameter_file => "Arabidopsis.smat");
+
+  my $job = $program->run(-seq => $ARGV[0]);
+
+  # Test for submission errors:
+  if ($job->error) {
+     print "Job submission error (",$job->jobid,"):\n";
+     print $job->error_message,"\n";
+     exit;
+  }
+
+  # Get results
+  print STDERR $job->content('genscan.out');
+  # or:
+  my $result_file = $job->save('genscan.out');
+
 
 =head1 DESCRIPTION
 
@@ -42,8 +76,8 @@ You can feed a result file as a filehandle to a bioperl parser :
 
 ... or to another pise job:
 
-   my $neighbor = $factory->program ('neighbor',
-				     infile => $job->fh('outfile'));
+  my $neighbor = $factory->program ('neighbor',
+			            -infile => $job->fh('outfile'));
 
 You can lookup up for a type of result that could be piped to another
 Pise program:
@@ -56,6 +90,47 @@ produced by e.g DNADIST or PROTDIST.
 All the available pipe types may be obtained by:
 
     $job->lookup_piped_files;
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+Bio::Tools::Run::AnalysisFactory::Pise
+Bio::Tools::Run::PiseApplication
 
 =cut
 
@@ -533,7 +608,7 @@ sub content {
 
 sub stdout {
     my $self = shift;
-    
+
     if (! $self->{JOBID}) {
 	$self->throw("Bio::Tools::Run::PiseJob::stdout: your job has no jobid");
     }
@@ -675,7 +750,8 @@ sub results_type {
 
     my $jobid = $self->{JOBID};
     my $application = $self->{APPLICATION};
-    
+    my $email = $self->{EMAIL};
+
     my $scratch_dir = (defined $self->{SCRATCH_DIR}) ? $self->{SCRATCH_DIR} : "" ;
     my $command = $application->program;
     if ($scratch_dir eq "") {
@@ -690,7 +766,6 @@ sub results_type {
     $remote =~ s/$command\.pl//;
     $remote .= "lib/results.pl";
     print STDERR "Bio::Tools::Run::PiseJob::results_type: running $remote to change results type ($results_type scratch_dir: $scratch_dir)\n" if $self->{VERBOSE};
-    my $email = $self->{EMAIL};
 
     my $res = $ua->request(POST $remote, [command => $command, email => $email, results_type => $results_type, scratch_dir => $scratch_dir]);
 
@@ -780,15 +855,17 @@ sub _init {
 			# not restricted to Sequence type (for
 			# Sequence type in Pise implies conversion)
 			$self->{ARGS}{$param . "_data"} = $value->seq;
+
 		    } elsif ($value->isa("Bio::SimpleAlign")) {
 			# not restricted to Sequence type (for
 			# Sequence type in Pise implies conversion)
-
+		 
 			#my $tmpfile = POSIX::tmpnam;
 			my $tmpfile = $param . ".fasta";
 			# bioperl 1.0
 			my $out = Bio::AlignIO->new(-file => ">$tmpfile", '-format' => 'fasta');
 			$out->write_aln($value);
+			#close(TMP);
 			push (@{$self->{TMPFILES}}, $tmpfile);
 			print STDERR "Bio::Tools::Run::PiseJob::_init written alignment to $tmpfile\n" if $self->{VERBOSE};
 			$self->{ARGS}{$param} = $tmpfile;
@@ -985,7 +1062,6 @@ sub _parse {
 	    $self->{PIPED_FILE_TYPE}{$result} = $handler->piped_file_type($result);
 	}
 	my %pipes = $handler->pipes;
-	
         if ( %pipes) {
 	    foreach my $f (keys %pipes) {
 		if (defined $pipes{$f}) {
