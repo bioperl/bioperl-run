@@ -493,7 +493,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::TCoffee;
 
-use vars qw($AUTOLOAD @ISA $TMPOUTFILE $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $TMPOUTFILE $PROGRAMNAME $PROGRAM
             @TCOFFEE_PARAMS @TCOFFEE_SWITCHES @OTHER_SWITCHES %OK_FIELD
             );
 use strict;
@@ -504,8 +504,8 @@ use Bio::AlignIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
-
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Factory::ApplicationFactoryI);
+use  Bio::Tools::Run::WrapperBase;
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase Bio::Factory::ApplicationFactoryI);
 
 # You will need to enable TCoffee to find the tcoffee program. This can be done
 # in (at least) twp ways:
@@ -516,10 +516,10 @@ use Bio::Factory::ApplicationFactoryI;
 #	BEGIN {$ENV{TCOFFEEDIR} = '/home/progs/tcoffee'; }
 
 BEGIN {
-
-    $PROGRAMDIR = $ENV{TCOFFEEDIR} || '';
-    $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-				      't_coffee'.($^O =~ /mswin/i ?'.exe':''));
+    $PROGRAMNAME = 't_coffee' . ($^O =~ /mswin/i ?'.exe':'');
+    if( defined $ENV{'TCOFFEEDIR'} ) {
+	$PROGRAM = Bio::Root::IO->catfile($ENV{'TCOFFEEDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
+    }
 
     @TCOFFEE_PARAMS = qw(IN TYPE PARAMETERS DO_NORMALISE EXTEND
 			 DP_MODE KTUPLE NDIAGS DIAG_MODE SIM_MATRIX
@@ -541,10 +541,9 @@ sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
-    $self->_initialize_io();
 
-    my ($attr, $value);
-    (undef,$TMPOUTFILE) = $self->tempfile();
+    my ($attr, $value);    
+    (undef,$TMPOUTFILE) = $self->io->tempfile();
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -566,24 +565,59 @@ sub AUTOLOAD {
 }
 
 
-=head2  exists_tcoffee
+=head2 executable
 
- Title   : exists_tcoffee
- Usage   : $coffeefound = Bio::Tools::Run::Alignment::TCoffee->exists_tcoffee()
- Function: Determine whether tcoffee program can be found on current host
- Example :
- Returns : 1 if tcoffee program found at expected location, 0 otherwise.
- Args    :  none
+ Title   : executable
+ Usage   : my $exe = $codeml->executable();
+ Function: Finds the full path to the 'codeml' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to 
+           [optional] boolean flag whether or not warn when exe is not found
+
 
 =cut
 
+sub executable{
+   my ($self, $exe, $warn) = @_;
 
-sub exists_tcoffee {
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-	$PROGRAM = $f if( -e $f );
-	return 1;
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+	   $self->{'_pathtoexe'} = $PROGRAM;
+       } else { 
+	   my $exe;
+	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+	       -x $exe ) {
+	       $self->{'_pathtoexe'} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+	       $self->{'_pathtoexe'} = undef;
+	   }
+       }
+   }
+   $self->{'_pathtoexe'};
+}
+
+=head2 error_string
+
+ Title   : error_string
+ Usage   : $obj->error_string($newval)
+ Function: Where the output from the last analysus run is stored.
+ Returns : value of error_string
+ Args    : newvalue (optional)
+
+
+=cut
+
+sub error_string{
+   my ($self,$value) = @_;
+   if( defined $value) {
+      $self->{'error_string'} = $value;
     }
-    return 0;
+    return $self->{'error_string'};
+
 }
 
 =head2  version
@@ -599,9 +633,9 @@ sub exists_tcoffee {
 
 sub version {
     my ($self) = @_;
-
-    return undef unless $self->exists_tcoffee;
-    my $string = `t_coffee -quiet=stdout 2>&1` ;
+    my $exe;
+    return undef unless $exe = $self->executable;
+    my $string = `$exe -quiet=stdout 2>&1` ;
     $string =~ /Version_([\d.]+)/;
     return $1 || undef;
 
@@ -642,8 +676,10 @@ sub align {
 
     my $param_string = $self->_setparams();
 
-# run tcoffee
+    # run tcoffee
     my $aln = &_run($self, 'align', $infilename, $param_string);
+
+    return $aln;
 }
 #################################################
 
@@ -714,14 +750,21 @@ sub _run {
 	push @{$self->{'_in'}}, "$infile1", "$infile2";	
     }
     my $param_string = shift;
-    my $instring = "-in=".join(",", @{$self->{'_in'}});
-    my $commandstring = $PROGRAM." $instring".
+    my $instring = join(', ', ("-in=".join(",", @{$self->{'_in'}}),
+			       qw(Mlalign_id_pair Mclustalw_pair)));
+#    my ($paramfh,$parameterFile) = $self->io->tempfile;
+#    print $paramfh ( "$instring\n-output=gcg$param_string") ;
+#    close($paramfh);
+#    my $commandstring = "t_coffee -output=gcg -parameters $parameterFile" ;    ##MJL
+    my $commandstring = $self->executable." $instring".
 	" -output=gcg". " $param_string";
 
     $self->debug( "tcoffee command = $commandstring \n");
 
     my $status = system($commandstring);
+
     $self->throw( "TCoffee call crashed: $? [command $commandstring]\n") if( -z $TMPOUTFILE );
+#    unlink ($parameterFile);
 
     my $outfile = $self->outfile() || $TMPOUTFILE;
 
@@ -777,7 +820,7 @@ sub _setinput {
 #  $input may be an array of BioSeq objects...
     elsif (ref($input) =~ /ARRAY/i ) {
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$infilename) = $self->tempfile();
+	($tfh,$infilename) = $self->io->tempfile();
 	$temp =  Bio::SeqIO->new('-fh' => $tfh,
 				'-format' => 'Fasta');
 	unless (scalar(@$input) > 1) {return 0;} # Need at least 2 seqs for alignment
@@ -790,8 +833,8 @@ sub _setinput {
 #  $input may be a SimpleAlign object.
     elsif ( $input->isa("Bio::SimpleAlign") ) {
 	#  Open temporary file for both reading & writing of SimpleAlign object
-	($tfh, $infilename) = $self->tempfile() if ($suffix ==1
-						    || $suffix == 2 );
+	($tfh, $infilename) = $self->io->tempfile() if ($suffix ==1
+							|| $suffix == 2 );
 	$temp =  Bio::AlignIO->new(-fh=>$tfh,
 				   '-format' => 'Fasta');
 	$temp->write_aln($input);
@@ -802,7 +845,7 @@ sub _setinput {
 # a previous alignment)
     elsif ( $input->isa("Bio::PrimarySeqI") && $suffix==2) {
         #  Open temporary file for both reading & writing of BioSeq object
-	($tfh,$infilename) = $self->tempfile();
+	($tfh,$infilename) = $self->io->tempfile();
 	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
 	$temp->write_seq($input);
 	return $infilename;
@@ -854,6 +897,87 @@ sub _setparams {
 
     if ($self->quiet() || $self->verbose < 0) { $param_string .= ' -quiet';}
     return $param_string;
+}
+
+=head1 Bio::Tools::Run::Wrapper methods
+
+=cut
+
+=head2 no_param_checks
+
+ Title   : no_param_checks
+ Usage   : $obj->no_param_checks($newval)
+ Function: Boolean flag as to whether or not we should
+           trust the sanity checks for parameter values  
+ Returns : value of no_param_checks
+ Args    : newvalue (optional)
+
+
+=cut
+
+=head2 save_tempfiles
+
+ Title   : save_tempfiles
+ Usage   : $obj->save_tempfiles($newval)
+ Function: 
+ Returns : value of save_tempfiles
+ Args    : newvalue (optional)
+
+
+=cut
+
+=head2 outfile_name
+
+ Title   : outfile_name
+ Usage   : my $outfile = $codeml->outfile_name();
+ Function: Get/Set the name of the output file for this run
+           (if you wanted to do something special)
+ Returns : string
+ Args    : [optional] string to set value to
+
+
+=cut
+
+
+=head2 tempdir
+
+ Title   : tempdir
+ Usage   : my $tmpdir = $self->tempdir();
+ Function: Retrieve a temporary directory name (which is created)
+ Returns : string which is the name of the temporary directory
+ Args    : none
+
+
+=cut
+
+=head2 cleanup
+
+ Title   : cleanup
+ Usage   : $codeml->cleanup();
+ Function: Will cleanup the tempdir directory after a PAML run
+ Returns : none
+ Args    : none
+
+
+=cut
+
+=head2 io
+
+ Title   : io
+ Usage   : $obj->io($newval)
+ Function:  Gets a L<Bio::Root::IO> object
+ Returns : L<Bio::Root::IO>
+ Args    : none
+
+
+=cut
+
+sub DESTROY {
+    my $self= shift;
+    unless ( $self->save_tempfiles ) {
+	$self->cleanup();
+    }
+    $self->SUPER::DESTROY();
 }
 
 1; # Needed to keep compiler happy
