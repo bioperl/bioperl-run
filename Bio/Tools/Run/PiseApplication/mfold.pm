@@ -47,9 +47,6 @@ Bio::Tools::Run::PiseApplication::mfold
 		NA (Excl)
 			RNA (default) or DNA (NA)
 
-		NUM (Integer)
-			NUM=# fold the `#'th sequence in the input file
-
 		T (Integer)
 			Temperature (T)
 
@@ -209,7 +206,6 @@ sub new {
 	"LC", 	# Sequence type (default = linear) (LC)
 	"NA", 	# RNA (default) or DNA (NA)
 	"control", 	# Control options
-	"NUM", 	# NUM=# fold the `#'th sequence in the input file
 	"T", 	# Temperature (T)
 	"P", 	# Percent (P)
 	"NA_CONC", 	# Na+ molar concentration (NA_CONC)
@@ -232,7 +228,6 @@ sub new {
 	"LC" => 'Excl',
 	"NA" => 'Excl',
 	"control" => 'Paragraph',
-	"NUM" => 'Integer',
 	"T" => 'Integer',
 	"P" => 'Integer',
 	"NA_CONC" => 'Float',
@@ -263,9 +258,6 @@ sub new {
 		"perl" => '($value and $value ne $vdef)?" NA=$value":""',
 	},
 	"control" => {
-	},
-	"NUM" => {
-		"perl" => '($value and $value ne $vdef)?" NUM=$value":""',
 	},
 	"T" => {
 		"perl" => '(defined $value and $value ne $vdef)?" T=$value":""',
@@ -314,7 +306,7 @@ sub new {
     };
 
     $self->{SEQFMT}  = {
-	"SEQ" => [1,2,4,8],
+	"SEQ" => [1,2,4],
 
     };
 
@@ -324,7 +316,6 @@ sub new {
 	"LC" => 2,
 	"NA" => 2,
 	"control" => 3,
-	"NUM" => 3,
 	"T" => 3,
 	"P" => 3,
 	"NA_CONC" => 3,
@@ -348,18 +339,17 @@ sub new {
 	"ANN",
 	"MODE",
 	"LC",
-	"P",
 	"NA_CONC",
 	"MG_CONC",
 	"W",
 	"MAXBP",
 	"MAX",
 	"control",
-	"NUM",
+	"T",
 	"ROT_ANG",
 	"START",
 	"STOP",
-	"T",
+	"P",
 
     ];
 
@@ -373,7 +363,6 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
-	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
 	"NA_CONC" => 0,
@@ -396,7 +385,6 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
-	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
 	"NA_CONC" => 0,
@@ -419,7 +407,6 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
-	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
 	"NA_CONC" => 0,
@@ -442,7 +429,6 @@ sub new {
 	"LC" => "Sequence type (default = linear) (LC)",
 	"NA" => "RNA (default) or DNA (NA)",
 	"control" => "Control options",
-	"NUM" => "NUM=# fold the `#'th sequence in the input file",
 	"T" => "Temperature (T)",
 	"P" => "Percent (P)",
 	"NA_CONC" => "Na+ molar concentration (NA_CONC)",
@@ -465,7 +451,6 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
-	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
 	"NA_CONC" => 0,
@@ -486,7 +471,7 @@ sub new {
 
 	"LC" => ['linear','linear','circular','circular',],
 	"NA" => ['RNA','RNA','DNA','DNA',],
-	"control" => ['NUM','T','P','NA_CONC','MG_CONC','W','MAXBP','MAX','ANN','MODE','ROT_ANG','START','STOP',],
+	"control" => ['T','P','NA_CONC','MG_CONC','W','MAXBP','MAX','ANN','MODE','ROT_ANG','START','STOP',],
 	"ANN" => ['none','none','p-num','p-num','ss-count','ss-count',],
 	"MODE" => ['auto','auto','bases','bases','lines','lines',],
     };
@@ -502,7 +487,6 @@ sub new {
     $self->{VDEF}  = {
 	"LC" => 'linear',
 	"NA" => 'RNA',
-	"NUM" => '1',
 	"T" => '37',
 	"P" => '5',
 	"NA_CONC" => '1.0',
@@ -521,7 +505,6 @@ sub new {
 	"LC" => { "perl" => '1' },
 	"NA" => { "perl" => '1' },
 	"control" => { "perl" => '1' },
-	"NUM" => { "perl" => '1' },
 	"T" => { "perl" => '1' },
 	"P" => { "perl" => '1' },
 	"NA_CONC" => { "perl" => '1' },
@@ -564,7 +547,6 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
-	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
 	"NA_CONC" => 0,
@@ -587,7 +569,6 @@ sub new {
 	"LC" => 1,
 	"NA" => 1,
 	"control" => 0,
-	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
 	"NA_CONC" => 0,
@@ -610,9 +591,7 @@ sub new {
 
     $self->{COMMENT}  = {
 	"SEQ" => [
-		"SEQ : The user must supply the name of a sequence file, called `file_name\' here. If `file_name\' ends with a suffix, that is, a period (`.\') followed by other characters, then the suffix is removed and the result is called `fold_name\'. If no periods exist in `file_name\', then `fold_name\' = `file_name\'. For example, if the sequence is stored in `trna.seq\', then `file_name\' becomes `trna\'. If, on the other hand, the sequence file is named `trna-file\', then `file_name\' becomes `trna-file\'. The `file_name\', which may contain periods, becomes the `prefix\' for all the output files, such as `file_name.out\', `file_name.det\' and others.",
-		"Accepted sequence file formats are GenBank, EMBL, FASTA and IntelliGenetics. The sequence file may contain multiple sequences. At present, the mfold script will fold the first sequence by default.",
-		"NUM=`#\' may be added that directs the  script to fold the `#\'th sequence in the input file.",
+		"SEQ : The sequence file may contain multiple sequences.At present, the mfold script will fold the first sequence by default.",
 	],
 	"P" => [
 		"P : This is the percent suboptimality for computing the energy dotplot and suboptimal foldings. The default value is 5%. This parametercontrols the value of the free energy increment, delta (deltaG).Delta of deltaG is set to P% of deltaG, the computed minimum freeenergy.  The energy dot plot shows only those base pairs that are infoldings with free energy minus or equal to deltaG plus delta(deltaG). Similarly, the free energies of computed foldings are in therange from deltaG to deltaG plus delta (deltaG). No matter the valueof P, mfold currently keeps delta (deltaG) in the range [1,12](kcal/mole).",
