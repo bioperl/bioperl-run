@@ -71,7 +71,7 @@ sub MY::postamble {
 
 my $NAME     = 'Bio';
 my $DISTNAME = "bioperl-run";
-my $VERSION  = "1.00";
+my $VERSION  = "1.2.2";
 
 my $proceed = prompt("Do you want to run the Pise tests (requires a network connection) y/n",'n');
 if( $proceed =~ /^[yY]/) {
