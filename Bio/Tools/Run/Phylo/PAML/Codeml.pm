@@ -340,7 +340,7 @@ sub new {
   my($class,@args) = @_;
 
   my $self = $class->SUPER::new(@args);
-  $self->{_branchLengths} = 0;
+  $self->{'_branchLengths'} = 0;
   my ($aln, $tree, $st, $params, $exe, 
       $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES 
 				    PARAMS EXECUTABLE BRANCHLENGTHS)],
@@ -351,8 +351,13 @@ sub new {
   defined $exe && $self->executable($exe);
   
   $self->set_default_parameters();
-  defined $params && map { $self->set_parameter($_, $$params{$_}) } keys %$params;
-
+  if( defined $params ) {
+      if( ref($flags) !~ /HASH/i ) { 
+	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
+      } else {
+	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
+      }
+  }
   return $self;
 }
 
@@ -376,7 +381,6 @@ sub run{
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
-   my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
    my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
 
    # now let's print the codeml.ctl file.
@@ -391,13 +395,15 @@ sub run{
    my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				 '-fh'          => $tempseqFH,
 				 '-interleaved' => 0,
-				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length());
+				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
    
    $alnout->write_aln($aln);
    $alnout->close();
    undef $alnout;   
    close($tempseqFH);
    if( $tree ) {
+       my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+
        my $treeout = new Bio::TreeIO('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
@@ -416,7 +422,7 @@ sub run{
        chdir($tmpdir);
        my $codemlexe = $self->executable();
        $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
-       open(RUN, "echo $self->{_branchLengths} | $codemlexe |");
+       open(RUN, "echo $self->{'_branchLengths'} | $codemlexe |");
        my @output = <RUN>;
        close(RUN);
        $self->error_string(join('',@output));
@@ -549,12 +555,12 @@ sub tree {
 	   $self->warn("Must specify a valid Bio::Tree::TreeI object to the alignment function");
        }
        $self->{'_tree'} = $tree;
-       if ( defined $params{branchLengths} ) {
-	 my $ubl = $params{branchLengths};
+       if ( defined $params{'_branchLengths'} ) {
+	 my $ubl = $params{'_branchLengths'};
 	 if ($ubl !~ m/^(0|1|2)$/) {
 	   $self->throw("The branchLengths parameter to tree() must be 0 (ignore), 1 (initial values) or 2 (fixed values) only");
 	 }
-	 $self->{_branchLengths} = $ubl;
+	 $self->{'_branchLengths'} = $ubl;
        }
    }
    return $self->{'_tree'};
