@@ -264,7 +264,8 @@ sub _maskedfile {
 	# add some sanity chex for writability?
     }
     elsif (!$self->{'maskedfile'}) {
-	$self->{'maskedfile'} = $self->io->tempfile(-dir=>$self->tempdir());
+	($self->{'maskedfh'},$self->{'maskedfile'}) = 
+	    $self->io->tempfile(-dir=>$self->tempdir());
     }
     return $self->{'maskedfile'};
 
