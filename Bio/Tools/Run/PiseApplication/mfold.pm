@@ -25,7 +25,7 @@ Bio::Tools::Run::PiseApplication::mfold
 
 	References:
 
-		A.E. Walter, D.H. Turner, J. Kim, M.H. Lyttle, P. Muller, D.H. Mathews and M. Zuker Coaxial stacking of helixes enhances binding of oligoribonucleotides and improves predictions of RNA folding. Proc. Natl. Acad. Sci. USA 91, 9218-9222 (1994)
+		M. Zuker, D.H. Mathews and D.H. Turner Algorithms and Thermodynamics for RNA Secondary Structure Prediction: A Practical Guide in RNA Biochemistry and Biotechnology, J. Barciszewski and B.F.C. Clark, eds., NATO ASI Series, Kluwer Academic Publishers, (1999) 
 
 
 
@@ -47,17 +47,38 @@ Bio::Tools::Run::PiseApplication::mfold
 		NA (Excl)
 			RNA (default) or DNA (NA)
 
+		NUM (Integer)
+			NUM=# fold the `#'th sequence in the input file
+
 		T (Integer)
 			Temperature (T)
 
 		P (Integer)
 			Percent (P)
 
+		NA_CONC (Float)
+			Na+ molar concentration (NA_CONC)
+
+		MG_CONC (Float)
+			Mg++ molar concentration (MG_CONC)
+
 		W (Integer)
 			Window parameter (default - set by sequence length) (W)
 
+		MAXBP (Integer)
+			MAXBP: Max base pair distance (default - no limit)
+
 		MAX (Integer)
-			Maximum number of foldings to be computed (MAX)
+			MAX: Maximum number of foldings to be computed
+
+		ANN (Excl)
+			Structure annotation type (default=none) (ANN)
+
+		MODE (Excl)
+			Structure display mode (default=auto) (MODE)
+
+		ROT_ANG (Integer)
+			Structure rotation angle (ROT_ANG)
 
 		START (Integer)
 			5' base number (START)
@@ -166,7 +187,7 @@ sub new {
 
     $self->{REFERENCE}   = [
 
-         "A.E. Walter, D.H. Turner, J. Kim, M.H. Lyttle, P. Muller, D.H. Mathews and M. Zuker Coaxial stacking of helixes enhances binding of oligoribonucleotides and improves predictions of RNA folding. Proc. Natl. Acad. Sci. USA 91, 9218-9222 (1994)",
+         "M. Zuker, D.H. Mathews and D.H. Turner Algorithms and Thermodynamics for RNA Secondary Structure Prediction: A Practical Guide in RNA Biochemistry and Biotechnology, J. Barciszewski and B.F.C. Clark, eds., NATO ASI Series, Kluwer Academic Publishers, (1999) ",
  ];
 
     $self->{_INTERFACE_STANDOUT} = undef;
@@ -178,9 +199,7 @@ sub new {
 	"LC",
 	"NA",
 	"control",
-	"htmlfile",
 	"outfiles",
-	"psfiles",
 
     ];
 
@@ -190,15 +209,20 @@ sub new {
 	"LC", 	# Sequence type (default = linear) (LC)
 	"NA", 	# RNA (default) or DNA (NA)
 	"control", 	# Control options
+	"NUM", 	# NUM=# fold the `#'th sequence in the input file
 	"T", 	# Temperature (T)
 	"P", 	# Percent (P)
+	"NA_CONC", 	# Na+ molar concentration (NA_CONC)
+	"MG_CONC", 	# Mg++ molar concentration (MG_CONC)
 	"W", 	# Window parameter (default - set by sequence length) (W)
-	"MAX", 	# Maximum number of foldings to be computed (MAX)
+	"MAXBP", 	# MAXBP: Max base pair distance (default - no limit)
+	"MAX", 	# MAX: Maximum number of foldings to be computed
+	"ANN", 	# Structure annotation type (default=none) (ANN)
+	"MODE", 	# Structure display mode (default=auto) (MODE)
+	"ROT_ANG", 	# Structure rotation angle (ROT_ANG)
 	"START", 	# 5' base number (START)
 	"STOP", 	# 3' base number (default = end) (STOP)
-	"htmlfile",
 	"outfiles",
-	"psfiles",
 
     ];
 
@@ -208,69 +232,89 @@ sub new {
 	"LC" => 'Excl',
 	"NA" => 'Excl',
 	"control" => 'Paragraph',
+	"NUM" => 'Integer',
 	"T" => 'Integer',
 	"P" => 'Integer',
+	"NA_CONC" => 'Float',
+	"MG_CONC" => 'Float',
 	"W" => 'Integer',
+	"MAXBP" => 'Integer',
 	"MAX" => 'Integer',
+	"ANN" => 'Excl',
+	"MODE" => 'Excl',
+	"ROT_ANG" => 'Integer',
 	"START" => 'Integer',
 	"STOP" => 'Integer',
-	"htmlfile" => 'Results',
 	"outfiles" => 'Results',
-	"psfiles" => 'Results',
 
     };
 
     $self->{FORMAT}  = {
 	"mfold" => {
-		"perl" => '($_html)? "mfold-html" : "mfold" ',
+		"perl" => ' "mfold RUN_TYPE=html" ',
 	},
 	"SEQ" => {
 		"perl" => '  " SEQ=$value"',
 	},
 	"LC" => {
-		"perl" => '($value && $value ne $vdef)?" LC=$value":""',
+		"perl" => '($value and $value ne $vdef)?" LC=$value":""',
 	},
 	"NA" => {
-		"perl" => '($value && $value ne $vdef)?" NA=$value":""',
+		"perl" => '($value and $value ne $vdef)?" NA=$value":""',
 	},
 	"control" => {
 	},
+	"NUM" => {
+		"perl" => '($value and $value ne $vdef)?" NUM=$value":""',
+	},
 	"T" => {
-		"perl" => '(defined $value && $value ne $vdef)?" T=$value":""',
+		"perl" => '(defined $value and $value ne $vdef)?" T=$value":""',
 	},
 	"P" => {
-		"perl" => '(defined $value && $value ne $vdef)?" P=$value":""',
+		"perl" => '(defined $value and $value ne $vdef)?" P=$value":""',
+	},
+	"NA_CONC" => {
+		"perl" => '(defined $value and $value ne $vdef)?" NA_CONC=$value":""',
+	},
+	"MG_CONC" => {
+		"perl" => '(defined $value and $value ne $vdef)?" MG_CONC=$value":""',
 	},
 	"W" => {
 		"perl" => '(defined $value)?" W=$value":""',
 	},
+	"MAXBP" => {
+		"perl" => '($value)?" MAXBP=$value":""',
+	},
 	"MAX" => {
-		"perl" => '(defined $value && $value ne $vdef)?" MAX=$value":""',
+		"perl" => '($value and $value ne $vdef)?" MAX=$value":""',
+	},
+	"ANN" => {
+		"perl" => '($value and $value ne $vdef)?" ANN=$value":""',
+	},
+	"MODE" => {
+		"perl" => '($value and $value ne $vdef)?" MODE=$value":""',
+	},
+	"ROT_ANG" => {
+		"perl" => '($value and $value ne $vdef)?" ROT_ANG=$value":""',
 	},
 	"START" => {
-		"perl" => '(defined $value && $value ne $vdef)?" START=$value":""',
+		"perl" => '($value and $value ne $vdef)?" START=$value":""',
 	},
 	"STOP" => {
-		"perl" => '(defined $value)?" STOP=$value":""',
-	},
-	"htmlfile" => {
+		"perl" => '($value)?" STOP=$value":""',
 	},
 	"outfiles" => {
-	},
-	"psfiles" => {
 	},
 
     };
 
     $self->{FILENAMES}  = {
-	"htmlfile" => '*.html',
-	"outfiles" => '*.pnt *.plot *.ct',
-	"psfiles" => '*.ps',
+	"outfiles" => '*.pnt *.plot *.ct *.html *.gif',
 
     };
 
     $self->{SEQFMT}  = {
-	"SEQ" => [1,2,3,4,5,9],
+	"SEQ" => [1,2,4,8],
 
     };
 
@@ -280,10 +324,17 @@ sub new {
 	"LC" => 2,
 	"NA" => 2,
 	"control" => 3,
+	"NUM" => 3,
 	"T" => 3,
 	"P" => 3,
+	"NA_CONC" => 3,
+	"MG_CONC" => 3,
 	"W" => 3,
+	"MAXBP" => 3,
 	"MAX" => 3,
+	"ANN" => 2,
+	"MODE" => 2,
+	"ROT_ANG" => 3,
 	"START" => 3,
 	"STOP" => 3,
 
@@ -291,19 +342,24 @@ sub new {
 
     $self->{BY_GROUP_PARAMETERS}  = [
 	"mfold",
-	"htmlfile",
 	"outfiles",
-	"psfiles",
 	"SEQ",
 	"NA",
+	"ANN",
+	"MODE",
 	"LC",
+	"P",
+	"NA_CONC",
+	"MG_CONC",
 	"W",
+	"MAXBP",
 	"MAX",
+	"control",
+	"NUM",
+	"ROT_ANG",
 	"START",
 	"STOP",
-	"control",
 	"T",
-	"P",
 
     ];
 
@@ -317,15 +373,20 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
+	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
+	"NA_CONC" => 0,
+	"MG_CONC" => 0,
 	"W" => 0,
+	"MAXBP" => 0,
 	"MAX" => 0,
+	"ANN" => 0,
+	"MODE" => 0,
+	"ROT_ANG" => 0,
 	"START" => 0,
 	"STOP" => 0,
-	"htmlfile" => 0,
 	"outfiles" => 0,
-	"psfiles" => 0,
 
     };
 
@@ -335,15 +396,20 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
+	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
+	"NA_CONC" => 0,
+	"MG_CONC" => 0,
 	"W" => 0,
+	"MAXBP" => 0,
 	"MAX" => 0,
+	"ANN" => 0,
+	"MODE" => 0,
+	"ROT_ANG" => 0,
 	"START" => 0,
 	"STOP" => 0,
-	"htmlfile" => 0,
 	"outfiles" => 0,
-	"psfiles" => 0,
 
     };
 
@@ -353,15 +419,20 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
+	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
+	"NA_CONC" => 0,
+	"MG_CONC" => 0,
 	"W" => 0,
+	"MAXBP" => 0,
 	"MAX" => 0,
+	"ANN" => 0,
+	"MODE" => 0,
+	"ROT_ANG" => 0,
 	"START" => 0,
 	"STOP" => 0,
-	"htmlfile" => 0,
 	"outfiles" => 0,
-	"psfiles" => 0,
 
     };
 
@@ -371,15 +442,20 @@ sub new {
 	"LC" => "Sequence type (default = linear) (LC)",
 	"NA" => "RNA (default) or DNA (NA)",
 	"control" => "Control options",
+	"NUM" => "NUM=# fold the `#'th sequence in the input file",
 	"T" => "Temperature (T)",
 	"P" => "Percent (P)",
+	"NA_CONC" => "Na+ molar concentration (NA_CONC)",
+	"MG_CONC" => "Mg++ molar concentration (MG_CONC)",
 	"W" => "Window parameter (default - set by sequence length) (W)",
-	"MAX" => "Maximum number of foldings to be computed (MAX)",
+	"MAXBP" => "MAXBP: Max base pair distance (default - no limit)",
+	"MAX" => "MAX: Maximum number of foldings to be computed",
+	"ANN" => "Structure annotation type (default=none) (ANN)",
+	"MODE" => "Structure display mode (default=auto) (MODE)",
+	"ROT_ANG" => "Structure rotation angle (ROT_ANG)",
 	"START" => "5' base number (START)",
 	"STOP" => "3' base number (default = end) (STOP)",
-	"htmlfile" => "",
 	"outfiles" => "",
-	"psfiles" => "",
 
     };
 
@@ -389,15 +465,20 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
+	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
+	"NA_CONC" => 0,
+	"MG_CONC" => 0,
 	"W" => 0,
+	"MAXBP" => 0,
 	"MAX" => 0,
+	"ANN" => 0,
+	"MODE" => 0,
+	"ROT_ANG" => 0,
 	"START" => 0,
 	"STOP" => 0,
-	"htmlfile" => 0,
 	"outfiles" => 0,
-	"psfiles" => 0,
 
     };
 
@@ -405,7 +486,9 @@ sub new {
 
 	"LC" => ['linear','linear','circular','circular',],
 	"NA" => ['RNA','RNA','DNA','DNA',],
-	"control" => ['T','P','W','MAX','START','STOP',],
+	"control" => ['NUM','T','P','NA_CONC','MG_CONC','W','MAXBP','MAX','ANN','MODE','ROT_ANG','START','STOP',],
+	"ANN" => ['none','none','p-num','p-num','ss-count','ss-count',],
+	"MODE" => ['auto','auto','bases','bases','lines','lines',],
     };
 
     $self->{FLIST}  = {
@@ -419,9 +502,15 @@ sub new {
     $self->{VDEF}  = {
 	"LC" => 'linear',
 	"NA" => 'RNA',
+	"NUM" => '1',
 	"T" => '37',
 	"P" => '5',
-	"MAX" => '100',
+	"NA_CONC" => '1.0',
+	"MG_CONC" => '0.0',
+	"MAX" => '50',
+	"ANN" => 'none',
+	"MODE" => 'auto',
+	"ROT_ANG" => '0',
 	"START" => '1',
 
     };
@@ -432,17 +521,20 @@ sub new {
 	"LC" => { "perl" => '1' },
 	"NA" => { "perl" => '1' },
 	"control" => { "perl" => '1' },
+	"NUM" => { "perl" => '1' },
 	"T" => { "perl" => '1' },
 	"P" => { "perl" => '1' },
+	"NA_CONC" => { "perl" => '1' },
+	"MG_CONC" => { "perl" => '1' },
 	"W" => { "perl" => '1' },
+	"MAXBP" => { "perl" => '1' },
 	"MAX" => { "perl" => '1' },
+	"ANN" => { "perl" => '1' },
+	"MODE" => { "perl" => '1' },
+	"ROT_ANG" => { "perl" => '1' },
 	"START" => { "perl" => '1' },
 	"STOP" => { "perl" => '1' },
-	"htmlfile" => {
-		"perl" => '($_html)',
-	},
 	"outfiles" => { "perl" => '1' },
-	"psfiles" => { "perl" => '1' },
 
     };
 
@@ -472,15 +564,20 @@ sub new {
 	"LC" => 0,
 	"NA" => 0,
 	"control" => 0,
+	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
+	"NA_CONC" => 0,
+	"MG_CONC" => 0,
 	"W" => 0,
+	"MAXBP" => 0,
 	"MAX" => 0,
+	"ANN" => 0,
+	"MODE" => 0,
+	"ROT_ANG" => 0,
 	"START" => 0,
 	"STOP" => 0,
-	"htmlfile" => 0,
 	"outfiles" => 0,
-	"psfiles" => 0,
 
     };
 
@@ -490,15 +587,20 @@ sub new {
 	"LC" => 1,
 	"NA" => 1,
 	"control" => 0,
+	"NUM" => 0,
 	"T" => 0,
 	"P" => 0,
+	"NA_CONC" => 0,
+	"MG_CONC" => 0,
 	"W" => 0,
+	"MAXBP" => 0,
 	"MAX" => 0,
+	"ANN" => 0,
+	"MODE" => 0,
+	"ROT_ANG" => 0,
 	"START" => 0,
 	"STOP" => 0,
-	"htmlfile" => 0,
 	"outfiles" => 0,
-	"psfiles" => 0,
 
     };
 
@@ -507,11 +609,28 @@ sub new {
     };
 
     $self->{COMMENT}  = {
+	"SEQ" => [
+		"SEQ : The user must supply the name of a sequence file, called `file_name\' here. If `file_name\' ends with a suffix, that is, a period (`.\') followed by other characters, then the suffix is removed and the result is called `fold_name\'. If no periods exist in `file_name\', then `fold_name\' = `file_name\'. For example, if the sequence is stored in `trna.seq\', then `file_name\' becomes `trna\'. If, on the other hand, the sequence file is named `trna-file\', then `file_name\' becomes `trna-file\'. The `file_name\', which may contain periods, becomes the `prefix\' for all the output files, such as `file_name.out\', `file_name.det\' and others.",
+		"Accepted sequence file formats are GenBank, EMBL, FASTA and IntelliGenetics. The sequence file may contain multiple sequences. At present, the mfold script will fold the first sequence by default.",
+		"NUM=`#\' may be added that directs the  script to fold the `#\'th sequence in the input file.",
+	],
 	"P" => [
-		"All computed folding will have energiy within P% from the computed minimum free energy.",
+		"P : This is the percent suboptimality for computing the energy dotplot and suboptimal foldings. The default value is 5%. This parametercontrols the value of the free energy increment, delta (deltaG).Delta of deltaG is set to P% of deltaG, the computed minimum freeenergy.  The energy dot plot shows only those base pairs that are infoldings with free energy minus or equal to deltaG plus delta(deltaG). Similarly, the free energies of computed foldings are in therange from deltaG to deltaG plus delta (deltaG). No matter the valueof P, mfold currently keeps delta (deltaG) in the range [1,12](kcal/mole).",
 	],
 	"W" => [
-		"The window parameter controls how many foldings will be automatically computed and how different they will be from one another. It takes on positive whole number values. A smaller value of this parameter will usually result in more computed foldings that may be quite similar to one another. A larger value will result in fewer foldings that are very different from one another. If this parameter is not chosen by the user, a default value will be selected from the table below according to the sequence size.",
+		"W : This is the window parameter that controls the number of foldingsthat are automatically computed by mfold . `W\' may be thought of as adistance parameter. The distance between 2 base pairs, i.j and i\'.j\'may be defined as max{|i-i\'|,|j-j\'|}. Then if k-1 foldings havealready been predicted by mfold , the kth folding will have at least Wbase pairs that are at least a distance W from any of the base pairsin the first k-1 foldings. As W increases, the number of predictedfoldings decreases. If W is not specified, mfold selects a value bydefault based on sequence length, as displayed in Table 3.",
+	],
+	"MAXBP" => [
+		"MAXBP : A base pair i.j will not be allowed to form (in linear RNA) ifj-i > MAXBP. For circular RNA, a base pair i.j cannot form ifmin{j-i,n+i-j} > MAXBP . Thus small values of MAXBP ensure that onlyshort range base pairs will be predicted. By default, MAXBP=+infinity,indicating no constraint. ",
+	],
+	"MAX" => [
+		"MAX : This is the maximum number of foldings that mfold will compute(50 by default). It is better to limit the number of foldings bycareful selection of the P and W parameters. ",
+	],
+	"ANN" => [
+		"ANN : This parameter currently takes on 3 values. ",
+		"1. `none\' :secondary structures are drawn without any special annotation. Lettersor outline are in black, while base pairs are red lines or dots for GCpairs and blue lines or dots for AU and GU pairs. ",
+		"2. `p-num\' : Coloreddots, colored base characters or a combination are used to display ineach folding how well-determined each base is according to the P-numvalues in the `fold_name.ann\' file. ",
+		"3. `ss-count\' : Colored dots,colored base characters or a combination are used to display in eachfolding how likely a base is to be single-stranded according to samplestatistics stored in the `fold_name.ss-count\' file. Both 2. and3. were recently described [38].",
 	],
 
     };
