@@ -141,6 +141,7 @@ methods. Internal methods are usually preceded with a "_".
 package Bio::Tools::Run::TribeMCL;
 use vars qw($AUTOLOAD @ISA  $PROGRAMDIR
             $TMPDIR $TMPOUTFILE @TRIBEMCL_PARAMS
+	    @MATRIXPROGRAM_PARAMS @MCLPROGRAM_PARAMS
             @OTHER_SWITCHES %OK_FIELD
 	    $MATRIXPROGRAM_NAME $MCLPROGRAM_NAME
 	    $MCLPROGRAM $MATRIXPROGRAM
@@ -196,11 +197,15 @@ BEGIN {
         $MATRIXPROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,$MATRIXPROGRAM_NAME.($^O =~ /mswin/i ?'.exe':''));
     }
 
-    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP HIT SCOREFILE BLASTFILE DESCRIPTION_FILE SEARCHIO PAIRS MCL MATRIX WEIGHT DESCRIPTION FAMILY_TAG USE_DB);
-    @OTHER_SWITCHES = qw(VERBOSE QUIET); 
+    @TRIBEMCL_PARAMS = qw(inputtype hsp hit scorefile blastfile description_file searchio pairs mcl matrix weight description family_tag use_db);
+
+    @MATRIXPROGRAM_PARAMS = qw(ind out chunk);
+    @MCLPROGRAM_PARAMS = qw(I t P R pct o);
+
+    @OTHER_SWITCHES = qw(verbose quiet); 
 
     # Authorize attribute fields
-    foreach my $attr ( @TRIBEMCL_PARAMS, @OTHER_SWITCHES) {
+    foreach my $attr (@TRIBEMCL_PARAMS, @MATRIXPROGRAM_PARAMS, @MCLPROGRAM_PARAMS, @OTHER_SWITCHES) {
       $OK_FIELD{$attr}++;
     }
 }
@@ -226,7 +231,6 @@ sub new {
     $self->$attr($value);
   }
   defined($self->weight) || $self->weight(200);
-  defined($self->I) || $self->I(3.0);
 
   return $self;
 }
@@ -235,7 +239,6 @@ sub AUTOLOAD {
     my $self = shift;
     my $attr = $AUTOLOAD;
     $attr =~ s/.*:://;
-    $attr = uc $attr;
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
     $self->{$attr} = shift if @_;
     return $self->{$attr};
@@ -455,13 +458,17 @@ CLUSTER:
         }
         if($#desc < 0){ #truly unknown
             $consensus{$i}{desc} = "UNKNOWN";
-            $consensus{$i}{conf} = 100;
+            $consensus{$i}{conf} = 0;
             next CLUSTER;
         }
         if($#desc == 0){#only a single description
             $consensus{$i}{desc} = grep(/S+/,@desc);
             $consensus{$i}{desc} = $consensus{$i}{desc} || "UNKNOWN";
-            $consensus{$i}{conf} = 100 * int(1/$total_members);            
+	    if ($consensus{$i}{desc} eq "UNKNOWN") {
+	      $consensus{$i}{conf} = 0;
+	    } else {
+	      $consensus{$i}{conf} = 100 * int(1/$total_members);            
+	    }
             next CLUSTER;
         }
 
@@ -619,11 +626,25 @@ sub _apply_edits {
 =cut
 
 sub _run_mcl {
-  my ($self, $ind_file,$infile) = @_;
-  my $inflation = $self->I;
-  my $exe = $self->mcl_executable;
-  my ($tfh1,$mclout) = $self->io->tempfile(-dir=>$TMPDIR);
-  my $cmd = "$exe $infile -I $inflation -o $mclout";
+  my ($self,$ind_file,$infile) = @_;
+  my $exe = $self->mcl_executable || $self->throw("mcl not found.");
+  my $cmd = $exe . " $infile";
+  unless (defined $self->o) {
+    my ($fh,$o) = $self->io->tempfile(-dir=>$TMPDIR);
+    $self->o($o);
+    # file handle not use later so deleted
+    close($fh);
+    undef $fh;
+  }
+  unless (defined $self->I) {
+    $self->I(3.0);
+  }
+  
+  foreach my $param (@MCLPROGRAM_PARAMS) {
+    if (defined $self->$param) {
+      $cmd .= " -$param ".$self->$param;
+    }
+  }
   if($self->quiet || 
      ($self->verbose < 0)){
       $cmd .= " -V all";
@@ -631,11 +652,11 @@ sub _run_mcl {
 	  $cmd .= ' 2> /dev/null';
       }
   }
+
   my $status = system($cmd);
-  close ($tfh1);
-  undef ($tfh1);
+
   $self->throw( "mcl  call ($cmd) crashed: $? \n") unless $status==0;
-  my $families = $self->_parse_mcl($ind_file,$mclout);
+  my $families = $self->_parse_mcl($ind_file,$self->o);
   return $families;
 }
   
@@ -652,17 +673,32 @@ sub _run_mcl {
 sub _run_matrix {
   my ($self,$parse_file) = @_;
   my $exe = $self->matrix_executable || $self->throw("tribe-matrix not found.");
-  my ($tfh1,$indexfile) = $self->io->tempfile(-dir=>$TMPDIR);
-  my ($tfh2,$matrixfile) = $self->io->tempfile(-dir=>$TMPDIR);
-  my $cmd = $exe. " $parse_file -ind $indexfile -out $matrixfile > /dev/null ";
+  my $cmd = $exe . " $parse_file";
+  unless (defined $self->ind) {
+    my ($fh,$indexfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    $self->ind($indexfile);
+    # file handle not use later so deleted
+    close($fh);
+    undef $fh;
+  }
+  unless (defined $self->out) {
+    my ($fh,$matrixfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    $self->out($matrixfile);
+    # file handle not use later so deleted
+    close($fh);
+    undef $fh;
+  }
+  foreach my $param (@MATRIXPROGRAM_PARAMS) {
+    if (defined $self->$param) {
+      $cmd .= " -$param ".$self->$param;
+    }
+  }
+  $cmd .= " > /dev/null";
   my $status = system($cmd);
-  close($tfh1);
-  close($tfh2);
-  undef $tfh1;
-  undef $tfh2;
+
   $self->throw( "tribe-matrix call ($cmd) crashed: $? \n") unless $status==0;
   
-  return ($indexfile,$matrixfile);
+  return ($self->ind,$self->out);
 }
 
 =head2 _setup_input
