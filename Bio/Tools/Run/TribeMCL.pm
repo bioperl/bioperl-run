@@ -157,7 +157,6 @@ use Bio::Tools::Run::WrapperBase;
 use Bio::Annotation::DBLink;
 use Bio::Seq;
 use Bio::Species;
-use Algorithm::Diff qw(LCS);;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -426,6 +425,13 @@ sub _generate_families {
      
 sub _consensifier {
     my ($self,$clusters) = @_;
+    eval {
+      require "Algorithm/Diff.pm";
+    };
+    if($@){
+      $self->warn("Algorith::Diff is needed to run TribeMCL");
+      return undef;
+    }
     my %description = %{$self->description}; 
     my %consensus;
     my $best_annotation;
@@ -498,7 +504,7 @@ CLUSTER:
             for (my $j=$i+1;$j<@desc;$j++){
                 my @list1=split(" ",$desc[$i]);
                 my @list2=split(" ",$desc[$j]);
-                my @lcs=LCS(\@list1,\@list2);
+                my @lcs=Algorithm::Diff::LCS(\@list1,\@list2);
                 my $lcs=join(" ",@lcs);
                 $lcshash{$lcs}=1;
                 $lcnext{$lcs}=1;
@@ -519,7 +525,7 @@ CLUSTER:
           foreach my $orig_desc (@orig_desc) {
             my @list1=split(" ",$candidate_consensus);
             my @list2=split(" ",$orig_desc);
-            my @lcs=LCS(\@list1,\@list2);
+            my @lcs=Algorithm::Diff::LCS(\@list1,\@list2);
             my $lcs=join(" ",@lcs);
 
             if ($lcs eq $candidate_consensus || index($orig_desc,$candidate_consensus) != -1 # addition;
