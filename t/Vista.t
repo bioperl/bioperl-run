@@ -9,7 +9,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 4;
+    $NTESTS = 5;
     plan tests => $NTESTS;
 }
 
@@ -20,7 +20,7 @@ END {
    foreach ( $Test::ntest..$NTESTS ) {
        skip($reason,1);
    }
-#   unlink "t/data/vista.pdf";
+   unlink "t/data/vista.pdf";
 }
 
 use Bio::Tools::Run::Vista;
@@ -69,25 +69,29 @@ my $aln = $aio->next_aln;
 
 my $out= Bio::Root::IO->catfile("t","data","vista.pdf");
 my $vis = Bio::Tools::Run::Vista->new('outfile'=>$out,
+                                      'title' => "My Vista Plot",
                                         'annotation'=>$gff_file,
                                         'annotation_format'=>'GFF',
-                                        'regmin'=>75,
-                                        'regmax'=>100,
-                                        'min'   => 50,
+                                        'min_perc_id'=>75,
+                                        'min_length'=>100,
+                                        'plotmin'   => 50,
                                         'tickdist' => 2000,
                                         'window'=>40,
                                         'numwindows'=>4,
+                                        'start'=>50,
+                                        'end'=>1500,
+                                        'tickdist'=>100,
+                                        'bases'=>1000,
+                                        'color'=> {'EXON'=>'45 25 54','CNS'=>'0 0 100'},
                                         'quiet'=>1);
 ok $vis->isa('Bio::Tools::Run::Vista');
-ok $vis->min, 50,
+ok $vis->plotmin, 50,
 ok $vis->annotation, $gff_file;
 
 $vis->run($aln,1);
-
-if($@=~/NoClassDefFoundError/){
-  print STDERR "Vista jar file not installed. Skipping";
-  exit(0);
-} 
+ok -e $out;
+unlink $out;
+$vis->run($aln,'mouse');
 ok -e $out;
 
 
