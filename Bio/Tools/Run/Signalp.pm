@@ -47,6 +47,8 @@ Bio::Tools::Run::Signalp
  Based on the EnsEMBL module Bio::EnsEMBL::Pipeline::Runnable::Protein::Signalp
  originally written by Marc Sohrmann (ms2@sanger.ac.uk)
  Written in BioPipe by Balamurugan Kumarasamy <savikalpa@fugu-sg.org>
+ Contributions by David Vilanova (david.vilanova@urbanet.ch)
+                  Shawn Hoon (shawnh@fugu-sg.org)
  Cared for by the Fugu Informatics team (fuguteam@fugu-sg.org)
 
 =head1 APPENDIX
@@ -177,6 +179,7 @@ sub run {
             $self->throw("cannot use filehandle");
         } 
 
+  #first 50 aa is enough for signalp
 	if ($seq->length>50){
 
 	    my $sub_seq = $seq->subseq(1, 50);
@@ -191,17 +194,13 @@ sub run {
 
     }
     else {
-        # The clone object is not a seq object but a file.
-        # Perhaps should check here or before if this file is 
-	# fasta format...if not die
-        # Here the file does not need to be created or deleted. 
-	# Its already written and may be used by other runnables.
-
 	my $in  = Bio::SeqIO->new(-file => $seq, '-format' =>'fasta');
 	my $infile1;  
 
+  #first 50 aa is enough for signalp
 	while ( my $tmpseq = $in->next_seq() ) {
-	    my $sub_seq = $tmpseq->subseq(1,40);
+
+	    my $sub_seq = $tmpseq->length > 50 ? $tmpseq->subseq(1,50) : $tmpseq->seq;
 	    $tmpseq->seq($sub_seq);
 	    $infile1 = $self->_writeSeqFile($tmpseq);  
 	}
