@@ -114,15 +114,31 @@ Bio::Tools::Run::Phylo::Forester::SDI
 
 =head1 SYNOPSIS
 
-    my $runner = Bio::Tools::Run::Phylo::Forester::SDI->new(
-        -jar => 'forester.jar'
-    );
+    my $runner = Bio::Tools::Run::Phylo::Forester::SDI->new();
 
-    my $outfile = $runner->run_file($infile);
-    my $outfile = $runner->outfile;
+    # run with file
+    $runner->species_tree_file('tree_of_life_bin_1-4.nhx');
+    $runner->gene_tree_file('input_tree.nhx') ;
+    $runner->output_file('out.tree');
+    $runner->run_file;
 
 =head1 DESCRIPTION
 
+This wrapper is for SDI in Forester package. 
+For more details on Forester, please see 
+
+http://www.genetics.wustl.edu/eddy/forester/
+
+
+=head2 NOTE
+
+You have to do something before running this module, since SDI will popup a GUI
+window to visualize the structure of the result treee, which is not expected 
+by someone who only want the result file.
+
+You need to comment out the source code to popup the window on the main method
+of class forester.tools.SDI .
+Then recompile it and make it accessible in CLASSPATH
 
 =head1 AUTHOR
 
