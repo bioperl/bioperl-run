@@ -1,6 +1,9 @@
-use Bio::Factory::Pise;
 
-my $factory = Bio::Factory::Pise->new(-email => ''); # put your email
+use Bio::Tools::Run::AnalysisFactory::Pise;
+
+#my $email = $ENV{USER} . "\@pasteur.fr";  # put your email
+
+my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
 
 my $needle = $factory->program('needle');
 

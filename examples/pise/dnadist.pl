@@ -1,9 +1,9 @@
 
-use Bio::Factory::Pise;
+use Bio::Tools::Run::AnalysisFactory::Pise;
 
-$email = $ENV{USER} . "\@pasteur.fr";
+#my $email = $ENV{USER} . "\@pasteur.fr";
 
-my $factory = Bio::Factory::Pise->new(-email => $email);
+my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
 
 my $dnadist = $factory->program('dnadist');
 my $job = $dnadist->run(-infile => $ARGV[0]);

@@ -4,12 +4,12 @@
 # and K. Schuerer (ftp://ftp.pasteur.fr/pub/GenSoft/unix/protein/toppred/)
 #
 
-use Bio::Factory::Pise;
+use Bio::Tools::Run::AnalysisFactory::Pise;
 use Bio::SeqIO;
 use Toppred;
 
-$email = $ENV{USER} . "\@pasteur.fr";
-my $factory = Bio::Factory::Pise->new(-email => $email);
+#my $email = $ENV{USER} . "\@pasteur.fr";
+my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
 
 my $toppred = $factory->program('toppred',
 				-query => $ARGV[0],

@@ -1,12 +1,12 @@
 
-use Bio::Factory::Pise;
+use Bio::Tools::Run::AnalysisFactory::Pise;
 use Bio::AlignIO;
 
 $in = Bio::AlignIO->new('-file' => $ARGV[0]);
 $aln = $in->next_aln();
 
-$email = ''; # your email
-$factory = Bio::Factory::Pise->new(-email => $email);
+#my $email = $ENV{USER} . "\@pasteur.fr";  # your email
+$factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
 my $clustalw = $factory->program('clustalw');
 
 my $job = $clustalw->run( -infile => $aln);
