@@ -137,7 +137,7 @@ sub run {
     my ($self, $input) = @_;
     $self->io->_io_cleanup();
     # test input
-    $self->debug( Dumper($input) ) if $self->verbose > 0;
+    $self->debug( Dumper($input) );
 
     #parse ACD information
     $self->acd if $self->verbose > 0;
@@ -233,7 +233,7 @@ sub run {
 	}
     }
     my $runstring = join (' ', $self->name, $option_string, '-auto');
-    print STDERR "Command line: ", $runstring, "\n" if $self->verbose > 0;
+    $self->debug( "Command line: ", $runstring, "\n"); 
     return `$runstring`;
 }
 
