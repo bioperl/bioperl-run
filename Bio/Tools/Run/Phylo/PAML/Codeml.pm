@@ -20,7 +20,7 @@ Bio::Tools::Run::Phylo::PAML::Codeml - Wrapper aroud the PAML program codeml
   use Bio::AlignIO;
 
   my $alignio = new Bio::AlignIO(-format => 'phylip',
-  			         -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
+  			         -file   => 't/data/gf-s85.phylip');
 
   my $aln = $alignio->next_aln;
 
