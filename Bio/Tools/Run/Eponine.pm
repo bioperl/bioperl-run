@@ -352,6 +352,8 @@ sub _setinput {
     my ($tfh1,$inputfile) = $self->tempfile(-dir=>$TMPDIR);
     my $in = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
     $in->write_seq($seq);
+    close($tfh1);
+    undef $tfh1;
     return ($inputfile);
 }
 

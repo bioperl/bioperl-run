@@ -250,7 +250,7 @@ sub _run {
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
     #my $outfile = $self->outfile() || $TMPOUTFILE ;
-    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my (undef,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 $infile3 > $outfile";
     $self->debug( "pseudowise command = $commandstring");
@@ -259,7 +259,7 @@ sub _run {
 
     #parse the outpur and return a Bio::Seqfeature array
     my $genes   = $self->_parse_results($outfile);
-
+    
     return @{$genes};
 }
 
@@ -376,8 +376,14 @@ sub _setinput {
     $self->_query_pep_seq($seq1);
     $self->_query_cdna_seq($seq2);
     $self->_subject_dna_seq($seq3);
-    return $outfile1,$outfile2,$outfile3;
-  
+
+  close($tfh1);
+  close($tfh2);
+  close($tfh2);
+  undef $tfh1;
+  undef $tfh2;
+  undef $tfh3;
+  return $outfile1,$outfile2,$outfile3;
 }
 
 sub _setparams {

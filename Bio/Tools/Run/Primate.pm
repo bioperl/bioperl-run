@@ -312,68 +312,74 @@ sub _parse_results {
 =cut
 
 sub _setinput {
-  my ($self, $query,$target) = @_;
-  my ($query_file,$target_file,$tfh1,$tfh2);
+    my ($self, $query,$target) = @_;
+    my ($query_file,$target_file,$tfh1,$tfh2);
 
-  if (ref($query) eq "ARRAY"){
-    if($query->[0]->can("isa") && $query->[0]->isa("Bio::PrimarySeqI")){
-      ($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
-      my $out1 = Bio::SeqIO->new(-fh=>$tfh1,'-format'=>'Fasta');
-      my %query;
-      foreach my $seq(@{$query}){
-        $out1->write_seq($seq) || return 0;
-        $query{$seq->primary_id} = $seq->seq;
-      }
-      $self->_query_seq(\%query);
+    if (ref($query) eq "ARRAY"){
+	if($query->[0]->can("isa") && $query->[0]->isa("Bio::PrimarySeqI")){
+	    ($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
+	    my $out1 = Bio::SeqIO->new(-fh=>$tfh1,'-format'=>'Fasta');
+	    my %query;
+	    foreach my $seq(@{$query}){
+		$out1->write_seq($seq) || return 0;
+		$query{$seq->primary_id} = $seq->seq;
+	    }
+	    close($tfh1);
+	    undef $tfh1;
+	    $self->_query_seq(\%query);
+	}
     }
-  }
-  elsif(ref($query)&& $query->isa("Bio::PrimarySeqI")){
-      ($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
-       my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-      my %query;
-      $query{$query->primary_id} = $query->seq;
-      $self->_query_seq(\%query);
-      $out1->write_seq($query) || return 0;
-      
-  }
-  elsif (-e $query){
-    my  $in  = Bio::SeqIO->new(-file => $query , '-format' => 'Fasta');
-    ($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
-    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-    my %query;
-    while(my $seq1 = $in->next_seq()){
-      $out1->write_seq($seq1) || return 0;
-      $query{$seq1->primary_id} = $seq1->seq;
+    elsif(ref($query)&& $query->isa("Bio::PrimarySeqI")){
+	($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
+	my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+	my %query;
+	$query{$query->primary_id} = $query->seq;
+	$self->_query_seq(\%query);
+	$out1->write_seq($query) || return 0;
+
     }
-    $self->_query_seq(\%query);
-    
-  }
-  else {
-    return 0;
-  }
-  if(ref($target) && $target->isa("Bio::PrimarySeqI")){
-      ($tfh2,$target_file) = $self->tempfile(-dir=>$TMPDIR);
-      
-      my $out1 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-      
-     $out1->write_seq($target)|| return 0;
-     $self->_target_seq($target);
-      
-  }  
-  elsif (-e $target){
-    my  $in  = Bio::SeqIO->new(-file => $target , '-format' => 'Fasta');
-    ($tfh2,$target_file) = $self->tempfile(-dir=>$TMPDIR);
-    my $out = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-    
-    my $seq1 = $in->next_seq() || return 0;
-    $out->write_seq($seq1);
-     $self->_target_seq($seq1);
-  }
-  else {
-    return 0;
-  }
-  
-  return $query_file,$target_file;
+    elsif (-e $query){
+	my  $in  = Bio::SeqIO->new(-file => $query , '-format' => 'Fasta');
+	($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
+	my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+	my %query;
+	while(my $seq1 = $in->next_seq()){
+	    $out1->write_seq($seq1) || return 0;
+	    $query{$seq1->primary_id} = $seq1->seq;
+	}
+	close($tfh1);
+	undef $tfh1;
+	$self->_query_seq(\%query);    
+    }
+    else {
+	return 0;
+    }
+    if(ref($target) && $target->isa("Bio::PrimarySeqI")){
+	($tfh2,$target_file) = $self->tempfile(-dir=>$TMPDIR);
+
+	my $out1 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+
+	$out1->write_seq($target)|| return 0;
+	$self->_target_seq($target);
+	close($tfh2);
+	undef $tfh2;
+    }  
+    elsif (-e $target){
+	my  $in  = Bio::SeqIO->new(-file => $target , '-format' => 'Fasta');
+	($tfh2,$target_file) = $self->tempfile(-dir=>$TMPDIR);
+	my $out = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+
+	my $seq1 = $in->next_seq() || return 0;
+	$out->write_seq($seq1);
+	close($tfh2);
+	undef $tfh2;
+	$self->_target_seq($seq1);
+    }
+    else {
+	return 0;
+    }
+
+    return $query_file,$target_file;
 }
 
 =head2  _setparams()

@@ -142,6 +142,8 @@ sub new {
 
   my ($attr, $value);
   ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+
+  # Need to check that filehandle is not left open here...
   (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
   while (@args) { 
     $attr =   shift @args;
@@ -384,7 +386,8 @@ sub _setinput {
   my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
   my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
   $out1->write_seq($seq);
-
+  close($tfh1);
+  undef $tfh1;
   return ($outfile1);
 }
 

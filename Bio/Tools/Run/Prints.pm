@@ -239,7 +239,7 @@ sub _input() {
 sub _run {
      my ($self)= @_;
      
-     my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+     my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
       my $str =$self->executable." ".$self->DB." ".$self->_input." -fjR >".$outfile;
      my $status = system($str);
      $self->throw( "Prints call ($str) crashed: $? \n") unless $status==0;

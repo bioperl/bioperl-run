@@ -263,9 +263,11 @@ sub _run {
           push @seg_feat, $seg_feat;
      }
      
-     $self->cleanup();
-     
+     # free resources
+     $self->cleanup();     
      unlink $outfile;
+     close($tfh1);
+     undef $tfh1;
      return @seg_feat;
 
 }
@@ -284,7 +286,8 @@ sub _writeSeqFile{
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
     my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
     $in->write_seq($seq);
-
+    close($tfh);
+    undef $tfh;
     return $inputfile;
 
 }

@@ -241,7 +241,7 @@ sub _input() {
 sub _run {
      my ($self,$display_id)= @_;
      
-     my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+     my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
       my $str =$self->executable.' -fz '.$self->_input." ".$self->DB." > ".$outfile;
      my $status = system($str);
      $self->throw( "Profile call ($str) crashed: $? \n") unless $status==0;

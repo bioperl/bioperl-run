@@ -248,7 +248,7 @@ sub _run {
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
 
-#    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 > $outfile";
     $self->debug( "genewise command = $commandstring");

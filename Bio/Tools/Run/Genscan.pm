@@ -248,7 +248,8 @@ sub _writeSeqFile(){
   my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$tmpdir);
   my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
   $in->write_seq($seq);
- 
+  close($tfh);
+  undef $tfh;
   return $inputfile;
 }
 
