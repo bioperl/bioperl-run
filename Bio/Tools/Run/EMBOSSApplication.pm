@@ -19,7 +19,7 @@ Bio::Tools::Run::EMBOSSApplication -  class for EMBOSS Applications
 
   use Bio::Factory::EMBOSS;
   # get an EMBOSS application object from the EMBOSS factory
-  $factory = new Bio::Factory::EMBOSS
+  $factory = new Bio::Factory::EMBOSS;
   $application = $factory->program('embossversion');
   # run the application with an optional hash containing parameters
   $result = $application->run(); # returns a string or creates a file
