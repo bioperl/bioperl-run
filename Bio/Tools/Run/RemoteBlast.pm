@@ -12,7 +12,8 @@
 
 =head1 NAME
 
-Bio::Tools::Run::RemoteBlast - Object for remote execution of the NCBI Blast via HTTP
+Bio::Tools::Run::RemoteBlast - Object for remote execution of the NCBI Blast
+via HTTP
 
 =head1 SYNOPSIS
 
@@ -41,7 +42,7 @@ Remote-blast "factory object" creation and blast-parameter initialization:
       foreach my $rid ( @rids ) {
   	  my $rc = $factory->retrieve_blast($rid);
   	  if( !ref($rc) ) {
-  	      if( $rc < 0 ) { 		
+  	      if( $rc < 0 ) {
   		      $factory->remove_rid($rid);
   		  }
   	      print STDERR "." if ( $v > 0 );
@@ -58,6 +59,14 @@ Remote-blast "factory object" creation and blast-parameter initialization:
   	  }
       }
   }
+
+This example shows how to change a CGI parameter:
+
+$Bio::Tools::Run::RemoteBlast::HEADER{'MATRIX_NAME'} = 'BLOSUM25';
+
+For a description of the many CGI parameters see:
+
+http://www.ncbi.nlm.nih.gov/BLAST/Doc/urlapi.html
 
 
 Various additional options and input formats are available.  See the
