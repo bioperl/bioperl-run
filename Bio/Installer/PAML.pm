@@ -79,7 +79,7 @@ BEGIN {
                   'DESTINATION_DOWNLOAD_DIR' => '/tmp',
                   'DESTINATION_INSTALL_DIR' => "$ENV{'HOME'}",
                   'PACKAGE_NAME' => 'paml3.14a.tar.gz',
-                  'DIRECTORY_NAME' => 'paml3.13d',
+                  'DIRECTORY_NAME' => 'paml3.14',
                   'ENV_NAME' => 'PAMLDIR',
                 );
 }
