@@ -29,7 +29,7 @@ my $db =  Bio::Root::IO->catfile("t","data","blat_dna.fa");
 
 my $query = Bio::Root::IO->catfile("t","data","blat_dna.fa");    
 
-my  $factory = Bio::Tools::Run::Blat->new();
+my  $factory = Bio::Tools::Run::Blat->new("DB"=>$db);
 ok $factory->isa('Bio::Tools::Run::Blat');
 
 my $blat_present = $factory->executable();
@@ -39,7 +39,7 @@ unless ($blat_present) {
        exit 0;
 }
 
-my @feat = $factory->align($db,$query);
+my @feat = $factory->align($query);
 
 ok $feat[0]->isa('Bio::SeqFeatureI');
 my @sub_feat = $feat[0]->get_SeqFeatures;
