@@ -150,8 +150,33 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory->program_name()
+ Function: holds the program name
+ Returns:  string     
+ Args    : None
+
+=cut
+
 sub program_name {
   return shift->program;
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{FASTADIR}) if $ENV{FASTADIR};
 }
 
 =head2 run
