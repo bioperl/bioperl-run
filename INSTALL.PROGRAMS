@@ -113,3 +113,6 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 
 28.     Lagan - Lagan suite of tools including MLAGAN
         http://lagan.stanford.edu/
+
+29.     Vista - Visualizing global DNA  sequence alignments of arbitrary length
+        http://www-gsd.lbl.gov/vista/VISTAdownload2.html
