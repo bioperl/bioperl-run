@@ -48,15 +48,15 @@ Bio::Tools::Run::TribeMCL
 
 
   #you can specify the path to the executable manually in the following way
-  my @params=('inputtype'=>'blastfile',I=>'2.0','
-                       mcl'=>'/home/shawn/software/mcl-02-150/src/shmcl/mcl','
-                       matrix'=>'/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
+  my @params=('inputtype'=>'blastfile',I=>'2.0',
+	      'mcl'=>'/home/shawn/software/mcl-02-150/src/shmcl/mcl',
+	      'matrix'=>'/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
   my $fact = Bio::Tools::Run::TribeMCL->new(@params);
 
   OR
 
-  $fact->matrix_exe('/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
-  $fact->mcl_exe('/home/shawn/software/mcl-02-150/src/shmcl/mcl');
+  $fact->matrix_executable('/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
+  $fact->mcl_executable('/home/shawn/software/mcl-02-150/src/shmcl/mcl');
 
   #to run
 
@@ -138,17 +138,19 @@ methods. Internal methods are usually preceded with a "_".
 
 # Let the code begin...
 package Bio::Tools::Run::TribeMCL;
-use vars qw($AUTOLOAD @ISA $MCL $MATRIX $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA  $PROGRAMDIR
             $TMPDIR $TMPOUTFILE @TRIBEMCL_PARAMS
-            @OTHER_SWITCHES %OK_FIELD);
+            @OTHER_SWITCHES %OK_FIELD
+	    $MATRIXPROGRAM_NAME $MCLPROGRAM_NAME
+	    $MCLPROGRAM $MATRIXPROGRAM
+	    );
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 
-
-@ISA = qw(Bio::Root::Root Bio::Root::IO);
+@ISA = qw(Bio::Root::Root);
 
 # You will need to enable mcl and tribe-matrix to use this wrapper. This
 # can be done in (at least) two ways:
@@ -173,22 +175,21 @@ use Bio::Factory::ApplicationFactoryI;
 #my $fact = Bio::Tools::Run::TribeMCL->new(@params);
 
 #or
-#$fact->matrix_exe('/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
-#$fact->mcl_exe('/home/shawn/software/mcl-02-150/src/shmcl/mcl');
+#$fact->matrix_executable('/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
+#$fact->mcl_executable('/home/shawn/software/mcl-02-150/src/shmcl/mcl');
 
 
 BEGIN {
-
+    $MATRIXPROGRAM_NAME = 'tribe-matrix';
+    $MCLPROGRAM_NAME    = 'mcl';
     if (defined $ENV{TRIBEDIR}) {
         $PROGRAMDIR = $ENV{TRIBEDIR} || '';
-        $MCL = Bio::Root::IO->catfile($PROGRAMDIR,'mcl'.($^O =~ /mswin/i ?'.exe':''));
-        $MATRIX = Bio::Root::IO->catfile($PROGRAMDIR,'tribe-matrix'.($^O =~ /mswin/i ?'.exe':''));
+        $MCLPROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,$MCLPROGRAM_NAME.($^O =~ /mswin/i ?'.exe':''));
+        $MATRIXPROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,$MATRIXPROGRAM_NAME.($^O =~ /mswin/i ?'.exe':''));
     }
-    else {
-        $MCL = 'mcl';
-        $MATRIX = 'tribe-matrix';
-    }
-    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE SEARCHIO PAIRS MCL MATRIX WEIGHT);
+
+    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE SEARCHIO 
+			  PAIRS MCL MATRIX WEIGHT);
     @OTHER_SWITCHES = qw(VERBOSE QUIET); 
 
     # Authorize attribute fields
@@ -201,37 +202,33 @@ sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
   
-  # to facilitiate tempfile cleanup
-  #$self->_initialize_io(@args);
   my ($attr, $value);
-  (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+  (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+  (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
     if ($attr =~/MCL/i) {
-      $self->mcl_exe($value);
+      $self->mcl_executable($value);
       next;
     }
     if ($attr =~ /MATRIX/i){
-      $self->matrix_exe($value);
+      $self->matrix_executable($value);
       next;
     }
     $self->$attr($value);
   }
-  defined ($self->mcl_exe) || $self->mcl_exe($MCL);
-  defined ($self->matrix_exe) || $self->matrix_exe($MATRIX);
   defined($self->weight) || $self->weight(200);
   defined($self->I) || $self->I(3.0);
-  unless ($self->exists_mcl()) {
+  unless ($self->mcl_executable) {
     if( $self->verbose >= 0 ) {
-      warn "mcl program not found as ".$self->mcl_exe." or not executable. \n"; 
+      warn "mcl program not found as ".$self->mcl_executable." or not executable. \n"; 
     }
   }
-  unless ($self->exists_matrix()) {
+  unless ($self->matrix_executable) {
     if( $self->verbose >= 0 ) {
-      warn "tribe-matrix program not found as ".$self->matrix_exe." or not executable. \n"; 
+      warn "tribe-matrix program not found as ".$self->matrix_executable." or not executable. \n"; 
     }
   }
 
@@ -248,82 +245,76 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
-=head2 exists_mcl
+=head2 mcl_executable
 
- Title   : exists_mcl
- Usage   : $self->exists_mcl()
- Function: check where mcl executable exists
- Returns : 1 for success and 0 for error
- Args    : 
-
-=cut
-
-sub exists_mcl{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($MCL) ) {
-      $MCL = $f if( -e $f );
-      return 1;
-    }
-    return 0;
-}
-
-=head2 exists_matrix
-
- Title   : exists_matrix
- Usage   : $self->exists_matrix()
- Function: check where tribe-matrix executable exists
- Returns : 1 for success and 0 for error
- Args    : 
-
-=cut
-
-sub exists_matrix{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($MATRIX) ) {
-      $MATRIX = $f if( -e $f );
-      return 1;
-    }
-    return 0;
-}
-
-=head2 mcl_exe
-
- Title   : mcl_exe
- Usage   : $self->mcl_exe()
+ Title   : mcl_executable
+ Usage   : $self->mcl_executable()
  Function: get set for path to mcl executable
- Returns : String
- Args    : 
+ Returns : String or undef if not installed
+ Args    : [optional] string of path to executable
+           [optional] boolean to warn on missing executable status
 
 =cut
 
-sub mcl_exe{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'_mcl_exe'} = $value;
-    }
-    return $self->{'_mcl_exe'};
-
+sub mcl_executable{
+   my ($self,$exe,$warn) = @_;
+   
+   if( defined $exe ) {
+       $self->{'_mcl_exe'} = $exe;
+   }
+   unless( defined $self->{'_mcl_exe'} ) {
+       # this would be the name set in the BEGIN block
+       if( $MCLPROGRAM && -e $MCLPROGRAM && -x $MCLPROGRAM ) {
+	   $self->{'_mcl_exe'} = $MCLPROGRAM;
+       } else { 
+	   my $exe;
+	   if( ( $exe = $self->io->exists_exe($MCLPROGRAM_NAME) ) &&
+	       -x $exe ) {
+	       $self->{'_mcl_exe'} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $MCLPROGRAM_NAME") 
+		   if $warn;
+	       $self->{'_mcl_exe'} = undef;
+	   }
+       }
+   }
+   $self->{'_mcl_exe'};
 }
 
-=head2 matrix_exe
+=head2 matrix_executable
 
- Title   : matrix_exe
- Usage   : $self->matrix_exe()
+ Title   : matrix_executable
+ Usage   : $self->matrix_executable()
  Function: get set for path to tribe-matrix executable
- Returns : String
- Args    : 
+ Returns : String or undef if not installed
+ Args    : [optional] string of path to executable
+           [optional] boolean to warn on missing executable status
 
 =cut
 
-sub matrix_exe{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'_matrix_exe'} = $value;
-    }
-    return $self->{'_matrix_exe'};
-
+sub matrix_executable{
+   my ($self,$exe,$warn) = @_;
+   
+   if( defined $exe ) {
+       $self->{'_matrix_exe'} = $exe;
+   }
+   unless( defined $self->{'_matrix_exe'} ) {
+       # this would be the name set in the BEGIN block
+       if( $MATRIXPROGRAM && -e $MATRIXPROGRAM && -x $MATRIXPROGRAM ) {
+	   $self->{'_matrix_exe'} = $MATRIXPROGRAM;
+       } else { 
+	   my $exe;
+	   if( ( $exe = $self->io->exists_exe($MATRIXPROGRAM_NAME) ) &&
+	       -x $exe ) {
+	       $self->{'_matrix_exe'} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $MATRIXPROGRAM_NAME") 
+		   if $warn;
+	       $self->{'_matrix_exe'} = undef;
+	   }
+       }
+   }
+   $self->{'_matrix_exe'};
 }
 
 =head2 run
@@ -362,8 +353,8 @@ sub run {
 sub _run_mcl {
   my ($self, $ind_file,$infile) = @_;
   my $inflation = $self->I;
-  my $exe = $self->mcl_exe;
-  my ($tfh1,$mclout) = $self->tempfile(-dir=>$TMPDIR);
+  my $exe = $self->mcl_executable;
+  my ($tfh1,$mclout) = $self->io->tempfile(-dir=>$TMPDIR);
   my $cmd = "$exe $infile -I $inflation -o $mclout";
   if($self->quiet || ($self->verbose < 0)){
     $cmd .= " >& /dev/null";
@@ -386,9 +377,9 @@ sub _run_mcl {
 
 sub _run_matrix {
   my ($self,$parse_file) = @_;
-  my ($tfh1,$indexfile) = $self->tempfile(-dir=>$TMPDIR);
-  my ($tfh2,$matrixfile) = $self->tempfile(-dir=>$TMPDIR);
-  my $exe = $self->matrix_exe || $self->throw("tribe-matrix not found.");
+  my ($tfh1,$indexfile) = $self->io->tempfile(-dir=>$TMPDIR);
+  my ($tfh2,$matrixfile) = $self->io->tempfile(-dir=>$TMPDIR);
+  my $exe = $self->matrix_executable || $self->throw("tribe-matrix not found.");
   my $cmd = $exe. " $parse_file -ind $indexfile -out $matrixfile > /dev/null ";
   my $status = system($cmd);
   $self->throw( "tribe-matrix call ($cmd) crashed: $? \n") unless $status==0;
@@ -409,7 +400,8 @@ sub _run_matrix {
 sub _setup_input {
   my ($self,$input) = @_;
   my ($type,$array);
-  my $type = $self->inputtype();
+  
+  $type = $self->inputtype();
   if($type =~/blastfile/i){
     $self->blastfile($input);
     $array = $self->_parse_blastfile($self->blastfile);
@@ -430,7 +422,7 @@ sub _setup_input {
     $self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
   }
   defined($array) || $self->throw("Need inputs for running tribe mcl, nothing provided"); 
-  my ($tfh,$outfile) = $self->tempfile(-dir=>$TMPDIR);
+  my ($tfh,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
   foreach my $line(@{$array}){
     my $str = join("\t",@{$line});
     print $tfh $str."\n";
@@ -565,7 +557,7 @@ sub _parse_mcl {
     if(/^\d+/){
       $start = 1;
       $i++;
-      $cluster[$i]=join(" ",$cluster[$i],"$_");
+      $cluster[$i] = join(" ",$cluster[$i] || '',"$_");
     }
     if (/\$$/){
       $start = 0;
@@ -585,6 +577,26 @@ sub _parse_mcl {
     }
 	}    
   return \@out;
+}
+
+
+=head2 io
+
+ Title   : io
+ Usage   : $obj->io($newval)
+ Function: Gets a L<Bio::Root::IO> object
+ Returns : L<Bio::Root::IO> object
+ Args    : none
+
+
+=cut
+
+sub io{
+   my ($self) = @_;
+   unless( defined $self->{'io'} ) {
+       $self->{'io'} = new Bio::Root::IO(-verbose => $self->verbose());
+   }
+    return $self->{'io'};
 }
 
 1;

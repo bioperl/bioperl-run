@@ -23,7 +23,7 @@ END {
     }
 }
 
-open(STDERR, ">/dev/null"); 
+#open(STDERR, ">/dev/null"); 
 my $blast_out = Bio::Root::IO->catfile("t","data","TribeMCL.bls");
 
 #do from raw blast output
@@ -44,15 +44,13 @@ ok ($fam->[2]->[0], 'ENSANGP00000019582');
 
 my $sio = Bio::SearchIO->new(-format=>'blast',
                              -file=>$blast_out);
-my @params=('inputtype'=>'searchio',I=>'3.0');
-my $fact = Bio::Tools::Run::TribeMCL->new(@params);
+@params=('inputtype'=>'searchio',I=>'3.0');
+$fact = Bio::Tools::Run::TribeMCL->new(@params);
 ok $fact->isa('Bio::Tools::Run::TribeMCL');
-my $bequiet =1 ;
+$bequiet =1 ;
 $fact->quiet($bequiet);
 
-my $fam = $fact->run($sio);
+$fam = $fact->run($sio);
 ok ($fam->[0]->[0], 'ENSANGP00000008485');
 ok ($fam->[1]->[0], 'COE1_MOUSE');
 ok ($fam->[2]->[0], 'ENSANGP00000019582');
-
-
