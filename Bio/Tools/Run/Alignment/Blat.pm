@@ -217,36 +217,37 @@ sub _database() {
 =cut
 
 sub _run {
-     my ($self)= @_;
-     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
-     # this is because we only want a unique filename
-     close($tfh);
-     undef $tfh;
+	my ($self)= @_;
+	my ($tfh,$outfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
+	# this is because we only want a unique filename
+	close($tfh);
+	undef $tfh;
 
+	my $str= Bio::Root::IO->catfile($self->executable,$self->program_name);
 
-     my $str= Bio::Root::IO->catfile($self->executable,$self->program_name);
+	$str.=' -out=psl '.$self->DB .' '.$self->_input.' '.$outfile;
 
-     $str.=' -out=blast '.$self->DB .' '.$self->_input.' '.$outfile;
 #this is shell specific, please fix
 #     if ($self->quiet() || $self->verbose() < 0) { 
 #	 $str .= '  >/dev/null 2>/dev/null';
 #     }
-     $self->debug($str ."\n") if( $self->verbose > 0 );
 
-     my $status = system($str);
-     $self->throw( "Blat call ($str) crashed: $? \n") unless $status==0;
-     
-     my $blat_obj;
-     if (ref ($outfile) !~ /GLOB/) {
-	 $blat_obj = Bio::SearchIO->new(-format  => 'psl',
-					-file    => $outfile);
-     } else {
-	 $blat_obj = Bio::SearchIO->new(-format  => 'psl',
-					-fh    => $outfile);
-     }
-     system('cp',$outfile,'/tmp/blat.out');
-     $self->cleanup();     
-     return $blat_obj;
+	$self->debug($str ."\n") if( $self->verbose > 0 );
+
+	my $status = system($str);
+	$self->throw( "Blat call ($str) crashed: $? \n") unless $status==0;
+
+	my $blat_obj;
+	if (ref ($outfile) !~ /GLOB/) {
+		$blat_obj = Bio::SearchIO->new(-format  => 'psl',
+												 -file    => $outfile);
+	} else {
+		$blat_obj = Bio::SearchIO->new(-format  => 'psl',
+												 -fh    => $outfile);
+	}
+	system('cp',$outfile,'/tmp/blat.out');
+	$self->cleanup();
+	return $blat_obj;
 }
 
 
