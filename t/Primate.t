@@ -40,7 +40,7 @@ my $verbose = 0;
 ## the print "1..x\n" in the BEGIN block to reflect the
 ## total number of tests that will be run. 
 
-use Bio::Tools::Run::Primate; # PAML parser
+use Bio::Tools::Run::Primate; 
 
 use Bio::SeqIO;
 
@@ -49,6 +49,11 @@ my $target= "t/data/primate_target.fa";
 
 my @params = ("query" => $query,"target" => $target,"m"=>0,"b"=>"TRUE");
 my $fact = Bio::Tools::Run::Primate->new(@params);
+unless ($fact->executable){
+  warn("Primate program not found. Skipping tests $Test::ntest to $NUMTESTS.\n");
+  exit(0);
+}
+
 ok($fact->isa("Bio::Tools::Run::Primate"));
 my @feat = $fact->search;
 
