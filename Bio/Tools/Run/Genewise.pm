@@ -1,3 +1,4 @@
+# $Id$
 #
 # Cared for by
 #
@@ -46,14 +47,17 @@ d2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
  the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+ the web:
 
-  bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - FUGU Student Intern
 
 Email: fugui@worf.fugu-sg.org
+
+=head1 CONTRIBUTORS
+
+Jason Stajich jason@bioperl.org
 
 =head1 APPENDIX
 
@@ -215,10 +219,9 @@ sub version {
 =cut
 
 sub predict_genes {
-
     my ($self, $seq1, $seq2)=@_;
     my ($attr, $value, $switch);
-    
+    $self->io->_io_cleanup();
 # Create input file pointer
     my ($infile1,$infile2)= $self->_setinput($seq1, $seq2);
     if (!($infile1 && $infile2)) {$self->throw("Bad input data (sequences need an id ) ");}
@@ -246,24 +249,28 @@ sub _run {
     my ($self,$infile1,$infile2) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-
-    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
-    my $paramstring = $self->_setparams;
-    my $commandstring = $self->executable." $paramstring $infile1 $infile2 > $outfile";
-    $self->debug( "genewise command = $commandstring");
-    my $status = system($commandstring);
-    $self->throw( "Genewise call ($commandstring) crashed: $? \n") unless $status==0;
-
-    #parse the outpur and return a Bio::SeqFeature::Gene::GeneStructure object
-    unless (open (GW, $outfile)) {
-      $self->throw("Cannot open Genewise outfile for parsing");
+    unless ( $self->executable ) {
+	$self->throw("Cannot run Genewise unless the executable is found.  Check your environment variables or make sure genewise is in your path.");
     }
-
+    my $paramstring = $self->_setparams;
+    
+    my $commandstring = $self->executable." $paramstring $infile1 $infile2";
+    # this is to capture STDERR messages which leak out when you run programs
+    # with open(FH, "... |");
+    if( ( ! ( $self->silent && $self->quiet)) &&
+	($^O !~ /os2|dos|MSWin32|amigaos/) ) {
+	# yeah, like genewise is really going to run on Windows...
+	$commandstring .= ' 2> /dev/null';
+    }
+    $self->debug( "genewise command = $commandstring");
+    open(GW, "$commandstring |") || $self->throw( "Genewise call ($commandstring) crashed: $? \n");
+        
     my $genewiseParser = Bio::Tools::Genewise->new(-fh=> \*GW);
     my @genes;
     while ( my $gene = $genewiseParser->next_prediction()){
         push @genes, $gene;
     }
+    close(GW);
     return @genes;
 }
 
@@ -292,19 +299,18 @@ sub _setinput {
 
     # Not going to set _query_pep/_subject_dna_seq 
     # if you pass in a filename
-    
-    unless( ref($seq1) ) {
-	    unless( -e $seq1 ) {
-	      $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
-	    }
-	    $outfile1 = $seq1;
-	
-    } else { 
-	    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
-	    my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , 
-				                        '-format' => 'Fasta');
 
-	    $out1->write_seq($seq1);
+    unless( ref($seq1) ) {
+	unless( -e $seq1 ) {
+	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+	}
+	$outfile1 = $seq1;
+    } else { 
+	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
+	my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
+				   '-format' => 'fasta');
+
+	$out1->write_seq($seq1);
 	$self->_query_pep_seq($seq1);
 	# Make sure you close things - this is what creates
 	# Out of filehandle errors 
@@ -319,18 +325,18 @@ sub _setinput {
 	$outfile2 = $seq2;	
     } else { 
 	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TEMPDIR);
-    
-	my $out2 = Bio::SeqIO->new(-file=> ">$outfile2", 
-				   '-format' => 'Fasta');
-	$out2->write_seq($seq2);
 
+	my $out2 = Bio::SeqIO->new('-fh'     => $tfh2, 
+				   '-format' => 'fasta');
+	$out2->write_seq($seq2);
+	
 	$self->_subject_dna_seq($seq2);
 	# Make sure you close things - this is what creates
 	# Out of filehandle errors 
 	close($tfh2);
 	undef $tfh2;
     }
-    return $outfile1,$outfile2;
+    return ($outfile1,$outfile2);
 }
 
 =head2 _setparams
