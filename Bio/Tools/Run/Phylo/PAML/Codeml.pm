@@ -90,6 +90,7 @@ use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::WrapperBase;
 use Bio::Tools::Phylo::PAML;
+use Cwd;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -431,6 +432,7 @@ sub run{
    close(CODEML);
    my ($rc,$parser) = (1);
    {
+       my $cwd = cwd();
        chdir($tmpdir);
        my $codemlexe = $self->executable();
        $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
@@ -454,8 +456,8 @@ sub run{
        if( $@ ) {
 	   $self->warn($self->error_string);
        }
+       chdir($cwd);
    }
-
    unless ( $self->save_tempfiles ) {
       unlink("$codeml_ctl");
       $self->cleanup();
