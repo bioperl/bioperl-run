@@ -15,4 +15,11 @@ Essentially
    # make install
 
 
+Some important environment variables you need to be aware of.
+
+Variable		Values     Comment
+PHYLIPVERSION		3.5, 3.6   If you want to run Phylip3.6 you 
+				   need to set this env variable to 3.6
+BLASTDIR		DIR PATH   Point to the directory where BLAST 
+	                           is installed
 
