@@ -334,7 +334,6 @@ sub _parse_results {
   open(REPOUT,"<$outfile") || $self->throw("Error opening $outfile\n");
   my $filehandle = \*REPOUT;
   my @repeat_features;
-    }
     #extract values
      while (<$filehandle>) {  
         if (/$filehandle/ =~ /no repetitive sequences detected/)
