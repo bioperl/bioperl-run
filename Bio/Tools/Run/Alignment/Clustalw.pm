@@ -570,6 +570,7 @@ sub _run {
     	$f =~ s/\.[^\.]*$// ;
     	unlink $f .'.dnd' if( $f ne '' );
     }
+    $in->close;
     return $aln;
 }
 
