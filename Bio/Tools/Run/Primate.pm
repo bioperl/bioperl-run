@@ -115,14 +115,14 @@ sub new {
   $self->_initialize_io();
 
   my ($attr, $value);
-  (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
+  ($TMPDIR) = $self->tempdir(CLEANUP=>1);
   (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
 
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
-    if ($attr =~/'PROGRAM'/i )  {
+    if ($attr =~/PROGRAM/i )  {
       $self->executable($value);
       next;
     }
@@ -133,12 +133,6 @@ sub new {
       $self->target($value);
     }
     $self->$attr($value);
-  }
-  unless( defined $self->executable) {
-      if( $self->verbose >= 0 ) {
-	  $self->warn( "primate program not found for $PROGRAMNAME or not executable. \n primate can be obtained from http://www.sanger.ac.uk/software/wise2\n"); 
-      }
-      return undef;
   }
   return $self;
 }
