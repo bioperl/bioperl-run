@@ -111,11 +111,13 @@ use strict;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-    @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE
-			   SUBS INDEL INTRON NULL INSERT
+    @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE GENESTATS INIT 
+			   SUBS INDEL INTRON NULL INSERT SPLICE_MAX_COLLAR SPLICE_MIN_COLLAR
+         GW_EDGEQUERY GW_EDGETARGET GW_SPLICESPREAD
 			   KBYTE HNAME ALG BLOCK DIVIDE GENER U V S T G E M);
 
-    @GENEWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD TREV
+    @GENEWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD TREV PSEUDO NOSPLICE_GTAG
+                            SPLICE_GTAG NOGWHSP GWHSP
 			    TFOR TABS BOTH HMMER );
 
     # Authorize attribute fields
@@ -279,15 +281,19 @@ sub _run {
       # yeah, like genewise is really going to run on Windows...
       $commandstring .= ' 2> /dev/null';
     }
+    my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
     $self->debug("genewise command = $commandstring");
-    open(GW, "$commandstring |") || $self->throw( "Genewise call ($commandstring) crashed: $? \n");
+    my $status = system("$commandstring > $outfile1");
+    $self->throw("Genewies call $commandstring crashed: $? \n") unless $status==0;
 
-    my $genewiseParser = Bio::Tools::Genewise->new(-fh=> \*GW);
+    
+    my $genewiseParser = Bio::Tools::Genewise->new(-file=> $outfile1);
     my @genes;
     while (my $gene = $genewiseParser->next_prediction()) {
         push @genes, $gene;
     }
-    close(GW);
+    close ($tfh1);
+    undef ($tfh1); 
     return @genes;
 }
 
