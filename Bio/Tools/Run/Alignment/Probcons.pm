@@ -92,7 +92,8 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Alignment::Probcons;
 
 use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
-            @PROBCONS_PARAMS @OTHER_SWITCHES %OK_FIELD
+            @PROBCONS_PARAMS @PROBCONS_SWITCHES @OTHER_SWITCHES 
+            %OK_FIELD
             );
 use strict;
 use Bio::Seq;
@@ -110,8 +111,11 @@ use  Bio::Tools::Run::WrapperBase;
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
     @PROBCONS_PARAMS = qw (CONSISTENCY ITERATIVE-REFINEMENT 
-                           PRE-TRAINING ANNOT TRAIN PARAMFILE MATRIXFILE );
-    @OTHER_SWITCHES = qw(CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS);
+                           PRE-TRAINING ANNOT TRAIN PARAMFILE MATRIXFILE
+                           CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS); 
+                           #FIXME: This last line are switches, dunno how to set them
+    @PROBCONS_SWITCHES = qw();
+    @OTHER_SWITCHES = qw();
 
 # Authorize attribute fields
     foreach my $attr ( @PROBCONS_PARAMS, @OTHER_SWITCHES ) {
@@ -401,6 +405,21 @@ sub _setparams {
     my ($attr, $value,$param_string);
     $param_string = '';
     my $laststr;
+    for  $attr ( @PROBCONS_PARAMS ) {
+	$value = $self->$attr();
+	next unless (defined $value);	
+	my $attr_key = lc $attr;
+        $attr_key = ' -'.$attr_key;
+        $param_string .= $attr_key .'='.$value;
+
+    }
+    for  $attr ( @PROBCONS_SWITCHES) {
+	$value = $self->$attr();
+	next unless ($value);
+	my $attr_key = lc $attr; #put switches in format expected by tcoffee
+	$attr_key = ' -'.$attr_key;
+	$param_string .= $attr_key ;
+    }
     # Set default output file if no explicit output file selected
     unless ($self->outfile_name ) {	
 	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
@@ -411,7 +430,7 @@ sub _setparams {
     #FIXME: This may be only for *nixes. Double check in other OSes
     $param_string .= " > ".$self->outfile_name;
     
-    if ($self->quiet() || $self->verbose < 0) { 
+    if ($self->verbose < 0) { 
 	$param_string .= ' 2> /dev/null';
     }
     return $param_string;
