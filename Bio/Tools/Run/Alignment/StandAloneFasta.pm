@@ -2,9 +2,9 @@
 #
 #Bioperl module for Bio::Tools::Run::Alignment::StandAloneFasta
 #
-#Written by Tiequan Zhang
-#Cared for by Shawn Hoon
-#Copyright Tiequan Zhang
+# Written by Tiequan Zhang
+# Cared for by Shawn Hoon
+# Copyright Tiequan Zhang
 #
 # You may distribute this module under the same terms as perl itself
 
@@ -12,8 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Alignment::StandAloneFasta - Object for the local execution of the
-Fasta3 program ((t)fasta3, (t)fastx3, (t)fasty3 ssearch3)
+Bio::Tools::Run::Alignment::StandAloneFasta - Object for the local execution of the Fasta3 programs ((t)fasta3, (t)fastx3, (t)fasty3 ssearch3)
 
 =head1 SYNOPSIS
 
@@ -86,27 +85,29 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via email
-or the web:
+the bugs and their resolution.  Bug reports can be submitted via the web:
 
-  bioperl-bugs@bio.perl.org
   http://bio.perl.org/bioperl-bugs/
 
 =head1 AUTHOR -  Tiequan Zhang
        Adapted for bioperl by Shawn Hoon
+       Enhanced by Jason Stajich
 
 Email tqzhang1973@yahoo.com
       shawnh@fugu-sg.org
+      jason-at-bioperl.org
 
 =head1 Appendix
 
-The rest of the documendation details each of the object methods.Internal methods are preceeded with a underscore 
+The rest of the documendation details each of the object
+methods. Internal methods are preceeded with a underscore
 
 =cut 
 
 package Bio::Tools::Run::Alignment::StandAloneFasta;
 
-use vars qw ($AUTOLOAD @ISA $library %parameters  $ktup @FASTA_PARAMS %OK_FIELD @OTHER_PARAMS);
+use vars qw ($AUTOLOAD @ISA $library %parameters 
+	     $ktup @FASTA_PARAMS %OK_FIELD @OTHER_PARAMS);
 use strict;
 
 use Bio::Root::Root;
@@ -119,9 +120,10 @@ use Bio::Tools::Run::WrapperBase;
 BEGIN {
   @FASTA_PARAMS=qw(a A b c E d f g h H i j l L M m n O o p Q q r R s w x y z);
   @OTHER_PARAMS =qw(program);
-  foreach my $att (@FASTA_PARAMS ,@OTHER_PARAMS) {$OK_FIELD{$att}++;}
+  foreach my $att (@FASTA_PARAMS, @OTHER_PARAMS) {$OK_FIELD{$att}++;}
   $ktup=2; 
-  %parameters=('q' =>'', 'm' =>'1', 'O' =>'');
+  %parameters=('H' => '',
+	       'q' =>'', 'm' =>'1', 'O' =>'');
     
 }
 
@@ -161,8 +163,46 @@ sub AUTOLOAD {
 =cut
 
 sub program_name {
-  my ($self) = @_;
-  return $self->program;
+  my ($self) = shift;
+  return $self->program(@_);
+}
+
+=head2 executable
+
+ Title   : executable
+ Usage   : my $exe = $blastfactory->executable('blastall');
+ Function: Finds the full path to the 'codeml' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to 
+           [optional] boolean flag whether or not warn when exe is not found
+
+
+=cut
+
+sub executable {
+   my ($self, $exename, $exe,$warn) = @_;
+   $exename = 'fasta34' unless defined $exename;
+
+   if( defined $exe && -x $exe ) {
+     $self->{'_pathtoexe'}->{$exename} = $exe;
+   }
+   unless( defined $self->{'_pathtoexe'}->{$exename} ) {
+       my $f = $self->program_path($exename);	    
+       $exe = $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
+        
+       #  This is how I meant to split up these conditionals --jason
+       # if exe is null we will execute this (handle the case where
+       # PROGRAMDIR pointed to something invalid)
+       unless( $exe )  {  # we didn't find it in that last conditional
+	   if( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
+	       $self->{'_pathtoexe'}->{$exename} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $exename") if $warn;
+	       $self->{'_pathtoexe'}->{$exename} = undef;
+	   }
+       }
+   }
+   return $self->{'_pathtoexe'}->{$exename};
 }
 
 =head2 program_dir
@@ -202,93 +242,115 @@ sub program_dir {
 =cut
 
 
-sub run{
+sub run {
+    my ($self,$input,$onefile)=@_;
+    local * FASTARUN;
 
-  my ($self,$input,$onefile)=@_;
-
-  my $program = $self->executable();
-  $self->throw("FASTA program not found or not executable.\n") unless (&_exist($program));
-
-#You should specify a library file
-  $self->throw("You didn't choose library.\n") unless ( $library);
-
-  my@seqs=$self->_setinput($input);
-  return 0 unless (@seqs);
-
-  my @fastobj; 
-  my ($fhout, $tempoutfile)=$self->io->tempfile(-dir=>$self->tempdir);
-  my $outfile=$self->O();
-
-#The outputs from executable FASTA program will be saved into different files if $onefile is 0,
-#else will be concatenated into one file
-  if ($onefile =~ /^0$/){
-    $onefile=0;
-  }else{
-    $onefile=1;
-  }
-
-  if (!$onefile){
-    my $count=0;
-
-    foreach my $seq (@seqs){
-        $count++; 
-#Decide if the output will be saved into a temporary file   
-          $self->O($outfile?("$outfile".'_'."$count"):$tempoutfile);
-#Each sequence will be saved into a temporary file, 
-#so that the FASTA program can decide the format
-        my ($fhinput,$teminputfile)=$self->io->tempfile(-dir=>$self->tempdir);
-        my $temp=Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'Fasta');
-        $temp->write_seq($seq);
-        close $fhinput;
-        
-        my $para=&_setparams;
-        $para .=" $teminputfile $library $ktup";
-        $para ="$program $para";
+    $self->io->_io_cleanup;
+    my $program = $self->executable($self->program) ||  
+	$self->throw("FASTA program not found or not executable.\n");
+    # You should specify a library file
+    $self->throw("You didn't choose library.\n") unless ( $library);
     
-        my $status= system($para);
-        $self->throw("$para crashed:  $?\n" )unless ($status==0);
-        
-        my $object=Bio::SearchIO->new(-file=>$self->O, -format=>"fasta");
-        push @fastobj, $object;
+    my @seqs = $self->_setinput($input);
+    return 0 unless (@seqs);
+
+    my @fastobj; 
+    my ($fhout, $tempoutfile)=$self->io->tempfile(-dir=>$self->tempdir);
+
+    my $outfile=$self->O();
+
+   # The outputs from executable FASTA program will
+   # be saved into different files if $onefile is 0,
+   # else will be concatenated into one file
+    my $onfile = (!defined $onefile || $onefile =~ /^0$/);
+
+    unless( $onfile ) {
+	my $count=0;
+
+	foreach my $seq (@seqs){
+	    $count++; 
+            # Decide if the output will be saved into a temporary file   
+	    if( $outfile ) { 
+		$self->O(sprintf("%s_%d",$outfile,$count));
+	    }
+	    
+	    my ($fhinput,$teminputfile)=
+		$self->io->tempfile(-dir=>$self->tempdir);
+
+	    my $temp = Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'Fasta');
+	    $temp->write_seq($seq);
+	    close $fhinput;
+
+	    my $para= $self->_setparams;
+
+	    $para .=" $teminputfile $library $ktup";
+	    $para ="$program $para";
+	    my $object;
+	    unless( $outfile ) {
+		open(FASTARUN, "$para |") || $self->throw($@);
+		$object = Bio::SearchIO->new(-fh=>\*FASTARUN, 
+					     -format=>"fasta");
+	    } else {
+		if ( $self->verbose() < 0) { 
+		    $para .= '  >/dev/null 2>/dev/null';
+		} else { 
+		    $self->debug("Going to execute: $para");
+		}
+		my $status = system($para);
+		$self->throw("$para crashed:  $?\n" )unless ($status==0);
+		$object = Bio::SearchIO->new(-file=>$self->O, 
+					     -format=>"fasta");
+	    }	    
+	    push @fastobj, $object;
+	}
+    } else {
+	if ($outfile){
+	    open (FILE, ">$outfile") or $self->throw("can't use $outfile:$!");
+	    close(FILE);
+	}
+	
+	foreach my $seq (@seqs){
+	    my ($fhinput,$teminputfile)=$self->io->tempfile(-dir=>$self->tempdir);
+	    my $temp=Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'Fasta');
+	    $temp->write_seq($seq);
+	    close $fhinput;
+	    undef $fhinput;
+	    
+	    $self->O($tempoutfile) if( $outfile );
+	    my $para= $self->_setparams;
+	    $para .= "  $teminputfile $library $ktup";
+	    $para ="$program $para";
+	    my $object;
+	    unless( $outfile ) {		
+		open(FASTARUN, "$para |") || $self->throw($@);
+		$object=Bio::SearchIO->new(-fh=>\*FASTARUN, 
+					   -format=>"fasta");
+	    } else {		
+		if ( $self->verbose() < 0) { 
+		    $para .= '  >/dev/null 2>/dev/null';
+		} else { 
+		    $self->debug("Going to execute: $para");
+		}
+		my $status = system($para);
+		$self->throw("$para crashed:  $?\n" )unless ($status==0);
+		$object = Bio::SearchIO->new(-file=>$self->O, 
+					     -format=>"fasta");		
+	    }
+	    push @fastobj, $object;
+	    
+             # The output in the temporary file
+	     # will be saved at the end of $outfile
+	    if($outfile){
+		open (FHOUT, $tempoutfile) or die("can't  open the $tempoutfile file");
+		open (FH, ">>$outfile") or die("can't  use the $outfile file");
+		print FH (<FHOUT>);
+		close (FHOUT);  
+		close (FH);
+	    }   
+	}
     }
-  }else {
-    if ($outfile){
-        open (FILE, ">$outfile") or die("can't use $outfile:$!");
-        close(FILE);
-    }
-    
-    foreach my $seq (@seqs){
-      my ($fhinput,$teminputfile)=$self->io->tempfile(-dir=>$self->tempdir);
-      my $temp=Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'Fasta');
-      $temp->write_seq($seq);
-      close $fhinput;
-      undef $fhinput;
-      
-      $self->O($tempoutfile);
-      my $para=&_setparams;
-      $para .="  $teminputfile $library $ktup";
-      $para ="$program $para";
-      
-      my $status= system($para);
-      $self->throw("$para crashed:  $?\n" )unless ($status==0);
-    
-      my $object=Bio::SearchIO->new(-file=>$tempoutfile, -format=>"fasta");
-      push @fastobj, $object;
-    
-#The output in the temporary file will be saved at the end of $outfile
-      if($outfile){
-        open (FHOUT, $tempoutfile) or die("can't  open the $tempoutfile file");
-        open (FH, ">>$outfile") or die("can't  use the $outfile file");
-        print  FH (<FHOUT>);
-        close (FHOUT);  
-        close (FH);
-        }   
-     }
-    
-  }
-
-
-return @fastobj
+    return @fastobj;
 }
 
 =head2 library
@@ -306,21 +368,21 @@ return @fastobj
 
 =cut
 
-sub library{
-  my($self,$lb)=@_;
-  return $library if (!defined($lb));
-  
-  if ( ($lb =~ /^%[a-zA-Z]+$/)||($lb=~ /^[a-zA-Z]$/)){
-    if(! defined $ENV{'FASTLIBS'} ){
-      $self->throw("abbrv. list request but FASTLIBS undefined, cannot use $lb");
-    }
-  }else {
-    if (! -e $lb){
-      $self->throw("cannot open $lb library");
-    }
-  }
+sub library {
+    my($self,$lb)=@_;
+    return $library if (!defined($lb));
 
-  return $library=$lb;
+    if ( ($lb =~ /^%[a-zA-Z]+$/)||($lb=~ /^[a-zA-Z]$/)){
+	if(! defined $ENV{'FASTLIBS'} ){
+	    $self->throw("abbrv. list request but FASTLIBS undefined, cannot use $lb");
+	}
+    } else {
+	unless ( -e $lb){
+	    $self->throw("cannot open $lb library");
+	}
+    }
+
+    return $library=$lb;
 }
 
 =head2  ktup
@@ -335,8 +397,7 @@ sub library{
 
 =cut
 
-sub ktup
-{
+sub ktup {
   my($self,$k)=@_;
   if(!defined($k)){return $ktup;}
   if ($k =~ /^[1-6]$/){
@@ -361,38 +422,37 @@ sub ktup
 
 sub _setinput  {
 
-  my ($self, $input) = @_;
-    
-    if( ! defined $input ) { 
-    $self->throw("Calling fasta program with no input");  
-    } 
-    
-  my @seqs;
-  if( ! ref $input ) {
-    if( -e $input ) {
-      my $seqio = new Bio::SeqIO(-format => 'fasta', -file => $input);
-        while( my $seq = $seqio->next_seq ) {
-      push @seqs, $seq;
-        }
-    } else {
-      $self->throw("Input $input was not a valid filename");
-    }
-   } elsif( ref($input) =~ /ARRAY/i ) {
-     foreach ( @$input ) {
-       if( ref($_) && $_->isa('Bio::PrimarySeqI') ) {
-       push @seqs, $_;
-      } else {
-        $self->warn("Trying to add a " . ref($_) ." but expected a Bio::PrimarySeqI");
-      }
-     }
-     if( ! @seqs) {
-      $self->throw("Did not pass in valid input -- no sequence objects found");
-     }
-  } elsif( $input->isa('Bio::PrimarySeqI') ) {
-    push @seqs, $input;
-    }
-  return @seqs;
+    my ($self, $input) = @_;
 
+    if( ! defined $input ) { 
+	$self->throw("Calling fasta program with no input");  
+    } 
+
+    my @seqs;
+    if( ! ref $input ) {
+	if( -e $input ) {
+	    my $seqio = new Bio::SeqIO(-format => 'fasta', -file => $input);
+	    while( my $seq = $seqio->next_seq ) {
+		push @seqs, $seq;
+	    }
+	} else {
+	    $self->throw("Input $input was not a valid filename");
+	}
+    } elsif( ref($input) =~ /ARRAY/i ) {
+	foreach ( @$input ) {
+	    if( ref($_) && $_->isa('Bio::PrimarySeqI') ) {
+		push @seqs, $_;
+	    } else {
+		$self->warn("Trying to add a " . ref($_) ." but expected a Bio::PrimarySeqI");
+	    }
+	}
+	if( ! @seqs) {
+	    $self->throw("Did not pass in valid input -- no sequence objects found");
+	}
+    } elsif( $input->isa('Bio::PrimarySeqI') ) {
+	push @seqs, $input;
+    }
+    return @seqs;
 }
 
 =head2  _exist
@@ -409,7 +469,7 @@ sub _setinput  {
 =cut
 
 sub _exist {
-  my  $exe =shift @_;
+  my  $exe = shift @_;
 
   return 0 unless($exe =~ /fast|ssearch/);
 
@@ -417,11 +477,7 @@ sub _exist {
 
   my $f;
   
-  if (($f=Bio::Root::IO->exists_exe($exe))&&(-x $f)){
-    return 1;
-  }else {
-    return 0;
-  }
+  return ($f=Bio::Root::IO->exists_exe($exe))&&(-x $f);
 }
 
 =head2  _setparams
@@ -434,17 +490,17 @@ sub _exist {
 
 =cut
 
-sub _setparams{
-  my ($attr,$value,$self);
-  $self = shift;
-  my $para = "";
-  foreach my $attr(@FASTA_PARAMS) {
-    $value = $self->$attr();
-    next unless (defined $value);
-    $para .=" -$attr $value";
-  }
-  $para .= " -q ";
-  return $para;
+sub _setparams {
+    my ($self,$attr,$value);
+    $self = shift;
+    my $para = "";
+    foreach my $attr(@FASTA_PARAMS) {
+	$value = $self->$attr();
+	next unless (defined $value);
+	$para .=" -$attr $value";
+    }
+    $para .= " -q ";
+    return $para;
 }
 
 1;
