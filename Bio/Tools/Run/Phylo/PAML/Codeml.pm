@@ -87,10 +87,9 @@ use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
 use Bio::TreeIO;
-use Bio::Tools::Run::Phylo::PAML::PAMLBase;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::Phylo::PAML::PAMLBase);
-
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 =head2 Default Values
 
@@ -324,16 +323,17 @@ BEGIN {
  Usage   : my $obj = new Bio::Tools::Run::Phylo::PAML::Codeml();
  Function: Builds a new Bio::Tools::Run::Phylo::PAML::Codeml object 
  Returns : Bio::Tools::Run::Phylo::PAML::Codeml
- Args    : -alignment => the L<Bio::Align::AlignI> object
+ Args    : -alignment => the Bio::Align::AlignI object
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
-           -tree => the L<Bio::Tree::TreeI> object
+           -tree => the Bio::Tree::TreeI object
            -branchlengths => 0: ignore any branch lengths found on the tree
                              1: use as initial values
                              2: fix branch lengths
            -params => a hashref of PAML parameters (all passed to set_parameter)
            -executable => where the codeml executable resides
 
+See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
 =cut
 
 sub new {
@@ -341,7 +341,9 @@ sub new {
 
   my $self = $class->SUPER::new(@args);
   $self->{_branchLengths} = 0;
-  my ($aln, $tree, $st, $params, $exe, $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES PARAMS EXECUTABLE BRANCHLENGTHS)],
+  my ($aln, $tree, $st, $params, $exe, 
+      $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES 
+				    PARAMS EXECUTABLE BRANCHLENGTHS)],
 				    @args);
   defined $aln && $self->alignment($aln);
   defined $tree && $self->tree($tree, branchLengths => ($ubl || 0) );
@@ -393,12 +395,14 @@ sub run{
    
    $alnout->write_aln($aln);
    $alnout->close();
-   undef $alnout;   close($tempseqFH);
+   undef $alnout;   
+   close($tempseqFH);
    if( $tree ) {
        my $treeout = new Bio::TreeIO('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();
+       close($temptreeFH);
        print CODEML "treefile = $temptreefile\n";
    }
    print CODEML "outfile = $outfile\n";
@@ -466,13 +470,14 @@ sub error_string{
  Usage   : my $exe = $codeml->executable();
  Function: Finds the full path to the 'codeml' executable
  Returns : string representing the full path to the exe
- Args    : none
+ Args    : [optional] name of executable to set path to 
+           [optional] boolean flag whether or not warn when exe is not found
 
 
 =cut
 
 sub executable{
-   my ($self, $exe) = @_;
+   my ($self, $exe,$warn) = @_;
 
    if( defined $exe ) {
      $self->{'_pathtoexe'} = $exe;
@@ -487,15 +492,13 @@ sub executable{
 	       -x $exe ) {
 	       $self->{'_pathtoexe'} = $exe;
 	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME");
+	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
 	       $self->{'_pathtoexe'} = undef;
 	   }
        }
    }
    $self->{'_pathtoexe'};
 }
-
-
 
 =head2 alignment
 
@@ -638,7 +641,7 @@ sub set_default_parameters{
 }
 
 
-=head1 Bio::Tools::Run::Phylo::PAML::PAMLBase methods
+=head1 Bio::Tools::Run::Wrapper methods
 
 =cut
 

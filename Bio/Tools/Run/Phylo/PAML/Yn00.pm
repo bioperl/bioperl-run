@@ -194,7 +194,6 @@ sub run{
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
-   my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir);
    my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir);
 
    # now let's print the yn.ctl file.
@@ -213,7 +212,8 @@ sub run{
    
    $alnout->write_aln($aln);
    $alnout->close();
-   undef $alnout;   close($tempseqFH);
+   undef $alnout;   
+   close($tempseqFH);
    print YN "outfile = $outfile\n";
    my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
@@ -311,13 +311,18 @@ sub error_string{
  Usage   : my $exe = $codeml->executable();
  Function: Finds the full path to the 'codeml' executable
  Returns : string representing the full path to the exe
- Args    : none
+ Args    : [optional] name of executable to set path to 
+           [optional] boolean flag whether or not warn when exe is not found
 
 
 =cut
 
 sub executable{
-   my ($self) = @_;
+   my ($self,$exe,$warn) = @_;
+
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
 
    unless( defined $self->{'_pathtoexe'} ) {
        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
@@ -328,7 +333,7 @@ sub executable{
 	       -x $exe ) {
 	       $self->{'_pathtoexe'} = $exe;
 	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME");
+	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
 	       $self->{'_pathtoexe'} = undef;
 	   }
        }
