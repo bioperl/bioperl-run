@@ -98,7 +98,9 @@ BEGIN {
     else {
         $PROGRAM = $PROGRAMNAME;
     }
-    @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE SUBS INDEL INTRON NULL KBYTE ALG BLOCK DIVIDE GENER );
+    @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE 
+			   SUBS INDEL INTRON NULL KBYTE 
+			   ALG BLOCK DIVIDE GENER U V);
 
     @GENEWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD TREV);
 
@@ -111,8 +113,6 @@ BEGIN {
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  # to facilitiate tempfile cleanup
-  $self->io->_initialize_io();
 
   my ($attr, $value);
   ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
@@ -219,7 +219,7 @@ sub predict_genes {
 
     my ($self, $seq1, $seq2)=@_;
     my ($attr, $value, $switch);
-
+    
 # Create input file pointer
     my ($infile1,$infile2)= $self->_setinput($seq1, $seq2);
     if (!($infile1 && $infile2)) {$self->throw("Bad input data (sequences need an id ) ");}
@@ -289,26 +289,49 @@ sub _setinput {
     my ($self, $seq1, $seq2) = @_;
     my ($tfh1,$tfh2,$outfile1,$outfile2);
 
-    if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI")))
-    { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
-    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
-    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TEMPDIR);
+    $self->throw("calling with not enough arguments") unless $seq1 && $seq2;
 
-    my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , '-format' => 'Fasta');
-    my $out2 = Bio::SeqIO->new(-file=> ">$outfile2", '-format' => 'Fasta');
+    # Not going to set _query_pep/_subject_dna_seq 
+    # if you pass in a filename
+    
+    unless( ref($seq1) ) {
+	unless( -e $seq1 ) {
+	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+	}
+	$outfile1 = $seq1;
+	
+    } else { 
+	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
+	my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , 
+				   '-format' => 'Fasta');
 
-    $out1->write_seq($seq1);
-    $out2->write_seq($seq2);
-    $self->_query_pep_seq($seq1);
-    $self->_subject_dna_seq($seq2);
-    # Make sure you close things - this is what creates
-    # Out of filehandle errors 
-    close($tfh2);
-    close($tfh1);
-    undef $tfh2;
-    undef $tfh1;
+	$out1->write_seq($seq1);
+	$self->_query_pep_seq($seq1);
+	# Make sure you close things - this is what creates
+	# Out of filehandle errors 
+	close($tfh1);
+	undef $tfh1;
+    }
+
+    unless( ref($seq2) ) {
+	unless( -e $seq2 ) { 
+	    $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");    
+	}
+	$outfile2 = $seq2;	
+    } else { 
+	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TEMPDIR);
+    
+	my $out2 = Bio::SeqIO->new(-file=> ">$outfile2", 
+				   '-format' => 'Fasta');
+	$out2->write_seq($seq2);
+
+	$self->_subject_dna_seq($seq2);
+	# Make sure you close things - this is what creates
+	# Out of filehandle errors 
+	close($tfh2);
+	undef $tfh2;
+    }
     return $outfile1,$outfile2;
-
 }
 
 =head2 _setparams
@@ -329,7 +352,7 @@ sub _setparams {
         my $value = $self->$attr();
         next unless (defined $value);
         my $attr_key = ' -'.(lc $attr);
-        $param_string .=$attr_key.' '.$value;
+        $param_string .= $attr_key.' '.$value;
     }
     foreach my $attr(@GENEWISE_SWITCHES){
         my $value = $self->$attr();
