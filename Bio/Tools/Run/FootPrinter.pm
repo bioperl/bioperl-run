@@ -406,17 +406,19 @@ sub _setinput {
     my ($tfh1,$outfile1);
     $outfile1 = $self->outfile_name();
     if (defined $outfile1) {
-	$self->io()->_initialize_io(-file => $tfh1);
+	open($tfh1,">$outfile1");
     } else {
 	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
     }
-    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+    my $out1 = Bio::SeqIO->new('-fh'      => $tfh1, 
+			       '-format' => 'Fasta');
     foreach my $seq(@seq){
 	$seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
 	$out1->write_seq($seq);
     }  
-    $tfh1->close;
-    undef($tfh1);
+    $out1->close(); # close the SeqIO object
+    close($tfh1);   # close the fh explicitly (just in case)
+    undef($tfh1);   # really get rid of it (just in case)
     return ($outfile1);
 }
 
