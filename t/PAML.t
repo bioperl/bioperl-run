@@ -64,11 +64,27 @@ if( ! defined $results ) {
 }
 my $result = $results->next_result;
 my $MLmatrix = $result->get_MLmatrix;
-ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
-ok($MLmatrix->[0]->[1]->{'dS'},1.1459);
-ok($MLmatrix->[0]->[1]->{'omega'}, 0.0605);
-ok($MLmatrix->[0]->[1]->{'S'}, 273.5);
-ok($MLmatrix->[0]->[1]->{'N'}, 728.5);
-ok($MLmatrix->[0]->[1]->{'t'}, 1.0895);
+
+# PAML 2.12 results
+if( $result->version =~ /3\.12/ ) {
+    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
+    ok($MLmatrix->[0]->[1]->{'dS'},1.1459);
+    ok($MLmatrix->[0]->[1]->{'omega'}, 0.0605);
+    ok($MLmatrix->[0]->[1]->{'S'}, 273.5);
+    ok($MLmatrix->[0]->[1]->{'N'}, 728.5);
+    ok($MLmatrix->[0]->[1]->{'t'}, 1.0895);
+} elsif( $result->version =~ /3\.13/ ) {
+# PAML 2.13 results
+    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
+    ok($MLmatrix->[0]->[1]->{'dS'},1.2462);
+    ok($MLmatrix->[0]->[1]->{'omega'}, 0.0572);
+    ok($MLmatrix->[0]->[1]->{'S'}, 278.8);
+    ok($MLmatrix->[0]->[1]->{'N'}, 723.2);
+    ok($MLmatrix->[0]->[1]->{'t'}, 1.1946);
+} else { 
+    for( 1..6) { 
+	skip("Can't test the result output, don't know about PAML version ".$result->version,1);
+    }
+}
 
 ok($codeml->error_string !~ /Error/); # we don't expect any errors;
