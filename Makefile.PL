@@ -73,7 +73,7 @@ my $VERSION  = "1.00";
 
 my $proceed = prompt("Do you want to run the Pise tests (requires a network connection) y/n",'n');
 if( $proceed =~ /^[yY]/) {
-    my $address = prompt("Enter your email address (devnull\@pasteur.fr is default)",'devnull@pasteur.fr');
+    my $address = prompt("Enter your email address (no default)",'');
    
     if (open T,">t/pise-email.test") {
 print T "$address\n";
