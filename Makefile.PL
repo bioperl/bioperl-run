@@ -16,16 +16,17 @@ use ExtUtils::MakeMaker;
 
 # All Bioperl dependencies on external modules are defined here
 %packages = (
+       'Algorithm::Diff'          =>'0.0/Compute intelligent differences between two files/generating consensus protein family descriptions/TribeMCL',
 	     'IO::String'               => '0.0/IO handle to read or write to a string/GenBank+GenPept sequence retrieval, Variation code/Bio::DB::*,Bio::Variation::*,Bio::Tools::Blast::Run::Webblast, Bio::Index::Blast',
 	     'File::Temp'               => '0.0/Temporary File creation/Bio::Root::IO uses if present/Bio::DB::WebDBSeqI, Bio::Seq::LargePrimarySeq',
 	     'XML::Parser::PerlSAX'          => '0.0/XML SAX parser/Pise Applications/Pise::Job',
-             'HTML::Parser'	=> '0.0/HTML Parser/Pise Applications/Pise::Job');
+        'HTML::Parser'	=> '0.0/HTML Parser/Pise Applications/Pise::Job');
 
 sub check_package {
     my ($name,$str) = @_;
     my ($ver,$desc,$expl,$module) = split( /\// , $str);
     if( !eval "require($name)") {
-	print "External Module $name, $desc,\n is not installed on this computer.\n  The $module in bioperl-run  needs it for $expl\n\n";
+	print "External Module $name, $desc,\n is not installed on this computer.\n  The $module module in bioperl-run  needs it for $expl\n\n";
 	return 1;
     }
 
@@ -105,14 +106,9 @@ Warning:
 
    There are some external packages and perl modules, listed above, which 
    bioperl-run uses. This only effects the functionality which is listed above:
-the rest of bioperl will work fine.
+the rest of bioperl-run will work fine.
 
-   The installation of these external packages is very simple. You
-   can read more about bioperl external dependencies at
-
-   http://bioperl.org/Core/external.shtml
-
-   Enjoy the rest of bioperl, which you can use after going 'make install'
+   Enjoy the rest of bioperl-run, which you can use after going 'make install'
 
 QQ_ERROR_QQ
 }
@@ -126,8 +122,8 @@ WriteMakefile(
                       DIST_DEFAULT => 'all tardist',
                    },
     ($] ge '5.005')  ? (
-	'AUTHOR' => 'FuguI Team (fugui@fugu-sg.org)',
-	'ABSTRACT' => 'Generic Feature Database',
+	'AUTHOR' => 'Bioperl Team (bioperl-l@bioperl.org)',
+	'ABSTRACT' => 'Bioperl wrapper toolkit',
 	) : (),
      'realclean'  => {  FILES        => join(' ',@BACKUP_FILES) }
 );
