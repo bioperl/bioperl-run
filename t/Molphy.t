@@ -22,7 +22,7 @@ BEGIN {
     }
     use Test;
     
-    $NUMTESTS = 9;
+    $NUMTESTS = 7;
     plan tests => $NUMTESTS;
     eval { require IO::String; 
 	   require Bio::Tools::Run::Phylo::Molphy::ProtML;
