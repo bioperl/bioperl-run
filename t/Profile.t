@@ -25,11 +25,7 @@ use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::Seq;
 
-my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","pfscan");
 my @params;
-if( -e $paramfile ) { # leave this in until Fugu guys fix 
-    push @params, 'PROGRAM',$paramfile
-}
 my $db =  Bio::Root::IO->catfile("t","data","prosite.dat");
 push @params, ('DB',$db);
 my  $factory = Bio::Tools::Run::Profile->new(@params);
