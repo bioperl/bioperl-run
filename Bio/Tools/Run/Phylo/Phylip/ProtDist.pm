@@ -10,7 +10,10 @@
 
 =head1 NAME 
 
-Bio::Tools::Run::Phylo::Phylip::ProtDist - Wrapper for the phylip program protdist by Joseph Felsentein for creating a distance matrix comparing protein sequences from a multiple alignment file or a L<Bio::SimpleAlign> object and returns a hash ref to the table
+Bio::Tools::Run::Phylo::Phylip::ProtDist - Wrapper for the phylip
+program protdist by Joseph Felsentein for creating a distance matrix
+comparing protein sequences from a multiple alignment file or a
+L<Bio::SimpleAlign> object and returns a hash ref to the table
 
 =head1 SYNOPSIS
 
@@ -20,10 +23,11 @@ $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 $inputfilename = 't/data/cysprot.fa';
 $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
 	
-#Create the Distance Matrix 
-#using a default PAM matrix  and id name lengths limit of 30
-#note to use id name length greater than the standard 10 in protdist, you will need
-#to modify the protdist source code
+
+# Create the Distance Matrix using a default PAM matrix and id name
+# lengths limit of 30 note to use id name length greater than the
+# standard 10 in protdist, you will need to modify the protdist source
+# code
 
 $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 my $matrix  = $protdist_factory->create_distance_matrix($aln);
@@ -351,7 +355,7 @@ sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
     $instring =  $infile."\n$param_string";
-    $self->debug( "Program ".$self->program."\n");
+    $self->debug( "Program ".$self->program." $param_string\n");
 
 	#open a pipe to run protdist to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {

@@ -10,7 +10,10 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phylo::Phylip::Neighbor - Wrapper for the phylip program neighbor by Joseph Felsenstein for creating a phylogenetic tree(either through Neighbor or UPGMA) based on protein distances based on amino substitution rate.
+Bio::Tools::Run::Phylo::Phylip::Neighbor - Wrapper for the phylip
+program neighbor by Joseph Felsenstein for creating a phylogenetic
+tree(either through Neighbor or UPGMA) based on protein distances
+based on amino substitution rate.
 
 =head1 SYNOPSIS
 
@@ -20,10 +23,10 @@ $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 $inputfilename = 't/data/cysprot.fa';
 $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
 	
-#Create the Distance Matrix 
-#using a default PAM matrix  and id name lengths limit of 30
-#note to use id name length greater than the standard 10 in neighbor, you will need
-#to modify the neighbor source code
+# Create the Distance Matrix 
+# using a default PAM matrix and id name lengths limit of 30 note to
+# use id name length greater than the standard 10 in neighbor, you
+# will need to modify the neighbor source code
 
 $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 my $matrix  = $protdist_factory->create_distance_matrix($aln);
