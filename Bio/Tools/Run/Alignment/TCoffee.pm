@@ -7,7 +7,7 @@
 # Copyright Jason Stajich, Peter Schattner
 #
 # You may distribute this module under the same terms as perl itself
-
+#
 # POD documentation - main docs before the code
 
 =head1 NAME
@@ -482,7 +482,7 @@ Report bugs to the Bioperl bug tracking system to help us keep track
 
 =head1 AUTHOR -  Jason Stajich, Peter Schattner
 
-Email jason@chg.mc.duke.edu, schattner@alum.mit.edu
+Email jason@bioperl.org, schattner@alum.mit.edu
 
 =head1 APPENDIX
 
@@ -494,6 +494,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Alignment::TCoffee;
 
 use vars qw($AUTOLOAD @ISA $TMPOUTFILE $PROGRAMNAME $PROGRAM
+            %DEFAULTS
             @TCOFFEE_PARAMS @TCOFFEE_SWITCHES @OTHER_SWITCHES %OK_FIELD
             );
 use strict;
@@ -512,7 +513,8 @@ use  Bio::Tools::Run::WrapperBase;
 # in (at least) twp ways:
 #  1. define an environmental variable TCOFFEE:
 #	export TCOFFEEDIR=/home/progs/tcoffee   or
-#  2. include a definition of an environmental variable TCOFFEEDIR in every script that will
+#  2. include a definition of an environmental variable TCOFFEEDIR 
+#      in every script that will
 #     use Bio::Tools::Run::Alignment::TCoffee.pm.
 #	BEGIN {$ENV{TCOFFEEDIR} = '/home/progs/tcoffee'; }
 
@@ -521,13 +523,20 @@ BEGIN {
     if( defined $ENV{'TCOFFEEDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'TCOFFEEDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
     }
+    %DEFAULTS = ( 'MATRIX' => 'blosum',
+                  'OUTPUT' => 'clustalw',
+                  'AFORMAT'=> 'msf',
+                  'METHODS' => [qw(Mlalign_id_pair Mclustalw_pair)]
+                );
+
 
     @TCOFFEE_PARAMS = qw(IN TYPE PARAMETERS DO_NORMALISE EXTEND
 			 DP_MODE KTUPLE NDIAGS DIAG_MODE SIM_MATRIX
 			 MATRIX GAPOPEN GAPEXT COSMETIC_PENALTY TG_MODE
 			 WEIGHT SEQ_TO_ALIGN NEWTREE USETREE TREE_MODE
 			 OUTFILE OUTPUT CASE CPU OUT_LIB OUTORDER SEQNOS
-			 RUN_NAME CONVERT);
+			 RUN_NAME CONVERT 
+                         );
 
     @TCOFFEE_SWITCHES = qw(QUICKTREE);
 
@@ -544,13 +553,22 @@ sub new {
     # to facilitiate tempfile cleanup
 
     my ($attr, $value);    
-    (undef,$TMPOUTFILE) = $self->io->tempfile();
+    
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
 	next if( $attr =~ /^-/); # don't want named parameters
 	$self->$attr($value);	
     }
+    $self->matrix($DEFAULTS{'MATRIX'}) unless( $self->matrix );
+    $self->output($DEFAULTS{'OUTPUT'}) unless( $self->output );
+    unless( $self->outfile ) {
+	(undef,$TMPOUTFILE) = $self->io->tempfile();	
+    }
+#    $self->aformat($DEFAULTS{'AFORMAT'}) unless $self->aformat;
+
+    $self->methods($DEFAULTS{'METHODS'}) unless $self->methods;
+
     return $self;
 }
 
@@ -559,6 +577,8 @@ sub AUTOLOAD {
     my $attr = $AUTOLOAD;
     $attr =~ s/.*:://;
     $attr = uc $attr;
+    # aliasing
+    $attr = 'OUTFILE' if $attr eq 'OUTFILE_NAME';
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
 
     $self->{$attr} = shift if @_;
@@ -642,6 +662,45 @@ sub version {
 
 }
 
+=head2 run
+
+ Title   : run
+ Usage   : my $output = $application->run(-seq     => $seq,
+					  -profile => $profile,
+					  -type    => 'profile-aln');
+ Function: Generic run of an application
+ Returns : Bio::SimpleAlign object
+ Args    : key-value parameters allowed for TCoffee runs AND
+           -type     => profile-aln or alignment for profile alignments or
+                        just multiple sequence alignment
+           -seq      => either Bio::PrimarySeqI object OR
+                        array ref of Bio::PrimarySeqI objects OR
+                        filename of sequences to run with
+           -profile  => profile to align to, if this is an array ref
+                        will specify the first two entries as the two
+                        profiles to align to each other
+       
+          
+
+
+=cut
+
+sub run{
+   my ($self,@args) = @_;
+   my ($type,$seq,$profile) = $self->_rearrange([qw(TYPE
+						    SEQ
+						    PROFILE)],
+						@args);
+   if( $type =~ /align/i ) {
+       return $self->align($seq);
+   } elsif( $type =~ /profile/i ) {
+       return $self->profile_align($seq,$profile);
+   } else { 
+       $self->warn("unrecognized alignment type $type\n");
+   }
+   return undef;
+}
+
 =head2  align
 
  Title   : align
@@ -669,18 +728,15 @@ or
 sub align {
     my ($self,$input) = @_;
 # Create input file pointer
-    my $infilename = $self->_setinput($input);
-    if (!$infilename) {$self->throw("Bad input data or less than 2 sequences in $input !");}
-
-# Create parameter string to pass to tcoffee program
-    $self->{'_in'} = [];
+    my ($infilename,$type) = $self->_setinput($input);
+    if (!$infilename) {
+	$self->throw("Bad input data or less than 2 sequences in $input !");
+    }
 
     my $param_string = $self->_setparams();
 
     # run tcoffee
-    my $aln = &_run($self, 'align', $infilename, $param_string);
-
-    return $aln;
+    return &_run($self, 'align', [$infilename,$type], $param_string);
 }
 #################################################
 
@@ -701,24 +757,26 @@ or references to SimpleAlign objects.
 =cut
 
 sub profile_align {
-
     my $self = shift;
     my $input1 = shift;
     my $input2 = shift;
-    my ($temp,$infilename1,$infilename2,$input,$seq);
+    my ($temp,$infilename1,$infilename2,$type1,$type2,$input,$seq);
 
 # Create input file pointers
-    $infilename1 = $self->_setinput($input1,1);
-    $infilename2 = $self->_setinput($input2,2);
-    if (!$infilename1 || !$infilename2) {$self->throw("Bad input data: $input1 or $input2 !");}
+    ($infilename1,$type1) = $self->_setinput($input1);
+    ($infilename2,$type2) = $self->_setinput($input2);
+    
+    if (!$infilename1 || !$infilename2) {
+     $self->throw("Bad input data: $input1 or $input2 !");
+    }
 
-    # Create parameter string to pass to tcoffee program
-    $self->{'_in'} = [];
     my $param_string = $self->_setparams();
 
 # run tcoffee
-    my $aln = $self->_run('profile-aln', $infilename1,
-			  $infilename2, $param_string);
+    my $aln = $self->_run('profile-aln', 
+			  [$infilename1,$type1],
+			  [$infilename2,$type2], 
+			  $param_string);
 
 }
 #################################################
@@ -730,7 +788,8 @@ sub profile_align {
  Function:  makes actual system call to tcoffee program
  Example :
  Returns : nothing; tcoffee output is written to a
-           temporary file $TMPOUTFILE
+           temporary file $TMPOUTFILE OR
+           specified output file
  Args    : Name of a file containing a set of unaligned fasta sequences
            and hash of parameters to be passed to tcoffee
 
@@ -741,38 +800,48 @@ sub _run {
     my ($infilename, $infile1,$infile2) = ('','','');
     my $self = shift;
     my $command = shift;
+    my $instring;
     if ($command =~ /align/) {
-        $infilename = shift ;
-	push @{$self->{'_in'}}, "$infilename";
+        my $infile = shift ;
+	my $type;
+	($infilename,$type) = @$infile;
+	$instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
+				      $self->methods));
     }
     if ($command =~ /profile/) {
-	$infile1 = shift ;
-        $infile2 = shift ;
-	push @{$self->{'_in'}}, "$infile1", "$infile2";	
+	my $in1 = shift ;
+        my $in2 = shift ;
+	my ($type1,$type2);
+	($infile1,$type1) = @$in1;
+	($infile2,$type2) = @$in2;
+	$instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
+				     'X'.$self->matrix,
+				     $self->methods));	
     }
     my $param_string = shift;
-    my $instring = join(', ', ("-in=".join(",", @{$self->{'_in'}}),
-			       qw(Mlalign_id_pair Mclustalw_pair)));
 #    my ($paramfh,$parameterFile) = $self->io->tempfile;
 #    print $paramfh ( "$instring\n-output=gcg$param_string") ;
 #    close($paramfh);
 #    my $commandstring = "t_coffee -output=gcg -parameters $parameterFile" ;    ##MJL
-    my $commandstring = $self->executable." $instring".
-	" -output=gcg". " $param_string";
 
+    my $commandstring = $self->executable." $instring $param_string";
+    
     $self->debug( "tcoffee command = $commandstring \n");
 
     my $status = system($commandstring);
+    my $outfile = $self->outfile() || $TMPOUTFILE;
 
-    $self->throw( "TCoffee call crashed: $? [command $commandstring]\n") if( -z $TMPOUTFILE );
+    $self->throw( "TCoffee call crashed: $? [command $commandstring]\n") 
+	if( !-e $outfile || -z $outfile );
+
 #    unlink ($parameterFile);
 
-    my $outfile = $self->outfile() || $TMPOUTFILE;
 
     # retrieve alignment (Note: MSF format for AlignIO = GCG format of
     # tcoffee)
 
-    my $in  = Bio::AlignIO->new('-file' => $outfile, '-format' => 'MSF');
+    my $in  = Bio::AlignIO->new('-file' => $outfile, '-format' => 
+				$self->output);
     my $aln = $in->next_aln();
 
     # Replace file suffix with dnd to find name of dendrogram file(s) to delete
@@ -800,56 +869,94 @@ sub _run {
  Usage   :  Internal function, not to be called directly	
  Function:  Create input file for tcoffee program
  Example :
- Returns : name of file containing tcoffee data input
+ Returns : name of file containing tcoffee data input AND
+           type of file (if known, S for sequence, L for sequence library,
+           A for sequence alignment)
  Args    : Seq or Align object reference or input file name
 
 
 =cut
 
 sub _setinput {
-    my ($self,$input, $suffix) = @_;
+    my ($self,$input) = @_;
     my ($infilename, $seq, $temp, $tfh);
-# suffix used to distinguish alignment files
-#  If $input is not a reference it better be the name of a
-# file with the sequence/ alignment data...
+    #  If $input is not a reference it better be the name of a
+    # file with the sequence/ alignment data...
+    my $type = '';
     if (! ref $input) {
 	# check that file exists or throw
 	$infilename = $input;
 	unless (-e $input) {return 0;}
-	return $infilename;
-    }
-#  $input may be an array of BioSeq objects...
-    elsif (ref($input) =~ /ARRAY/i ) {
-        #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$infilename) = $self->io->tempfile();
-	$temp =  Bio::SeqIO->new('-fh' => $tfh,
-				'-format' => 'Fasta');
-	unless (scalar(@$input) > 1) {return 0;} # Need at least 2 seqs for alignment
-	foreach $seq (@$input) {
-	    return 0 unless ( ref($seq) and $seq->isa("Bio::PrimarySeqI") and $seq->id );
-	    $temp->write_seq($seq);
+	# let's peek and guess
+	open(IN,$infilename) || $self->throw("Cannot open $infilename");
+	my $header = <IN>;
+	if( $header =~ /^\s+\d+\s+\d+/ ||
+	    $header =~ /Pileup/i ||
+	    $header =~ /clustal/i ) { # phylip
+	    $type = 'A';
 	}
-	return $infilename;
-    }
+	close(IN);
+	return ($infilename,$type);
+    } elsif (ref($input) =~ /ARRAY/i ) { #  $input may be an
+	                                 #  array of BioSeq objects...
+        #  Open temporary file for both reading & writing of array
+	($tfh,$infilename) = $self->io->tempfile();
+	if( ! ref($input->[0]) ) {
+	    $self->warn("passed an array ref which did not contain objects to _setinput");
+	    return undef;
+	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
+	    $temp =  Bio::SeqIO->new('-fh' => $tfh,
+				     '-format' => 'fasta');
+	    my $ct = 1;
+	    foreach $seq (@$input) {
+		return 0 unless ( ref($seq) && 
+				  $seq->isa("Bio::PrimarySeqI") );
+		if( ! defined $seq->display_id ||
+		    $seq->display_id =~ /^\s+$/) {
+		    $seq->display_id( "Seq".$ct++);
+		}
+		$temp->write_seq($seq);
+	    }
+	    $temp->close();
+	    undef $temp;
+	    $type = 'S';
+	} elsif( $input->[0]->isa('Bio::Align::AlignI' ) ) {
+	    $temp =  Bio::AlignIO->new('-fh' => $tfh,
+				       '-format' => $self->aformat);
+	    foreach my $aln (@$input) {
+		next unless ( ref($aln) && 
+			      $aln->isa("Bio::Align::AlignI") );
+		$temp->write_aln($aln);
+	    }
+	    $temp->close();
+	    undef $temp;
+	    $type = 'A';
+	}  else { 
+	    $self->warn( "got an array ref with 1st entry ".$input->[0]." and don't know what to do with it\n");
+	}
+    	close($tfh);
+	return ($infilename,$type);
 #  $input may be a SimpleAlign object.
-    elsif ( $input->isa("Bio::SimpleAlign") ) {
+    } elsif ( $input->isa("Bio::Align::AlignI") ) {
 	#  Open temporary file for both reading & writing of SimpleAlign object
-	($tfh, $infilename) = $self->io->tempfile() if ($suffix ==1
-							|| $suffix == 2 );
+	($tfh, $infilename) = $self->io->tempfile();
 	$temp =  Bio::AlignIO->new(-fh=>$tfh,
-				   '-format' => 'Fasta');
+				   '-format' => 'clustalw');
 	$temp->write_aln($input);
-	return $infilename;
+	return ($infilename,'A');
     }
-
+    
 #  or $input may be a single BioSeq object (to be added to
 # a previous alignment)
-    elsif ( $input->isa("Bio::PrimarySeqI") && $suffix==2) {
+    elsif ( $input->isa("Bio::PrimarySeqI")) {
         #  Open temporary file for both reading & writing of BioSeq object
 	($tfh,$infilename) = $self->io->tempfile();
 	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
 	$temp->write_seq($input);
-	return $infilename;
+	$temp->close();
+	return ($infilename,'S');
+    } else { 
+	$self->warn("Got $input and don't know what to do with it\n");
     }
     return 0;
 }
@@ -870,7 +977,7 @@ sub _setinput {
 sub _setparams {
     my ($self) = @_;
     my ($attr, $value,$param_string);
-
+    $param_string = '';
     my $laststr;
     for  $attr ( @TCOFFEE_PARAMS ) {
 	$value = $self->$attr();
@@ -891,14 +998,51 @@ sub _setparams {
 	$param_string .= $attr_key ;
     }
 
-# Set default output file if no explicit output file selected
-    unless ($param_string =~ /outfile/) {
+    # Set default output file if no explicit output file selected
+    unless ($self->outfile ) {
 	$param_string .= " -outfile=$TMPOUTFILE" ;
     }
 
     if ($self->quiet() || $self->verbose < 0) { $param_string .= ' -quiet';}
     return $param_string;
 }
+
+=head2 aformat
+
+ Title   : aformat
+ Usage   : my $alignmentformat = $self->aformat();
+ Function: Get/Set alignment format
+ Returns : string
+ Args    : string
+
+
+=cut
+
+sub aformat{
+    my $self = shift;
+    $self->{'_aformat'} = shift if @_;
+    return $self->{'_aformat'};
+}
+
+
+=head2 methods
+
+ Title   : methods
+ Usage   : my @methods = $self->methods()
+ Function: Get/Set Alignment methods - NOT VALIDATED
+ Returns : array of strings
+ Args    : arrayref of strings
+
+
+=cut
+
+sub methods{
+   my ($self) = shift;
+
+   @{$self->{'_methods'}} = @{shift || []} if @_;
+   return @{$self->{'_methods'} || []};
+}
+
 
 =head1 Bio::Tools::Run::Wrapper methods
 
