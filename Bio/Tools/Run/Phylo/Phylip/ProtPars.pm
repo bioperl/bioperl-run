@@ -124,13 +124,14 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    %OK_FIELD);
 use strict;
 use Bio::SimpleAlign;
+use Cwd;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
-use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Run::Phylo::Phylip::Base;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+@ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
 
 # You will need to enable the protpars program. This
 # can be done in (at least) two ways:
@@ -306,45 +307,47 @@ sub create_tree{
  Function:   makes actual system call to protpars program
  Example :
  Returns : Bio::Tree object
- Args    : Name of a file containing a set of multiple alignments in Phylip format 
-           and a parameter string to be passed to protpars
+ Args    : Name of a file containing a set of multiple alignments 
+           in Phylip format and a parameter string to be passed to protpars
 
 
 =cut
 
 sub _run {
-	my ($self,$infile,$param_string) = @_;
-	my $instring;
-	$instring =  $infile."\n$param_string";
-	$self->debug( "Program ".$self->executable."\n");
+    my ($self,$infile,$param_string) = @_;
+    my $instring;
+    $instring =  $infile."\n$param_string";
+    $self->debug( "Program ".$self->executable."\n");
 
-	#open a pipe to run protpars to bypass interactive menus
-	if ($self->quiet() || $self->verbose() < 0) {
-		open(PROTPARS,"|".$self->executable.">/dev/null");
-	}
-	else {
-		open(PROTPARS,"|".$self->executable);
-	}
-	print PROTPARS $instring;
-	close(PROTPARS);	
+    #open a pipe to run protpars to bypass interactive menus
+    if ($self->quiet() || $self->verbose() < 0) {
+	open(PROTPARS,"|".$self->executable.">/dev/null");
+    }
+    else {
+	open(PROTPARS,"|".$self->executable);
+    }
+    print PROTPARS $instring;
+    close(PROTPARS);	
 
-	#get the results
-	my $path = `pwd`;
-	chomp($path);
-    	my $treefile = $path."/outtree";
-	my $outfile = $path."/outfile";
+    #get the results
+    my $path = cwd;
+    chomp($path);
+    my $treefile = Bio::Root::IO->catfile($path,$self->treefile);
+    my $outfile = Bio::Root::IO->catfile($path, $self->outfile);
 
-	$self->throw("Protpars did not create treefile correctly") unless (-e $treefile);
+    $self->throw("Protpars did not create treefile correctly") 
+	unless (-e $treefile);
 
-	#create the tree
-	my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
-	my $tree = $in->next_tree();
+    #create the tree
+    my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
+    my $tree = $in->next_tree();
 
-    # Clean up the temporary files created along the way...
+    unless ( $self->save_tempfiles ) {
+	# Clean up the temporary files created along the way...	
 	unlink $treefile;
 	unlink $outfile;
-	
-	return $tree;
+    }	
+    return $tree;
 }
 
 
