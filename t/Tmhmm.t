@@ -10,7 +10,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 3;
+   $NTESTS = 5;
    plan tests => $NTESTS;
 }
 
@@ -32,7 +32,7 @@ my @params = ('PROGRAM',$paramfile);
 my  $factory = Bio::Tools::Run::Tmhmm->new(@params);
 ok $factory->isa('Bio::Tools::Run::Tmhmm');
 
-my $prot_file=  Bio::Root::IO->catfile("data","test_prot.FastA");
+my $prot_file=  Bio::Root::IO->catfile("t","data","test_prot.FastA");
 
 my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file => $prot_file, -fmt => 'Fasta');
@@ -47,7 +47,8 @@ unless ($tmhmm_present) {
 my @feat = $factory->predict_protein_features($seq1);
 
 ok $feat[0]->isa('Bio::SeqFeatureI');
-
+ok ($feat[0]->start,121);
+ok ($feat[0]->end,143);
 
    
 
