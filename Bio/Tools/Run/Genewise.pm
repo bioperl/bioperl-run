@@ -273,9 +273,7 @@ sub _run {
 sub _parse_results {
     my ($self,$outfile) = @_;
     $outfile||$self->throw("No outfile specified");
-    my ($self) = @_;
 
-    print STDERR "Parsing the file\n";
 
     my $filehandle;
     if (ref ($outfile) !~ /GLOB/)
@@ -298,7 +296,7 @@ sub _parse_results {
         chomp;
         my @f = split;
         if (scalar(@f)>50) { #super tedious way of fetching the score from the
-          $score = $f[81];
+	  $score = $f[82];
         }  
         if (scalar(@f)<50) { #this condition ignores the "irrelevant"(in ensembl context) part of the results 
           my $seqname = $f[0]." ".$f[1];
