@@ -166,9 +166,6 @@ sub executable{
                $self->{'_pathtoexe'} = $exe;
            } else {
                $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-               #$self->{'_pathtoexe'} = undef;
-               $self->{'_pathtoexe'} = '/usr/users/kiran/wise2/wise2/src/bin/pseudowise';
-
            }
        }
    }
