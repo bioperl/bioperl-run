@@ -48,9 +48,9 @@ my $hit    = $result->next_hit;
 my $hsp    = $hit->next_hsp;
 ok $hsp->isa("Bio::Search::HSP::HSPI");
 ok ($hsp->query->start,1);
-ok ($hsp->query->end,1775);
+ok ($hsp->query->end,1776);
 ok ($hsp->hit->start,1);
-ok ($hsp->hit->end,1775);
+ok ($hsp->hit->end,1776);
 my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
 
 my $seq  = $sio->next_seq ;
@@ -61,9 +61,9 @@ $hit    = $result->next_hit;
 $hsp    = $hit->next_hsp;
 ok $hsp->isa("Bio::Search::HSP::HSPI");
 ok ($hsp->query->start,1);
-ok ($hsp->query->end,1775);
+ok ($hsp->query->end,1776);
 ok ($hsp->hit->start,1);
-ok ($hsp->hit->end,1775);
+ok ($hsp->hit->end,1776);
 
  
 1; 

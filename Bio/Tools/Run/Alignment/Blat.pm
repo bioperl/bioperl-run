@@ -218,7 +218,6 @@ sub _database() {
 
 sub _run {
      my ($self)= @_;
-#     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
      my ($tfh,$outfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
      # this is because we only want a unique filename
      close($tfh);
@@ -228,11 +227,10 @@ sub _run {
      my $str= Bio::Root::IO->catfile($self->executable,$self->program_name);
 
      $str.=' -out=blast '.$self->DB .' '.$self->_input.' '.$outfile;
-warn $str;
-warn $Bio::Root::IO::TEMPDIR;
-     if ($self->quiet() || $self->verbose() < 0) { 
-	 $str .= '  >/dev/null 2>/dev/null';
-     }
+#this is shell specific, please fix
+#     if ($self->quiet() || $self->verbose() < 0) { 
+#	 $str .= '  >/dev/null 2>/dev/null';
+#     }
      $self->debug($str ."\n") if( $self->verbose > 0 );
 
      my $status = system($str);
@@ -240,12 +238,13 @@ warn $Bio::Root::IO::TEMPDIR;
      
      my $blat_obj;
      if (ref ($outfile) !~ /GLOB/) {
-	 $blat_obj = Bio::SearchIO->new(-format  => 'blast',
+	 $blat_obj = Bio::SearchIO->new(-format  => 'psl',
 					-file    => $outfile);
      } else {
-	 $blat_obj = Bio::SearchIO->new(-format  => 'blast',
+	 $blat_obj = Bio::SearchIO->new(-format  => 'psl',
 					-fh    => $outfile);
      }
+system('cp',$outfile,'/tmp/blat.out');
      $self->cleanup();     
      return $blat_obj;
 }
@@ -263,7 +262,8 @@ warn $Bio::Root::IO::TEMPDIR;
 
 sub _writeSeqFile {
     my ($self,$seq) = @_;
-    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
+    #my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
+    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
     my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
     $in->write_seq($seq);
     $in->close();
