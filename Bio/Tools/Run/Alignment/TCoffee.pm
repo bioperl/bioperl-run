@@ -505,7 +505,8 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use  Bio::Tools::Run::WrapperBase;
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
+          Bio::Factory::ApplicationFactoryI);
 
 # You will need to enable TCoffee to find the tcoffee program. This can be done
 # in (at least) twp ways:
@@ -568,8 +569,8 @@ sub AUTOLOAD {
 =head2 executable
 
  Title   : executable
- Usage   : my $exe = $codeml->executable();
- Function: Finds the full path to the 'codeml' executable
+ Usage   : my $exe = $t_coffee->executable();
+ Function: Finds the full path to the 't_cofee' executable
  Returns : string representing the full path to the exe
  Args    : [optional] name of executable to set path to 
            [optional] boolean flag whether or not warn when exe is not found
@@ -929,7 +930,7 @@ sub _setparams {
 =head2 outfile_name
 
  Title   : outfile_name
- Usage   : my $outfile = $codeml->outfile_name();
+ Usage   : my $outfile = $tcoffee->outfile_name();
  Function: Get/Set the name of the output file for this run
            (if you wanted to do something special)
  Returns : string
@@ -953,7 +954,7 @@ sub _setparams {
 =head2 cleanup
 
  Title   : cleanup
- Usage   : $codeml->cleanup();
+ Usage   : $tcoffee->cleanup();
  Function: Will cleanup the tempdir directory after a PAML run
  Returns : none
  Args    : none
