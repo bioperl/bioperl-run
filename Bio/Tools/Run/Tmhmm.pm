@@ -1,33 +1,33 @@
-=head1
-
-  Copyright Balamurugan Kumarasamy
-
-  You may distribute this module under the same terms as perl itself
-  POD documentation - main docs before the code
-
+#
+#
+#  Copyright Balamurugan Kumarasamy
+#
+#  You may distribute this module under the same terms as perl itself
+#  POD documentation - main docs before the code
+#
 
 =head1 NAME
 
-  Bio::Tools::Run::Tmhmm - Object for identifying transmembrane helixes
+Bio::Tools::Run::Tmhmm - Object for identifying transmembrane helixes
   in a given protein seequence.
 
 =head1 SYNOPSIS
 
-  Build a Tmhmm  factory
+  # Build a Tmhmm  factory
 
   # $paramfile is the full path to the seg binary file
- 
+
   my @params = ('PROGRAM',$paramfile);
   my $factory = Bio::Tools::Run::Tmhmm->new($param);
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
-  
+
   my @feats = $factory->predict_protein_features($seq);
 
 =head1 DESCRIPTION
 
-  Tmhmm is a program for identifying transmembrane helices in proteins 
+  Tmhmm is a program for identifying transmembrane helices in proteins
 
 =head1 FEEDBACK
 
@@ -40,7 +40,7 @@
  bioperl-l@bioperl.org          - General discussion
  http://bio.perl.org/MailList.html             - About the mailing lists
 
-=d2 Reporting Bugs
+=head2 Reporting Bugs
 
  Report bugs to the Bioperl bug tracking system to help us keep track
  the bugs and their resolution.  Bug reports can be submitted via
@@ -118,7 +118,7 @@ sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
        $self->io->_initialize_io();
- 
+
        my ($attr, $value);
        while (@args)  {
            $attr =   shift @args;
@@ -131,12 +131,12 @@ sub new {
 
 =head2 executable
 
-Title   : executable
-Usage   : my $exe = $Tmhmm->executable;
-Function: Finds the full path to the 'genscan' executable
-Returns : string representing the full path to the exe
-Args    : [optional] name of executable to set path to
-          [optional] boolean flag whether or not warn when exe is not found
+ Title   : executable
+ Usage   : my $exe = $Tmhmm->executable;
+ Function: Finds the full path to the 'genscan' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
 
 =cut
 
@@ -175,6 +175,7 @@ sub executable{
  Args    :   A Bio::PrimarySeqI
 
 =cut
+
 sub predict_protein_features{
     my ($self,$seq) = @_;
     my @feats;
@@ -184,28 +185,30 @@ sub predict_protein_features{
         if (ref($seq) =~ /GLOB/) {
             $self->throw("cannot use filehandle");
         }
-    
+
         my $infile1 = $self->_writeSeqFile($seq);
-        
+
         $self->_input($infile1);
-        
+
          @feats = $self->_run();
           unlink $infile1;
-       
+
     }
     else {
-        #The clone object is not a seq object but a file.
-        #Perhaps should check here or before if this file is fasta format...if not die
-        #Here the file does not need to be created or deleted. Its already written and may be used by other runnables.
+        #The clone object is not a seq object but a file.  Perhaps
+        #should check here or before if this file is fasta format...if
+        #not die Here the file does not need to be created or
+        #deleted. Its already written and may be used by other
+        #runnables.
 
         $self->_input($seq);
 
          @feats = $self->_run();
-        
+
     }
 
     return @feats;
-   
+
 }
 
 
@@ -222,7 +225,7 @@ sub predict_protein_features{
 sub _input() {
      my ($self,$infile1) = @_;
      if (defined $infile1){
-         
+
          $self->{'input'}=$infile1;
      }
       return $self->{'input'};
@@ -240,12 +243,12 @@ sub _input() {
 
 sub _run {
      my ($self)= @_;
-     
+
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
      my $str =$self->executable." ".$self->_input." > ".$outfile;
      my $status = system($str);
      $self->throw( "Tmhmm call ($str) crashed: $? \n") unless $status==0;
-     
+
      my $filehandle;
      if (ref ($outfile) !~ /GLOB/) {
         open (TMHMM, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
@@ -256,14 +259,13 @@ sub _run {
      }
 
      my $tmhmm_parser = Bio::Tools::Tmhmm->new(-fh=>$filehandle);
-    
+
      my @tmhmm_feat;
 
      while(my $tmhmm_feat = $tmhmm_parser->next_result){
-           
+
            push @tmhmm_feat, $tmhmm_feat;
      }
-     
      # free resources
      $self->cleanup();
      unlink $outfile;
@@ -272,6 +274,7 @@ sub _run {
      return @tmhmm_feat;
 
 }
+
 =head2 _writeSeqFile
 
  Title   :   _writeSeqFile

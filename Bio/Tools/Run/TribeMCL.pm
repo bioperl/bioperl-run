@@ -73,7 +73,7 @@ Bio::Tools::Run::TribeMCL
   my $fam = $fact->run($sio); 
 
   #print out your clusters
-  
+
   for (my $i = 0; $i <scalar(@{$fam}); $i++){
     print "Cluster $i \t ".scalar(@{$fam->[$i]})." members\n";
     foreach my $member (@{$fam->[$i]}){

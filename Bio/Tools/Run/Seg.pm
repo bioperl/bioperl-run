@@ -3,23 +3,14 @@
 # You may distribute this module under the same terms as perl itself
 #  POD documentation - main docs before the code
 
-=head1 
- 
-  Copyright Balamurugan Kumarasamy
-
-  You may distribute this module under the same terms as perl itself
-  POD documentation - main docs before the code
-
-
 =head1 NAME
 
-  Bio::Tools::Run::Seg - Object for identifying low complexity
+Bio::Tools::Run::Seg - Object for identifying low complexity
   regions in a given protein seequence.
 
 =head1 SYNOPSIS
 
-  Build a Seg factory
-
+  # Build a Seg factory
   # $paramfile is the full path to the seg binary file
   my @params = ('PROGRAM',$paramfile);
   my $factory = Bio::Tools::Run::Seg->new($param);
@@ -30,8 +21,9 @@
 
 =head1 DESCRIPTION
 
- Seg is a low complexity region (in protein) identifying program developed by Wootton and Federhen 
- at the National Center for Biotechnology Information (NCBI)
+ Seg is a low complexity region (in protein) identifying program
+ developed by Wootton and Federhen at the National Center for
+ Biotechnology Information (NCBI)
 
 =head1 FEEDBACK
 
@@ -43,14 +35,14 @@
 
  bioperl-l@bioperl.org          - General discussion
  http://bio.perl.org/MailList.html             - About the mailing lists
-     
 
-=d2 Reporting Bugs
+
+=head2 Reporting Bugs
 
  Report bugs to the Bioperl bug tracking system to help us keep track
  the bugs and their resolution.  Bug reports can be submitted via
  email or the web:
-  
+
  bioperl-bugs@bio.perl.org
  http://bio.perl.org/bioperl-bugs/
 
@@ -111,7 +103,7 @@ sub AUTOLOAD {
  Usage   : $rm->new(@params)
  Function: creates a new Seg factory
  Returns:  Bio::Tools::Run::Seg
- Args    : 
+ Args    :
 
 =cut
 
@@ -119,12 +111,12 @@ sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
        $self->io->_initialize_io();
- 
+
        my ($attr, $value);
        while (@args)  {
            $attr =   shift @args;
            $value =  shift @args;
-           next if( $attr =~ /^-/ ); 
+           next if( $attr =~ /^-/ );
            $self->$attr($value);
        }
        return $self;
@@ -165,6 +157,7 @@ sub executable{
     return  $self->{'_pathtoexe'};
 }
 
+
 *program = \&executable;
 
 =head2 predict_protein_features
@@ -185,11 +178,11 @@ sub predict_protein_features{
         if (ref($seq) =~ /GLOB/) {
             $self->throw("cannot use filehandle");
         }
-       
+
         my $infile1 = $self->_writeSeqFile($seq);
-        
+
         $self->_input($infile1);
-        
+
         @feats = $self->_run();
         unlink $infile1;
     }
@@ -200,9 +193,9 @@ sub predict_protein_features{
         $self->_input($seq);
 
          @feats = $self->_run();
-        
+
     }
-   
+
     return @feats;
 
 }
@@ -220,7 +213,7 @@ sub predict_protein_features{
 sub _input {
      my ($self,$infile1) = @_;
      if(defined $infile1){
-         
+
          $self->{'input'}=$infile1;
      }
      return $self->{'input'};
@@ -238,12 +231,12 @@ sub _input {
 
 sub _run {
      my ($self)= @_;
-     
+
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
      my $str =$self->executable." ".$self->_input." -l > ".$outfile;
      my $status = system($str);
      $self->throw( "Seg call ($str) crashed: $? \n") unless $status==0;
-     
+
      my $filehandle;
      if (ref ($outfile) !~ /GLOB/) {
         open (SEG, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
@@ -260,9 +253,8 @@ sub _run {
 
           push @seg_feat, $seg_feat;
      }
-     
      # free resources
-     $self->cleanup();     
+     $self->cleanup();
      unlink $outfile;
      close($tfh1);
      undef $tfh1;
@@ -279,6 +271,7 @@ sub _run {
  Args    :
 
 =cut
+
 sub _writeSeqFile{
     my ($self,$seq) = @_;
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());

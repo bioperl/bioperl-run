@@ -14,20 +14,20 @@ tags.
 
 =head1 SYNOPSIS
 
-use Bio::Tools::Run::Primate;
-use Bio::SeqIO;
+  use Bio::Tools::Run::Primate;
+  use Bio::SeqIO;
 
-my $query = "primer.fa"
-my $target = "contig.fa" 
+  my $query = "primer.fa"
+  my $target = "contig.fa"
 
-my @params = ("query" => $query,"target" => $target,"m"=>0);
-my $fact = Bio::Tools::Run::Primate->new(@params);
+  my @params = ("query" => $query,"target" => $target,"m"=>0);
+  my $fact = Bio::Tools::Run::Primate->new(@params);
 
-my @feat = $fact->search;
-foreach my $feat(@feat) {
-    print $feat->seqname."\t".$feat->primary_tag."\t".$feat->start.
-    "\t".$feat->end."\t".$feat->strand."\t".$feat->seq->seq."\n";
-}
+  my @feat = $fact->search;
+  foreach my $feat(@feat) {
+      print $feat->seqname."\t".$feat->primary_tag."\t".$feat->start.
+      "\t".$feat->end."\t".$feat->strand."\t".$feat->seq->seq."\n";
+  }
 
 =head1 DESCRIPTION
 
@@ -54,9 +54,9 @@ email or the web:
 bioperl-bugs@bio.perl.org
 http://bio.perl.org/bioperl-bugs/
 
-=head1 AUTHOR - Shawn Hoon 
+=head1 AUTHOR - Shawn Hoon
 
-Email shawnh@fugu-sg.org 
+Email shawnh@fugu-sg.org
 
 =head1 APPENDIX
 
@@ -88,7 +88,7 @@ BEGIN {
 
     @PRIMATE_PARAMS = qw(V Q T M B QUERY TARGET OUTFILE PROGRAM EXECUTABLE);
     @OTHER_SWITCHES = qw(QUIET VERBOSE);
-    
+
     # Authorize attribute fields
     foreach my $attr ( @PRIMATE_PARAMS,@OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
 }
@@ -149,7 +149,7 @@ sub AUTOLOAD {
  Usage   : my $exe = $primate->executable();
  Function: Finds the full path to the 'primate' executable
  Returns : string representing the full path to the exe
- Args    : optional 
+ Args    : optional
 
 
 =cut
@@ -164,12 +164,12 @@ sub executable{
    unless( defined $self->{'_pathtoexe'} ) {
        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
 	   $self->{'_pathtoexe'} = $PROGRAM
-       } else { 
+       } else {
 	   my $exe;
 	   if( ( $exe = $self->exists_exe($PROGRAMNAME) ) &&
 	       -x $exe ) {
 	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
+	   } else {
 	       $self->warn("Cannot find executable for $PROGRAMNAME");
 	       $self->{'_pathtoexe'} = undef;
 	   }
@@ -183,7 +183,7 @@ sub executable{
 =head2  version
 
  Title   : version
- Usage   : $primate->version 
+ Usage   : $primate->version
  Function: Determine the version number of the program
  Returns : float or undef
  Args    : none
@@ -200,12 +200,12 @@ sub version {
     return $1 || undef;
 }
 
-=head2 search 
+=head2 search
 
  Title   : search
  Usage   : @feat = $factory->search();
  Function: Perform a primate search
- Returns : Array of L<Bio::SeqFeature::Generic> 
+ Returns : Array of L<Bio::SeqFeature::Generic>
  Args    : none
 
 =cut
@@ -216,7 +216,7 @@ sub search {
     $target = $target ||$self->target;
     $target || $self->throw("Need a target sequence");
     $self->query || $self->throw("Need a query sequence");
-    
+
 # Create input file pointer
     my ($query_file,$target_file)= $self->_setinput($self->query,$target);
     if (!($query_file && $target_file)) {$self->throw("Unable to create temp files for query and target !");}
@@ -224,7 +224,7 @@ sub search {
 # Create parameter string to pass to primate program
     my $param_string = $self->_setparams();
 
-# run primate 
+# run primate
     my @feats= $self->_run($query_file,$target_file,$param_string);
     return @feats;
 }
@@ -237,8 +237,8 @@ sub search {
  Title   :  _run
  Usage   : Internal function, not to be called directly
  Function: makes actual system call to dba program
- Returns : array of L<Bio::SeqFeature::Generic> 
- Args    : path to query and target file and parameter string 
+ Returns : array of L<Bio::SeqFeature::Generic>
+ Args    : path to query and target file and parameter string
 
 =cut
 
@@ -262,9 +262,9 @@ sub _run {
 
  Title   :  _parse_results
  Usage   :  Internal function, not to be called directly
- Function:  Passes primate output  
- Returns : array of L<Bio::SeqFeature::Generic> 
- Args    : the name of the output file 
+ Function:  Passes primate output
+ Returns : array of L<Bio::SeqFeature::Generic>
+ Args    : the name of the output file
 
 =cut
 
@@ -273,7 +273,7 @@ sub _parse_results {
     $outfile||$self->throw("No outfile specified");
     my @feats;
     my %query = $self->_query_seq();
-    
+
     open(OUT,$outfile);
     while(my $entry = <OUT>){
         chomp($entry);
@@ -290,22 +290,22 @@ sub _parse_results {
                                                       -frame       => 1,
                                                       -source      => 'primate',
                                                       -primary     => $tagname);
-      $feature->attach_seq($self->_target_seq); 
+      $feature->attach_seq($self->_target_seq);
       push @feats,$feature;
       }
-  }                                                                                       
+  }
 
    return @feats;
-}    
-      
-   
+}
+
+
 =head2  _setinput()
 
  Title   : _setinput
  Usage   : Internal function, not to be called directly
- Function: Create input files for primate 
+ Function: Create input files for primate
  Returns : name of file containing query and target
- Args    : query and target (either a filename or a L<Bio::PrimarySeqI> 
+ Args    : query and target (either a filename or a L<Bio::PrimarySeqI>
 
 =cut
 
@@ -385,8 +385,8 @@ sub _setinput {
  Title   : _setparams
  Usage   : Internal function, not to be called directly
  Function: Create parameter inputs for primate program
- Returns : parameter string to be passed to primate 
- Args    : the param array 
+ Returns : parameter string to be passed to primate
+ Args    : the param array
 
 =cut
 
@@ -399,8 +399,8 @@ sub _setparams {
     for  $attr ( @PRIMATE_PARAMS ) {
       $value = $self->$attr();
       next unless (defined $value);
-          
-      my $attr_key = lc $attr; #put params in format expected by dba 
+
+      my $attr_key = lc $attr; #put params in format expected by dba
       $attr_key = ' -'.$attr_key;
       if(($attr_key !~/QUERY/i) && ($attr_key !~/TARGET/i)){
       $param_string .= $attr_key.' '.$value;
@@ -417,7 +417,7 @@ sub _setparams {
 
  Title   :  _query_seq
  Usage   :  Internal function, not to be called directly
- Function:  get/set for the query sequence 
+ Function:  get/set for the query sequence
  Returns :  a hash of seq with key the query tag
  Args    :  optional
 
@@ -450,4 +450,4 @@ sub _target_seq {
 }
 
 1; # Needed to keep compiler happy
-  
+

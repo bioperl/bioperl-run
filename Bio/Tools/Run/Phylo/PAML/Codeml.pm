@@ -143,7 +143,7 @@ B<NSsites> specifies models that allow the dN/dS ratio (omega) to vary
 among sites (Nielsen and Yang 1998, Yang et al. 2000) B<Nssites> = m
 corresponds to model Mm in Yang et al (2000).  The variable B<ncatG>
 is used to specify the number of categories in the omega distribution
-under some models.  The values of L<ncatG()> used to perform our
+under some models.  The values of ncatG() used to perform our
 analyses are 3 for M3 (discrete), 5 for M4 (freq), 10 for the
 continuous distributions (M5: gamma, M6: 2gamma, M7: beta, M8:beta&amp;w,
 M9:beta&amp;gamma, M10: beta&gamma+1, M11:beta&amp;normal&gt;1, and
@@ -353,7 +353,7 @@ sub new {
   defined $tree && $self->tree($tree, branchLengths => ($ubl || 0) );
   defined $st  && $self->save_tempfiles($st);
   defined $exe && $self->executable($exe);
-  
+
   $self->set_default_parameters();
   if( defined $params ) {
       if( ref($params) !~ /HASH/i ) { 

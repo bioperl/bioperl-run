@@ -16,46 +16,46 @@ Bio::Tools::Run::Phylo::Molphy::ProtML - A wrapper for the Molphy pkg app ProtML
 
 =head1 SYNOPSIS
 
-use Bio::AlignIO;
-use Bio::TreeIO;
-use Bio::Tools::Run::Phylo::Molphy::ProtML;
+  use Bio::AlignIO;
+  use Bio::TreeIO;
+  use Bio::Tools::Run::Phylo::Molphy::ProtML;
 
-my %args = ( 'models' => 'jtt', 
-	     'search' => 'quick', 
-	     "other" => [ '-information', '-w']); 
-my $verbose = 0; # change to 1 if you want some debugging output
-my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
-							-flags => \%args);
+  my %args = ( 'models' => 'jtt',
+  	     'search' => 'quick',
+  	     "other" => [ '-information', '-w']);
+  my $verbose = 0; # change to 1 if you want some debugging output
+  my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
+  							-flags => \%args);
 
-die("cannot find the protml executable") unless $protml->executable;
+  die("cannot find the protml executable") unless $protml->executable;
 
-# read in a previously built protein alignment
-my $in = new Bio::AlignIO(-format => 'clustalw',
-			  -file   => 't/data/cel-cbr-fam.aln');
-my $aln = $in->next_aln;
-$protml->alignment($aln);
+  # read in a previously built protein alignment
+  my $in = new Bio::AlignIO(-format => 'clustalw',
+  			  -file   => 't/data/cel-cbr-fam.aln');
+  my $aln = $in->next_aln;
+  $protml->alignment($aln);
 
-my ($rc,$results) = $protml->run();
+  my ($rc,$results) = $protml->run();
 
-# This may be a bit of overkill, but it is possible we could
-# have a bunch of results and $results is a 
-# Bio::Tools::Phylo::Molphy object
+  # This may be a bit of overkill, but it is possible we could
+  # have a bunch of results and $results is a
+  # Bio::Tools::Phylo::Molphy object
 
-my $r = $results->next_result;
-# $r is a Bio::Tools::Phylo::Molphy::Result object
+  my $r = $results->next_result;
+  # $r is a Bio::Tools::Phylo::Molphy::Result object
 
-my @trees;
-while( my $t = $r->next_tree ) { 
-    push @trees, $t;
-}
+  my @trees;
+  while( my $t = $r->next_tree ) {
+      push @trees, $t;
+  }
 
-print "search space is ", $r->search_space, "\n";
-      "1st tree score is ", $tree[0]->score, "\n";
+  print "search space is ", $r->search_space, "\n";
+        "1st tree score is ", $tree[0]->score, "\n";
 
-my $out = new Bio::TreeIO(-file => ">saved_MLtrees.tre",
-                          -format => "newick");
-$out->write_tree($tree[0]);
-$out = undef;
+  my $out = new Bio::TreeIO(-file => ">saved_MLtrees.tre",
+                            -format => "newick");
+  $out->write_tree($tree[0]);
+  $out = undef;
 
 =head1 DESCRIPTION
 
@@ -71,55 +71,55 @@ in its present implementation, (extensions are welcomed!).
 
 The main components are the protml and nucml executables which are
 used to build maximum likelihood (ML) phylogenetic trees based on
-either protein or nucleotide sequences.  
+either protein or nucleotide sequences.
 
 Here are the valid input parameters, we have added a longhand version
 of the parameters to help you understand what each one does.  Either
 the longhand or the original Molphy parameter will work.
 
-on the left while the Molphy parameter is on the 
+on the left while the Molphy parameter is on the
 
-Bioperl      Molphy           Description
-Longhand     parameter
-Model (one of these):
----------------
- jtt             j            Jones, Taylor & Thornton (1992)
-jtt-f            jf           JTT w/ frequencies
-dayhoff          d            Dahoff et al. (1978)
-dayhoff-f        d            dayhoff w/ frequencies
-mtrev24          m            mtREV24 Adachi & Hasegwa (1995)
-mtrev24-f        mf           mtREV24 w/ frequencies
-poisson          p            Poisson
-proportional     pf           Proportional
-  rsr            r            Relative Substitution Rate
- rsr-f           rf           RSR w/ frequencies
-frequencies      f            data frequencies
-		   
-Search Strategy (one of these):
-----------------
-usertrees        u            User trees (must also supply a tree)
-rearrangement    R            Local rearrangement
-    lbp          RX           Local boostrap prob
-exhaustive       e            Exhaustive search
-   star          s            Star decomposition search (may not be ML)
-   quick         q            Quick Add OTU search (may not be ML)
- distance        D            ML Distance matrix --> NJDIST (need to supply 
-							     NJDIST tree)
+  Bioperl      Molphy           Description
+  Longhand     parameter
+  Model (one of these):
+  ---------------
+   jtt             j            Jones, Taylor & Thornton (1992)
+  jtt-f            jf           JTT w/ frequencies
+  dayhoff          d            Dahoff et al. (1978)
+  dayhoff-f        d            dayhoff w/ frequencies
+  mtrev24          m            mtREV24 Adachi & Hasegwa (1995)
+  mtrev24-f        mf           mtREV24 w/ frequencies
+  poisson          p            Poisson
+  proportional     pf           Proportional
+    rsr            r            Relative Substitution Rate
+   rsr-f           rf           RSR w/ frequencies
+  frequencies      f            data frequencies
+
+  Search Strategy (one of these):
+  ----------------
+  usertrees        u            User trees (must also supply a tree)
+  rearrangement    R            Local rearrangement
+      lbp          RX           Local boostrap prob
+  exhaustive       e            Exhaustive search
+     star          s            Star decomposition search (may not be ML)
+     quick         q            Quick Add OTU search (may not be ML)
+   distance        D            ML Distance matrix --> NJDIST (need to supply
+  							     NJDIST tree)
 
 
-Others (can be some or all of these):
----------------
-norell-bp        b            No RELL-BP
-minimumevolution M            Minimum evolution
+  Others (can be some or all of these):
+  ---------------
+  norell-bp        b            No RELL-BP
+  minimumevolution M            Minimum evolution
 
-sequential       S            Sequence is in Sequential format 
-                   _OR_
-interleaved      I            Sequence is in Interleaved format
+  sequential       S            Sequence is in Sequential format
+                     _OR_
+  interleaved      I            Sequence is in Interleaved format
 
-verbose          v            Verbose messages directed to STDERR
-information      i            Output some information (tree vals)
-		 w            More some extra information (transition 
-							   matricies, etc)
+  verbose          v            Verbose messages directed to STDERR
+  information      i            Output some information (tree vals)
+  		 w            More some extra information (transition
+  							   matricies, etc)
 
 
 =head1 FEEDBACK
@@ -172,15 +172,15 @@ use Bio::Root::Root;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
-BEGIN { 
+BEGIN {
     $MINNAMELEN = 25;
     $PROGRAMNAME = 'protml'  . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'MOLPYDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'MOLPHYDIR'},$PROGRAMNAME);
     }
-    
+
     %VALIDFLAGS = (
-		   'models' => { # models 
+		   'models' => { # models
 		       jtt          => 'j', # Jones, Taylor & Thornton (1992)
 		       'jtt-f'      => 'jf', # jtt w/ frequencies
 		       dayhoff      => 'd', # Dahoff et al. (1978)
@@ -213,40 +213,40 @@ BEGIN {
 		   }
 		   );
     # this will allow for each of the parameters to also accept the original
-    # protML params 
+    # protML params
     my @toadd;
     foreach my $type ( keys %VALIDFLAGS ) {
 	my @keys = keys %{ $VALIDFLAGS{$type} };
-	for my $k ( @keys ) { 
+	for my $k ( @keys ) {
 	    my $v = $VALIDFLAGS{$type}->{$k};
 	    $VALIDFLAGS{$type}->{$v} = $v;
 	}
     }
     %VALIDVALUES = (num_retained     => sub { my $a = shift;
-					      if( $a =~ /^\d+$/) { 
+					      if( $a =~ /^\d+$/) {
 						  return 'n';
 						  }}, # should be a number
 		    percent_retained => sub { my $a = shift;
-					      if( $a =~ /^\d+$/ && 
-						  $a >= 0 && $a <= 100) { 
+					      if( $a =~ /^\d+$/ &&
+						  $a >= 0 && $a <= 100) {
 						  return 'P';
 					      }}
 		    );
 
-    
+
 }
 
 =head2 new
 
  Title   : new
  Usage   : my $obj = new Bio::Tools::Run::Phylo::Molphy::ProtML();
- Function: Builds a new Bio::Tools::Run::Phylo::Molphy::ProtML object 
+ Function: Builds a new Bio::Tools::Run::Phylo::Molphy::ProtML object
  Returns : Bio::Tools::Run::Phylo::Molphy::ProtML
  Args    : -alignment => the Bio::Align::AlignI object
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
            -tree => the Bio::Tree::TreeI object
-           -params => a hashref of PAML parameters (all passed to 
+           -params => a hashref of PAML parameters (all passed to
 						    set_parameter)
            -executable => where the protml executable resides
 
@@ -262,8 +262,8 @@ sub new {
   $self->{'_protmlparams'} = {};
   $self->{'_protmlflags'} = {};
 
-  my ($aln, $tree, $st,  $flags, $params, 
-      $exe) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES 
+  my ($aln, $tree, $st,  $flags, $params,
+      $exe) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES
 				    FLAGS PARAMS EXECUTABLE)],
 				    @args);
   defined $aln && $self->alignment($aln);
@@ -271,7 +271,7 @@ sub new {
   defined $st  && $self->save_tempfiles($st);
   defined $exe && $self->executable($exe);
   if( defined $flags ) {
-      if( ref($flags) !~ /HASH/i ) { 
+      if( ref($flags) !~ /HASH/i ) {
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
 	  foreach my $type ( keys %$flags ) {
@@ -279,14 +279,14 @@ sub new {
 		  foreach my $flag ( @{$flags->{$type}} ) {
 		      $self->set_flag('others', $flag) ;
 		  }
-	      } else {  
+	      } else {
 		  $self->set_flag($type, $flags->{$type}) ;
 	      }
 	  }
       }
   }
   if( defined $params ) {
-      if( ref($flags) !~ /HASH/i ) { 
+      if( ref($flags) !~ /HASH/i ) {
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
 	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
@@ -316,7 +316,7 @@ sub run {
     }
 
     my $align = $self->alignment();
-    if( ! $align  ) { 
+    if( ! $align  ) {
 	$self->warn("must have provided a valid alignment object");
 	return -1;
     }
@@ -334,22 +334,22 @@ sub run {
 	return;
     }
     my $tree = $self->tree;
-    
-    for my $t ( keys %flags ) { 
+
+    for my $t ( keys %flags ) {
 	if( $t eq 'others' ) {
 	    $cmdstring .= " " . join(" ", map { '-'.$_ } keys %{$flags{$t}});
-	} else { 
+	} else {
 	    next if $flags{$t} eq 'u';
 	    $cmdstring .= " -".$flags{$t};
 	}
     }
 
-    while( my ($param,$val) = each %params ) { 
+    while( my ($param,$val) = each %params ) {
 	$cmdstring .= " \-$param $val";
     }
     my ($tmpdir) = $self->tempdir();
     my ($tempseqFH,$tempseqfile) = $self->io->tempfile
-	('DIR' => $tmpdir, 
+	('DIR' => $tmpdir,
 	 UNLINK => ($self->save_tempfiles ? 0 : 1));
 
     my $alnout = new Bio::AlignIO('-format'      => 'phylip',
@@ -357,14 +357,14 @@ sub run {
 				  '-interleaved' => 0,
 				  '-idlinebreak' => 1,
 				  '-idlength'    => $MINNAMELEN > $align->maxdisplayname_length() ? $MINNAMELEN : $align->maxdisplayname_length() +1);
-    
+
     $alnout->write_aln($align);
     $alnout->close();
     $alnout = undef;
     close($tempseqFH);
 
     $cmdstring .= " $tempseqfile";
-    if( $tree && defined $flags{'search'} eq 'u' ) { 
+    if( $tree && defined $flags{'search'} eq 'u' ) {
 	my ($temptreeFH,$temptreefile) = $self->io->tempfile
 	    ('DIR' => $tmpdir,
 	     UNLINK => ($self->save_tempfiles ? 0 : 1));
@@ -376,7 +376,7 @@ sub run {
 	$cmdstring .= " $temptreefile";
     }
     $self->debug( "cmdstring is $cmdstring\n");
-    
+
     unless( open(PROTML, "$cmdstring |") ) {
 	$self->warn("Cannot run $cmdstring");
 	return undef;
@@ -391,7 +391,7 @@ sub run {
  Usage   : my $exe = $protml->executable();
  Function: Finds the full path to the 'protml' executable
  Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
+ Args    : [optional] name of executable to set path to
            [optional] boolean flag whether or not warn when exe is not found
 
 
@@ -407,12 +407,12 @@ sub executable{
    unless( defined $self->{'_pathtoexe'} ) {
        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
 	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
+       } else {
 	   my $exe;
 	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
 	       -x $exe ) {
 	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
+	   } else {
 	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
 	       $self->{'_pathtoexe'} = undef;
 	   }
@@ -437,8 +437,8 @@ See also : L<Bio::SimpleAlign>, L<Bio::Align::AlignI>
 
 sub alignment{
    my ($self,$aln) = @_;
-   if( defined $aln ) { 
-       if( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
+   if( defined $aln ) {
+       if( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) {
 	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function");
 	   return undef;
        }
@@ -463,8 +463,8 @@ See also : L<Bio::Tree::Tree>
 
 sub tree {
    my ($self, $tree, %params) = @_;
-   if( defined $tree ) { 
-       if( ! ref($tree) || ! $tree->isa('Bio::Tree::TreeI') ) { 
+   if( defined $tree ) {
+       if( ! ref($tree) || ! $tree->isa('Bio::Tree::TreeI') ) {
 	   $self->warn("Must specify a valid Bio::Tree::TreeI object to the alignment function");
        }
        $self->{'_tree'} = $tree;
@@ -477,7 +477,7 @@ sub tree {
  Title   : get_flags
  Usage   : my @params = $protml->get_flags();
  Function: returns the list of flags
- Returns : array of flag names coded in the way that 
+ Returns : array of flag names coded in the way that
  Args    : none
 
 
@@ -495,7 +495,7 @@ sub get_flags{
  Title   : set_flag
  Usage   : $protml->set_parameter($type,$val);
  Function: Sets a protml parameter, will be validated against
-           the valid values as set in the %VALIDVALUES class variable.  
+           the valid values as set in the %VALIDVALUES class variable.
            The checks can be ignored if one turns off param checks like this:
              $protml->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
@@ -515,27 +515,27 @@ sub set_flag{
    }
 
    if( ! defined $type ||
-       ! defined $param ) { 
+       ! defined $param ) {
        $self->debug("Must supply a type and param when setting flag");
        return 0;
    }
-   
+
    if( ! $VALIDFLAGS{$type} ) {
        $self->warn("$type is an unrecognized type");
    }
    $param = lc($param);
-   
+
    while( substr($param,0,1) eq '-') { # handle multiple '-'
        substr($param,0,1,'');
    }
-   
-   if(! $self->no_param_checks && ! defined $VALIDFLAGS{$type}->{$param} ) { 
+
+   if(! $self->no_param_checks && ! defined $VALIDFLAGS{$type}->{$param} ) {
        $self->warn("unknown flag ($type) $param will not be set unless you force by setting no_param_checks to true");
        return 0;
-   } 
+   }
    if($type eq 'others' ) {
        $self->{'_protmlflags'}->{$type}->{$VALIDFLAGS{$type}->{$param} || $param} = 1;
-   } else { 
+   } else {
        $self->{'_protmlflags'}->{$type} = $VALIDFLAGS{$type}->{$param} || $param;
    }
    return 1;
@@ -565,7 +565,7 @@ sub get_parameters{
  Title   : set_parameter
  Usage   : $protml->set_parameter($param,$val);
  Function: Sets a protml parameter, will be validated against
-           the valid values as set in the %VALIDVALUES class variable.  
+           the valid values as set in the %VALIDVALUES class variable.
            The checks can be ignored if one turns off param checks like this:
              $protml->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
@@ -580,11 +580,11 @@ sub set_parameter{
    my ($self,$param,$value) = @_;
    $param = lc($param);
    $param =~ s/^\-//;
-   if(! $self->no_param_checks && ! defined $VALIDVALUES{$param} ) { 
+   if(! $self->no_param_checks && ! defined $VALIDVALUES{$param} ) {
        $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
        return 0;
-   } 
-  
+   }
+
    my $paramflag = $VALIDVALUES{$param}->($value);
    if( $paramflag ) {
        $self->{'_protmlparams'}->{$paramflag} = $value;
@@ -604,7 +604,7 @@ sub set_parameter{
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -615,7 +615,7 @@ sub set_parameter{
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 

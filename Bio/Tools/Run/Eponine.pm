@@ -1,8 +1,8 @@
 # $Id$
 #
-# Cared for by Tania Oh 
+# Cared for by Tania Oh
 #
-# Copyright Tania Oh 
+# Copyright Tania Oh
 #
 # You may distribute this module under the same terms as perl itself
 
@@ -10,8 +10,8 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Eponine- 
-Object for execution  of the Eponine which is a mammalian TSS predictor 
+Bio::Tools::Run::Eponine-
+Object for execution  of the Eponine which is a mammalian TSS predictor
 
 =head1 SYNOPSIS
 
@@ -20,23 +20,23 @@ Object for execution  of the Eponine which is a mammalian TSS predictor
   my $seq = "/data/seq.fa";
   my $threshold  = "0.999";
   my @params = ( '-seq' => $seq,
-  		 '-threshold' => $threshold, 
+  		 '-threshold' => $threshold,
 	         '-epojar'  => '/usr/local/bin/eponine-scan.jar',
 	          '-java'  => '/usr/local/bin/java');
 
   my $factory = Bio::Tools::Run::Eponine->new(@params);
-  # run eponine against fasta 
+  # run eponine against fasta
   my $r = $factory->run_eponine();
   my $parser = Bio::Tools::Eponine->new($r);
-  
+
   while (my $feat = $parser->next_prediction){
 	  #$feat contains array of SeqFeature
 	  foreach my $orf($feat){
 		  print $orf->seqname. "\n";
 	  }
   }
- 
-  
+
+
 
 
 Various additional options and input formats are available.  See the
@@ -70,9 +70,9 @@ or the web:
   bioperl-bugs@bio.perl.org
   http://bio.perl.org/bioperl-bugs/
 
-=head1 AUTHOR  
+=head1 AUTHOR
 
-Email gisoht@nus.edu.sg 
+Email gisoht@nus.edu.sg
 
 =head1 APPENDIX
 
@@ -85,7 +85,7 @@ package Bio::Tools::Run::Eponine;
 
 #tgot to take inmore parameters
 
-use vars qw($AUTOLOAD @ISA @EPONINE_PARAMS  %EPONINE_PARAMS  
+use vars qw($AUTOLOAD @ISA @EPONINE_PARAMS  %EPONINE_PARAMS
 	    $EPOJAR $JAVA $PROGRAMDIR $PROGRAMNAME $PROGRAM
             $TMPDIR $TMPOUTFILE  $DEFAULT_THRESHOLD
             %OK_FIELD);
@@ -96,25 +96,25 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 
-BEGIN {      
+BEGIN {
     $DEFAULT_THRESHOLD = 50;
     $PROGRAMNAME = 'java';
     $EPOJAR = 'eponine-scan.jar';
 
-    if( ! defined $PROGRAMDIR ) { 
+    if( ! defined $PROGRAMDIR ) {
 	$PROGRAMDIR = $ENV{'JAVA_HOME'} || $ENV{'JAVA_DIR'};
     }
     if (defined $PROGRAMDIR) {
-	foreach my $progname ( [qw(java)],[qw(bin java)] ) { 
+	foreach my $progname ( [qw(java)],[qw(bin java)] ) {
 	    my $f = Bio::Root::IO->catfile($PROGRAMDIR, @$progname);
 	    if( -e $f && -x $f ) {
 		$PROGRAM = $f;
 		last;
-	    } 
+	    }
 	}
     }
-    
-    if( defined $ENV{'EPONINEDIR'} ) { 
+
+    if( defined $ENV{'EPONINEDIR'} ) {
 	$EPOJAR = Bio::Root::IO->catfile($ENV{'EPONINEDIR'}, $EPOJAR);
         if ( ! -e $EPOJAR) {
 	   $EPOJAR =undef;
@@ -125,11 +125,11 @@ BEGIN {
 		       'THRESHOLD' => '0.999',
 		       'EPOJAR'   => '/usr/local/bin/eponine-scan.jar',
 		       'JAVA'     => '/usr/java/jre1.3.1_02/bin/java');
-    
+
     @EPONINE_PARAMS=qw(SEQ THRESHOLD JAVA EPOJAR);
-    
+
     foreach my $attr ( @EPONINE_PARAMS)
-    { $OK_FIELD{$attr}++; }    
+    { $OK_FIELD{$attr}++; }
 }
 
 @ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Tools::Run::WrapperBase);
@@ -183,8 +183,8 @@ sub new {
 
     $self->{'_java'}      = undef; # location of java vm
     $self->{'_epojar'}    = undef; # location of eponine-scan.jar executable JAR file.
-    $self->{'_threshold'} = 0.999; # minimum posterior for filtering predictions 
-    $self->{'_filename'} = undef; #location of seq 
+    $self->{'_threshold'} = 0.999; # minimum posterior for filtering predictions
+    $self->{'_filename'} = undef; #location of seq
     $seq = $EPONINE_PARAMS{'seq'}     unless defined $seq;
     $threshold = $EPONINE_PARAMS{'threshold'}     unless defined $threshold;
     if  (! defined $epojar && defined $EPOJAR) {
@@ -197,7 +197,7 @@ sub new {
 	    $java = $PROGRAM;
     }
     else {
-       $java = $EPONINE_PARAMS{'JAVA'} unless defined $java; 
+       $java = $EPONINE_PARAMS{'JAVA'} unless defined $java;
     }
     $self->filename($seq) if ($seq);
 
@@ -205,27 +205,27 @@ sub new {
       # full path assumed
       $self->java($java);
     }
-    
+
    $self->epojar($epojar) if (defined $epojar && -e $epojar);
 
    if (defined $threshold && $threshold >=0 ){
         $self->threshold($threshold);
    } else {
-        $self->threshold($DEFAULT_THRESHOLD); 
+        $self->threshold($DEFAULT_THRESHOLD);
     }
-				  
+				
     return $self;
 }
 
 
 
-=head2 filename 
+=head2 filename
 
- Title   : filename 
+ Title   : filename
  Usage   : my $filename= $self->filename
- Function: Get/Set the method to submit the seq 
+ Function: Get/Set the method to submit the seq
  Returns : string
- Args    : 
+ Args    :
 
 =cut
 
@@ -258,12 +258,12 @@ sub java {
    unless( defined $self->{'_pathtojava'} ) {
        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
 	   $self->{'_pathtojava'} = $PROGRAM;
-       } else { 
+       } else {
 	   my $exe;
 	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
 	       -x $exe ) {
 	       $self->{'_pathtojava'} = $exe;
-	   } else { 
+	   } else {
 	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
 	       $self->{'_pathtojava'} = undef;
 	   }
@@ -286,7 +286,7 @@ sub epojar {
     my ($self, $location) = @_;
     if ($location)
     {
-	unless( $location ) { 
+	unless( $location ) {
 	    $self->warn("eponine-scan.jar not found at $location: $!\n");
 	    return undef;
 	}
@@ -297,11 +297,11 @@ sub epojar {
 
 
 
-=head2 threshold 
+=head2 threshold
 
- Title   : threshold 
+ Title   : threshold
  Usage   : my $threshold = $self->threshold
- Function: Get/Set the threshold for Eponine 
+ Function: Get/Set the threshold for Eponine
  Returns : string
  Args    : b/w 0.9 and  1.0
 
@@ -321,10 +321,10 @@ sub threshold{
 
  Title   : predict_TSS
  Usage   : my @genes = $self->predict_TSS($seq)
- Function: runs Eponine and creates an array of genes 
+ Function: runs Eponine and creates an array of genes
  Returns : An Array of SeqFeatures
  Args    : A Bio::PrimarySeqI
- 
+
 =cut
 
 sub predict_TSS{
@@ -332,7 +332,7 @@ sub predict_TSS{
     my $infile = $self->_setinput($seq);
     my @tss = $self->_run_eponine();
     return @tss;
-    
+
 }
 
 
@@ -342,8 +342,8 @@ sub predict_TSS{
  Usage   : Internal function, not to be called directly
  Function: writes input sequence to file and return the file name
  Example :
- Returns : string 
- Args    : 
+ Returns : string
+ Args    :
 
 =cut
 
@@ -366,6 +366,7 @@ sub _setinput {
     Args    :   none
 
 =cut
+
 sub run_eponine {
     my ($self) = @_;
     my $result = $TMPOUTFILE;
