@@ -6,7 +6,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: papplmaker.PLS,v 1.2 2003-04-23 12:23:11 senger Exp $
+#   $Id: papplmaker.PLS,v 1.3 2003-05-30 15:43:22 jason Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -61,8 +61,8 @@ BEGIN {
 
 
     # set the version for version checking
-    $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q$Id: papplmaker.PLS,v 1.2 2003-04-23 12:23:11 senger Exp $;
+    $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q$Id: papplmaker.PLS,v 1.3 2003-05-30 15:43:22 jason Exp $;
 
     # help wanted?
     if ($opt_h) {
@@ -407,7 +407,7 @@ names of the corresponding analyses, but this can be changed by the
 C<-m> option which is actually a template where the following strings
 are recognised and replaced:
 
-=over
+=over 4
 
 =item $ANALYSIS or ${ANALYSIS}
 

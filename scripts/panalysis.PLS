@@ -15,7 +15,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.3 2003-04-23 12:23:11 senger Exp $
+#   $Id: panalysis.PLS,v 1.4 2003-05-30 15:43:22 jason Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -112,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q$Id: panalysis.PLS,v 1.3 2003-04-23 12:23:11 senger Exp $;
+    $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q$Id: panalysis.PLS,v 1.4 2003-05-30 15:43:22 jason Exp $;
 
 
     # help wanted?
@@ -512,7 +512,7 @@ And again later another invocation can ask for results:
 Here is a list of all job options (except for results, they are in the
 next section):
 
-=over
+=over 4
 
 =item Job execution and termination
 
@@ -568,7 +568,7 @@ specification> obtainable using the C<-o> or C<-O> options), or a
 equal-sign-separated name/format construct suggesting what to do with
 the result. The possibilities are:
 
-=over
+=over 4
 
 =item result-name
 
@@ -590,7 +590,7 @@ It saves the given result into a file whose name is given by the
 C<template>. The template can contain several strings which are
 substituted before using it as the filename:
 
-=over
+=over 4
 
 =item Any '*'
 

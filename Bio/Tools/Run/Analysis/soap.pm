@@ -67,7 +67,7 @@ This software is provided "as is" without warranty of any kind.
 
 =head1 SEE ALSO
 
-=over
+=over 4
 
 =item *
 
@@ -152,7 +152,7 @@ already be partly initiated (from Bio::Tools::Run::Analysis::new method);
 so if you need to do some tricks with the 'class invocation' you need to
 change Bio::Analysis I<new> method, not this one.
 
-=over
+=over 4
 
 =item -location
 

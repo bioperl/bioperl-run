@@ -119,7 +119,7 @@ This software is provided "as is" without warranty of any kind.
 
 =head1 SEE ALSO
 
-=over
+=over 4
 
 =item *
 
@@ -183,7 +183,7 @@ and returns a more specific lower-level object, for example
 C<Bio::Tools::Run::AnalysisFactory::soap> object - which one it is it depends on the C<-access>
 parameter.
 
-=over
+=over 4
 
 =item -access
 
