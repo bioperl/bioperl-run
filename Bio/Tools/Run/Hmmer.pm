@@ -63,10 +63,9 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via email
-or the web:
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
- bioperl-bugs@bioperl.org
  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Shawn
@@ -97,7 +96,7 @@ use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-       @HMMER_PARAMS=qw(HMM program PROGRAM DB n A E T Z );
+       @HMMER_PARAMS=qw(HMM program PROGRAM DB n A E T Z  );
        @HMMER_SWITCHES=qw(n);
        foreach my $attr ( @HMMER_PARAMS,@HMMER_SWITCHES)
                         { $OK_FIELD{$attr}++; }
@@ -205,25 +204,39 @@ sub run{
 =cut
 
 sub _run {
-     my ($self,$file)= @_;
+    my ($self,$file)= @_;
 
-     my $str = $self->executable;
-     my $param_str = $self->arguments." ".$self->_setparams;
-     $str.=" $param_str ".$file;
-   
+    my $str = $self->executable;
+    my $param_str = $self->arguments." ".$self->_setparams;
+    $str.=" $param_str ".$file;
+
     $self->debug("HMMER command = $str"); 
 
-     if($self->program_name=~/hmmpfam|hmmsearch|hmmalign/){
-       open(HMM,"$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
-       my $searchio= Bio::SearchIO->new(-fh=>\*HMM,-format=>"hmmer");
-       return $searchio; 
-      }
-      else { # for hmmbuild or hmmcalibrate
-        my $status = system($str);
-        $self->throw("HMMER call($str) crashed: $?\n") unless $status==0;
-        return 1;
-      }
-     
+    if($self->program_name=~/hmmpfam|hmmsearch|hmmalign/){
+	open(HMM,"$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
+	my $io;
+	while(<HMM>) {
+	    $self->debug($_);
+	    $io .= $_;
+	}
+	use IO::String;
+	my $searchio= Bio::SearchIO->new(-fh    =>IO::String->new($io),
+					 -format=>"hmmer");
+	return $searchio; 
+    } else {			
+        # for hmmbuild or hmmcalibrate
+	my $status = open(OUT,"$str | ");
+	my $io;
+	while(<OUT>){
+	    $io .= $_;
+	}
+	close(OUT);
+	$self->warn($io) if $self->verbose > 0;
+	unless( $status ) {
+	    $self->throw("HMMER call($str) crashed: $?\n") unless $status==1;
+	}
+	return 1;
+    }
 }
 
 =head2 _setparams
