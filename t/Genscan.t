@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 12;
+    $NTESTS = 4;
     plan tests => $NTESTS;
 }
 
@@ -23,24 +23,20 @@ END {
 use Bio::Tools::Run::Genscan;
 use Bio::Root::IO;
 
-ok(1);
-my $verbose = -1;
-
 my $paramfile = Bio::Root::IO->catfile("t", "data", "HumanIso.smat");
 my @params = ('MATRIX',$paramfile);
-#my  $factory = Bio::Tools::Run::Genscan->new(MATRIX=>$paramfile);
 my  $factory = Bio::Tools::Run::Genscan->new(@params);
 ok $factory->isa('Bio::Tools::Run::Genscan');
+ok $factory->matrix;
 
-
-#test with one file with 2 sequences
 my $inputfilename = Bio::Root::IO->catfile("t","data","Genscan.FastA");
 my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
 $seq1 = $seqstream->next_seq();
 
 
-my $genscan_present = $factory->exists_genscan();
+my $genscan_present = $factory->executable();
+
 unless ($genscan_present) {
         warn("Genscan program not found. Skipping tests $Test::ntest to $NTESTS.\n");
             exit 0;
