@@ -12,14 +12,14 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phylo::Phylip::DrawTree - DESCRIPTION of Object
+Bio::Tools::Run::Phylo::Phylip::DrawTree - use Phylip DrawTree program to draw trees
 
 =head1 SYNOPSIS
 
 use Bio::Tools::Run::Phylo::Phylip::DrawTree;
 
 my $drawfact = new Bio::Tools::Run::Phylo::Phylip::DrawTree();
-my $treeimage = $drawfact->draw_tree($tree);
+my $treeimagefile = $drawfact->draw_tree($tree);
 
 =head1 DESCRIPTION
 
@@ -69,7 +69,7 @@ Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Phylo::Phylip::DrawTree;
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-	    $FONTFILE $TMPDIR @DRAW_PARAMS @OTHER_SWITCHES
+	    $FONTFILE @DRAW_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD %DEFAULT);
 use strict;
 
@@ -143,7 +143,6 @@ sub new {
   $self->io->_initialize_io();
   
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
   
   while (@args)  {
       $attr =   shift @args;
@@ -268,11 +267,11 @@ sub _run {
     if( -e $self->io->catfile($curpath,'fontfile') ) {
 	$instring .= $self->io->catfile($curpath,'fontfile')."\n";
     } elsif( File::Spec->file_name_is_absolute($self->fontfile) ) {	 
-	$instring .= $self->io->catfile($TMPDIR,$self->fontfile)."\n";
+	$instring .= $self->io->catfile($self->tempdir,$self->fontfile)."\n";
     } else {
 	$instring .= $self->io->catfile($curpath,$self->fontfile)."\n";
     }
-    chdir($TMPDIR);
+    chdir($self->tempdir);
     $instring .= $param_string;
     $self->debug( "Program ".$self->executable." $param_string\n");
     # open a pipe to run drawgram to bypass interactive menus
@@ -286,7 +285,7 @@ sub _run {
     close(DRAW);	
     chdir($curpath);
     #get the results
-    my $plotfile = $self->io->catfile($TMPDIR,$self->plotfile);
+    my $plotfile = $self->io->catfile($self->tempdir,$self->plotfile);
 
     $self->throw("drawgram did not create plotfile correctly ($plotfile)")
 	unless (-e $plotfile);    		
@@ -316,7 +315,7 @@ sub _setinput {
     } elsif ($input->isa("Bio::Tree::TreeI")) {
         #  Open temporary file for both reading & writing of BioSeq array
 	my $tfh;
-	($tfh,$treefile) = $self->io->tempfile(-dir=>$TMPDIR);
+	($tfh,$treefile) = $self->io->tempfile(-dir=>$self->tempdir);
 	my $treeIO = Bio::TreeIO->new(-fh => $tfh, 
 				      -format=>'newick');
 	$treeIO->write_tree($input);

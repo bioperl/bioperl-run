@@ -11,9 +11,7 @@
 =head1 NAME 
 
 Bio::Tools::Run::Phylo::Phylip::ProtDist - Wrapper for the phylip
-program protdist by Joseph Felsentein for creating a distance matrix
-comparing protein sequences from a multiple alignment file or a
-L<Bio::SimpleAlign> object and returns a hash ref to the table
+program protdist
 
 =head1 SYNOPSIS
 
@@ -41,6 +39,11 @@ L<Bio::SimpleAlign> object and returns a hash ref to the table
   my $matrix  = 
     $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
 
+=head1 DESCRIPTION
+
+Wrapper for protdist Joseph Felsentein for creating a distance matrix
+comparing protein sequences from a multiple alignment file or a
+L<Bio::SimpleAlign> object and returns a hash ref to the table
 
 =head1 PARAMETERS FOR PROTDIST COMPUTATION
 
@@ -180,7 +183,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::Phylip::ProtDist;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-	    $TMPDIR $TMPOUTFILE @PROTDIST_PARAMS @OTHER_SWITCHES
+	    @PROTDIST_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
 use Bio::SimpleAlign;
@@ -229,10 +232,8 @@ sub new {
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
     $self->io->_initialize_io();
-
+    
     my ($attr, $value);
-    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -380,9 +381,9 @@ sub _run {
 	$infile = $self->io->catfile($curpath,$infile);
     }
     $instring =  $infile."\n$param_string";
-    $self->debug( "Program ".$self->executable." $param_string\n");
+    $self->debug( "Program ".$self->executable." $instring\n");
     
-    chdir($TMPDIR);
+    chdir($self->tempdir);
     #open a pipe to run protdist to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
 	open(PROTDIST,"|".$self->executable.">/dev/null");
@@ -394,7 +395,7 @@ sub _run {
     close(PROTDIST);	
     
     # get the results
-    my $outfile = $self->io->catfile($TMPDIR,$self->outfile);
+    my $outfile = $self->io->catfile($self->tempdir,$self->outfile);
     chdir($curpath);
     $self->throw("protdist did not create matrix correctly ($outfile)")
 	unless (-e $outfile);
@@ -403,24 +404,25 @@ sub _run {
     my @values;
     
     open(DIST, $outfile);
+    my @names;
+    my %seen;
     while (<DIST>){
 	next if (/^\s+\d+$/);
-        my @line = split /\s+/,$_;
-        push @values,[@line];
-    }
-    close(DIST);
-	#list of sequences 
-    my @name = map{$_->[0]}@values;
-    my %dist;
-	#create the matrix using a hash of hash 
-    my $i = 0;
-    foreach my $name (@name){
-	my $j = 1;
-        foreach my $n(@name){
-		$dist{$name}{$n} = $values[$i][$j];
-		$j++;
+        my ($n,@line) = split( /\s+/,$_);
+	if( $seen{$n}++ ) {
+	    $n = $n."_".$seen{$n};
 	}
-    	$i++;
+	push @names, $n;
+        push @values, [@line];
+    }
+    close(DIST);    
+    my %dist;
+    # create the matrix using a hash of hash     
+    foreach my $name (@names) {
+	my $row = shift @values;
+        foreach my $n (@names) {
+	    $dist{$name}{$n} = shift @$row;
+	}
     }
 		
     # Clean up the temporary files created along the way...
@@ -460,7 +462,7 @@ sub _setinput {
     #  $input may be a SimpleAlign Object
     if ($input->isa("Bio::SimpleAlign")) {
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
+	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
 				      -format=>'phylip',
 				      -idlength=>$self->idlength());

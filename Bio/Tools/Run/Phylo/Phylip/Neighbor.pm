@@ -173,7 +173,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::Phylip::Neighbor;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-	    $TMPDIR $TMPOUTFILE @NEIGHBOR_PARAMS @OTHER_SWITCHES
+	    @NEIGHBOR_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
 use Bio::SimpleAlign;
@@ -229,8 +229,6 @@ sub new {
     $self->io->_initialize_io();
 
     my ($attr, $value);
-    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -342,7 +340,7 @@ sub _run {
     }
     $instring =  $infile."\n$param_string";
     $self->debug( "Program ".$self->executable."\n");
-    chdir($TMPDIR);
+    chdir($self->tempdir);
 	#open a pipe to run neighbor to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
 	open(NEIGHBOR,"|".$self->executable.">/dev/null");
@@ -354,8 +352,8 @@ sub _run {
     close(NEIGHBOR);	
     chdir($curpath);
     #get the results
-    my $outfile = $self->io->catfile($TMPDIR,$self->outfile);
-    my $treefile = $self->io->catfile($TMPDIR,$self->treefile);
+    my $outfile = $self->io->catfile($self->tempdir,$self->outfile);
+    my $treefile = $self->io->catfile($self->tempdir,$self->treefile);
     
     $self->throw("neighbor did not create tree correctly (expected $treefile) ") unless (-e $treefile);
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
@@ -437,7 +435,7 @@ sub _setinput {
     #  $input may be a hash ref to a distance matrix
     if (ref($input) eq "HASH") {
         #  Open temporary file for both reading & writing of distance matrix
-	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
+	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	my $num_species = scalar(keys %{$input});
 	print $tfh "   $num_species\n";
 	foreach my $key (keys %{$input}){

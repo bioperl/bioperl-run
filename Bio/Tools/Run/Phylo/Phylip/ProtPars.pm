@@ -124,7 +124,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::Phylip::ProtPars;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-	    $TMPDIR $TMPOUTFILE @PROTPARS_PARAMS @OTHER_SWITCHES
+	    @PROTPARS_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
 use Bio::SimpleAlign;
@@ -177,8 +177,6 @@ sub new {
     $self->io->_initialize_io();
 
     my ($attr, $value);
-    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -325,7 +323,7 @@ sub _run {
     }
     $instring =  $infile."\n$param_string";
     $self->debug( "Program ".$self->executable."\n");
-    chdir($TMPDIR);
+    chdir($self->tempdir);
     #open a pipe to run protpars to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
 	open(PROTPARS,"|".$self->executable.">/dev/null");
@@ -337,8 +335,8 @@ sub _run {
     close(PROTPARS);	
     chdir($curpath);
     #get the results
-    my $outfile = $self->io->catfile($TMPDIR,$self->outfile);
-    my $treefile = $self->io->catfile($TMPDIR,$self->treefile);
+    my $outfile = $self->io->catfile($self->tempdir,$self->outfile);
+    my $treefile = $self->io->catfile($self->tempdir,$self->treefile);
     
     $self->throw("Protpars did not create treefile correctly") 
 	unless (-e $treefile);
@@ -386,7 +384,7 @@ sub _setinput {
     #  $input may be a SimpleAlign Object
     if ($input->isa("Bio::Align::AlignI")) {
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
+	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	my $alnIO = Bio::AlignIO->new(-fh => $tfh, -format=>'phylip',idlength=>$self->idlength());
 	$alnIO->write_aln($input);
 	$alnIO->close();
