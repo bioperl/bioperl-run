@@ -318,7 +318,7 @@ sub run{
 sub predict_TSS {
   return shift->run(@_);
 }
-  
+
 =head2  _setinput()
 
  Title   : _setinput
