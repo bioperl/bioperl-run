@@ -361,8 +361,6 @@ sub _run {
     $self->throw("SeqBoot did not create files correctly ($outfile)")
   	unless (-e $outfile);
     
-    `cp $outfile ~/test.$$`;
-
     #parse the alignments
     my @aln;
     my @parse_params;
