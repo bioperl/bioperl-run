@@ -67,7 +67,7 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 	Bio::Tools::Run::Tmhmm
 	http://www.cbs.dtu.dk/services/TMHMM/
 
-17.	TribeMBL - Method for clustering proteins into related groups.
+17.	TribeMCL - Method for clustering proteins into related groups.
 	Bio::Tools::Run::TribeMCL
 	http://www.ebi.ac.uk/research/cgg/tribe/
 
@@ -106,3 +106,10 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 26.     FASTA,SSEARCH - Pairwise sequence alignment
         Bio::Tools::Run::StandAloneFasta
         ftp://ftp.virginia.edu/pub/fasta
+
+27.     Promoterwise - Sequence alignment designed
+        for promoter sequences
+        http://www.sanger.ac.uk/software/wise2
+
+28.     Lagan - Lagan suite of tools including MLAGAN
+        http://lagan.stanford.edu/
