@@ -1039,7 +1039,7 @@ sub methods{
 }
 
 
-=head1 Bio::Tools::Run::Wrapper methods
+=head1 Bio::Tools::Run::BaseWrapper methods
 
 =cut
 
@@ -1094,7 +1094,7 @@ sub methods{
 
  Title   : cleanup
  Usage   : $tcoffee->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory
  Returns : none
  Args    : none
 

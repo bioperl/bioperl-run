@@ -161,8 +161,9 @@ use Bio::Tools::FootPrinter;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
 BEGIN {
-    @FP_PARAMS = qw(SEQUENCE_TYPE SIZE MAX_MUTATIONS MAX_MUTATIONS_PER_BRANCH LOSSES LOSS_COST TREE PROGRAM
-                    SUBREGION_SIZE POSITION_CHANGE_COST INDEL_COST INVERSION_COST );
+    @FP_PARAMS = qw(SEQUENCE_TYPE SIZE MAX_MUTATIONS MAX_MUTATIONS_PER_BRANCH
+                    LOSSES LOSS_COST TREE PROGRAM SUBREGION_SIZE POSITION_CHANGE_COST
+                    INDEL_COST INVERSION_COST );
     @FP_SWITCHES = qw(TRIPLET_FILTERING PAIR_FILTERING POST_FILTERING DETAILS);
     @OTHER_SWITCHES = qw(QUIET);
 
@@ -446,7 +447,7 @@ sub _setinput {
 
  Title   : cleanup
  Usage   : $codeml->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory
  Returns : none
  Args    : none
 
