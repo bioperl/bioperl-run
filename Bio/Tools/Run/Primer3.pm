@@ -370,7 +370,8 @@ sub run {
  # make a temporary file and print the instructions to it.
  my ($temphandle, $tempfile)=$self->io->tempfile;
  print $temphandle join "\n", @{$self->{'primer3_input'}}, "=\n";
- open (RESULTS, "$executable < $tempfile|") || $self->throw("Can't open RESULTS");
+ $temphandle->close;
+open (RESULTS, "$executable < $tempfile|") || $self->throw("Can't open RESULTS");
  if ($self->{'_outfilename'}) {
   
   # I can't figure out how to use either of these to write the results out.
