@@ -28,12 +28,13 @@ END {
 
 ok(1);
 my $verbose = $DEBUG;
-my @params = (
+my @params = ('-verbose'  => $verbose,
 	      'idlength'  =>30,
 	      'datatype'  =>'GENEFREQ',
 	      'REPLICATES'=>50);
 
 my $sb_factory = Bio::Tools::Run::Phylo::Phylip::SeqBoot->new(@params);
+
 unless($sb_factory->executable){
     warn("SeqBoot program not found. Skipping tests $Test::ntest to $NTESTS.\n");
     exit 0;
@@ -51,7 +52,8 @@ $sb_factory->replicates(2);
 ok $sb_factory->replicates, 2, "coludn't set number of replicates";
 
 
-my $bequiet = 1;
+my $bequiet = $verbose > 0 ? 0 : 1;
+
 $sb_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");

@@ -28,9 +28,8 @@ END {
 
 ok(1);
 my $verbose = $DEBUG;
-
-my $sb_factory = Bio::Tools::Run::Phylo::Phylip::Consense->new();
-
+my $sb_factory = new Bio::Tools::Run::Phylo::Phylip::Consense
+    (-verbose => $verbose);
 unless($sb_factory->executable){
     warn("Consense program not found. Skipping tests $Test::ntest to $NTESTS.\n");
     exit 0;
@@ -43,7 +42,7 @@ $sb_factory->rooted(1);
 ok $sb_factory->rooted, 1, "coludn't set rooted option";
 
 
-my $bequiet = 1;
+my $bequiet = $verbose > 0 ? 0 : 1;
 $sb_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","consense.treefile");
