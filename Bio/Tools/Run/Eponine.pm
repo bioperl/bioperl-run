@@ -153,8 +153,8 @@ sub new {
     my $epojar;
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
+    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
+    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
     while (@args)  {
        $attr =   shift @args;
        $value =  shift @args;

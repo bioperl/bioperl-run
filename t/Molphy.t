@@ -43,6 +43,7 @@ END {
 }
 my $verbose = $ENV{'BIOPERLDEBUG'};
 
+END { unlink('protml.eps'); }
 ## End of black magic.
 ##
 ## Insert additional test code below but remember to change
@@ -79,3 +80,4 @@ ok($r->model, 'JTT');
 ok($r->search_space,50);
 ok($trees[0]->score, -453.1);
 ok($protml->error_string !~ /Error/); # we don't expect any errors;
+

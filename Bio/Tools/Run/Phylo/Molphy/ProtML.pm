@@ -272,6 +272,10 @@ sub new {
 sub run {
     my ($self) = @_;
 
+    unless ( $self->save_tempfiles ) {
+	$self->cleanup();
+    }
+
     my $align = $self->alignment();
     if( ! $align  ) { 
 	$self->warn("must have provided a valid alignment object");
@@ -305,7 +309,9 @@ sub run {
 	$cmdstring .= " \-$param $val";
     }
     my ($tmpdir) = $self->tempdir();
-    my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+    my ($tempseqFH,$tempseqfile) = $self->io->tempfile
+	('DIR' => $tmpdir, 
+	 UNLINK => ($self->save_tempfiles ? 0 : 1));
 
     my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				  '-fh'          => $tempseqFH,
@@ -315,7 +321,7 @@ sub run {
     
     $alnout->write_aln($align);
     $alnout->close();
-    undef $alnout;   
+    $alnout = undef;
     close($tempseqFH);
 
     $cmdstring .= " $tempseqfile";
@@ -337,9 +343,6 @@ sub run {
 	return undef;
     }
     my $parser= new Bio::Tools::Phylo::Molphy(-fh => \*PROTML);
-    unless ( $self->save_tempfiles ) {
-	$self->cleanup();
-    }
     return (1,$parser);
 }
 

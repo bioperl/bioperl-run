@@ -387,7 +387,7 @@ sub run{
    if( ! ref($aln) && -e $aln ) { 
        $tempseqfile = $aln;
    } else { 
-       ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+       ($tempseqFH,$tempseqfile) = $self->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
        my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
 				 '-interleaved' => 0,
