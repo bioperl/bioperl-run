@@ -46,6 +46,7 @@ unless ($genscan_present) {
         warn("Genscan program not found. Skipping tests $Test::ntest to $NTESTS.\n");
             exit 0;
 }
+$factory->quiet(1);
 my @feat = $factory->predict_genes($seq1);
     
 my $protein = $feat[0]->predicted_protein();

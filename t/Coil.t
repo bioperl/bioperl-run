@@ -43,7 +43,7 @@ unless ($coil_present) {
        warn("coil  program not found. Skipping tests $Test::ntest to $NTESTS.\n");
        exit 0;
 }
-
+$factory->quiet(1);
 my @feat = $factory->predict_protein_features($seq1);
 
 ok $feat[0]->isa('Bio::SeqFeatureI');
