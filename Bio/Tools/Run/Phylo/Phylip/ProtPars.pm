@@ -116,7 +116,7 @@ methods. Internal methods are usually preceded with a _
 	
 package Bio::Tools::Run::Phylo::Phylip::ProtPars;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @PROTPARS_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
@@ -125,8 +125,9 @@ use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 # You will need to enable the protpars program. This
 # can be done in (at least) two ways:
@@ -146,14 +147,14 @@ use Bio::Root::IO;
 
 
 BEGIN {
-
+  $PROGRAMNAME = "protpars";
 	if (defined $ENV{PHYLIPDIR}) {
 		$PROGRAMDIR = $ENV{PHYLIPDIR} || '';
 		$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-					'protpars'.($^O =~ /mswin/i ?'.exe':''));
+					$PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
     	}
 	else {
-		$PROGRAM = 'protpars';
+		$PROGRAM = $PROGRAMNAME;
 	}
 	@PROTPARS_PARAMS = qw(THRESHOLD JUMBLE OUTGROUP);
 	@OTHER_SWITCHES = qw(QUIET);
@@ -166,17 +167,17 @@ sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
-    $self->_initialize_io();
+    $self->io->_initialize_io();
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~/PROGRAM/i) {
-		$self->program($value);
+		$self->executable($value);
 		next;
 	}
 	if ($attr =~ /IDLENGTH/i){
@@ -185,14 +186,6 @@ sub new {
 	}
 	$self->$attr($value);	
    }
-   if (! defined $self->program) {
-	$self->program($PROGRAM);
-   }
-   unless ($self->exists_protpars()) {
-	if( $self->verbose >= 0 ) {
-		warn "protpars program not found as ".$self->program." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n";
-	}
-    }
     return $self;
 }
 
@@ -206,46 +199,40 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
+=head2 executable
 
-=head2  exists_protpars()
-
- Title   : exists_protpars
- Usage   : $protparsfound = Bio::Tools::Run::Alignment::Tree->exists_protpars()
- Function: Determine whether protpars program can be found on current host
- Example :
- Returns : 1 if protpars program found at expected location, 0 otherwise.
- Args    :  none
-
-=cut
-
-
-sub exists_protpars{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-	$PROGRAM = $f if( -e $f );
-	return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function: 
- Returns : value of program
- Args    : newvalue (optional)
+ Title   : executable
+ Usage   : my $exe = $genscan->executable();
+ Function: Finds the full path to the 'genscan' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
 
 
 =cut
 
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
+sub executable{
+   my ($self, $exe,$warn) = @_;
 
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+           $self->{'_pathtoexe'} = $PROGRAM;
+       } else {
+           my $exe;
+           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+               -x $exe ) {
+               $self->{'_pathtoexe'} = $exe;
+           } else {
+               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+               $self->{'_pathtoexe'} = undef;
+           }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
 
 =head2 idlength 
@@ -328,14 +315,14 @@ sub _run {
 	my ($self,$infile,$param_string) = @_;
 	my $instring;
 	$instring =  $infile."\n$param_string";
-	$self->debug( "Program ".$self->program."\n");
+	$self->debug( "Program ".$self->executable."\n");
 
 	#open a pipe to run protpars to bypass interactive menus
 	if ($self->quiet() || $self->verbose() < 0) {
-		open(PROTPARS,"|".$self->program.">/dev/null");
+		open(PROTPARS,"|".$self->executable.">/dev/null");
 	}
 	else {
-		open(PROTPARS,"|".$self->program);
+		open(PROTPARS,"|".$self->executable);
 	}
 	print PROTPARS $instring;
 	close(PROTPARS);	
@@ -390,7 +377,7 @@ sub _setinput {
     #  $input may be a SimpleAlign Object
     if ($input->isa("Bio::SimpleAlign")) {
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$alnfilename) = $self->tempfile(-dir=>$TMPDIR);
+	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
 	my $alnIO = Bio::AlignIO->new(-fh => $tfh, -format=>'phylip',idlength=>$self->idlength());
 	$alnIO->write_aln($input);
 	$alnIO->close();

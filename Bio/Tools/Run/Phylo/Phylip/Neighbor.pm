@@ -165,7 +165,7 @@ methods. Internal methods are usually preceded with a _
 	
 package Bio::Tools::Run::Phylo::Phylip::Neighbor;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @NEIGHBOR_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
@@ -173,9 +173,9 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
+use Bio::Tools::Run::WrapperBase;
 use Bio::Root::IO;
-
-@ISA = qw(Bio::Root::Root Bio::Root::IO);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 # You will need to enable the neighbor program. This
 # can be done in (at least) 3 ways:
@@ -195,13 +195,14 @@ use Bio::Root::IO;
 
 BEGIN {
 
+    $PROGRAMNAME="neighbor";
     if (defined $ENV{PHYLIPDIR}) {
 	$PROGRAMDIR = $ENV{PHYLIPDIR} || '';
 	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-					  'neighbor'.($^O =~ /mswin/i ?'.exe':''));
+					  $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
     }
     else {
-	$PROGRAM = 'neighbor';
+	$PROGRAM = $PROGRAMNAME;
     }
 	@NEIGHBOR_PARAMS = qw(TYPE OUTGROUP LOWTRI UPPTRI SUBREP JUMBLE);
 	@OTHER_SWITCHES = qw(QUIET);
@@ -214,17 +215,17 @@ sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
-    $self->_initialize_io();
+    $self->io->_initialize_io();
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~/PROGRAM/i) {
-		$self->program($value);
+		$self->executable($value);
 		next;
 	}
 	if ($attr =~ /IDLENGTH/i){
@@ -233,14 +234,8 @@ sub new {
 	}
 	$self->$attr($value);	
     }
-    if (! defined $self->program) {
-	$self->program($PROGRAM);
-    }
     if (! defined $self->idlength){
 	$self->idlength(10);
-    }
-    unless ($self->exists_neighbor()) {
-	$self->warn( "neighbor program not found as ".$self->program." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n");
     }
     return $self;
 }
@@ -253,46 +248,6 @@ sub AUTOLOAD {
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
     $self->{$attr} = shift if @_;
     return $self->{$attr};
-}
-
-=head2  exists_neighbor()
-
- Title   : exists_neighbor
- Usage   : $neighborfound = Bio::Tools::Run::Alignment::Tree->exists_neighbor()
- Function: Determine whether neighbor program can be found on current host
- Example :
- Returns : 1 if neighbor program found at expected location, 0 otherwise.
- Args    :  none
-
-=cut
-
-sub exists_neighbor{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-	$PROGRAM = $f if( -e $f );
-	return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function: 
- Returns : value of program
- Args    : newvalue (optional)
-
-
-=cut
-
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
-
 }
 
 =head2 idlength 
@@ -375,14 +330,14 @@ sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
     $instring =  $infile."\n$param_string";
-    $self->debug( "Program ".$self->program."\n");
+    $self->debug( "Program ".$self->executable."\n");
 
 	#open a pipe to run neighbor to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-	open(NEIGHBOR,"|".$self->program.">/dev/null");
+	open(NEIGHBOR,"|".$self->executable.">/dev/null");
     }
     else {
-	open(NEIGHBOR,"|".$self->program);
+	open(NEIGHBOR,"|".$self->executable);
     }
     print NEIGHBOR $instring;
     close(NEIGHBOR);	
@@ -401,6 +356,42 @@ sub _run {
     unlink $outfile;
     unlink $treefile;
     return $tree; 
+}
+
+=head2 executable
+
+ Title   : executable
+ Usage   : my $exe = $neighbor->executable();
+ Function: Finds the full path to the 'genscan' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
+
+
+=cut
+
+sub executable{
+   my ($self, $exe,$warn) = @_;
+
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+           $self->{'_pathtoexe'} = $PROGRAM;
+       } else {
+           my $exe;
+           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+               -x $exe ) {
+               $self->{'_pathtoexe'} = $exe;
+           } else {
+               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+               $self->{'_pathtoexe'} = undef;
+           }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
 
 
@@ -434,7 +425,7 @@ sub _setinput {
     #  $input may be a hash ref to a distance matrix
     if (ref($input) eq "HASH") {
         #  Open temporary file for both reading & writing of distance matrix
-	($tfh,$alnfilename) = $self->tempfile(-dir=>$TMPDIR);
+	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
 	my $num_species = scalar(keys %{$input});
 	print $tfh "   $num_species\n";
 	foreach my $key (keys %{$input}){

@@ -230,7 +230,7 @@ sub new {
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~/PROGRAM/i) {
-		$self->program($value);
+		$self->executable($value);
 		next;
 	}
 	if ($attr =~ /IDLENGTH/i){
@@ -240,11 +240,6 @@ sub new {
 	$self->$attr($value);	
     }
 
-    unless ($self->executable) {
-	if( $self->verbose >= 0 ) {
-		warn "protdist program not found as ".$self->executable." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n";
-	}
-    }
     return $self;
 }
 
@@ -453,7 +448,7 @@ sub _setinput {
     #  $input may be a SimpleAlign Object
     if ($input->isa("Bio::SimpleAlign")) {
         #  Open temporary file for both reading & writing of BioSeq array
-		($tfh,$alnfilename) = $self->tempfile(-dir=>$TMPDIR);
+		($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
 		my $alnIO = Bio::AlignIO->new(-fh => $tfh, -format=>'phylip',idlength=>$self->idlength());
 		$alnIO->write_aln($input);
 		$alnIO->close();
