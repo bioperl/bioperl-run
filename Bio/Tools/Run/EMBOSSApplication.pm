@@ -211,7 +211,7 @@ sub run {
 		     $input->{$attr}. "\n");
 	$option_string .= " " . $attr;
 	$option_string .= " ". $input->{$attr}
-	   if $input->{$attr};
+	   if defined $input->{$attr};
     }
 
     #check mandatory attributes against given ones
@@ -223,7 +223,7 @@ sub run {
 #	}
 	foreach my $attr (keys %{$self->acd->mandatory} ) {
 	    last unless defined $self->acd; # might not have the parser
-	    unless ($input->{$attr}) {
+	    unless (defined $input->{$attr}) {
 		print "-" x 38, "\n", "MISSING MANDATORY ATTRIBUTE: $attr\n", 
 		    "-" x 38, "\n";
 		$self->acd->print($attr) and
