@@ -1,8 +1,8 @@
 # BioPerl module for Bio::Tools::Run::Alignment::Probcons
 #
-# Cared for by Jason Stajich
+# Cared for by Albert Vilella
 #
-# Copyright Jason Stajich <jason-at-bioperl-dot-org>
+#
 #
 # You may distribute this module under the same terms as perl itself
 #
@@ -12,7 +12,7 @@
 
 Bio::Tools::Run::Alignment::Probcons - Object for the calculation of an
 iterative multiple sequence alignment from a set of unaligned
-sequences or alignments using the MUSCLE program
+sequences or alignments using the Probcons program
 
 =head1 SYNOPSIS
 
@@ -33,6 +33,38 @@ sequences or alignments using the MUSCLE program
 
   #There are various additional options and input formats available.
   #See the DESCRIPTION section that follows for additional details.
+
+  #To run probcons with training, try something like:
+
+  #First round to generate train.params
+  $factory = new Bio::Tools::Run::Alignment::Probcons
+      (
+       'iterative-refinement'  => '1000',
+       'consistency'   => '5',
+       'pre-training' => '20',
+       'emissions' => '',
+       'verbose' => '',
+       'train'   => "$dir/$subdir/$outdir/train.params",
+      );
+  $factory->outfile_name("$dir/$subdir/$outdir/train.params");
+
+  #Second round to use train.params to get a high qual alignment
+
+  $seq_array_ref = \@seq_array;
+  $aln = $factory->align($seq_array_ref);
+  $aln = '';
+  $factory = '';
+
+  $factory = new Bio::Tools::Run::Alignment::Probcons
+      (
+       'iterative-refinement'  => '1000',
+       'consistency'   => '5',
+       'pre-training' => '20',
+       'verbose' => '',
+       'paramfile'   => "$dir/$subdir/$outdir/train.params",
+      );
+  $factory->outfile_name("$dir/$subdir/$outdir/outfile.afa");
+  $aln = $factory->align($seq_array_ref);
 
 =head1 DESCRIPTION
 
@@ -113,7 +145,8 @@ BEGIN {
     @PROBCONS_PARAMS = qw (CONSISTENCY ITERATIVE-REFINEMENT 
                            PRE-TRAINING ANNOT TRAIN PARAMFILE MATRIXFILE
                            CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS); 
-                           #FIXME: This last line are switches, dunno how to set them
+                           #FIXME: Last line are switches, dunno how to set them, 
+                           #gave as params
     @PROBCONS_SWITCHES = qw();
     @OTHER_SWITCHES = qw();
 
@@ -358,7 +391,7 @@ sub _setinput {
 	if( ! ref($input->[0]) ) {
 	    $self->warn("passed an array ref which did not contain objects to _setinput");
 	    return undef;
-	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
+	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {
 	    $temp =  Bio::SeqIO->new('-fh' => $tfh,
 				     '-format' => 'fasta');
 	    my $ct = 1;
