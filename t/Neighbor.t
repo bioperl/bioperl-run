@@ -26,13 +26,19 @@ END {
 
 ok(1);
 my $verbose = -1;
-my @params = ('type'=>'UPGMA','outgroup'=>2,'lowtri'=>1,'upptri'=>1,'subrep'=>1,'jumble'=>13);
+my @params = ('type'    =>'UPGMA',
+#	      'outgroup'=>2,
+	      'lowtri'  =>1,
+	      'upptri'  =>1,
+	      'subrep'  =>1,
+	      'jumble'  =>13);
+
 my $tree_factory = Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
 unless ($tree_factory->executable) {
     warn("neighbor program not found. Skipping tests $Test::ntest to $NTESTS.\n") if( $DEBUG);    
     exit 0;
 }
-
+$tree_factory->treefile('treefile');
 ok $tree_factory->isa('Bio::Tools::Run::Phylo::Phylip::Neighbor');
 
 my $type= "NEIGHBOR";
@@ -80,6 +86,7 @@ ok($nodes[2]->id, 'SINFRUP001',"failed creating tree by protpars");
 $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
 my  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
 $protdist_factory->quiet(1);
+
 my $matrix = $protdist_factory->create_distance_matrix($inputfilename);
 $tree = $tree_factory->create_tree($matrix);
 

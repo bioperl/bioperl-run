@@ -45,7 +45,7 @@ Works with Phylip version 3.6
   # Alternatively, one can create the tree by passing in a file name 
   # containing a phylip formatted distance matrix(using protdist)
   my $neighbor_factory = 
-     Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
+    Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
   my $tree = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
 
 =head1 PARAMTERS FOR NEIGHBOR COMPUTATION
@@ -150,11 +150,15 @@ Report bugs to the Bioperl bug tracking system to help us keep track
  email or the web:
 
   bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Shawn Hoon 
 
 Email shawnh@fugu-sg.org 
+
+=head1 CONTRIBUTORS
+
+Email:jason-at-bioperl.org
 
 =head1 APPENDIX
 
@@ -176,9 +180,12 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
-use Bio::Tools::Run::WrapperBase;
 use Bio::Root::IO;
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+use Bio::Tools::Run::Phylo::Phylip::Base;
+			    
+# inherit from Phylip::Base which has some methods for dealing with
+# Phylip specifics
+@ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
 
 # You will need to enable the neighbor program. This
 # can be done in (at least) 3 ways:
@@ -341,11 +348,11 @@ sub _run {
     print NEIGHBOR $instring;
     close(NEIGHBOR);	
 
-	#get the results
+    # get the results
     my $path = `pwd`;
     chomp($path);
-    my $outfile = $path."/outfile";
-    my $treefile = $path."/outtree";
+    my $outfile = $self->io->catfile($path,$self->outfile);
+    my $treefile = $self->io->catfile($path,$self->treefile);
     
     $self->throw("neighbor did not create tree correctly (expected $treefile) ") unless (-e $treefile);
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
@@ -454,46 +461,70 @@ sub _setinput {
 sub _setparams {
     my ($attr, $value, $self);
 
-	#do nothing for now
+    #do nothing for now
     $self = shift;
     my $param_string = "";
     my $type ="";
-	foreach  my $attr ( @NEIGHBOR_PARAMS) {
-        	$value = $self->$attr();
-	        next unless (defined $value && $value);
-      		if ($attr =~/TYPE/i){
-			if ($value=~/UPGMA/i){
-				$type = "UPGMA";
-				$param_string .= "N\n";
-			}
-		}
-		elsif($attr =~ /OUTGROUP/i){
-			if ($type ne "UPGMA"){
-				$self->throw("Unallowed value for outgroup") unless ($value =~ /\d+/);
-				$param_string .= "O\n$value\n";
-			}
-			else {
-				$self->throw("Can't set outgroup using UPGMA. Use Neighbor-Joining instead");
-			}
-		}
-		elsif ($attr =~ /LOWTRI/i){
-			$param_string .="L\n";
-		}
-		elsif ($attr =~ /UPPTRI/i){
-			$param_string .="R\n";
-		}
-		elsif ($attr =~ /SUBREP/i){
-			$param_string .="S\n";
-		}
-		elsif ($attr =~ /JUMBLE/i){
-			$self->throw("Unallowed value for random seed") unless ($value =~ /\d+/);
-			$param_string .="J\n$value\n";
-		}
-		else{}
-	} 
+    foreach  my $attr ( @NEIGHBOR_PARAMS) {
+	$value = $self->$attr();
+	next unless (defined $value && $value);
+	if ($attr =~/TYPE/i){
+	    if ($value=~/UPGMA/i){
+		$type = "UPGMA";
+		$param_string .= "N\n";
+	    }
+	}
+	elsif($attr =~ /OUTGROUP/i){
+	    if ($type ne "UPGMA"){
+		$self->throw("Unallowed value for outgroup") unless ($value =~ /\d+/);
+		$param_string .= "O\n$value\n";
+	    }
+	    else {
+		$self->throw("Can't set outgroup using UPGMA. Use Neighbor-Joining instead");
+	    }
+	}
+	elsif ($attr =~ /LOWTRI/i){
+	    $param_string .="L\n";
+	}
+	elsif ($attr =~ /UPPTRI/i){
+	    $param_string .="R\n";
+	}
+	elsif ($attr =~ /SUBREP/i){
+	    $param_string .="S\n";
+	}
+	elsif ($attr =~ /JUMBLE/i){
+	    $self->throw("Unallowed value for random seed") unless ($value =~ /\d+/);
+	    $param_string .="J\n$value\n";
+	}
+	else{}
+    } 
     $param_string .="Y\n";
 
     return $param_string;
 }
+
+=head2 outfile
+
+ Title   : outfile
+ Usage   : $obj->outfile($newval)
+ Function: Get/Set default PHYLIP outfile name ('outfile' usually)
+ Returns : value of outfile
+ Args    : newvalue (optional)
+
+
+=cut
+
+
+=head2 treefile
+
+ Title   : treefile
+ Usage   : $obj->treefile($newval)
+ Function: Get/Set the default PHYLIP treefile name ('treefile' usually)
+ Returns : value of treefile
+ Args    : newvalue (optional)
+
+
+=cut
+
 
 1; # Needed to keep compiler happy

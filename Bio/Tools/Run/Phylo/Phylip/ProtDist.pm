@@ -183,13 +183,14 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @PROTDIST_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
-use Bio::Tools::Run::WrapperBase;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
-use Bio::Root::Root;
+use Bio::Tools::Run::Phylo::Phylip::Base;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
+# inherit from Phylip::Base which has some methods for dealing with
+# Phylip specifics
+@ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
 
 # You will need to enable the protdist program. This
 # can be done in (at least) 3 ways:
@@ -225,6 +226,7 @@ sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
+    $self->io->_initialize_io();
 
     my ($attr, $value);
     ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
@@ -234,16 +236,15 @@ sub new {
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~/PROGRAM/i) {
-		$self->executable($value);
-		next;
+	    $self->executable($value);
+	    next;
 	}
 	if ($attr =~ /IDLENGTH/i){
-		$self->idlength($value);
-		next;
+	    $self->idlength($value);
+	    next;
 	}
 	$self->$attr($value);	
     }
-
     return $self;
 }
 
@@ -388,13 +389,15 @@ sub _run {
 	#get the results
     my $path = `pwd`;
     chomp($path);
-    my $outfile = $path."/outfile";
+    my $outfile = $self->io->catfile($path,$self->outfile);
 
-    $self->throw("protdist did not create matrix correctly") unless (-e $outfile);
+    $self->throw("protdist did not create matrix correctly ($outfile)")
+	unless (-e $outfile);
 
 	#Create the distance matrix here
     my @values;
-    open(DIST, "outfile");
+    
+    open(DIST, $outfile);
     while (<DIST>){
 	next if (/^\s+\d+$/);
         my @line = split /\s+/,$_;
