@@ -379,10 +379,10 @@ sub new {
 
 sub run{
    my ($self) = @_;
-    unless ( $self->save_tempfiles ) {
-	# brush so we don't get plaque buildup ;)
-	$self->cleanup();
-    }
+   unless ( $self->save_tempfiles ) {
+       # brush so we don't get plaque buildup ;)
+       $self->cleanup();
+   }
    my ($aln,$tree) = ($self->alignment(),$self->tree);
    if( ! $aln ) { 
        $self->warn("must have supplied a valid aligment file in order to run codeml");
@@ -666,7 +666,7 @@ sub set_default_parameters{
 }
 
 
-=head1 Bio::Tools::Run::Wrapper methods
+=head1 Bio::Tools::Run::WrapperBase methods
 
 =cut
 
