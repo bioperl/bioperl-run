@@ -13,13 +13,20 @@ BEGIN {
     $NTESTS = 12;
     plan tests => $NTESTS;
 }
+
+END {
+  foreach ( $Test::ntest..$NTESTS ) {
+	skip('Unable to run Genscan tests, exe may not be installed',1);
+  }
+}
+
 use Bio::Tools::Run::Genscan;
 use Bio::Root::IO;
 
 ok(1);
 my $verbose = -1;
 
-my $paramfile = ("data/HumanIso.smat");
+my $paramfile = Bio::Root::IO->catfile("t", "data", "HumanIso.smat");
 my @params = ('MATRIX',$paramfile);
 #my  $factory = Bio::Tools::Run::Genscan->new(MATRIX=>$paramfile);
 my  $factory = Bio::Tools::Run::Genscan->new(@params);
@@ -27,8 +34,7 @@ ok $factory->isa('Bio::Tools::Run::Genscan');
 
 
 #test with one file with 2 sequences
-my $inputfilename = Bio::Root::IO->catfile("data","Genscan.FastA");
-#my $inputfilename = Bio::Root::IO->catfile("code1.FastA");
+my $inputfilename = Bio::Root::IO->catfile("t","data","Genscan.FastA");
 my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
 $seq1 = $seqstream->next_seq();
