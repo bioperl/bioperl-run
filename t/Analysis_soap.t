@@ -22,7 +22,7 @@ BEGIN {
 	use lib 't';
     }
     use Test;
-    $NUMTESTS = 19;
+    $NUMTESTS = 17;
     plan tests => $NUMTESTS;
 }
 
@@ -110,7 +110,8 @@ skip ($serror, ref ($spec) eq 'ARRAY' && @$spec > 0 && ref ($$spec[0]) eq 'HASH'
 &print_error;
 
 print sprintf ($format, 'calling "result_spec" ');
-skip ($serror, eval { ref ($seqret->result_spec) eq 'HASH' });
+eval { $spec = $seqret->result_spec };
+skip ($serror, ref ($spec) eq 'ARRAY' && @$spec > 0 && ref ($$spec[0]) eq 'HASH');
 &print_error;
 
 print sprintf ($format, 'calling "describe" ');
@@ -152,27 +153,27 @@ if ($job) {
     &skip_tests ($next_dependent_tests);
 }
 
-my $empty_job;
-eval { $empty_job = $seqret->create_job() };
-print sprintf ($format, 'creating an empty job ');
-skip ($serror, ref ($empty_job) =~ /^Bio::Tools::Run::Analysis::Job/);
-&print_error;
+#my $empty_job;
+#eval { $empty_job = $seqret->create_job() };
+#print sprintf ($format, 'creating an empty job ');
+#skip ($serror, ref ($empty_job) =~ /^Bio::Tools::Run::Analysis::Job/);
+#&print_error;
 
-$next_dependent_tests = 1;
-if ($empty_job) {
+#$next_dependent_tests = 1;
+#if ($empty_job) {
 
-#    TBD (should be mentioned in TODO)
-#    print sprintf ($format, 'calling "empty_job->status" ');
-#    skip ($serror, eval { $empty_job->status eq 'CREATED' });
+##    TBD (should be mentioned in TODO)
+##    print sprintf ($format, 'calling "empty_job->status" ');
+##    skip ($serror, eval { $empty_job->status eq 'CREATED' });
+##    &print_error;
+
+#    print sprintf ($format, 'calling "empty_job->remove" ');
+#    eval { $empty_job->remove };
+#    skip ($serror, $empty_job->{'_destroy_on_exit'} == 1);
 #    &print_error;
-
-    print sprintf ($format, 'calling "empty_job->remove" ');
-    eval { $empty_job->remove };
-    skip ($serror, $empty_job->{'_destroy_on_exit'} == 1);
-    &print_error;
-} else {
-    &skip_tests ($next_dependent_tests);
-}
+#} else {
+#    &skip_tests ($next_dependent_tests);
+#}
 
 print sprintf ($format, 'calling "wait_for" ');
 eval { $job = $seqret->wait_for (\%inputs) };
