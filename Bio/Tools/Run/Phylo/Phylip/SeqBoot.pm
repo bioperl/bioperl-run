@@ -402,20 +402,21 @@ sub _setinput {
         unless (-e $input) {return 0;}
 		   return $alnfilename;
     }
+    my @input = ref($input) eq 'ARRAY' ? @{$input}: ($input);
 
-    #  $input may be a SimpleAlign Object
-    if ($input->isa("Bio::SimpleAlign")) {
-        #  Open temporary file for both reading & writing of BioSeq array
-    	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
-    	my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
+    ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+    my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
 	                      			      -format=>'phylip',
                       				      -idlength=>$self->idlength());
+    foreach my $input(@input){
+    #  $input should be a Bio::Align::AlignI 
+      $input->isa("Bio::Align::AlignI") || $self->throw("Expecting a Bio::Align::AlignI object");
+      #  Open temporary file for both reading & writing of BioSeq array
     	$alnIO->write_aln($input);
-    	$alnIO->close();
-    	close($tfh);
-    	return $alnfilename;		
     }
-    return 0;
+    $alnIO->close();
+    close($tfh);
+    return $alnfilename;		
 }
 
 =head2  _setparams()
