@@ -386,7 +386,9 @@ sub submit_blast {
     my %header = $self->header;    
     foreach my $seq ( @seqs ) {
 	#If query has a fasta header, the output has the query line.
-	$header{'QUERY'} = ">".(defined $seq->primary_id() ? $seq->primary_id() : "").
+#	$header{'QUERY'} = ">".(defined $seq->primary_id() ? $seq->primary_id() : "").
+#		" ".(defined $seq->desc() ? $seq->desc() : "")."\n".$seq->seq();
+	$header{'QUERY'} = ">".(defined $seq->display_id() ? $seq->display_id() : "").
 		" ".(defined $seq->desc() ? $seq->desc() : "")."\n".$seq->seq();
 	my $request = POST $URLBASE, [%header];
 	$self->warn($request->as_string) if ( $self->verbose > 0);
