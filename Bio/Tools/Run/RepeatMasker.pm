@@ -85,6 +85,7 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 
 use strict;
 use Bio::SeqFeature::Generic;
+use Bio::SeqFeature::FeaturePair;
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
 
@@ -359,19 +360,32 @@ sub _parse_results {
           $strand = -1;
 	    }
      #my $rc = $self->_get_consensus($repeat_name, $repeat_class);
-
+      
 	    my $rf = Bio::SeqFeature::Generic->new;
 	    $rf->seqname          ($query_name);
 	    $rf->score            ($score);
 	    $rf->start            ($query_start);
 	    $rf->end              ($query_end);
 	    $rf->strand           ($strand);
-	    $rf->add_tag_value("repeat_name", $repeat_name);
-	    $rf->add_tag_value("repeat_class",$repeat_class);
+      $rf->source_tag       ($PROGRAMNAME);
+      $rf->primary_tag      ($repeat_class);
+
+      my $rf2 = Bio::SeqFeature::Generic->new;
+      $rf2->seqname         ($repeat_name);
+      $rf2->score           ($score);
+      $rf2->start           ($hit_start);
+      $rf2->end             ($hit_end);
+      $rf2->strand          ($strand);
+      $rf2->source_tag      ($PROGRAMNAME);
+      $rf->primary_tag      ($repeat_class);
+
+      my $fp = Bio::SeqFeature::FeaturePair->new(-feature1=>$rf,
+                                            -feature2=>$rf2);
+
 
 	    #$rf->repeat_consensus ($rc);
 
-	    push @repeat_features, $rf;
+	    push @repeat_features, $fp;
         }
     }
     close $filehandle;
