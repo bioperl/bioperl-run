@@ -546,10 +546,19 @@ sub profile_align {
 sub _run {
     my ($self,$command,$infile1,$infile2,$param_string) = @_;
     my $instring;
+
     if ($command =~ /align/) {
-    	$instring =  "-infile=$infile1";
+
+	if( $^O eq 'dec_osf' ) {
+	    $instring =  "$infile1";
+	    $command = '';
+	} else { 
+	    $instring = " -infile=$infile1";
+	}
     	$param_string .= " $infile2";
+
     }
+
     if ($command =~ /profile/) {
 	    $instring =  "-profile1=$infile1  -profile2=$infile2";
     	chmod 0777, $infile1,$infile2;
@@ -561,7 +570,6 @@ sub _run {
 	" -output=$output". " $param_string";
 
     $self->debug( "clustal command = $commandstring");
-    	
     my $status = system($commandstring);    
     $self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
     
@@ -702,7 +710,7 @@ sub _setparams {
     }
 
     if ($self->quiet() || $self->verbose() < 0) { 
-	$param_string .= '  >/dev/null';
+	$param_string .= '  >/dev/null 2>/dev/null';
     }
 
     return $param_string;

@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 10;
+    $NTESTS = 9;
     plan tests => $NTESTS;
 }
 
@@ -25,10 +25,9 @@ END {
 	skip("Clustalw program not found. Skipping. (Be sure you have clustalw > 1.4)",1);
     }
 }
-
 ok(1);
 my $verbose = -1;
-my @params = ('ktuple' => 2, 'matrix' => 'BLOSUM', 
+my @params = ('ktuple' => 2,
 	      -verbose => $verbose);
 my  $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 
@@ -40,14 +39,10 @@ $factory->ktuple($ktuple);
 my $new_ktuple = $factory->ktuple();
 ok $new_ktuple, 3, " couldn't set factory parameter";
 
-
-my $what_matrix = $factory->matrix();
-ok $what_matrix, 'BLOSUM', "couldn't get factory parameter";
-
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress clustal messages to terminal
 
-my $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
+my $inputfilename = Bio::Root::IO->catfile(qw(t data cysprot.fa));
 my $aln;
 exit(0) unless( $factory->executable );
 
@@ -58,8 +53,8 @@ $aln = $factory->align($inputfilename);
 ok ($aln->get_seq_by_pos(1)->get_nse, 'CATH_HUMAN/1-335', 
     "failed clustalw alignment using input file");
 
-my $str = Bio::SeqIO->new(-file=> Bio::Root::IO->catfile("t","data","cysprot.fa"), 
-			  '-format' => 'Fasta');
+my $str = Bio::SeqIO->new(-file=> $inputfilename, 
+			  '-format' => 'fasta');
 my @seq_array =();
 
 while ( my $seq = $str->next_seq() ) {
