@@ -125,10 +125,13 @@ use vars qw(%Menu %FileName);
                                         'PERMUTE'  =>"J\nJ\n",
                                         },
                           'REPLICATES'=>"R\n",
-                          'SUBMIT'   =>"Y\n",
+                          'SUBMIT'    =>"Y\n",
                        },
-
-           
+           'CONSENSE'=>{  
+                          'ROOTED'   => "R\n",
+                          'OUTGROUP' => "O\n",
+                          'SUBMIT'    =>"Y\n",
+                       },
          },
   "3.6"=>{'PROTDIST'=>{'MODEL'  => {
                                    'PAM'   =>"P\nY\n",
@@ -180,6 +183,17 @@ use vars qw(%Menu %FileName);
                                         },
                           'REPLICATES'=>"R\n",
                           'SUBMIT'   =>"Y\n",
+                       },
+
+           'CONSENSE'=>{  'TYPE'     => {
+                                        'MRE'     =>"",
+                                        'STRICT'  =>"C\n",
+                                        'MR'      =>"C\nC\n",
+                                        'ML'      =>"C\nC\nC\n",
+                                        },
+                          'ROOTED'   => "R\n",
+                          'OUTGROUP' => "O\n",
+                          'SUBMIT'    =>"Y\n",
                        },
          },
 );
