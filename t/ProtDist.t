@@ -95,7 +95,7 @@ unless ($protdist_present) {
 $dist_factory->verbose($verbose);
 $matrix = $dist_factory->create_distance_matrix($inputfilename);
 
-ok($matrix->{'ENSP000003'}{'SINFRUP001'},0.27708);
+ok($matrix->get_entry('ENSP000003','SINFRUP001'),0.27708);
 
 $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 @params = ('ktuple' => 2, 'matrix' => 'BLOSUM', 
@@ -107,7 +107,6 @@ exit(0) unless $align_factory->executable();
 my $aln = $align_factory->align($inputfilename);
 $matrix = $dist_factory->create_distance_matrix($aln);
 
-ok (int($matrix->{'ALEU_HORVU'}{'ALEU_HORVU'}),0,
+ok (int($matrix->get_entry('ALEU_HORVU','ALEU_HORVU')),0,
     "failed creating distance matrix");
-ok(sprintf("%.2f",$matrix->{'CATL_HUMAN'}{'CYS1_DICDI'}),
-	   '1.30', "failed creating distance matrix");
+ok(sprintf("%.2f",$matrix->get_entry('CATL_HUMAN','CYS1_DICDI'),'1.30', "failed creating distance matrix"));
