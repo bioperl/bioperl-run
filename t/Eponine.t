@@ -13,6 +13,15 @@ BEGIN {
     plan tests => $NTESTS;
 }
 
+use vars qw( $reason);
+$reason = 'Unable to run Eponine, java may not be installed';
+
+END {
+   foreach ( $Test::ntest..$NTESTS ) {
+       skip($reason,1);
+   }
+}
+
 use Bio::Tools::Run::Eponine;
 use Bio::SeqIO;
 
@@ -20,9 +29,7 @@ use Bio::SeqIO;
 my $v;
 if (-d "java") {
     print STDERR "You must have java to run eponine\n";
-    for ($Test::ntest..$NTESTS) {
-	skip("Skipping because no java present to run eponine",1);
-    }
+    $reason = "Skipping because no java present to run eponine";
     exit(0);
 }
 my $output = `java -version 2>&1`;
@@ -44,15 +51,13 @@ while (<PIPE>) {
 }
 if ($v < 1.2) {
     print STDERR "You need at least version 1.2 of JDK to run eponine\n";
-    for ($Test::ntest..$NTESTS) {
-       	skip("Skipping due to old java version",1);
-    }
-    exit;   
+    $reason = "Skipping due to old java version";
+    exit(0);   
 }   
 
 if( ! $ENV{'EPONINEDIR'}  ) {
-    print STDERR "You must have defined EPONINEDIR to run these tests\n";
-    exit;
+    $reason = "You must have defined EPONINEDIR to run these tests";
+    exit(0);
 }
 my $inputfilename= Bio::Root::IO->catfile("t","data","eponine.fa");
 my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999,
