@@ -136,7 +136,8 @@ be an integral number between 0 to k - 1 if k different dN/dS ratios
 (omega_0 - omega_k - 1) are assumed for the branches of the
 tree. B<Bioperl note basically, doing this interactively is not going
 to work very well, so this module is really focused around using the 0
-or 1 parameters.  Read the program documentation if you'd like some more detail instructions>.
+or 1 parameters.  Read the program documentation if you'd like some more 
+detailed instructions.
 
 B<NSsites> specifies models that allow the dN/dS ratio (omega) to vary
 among sites (Nielsen and Yang 1998, Yang et al. 2000) B<Nssites> = m
@@ -210,7 +211,10 @@ for the a- and b-globin genes shown in Table 2 of Goldman and Yang
 (1994), calculated using the MEGA package (Kumar et al., 1993), are
 not accurate.  
 
-Results of ancestral reconstructions (B<RateAncestor> = 1) are collected in the file rst. Under models of variable dN/dS ratios among sites (NSsites models), the posterior probabilities for site classes as well as positively selected sites are listed in rst.
+Results of ancestral reconstructions (B<RateAncestor> = 1) are collected 
+in the file rst. Under models of variable dN/dS ratios among sites (NSsites models), 
+the posterior probabilities for site classes as well as positively 
+selected sites are listed in rst.
 
 INCOMPLETE DOCUMENTATION OF ALL METHODS
 
@@ -317,6 +321,13 @@ BEGIN {
 		     # (method) 
 		     # 0: simultaneous,1: 1 branch at a time
 		     'method'        => [0,1], 
+
+		     # allow branch lengths to be fixed
+		     # 0 ignore
+		     # -1 use random starting points
+		     # 1 use the branch lengths in initial ML iteration
+		     # 2 branch lengths are fixed
+		     'fix_blength'   => [0,-1,2],
 		     );
 }
 
