@@ -25,8 +25,8 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Primer3 - Create input for and work with the output from the 
-program primer3
+Bio::Tools::Run::Primer3 - Create input for and work with the output 
+from the program primer3
 
 =head1 SYNOPSIS
 
@@ -38,13 +38,20 @@ program primer3
 
   my $seqio=Bio::SeqIO->new(-file=>'data/dna1.fa');
   my $seq=$seqio->next_seq;
-  my $primer3 = Bio::Tools::Run::Primer3->new(-seq=>$seq, -outfile=>"temp.out");
+  my $primer3 = Bio::Tools::Run::Primer3->new(-seq=>$seq,
+                                              -outfile=>"temp.out",
+                                              -path=>"/usr/bin/primer3_core");
 
-  unless ($primer3->executable) {print STDERR "primer3 can not be found. Is it installed?\n"; exit(-1)}
+  # or after the fact you can change the program_name
+  $primer3->program_name('my_suprefast_primer3');
+
+  unless ($primer3->executable) {
+    print STDERR "primer3 can not be found. Is it installed?\n";
+    exit(-1)
+  }
 
   # what are the arguments, and what do they mean?
   my $args=$primer3->arguments;
-
 
   print "ARGUMENT\tMEANING\n";
   foreach my $key (keys %{$args}) {print "$key\t", $$args{$key}, "\n"}
@@ -60,18 +67,6 @@ program primer3
   # things that you can get from this. For example:
 
   print "There were ", $results->number_of_results, " primers\n";
-
-  # 
-  # you can specify the path to primer3 specifically
-  my $primer3 = Bio::Tools::Run::Primer3->new
-        (-path   => '/home/me/src/primer3/primer3_core',
-         -seq    => $seq,
-         -outfile=> "temp.out");
-
- # or after the fact you can change the program_name
- $primer3->program_name('my_suprefast_primer3');
-
-=head1 DESCRIPTION
 
 Bio::Tools::Primer3 creates the input files needed to design primers
 using primer3 and provides mechanisms to access data in the primer3
@@ -214,24 +209,22 @@ sub AUTOLOAD {
 
  Title   : new()
  Usage   : my $primer3 = Bio::Tools::Primer3->new(-file=>$file) to read 
-            a primer3 output file.
+           a primer3 output file.
            my $primer3 = Bio::Tools::Primer3->new(-seq=>sequence object) 
-            design primers against sequence
- Function: Start primer3 working and adds a sequence. 
-           At the moment it will not clear out the old sequence, 
-           but I suppose it should.
+           design primers against sequence
+ Function: Start primer3 working and adds a sequence. At the moment it 
+           will not clear out the old sequence, but I suppose it should.
  Returns : Doesn't return anything. If called with a filename will allow 
            you to retrieve the results
- Args    : -seq (optional) Bio::Seq object of sequence. 
-            This is required to run primer3 but
-            can be added later with add_targets()
-	   -outfile file name to output results to (note: can also 
-            be added with $primer3->outfile_name
-	   -path path to primer3 executable (incl. program. eg. 
-            /usr/bin/primer3_core). This can also be set with 
-            program_name and program_dir
+ Args    : -seq (optional) Bio::Seq object of sequence. This is required 
+           to run primer3 but can be added later with add_targets()
+	   -outfile file name to output results to (can also be added 
+           with $primer3->outfile_name
+	   -path path to primer3 executable, including program name, e.g. 
+           "/usr/bin/primer3_core". This can also be set with program_name 
+           and program_dir
 	   -verbose (optional) set verbose output
- Notes   : 
+ Notes   :
 
 =cut
 
@@ -304,8 +297,10 @@ sub program_dir {
  Usage   : $primer3->add_targets(key=>value)
  Function: Add any legal value to the input command line. 
  Returns : Returns the number of arguments added.
- Args    : Use $primer3->arguments to find a list of all the values that are allowed, or see the primer3 docs.
- Notes   : This will only do limited error checking at the moment, but it should work.
+ Args    : Use $primer3->arguments to find a list of all the values 
+           that are allowed, or see the primer3 docs.
+ Notes   : This will only do limited error checking at the moment, 
+           but it should work.
 
 =cut
 
