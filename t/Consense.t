@@ -22,7 +22,7 @@ use Bio::AlignIO;
 
 END {     
     for ( $Test::ntest..$NTESTS ) {
-	skip("SeqBoot not found. Skipping.",1);
+    	skip("consense not found. Skipping.",1);
     }
 }
 
@@ -47,7 +47,6 @@ my $bequiet = 1;
 $sb_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","consense.treefile");
-
 my $tree = $sb_factory->run($inputfilename);
 
 ok $tree->number_nodes, 12;
