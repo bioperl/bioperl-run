@@ -175,7 +175,7 @@ methods. Internal methods are usually preceded with a _
 	
 package Bio::Tools::Run::Phylo::Phylip::ProtDist;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @PROTPARS_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
@@ -183,9 +183,9 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
-use Bio::Root::IO;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
 # You will need to enable the protdist program. This
 # can be done in (at least) 3 ways:
@@ -204,14 +204,11 @@ use Bio::Root::IO;
 
 
 BEGIN {
-
+    $PROGRAMNAME = 'protdist'  . ($^O =~ /mswin/i ?'.exe':'');
     if (defined $ENV{PHYLIPDIR}) {
 	$PROGRAMDIR = $ENV{PHYLIPDIR} || '';
 	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
 					  'protdist'.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {
-	$PROGRAM = 'protdist';
     }
 	@PROTPARS_PARAMS = qw(MODEL GENCODE CATEGORY PROBCHANGE TRANS FREQ);
 	@OTHER_SWITCHES = qw(QUIET);
@@ -224,11 +221,10 @@ sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
-    $self->_initialize_io();
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -243,12 +239,10 @@ sub new {
 	}
 	$self->$attr($value);	
     }
-    if (! defined $self->program) {
-	$self->program($PROGRAM);
-    }
-    unless ($self->exists_protdist()) {
+
+    unless ($self->executable) {
 	if( $self->verbose >= 0 ) {
-		warn "protdist program not found as ".$self->program." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n";
+		warn "protdist program not found as ".$self->executable." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n";
 	}
     }
     return $self;
@@ -265,45 +259,39 @@ sub AUTOLOAD {
 }
 
 
-=head2  exists_protdist()
+=head2 executable
 
- Title   : exists_protdist
- Usage   : $protdistfound = Bio::Tools::Run::Alignment::Tree->exists_protdist()
- Function: Determine whether protdist program can be found on current host
- Example :
- Returns : 1 if protdist program found at expected location, 0 otherwise.
- Args    :  none
-
-=cut
-
-
-sub exists_protdist{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-	$PROGRAM = $f if( -e $f );
-	return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function: 
- Returns : value of program
- Args    : newvalue (optional)
-
+ Title   : executable
+ Usage   : $obj->executable($newval)
+ Function: Finds the full path to the 'protdist' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to 
+           [optional] boolean flag whether or not warn when exe is not found
 
 =cut
 
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
+sub executable{
+   my ($self, $exe,$warn) = @_;
 
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+	   $self->{'_pathtoexe'} = $PROGRAM;
+       } else { 
+	   my $exe;
+	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+	       -x $exe ) {
+	       $self->{'_pathtoexe'} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+	       $self->{'_pathtoexe'} = undef;
+	   }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
 
 =head2 idlength 
@@ -387,14 +375,14 @@ sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
     $instring =  $infile."\n$param_string";
-    $self->debug( "Program ".$self->program." $param_string\n");
+    $self->debug( "Program ".$self->executable." $param_string\n");
 
 	#open a pipe to run protdist to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-	open(PROTPARS,"|".$self->program.">/dev/null");
+	open(PROTPARS,"|".$self->executable.">/dev/null");
     }
     else {
-	open(PROTPARS,"|".$self->program);
+	open(PROTPARS,"|".$self->executable);
     }
     print PROTPARS $instring;
     close(PROTPARS);	
@@ -553,5 +541,80 @@ sub _setparams {
 
     return $param_string;
 }
+
+
+
+=head1 Bio::Tools::Run::Wrapper methods
+
+=cut
+
+=head2 no_param_checks
+
+ Title   : no_param_checks
+ Usage   : $obj->no_param_checks($newval)
+ Function: Boolean flag as to whether or not we should
+           trust the sanity checks for parameter values  
+ Returns : value of no_param_checks
+ Args    : newvalue (optional)
+
+
+=cut
+
+=head2 save_tempfiles
+
+ Title   : save_tempfiles
+ Usage   : $obj->save_tempfiles($newval)
+ Function: 
+ Returns : value of save_tempfiles
+ Args    : newvalue (optional)
+
+
+=cut
+
+=head2 outfile_name
+
+ Title   : outfile_name
+ Usage   : my $outfile = $codeml->outfile_name();
+ Function: Get/Set the name of the output file for this run
+           (if you wanted to do something special)
+ Returns : string
+ Args    : [optional] string to set value to
+
+
+=cut
+
+
+=head2 tempdir
+
+ Title   : tempdir
+ Usage   : my $tmpdir = $self->tempdir();
+ Function: Retrieve a temporary directory name (which is created)
+ Returns : string which is the name of the temporary directory
+ Args    : none
+
+
+=cut
+
+=head2 cleanup
+
+ Title   : cleanup
+ Usage   : $codeml->cleanup();
+ Function: Will cleanup the tempdir directory after a PAML run
+ Returns : none
+ Args    : none
+
+
+=cut
+
+=head2 io
+
+ Title   : io
+ Usage   : $obj->io($newval)
+ Function:  Gets a L<Bio::Root::IO> object
+ Returns : L<Bio::Root::IO>
+ Args    : none
+
+
+=cut
 
 1; # Needed to keep compiler happy

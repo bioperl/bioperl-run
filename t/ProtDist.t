@@ -13,7 +13,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 10;
+    $NTESTS = 9;
     plan tests => $NTESTS;
 }
 
@@ -74,7 +74,7 @@ $dist_factory->quiet($bequiet);  # Suppress protpars messages to terminal
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
 my $matrix;
-my $protdist_present = $dist_factory->exists_protdist();
+my $protdist_present = $dist_factory->executable();
 unless ($protdist_present) {
     warn("protdist program not found. Skipping tests $Test::ntest to $NTESTS.\n") if($DEBUG);    
     exit 0;
