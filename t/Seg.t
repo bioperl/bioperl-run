@@ -24,14 +24,8 @@ use Bio::Tools::Run::Seg;
 use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::Seq;
-my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","seg_dir","seg");
-my @params;
 
-if( -e $paramfile ) { 
-   push @params, ('PROGRAM',$paramfile);
-}
-
-my  $factory = Bio::Tools::Run::Seg->new(@params);
+my  $factory = Bio::Tools::Run::Seg->new();
 ok $factory->isa('Bio::Tools::Run::Seg');
 my $prot_file=  Bio::Root::IO->catfile("t","data","test_prot.FastA");
 
