@@ -97,7 +97,8 @@ sub start_element {
 	# so nothing could work for Pise installation where Pise is in the
 	# url... :-(
 	#if ($PiseJobParser::href !~ /Pise/ && $PiseJobParser::href ne "" && $PiseJobParser::output_files) {
-	if ($self->{href} ne "") {
+	if (defined $self->{href} && 
+	    $self->{href} ne "") {
 	    if ($self->{output_files}) {
 		push (@{$self->{hrefs}}, $self->{href} );
 		print STDERR "Bio::Tools::Run::PiseJobParser: href=",$self->{href} ,"\n" if ($self->{DEBUG});
@@ -120,12 +121,14 @@ sub start_element {
 	    $self->{terminated} = 0;
 	}
     } elsif ($element->{Name} eq "INPUT") {
-	my $name=$attributes{NAME};
-	my $value=$attributes{VALUE};
-	if ($name eq "scratch_dir") {
-	    $self->{scratch_dir} = $value;
-	} else {
-	    $self->{value}{$name} = $value;
+	my $name =$attributes{NAME} || '';
+	my $value=$attributes{VALUE} || '';
+	if( defined $name && defined $value ) {
+	    if ($name eq "scratch_dir") {
+		$self->{scratch_dir} = $value;
+	    } else {
+		$self->{value}{$name} = $value;
+	    }
 	}
 	if ($self->{connected}{$self->{href}}) {
 	    if ($name eq "piped_file_type") {
@@ -187,6 +190,7 @@ sub pipes {
     if (defined $self->{pipes}) {
 	return %{$self->{pipes}};
     }
+    return ();
 }
 
 sub piped_file_type {

@@ -31,8 +31,8 @@ Once the job is created, you can get results:
   foreach my $result ($job->get_results) {
     print $job->content($result);
     $job->save($result, "myfile"); # $job->save($result) keeps the name
-    print $job->stdout;            # print job standard output
-    print $job->stderr;            # print job standard error
+    print $job->pise_stdout;            # print job standard output
+    print $job->pise_stderr;            # print job standard error
   }
 
 You can feed a result file as a filehandle to a bioperl parser :
@@ -63,7 +63,7 @@ All the available pipe types may be obtained by:
 
 package Bio::Tools::Run::PiseJob;
 
-use vars qw(@ISA);
+use vars qw(@ISA $VERSION);
 use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
@@ -74,7 +74,7 @@ use HTTP::Request::Common;
 use POSIX;
 
 @ISA = qw(Bio::Root::Root);
-
+$VERSION = '1.0';
 
 =head2 new
 
@@ -531,9 +531,9 @@ sub content {
 
 =cut
 
-sub stdout {
+sub pise_stdout {
     my $self = shift;
-
+    
     if (! $self->{JOBID}) {
 	$self->throw("Bio::Tools::Run::PiseJob::stdout: your job has no jobid");
     }
@@ -547,7 +547,7 @@ sub stdout {
 
 sub output {
     my $self = shift;
-    return($self->stdout);
+    return($self->pise_stdout);
 }
 
 =head2 stderr
@@ -560,7 +560,7 @@ sub output {
 
 =cut
 
-sub stderr {
+sub pise_stderr {
     my $self = shift;
 
     if (! $self->{JOBID}) {
@@ -759,6 +759,7 @@ sub _init {
     $self->{PIPES} = {};
     $self->{PIPED_FILE_TYPE} = {};
     $self->{UA} = undef;
+    $self->{VERSION} = $VERSION;
 
     foreach my $param ($application->parameters) { 
 	my $value;
@@ -839,9 +840,10 @@ sub _submit {
     my @content;
 
     foreach my $param (keys %{ $self->{ARGS} }) {
-	$type = $application->param_type($param);
-        $value = $self->{ARGS}{$param};
-	if ($type eq "InFile" || $type eq "Sequence") {
+	$type = $application->param_type($param) || '';
+        $value = $self->{ARGS}{$param} || '';
+	if (defined $type && 
+	    ($type eq "InFile" || $type eq "Sequence") ) {
 	    if ($param !~ /_data$/) {
 		stat($value);
 		if (-e _) {
@@ -980,7 +982,8 @@ sub _parse {
 	    $self->{PIPED_FILE_TYPE}{$result} = $handler->piped_file_type($result);
 	}
 	my %pipes = $handler->pipes;
-        if (defined %pipes) {
+	
+        if ( %pipes) {
 	    foreach my $f (keys %pipes) {
 		if (defined $pipes{$f}) {
 		    my @p = @{ $pipes{$f} };
@@ -1075,7 +1078,7 @@ sub _clean_content {
 #    $content =~ s/</&lt;/g;
 #    $content =~ s/>/&gt;/g;
     my $title;
-    my $head;
+    my $head = '';
     my $foot;
 #    if ($content !~ /<\?xml/) {
 #	$head = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
