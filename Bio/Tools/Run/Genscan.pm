@@ -88,7 +88,7 @@ BEGIN {
         $PROGRAM = 'genscan';
     }
               
-     @GENSCAN_PARAMS=qw(MATRIX VERBOSE);
+     @GENSCAN_PARAMS=qw(MATRIX VERBOSE QUIET);
       foreach my $attr ( @GENSCAN_PARAMS)
                         { $OK_FIELD{$attr}++; }
 }
@@ -199,10 +199,13 @@ sub _run {
     if($self->verbose){
        $str.=" -v ";
     }
-    print STDERR "$str\n";
+    if($self->quiet){
+        open(STDERR,">/dev/null");
+    }
     unless (open(GENSCAN, "$str |")){
 	    $self->warn("Cannot run $str");
     }
+    close(STDERR);
     my $genScanParser = Bio::Tools::Genscan->new(-fh=> \*GENSCAN);
 
     
