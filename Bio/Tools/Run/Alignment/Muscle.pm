@@ -111,6 +111,7 @@ use  Bio::Tools::Run::WrapperBase;
 
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
+    @MUSCLE_PARAMS = qw(IN OUT REFINE);
     @OTHER_SWITCHES = qw(QUIET);
 
 # Authorize attribute fields
@@ -400,6 +401,21 @@ sub _setparams {
     my ($attr, $value,$param_string);
     $param_string = '';
     my $laststr;
+    for  $attr ( @MUSCLE_PARAMS ) {
+	$value = $self->$attr();
+	next unless (defined $value);	
+	my $attr_key = lc $attr;
+        $attr_key = ' -'.$attr_key;
+        $param_string .= $attr_key .' '.$value;
+
+    }
+#     for  $attr ( @MUSCLE_SWITCHES) {
+# 	$value = $self->$attr();
+# 	next unless ($value);
+# 	my $attr_key = lc $attr; #put switches in format expected by tcoffee
+# 	$attr_key = ' -'.$attr_key;
+# 	$param_string .= $attr_key ;
+#     }
     # Set default output file if no explicit output file selected
     unless ($self->outfile_name ) {	
 	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
