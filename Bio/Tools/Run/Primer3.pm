@@ -1,3 +1,4 @@
+# $Id$
 #
 # This is the original copyright statement. I have relied on Chad's module
 # extensively for this module.
@@ -60,22 +61,36 @@ program primer3
 
   print "There were ", $results->number_of_results, " primers\n";
 
+  # 
+  # you can specify the path to primer3 specifically
+  my $primer3 = Bio::Tools::Run::Primer3->new
+        (-path   => '/home/me/src/primer3/primer3_core',
+         -seq    => $seq,
+         -outfile=> "temp.out");
+
+ # or after the fact you can change the program_name
+ $primer3->program_name('my_suprefast_primer3');
+
 =head1 DESCRIPTION
 
-Bio::Tools::Primer3 creates the input files needed to design primers using
-primer3 and provides mechanisms to access data in the primer3 output files.
+Bio::Tools::Primer3 creates the input files needed to design primers
+using primer3 and provides mechanisms to access data in the primer3
+output files.
 
-This module provides a bioperl interface to the program primer3. See 
-http://www-genome.wi.mit.edu/genome_software/other/primer3.html
-for details and to download the software.
+This module provides a bioperl interface to the program primer3. See
+http://www-genome.wi.mit.edu/genome_software/other/primer3.html for
+details and to download the software.
 
-This module is based on one written by Chad Matsalla (bioinformatics1@dieselwurks.com)
+This module is based on one written by Chad Matsalla
+(bioinformatics1@dieselwurks.com)
 
-I have ripped some of his code, and added a lot of my own. I hope he's not mad at me!
+I have ripped some of his code, and added a lot of my own. I hope he's
+not mad at me!
 
-The original version was designed to work with PrimedSeq and Bio::SeqFeature::Primer.
-I will try and include those compatibilities too, but as of this writing neither
-are fully developed, so we'll see how far we get.
+The original version was designed to work with PrimedSeq and
+Bio::SeqFeature::Primer.  I will try and include those compatibilities
+too, but as of this writing neither are fully developed, so we'll see
+how far we get.
 
 =head1 FEEDBACK
 
@@ -91,10 +106,9 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via email
-or the web:
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bio.perl.org
   http://bugzilla.bioperl.org/
 
 
@@ -112,7 +126,8 @@ bioinformatics1@dieselwurks.com
 
 =head1 CONTRIBUTORS
 
-Shawn Hoon shawnh@fugu-sg.org
+Shawn Hoon shawnh-at-stanford.edu
+Jason Stajich jason-at-bioperl.org
 
 =head1 APPENDIX
 
@@ -124,7 +139,6 @@ Internal methods are usually preceded with a _
 # Let the code begin...
 
 
-
 package Bio::Tools::Run::Primer3;
 
 use vars qw(@ISA);
@@ -134,40 +148,55 @@ use Bio::Tools::Primer3;
 use Bio::Tools::Run::WrapperBase;
 use File::Spec;
 
-use vars qw($AUTOLOAD @ISA @PRIMER3_PARAMS %OK_FIELD);
+use vars qw($AUTOLOAD @ISA @PRIMER3_PARAMS $PROGRAMNAME %OK_FIELD);
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 
-BEGIN {
- @PRIMER3_PARAMS=qw(
-  PROGRAM
-  EXCLUDED_REGION INCLUDED_REGION PRIMER_COMMENT PRIMER_DNA_CONC PRIMER_EXPLAIN_FLAG PRIMER_FILE_FLAG 
-  PRIMER_FIRST_BASE_INDEX PRIMER_GC_CLAMP PRIMER_INTERNAL_OLIGO_DNA_CONC PRIMER_INTERNAL_OLIGO_EXCLUDED_REGION 
-  PRIMER_INTERNAL_OLIGO_INPUT PRIMER_INTERNAL_OLIGO_MAX_GC PRIMER_INTERNAL_OLIGO_MAX_MISHYB 
-  PRIMER_INTERNAL_OLIGO_MAX_POLY_X PRIMER_INTERNAL_OLIGO_MAX_SIZE PRIMER_INTERNAL_OLIGO_MAX_TM 
-  PRIMER_INTERNAL_OLIGO_MIN_GC PRIMER_INTERNAL_OLIGO_MIN_QUALITY PRIMER_INTERNAL_OLIGO_MIN_SIZE 
-  PRIMER_INTERNAL_OLIGO_MIN_TM PRIMER_INTERNAL_OLIGO_MISHYB_LIBRARY PRIMER_INTERNAL_OLIGO_OPT_GC_PERCENT 
-  PRIMER_INTERNAL_OLIGO_OPT_SIZE PRIMER_INTERNAL_OLIGO_OPT_TM PRIMER_INTERNAL_OLIGO_SALT_CONC 
-  PRIMER_INTERNAL_OLIGO_SELF_ANY PRIMER_INTERNAL_OLIGO_SELF_END PRIMER_IO_WT_COMPL_ANY PRIMER_IO_WT_COMPL_END 
-  PRIMER_IO_WT_END_QUAL PRIMER_IO_WT_GC_PERCENT_GT PRIMER_IO_WT_GC_PERCENT_LT PRIMER_IO_WT_NUM_NS 
-  PRIMER_IO_WT_REP_SIM PRIMER_IO_WT_SEQ_QUAL PRIMER_IO_WT_SIZE_GT PRIMER_IO_WT_SIZE_LT PRIMER_IO_WT_TM_GT 
-  PRIMER_IO_WT_TM_LT PRIMER_LEFT_INPUT PRIMER_LIBERAL_BASE PRIMER_MAX_DIFF_TM PRIMER_MAX_END_STABILITY 
-  PRIMER_MAX_GC PRIMER_MAX_MISPRIMING PRIMER_MAX_POLY_X PRIMER_MAX_SIZE PRIMER_MAX_TM PRIMER_MIN_END_QUALITY 
-  PRIMER_MIN_GC PRIMER_MIN_QUALITY PRIMER_MIN_SIZE PRIMER_MIN_TM PRIMER_MISPRIMING_LIBRARY PRIMER_NUM_NS_ACCEPTED 
-  PRIMER_NUM_RETURN PRIMER_OPT_GC_PERCENT PRIMER_OPT_SIZE PRIMER_OPT_TM PRIMER_PAIR_MAX_MISPRIMING 
-  PRIMER_PAIR_WT_COMPL_ANY PRIMER_PAIR_WT_COMPL_END PRIMER_PAIR_WT_DIFF_TM PRIMER_PAIR_WT_IO_PENALTY 
-  PRIMER_PAIR_WT_PRODUCT_SIZE_GT PRIMER_PAIR_WT_PRODUCT_SIZE_LT PRIMER_PAIR_WT_PRODUCT_TM_GT 
-  PRIMER_PAIR_WT_PRODUCT_TM_LT PRIMER_PAIR_WT_PR_PENALTY PRIMER_PAIR_WT_REP_SIM PRIMER_PICK_ANYWAY 
-  PRIMER_PICK_INTERNAL_OLIGO PRIMER_PRODUCT_MAX_TM PRIMER_PRODUCT_MIN_TM PRIMER_PRODUCT_OPT_SIZE 
-  PRIMER_PRODUCT_OPT_TM PRIMER_PRODUCT_SIZE_RANGE PRIMER_QUALITY_RANGE_MAX PRIMER_QUALITY_RANGE_MIN 
-  PRIMER_RIGHT_INPUT PRIMER_SALT_CONC PRIMER_SELF_ANY PRIMER_SELF_END PRIMER_SEQUENCE_ID PRIMER_SEQUENCE_QUALITY 
-  PRIMER_START_CODON_POSITION PRIMER_TASK PRIMER_WT_COMPL_ANY PRIMER_WT_COMPL_END PRIMER_WT_END_QUAL 
-  PRIMER_WT_END_STABILITY PRIMER_WT_GC_PERCENT_GT PRIMER_WT_GC_PERCENT_LT PRIMER_WT_NUM_NS PRIMER_WT_POS_PENALTY 
-  PRIMER_WT_REP_SIM PRIMER_WT_SEQ_QUAL PRIMER_WT_SIZE_GT PRIMER_WT_SIZE_LT PRIMER_WT_TM_GT PRIMER_WT_TM_LT SEQUENCE TARGET
-  );
-
- foreach my $attr (@PRIMER3_PARAMS) {$OK_FIELD{$attr}++}
+BEGIN { 
+    $PROGRAMNAME = 'primer3';
+    @PRIMER3_PARAMS=qw( PROGRAM EXCLUDED_REGION INCLUDED_REGION
+ PRIMER_COMMENT PRIMER_DNA_CONC PRIMER_EXPLAIN_FLAG PRIMER_FILE_FLAG
+ PRIMER_FIRST_BASE_INDEX PRIMER_GC_CLAMP
+ PRIMER_INTERNAL_OLIGO_DNA_CONC PRIMER_INTERNAL_OLIGO_EXCLUDED_REGION
+ PRIMER_INTERNAL_OLIGO_INPUT PRIMER_INTERNAL_OLIGO_MAX_GC
+ PRIMER_INTERNAL_OLIGO_MAX_MISHYB PRIMER_INTERNAL_OLIGO_MAX_POLY_X
+ PRIMER_INTERNAL_OLIGO_MAX_SIZE PRIMER_INTERNAL_OLIGO_MAX_TM
+ PRIMER_INTERNAL_OLIGO_MIN_GC PRIMER_INTERNAL_OLIGO_MIN_QUALITY
+ PRIMER_INTERNAL_OLIGO_MIN_SIZE PRIMER_INTERNAL_OLIGO_MIN_TM
+ PRIMER_INTERNAL_OLIGO_MISHYB_LIBRARY
+ PRIMER_INTERNAL_OLIGO_OPT_GC_PERCENT PRIMER_INTERNAL_OLIGO_OPT_SIZE
+ PRIMER_INTERNAL_OLIGO_OPT_TM PRIMER_INTERNAL_OLIGO_SALT_CONC
+ PRIMER_INTERNAL_OLIGO_SELF_ANY PRIMER_INTERNAL_OLIGO_SELF_END
+ PRIMER_IO_WT_COMPL_ANY PRIMER_IO_WT_COMPL_END PRIMER_IO_WT_END_QUAL
+ PRIMER_IO_WT_GC_PERCENT_GT PRIMER_IO_WT_GC_PERCENT_LT
+ PRIMER_IO_WT_NUM_NS PRIMER_IO_WT_REP_SIM PRIMER_IO_WT_SEQ_QUAL
+ PRIMER_IO_WT_SIZE_GT PRIMER_IO_WT_SIZE_LT PRIMER_IO_WT_TM_GT
+ PRIMER_IO_WT_TM_LT PRIMER_LEFT_INPUT PRIMER_LIBERAL_BASE
+ PRIMER_MAX_DIFF_TM PRIMER_MAX_END_STABILITY PRIMER_MAX_GC
+ PRIMER_MAX_MISPRIMING PRIMER_MAX_POLY_X PRIMER_MAX_SIZE PRIMER_MAX_TM
+ PRIMER_MIN_END_QUALITY PRIMER_MIN_GC PRIMER_MIN_QUALITY
+ PRIMER_MIN_SIZE PRIMER_MIN_TM PRIMER_MISPRIMING_LIBRARY
+ PRIMER_NUM_NS_ACCEPTED PRIMER_NUM_RETURN PRIMER_OPT_GC_PERCENT
+ PRIMER_OPT_SIZE PRIMER_OPT_TM PRIMER_PAIR_MAX_MISPRIMING
+ PRIMER_PAIR_WT_COMPL_ANY PRIMER_PAIR_WT_COMPL_END
+ PRIMER_PAIR_WT_DIFF_TM PRIMER_PAIR_WT_IO_PENALTY
+ PRIMER_PAIR_WT_PRODUCT_SIZE_GT PRIMER_PAIR_WT_PRODUCT_SIZE_LT
+ PRIMER_PAIR_WT_PRODUCT_TM_GT PRIMER_PAIR_WT_PRODUCT_TM_LT
+ PRIMER_PAIR_WT_PR_PENALTY PRIMER_PAIR_WT_REP_SIM PRIMER_PICK_ANYWAY
+ PRIMER_PICK_INTERNAL_OLIGO PRIMER_PRODUCT_MAX_TM
+ PRIMER_PRODUCT_MIN_TM PRIMER_PRODUCT_OPT_SIZE PRIMER_PRODUCT_OPT_TM
+ PRIMER_PRODUCT_SIZE_RANGE PRIMER_QUALITY_RANGE_MAX
+ PRIMER_QUALITY_RANGE_MIN PRIMER_RIGHT_INPUT PRIMER_SALT_CONC
+ PRIMER_SELF_ANY PRIMER_SELF_END PRIMER_SEQUENCE_ID
+ PRIMER_SEQUENCE_QUALITY PRIMER_START_CODON_POSITION PRIMER_TASK
+ PRIMER_WT_COMPL_ANY PRIMER_WT_COMPL_END PRIMER_WT_END_QUAL
+ PRIMER_WT_END_STABILITY PRIMER_WT_GC_PERCENT_GT
+ PRIMER_WT_GC_PERCENT_LT PRIMER_WT_NUM_NS PRIMER_WT_POS_PENALTY
+ PRIMER_WT_REP_SIM PRIMER_WT_SEQ_QUAL PRIMER_WT_SIZE_GT
+ PRIMER_WT_SIZE_LT PRIMER_WT_TM_GT PRIMER_WT_TM_LT SEQUENCE TARGET );
+    
+    foreach my $attr (@PRIMER3_PARAMS) {$OK_FIELD{$attr}++}
 }
 
 sub AUTOLOAD {
@@ -184,13 +213,23 @@ sub AUTOLOAD {
 =head2 new()
 
  Title   : new()
- Usage   : my $primer3 = Bio::Tools::Primer3->new(-file=>$file) to read a primer3 output file.
-           my $primer3 = Bio::Tools::Primer3->new(-seq=>sequence object) design primers against sequence
- Function: Start primer3 working and adds a sequence. At the moment it will not clear out the old sequence, but I suppose it should.
- Returns : Doesn't return anything. If called with a filename will allow you to retrieve the results
- Args    : -seq (optional) Bio::Seq object of sequence. This is required to run primer3 but can be added later with add_targets()
-	   -outfile file name to output results to (note can also be added with $primer3->outfile_name
-	   -path path to primer3 executable (incl. program. eg. /usr/bin/primer3_core). This can also be set with program_name and program_dir
+ Usage   : my $primer3 = Bio::Tools::Primer3->new(-file=>$file) to read 
+            a primer3 output file.
+           my $primer3 = Bio::Tools::Primer3->new(-seq=>sequence object) 
+            design primers against sequence
+ Function: Start primer3 working and adds a sequence. 
+           At the moment it will not clear out the old sequence, 
+           but I suppose it should.
+ Returns : Doesn't return anything. If called with a filename will allow 
+           you to retrieve the results
+ Args    : -seq (optional) Bio::Seq object of sequence. 
+            This is required to run primer3 but
+            can be added later with add_targets()
+	   -outfile file name to output results to (note: can also 
+            be added with $primer3->outfile_name
+	   -path path to primer3 executable (incl. program. eg. 
+            /usr/bin/primer3_core). This can also be set with 
+            program_name and program_dir
 	   -verbose (optional) set verbose output
  Notes   : 
 
@@ -233,7 +272,7 @@ sub new {
 sub program_name {
   my $self = shift;
   return $self->{'program_name'} = shift @_ if @_;
-  return $self->{'program_name'} || 'primer3';
+  return $self->{'program_name'} || $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -286,7 +325,8 @@ sub add_targets {
   }
   
   unless ($self->{'no_param_checks'}) {
-   unless ($OK_FIELD{$key}) {$self->warn("Parameter $key is not a valid Primer3 parameter"); next}
+      unless ($OK_FIELD{$key}) {
+	  $self->warn("Parameter $key is not a valid Primer3 parameter"); next}
   }
   
   if (uc($key) eq "INCLUDED_REGION") {
@@ -324,7 +364,7 @@ sub add_targets {
   my $replaced; # don't add it if it is replacing something!
   my @new_array;
   foreach my $input (@$inputarray) {
-    my ($array_key, $array_value) = split /=/, $input;
+    my ($array_key, $array_value) = split '=', $input;
     if (uc($array_key) eq uc($key)) {push @new_array, $toadd; $replaced=1}
     else {push @new_array, $input}
   }
@@ -368,46 +408,42 @@ sub run {
  
  
  # make a temporary file and print the instructions to it.
- my ($temphandle, $tempfile)=$self->io->tempfile;
+ my ($temphandle, $tempfile) = $self->io->tempfile;
  print $temphandle join "\n", @{$self->{'primer3_input'}}, "=\n";
- $temphandle->close;
-open (RESULTS, "$executable < $tempfile|") || $self->throw("Can't open RESULTS");
+ close($temphandle);
+ open (RESULTS, "$executable < $tempfile|") || $self->throw("Can't open RESULTS");
  if ($self->{'_outfilename'}) {
-  
-  # I can't figure out how to use either of these to write the results out.
-  # neither work, what am I doing wrong or missing in the docs?
-  
+     
+     # I can't figure out how to use either of these to write the results out.
+     # neither work, what am I doing wrong or missing in the docs?
+     
 #  $self->{output}=$self->_initialize_io(-file=>$self->{'outfile'});
 #  $self->{output}=$self->io;
-  
-  # OK, for now, I will just do it myself, because I need this to check the parser :)
-  open (OUT, ">".$self->{'_outfilename'}) || $self->throw("Can't open ".$self->{'_outfilename'}." for writing");
-}
- 
- 
+     
+     # OK, for now, I will just do it myself, because I need this to check the parser :)
+     open (OUT, ">".$self->{'_outfilename'}) || 
+	 $self->throw("Can't open ".$self->{'_outfilename'}." for writing");
+ }
  
  my @results;
  while (<RESULTS>) {
-  if ($self->{'_outfilename'}) {
-   # this should work, but isn't
-   #$self->{output}->_print($_);
-   print OUT $_;
-   }
-  chomp;
-  my ($return, $value) = split /=/;
-  $self->{'results'}->{$return} = $value;
+     if ($self->{'_outfilename'}) {
+	 # this should work, but isn't
+	 #$self->{output}->_print($_);
+	 print OUT $_;
+     }
+     chomp;
+     my ($return, $value) = split('=',$_);
+     $self->{'results'}->{$return} = $value;
  }
  close RESULTS;
-
- #clean up the output file
+ 
+ # close the output file
  if ($self->{'_outfilename'}) { 
-# $self->{output}->close();
-  close OUT;
+     close OUT;
  }
 
  $self->cleanup;
- 
- 
  # convert the results to individual results
  $self->{results_obj}=new Bio::Tools::Primer3;
  $self->{results_obj}->_set_variable('results', $self->{results});
@@ -427,8 +463,10 @@ open (RESULTS, "$executable < $tempfile|") || $self->throw("Can't open RESULTS")
  Function: Describes the options that you can set through Bio::Tools::Primer3, with a brief (one line) description of what they are and their default values
  Returns : A string (if an argument is supplied) or a reference to a hash.
  Args    : If supplied with an argument will return a string of its description.
-           If no arguments are supplied, will return all the arguments as a reference to a hash
- Notes   : Much of this is taken from the primer3 README file, and you should read that file for a more detailed description.
+           If no arguments are supplied, will return all the arguments as a 
+           reference to a hash
+ Notes   : Much of this is taken from the primer3 README file, and you should 
+           read that file for a more detailed description.
 
 =cut
 
@@ -629,17 +667,5 @@ sub _input_args {
 # -2 on out-of-memory
 # -3 empty input
 # -4 error in a "Global" input tag (message in PRIMER_ERROR).
-
-
-
-
-
-
-
-
-
-
-
-
 
 1;
