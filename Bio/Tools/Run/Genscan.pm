@@ -137,14 +137,28 @@ sub new {
 =head2 predict_genes()
 
     Title   :   predict_genes()
-    Usage   :   $obj->predictgenes($matrixFile,$seqFile)
+    Usage   :   DEPRECATED: use $obj->run($seq) instead 
     Function:   Runs genscan and creates an array of Genes
     Returns :   An array of Bio::Tools::Prediction::Gene objects
     Args    :   A Bio::PrimarySeqI    
 
 =cut
 
-sub predict_genes() {
+sub predict_genes{
+	return shift->run(@_);
+}
+
+=head2 run
+
+    Title   :   run
+    Usage   :   $obj->run($seq)
+    Function:   Runs genscan and creates an array of Genes
+    Returns :   An array of Bio::Tools::Prediction::Gene objects
+    Args    :   A Bio::PrimarySeqI    
+
+=cut
+
+sub run {
     my ($self,$seq) = @_;
     my $infile1 = $self->_writeSeqFile($seq);  
     $self->_set_input($infile1);  

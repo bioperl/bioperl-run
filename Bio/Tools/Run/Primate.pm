@@ -23,7 +23,7 @@ tags.
   my @params = ("query" => $query,"target" => $target,"m"=>0);
   my $fact = Bio::Tools::Run::Primate->new(@params);
 
-  my @feat = $fact->search;
+  my @feat = $fact->run;
   foreach my $feat(@feat) {
       print $feat->seqname."\t".$feat->primary_tag."\t".$feat->start.
       "\t".$feat->end."\t".$feat->strand."\t".$feat->seq->seq."\n";
@@ -187,15 +187,29 @@ sub version {
 =head2 search
 
  Title   : search
- Usage   : @feat = $factory->search();
+ Usage   : DEPRECATED. Use $factory->run() instead
  Function: Perform a primate search
  Returns : Array of L<Bio::SeqFeature::Generic>
- Args    : none
+ Args    : 
 
 =cut
 
 sub search {
+	return shift->run(@_);
+}
 
+
+=head2 run 
+
+ Title   : run
+ Usage   : @feat = $factory->run();
+ Function: Perform a primate search
+ Returns : Array of L<Bio::SeqFeature::Generic>
+ Args    : 
+
+=cut
+
+sub run{
     my ($self,$target) = @_;
     $target = $target ||$self->target;
     $target || $self->throw("Need a target sequence");

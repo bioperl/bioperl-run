@@ -16,7 +16,7 @@ Bio::Tools::Run::Hmmpfam
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->predict_protein_features($seq);
+  my @feats = $factory->run($seq);
 
 =head1 DESCRIPTION
   wrapper module for Hmmpfam program 
@@ -140,8 +140,8 @@ sub new {
 
 =head2 predict_protein_features
 
- Title   :   predict_protein_features()
- Usage   :   $obj->predict_protein_features($seqFile)
+ Title   :   predict_protein_features
+ Usage   :   DEPRECATED. Use obj->run($seqFile)
  Function:   Runs Hmmpfam and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
@@ -149,6 +149,20 @@ sub new {
 =cut
 
 sub predict_protein_features{
+	return shift->run(@_);
+}
+
+=head2 run
+
+ Title   :   run
+ Usage   :   $obj->run($seqFile)
+ Function:   Runs Hmmpfam and creates an array of featrues
+ Returns :   An array of Bio::SeqFeature::Generic objects
+ Args    :   A Bio::PrimarySeqI
+
+=cut
+
+sub run{
     my ($self,$seq) = @_;
     my @feats;
 

@@ -20,7 +20,7 @@ given sequence given a protein and a cdna sequence
   #  Pass the factory 3 Bio:SeqI objects (in the order of query peptide and cdna and
      target_genomic) 
   #@genes is an array of GenericSeqFeature objects
-  my @genes = $factory->predict_genes($seq1, $seq2, $seq3); 
+  my @genes = $factory->run($seq1, $seq2, $seq3); 
 
 =head1 DESCRIPTION
 
@@ -179,12 +179,8 @@ sub version {
 =head2 predict_genes 
 
  Title   : predict_genes 
- Usage   :
-            3 sequence objects 
-            @feats = $factory->predict_genes($seq1, $seq2, $seq3);
-
-Function: Predict pseudogenes
-
+ Usage   : DEPRECATED. Use $factory->run instead 
+ Function: Predict pseudogenes
  Returns : An array of Bio::Seqfeature::Generic objects 
  Args    : Name of a file containing a set of 3 fasta sequences in the order of 
            peptide, cdna and genomic sequences
@@ -198,6 +194,27 @@ Function: Predict pseudogenes
 =cut
 
 sub predict_genes {
+	return shift->run(@_);
+}
+
+=head2 run
+
+ Title   : run
+ Usage   : my @feats = $factory->run($seq1, $seq2, $seq3);
+ Function: Executes pseudogene binary
+ Returns : An array of Bio::Seqfeature::Generic objects 
+ Args    : Name of a file containing a set of 3 fasta sequences in the order of 
+           peptide, cdna and genomic sequences
+           or else 3  Bio::Seq objects.
+
+ Throws an exception if argument is not either a string (eg a
+ filename) or 3 Bio::Seq objects.  If
+ arguments are strings, throws exception if file corresponding to string
+ name can not be found. 
+
+=cut
+
+sub run{
 
     my ($self,$seq1, $seq2, $seq3)=@_; 
     my ($attr, $value, $switch);

@@ -16,12 +16,13 @@ Bio::Tools::Run::Prints
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->predict_protein_features($seq);
+  my @feats = $factory->run($seq);
 
 =head1 DESCRIPTION
 
   FingerPRINTScan II is a PRINTS fingerprint identification algorithm.
   Copyright (C) 1998,1999  Phil Scordis
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -145,7 +146,7 @@ sub new {
 =head2 predict_protein_features
 
  Title   :   predict_protein_features()
- Usage   :   $obj->predict_protein_features($seqFile)
+ Usage   :   DEPRECATED. Use $obj->run($seqFile) instead.
  Function:   Runs Prints and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
@@ -153,6 +154,20 @@ sub new {
 =cut
 
 sub predict_protein_features{
+	return shift->run(@_);
+}
+
+=head2 run 
+
+ Title   :   run 
+ Usage   :   $obj->run($seq)
+ Function:   Runs Prints 
+ Returns :   An array of Bio::SeqFeature::Generic objects
+ Args    :   A Bio::PrimarySeqI, or a Fasta file name
+
+=cut
+
+sub run{
     my ($self,$seq) = @_;
     my @feats;
 

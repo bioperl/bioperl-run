@@ -20,7 +20,7 @@ given sequence given a protein
   # Pass the factory 2 Bio:SeqI objects (in the order of query peptide and
      target_genomic)
   # $genes is a Bio::SeqFeature::Gene::GeneStructure object  
-  my $genes = $factory->predict_genes($protein_seq, $genomic_seq);
+  my $genes = $factory->run($protein_seq, $genomic_seq);
 
   Available Params
   Model    [-codon,-gene,-cfreq,-splice,-subs,-indel,-intron,-null]
@@ -185,8 +185,7 @@ sub version {
 =head2 predict_genes
 
  Title   : predict_genes
- Usage   : 2 sequence objects
-           $genes = $factory->predict_genes($seq1, $seq2);
+ Usage   : DEPRECATED. Use $factory->run($seq1,$seq2) 
  Function: Predict genes
  Returns : A Bio::Seqfeature::Gene:GeneStructure object
  Args    : Name of a file containing a set of 2 fasta sequences in the order of
@@ -201,6 +200,28 @@ sub version {
 =cut
 
 sub predict_genes {
+	return shift->run(@_);
+}
+
+=head2 run 
+
+ Title   : run 
+ Usage   : 2 sequence objects
+           $genes = $factory->run($seq1, $seq2);
+ Function: run 
+ Returns : A Bio::Seqfeature::Gene:GeneStructure object
+ Args    : Name of a file containing a set of 2 fasta sequences in the order of
+           peptide and genomic sequences
+           or else 2  Bio::Seq objects.
+
+ Throws an exception if argument is not either a string (eg a
+ filename) or 2 Bio::Seq objects.  If
+ arguments are strings, throws exception if file corresponding to string
+ name can not be found.
+
+=cut
+
+sub run{
     my ($self, $seq1, $seq2)=@_;
     my ($attr, $value, $switch);
     $self->io->_io_cleanup();

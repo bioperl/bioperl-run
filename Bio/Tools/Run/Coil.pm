@@ -21,7 +21,7 @@ Bio::Tools::Run::Coil
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->predict_protein_features($seq);
+  my @feats = $factory->run($seq);
 
 =head1 DESCRIPTION
 
@@ -150,7 +150,7 @@ sub new {
 =head2 predict_protein_features
 
  Title   :   predict_protein_features()
- Usage   :   $obj->predict_protein_features($seqFile)
+ Usage   :   DEPRECATED. Use $obj->run instead. 
  Function:   Runs Coil and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
@@ -158,6 +158,20 @@ sub new {
 =cut
 
 sub predict_protein_features{
+	return shift->run(@_);
+}
+
+=head2 run 
+
+ Title   :   run
+ Usage   :   $obj->run($seq)
+ Function:   Runs Coil and creates an array of featrues
+ Returns :   An array of Bio::SeqFeature::Generic objects
+ Args    :   A Bio::PrimarySeqI, or a Fasta filename.
+
+=cut
+
+sub run{
     my ($self,$seq) = @_;
     my @feats;
     
@@ -174,13 +188,13 @@ sub predict_protein_features{
         unlink $infile1;
     }
     else {
-        #The clone object is not a seq object but a file.
+        #The argument is not a seq object but a sequence in a fasta file.
         #Perhaps should check here or before if this file is fasta format...if not die
         #Here the file does not need to be created or deleted. Its already written and may be used by other runnables.
 
         $self->_input($seq);
 
-         @feats = $self->_run();
+        @feats = $self->_run();
         
     }
    

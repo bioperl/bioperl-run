@@ -25,15 +25,15 @@ Wrapper for RepeatMasker Program
   my $seq = $in->next_seq();
 
   #return an array of Bio::SeqFeature::FeaturePair objects
-  my @feats = $factory->mask($seq); 
+  my @feats = $factory->run($seq); 
 
 or
 
-  $factory->mask($seq);
+  $factory->run($seq);
   my @feats = $factory->repeat_features;
 
   #return the masked sequence, a Bio::SeqI object
-  my $masked_seq = $factory->masked_seq;
+  my $masked_seq = $factory->run;
 
 =head1 DESCRIPTION
 
@@ -199,19 +199,19 @@ sub version {
     return $self->{'_version'} = $1 || undef;
 }
 
-=head2  mask
+=head2 run
 
- Title   : mask
- Usage   : $rm->mask($seq)
- Function: carry out repeat mask
- Example :
+ Title   : run
+ Usage   : $rm->run($seq);
+ Function: Run Repeatmasker on the sequence set as
+           the argument
  Returns : an array of repeat features that are
            Bio::SeqFeature::FeaturePairs
  Args    : Bio::PrimarySeqI compliant object
 
 =cut
 
-sub mask {
+sub run {
   my ($self,$seq) = @_;
   my ($infile);
   $infile = $self->_setinput($seq);
@@ -220,8 +220,25 @@ sub mask {
   my @repeat_feats = $self->_run($infile,$param_string);
 
   return @repeat_feats;
-
 }
+
+
+=head2  mask
+
+ Title   : mask
+ Usage   : $rm->mask($seq)
+ Function: This method is deprecated. Call run() instead
+ Example :
+ Returns : an array of repeat features that are
+           Bio::SeqFeature::FeaturePairs
+ Args    : Bio::PrimarySeqI compliant object
+
+=cut
+
+sub mask{
+	return shift->run(@_);
+}
+
 
 =head2  _run
 

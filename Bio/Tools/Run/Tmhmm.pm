@@ -23,7 +23,7 @@ Bio::Tools::Run::Tmhmm - Object for identifying transmembrane helixes
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
 
-  my @feats = $factory->predict_protein_features($seq);
+  my @feats = $factory->run($seq);
 
 =head1 DESCRIPTION
 
@@ -152,10 +152,11 @@ sub new {
        }
        return $self;
 }
+
 =head2 predict_protein_features
 
  Title   :   predict_protein_features()
- Usage   :   $obj->predict_protein_features($seqFile)
+ Usage   :   DEPRECATED Use $obj->run($seq) instead
  Function:   Runs Tmhmm and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
@@ -163,6 +164,20 @@ sub new {
 =cut
 
 sub predict_protein_features{
+	return shift->run(@_);
+}
+
+=head2 run
+
+ Title   :   run()
+ Usage   :   $obj->run($seq)
+ Function:   Runs Tmhmm and creates an array of featrues
+ Returns :   An array of Bio::SeqFeature::Generic objects
+ Args    :   A Bio::PrimarySeqI
+
+=cut
+
+sub run{
     my ($self,$seq) = @_;
     my @feats;
 
