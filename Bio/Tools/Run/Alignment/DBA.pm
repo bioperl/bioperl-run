@@ -86,8 +86,9 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Search::HSP::GenericHSP;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase); 
 
 # You will need to enable dba to find the dba program. This
 # can be done in (at least) two ways:
@@ -121,11 +122,11 @@ sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
   # to facilitiate tempfile cleanup
-  $self->_initialize_io();
+  $self->io->_initialize_io();
 
   my ($attr, $value);
-  (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+  (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+  (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
 
   while (@args) {
     $attr =   shift @args;
@@ -136,12 +137,6 @@ sub new {
       next;
     }
     $self->$attr($value);
-  }
-  unless( defined $self->executable) {
-      if( $self->verbose >= 0 ) {
-	  $self->warn( "DBA program not found for $PROGRAMNAME or not executable. \n DBA can be obtained from http://www.sanger.ac.uk/software/wise2\n"); 
-      }
-      return undef;
   }
   return $self;
 }
@@ -179,7 +174,7 @@ sub executable{
 	   $self->{'_pathtoexe'} = $PROGRAM;
        } else { 
 	   my $exe;
-	   if( ( $exe = $self->exists_exe($PROGRAMNAME) ) &&
+	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
 	       -x $exe ) {
 	       $self->{'_pathtoexe'} = $exe;
 	   } else { 
@@ -441,11 +436,11 @@ sub _setinput {
     $infilename = $input;
     unless(-e $input){return 0;}
     my  $in  = Bio::SeqIO->new(-file => $infilename , '-format' => 'Fasta');
-    ($tfh1,$outfile1) = $self->tempfile(-dir=>$TMPDIR);
-    ($tfh2,$outfile2) = $self->tempfile(-dir=>$TMPDIR);
+    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
+    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TMPDIR);
 
-    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-    my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta','-flush'=>1);
+    my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta','-flush'=>1);
 
     my $seq1 = $in->next_seq() || return 0; 
     my $seq2 = $in->next_seq() || return 0; 
@@ -461,8 +456,8 @@ sub _setinput {
       my $in1  = Bio::SeqIO->new(-file => $input->[0], '-format' => 'Fasta');
       my $in2  = Bio::SeqIO->new(-file => $input->[1], '-format' => 'Fasta');
 
-      ($tfh1,$outfile1) = $self->tempfile(-dir=>$TMPDIR);
-      ($tfh2,$outfile2) = $self->tempfile(-dir=>$TMPDIR);
+      ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
+      ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TMPDIR);
 
       my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
       my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
@@ -476,8 +471,8 @@ sub _setinput {
       return $outfile1,$outfile2;
     }
     elsif($input->[0]->isa("Bio::PrimarySeqI") && $input->[1]->isa("Bio::PrimarySeqI")) {
-      ($tfh1,$outfile1) = $self->tempfile(-dir=>$TMPDIR);
-      ($tfh2,$outfile2) = $self->tempfile(-dir=>$TMPDIR);
+      ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
+      ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TMPDIR);
 
       my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
       my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
@@ -534,9 +529,6 @@ sub _setparams {
     }
 
 
-    if ($self->quiet() || $self->verbose() < 0) {
-      $param_string .= '  >/dev/null ';
-    }
     return $param_string;
 }
 
