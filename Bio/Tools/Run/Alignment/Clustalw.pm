@@ -322,7 +322,9 @@ use Bio::Seq;
 use Bio::SeqIO;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
+use Bio::TreeIO;
 use Bio::Root::Root;
+use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
@@ -344,10 +346,12 @@ BEGIN {
                    GAPOPEN GAPEXT MAXDIV GAPDIST HGAPRESIDUES PWMATRIX
                    PWDNAMATRIX PWGAPOPEN PWGAPEXT SCORE TRANSWEIGHT
                    SEED HELIXGAP OUTORDER STRANDGAP LOOPGAP TERMINALGAP
-                   HELIXENDIN HELIXENDOUT STRANDENDIN STRANDENDOUT PROGRAM);
+                   HELIXENDIN HELIXENDOUT STRANDENDIN STRANDENDOUT PROGRAM
+                   REPS OUTPUTTREE SEED BOOTLABELS BOOTSTRAP);
 
     @CLUSTALW_SWITCHES = qw(HELP CHECK OPTIONS NEGATIVE NOWEIGHTS ENDGAPS
-                        NOPGAP NOHGAP NOVGAP KIMURA TOSSGAPS);
+                        NOPGAP NOHGAP NOVGAP KIMURA TOSSGAPS
+                        KIMURA TOSSGAPS NJTREE);
 
     @OTHER_SWITCHES = qw(QUIET);
     # Authorize attribute fields
@@ -511,6 +515,41 @@ sub profile_align {
 }
 #################################################
 
+=head2  tree
+
+ Title   : tree
+ Usage   :
+    @params = ('bootstrap', 1000, 'tossgaps', 1, 'kimura', 1, 'seed', 121, 'bootlabels', 'nodes', 'quiet', 1);
+    $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
+    $tree_obj = $factory->tree($aln_obj);
+or
+    $tree_obj = $factory->tree($treefilename);
+ Function: 
+ Example :
+ Returns : 
+ Args    : 
+
+
+=cut
+
+sub tree {
+    my ($self,$input) = @_;
+    my ($temp,$infilename, $seq);
+    my ($attr, $value, $switch);
+    $self->io->_io_cleanup();
+    # Create input file pointer
+    $infilename = $self->_setinput($input);
+    
+    if (!$infilename) {$self->throw("Bad input data (sequences need an id ) or less than 2 sequences in $input !");}
+    
+    # Create parameter string to pass to clustalw program
+    my $param_string = $self->_setparams();
+
+    # run clustalw
+    my $tree = $self->_run('tree', $infilename,$param_string);
+}
+#################################################
+
 =head2  _run
 
  Title   :  _run
@@ -546,6 +585,34 @@ sub _run {
     	chmod 0777, $infile1,$infile2;
     	$command = '-profile';
     }
+    
+    if ($command =~ /tree/) {
+        
+    	if( $^O eq 'dec_osf' ) {
+	    $instring =  "$infile1";
+	    $command = '';
+	} else { 
+	    $instring = " $infile1";
+	}
+    	$param_string .= " $infile2";
+    	
+    	$self->debug( "Program ".$self->executable."\n");
+    	
+    	my $commandstring = $self->executable."$instring"."$param_string";
+        $self->debug( "clustal command = $commandstring");
+    	my $status = system($commandstring);
+    	$self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
+        
+    	my $treefile = $instring;
+    	$treefile =~ s/ //g;
+    	$treefile = $instring.'.phb' if $param_string =~ /-bootstrap/;
+        $treefile = $instring.'.ph' if $param_string =~ /-tree/;
+        
+    	my $in = new Bio::TreeIO('-file'=> "$treefile");
+        
+    	return $in;
+    }
+    
     my $output = $self->output || 'gcg';
     $self->debug( "Program ".$self->executable."\n");
     my $commandstring = $self->executable." $command"." $instring".
@@ -556,12 +623,12 @@ sub _run {
     $self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
     
     my $outfile = $self->outfile();
-
+    
 # retrieve alignment (Note: MSF format for AlignIO = GCG format of clustalw)
 
     my $format= $output =~/phylip/i ? "phylip" : "MSF";
 
-    my $in  = Bio::AlignIO->new(-file => $outfile, '-format' => $format);
+    my $in  = Bio::AlignIO->new(-file => $outfile);
     my $aln = $in->next_aln();
 
     # Clean up the temporary files created along the way...
@@ -609,7 +676,7 @@ sub _setinput {
 	($tfh,$infilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	$temp =  Bio::SeqIO->new('-fh'=>$tfh,
 				 '-format' =>'Fasta');
-
+        
 	# Need at least 2 seqs for alignment
 	unless (scalar(@$input) > 1) {return 0;}
 
@@ -696,8 +763,10 @@ sub _setparams {
     	$param_string .= " -outfile=$outfile" ;
     }
     
-    if ($self->quiet() || $self->verbose() < 0) { 
-	$param_string .= '  >/dev/null 2>/dev/null';
+    if ($self->quiet() || $self->verbose() < 0) {
+        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR, $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
+        if ($^O =~ /mswin/i) { $param_string .= ' >'.$self->outfile().'out'; }
+        elsif ($^O =~ /unix/i) { $param_string .= ' >/dev/null 2>/dev/null'; }
     }
     
     return $param_string;
