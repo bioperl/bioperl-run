@@ -13,7 +13,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 10;
+    $NTESTS = 11;
     plan tests => $NTESTS;
 }
 
@@ -100,4 +100,7 @@ exit(0) unless $align_factory->executable();
 my $aln = $align_factory->align($inputfilename);
 $matrix = $dist_factory->create_distance_matrix($aln);
 
-ok (int($matrix->{'ALEU_HORVU'}{'ALEU_HORVU'}),0.0,"failed creating distance matrix");
+ok (int($matrix->{'ALEU_HORVU'}{'ALEU_HORVU'}),0,
+    "failed creating distance matrix");
+ok(sprintf("%.2f",$matrix->{'CATL_HUMAN'}{'CYS1_DICDI'}),
+	   '1.30', "failed creating distance matrix");
