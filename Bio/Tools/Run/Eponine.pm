@@ -381,7 +381,7 @@ sub run_eponine {
 	return undef;
     }
     my $cmd  =   $self->java.' -jar '.$self->epojar.' -seq '.$self->filename.' -threshold '.$self->threshold." > ".$result;
-    $self->throw("Error running eponine-scan on ".$self->filename." \n Eponine crashed ($cmd) crashed: $? \n")
+    $self->throw("Error running eponine-scan on ".$self->filename." \n Check your java version, it has to be version 1.2 or later. Eponine crashed ($cmd) crashed: $? \n")
          if (system ($cmd));
 
    #parse results even though it's wierd.. thought parser and wrapper should be separate
