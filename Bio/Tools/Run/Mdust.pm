@@ -1,23 +1,14 @@
-package Bio::Tools::Run::Mdust;
+# $Id$
+#
+# BioPerl module for Bio::Tools::SiRNA
+#
+# Cared for by Donald Jackson, donald.jackson@bms.com
+#
+# Copyright Donald Jackson
+#
+# You may distribute this module under the same terms as perl itself
 
-require 5.005_62;
-use strict;
-#use warnings;
-
-use Bio::SeqIO;
-use Bio::SeqFeature::Generic;
-use Bio::Root::Root;
-
-use vars qw($AUTOLOAD);
-
-our @ISA = qw(Bio::Root::Root);
-
-our $VERSION = '0.01';
-
-our $MDUST_EXE = $ENV{'MDUSTDIR'} . '/mdust'; # path to mdust executable
-our $TMPDIR = '.'; 
-
-our @ARGNAMES = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -49,7 +40,64 @@ to '/usr/local/bin').
 
 None
 
-=head1 METHODS
+=head1 SEE ALSO
+
+L<mdust>, L<perl>.
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+the web:
+
+  http://bugzilla.bioperl.org/
+
+=head1 AUTHOR
+
+Donald Jackson (donald.jackson@bms.com)
+
+=head1 CONTRIBUTORS
+
+Additional contributors names and emails here
+
+=head1 APPENDIX
+
+The rest of the documentation details each of the object methods.
+Internal methods are usually preceded with a _
+
+=cut
+
+
+package Bio::Tools::Run::Mdust;
+
+require 5.005_62;
+use strict;
+
+use Bio::SeqIO;
+use Bio::SeqFeature::Generic;
+use Bio::Root::Root;
+
+use vars qw($AUTOLOAD);
+
+our @ISA = qw(Bio::Root::Root);
+
+our $VERSION = '0.01';
+
+our $MDUST_EXE = $ENV{'MDUSTDIR'} . '/mdust'; # path to mdust executable
+our $TMPDIR = '.'; 
+
+our @ARGNAMES = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
 
 
 =head2 new
@@ -266,16 +314,3 @@ sub AUTOLOAD {
 }
 
 1;
-
-
-__END__
-
-=head1 AUTHOR
-
-Donald Jackson (donald.jackson@bms.com)
-
-=head1 SEE ALSO
-
-perl(1), Bio::Seq
-
-=cut
