@@ -271,23 +271,29 @@ sub program_name {
 =head2 program_dir
 
  Title   : program_dir
- Usage   : $factory->program_dir(@params)
- Function: returns the program directory, obtiained from ENV variable.
- Returns:  string
+ Usage   : $primer3->program_dir($dir)
+ Function: returns the program directory, which may also be obtained from ENV variable.
+ Returns :  string
  Args    :
 
 =cut
 
 sub program_dir {
-	my ($self, $dir) = @_;
-	if ($dir) {
+   my ($self, $dir) = @_;
+   if ($dir) {
       $self->{'program_dir'}=$dir;
-	} elsif ($ENV{PRIMER3}) {
+   } 
+   
+   # we need to stop here if we know what the answer is, otherwise we can never set it and then call it later
+   return $self->{'program_dir'} if $self->{'program_dir'};
+   
+   if ($ENV{PRIMER3}) {
       $self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3});
-	} else {
+   } else {
       $self->{'program_dir'}='/usr/local/bin';
-	}
-	return $self->{'program_dir'}
+   }
+   
+   return $self->{'program_dir'}
 }
 
 
