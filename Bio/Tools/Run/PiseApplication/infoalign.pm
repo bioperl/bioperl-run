@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::infoalign
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::infoalign
 
 	INFOALIGN	Information on a multiple sequence alignment (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/infoalign.html 
+         for available values):
 
 
 		infoalign (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- gapany [set of sequences] (-sequence)
 			pipe: seqsfile
-
-		advanced (Paragraph)
-			advanced Section
 
 		refseq (String)
 			The number or the name of the reference sequence (-refseq)
@@ -45,9 +50,6 @@ Bio::Tools::Run::PiseApplication::infoalign
 
 		identity (Float)
 			Required % of identities at a position fro consensus (-identity)
-
-		output (Paragraph)
-			output Section
 
 		outfile (OutFile)
 			Output sequence details to a file (-outfile)
@@ -96,6 +98,63 @@ Bio::Tools::Run::PiseApplication::infoalign
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/infoalign.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -111,20 +170,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $infoalign = Bio::Tools::Run::PiseApplication::infoalign->new($remote, $email, @params);
+ Usage   : my $infoalign = Bio::Tools::Run::PiseApplication::infoalign->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::infoalign object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $infoalign = $factory->program('infoalign');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::infoalign.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/infoalign.pm
 
@@ -133,6 +192,8 @@ sub new {
     $self->{TITLE}   = "INFOALIGN";
 
     $self->{DESCRIPTION}   = "Information on a multiple sequence alignment (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -242,7 +303,7 @@ sub new {
 	"output" => {
 	},
 	"outfile" => {
-		"perl" => '($value && $value ne $vdef)? " -outfile=$value" : ""',
+		"perl" => '" -outfile=$value"',
 	},
 	"html" => {
 		"perl" => '($value)? " -html" : ""',
@@ -434,7 +495,7 @@ sub new {
 	"plurality" => 0,
 	"identity" => 0,
 	"output" => 0,
-	"outfile" => 0,
+	"outfile" => 1,
 	"html" => 0,
 	"only" => 0,
 	"heading" => 0,
@@ -531,7 +592,7 @@ sub new {
 	"refseq" => '0',
 	"plurality" => '50.0',
 	"identity" => '0.0',
-	"outfile" => 'stdout',
+	"outfile" => 'outfile.out',
 	"html" => '0',
 	"only" => '0',
 	"heading" => '',
@@ -640,7 +701,7 @@ sub new {
 	"plurality" => 0,
 	"identity" => 0,
 	"output" => 0,
-	"outfile" => 0,
+	"outfile" => 1,
 	"html" => 0,
 	"only" => 0,
 	"heading" => 0,
@@ -669,6 +730,9 @@ sub new {
 	],
 	"refseq" => [
 		"If you give the number in the alignment or the name of a sequence, it will be taken to be the reference sequence. The reference sequence is the one against which all the other sequences are compared. If this is set to 0 then the consensus sequence will be used as the reference sequence. By default the consensus sequence is used as the reference sequence.",
+	],
+	"matrix" => [
+		"This is the scoring matrix file used when comparing sequences.  By default it is the file \'EBLOSUM62\' (for proteins) or the file \'EDNAFULL\' (for nucleic sequences).  These files are found in the \'data\' directory of the EMBOSS installation.",
 	],
 	"plurality" => [
 		"Set a cut-off for the % of positive scoring matches below which there is no consensus. The default plurality is taken as 50% of the total weight of all the sequences in the alignment.",

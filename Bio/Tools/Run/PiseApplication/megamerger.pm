@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::megamerger
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,17 @@ Bio::Tools::Run::PiseApplication::megamerger
 
 	MEGAMERGER	Merge two large overlapping nucleic acid sequences (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/megamerger.html 
+         for available values):
 
 
 		megamerger (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		seqa (Sequence)
 			seqa -- DNA [single sequence] (-seqa)
@@ -34,14 +42,8 @@ Bio::Tools::Run::PiseApplication::megamerger
 		seqb (Sequence)
 			seqb -- DNA [single sequence] (-seqb)
 
-		required (Paragraph)
-			required Section
-
 		wordsize (Integer)
 			Word size (-wordsize)
-
-		output (Paragraph)
-			output Section
 
 		outseq (OutFile)
 			outseq (-outseq)
@@ -55,6 +57,63 @@ Bio::Tools::Run::PiseApplication::megamerger
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/megamerger.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -70,20 +129,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $megamerger = Bio::Tools::Run::PiseApplication::megamerger->new($remote, $email, @params);
+ Usage   : my $megamerger = Bio::Tools::Run::PiseApplication::megamerger->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::megamerger object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $megamerger = $factory->program('megamerger');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::megamerger.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/megamerger.pm
 
@@ -92,6 +151,8 @@ sub new {
     $self->{TITLE}   = "MEGAMERGER";
 
     $self->{DESCRIPTION}   = "Merge two large overlapping nucleic acid sequences (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -171,7 +232,7 @@ sub new {
 		"perl" => '" -osformat=$value"',
 	},
 	"report" => {
-		"perl" => '($value && $value ne $vdef)? " -report=$value" : ""',
+		"perl" => '" -report=$value"',
 	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
@@ -266,7 +327,7 @@ sub new {
 	"output" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 0,
-	"report" => 0,
+	"report" => 1,
 	"auto" => 0,
 
     };
@@ -321,7 +382,7 @@ sub new {
 	"wordsize" => '20',
 	"outseq" => 'outseq.out',
 	"outseq_sformat" => 'fasta',
-	"report" => 'stdout',
+	"report" => 'report.out',
 
     };
 
@@ -391,7 +452,7 @@ sub new {
 	"output" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 1,
-	"report" => 0,
+	"report" => 1,
 	"auto" => 0,
 
     };

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::kitsch
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,18 +30,19 @@ Bio::Tools::Run::PiseApplication::kitsch
 		Felsenstein, J.  1989.  PHYLIP -- Phylogeny Inference Package (Version 3.2). Cladistics  5: 164-166.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/kitsch.html 
+         for available values):
 
 
 		kitsch (String)
 
-
 		infile (InFile)
 			Distances matrix File
 			pipe: phylip_dist
-
-		fitch_options (Paragraph)
-			Fitch options
 
 		method (Excl)
 			Program method
@@ -44,9 +53,6 @@ Bio::Tools::Run::PiseApplication::kitsch
 		power (Integer)
 			Power (P)
 
-		jumble_opt (Paragraph)
-			Randomize options
-
 		jumble (Switch)
 			Randomize (jumble) input order (J)
 
@@ -55,9 +61,6 @@ Bio::Tools::Run::PiseApplication::kitsch
 
 		times (Integer)
 			Number of times to jumble
-
-		bootstrap (Paragraph)
-			Bootstrap options
 
 		multiple_dataset (Switch)
 			Analyze multiple data sets (M)
@@ -70,18 +73,7 @@ Bio::Tools::Run::PiseApplication::kitsch
 
 		consense_confirm (String)
 
-
 		consense_terminal_type (String)
-
-
-		consense_outfile (Results)
-
-
-		consense_treefile (Results)
-
-
-		user_tree_opt (Paragraph)
-			User tree options
 
 		user_tree (Switch)
 			Use User tree (default: no, search for best tree) (U)
@@ -91,9 +83,6 @@ Bio::Tools::Run::PiseApplication::kitsch
 
 		tree_nb (Integer)
 			How many tree(s) in the User Tree file
-
-		output (Paragraph)
-			Output options
 
 		print_tree (Switch)
 			Print out tree (3)
@@ -107,33 +96,70 @@ Bio::Tools::Run::PiseApplication::kitsch
 		indent_tree (Switch)
 			Indent treefile
 
-		other_options (Paragraph)
-			Other options
-
 		triangular (Excl)
 			Matrix format
 
-		outfile (Results)
-
-
-		treefile (Results)
-
-			pipe: phylip_tree
-
-		indented_treefile (Results)
-
-
-		params (Results)
-
-
 		confirm (String)
-
 
 		terminal_type (String)
 
+=head1 FEEDBACK
 
-		tmp_params (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/kitsch.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -149,20 +175,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $kitsch = Bio::Tools::Run::PiseApplication::kitsch->new($remote, $email, @params);
+ Usage   : my $kitsch = Bio::Tools::Run::PiseApplication::kitsch->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::kitsch object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $kitsch = $factory->program('kitsch');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::kitsch.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/kitsch.pm
 
@@ -171,6 +197,8 @@ sub new {
     $self->{TITLE}   = "Phylip";
 
     $self->{DESCRIPTION}   = "kitsch - Fitch-Margoliash and Least Squares Methods with Evolutionary Clock";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Felsenstein";
 

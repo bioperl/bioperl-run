@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::hmmscore
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::hmmscore
 		R. Hughey and A. Krogh., SAM: Sequence alignment and modeling software system. Technical Report UCSC-CRL-96-22, University of California, Santa Cruz, CA, September 1996. 
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/hmmscore.html 
+         for available values):
 
 
 		hmmscore (String)
-
 
 		run (String)
 			Run name
@@ -36,16 +48,6 @@ Bio::Tools::Run::PiseApplication::hmmscore
 			Model (-i)
 			pipe: sam_model
 
-		scorefile (Results)
-
-			pipe: sam_score
-
-		outfiles (Results)
-
-
-		input (Paragraph)
-			Input options
-
 		id (String)
 			Sequence identifier(s) selection (separated by commas) (-id)
 
@@ -54,12 +56,8 @@ Bio::Tools::Run::PiseApplication::hmmscore
 
 		read_smooth (Switch)
 
-
 		smooth_file (InFile)
 			Read a smooth curve from this smooth_file (-smooth_file and -read_smooth)
-
-		control (Paragraph)
-			Control options
 
 		adjust_score (Excl)
 			Adjust score option (-adjust_score)
@@ -85,9 +83,6 @@ Bio::Tools::Run::PiseApplication::hmmscore
 		subtract_null (Excl)
 			Null model scoring (-subtract_null)
 
-		selection (Paragraph)
-			Selection options
-
 		select_score (Excl)
 			Selection criteria used for listing sequence scores in file runname.dist (-select_score)
 
@@ -106,14 +101,69 @@ Bio::Tools::Run::PiseApplication::hmmscore
 		NLLFile (InFile)
 			File with already-calculated sequence distances (-NLLFile)
 
-		output (Paragraph)
-			Output options
-
 		calc_smooth (Switch)
 			Calculate a smooth curve and write it to smooth_file (-calc_smooth)
 
 		sort (Excl)
 			Sequence sorting (-sort)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/hmmscore.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -129,20 +179,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $hmmscore = Bio::Tools::Run::PiseApplication::hmmscore->new($remote, $email, @params);
+ Usage   : my $hmmscore = Bio::Tools::Run::PiseApplication::hmmscore->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::hmmscore object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $hmmscore = $factory->program('hmmscore');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::hmmscore.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/hmmscore.pm
 
@@ -151,6 +201,8 @@ sub new {
     $self->{TITLE}   = "SAM";
 
     $self->{DESCRIPTION}   = "hmmscore - calculate NLL scores, smooth curves and Z-scores for sequences given a model";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "R. Hughey, A. Krogh";
 

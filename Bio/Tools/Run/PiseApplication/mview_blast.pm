@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::mview_blast
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::mview_blast
 		Brown, N.P., Leroy C., Sander C. (1998). MView: A Web compatible database search or multiple alignment  viewer. Bioinformatics. 14(4):380-381.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/mview_blast.html 
+         for available values):
 
 
 		mview_blast (String)
-
 
 		blast_output (InFile)
 			Blast/FASTA Output File
@@ -33,9 +45,6 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 		in (Excl)
 			Type of search (-in)
-
-		main_formatting_options (Paragraph)
-			Main formatting options
 
 		ruler (Switch)
 			Attach a ruler (-ruler)
@@ -49,9 +58,6 @@ Bio::Tools::Run::PiseApplication::mview_blast
 		dna (Switch)
 			Use DNA/RNA colormaps and/or consensus groups (-dna)
 
-		alignment_options (Paragraph)
-			Alignment options
-
 		coloring (Excl)
 			Colour scheme (-coloring)
 
@@ -60,9 +66,6 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 		ignore (Excl)
 			Ignore singleton or class group (-ignore)
-
-		consensus_options (Paragraph)
-			Consensus options
 
 		con_coloring (Excl)
 			Basic style of coloring (-con_coloring)
@@ -73,14 +76,8 @@ Bio::Tools::Run::PiseApplication::mview_blast
 		con_ignore (Excl)
 			Ignore singleton or class group (-con_ignore)
 
-		hybrid_alignment_consensus_options (Paragraph)
-			Hybrid alignment and consensus options
-
 		con_gaps (Switch)
 			Count gaps during consensus computations (-con_gaps)
-
-		general_row_column_filters (Paragraph)
-			General row/column filters
 
 		top (Integer)
 			Report top N hits (-top)
@@ -102,9 +99,6 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 		nops (String)
 			Display rows unprocessed (separated by commas) (-nops)
-
-		general_formatting_options (Paragraph)
-			General formatting options
 
 		width (Integer)
 			Paginate in N columns of alignment (-width)
@@ -129,9 +123,6 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 		register (Switch)
 			Output multi-pass alignments with columns in register (-register)
-
-		html_markup_options (Paragraph)
-			HTML markup options
 
 		html_output (Excl)
 			HTML output
@@ -169,26 +160,17 @@ Bio::Tools::Run::PiseApplication::mview_blast
 		srs (Switch)
 			Try to use SRS links (-srs)
 
-		blast_options (Paragraph)
-			BLAST options
-
 		hsp (Excl)
 			HSP tiling method (-hsp)
 
 		strand (Excl)
 			Report only these query strand orientations (-strand)
 
-		blast1_options (Paragraph)
-			BLAST series 1 options
-
 		maxpval (Float)
 			Ignore hits with p-value more than N -- Blastp only (-maxpval)
 
 		minscore (Float)
 			Ignore hits with score less than N (-minscore)
-
-		blast2_options (Paragraph)
-			BLAST series 2 options
 
 		maxeval (Float)
 			Ignore hits with p-value more than N -- Blast2 only (-maxeval)
@@ -199,9 +181,6 @@ Bio::Tools::Run::PiseApplication::mview_blast
 		cycle (String)
 			Process the Nth cycle of a multipass search (-cycle)
 
-		fasta_options (Paragraph)
-			FASTA options
-
 		minopt (Integer)
 			Ignore hits with opt score less than N (-minopt)
 
@@ -210,16 +189,66 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 		html_output_file (OutFile)
 
-
-		html_file (Results)
-
-
-		alig_file (Results)
-
-			pipe: readseq_ok_alig
-
 		out (Excl)
 			Output format (-out)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/mview_blast.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -235,20 +264,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $mview_blast = Bio::Tools::Run::PiseApplication::mview_blast->new($remote, $email, @params);
+ Usage   : my $mview_blast = Bio::Tools::Run::PiseApplication::mview_blast->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::mview_blast object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $mview_blast = $factory->program('mview_blast');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::mview_blast.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/mview_blast.pm
 
@@ -257,6 +286,8 @@ sub new {
     $self->{TITLE}   = "MVIEW";
 
     $self->{DESCRIPTION}   = "view Blast results as a multiple alignment";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "N. P. Brown";
 

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::lindna
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,41 +23,53 @@ Bio::Tools::Run::PiseApplication::lindna
 
 	LINDNA	Draws linear maps of DNA constructs (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/lindna.html 
+         for available values):
 
 
 		lindna (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
-
-		inputfile (InFile)
-			input file containing mapping data (-inputfile)
-
-		output (Paragraph)
-			output Section
 
 		graphout (Excl)
 			graphout [device to be displayed on] (-graphout)
 
-		intersymbol (String)
-			type of junctions between blocks (enter Straight, Up, Down, or No) (-intersymbol)
+		inputfile (InFile)
+			input file containing mapping data (-inputfile)
 
-		intercolor (Integer)
-			color of junctions between blocks (enter a color number) (-intercolor)
+		ruler (Switch)
+			do you want a ruler (-ruler)
 
-		interticks (String)
-			do you want horizontal junctions between ticks (Y or N) (-interticks)
+		blocktype (Excl)
+			type of blocks (enter Open, Filled, or Outline) (-blocktype)
+
+		intersymbol (Excl)
+			type of junctions between blocks (-intersymbol)
+
+		intercolour (Integer)
+			colour of junctions between blocks (enter a colour number) (-intercolour)
+
+		interticks (Switch)
+			do you want horizontal junctions between ticks (-interticks)
 
 		gapsize (Integer)
 			interval between ticks in the ruler (enter an integer) (-gapsize)
 
-		ticklines (String)
-			do you want vertical lines at the ruler's ticks (Y or N) (-ticklines)
+		ticklines (Switch)
+			do you want vertical lines at the ruler's ticks (-ticklines)
+
+		textheight (Float)
+			height of text (enter a number to multiply the default height) (-textheight)
+
+		textlength (Float)
+			length of text (enter a number to multiply the default length) (-textlength)
+
+		margin (Float)
+			width of left margin (enter a number to multiply the default width) (-margin)
 
 		tickheight (Float)
 			height of ticks (enter a number to multiply the default height) (-tickheight)
@@ -68,21 +88,65 @@ Bio::Tools::Run::PiseApplication::lindna
 
 		auto (String)
 
-
 		psouput (String)
 
+=head1 FEEDBACK
 
-		psresults (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
 
-		metaresults (Results)
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
+=head2 Reporting Bugs
 
-		dataresults (Results)
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
 
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
 
-		pngresults (Results)
+=head1 AUTHOR
 
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/lindna.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -98,20 +162,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $lindna = Bio::Tools::Run::PiseApplication::lindna->new($remote, $email, @params);
+ Usage   : my $lindna = Bio::Tools::Run::PiseApplication::lindna->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::lindna object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $lindna = $factory->program('lindna');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::lindna.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/lindna.pm
 
@@ -120,6 +184,8 @@ sub new {
     $self->{TITLE}   = "LINDNA";
 
     $self->{DESCRIPTION}   = "Draws linear maps of DNA constructs (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -134,8 +200,23 @@ sub new {
     $self->{TOP_PARAMETERS}  = [ 
 	"lindna",
 	"init",
-	"input",
-	"output",
+	"graphout",
+	"inputfile",
+	"ruler",
+	"blocktype",
+	"intersymbol",
+	"intercolour",
+	"interticks",
+	"gapsize",
+	"ticklines",
+	"textheight",
+	"textlength",
+	"margin",
+	"tickheight",
+	"blockheight",
+	"rangeheight",
+	"gapgroup",
+	"postext",
 	"auto",
 	"psouput",
 	"psresults",
@@ -148,15 +229,18 @@ sub new {
     $self->{PARAMETERS_ORDER}  = [
 	"lindna",
 	"init",
-	"input", 	# input Section
-	"inputfile", 	# input file containing mapping data (-inputfile)
-	"output", 	# output Section
 	"graphout", 	# graphout [device to be displayed on] (-graphout)
-	"intersymbol", 	# type of junctions between blocks (enter Straight, Up, Down, or No) (-intersymbol)
-	"intercolor", 	# color of junctions between blocks (enter a color number) (-intercolor)
-	"interticks", 	# do you want horizontal junctions between ticks (Y or N) (-interticks)
+	"inputfile", 	# input file containing mapping data (-inputfile)
+	"ruler", 	# do you want a ruler (-ruler)
+	"blocktype", 	# type of blocks (enter Open, Filled, or Outline) (-blocktype)
+	"intersymbol", 	# type of junctions between blocks (-intersymbol)
+	"intercolour", 	# colour of junctions between blocks (enter a colour number) (-intercolour)
+	"interticks", 	# do you want horizontal junctions between ticks (-interticks)
 	"gapsize", 	# interval between ticks in the ruler (enter an integer) (-gapsize)
-	"ticklines", 	# do you want vertical lines at the ruler's ticks (Y or N) (-ticklines)
+	"ticklines", 	# do you want vertical lines at the ruler's ticks (-ticklines)
+	"textheight", 	# height of text (enter a number to multiply the default height) (-textheight)
+	"textlength", 	# length of text (enter a number to multiply the default length) (-textlength)
+	"margin", 	# width of left margin (enter a number to multiply the default width) (-margin)
 	"tickheight", 	# height of ticks (enter a number to multiply the default height) (-tickheight)
 	"blockheight", 	# height of blocks (enter a number to multiply the default height) (-blockheight)
 	"rangeheight", 	# height of range ends (enter a number to multiply the default height) (-rangeheight)
@@ -174,15 +258,18 @@ sub new {
     $self->{TYPE}  = {
 	"lindna" => 'String',
 	"init" => 'String',
-	"input" => 'Paragraph',
-	"inputfile" => 'InFile',
-	"output" => 'Paragraph',
 	"graphout" => 'Excl',
-	"intersymbol" => 'String',
-	"intercolor" => 'Integer',
-	"interticks" => 'String',
+	"inputfile" => 'InFile',
+	"ruler" => 'Switch',
+	"blocktype" => 'Excl',
+	"intersymbol" => 'Excl',
+	"intercolour" => 'Integer',
+	"interticks" => 'Switch',
 	"gapsize" => 'Integer',
-	"ticklines" => 'String',
+	"ticklines" => 'Switch',
+	"textheight" => 'Float',
+	"textlength" => 'Float',
+	"margin" => 'Float',
 	"tickheight" => 'Float',
 	"blockheight" => 'Float',
 	"rangeheight" => 'Float',
@@ -201,30 +288,41 @@ sub new {
 	"init" => {
 		"perl" => ' "" ',
 	},
-	"input" => {
+	"graphout" => {
+		"perl" => '($value)? " -graphout=$value" : ""',
 	},
 	"inputfile" => {
 		"perl" => '($value && $value ne $vdef)? " -inputfile=$value" : ""',
 	},
-	"output" => {
+	"ruler" => {
+		"perl" => '($value)? "" : " -noruler"',
 	},
-	"graphout" => {
-		"perl" => '($value)? " -graphout=$value" : ""',
+	"blocktype" => {
+		"perl" => '($value && $value ne $vdef)? " -blocktype=$value" : ""',
 	},
 	"intersymbol" => {
 		"perl" => '($value && $value ne $vdef)? " -intersymbol=$value" : ""',
 	},
-	"intercolor" => {
-		"perl" => '(defined $value && $value != $vdef)? " -intercolor=$value" : ""',
+	"intercolour" => {
+		"perl" => '(defined $value && $value != $vdef)? " -intercolour=$value" : ""',
 	},
 	"interticks" => {
-		"perl" => '($value && $value ne $vdef)? " -interticks=$value" : ""',
+		"perl" => '($value)? " -interticks" : ""',
 	},
 	"gapsize" => {
 		"perl" => '(defined $value && $value != $vdef)? " -gapsize=$value" : ""',
 	},
 	"ticklines" => {
-		"perl" => '($value && $value ne $vdef)? " -ticklines=$value" : ""',
+		"perl" => '($value)? " -ticklines" : ""',
+	},
+	"textheight" => {
+		"perl" => '(defined $value && $value != $vdef)? " -textheight=$value" : ""',
+	},
+	"textlength" => {
+		"perl" => '(defined $value && $value != $vdef)? " -textlength=$value" : ""',
+	},
+	"margin" => {
+		"perl" => '(defined $value && $value != $vdef)? " -margin=$value" : ""',
 	},
 	"tickheight" => {
 		"perl" => '(defined $value && $value != $vdef)? " -tickheight=$value" : ""',
@@ -275,19 +373,24 @@ sub new {
 
     $self->{GROUP}  = {
 	"init" => -10,
-	"inputfile" => 1,
-	"graphout" => 2,
-	"intersymbol" => 3,
-	"intercolor" => 4,
-	"interticks" => 5,
-	"gapsize" => 6,
-	"ticklines" => 7,
-	"tickheight" => 8,
-	"blockheight" => 9,
-	"rangeheight" => 10,
-	"gapgroup" => 11,
-	"postext" => 12,
-	"auto" => 13,
+	"graphout" => 1,
+	"inputfile" => 2,
+	"ruler" => 3,
+	"blocktype" => 4,
+	"intersymbol" => 5,
+	"intercolour" => 6,
+	"interticks" => 7,
+	"gapsize" => 8,
+	"ticklines" => 9,
+	"textheight" => 10,
+	"textlength" => 11,
+	"margin" => 12,
+	"tickheight" => 13,
+	"blockheight" => 14,
+	"rangeheight" => 15,
+	"gapgroup" => 16,
+	"postext" => 17,
+	"auto" => 18,
 	"psouput" => 100,
 	"lindna" => 0
 
@@ -295,20 +398,23 @@ sub new {
 
     $self->{BY_GROUP_PARAMETERS}  = [
 	"init",
-	"input",
-	"lindna",
-	"output",
-	"psresults",
-	"metaresults",
-	"dataresults",
 	"pngresults",
-	"inputfile",
+	"lindna",
+	"metaresults",
+	"psresults",
+	"dataresults",
 	"graphout",
+	"inputfile",
+	"ruler",
+	"blocktype",
 	"intersymbol",
-	"intercolor",
+	"intercolour",
 	"interticks",
 	"gapsize",
 	"ticklines",
+	"textheight",
+	"textlength",
+	"margin",
 	"tickheight",
 	"blockheight",
 	"rangeheight",
@@ -325,15 +431,18 @@ sub new {
 
     $self->{ISHIDDEN}  = {
 	"init" => 1,
-	"input" => 0,
-	"inputfile" => 0,
-	"output" => 0,
 	"graphout" => 0,
+	"inputfile" => 0,
+	"ruler" => 0,
+	"blocktype" => 0,
 	"intersymbol" => 0,
-	"intercolor" => 0,
+	"intercolour" => 0,
 	"interticks" => 0,
 	"gapsize" => 0,
 	"ticklines" => 0,
+	"textheight" => 0,
+	"textlength" => 0,
+	"margin" => 0,
 	"tickheight" => 0,
 	"blockheight" => 0,
 	"rangeheight" => 0,
@@ -351,15 +460,18 @@ sub new {
 
     $self->{ISCOMMAND}  = {
 	"init" => 0,
-	"input" => 0,
-	"inputfile" => 0,
-	"output" => 0,
 	"graphout" => 0,
+	"inputfile" => 0,
+	"ruler" => 0,
+	"blocktype" => 0,
 	"intersymbol" => 0,
-	"intercolor" => 0,
+	"intercolour" => 0,
 	"interticks" => 0,
 	"gapsize" => 0,
 	"ticklines" => 0,
+	"textheight" => 0,
+	"textlength" => 0,
+	"margin" => 0,
 	"tickheight" => 0,
 	"blockheight" => 0,
 	"rangeheight" => 0,
@@ -376,15 +488,18 @@ sub new {
 
     $self->{ISMANDATORY}  = {
 	"init" => 0,
-	"input" => 0,
-	"inputfile" => 0,
-	"output" => 0,
 	"graphout" => 0,
+	"inputfile" => 0,
+	"ruler" => 0,
+	"blocktype" => 0,
 	"intersymbol" => 0,
-	"intercolor" => 0,
+	"intercolour" => 0,
 	"interticks" => 0,
 	"gapsize" => 0,
 	"ticklines" => 0,
+	"textheight" => 0,
+	"textlength" => 0,
+	"margin" => 0,
 	"tickheight" => 0,
 	"blockheight" => 0,
 	"rangeheight" => 0,
@@ -401,15 +516,18 @@ sub new {
 
     $self->{PROMPT}  = {
 	"init" => "",
-	"input" => "input Section",
-	"inputfile" => "input file containing mapping data (-inputfile)",
-	"output" => "output Section",
 	"graphout" => "graphout [device to be displayed on] (-graphout)",
-	"intersymbol" => "type of junctions between blocks (enter Straight, Up, Down, or No) (-intersymbol)",
-	"intercolor" => "color of junctions between blocks (enter a color number) (-intercolor)",
-	"interticks" => "do you want horizontal junctions between ticks (Y or N) (-interticks)",
+	"inputfile" => "input file containing mapping data (-inputfile)",
+	"ruler" => "do you want a ruler (-ruler)",
+	"blocktype" => "type of blocks (enter Open, Filled, or Outline) (-blocktype)",
+	"intersymbol" => "type of junctions between blocks (-intersymbol)",
+	"intercolour" => "colour of junctions between blocks (enter a colour number) (-intercolour)",
+	"interticks" => "do you want horizontal junctions between ticks (-interticks)",
 	"gapsize" => "interval between ticks in the ruler (enter an integer) (-gapsize)",
-	"ticklines" => "do you want vertical lines at the ruler's ticks (Y or N) (-ticklines)",
+	"ticklines" => "do you want vertical lines at the ruler's ticks (-ticklines)",
+	"textheight" => "height of text (enter a number to multiply the default height) (-textheight)",
+	"textlength" => "length of text (enter a number to multiply the default length) (-textlength)",
+	"margin" => "width of left margin (enter a number to multiply the default width) (-margin)",
 	"tickheight" => "height of ticks (enter a number to multiply the default height) (-tickheight)",
 	"blockheight" => "height of blocks (enter a number to multiply the default height) (-blockheight)",
 	"rangeheight" => "height of range ends (enter a number to multiply the default height) (-rangeheight)",
@@ -426,15 +544,18 @@ sub new {
 
     $self->{ISSTANDOUT}  = {
 	"init" => 0,
-	"input" => 0,
-	"inputfile" => 0,
-	"output" => 0,
 	"graphout" => 0,
+	"inputfile" => 0,
+	"ruler" => 0,
+	"blocktype" => 0,
 	"intersymbol" => 0,
-	"intercolor" => 0,
+	"intercolour" => 0,
 	"interticks" => 0,
 	"gapsize" => 0,
 	"ticklines" => 0,
+	"textheight" => 0,
+	"textlength" => 0,
+	"margin" => 0,
 	"tickheight" => 0,
 	"blockheight" => 0,
 	"rangeheight" => 0,
@@ -451,9 +572,9 @@ sub new {
 
     $self->{VLIST}  = {
 
-	"input" => ['inputfile',],
-	"output" => ['graphout','intersymbol','intercolor','interticks','gapsize','ticklines','tickheight','blockheight','rangeheight','gapgroup','postext',],
 	"graphout" => ['x11','x11','hp7470','hp7470','postscript','postscript','cps','cps','hp7580','hp7580','null','null','data','data','colourps','colourps','text','text','none','none','tek4107t','tek4107t','tekt','tekt','xwindows','xwindows','hpgl','hpgl','xterm','xterm','meta','meta','ps','ps','tek','tek','png','png','tektronics','tektronics',],
+	"blocktype" => ['1','Open','2','Filled','3','Outline',],
+	"intersymbol" => ['1','Straight','2','Up','3','Down','4','No',],
     };
 
     $self->{FLIST}  = {
@@ -466,11 +587,16 @@ sub new {
 
     $self->{VDEF}  = {
 	"graphout" => 'postscript',
+	"ruler" => '1',
+	"blocktype" => 'Filled',
 	"intersymbol" => 'Straight',
-	"intercolor" => '1',
-	"interticks" => 'N',
+	"intercolour" => '1',
+	"interticks" => '0',
 	"gapsize" => '500',
-	"ticklines" => 'N',
+	"ticklines" => '0',
+	"textheight" => '1',
+	"textlength" => '1',
+	"margin" => '1',
 	"tickheight" => '1',
 	"blockheight" => '1',
 	"rangeheight" => '1',
@@ -481,15 +607,18 @@ sub new {
 
     $self->{PRECOND}  = {
 	"init" => { "perl" => '1' },
-	"input" => { "perl" => '1' },
-	"inputfile" => { "perl" => '1' },
-	"output" => { "perl" => '1' },
 	"graphout" => { "perl" => '1' },
+	"inputfile" => { "perl" => '1' },
+	"ruler" => { "perl" => '1' },
+	"blocktype" => { "perl" => '1' },
 	"intersymbol" => { "perl" => '1' },
-	"intercolor" => { "perl" => '1' },
+	"intercolour" => { "perl" => '1' },
 	"interticks" => { "perl" => '1' },
 	"gapsize" => { "perl" => '1' },
 	"ticklines" => { "perl" => '1' },
+	"textheight" => { "perl" => '1' },
+	"textlength" => { "perl" => '1' },
+	"margin" => { "perl" => '1' },
 	"tickheight" => { "perl" => '1' },
 	"blockheight" => { "perl" => '1' },
 	"rangeheight" => { "perl" => '1' },
@@ -536,15 +665,18 @@ sub new {
 
     $self->{ISCLEAN}  = {
 	"init" => 0,
-	"input" => 0,
-	"inputfile" => 0,
-	"output" => 0,
 	"graphout" => 0,
+	"inputfile" => 0,
+	"ruler" => 0,
+	"blocktype" => 0,
 	"intersymbol" => 0,
-	"intercolor" => 0,
+	"intercolour" => 0,
 	"interticks" => 0,
 	"gapsize" => 0,
 	"ticklines" => 0,
+	"textheight" => 0,
+	"textlength" => 0,
+	"margin" => 0,
 	"tickheight" => 0,
 	"blockheight" => 0,
 	"rangeheight" => 0,
@@ -561,15 +693,18 @@ sub new {
 
     $self->{ISSIMPLE}  = {
 	"init" => 0,
-	"input" => 0,
-	"inputfile" => 0,
-	"output" => 0,
 	"graphout" => 0,
+	"inputfile" => 0,
+	"ruler" => 0,
+	"blocktype" => 0,
 	"intersymbol" => 0,
-	"intercolor" => 0,
+	"intercolour" => 0,
 	"interticks" => 0,
 	"gapsize" => 0,
 	"ticklines" => 0,
+	"textheight" => 0,
+	"textlength" => 0,
+	"margin" => 0,
 	"tickheight" => 0,
 	"blockheight" => 0,
 	"rangeheight" => 0,
@@ -589,6 +724,33 @@ sub new {
     };
 
     $self->{COMMENT}  = {
+	"blocktype" => [
+		"type of blocks: Open, Filled, or Outline. Option \'Outline\' draws filled blocks surrounded by a black border",
+	],
+	"textheight" => [
+		"height of text. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"textlength" => [
+		"length of text. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"margin" => [
+		"width of left margin. This is the region left to the groups where the names of the groups are displayed. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"tickheight" => [
+		"height of ticks. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"blockheight" => [
+		"height of blocks. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"rangeheight" => [
+		"height of range ends. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"gapgroup" => [
+		"space between groups. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
+	"postext" => [
+		"space between text and ticks, blocks, and ranges. Enter a number <1 or >1 to decrease or increase the size, respectively",
+	],
 
     };
 

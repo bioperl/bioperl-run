@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::mview_alig
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::mview_alig
 		Brown, N.P., Leroy C., Sander C. (1998). MView: A Web compatible database search or multiple alignment  viewer. Bioinformatics. 14(4):380-381.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/mview_alig.html 
+         for available values):
 
 
 		mview_alig (String)
-
 
 		alig (Sequence)
 			Alignment File
@@ -34,10 +46,6 @@ Bio::Tools::Run::PiseApplication::mview_alig
 			Type of alignment (-in)
 
 		from_phylip (String)
-
-
-		main_formatting_options (Paragraph)
-			Main formatting options
 
 		ruler (Switch)
 			Attach a ruler (-ruler)
@@ -51,9 +59,6 @@ Bio::Tools::Run::PiseApplication::mview_alig
 		dna (Switch)
 			Use DNA/RNA colormaps and/or consensus groups (-dna)
 
-		alignment_options (Paragraph)
-			Alignment options
-
 		coloring (Excl)
 			Colour scheme (-coloring)
 
@@ -62,9 +67,6 @@ Bio::Tools::Run::PiseApplication::mview_alig
 
 		ignore (Excl)
 			Ignore singleton or class group (-ignore)
-
-		consensus_options (Paragraph)
-			Consensus options
 
 		con_coloring (Excl)
 			Basic style of coloring (-con_coloring)
@@ -75,14 +77,8 @@ Bio::Tools::Run::PiseApplication::mview_alig
 		con_ignore (Excl)
 			Ignore singleton or class group (-con_ignore)
 
-		hybrid_alignment_consensus_options (Paragraph)
-			Hybrid alignment and consensus options
-
 		con_gaps (Switch)
 			Count gaps during consensus computations (-con_gaps)
-
-		general_row_column_filters (Paragraph)
-			General row/column filters
 
 		top (Integer)
 			Report top N hits (-top)
@@ -105,9 +101,6 @@ Bio::Tools::Run::PiseApplication::mview_alig
 		nops (String)
 			Display rows unprocessed (separated by commas) (-nops)
 
-		general_formatting_options (Paragraph)
-			General formatting options
-
 		width (Integer)
 			Paginate in N columns of alignment (-width)
 
@@ -128,9 +121,6 @@ Bio::Tools::Run::PiseApplication::mview_alig
 
 		label4 (Switch)
 			Switch off label: percent identity (-label4)
-
-		html_markup_options (Paragraph)
-			HTML markup options
 
 		html_output (Excl)
 			HTML output
@@ -167,16 +157,66 @@ Bio::Tools::Run::PiseApplication::mview_alig
 
 		html_output_file (OutFile)
 
-
-		html_file (Results)
-
-
-		alig_file (Results)
-
-			pipe: readseq_ok_alig
-
 		out (Excl)
 			Output format (-out)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/mview_alig.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -192,20 +232,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $mview_alig = Bio::Tools::Run::PiseApplication::mview_alig->new($remote, $email, @params);
+ Usage   : my $mview_alig = Bio::Tools::Run::PiseApplication::mview_alig->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::mview_alig object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $mview_alig = $factory->program('mview_alig');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::mview_alig.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/mview_alig.pm
 
@@ -214,6 +254,8 @@ sub new {
     $self->{TITLE}   = "MVIEW";
 
     $self->{DESCRIPTION}   = "a multiple alignment viewer";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 

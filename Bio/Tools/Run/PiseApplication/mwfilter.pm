@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::mwfilter
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,41 +23,92 @@ Bio::Tools::Run::PiseApplication::mwfilter
 
 	MWFILTER	Filter noisy molwts from mass spec output (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/mwfilter.html 
+         for available values):
 
 
 		mwfilter (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		infile (InFile)
 			Molecular weight file input (-infile)
 
-		required (Paragraph)
-			required Section
-
 		tolerance (Float)
 			ppm tolerance (-tolerance)
 
-		advanced (Paragraph)
-			advanced Section
+		showdel (Switch)
+			Output deleted mwts (-showdel)
 
 		datafile (String)
 			Data file of noisy molecular weights (-datafile)
-
-		output (Paragraph)
-			output Section
 
 		outfile (OutFile)
 			outfile (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/mwfilter.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -65,20 +124,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $mwfilter = Bio::Tools::Run::PiseApplication::mwfilter->new($remote, $email, @params);
+ Usage   : my $mwfilter = Bio::Tools::Run::PiseApplication::mwfilter->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::mwfilter object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $mwfilter = $factory->program('mwfilter');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::mwfilter.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/mwfilter.pm
 
@@ -87,6 +146,8 @@ sub new {
     $self->{TITLE}   = "MWFILTER";
 
     $self->{DESCRIPTION}   = "Filter noisy molwts from mass spec output (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -116,6 +177,7 @@ sub new {
 	"infile", 	# Molecular weight file input (-infile)
 	"required", 	# required Section
 	"tolerance", 	# ppm tolerance (-tolerance)
+	"showdel", 	# Output deleted mwts (-showdel)
 	"advanced", 	# advanced Section
 	"datafile", 	# Data file of noisy molecular weights (-datafile)
 	"output", 	# output Section
@@ -131,6 +193,7 @@ sub new {
 	"infile" => 'InFile',
 	"required" => 'Paragraph',
 	"tolerance" => 'Float',
+	"showdel" => 'Switch',
 	"advanced" => 'Paragraph',
 	"datafile" => 'String',
 	"output" => 'Paragraph',
@@ -152,6 +215,9 @@ sub new {
 	},
 	"tolerance" => {
 		"perl" => '" -tolerance=$value"',
+	},
+	"showdel" => {
+		"perl" => '($value)? " -showdel" : ""',
 	},
 	"advanced" => {
 	},
@@ -184,9 +250,10 @@ sub new {
 	"init" => -10,
 	"infile" => 1,
 	"tolerance" => 2,
-	"datafile" => 3,
-	"outfile" => 4,
-	"auto" => 5,
+	"showdel" => 3,
+	"datafile" => 4,
+	"outfile" => 5,
+	"auto" => 6,
 	"mwfilter" => 0
 
     };
@@ -200,6 +267,7 @@ sub new {
 	"mwfilter",
 	"infile",
 	"tolerance",
+	"showdel",
 	"datafile",
 	"outfile",
 	"auto",
@@ -216,6 +284,7 @@ sub new {
 	"infile" => 0,
 	"required" => 0,
 	"tolerance" => 0,
+	"showdel" => 0,
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
@@ -231,6 +300,7 @@ sub new {
 	"infile" => 0,
 	"required" => 0,
 	"tolerance" => 0,
+	"showdel" => 0,
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
@@ -245,6 +315,7 @@ sub new {
 	"infile" => 1,
 	"required" => 0,
 	"tolerance" => 1,
+	"showdel" => 0,
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
@@ -259,6 +330,7 @@ sub new {
 	"infile" => "Molecular weight file input (-infile)",
 	"required" => "required Section",
 	"tolerance" => "ppm tolerance (-tolerance)",
+	"showdel" => "Output deleted mwts (-showdel)",
 	"advanced" => "advanced Section",
 	"datafile" => "Data file of noisy molecular weights (-datafile)",
 	"output" => "output Section",
@@ -273,6 +345,7 @@ sub new {
 	"infile" => 0,
 	"required" => 0,
 	"tolerance" => 0,
+	"showdel" => 0,
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
@@ -284,7 +357,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"input" => ['infile',],
-	"required" => ['tolerance',],
+	"required" => ['tolerance','showdel',],
 	"advanced" => ['datafile',],
 	"output" => ['outfile',],
     };
@@ -299,6 +372,7 @@ sub new {
 
     $self->{VDEF}  = {
 	"tolerance" => '50.0',
+	"showdel" => '0',
 	"datafile" => 'Emwfilter.dat',
 	"outfile" => 'outfile.out',
 
@@ -310,6 +384,7 @@ sub new {
 	"infile" => { "perl" => '1' },
 	"required" => { "perl" => '1' },
 	"tolerance" => { "perl" => '1' },
+	"showdel" => { "perl" => '1' },
 	"advanced" => { "perl" => '1' },
 	"datafile" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
@@ -344,6 +419,7 @@ sub new {
 	"infile" => 0,
 	"required" => 0,
 	"tolerance" => 0,
+	"showdel" => 0,
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
@@ -358,6 +434,7 @@ sub new {
 	"infile" => 1,
 	"required" => 0,
 	"tolerance" => 1,
+	"showdel" => 0,
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,

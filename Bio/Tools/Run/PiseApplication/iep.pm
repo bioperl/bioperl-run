@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::iep
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::iep
 
 	IEP	Calculates the isoelectric point of a protein (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/iep.html 
+         for available values):
 
 
 		iep (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequencea (Sequence)
 			sequencea -- pureprotein [sequences] (-sequencea)
 			pipe: seqsfile
-
-		advanced (Paragraph)
-			advanced Section
 
 		step (Float)
 			pH step value (-step)
@@ -42,9 +47,6 @@ Bio::Tools::Run::PiseApplication::iep
 
 		termini (Switch)
 			Include charge at N and C terminus (-termini)
-
-		output (Paragraph)
-			output Section
 
 		plot (Switch)
 			Plot charge vs pH (-plot)
@@ -60,21 +62,65 @@ Bio::Tools::Run::PiseApplication::iep
 
 		auto (String)
 
-
 		psouput (String)
 
+=head1 FEEDBACK
 
-		psresults (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
 
-		metaresults (Results)
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
+=head2 Reporting Bugs
 
-		dataresults (Results)
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
 
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
 
-		pngresults (Results)
+=head1 AUTHOR
 
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/iep.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -90,20 +136,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $iep = Bio::Tools::Run::PiseApplication::iep->new($remote, $email, @params);
+ Usage   : my $iep = Bio::Tools::Run::PiseApplication::iep->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::iep object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $iep = $factory->program('iep');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::iep.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/iep.pm
 
@@ -112,6 +158,8 @@ sub new {
     $self->{TITLE}   = "IEP";
 
     $self->{DESCRIPTION}   = "Calculates the isoelectric point of a protein (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 

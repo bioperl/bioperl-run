@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::loadseq
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,17 @@ Bio::Tools::Run::PiseApplication::loadseq
 
 	loadseq	load several sequences into a file
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/loadseq.html 
+         for available values):
 
 
 		loadseq (String)
 
-
 		explanation (String)
-
-
-		howto (Results)
-
 
 		seq (Sequence)
 			Sequence to load
@@ -34,10 +42,6 @@ Bio::Tools::Run::PiseApplication::loadseq
 			You may give a name to your sequence
 
 		loadresult (String)
-
-
-		efetch_params (Paragraph)
-			Efetch parameters
 
 		db (Excl)
 			Database
@@ -49,15 +53,69 @@ Bio::Tools::Run::PiseApplication::loadseq
 			Search with Accession number (except nrl3d)
 
 		outfile (OutFile)
-
 			pipe: seqsfile
-
-		other_options (Paragraph)
-			Other parameters
 
 		seqfile (Sequence)
 			Already loaded sequences file
 			pipe: seqsfile
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/loadseq.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -73,20 +131,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $loadseq = Bio::Tools::Run::PiseApplication::loadseq->new($remote, $email, @params);
+ Usage   : my $loadseq = Bio::Tools::Run::PiseApplication::loadseq->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::loadseq object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $loadseq = $factory->program('loadseq');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::loadseq.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/loadseq.pm
 
@@ -95,6 +153,8 @@ sub new {
     $self->{TITLE}   = "loadseq";
 
     $self->{DESCRIPTION}   = "load several sequences into a file";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{_INTERFACE_STANDOUT} = undef;
     $self->{_STANDOUT_FILE} = undef;
@@ -317,7 +377,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"efetch_params" => ['db','query','ac',],
-	"db" => ['swissprot','swissprot','pir','pir','genpept','genpept','genbank','genbank','embl','embl','nrl3d','nrl3d','epd','epd','prosite','prosite',],
+	"db" => ['swissprot','swissprot','pir','pir','trembl','trembl','genpept','genpept','genbank','genbank','embl','embl','nrl3d','nrl3d','epd','epd','prosite','prosite',],
 	"other_options" => ['seqfile',],
     };
 

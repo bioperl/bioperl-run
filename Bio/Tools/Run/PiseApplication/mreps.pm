@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::mreps
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,17 +30,21 @@ Bio::Tools::Run::PiseApplication::mreps
 		R. Kolpakov, G. Kucherov, Finding Approximate Repetitions under Hamming Distance, 9-th European Symposium on Algorithms (ESA), Århus (Denmark), Lecture Notes in Computer Science, vol. 2161, pp 170-181.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/mreps.html 
+         for available values):
 
 
 		mreps (String)
-
 
 		query (Sequence)
 			Query Sequence file
 
 		err (Integer)
-			Specifies the mininum number of mismatches (-err)
+			Specifies the resolution (error level) (-res)
 
 		from (Integer)
 			Specifies starting position (-from)
@@ -58,11 +70,72 @@ Bio::Tools::Run::PiseApplication::mreps
 		exp (Integer)
 			Report repetitions whose exponent is at least n (-exp)
 
+		small (Switch)
+			Output small repeats that can occur randomly (-allowsmall)
+
 		noprint (Switch)
 			Do not output repetitions sequences (-noprint)
 
 		xml (OutFile)
 			XML format output file name (-xmloutput)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/mreps.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -78,20 +151,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $mreps = Bio::Tools::Run::PiseApplication::mreps->new($remote, $email, @params);
+ Usage   : my $mreps = Bio::Tools::Run::PiseApplication::mreps->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::mreps object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $mreps = $factory->program('mreps');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::mreps.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/mreps.pm
 
@@ -100,6 +173,8 @@ sub new {
     $self->{TITLE}   = "mreps";
 
     $self->{DESCRIPTION}   = "Algorithm for finding maximal tandem repetitions";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -130,6 +205,7 @@ sub new {
 	"minperiod",
 	"maxperiod",
 	"exp",
+	"small",
 	"noprint",
 	"xml",
 
@@ -138,7 +214,7 @@ sub new {
     $self->{PARAMETERS_ORDER}  = [
 	"mreps",
 	"query", 	# Query Sequence file
-	"err", 	# Specifies the mininum number of mismatches (-err)
+	"err", 	# Specifies the resolution (error level) (-res)
 	"from", 	# Specifies starting position (-from)
 	"to", 	# Specifies end position (-to)
 	"win", 	# Processes by sliding windows of size 2*n overlaping by n (-win)
@@ -147,6 +223,7 @@ sub new {
 	"minperiod", 	# Report repetitions whose period is at least n (-minperiod)
 	"maxperiod", 	# Report repetitions whose period is at most n (-maxperiod)
 	"exp", 	# Report repetitions whose exponent is at least n (-exp)
+	"small", 	# Output small repeats that can occur randomly (-allowsmall)
 	"noprint", 	# Do not output repetitions sequences (-noprint)
 	"xml", 	# XML format output file name (-xmloutput)
 
@@ -164,6 +241,7 @@ sub new {
 	"minperiod" => 'Integer',
 	"maxperiod" => 'Integer',
 	"exp" => 'Integer',
+	"small" => 'Switch',
 	"noprint" => 'Switch',
 	"xml" => 'OutFile',
 
@@ -177,7 +255,7 @@ sub new {
 		"perl" => '" -fasta $value"',
 	},
 	"err" => {
-		"perl" => '(defined $value) ? " -err $value" : ""',
+		"perl" => '(defined $value ) ? " -res $value" : ""',
 	},
 	"from" => {
 		"perl" => '(defined $value) ? " -from $value" : ""',
@@ -202,6 +280,9 @@ sub new {
 	},
 	"exp" => {
 		"perl" => '(defined $value) ? " -exp $value" : ""',
+	},
+	"small" => {
+		"perl" => '(defined $value) ? " -allowsmall" : ""',
 	},
 	"noprint" => {
 		"perl" => '(defined $value) ? " -noprint" : ""',
@@ -233,6 +314,7 @@ sub new {
 	"minperiod" => 10,
 	"maxperiod" => 10,
 	"exp" => 10,
+	"small" => 10,
 	"noprint" => 10,
 	"xml" => 10,
 
@@ -250,6 +332,7 @@ sub new {
 	"minperiod",
 	"maxperiod",
 	"exp",
+	"small",
 	"noprint",
 	"query",
 
@@ -271,6 +354,7 @@ sub new {
 	"minperiod" => 0,
 	"maxperiod" => 0,
 	"exp" => 0,
+	"small" => 0,
 	"noprint" => 0,
 	"xml" => 0,
 
@@ -288,6 +372,7 @@ sub new {
 	"minperiod" => 0,
 	"maxperiod" => 0,
 	"exp" => 0,
+	"small" => 0,
 	"noprint" => 0,
 	"xml" => 0,
 
@@ -305,6 +390,7 @@ sub new {
 	"minperiod" => 0,
 	"maxperiod" => 0,
 	"exp" => 0,
+	"small" => 0,
 	"noprint" => 0,
 	"xml" => 0,
 
@@ -313,7 +399,7 @@ sub new {
     $self->{PROMPT}  = {
 	"mreps" => "",
 	"query" => "Query Sequence file",
-	"err" => "Specifies the mininum number of mismatches (-err)",
+	"err" => "Specifies the resolution (error level) (-res)",
 	"from" => "Specifies starting position (-from)",
 	"to" => "Specifies end position (-to)",
 	"win" => "Processes by sliding windows of size 2*n overlaping by n (-win)",
@@ -322,6 +408,7 @@ sub new {
 	"minperiod" => "Report repetitions whose period is at least n (-minperiod)",
 	"maxperiod" => "Report repetitions whose period is at most n (-maxperiod)",
 	"exp" => "Report repetitions whose exponent is at least n (-exp)",
+	"small" => "Output small repeats that can occur randomly (-allowsmall)",
 	"noprint" => "Do not output repetitions sequences (-noprint)",
 	"xml" => "XML format output file name (-xmloutput)",
 
@@ -339,6 +426,7 @@ sub new {
 	"minperiod" => 0,
 	"maxperiod" => 0,
 	"exp" => 0,
+	"small" => 0,
 	"noprint" => 0,
 	"xml" => 0,
 
@@ -372,6 +460,7 @@ sub new {
 	"minperiod" => { "perl" => '1' },
 	"maxperiod" => { "perl" => '1' },
 	"exp" => { "perl" => '1' },
+	"small" => { "perl" => '1' },
 	"noprint" => { "perl" => '1' },
 	"xml" => { "perl" => '1' },
 
@@ -409,6 +498,7 @@ sub new {
 	"minperiod" => 0,
 	"maxperiod" => 0,
 	"exp" => 0,
+	"small" => 0,
 	"noprint" => 0,
 	"xml" => 0,
 
@@ -426,6 +516,7 @@ sub new {
 	"minperiod" => 0,
 	"maxperiod" => 0,
 	"exp" => 0,
+	"small" => 0,
 	"noprint" => 0,
 	"xml" => 0,
 

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::lassap
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,11 +23,15 @@ Bio::Tools::Run::PiseApplication::lassap
 
 	LASSAP	LArge Scale Sequence compArison Package (Glemet, Codani)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/lassap.html 
+         for available values):
 
 
 		lassap (String)
-
 
 		method (Excl)
 			Comparison method
@@ -35,18 +47,10 @@ Bio::Tools::Run::PiseApplication::lassap
 
 		dr1 (String)
 
-
 		dr2 (String)
-
-
-		control_options (Paragraph)
-			Control options
 
 		matrix (Excl)
 			Scoring matrix
-
-		gap_options (Paragraph)
-			Gap and cutoff options
 
 		gapo (Integer)
 			Gap open penalty
@@ -56,9 +60,6 @@ Bio::Tools::Run::PiseApplication::lassap
 
 		cutoff (Integer)
 			Cutoff
-
-		blast_options (Paragraph)
-			Blast options
 
 		Expect (Integer)
 			Expect: upper bound on the expected frequency of chance occurrence of a set of HSPs (E)
@@ -78,9 +79,6 @@ Bio::Tools::Run::PiseApplication::lassap
 		X (Integer)
 			X (word hit extension drop-off score)
 
-		fasta_options (Paragraph)
-			FASTA options
-
 		ktup (Integer)
 			ktup : sensitivity and speed of the search
 
@@ -93,26 +91,14 @@ Bio::Tools::Run::PiseApplication::lassap
 		linlen (Integer)
 			output line length for sequence alignments (< 200)
 
-		SWR_options (Paragraph)
-			SWR (Smith-Waterman randomized) options
-
 		ran (Integer)
 			How many randomizations
-
-		BM_options (Paragraph)
-			BM (Boyer-Moore) options
 
 		swap (Switch)
 			Don't test for inclusion of query1 into query2
 
-		KBEST_options (Paragraph)
-			KBEST (K best alignments) options
-
 		k (Integer)
 			How many best alignments
-
-		frames_options (Paragraph)
-			Frames options
 
 		frame_query1 (List)
 			First sequence frames
@@ -122,9 +108,6 @@ Bio::Tools::Run::PiseApplication::lassap
 
 		gc (Excl)
 			Genetic Code
-
-		output_options (Paragraph)
-			Output options
 
 		view_alignment (Switch)
 			View alignment (not available for all methods)
@@ -140,12 +123,67 @@ Bio::Tools::Run::PiseApplication::lassap
 
 		flag_algo_opt (String)
 
-
 		flag_algo_opt2 (String)
-
 
 		gc2 (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/lassap.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -161,20 +199,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $lassap = Bio::Tools::Run::PiseApplication::lassap->new($remote, $email, @params);
+ Usage   : my $lassap = Bio::Tools::Run::PiseApplication::lassap->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::lassap object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $lassap = $factory->program('lassap');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::lassap.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/lassap.pm
 
@@ -183,6 +221,8 @@ sub new {
     $self->{TITLE}   = "LASSAP";
 
     $self->{DESCRIPTION}   = "LArge Scale Sequence compArison Package";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Glemet, Codani";
 
