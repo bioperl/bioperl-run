@@ -49,13 +49,13 @@ Works with Phylip version 3.6
   #or
   $neighbor_factory->outgroup(1);
 
-  my $tree = $neighbor_factory->create_tree($matrix);
+  my ($tree) = $neighbor_factory->create_tree($matrix);
 
   # Alternatively, one can create the tree by passing in a file name 
   # containing a phylip formatted distance matrix(using protdist)
   my $neighbor_factory = 
     Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
-  my $tree = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
+  my ($tree) = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
 
 =head1 PARAMTERS FOR NEIGHBOR COMPUTATION
 
@@ -226,7 +226,7 @@ BEGIN {
     else {
 	$PROGRAM = $PROGRAMNAME;
     }
-	@NEIGHBOR_PARAMS = qw(TYPE OUTGROUP LOWTRI UPPTRI SUBREP JUMBLE);
+	@NEIGHBOR_PARAMS = qw(TYPE OUTGROUP LOWTRI UPPTRI SUBREP JUMBLE MULTIPLE);
 	@OTHER_SWITCHES = qw(QUIET);
 	foreach my $attr(@NEIGHBOR_PARAMS,@OTHER_SWITCHES) {
 		$OK_FIELD{$attr}++;
@@ -324,8 +324,8 @@ sub create_tree{
     my $param_string = $self->_setparams();
 
 # run neighbor
-    my $tree = $self->_run($infilename,$param_string);
-    return $tree;
+    my @tree = $self->_run($infilename,$param_string);
+    return wantarray ? @tree: \@tree;
 }
 
 #################################################
@@ -368,14 +368,17 @@ sub _run {
     
     $self->throw("neighbor did not create tree correctly (expected $treefile) ") unless (-e $treefile);
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
-    my $tree = $in->next_tree();
+    my @tree;
+    while (my $tree = $in->next_tree){
+        push @tree, $tree;
+    }
 
     # Clean up the temporary files created along the way...
     unless ( $self->save_tempfiles ) { 
 	unlink $outfile;
 	unlink $treefile;
     }
-    return $tree; 
+    return @tree; 
 }
 
 =head2 executable
@@ -443,24 +446,26 @@ sub _setinput {
     	return $alnfilename;
     }
 
-
-    my %names;
-    #  $input may be a hash ref to a distance matrix
-    if ($input->isa("Bio::Matrix::PhylipDist")){
+    my @input = ref($input) eq "ARRAY" ? @{$input} : ($input);
+    ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+    foreach my $input(@input){
+     if ($input->isa("Bio::Matrix::PhylipDist")){
         #  Open temporary file for both reading & writing of distance matrix
-      	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
         print $tfh $input->print_matrix;
-	      close($tfh);
-        #set the species names
-        my @names = @{$input->names};
-        for(my $i=0; $i<= $#names; $i++){
-            $names{$names[$i]} = $i+1;
-        }
-        $self->names(\%names);
-      	return $alnfilename;		
+     }
     }
+	  close($tfh);
+    #get names from the first matrix, to be used in outgroup ordering
+    my %names;
+    $input = shift @input;
+    #set the species names
+    my @names = @{$input->names};
+    for(my $i=0; $i<= $#names; $i++){
+      $names{$names[$i]} = $i+1;
+    }
+    $self->names(\%names);
 
-    return 0;
+   return $alnfilename;		
 }
 
 =head2  names()
@@ -530,6 +535,13 @@ sub _setparams {
 	     $self->throw("Unallowed value for random seed") unless ($value =~ /\d+/);
 	     $param_string .=$menu{'JUMBLE'}."$value\n";
 	    }
+      elsif($attr=~/MULTIPLE/i){
+        $param_string.=$menu{'MULTIPLE'}."$value\n";
+        #version 3.6 needs a random seed
+        if($version eq "3.6"){
+            $param_string .= (2 * int(rand(10000)) + 1)."\n";
+        }
+      }
     	else{
        $param_string .= $menu{uc $attr};
 	    }

@@ -94,6 +94,7 @@ use vars qw(%Menu %FileName);
                       'TRANS'     =>"T\n",
                       'FREQ'      =>"F\n",
                       'SUBMIT'    =>"Y\n",
+                      'MULTIPLE'  =>"M\n",
                      },
           'NEIGHBOR'=>{  'TYPE'    =>{
                                     'UPGMA'=>"N\n"
@@ -104,6 +105,7 @@ use vars qw(%Menu %FileName);
                         'SUBREP'  =>"S\n",
                         'JUMBLE'  =>"J\n",
                         'SUBMIT'    =>"Y\n",
+                        'MULTIPLE'  =>"M\n",
                       },
 
            'PROTPARS'=>{  'THRESHOLD'=>"T\n",
@@ -153,6 +155,7 @@ use vars qw(%Menu %FileName);
                       'FREQ'      =>"F\n",
                       'WEIGHTS'   =>"W\n",
                       'SUBMIT'    => "Y\n",
+                      'MULTIPLE'  =>"M\nD\n",
                      },
           'NEIGHBOR'=>{ 'TYPE'    =>{
                                      'UPGMA'=>"N\n",
@@ -163,6 +166,7 @@ use vars qw(%Menu %FileName);
                         'SUBREP'  =>"S\n",
                         'JUMBLE'  =>"J\n",
                         'SUBMIT'    =>"Y\n",
+                        'MULTIPLE'  =>"M\n",
                      },
           'PROTPARS'=>{  'THRESHOLD'=>"T\n",
                           'JUMBLE'   =>"J\n",

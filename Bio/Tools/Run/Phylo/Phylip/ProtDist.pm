@@ -30,7 +30,7 @@ program protdist
   @params = ('MODEL' => 'PAM');
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 
-  my $matrix  = $protdist_factory->create_distance_matrix($aln); # Bio::Matrix::PhylipDist matrix
+  my ($matrix)  = $protdist_factory->create_distance_matrix($aln); # an array of Bio::Matrix::PhylipDist matrix
 
   #finding the distance between two sequences
   my $distance = $matrix->get_entry('protein_name_1','protein_name_2');
@@ -43,7 +43,7 @@ program protdist
   #Alternatively, one can create the matrix by passing in a file 
   #name containing a multiple alignment in phylip format
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-  my $matrix  = 
+  my ($matrix)  = 
   $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
 
 =head1 DESCRIPTION
@@ -78,10 +78,20 @@ Description	: (optional)
                   defaults to Equal
  		  (0.25,0.25,0.25,0.25) found in the phylip package.
 
+=head2 MULTIPLE
+
+Title    : MULTIPLE
+Description: (optional)
+
+          This allows multiple distance matrices to be generated from multiple
+          MSA.
+
+          Usage: @params = ('MULTIPLE'=>100) where the value specifyies the 
+          number of aligments given.
+
 =head2 ALL SUBSEQUENT PARAMETERS WILL ONLY WORK IN CONJUNCTION WITH
 THE Categories Distance MODEL*
 
-=cut
 
 =head2 GENCODE
 
@@ -202,7 +212,7 @@ use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
 use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
-use Bio::Matrix::PhylipDist;
+use Bio::Tools::Phylo::Phylip::ProtDist;
 use Cwd;
 
 
@@ -233,7 +243,7 @@ BEGIN {
 	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
 					  'protdist'.($^O =~ /mswin/i ?'.exe':''));
     }
-	@PROTDIST_PARAMS = qw(MODEL GENCODE CATEGORY PROBCHANGE TRANS WEIGHTS FREQ);
+	@PROTDIST_PARAMS = qw(MODEL GENCODE CATEGORY PROBCHANGE TRANS WEIGHTS FREQ MULTIPLE);
 	@OTHER_SWITCHES = qw(QUIET);
 	foreach my $attr(@PROTDIST_PARAMS,@OTHER_SWITCHES) {
 		$OK_FIELD{$attr}++;
@@ -368,7 +378,9 @@ sub create_distance_matrix{
 # Create parameter string to pass to protdist program
     my $param_string = $self->_setparams();
 # run protdist
-    my $aln = $self->_run($infilename,$param_string);
+    my @mat = $self->_run($infilename,$param_string);
+   
+    return  wantarray ? @mat:\@mat;
 }
 
 #################################################
@@ -414,12 +426,16 @@ sub _run {
 	unless (-e $outfile);
 
 	#Create the distance matrix here
-    my $matrix = Bio::Matrix::PhylipDist->new(-file=>$outfile,-program=>"protdist");
+    my $parser = Bio::Tools::Phylo::Phylip::ProtDist->new(-file=>$outfile);
+    my @matrix;
+    while (my $mat = $parser->next_matrix){
+        push @matrix, $mat;
+    }
 
     # Clean up the temporary files created along the way...
     unlink $outfile unless $self->save_tempfiles;
 	
-    return $matrix;
+    return @matrix;
 }
 
 
@@ -449,20 +465,33 @@ sub _setinput {
         unless (-e $input) {return 0;}
 		return $alnfilename;
     }
+    my @input = ref $input eq 'ARRAY' ? @{$input} : ($input);
 
     #  $input may be a SimpleAlign Object
-    if ($input->isa("Bio::SimpleAlign")) {
+   ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+	  my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
+	                    			      -format=>'phylip',
+                    				      -idlength=>$self->idlength());
+    my $input_count = 0;
+    foreach my $input(@input){
+      if ($input->isa("Bio::SimpleAlign")){
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
-	my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
-				      -format=>'phylip',
-				      -idlength=>$self->idlength());
-	$alnIO->write_aln($input);
-	$alnIO->close();
-	close($tfh);
-	return $alnfilename;		
+      	$alnIO->write_aln($input);
+      }
+      $input_count++;
     }
-    return 0;
+    $alnIO->close();
+    close($tfh);
+    $self->_input_nbr($input_count); 
+    return $alnfilename;		
+}
+
+sub _input_nbr {
+    my ($self,$val) = @_;
+    if($val){
+        $self->{'_input_nbr'} = $val;
+    }
+    return $self->{'_input_nbr'};
 }
 
 =head2  _setparams()
@@ -493,7 +522,10 @@ sub _setparams {
     		$cat = 1;
        }
 		   $param_string .= $menu{'MODEL'}{$value};
-   	}
+   	  }
+      if($attr=~/MULTIPLE/i){
+          $param_string.=$menu{'MULTIPLE'}."$value\n";
+      }
   	if ($cat == 1){
 	    if($attr =~ /GENCODE/i){		
         my $allowed = $menu{'GENCODE'}{'ALLOWED'};
@@ -523,18 +555,22 @@ sub _setparams {
     		if ($freq[0] !~ /\d+/){	#a letter provided (sets frequencies equally to 0.25)
 		     $param_string .=$menu{'FREQ'}.$freq[0]."\n";
 	    	}
-		elsif ($#freq ==  3) {#must have 4 digits for each base
+    		elsif ($#freq ==  3) {#must have 4 digits for each base
 					  $param_string .=$menu{'FREQ'};
 					  foreach my $f (@freq){
 					      $param_string.="$f\n";
 					  }
-				      }
-		else {
-		    $self->throw("Unallowed value for base frequencies");
-		}
+				}
+		    else {
+		     $self->throw("Unallowed value for base frequencies");
+		    }
 	    }
-	}
+	  }
     } 
+    #set multiple option is not set and there are more than one sequence
+    if (($param_string !~ $menu{'MULTIPLE'}) && (defined ($self->_input_nbr) &&($self->_input_nbr > 1))){
+      $param_string.=$menu{'MULTIPLE'}.$self->_input_nbr."\n";
+    }
     $param_string .=$menu{'SUBMIT'};
 
     return $param_string;

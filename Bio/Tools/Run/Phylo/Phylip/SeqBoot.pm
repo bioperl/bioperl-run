@@ -325,6 +325,7 @@ sub run{
     my $param_string = $self->_setparams();
 # run SeqBoot
     my $aln = $self->_run($infilename,$param_string);
+    return $aln;
 }
 
 #################################################
@@ -373,7 +374,7 @@ sub _run {
     # get the results
     my $outfile = $self->io->catfile($self->tempdir,$self->outfile);
     chdir($curpath);
-    $self->throw("SeqBoot did not create matrix correctly ($outfile)")
+    $self->throw("SeqBoot did not create files correctly ($outfile)")
   	unless (-e $outfile);
 
     #parse the alignments

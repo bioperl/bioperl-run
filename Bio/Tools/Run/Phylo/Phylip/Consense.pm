@@ -372,10 +372,9 @@ sub _run {
     my $instring;
     my $curpath = cwd;    
     unless( File::Spec->file_name_is_absolute($infile) ) {
-	$infile = $self->io->catfile($curpath,$infile);
+    	$infile = $self->io->catfile($curpath,$infile);
     }
 
-    $self->debug( "Program ".$self->executable." $instring\n");
 
     chdir($self->tempdir);
     #open a pipe to run Consense to bypass interactive menus
@@ -386,6 +385,7 @@ sub _run {
     	open(Consense,"|".$self->executable);
     }
     $instring = $infile."\n".$param_string;
+    $self->debug( "Program ".$self->executable." $instring\n");
     print Consense $instring;
     close(Consense);	
     
@@ -452,26 +452,20 @@ sub _setinput {
     }
 
     #  $input may be a SimpleAlign Object
-    if(ref($input) eq 'ARRAY'){
-    	  ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
-        my $treeIO = Bio::TreeIO->new(-fh => $tfh, 
-	                            			   -format=>'newick');
+    my @input = ref($input) eq "ARRAY" ? @{$input} : ($input);
+   ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+    my $treeIO = Bio::TreeIO->new(-fh => $tfh, 
+	                              	-format=>'newick');
 
-        foreach my $tree(@{$input}){
-          $tree->isa('Bio::Tree::TreeI') || $self->throw('Expected a Bio::TreeI object');
-        	$treeIO->write_tree($tree);
-        }
-        #get the species names in order, using the first one
-        $self->_set_names_from_tree($input->[0]);
-
-       $treeIO->close();
-       close($tfh);
-
-
-       
-       return $alnfilename;		
+    foreach my $tree(@input){
+      $tree->isa('Bio::Tree::TreeI') || $self->throw('Expected a Bio::TreeI object');
+       $treeIO->write_tree($tree);
     }
-    return 0;
+    #get the species names in order, using the first one
+    $self->_set_names_from_tree($input[0]);
+    $treeIO->close();
+    close($tfh);
+    return $alnfilename;		
 }
 
 =head2  names()
