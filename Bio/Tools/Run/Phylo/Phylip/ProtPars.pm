@@ -170,7 +170,7 @@ sub new {
     $self->io->_initialize_io();
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
     (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	$attr =   shift @args;
