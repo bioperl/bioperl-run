@@ -1,5 +1,17 @@
 $Id$
 
 This is where modules which wrap around running various applications
-are stored.  These will be folded back into a Bioperl distribution by
-the release master.
+are stored.  See the Changes file for more information about what is
+contained in here.  The installation of this package is identical to
+the core bioperl install.
+
+Essentially
+
+   % perl Makefile.PL
+   % make
+   % make test (some tests may not succeed if you do not have the necessary
+	        programs or env variables defined)
+   % su
+   # make install
+
+
