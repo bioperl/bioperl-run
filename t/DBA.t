@@ -39,9 +39,9 @@ my $inputfilename_1a = Bio::Root::IO->catfile("t","data","dba1a.fa");
 my $inputfilename_1b = Bio::Root::IO->catfile("t","data","dba1b.fa");
 my $inputfilename2 = Bio::Root::IO->catfile("t","data","dba2.fa");
 my $aln;
-my $dba_present = $factory->exists_dba();
-unless ($dba_present) {
-    warn("Clustalw program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+my $dba_present = $factory->executable();
+unless (defined $dba_present) {
+    warn("DBA program not found. Skipping tests $Test::ntest to $NTESTS.\n");
     exit 0;
 }
 my @hsps = $factory->align($inputfilename2);

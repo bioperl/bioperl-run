@@ -75,7 +75,7 @@ methods. Internal methods are usually preceded with a _
 
 
 package Bio::Tools::Run::Alignment::DBA;
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
             $TMPDIR $TMPOUTFILE @DBA_SWITCHES @DBA_PARAMS
             @OTHER_SWITCHES %OK_FIELD);
 use strict;
@@ -101,15 +101,11 @@ use Bio::Search::HSP::GenericHSP;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
+    $PROGRAMNAME = 'dba';
+    if( defined $ENV{'WISEDIR'} ) {
+	$PROGRAM = Bio::Root::IO->catfile($ENV{'WISEDIR'},$PROGRAMNAME).($^O =~ /mswin/i ?'.exe':'');
+    }
 
-    if (defined $ENV{WISEDIR}) {
-        $PROGRAMDIR = $ENV{WISEDIR} || '';
-        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR."/src/bin/",
-                                          'dba'.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {
-        $PROGRAM = 'dba';
-    }
     @DBA_PARAMS = qw(MATCHA MATCHB MATCHC MATCHD GAP BLOCKOPEN UMATCH SINGLE
                      NOMATCHN PARAMS KBYTE DYMEM DYDEBUG OUTFILE
                      ERRORLOG);
@@ -130,25 +126,23 @@ sub new {
   my ($attr, $value);
   (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
   (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
-    if ($attr =~/'PROGRAM'/i) {
-      $self->program($value);
+    if ($attr =~/'PROGRAM'/i )  {
+      $self->executable($value);
       next;
     }
     $self->$attr($value);
   }
-  if (! defined $self->program) {
-    $self->program($PROGRAM);
+  unless( defined $self->executable) {
+      if( $self->verbose >= 0 ) {
+	  $self->warn( "DBA program not found for $PROGRAMNAME or not executable. \n DBA can be obtained from http://www.sanger.ac.uk/software/wise2\n"); 
+      }
+      return undef;
   }
-  unless ($self->exists_dba()) {
-    if( $self->verbose >= 0 ) {
-      warn "DBA program not found as ".$self->program." or not executable. \n DBA can be obtained from http://www.sanger.ac.uk/software/wise2\n"; 
-    }
-  }
-
   return $self;
 }
 
@@ -162,45 +156,39 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
-=head2  exists_dba()
+=head2 executable
 
- Title   : exists_dba
- Usage   : $dbafound= Bio::Tools::Run::Alignment::DBA->exists_dba()
- Function: Determine whether dba program can be found on current host
- Example :
- Returns : 1 if dba program found at expected location, 0 otherwise.
- Args    :  none
-
-=cut
-
-
-sub exists_dba{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-  $PROGRAM = $f if( -e $f );
-  return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function:
- Returns : value of program
- Args    : newvalue (optional)
+ Title   : executable
+ Usage   : my $exe = $codeml->executable();
+ Function: Finds the full path to the 'dba' executable
+ Returns : string representing the full path to the exe
+ Args    : none
 
 
 =cut
 
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
+sub executable{
+   my ($self, $exe) = @_;
 
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+	   $self->{'_pathtoexe'} = $PROGRAM;
+       } else { 
+	   my $exe;
+	   if( ( $exe = $self->exists_exe($PROGRAMNAME) ) &&
+	       -x $exe ) {
+	       $self->{'_pathtoexe'} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $PROGRAMNAME");
+	       $self->{'_pathtoexe'} = undef;
+	   }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
 
 =head2  version
@@ -217,11 +205,11 @@ sub program{
 sub version {
     my ($self) = @_;
 
-    return undef unless $self->exists_dba;
-    my $string = `dba -- ` ;
+    my $exe = $self->executable();
+    return undef unless defined $exe;
+    my $string = `$exe -- ` ;
     $string =~ /\(([\d.]+)\)/;
     return $1 || undef;
-
 }
 
 =head2  align
@@ -290,9 +278,9 @@ sub align {
 sub _run {
     my ($self,$infile1,$infile2,$param_string) = @_;
     my $instring;
-    $self->debug( "Program ".$self->program."\n");
+    $self->debug( "Program ".$self->executable."\n");
     my $outfile = $self->outfile() || $TMPOUTFILE ;
-    my $commandstring = $self->program." $param_string -pff $infile1 $infile2 > $outfile";
+    my $commandstring = $self->executable." $param_string -pff $infile1 $infile2 > $outfile";
     $self->debug( "dba command = $commandstring");
     my $status = system($commandstring);
     $self->throw( "DBA call ($commandstring) crashed: $? \n") unless $status==0;
@@ -373,6 +361,7 @@ sub _parse_results {
                                                        -query_length  =>length($self->_query_seq->seq),
                                                        -query_seq     =>$query{seq},
                                                        -hit_seq       =>$subject{seq},
+                                                       -conserved     =>$identical,
                                                        -identical   =>$identical,
                                                        -homology_seq  =>$xor);
             push @hsps, $hsp; 
@@ -421,6 +410,7 @@ sub _parse_results {
                                                -query_length  =>length($self->_query_seq->seq),
                                                -query_seq     =>$query{seq},
                                                -hit_seq       =>$subject{seq},
+                                               -conserved     =>$identical,
                                                -identical     =>$identical,
                                                -homology_seq  =>$xor);
      push @hsps, $hsp;
