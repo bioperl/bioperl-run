@@ -475,11 +475,9 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+the bugs and their resolution.  Bug reports can be submitted via the web:
 
-  bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+ http://bugzilla.open-bio.org/
 
 =head1 AUTHOR -  Jason Stajich, Peter Schattner
 
@@ -546,7 +544,7 @@ BEGIN {
 =head2 program_name
 
  Title   : program_name
- Usage   : $factory>program_name()
+ Usage   : $factory->program_name()
  Function: holds the program name
  Returns:  string
  Args    : None
@@ -685,13 +683,13 @@ sub run{
 
  Title   : align
  Usage   :
-	$inputfilename = 't/cysprot.fa';
+	$inputfilename = 't/data/cysprot.fa';
 	$aln = $factory->align($inputfilename);
 or
-	$seq_array_ref = \@seq_array; @seq_array is array of Seq objs
+	$seq_array_ref = \@seq_array; 
+        # @seq_array is array of Seq objs
 	$aln = $factory->align($seq_array_ref);
  Function: Perform a multiple sequence alignment
- Example :
  Returns : Reference to a SimpleAlign object containing the
            sequence alignment.
  Args    : Name of a file containing a set of unaligned fasta sequences
@@ -822,11 +820,10 @@ sub _run {
     my $status = system($commandstring);
     my $outfile = $self->outfile(); 
 
-    $self->throw( "TCoffee call crashed: $? [command $commandstring]\n") 
-	if( !-e $outfile || -z $outfile );
-
-#    unlink ($parameterFile);
-
+    if( !-e $outfile || -z $outfile ) {
+	$self->warn( "TCoffee call crashed: $? [command $commandstring]\n");
+	return undef;
+    }
 
     # retrieve alignment (Note: MSF format for AlignIO = GCG format of
     # tcoffee)
