@@ -1,4 +1,4 @@
-# BioPerl module for TribeMCL f
+# BioPerl module for TribeMCL
 #
 # Cared for by Shawn Hoon <shawnh@fugu-sg.org>
 #
@@ -146,11 +146,15 @@ use vars qw($AUTOLOAD @ISA  $PROGRAMDIR
 	    $MCLPROGRAM $MATRIXPROGRAM
 	    );
 use strict;
+
 use Bio::SeqIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
+use Bio::Cluster::Family;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Run::WrapperBase;
+use Bio::Seq;
+use Algorithm::Diff qw(LCS);;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -190,7 +194,7 @@ BEGIN {
         $MATRIXPROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,$MATRIXPROGRAM_NAME.($^O =~ /mswin/i ?'.exe':''));
     }
 
-    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE SEARCHIO PAIRS MCL MATRIX WEIGHT);
+    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE DESCRIPTION_FILE SEARCHIO PAIRS MCL MATRIX WEIGHT DESCRIPTION FAMILY_TAG);
     @OTHER_SWITCHES = qw(VERBOSE QUIET); 
 
     # Authorize attribute fields
@@ -319,6 +323,9 @@ sub matrix_executable{
 
 sub run {
   my ($self,$input) = @_;
+  if($self->description_file){
+      $self->_setup_description($self->description_file);
+  }
   my $file = $self->_setup_input($input);
   defined($file) || $self->throw("Error setting up input ");
   #run tribe-matrix to generate matrix for mcl
@@ -326,10 +333,232 @@ sub run {
   $self->throw("tribe-matrix not run properly as index file is missing") unless (-e $index_file);
   $self->throw("tribe-matrix not run properly as matrix file is missing") unless (-e $mcl_infile);
   #run mcl
-  my $families = $self->_run_mcl($index_file,$mcl_infile);
-  return $families;
+  my $clusters = $self->_run_mcl($index_file,$mcl_infile);
+  my $families;
+  if($self->description){
+    my %consensus = $self->_consensifier($clusters);
+    $families = $self->_generate_families($clusters,\%consensus);
+  }
+  else {
+    $families = $self->_generate_families($clusters);
+  }
+  
+
+  return @{$families};
 }
 
+sub _generate_families {
+    my ($self,$clusters,$consensus) = @_;
+    my $family_tag = $self->family_tag || "TribeFamily";
+    my @fam;
+    if($consensus){
+      my %description = %{$self->description};
+      my %consensus = %{$consensus};
+      for(my $i = 0; $i < scalar(@{$clusters}); $i++){
+          my @mem;
+          foreach my $member (@{$clusters->[$i]}){
+              my $mem = Bio::Seq->new(-id=>$member,
+                                             -alphabet=>"protein",
+                                             -desc=>$description{$member});
+              push @mem, $mem;
+          }
+          my $id = $family_tag."_".$i;
+          my $fam = Bio::Cluster::Family->new(-family_id=>$id,
+                                              -description=>$consensus{$i}{desc},
+                                              -annotation_score=>$consensus{$i}{conf},
+                                              -members=>\@mem);
+          push @fam, $fam;
+      }
+     return \@fam;
+    }
+    else {
+        for(my $i = 0; $i < scalar(@{$clusters}); $i++){
+          my @mem;
+          foreach my $member (@{$clusters->[$i]}){
+              my $mem = Bio::Seq->new(-id=>$member,
+                                             -alphabet=>"protein");
+              push @mem, $mem;
+          }
+          my $id = $family_tag."_".$i;
+          my $fam = Bio::Cluster::Family->new(-family_id=>$id,
+                                              -members=>\@mem);
+          push @fam, $fam;
+      }
+     return \@fam;
+    }
+
+}
+
+     
+sub _consensifier {
+    my ($self,$clusters) = @_;
+    my %description = %{$self->description}; 
+    my %consensus;
+    my $best_annotation;
+CLUSTER:
+    for(my $i = 0; $i < scalar(@{$clusters}); $i++){
+        my @desc;
+        my @orig_desc;
+        my $total_members = scalar(@{$clusters->[$i]});
+
+        foreach my $member(@{$clusters->[$i]}){
+          push @desc, $description{$member} if $description{$member};
+          push @orig_desc, $description{$member} if $description{$member};
+        }
+        if($#desc < 0){ #truly unknown
+            $consensus{$i}{desc} = "UNKNOWN";
+            $consensus{$i}{conf} = 100;
+            next CLUSTER;
+        }
+        if($#desc == 0){#only a single description
+            $consensus{$i}{desc} = grep(/S+/,@desc);
+            $consensus{$i}{conf} = 100 * int(1/$total_members);            
+            next CLUSTER;
+        }
+
+        #all the same desc
+        my %desc = undef;
+        foreach my $desc (@desc) {        $desc{$desc}++;     }
+        if ( (keys %desc) == 1 ) {
+          my ($best_annotation,) = keys %desc;
+          my $n = grep($_ eq $best_annotation, @desc);
+          my $perc= int( 100*($n/$total_members) );
+          $consensus{$i}{desc} = $best_annotation;
+          $consensus{$i}{conf} = $perc;
+          next CLUSTER;
+        }
+      
+        my %lcshash = undef;
+        my %lcnext = undef;
+        while (@desc) {
+          # do an all-against-all LCS (longest commong substring) of the
+          # descriptions of all members; take the resulting strings, and
+          # again do an all-against-all LCS on them, until we have nothing
+          # left. The LCS's found along the way are in lcshash.
+          #
+          # Incidentally, longest common substring is a misnomer, since it
+          # is not guaranteed to occur in either of the original strings. It
+          # is more like the common parts of a Unix diff ...
+          for (my $i=0;$i<@desc;$i++) {
+            for (my $j=$i+1;$j<@desc;$j++){
+                my @list1=split(" ",$desc[$i]);
+                my @list2=split(" ",$desc[$j]);
+                my @lcs=LCS(\@list1,\@list2);
+                my $lcs=join(" ",@lcs);
+                $lcshash{$lcs}=1;
+                $lcnext{$lcs}=1;
+            }
+          }
+          @desc=keys(%lcnext);
+          undef %lcnext;
+        }
+        my ($best_score, $best_perc)=(0, 0);
+        my @all_cands=sort {length($b) <=>length($a)} keys %lcshash ;
+        foreach my $candidate_consensus (@all_cands) {
+          my @temp=split(" ",$candidate_consensus);
+          my $length=@temp;               # num of words in annotation
+
+          # see how many members of cluster contain this LCS:
+
+          my ($lcs_count)=0;
+          foreach my $orig_desc (@orig_desc) {
+            my @list1=split(" ",$candidate_consensus);
+            my @list2=split(" ",$orig_desc);
+            my @lcs=LCS(\@list1,\@list2);
+            my $lcs=join(" ",@lcs);
+
+            if ($lcs eq $candidate_consensus || index($orig_desc,$candidate_consensus) != -1 # addition;
+                # many good (single word) annotations fall out otherwise
+               ) {
+                $lcs_count++;
+
+                # Following is occurs frequently, as LCS is _not_ the longest
+                # common substring ... so we can't use the shortcut either
+
+                # if ( index($orig_desc,$candidate_consensus) == -1 ) {
+                #   warn "lcs:'$lcs' eq cons:'$candidate_consensus' and
+                # orig:'$orig_desc', but index == -1\n"
+                # }
+            }
+          }
+          my $perc_with_desc=(($lcs_count/$total_members))*100;
+          my $perc=($lcs_count/$total_members)*100;
+          my $score=$perc + ($length*14); # take length into account as well
+          $score = 0 if $length==0;
+          if (($perc_with_desc >= 40) && ($length >= 1)) {
+            if ($score > $best_score) {
+                $best_score=$score;
+                $best_perc=$perc;
+                $best_annotation=$candidate_consensus;
+            }
+          }
+      }
+      if ($best_perc==0 || $best_perc >= 100 )  {
+        $best_perc=100;
+      }
+      if  ( $best_annotation eq  '')  {
+        $best_annotation = 'AMBIGUOUS';
+      }
+      $consensus{$i}{desc} = $best_annotation;
+      $consensus{$i}{conf} = $best_perc;
+  }
+  return %consensus;
+}
+    
+
+sub _setup_description {
+    my ($self,$file) = @_;
+    my $goners='().-';
+    my $spaces= ' ' x length($goners);
+    my $filter = "tr '$goners' '$spaces' < $file";
+    open (FILE,"$filter | ") || die "$filter: $!";
+    my %description;
+    while(<FILE>){
+        chomp;
+        my ($acc,$description) = split("\t",$_);
+        $description || $self->throw("Wrongly formated description file");
+        $description = $self->_apply_edits($description);
+
+        if($description{$acc}){
+            $self->warn("Duplicated entry $acc in description file, overwriting..");
+        }
+        $description{$acc} = $description;
+    }
+    $self->description(\%description);
+}
+
+sub as_words {
+    #add ^ and $ to regexp
+    my (@words);
+    my @newwords=();
+
+    foreach my $word (@words) { push @newwords, "^$word\$" };
+}
+
+sub _apply_edits {
+  my ($self,$desc) = @_;
+  my @deletes = ( 'FOR\$',  'SIMILAR TO\$', 'SIMILAR TO PROTEIN\$',
+               'RIKEN.*FULL.*LENGTH.*ENRICHED.*LIBRARY',
+               '\w*\d{4,}','HYPOTHETICAL PROTEIN'
+               );
+  my @newwords =  &as_words(qw(NOVEL PUTATIVE PREDICTED
+                               UNNAMED UNNMAED ORF CLONE MRNA
+                               CDNA EST RIKEN FIS KIAA\d+ \S+RIK IMAGE HSPC\d+
+                               FOR HYPOTETICAL HYPOTHETICAL));
+  push @deletes, @newwords;
+
+  foreach my $re ( @deletes ) { $desc=~s/$re//g; }
+
+  #Apply some fixes to the annotation:
+  $desc=~s/EC (\d+) (\d+) (\d+) (\d+)/EC $1.$2.$3.$4/;
+  $desc=~s/EC (\d+) (\d+) (\d+)/EC $1.$2.$3.-/;
+  $desc=~s/EC (\d+) (\d+)/EC $1\.$2.-.-/;
+  $desc=~s/(\d+) (\d+) KDA/$1.$2 KDA/;
+  return $desc;
+    
+}
+
+        
 =head2 _run_mcl
 
  Title   : _run_mcl
