@@ -1,3 +1,4 @@
+# -*-Perl-*- mode
 use strict;
 BEGIN {
     use vars qw($NTESTS);
@@ -15,7 +16,7 @@ BEGIN {
 use Bio::Factory::Pise;
 use Bio::Tools::Genscan;
 use Bio::SeqIO;
-use ExtUtils::MakeMaker qw(prompt);
+
 my $golden_outfile = 'golden.out';
 my $actually_submit;
 
@@ -32,20 +33,16 @@ END {
     }
 }
 
-sub Prompt
-{
- my($prompt, $def) = @_;
- $def = "" unless defined $def;
- chomp($prompt);
- prompt($prompt,$def);
-}
-
 my $verbose = $ENV{'BIOPERLDEBUG'} || -1;
 ok(1);
-
-my $email = Prompt('Please enter your email: ');
-if (! $email) {
-    exit;
+my $email;
+if( -e "t/pise-email.test" ) {
+    if( open(T, "t/pise-email.test") ) {
+	chomp($email = <T>);
+    } else { 
+	print "skipping tests, cannot run without read access to testfile data";
+	exit;
+    }
 }
 
 my $factory = Bio::Factory::Pise->new(-email => $email);
@@ -56,7 +53,8 @@ my $golden = $factory->program('golden',
 			       -query => 'HUMRASH');
 ok($golden->isa('Bio::Tools::Run::PiseApplication::golden'));
 
-$actually_submit = Prompt('Actually submit? ',1);
+$actually_submit = 1;
+#prompt('Actually submit? ',1);
 
 if ($actually_submit) {
     my $job = $golden->run();
