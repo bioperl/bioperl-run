@@ -13,11 +13,11 @@ BEGIN {
     use Test;
     $NTESTS = 10;
     plan tests => $NTESTS; 
-    eval { require XML::Parser::Sax;};
+    eval { require XML::Parser::PerlSAX;};
     if ($@) { 
-       print STDERR "Need XML::Parser::Sax to run test, skipping test\n";
+       print STDERR "Need XML::Parser::PerlSA to run test, skipping test\n";
        foreach ( $Test::ntest .. $NTESTS ) {
-          skip("unable to the Pise tests -- Need XML::Parser::Sax",1);
+          skip("unable to the Pise tests -- Need XML::Parser::PerlSAX",1);
        }
     exit(0);
     }
