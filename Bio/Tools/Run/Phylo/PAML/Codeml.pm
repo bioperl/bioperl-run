@@ -26,11 +26,12 @@ Bio::Tools::Run::Phylo::PAML::Codeml - Wrapper aroud the PAML program codeml
 
   my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml();
   $codeml->alignment($aln);
-  my ($rc,$results) = $codeml->run();
-
-  print "Ka = ", $results->{'dN'},"\n";
-  print "Ks = ", $results->{'dS'},"\n";
-  print "Ka/Ks = ", $results->{'dN/dS'},"\n";
+  my ($rc,$parser) = $codeml->run();
+  my $result = $parser->next_result;
+  my $MLmatrix = $result->get_MLmatrix();
+  print "Ka = ", $MLmatrix->[0]->[1]->{'dN'},"\n";
+  print "Ks = ", $MLmatrix->[0]->[1]->{'dS'},"\n";
+  print "Ka/Ks = ", $MLmatrix->[0]->[1]->{'omega'},"\n";
 
 =head1 DESCRIPTION
 
@@ -428,17 +429,20 @@ sub run{
        chdir($tmpdir);
        my $codemlexe = $self->executable();
        $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
-       open(RUN, "echo $self->{'_branchLengths'} | $codemlexe |");
+       if( $self->{'_branchLengths'} ) { 
+	   open(RUN, "echo $self->{'_branchLengths'} | $codemlexe |") or $self->throw("Cannot open exe $codemlexe");
+       } else {
+	   open(RUN, "$codemlexe |") or $self->throw("Cannot open exe $codemlexe");
+       }
        my @output = <RUN>;
        close(RUN);
        $self->error_string(join('',@output));
-
        if( grep { /\berr(or)?: /io } @output  ) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }
        eval {
-	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/".$self->outfile, 
+	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
 						 -dir => "$tmpdir");
 
        };
@@ -446,7 +450,6 @@ sub run{
 	   $self->warn($self->error_string);
        }
    }
-
 
    unless ( $self->save_tempfiles ) {
       unlink("$codeml_ctl");
