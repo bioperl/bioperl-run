@@ -28,6 +28,10 @@ ok(1);
 my $verbose = -1;
 my @params = ('type'=>'UPGMA','outgroup'=>2,'lowtri'=>1,'upptri'=>1,'subrep'=>1,'jumble'=>13);
 my $tree_factory = Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
+unless ($tree_factory->executable) {
+    warn("neighbor program not found. Skipping tests $Test::ntest to $NTESTS.\n") if( $DEBUG);    
+    exit 0;
+}
 
 ok $tree_factory->isa('Bio::Tools::Run::Phylo::Phylip::Neighbor');
 
@@ -66,11 +70,6 @@ $tree_factory->quiet($bequiet);  # Suppress protpars messages to terminal
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","neighbor.dist");
 my $tree;
-my $neighbor_present = $tree_factory->exists_neighbor();
-unless ($neighbor_present) {
-    warn("neighbor program not found. Skipping tests $Test::ntest to $NTESTS.\n") if( $DEBUG);    
-    exit 0;
-}
 
 $tree = $tree_factory->create_tree($inputfilename);
 my @nodes = sort { defined $a->id && defined $b->id &&

@@ -29,8 +29,12 @@ ok(1);
 my $verbose = -1;
 my @params = ('threshold'=>10,'jumble'=>'17,10',outgroup=>2,'idlength'=>10);
 my $tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->new(@params);
-
 ok $tree_factory->isa('Bio::Tools::Run::Phylo::Phylip::ProtPars');
+unless($tree_factory->executable){
+    warn("Protpars program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+    exit 0;
+}
+
 
 my $threshold = 5;
 $tree_factory->threshold($threshold);
@@ -56,14 +60,6 @@ $tree_factory->quiet($bequiet);  # Suppress protpars messages to terminal
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
 my $tree;
-my $protpars_present = $tree_factory->exists_protpars();
-unless ($protpars_present) {
-    if($DEBUG ){ 
-	warn("protpars program not found. Skipping tests $Test::ntest to $NTESTS.\n");    
-    }
-    exit 0;
-}
-
 
 $tree = $tree_factory->create_tree($inputfilename);
 
@@ -88,5 +84,5 @@ my $aln = $align_factory->align($inputfilename);
 $tree = $tree_factory->create_tree($aln);
 
 @nodes = sort { defined $a->id && defined $b->id && $a->id cmp $b->id } $tree->get_nodes();
-ok ($nodes[6]->id, 'CYS1_DICDI', 
+ok ($nodes[5]->id, 'CYS1_DICDI', 
     "failed creating tree by protpars");

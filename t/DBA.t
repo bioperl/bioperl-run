@@ -29,6 +29,11 @@ ok(1);
 my $verbose = -1;
 my @params = ('matchA' => 0.75, 'matchB' => '0.55','dymem'=>'linear');
 my  $factory = Bio::Tools::Run::Alignment::DBA->new(@params);
+unless (defined $factory->executable) {
+    warn("DBA program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+    exit 0;
+}
+
 ok $factory->isa('Bio::Tools::Run::Alignment::DBA');
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress clustal messages to terminal
@@ -39,11 +44,6 @@ my $inputfilename_1a = Bio::Root::IO->catfile("t","data","dba1a.fa");
 my $inputfilename_1b = Bio::Root::IO->catfile("t","data","dba1b.fa");
 my $inputfilename2 = Bio::Root::IO->catfile("t","data","dba2.fa");
 my $aln;
-my $dba_present = $factory->executable();
-unless (defined $dba_present) {
-    warn("DBA program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
 my @hsps = $factory->align($inputfilename2);
 ok($hsps[0]->isa("Bio::Search::HSP::GenericHSP"));
 ok($hsps[0]->query->start,4);
