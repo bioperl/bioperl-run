@@ -150,7 +150,7 @@ use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
-use Bio::Cluster::Family;
+use Bio::Cluster::SequenceFamily;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Run::WrapperBase;
 use Bio::Seq;
@@ -363,10 +363,10 @@ sub _generate_families {
               push @mem, $mem;
           }
           my $id = $family_tag."_".$i;
-          my $fam = Bio::Cluster::Family->new(-family_id=>$id,
-                                              -description=>$consensus{$i}{desc},
-                                              -annotation_score=>$consensus{$i}{conf},
-                                              -members=>\@mem);
+          my $fam = Bio::Cluster::SequenceFamily->new(-family_id=>$id,
+						      -description=>$consensus{$i}{desc},
+						      -annotation_score=>$consensus{$i}{conf},
+						      -members=>\@mem);
           push @fam, $fam;
       }
      return \@fam;
@@ -380,8 +380,8 @@ sub _generate_families {
               push @mem, $mem;
           }
           my $id = $family_tag."_".$i;
-          my $fam = Bio::Cluster::Family->new(-family_id=>$id,
-                                              -members=>\@mem);
+          my $fam = Bio::Cluster::SequenceFamily->new(-family_id=>$id,
+						      -members=>\@mem);
           push @fam, $fam;
       }
      return \@fam;
@@ -417,7 +417,7 @@ CLUSTER:
         }
 
         #all the same desc
-        my %desc = undef;
+        my %desc = ();
         foreach my $desc (@desc) {        $desc{$desc}++;     }
         if ( (keys %desc) == 1 ) {
           my ($best_annotation,) = keys %desc;
@@ -428,8 +428,8 @@ CLUSTER:
           next CLUSTER;
         }
       
-        my %lcshash = undef;
-        my %lcnext = undef;
+        my %lcshash = ();
+        my %lcnext = ();
         while (@desc) {
           # do an all-against-all LCS (longest commong substring) of the
           # descriptions of all members; take the resulting strings, and
@@ -583,8 +583,11 @@ sub _run_mcl {
       }
   }
   my $status = system($cmd);
+  close($tfh1);
+  undef $tfh1;
   $self->throw( "mcl  call ($cmd) crashed: $? \n") unless $status==0;
   my $families = $self->_parse_mcl($ind_file,$mclout);
+  
   return $families;
 }
   
@@ -600,11 +603,16 @@ sub _run_mcl {
 
 sub _run_matrix {
   my ($self,$parse_file) = @_;
+  my $exe = $self->matrix_executable || $self->throw("tribe-matrix not found.");
   my ($tfh1,$indexfile) = $self->io->tempfile(-dir=>$TMPDIR);
   my ($tfh2,$matrixfile) = $self->io->tempfile(-dir=>$TMPDIR);
-  my $exe = $self->matrix_executable || $self->throw("tribe-matrix not found.");
   my $cmd = $exe. " $parse_file -ind $indexfile -out $matrixfile > /dev/null ";
   my $status = system($cmd);
+  # free resources
+  close($tfh1);
+  close($tfh2);
+  undef $tfh1;
+  undef $tfh2;
   $self->throw( "tribe-matrix call ($cmd) crashed: $? \n") unless $status==0;
   
   return ($indexfile,$matrixfile);
@@ -650,6 +658,7 @@ sub _setup_input {
 	$self->throw("Need inputs for running tribe mcl, nothing provided"); 
     }
     close($tfh);
+    $tfh = undef;
     return $outfile;
 }
 
@@ -678,8 +687,8 @@ sub _get_from_hsp {
         my $first=(split("e-",$expect))[0];
         my $second=(split("e-",$expect))[1];
 
-	print $tfh join("\t", $pair->feature1->seqname,
-			$pair->feature2->seqname,int($first),
+	print $tfh join("\t", $pair->feature1->seq_id,
+			$pair->feature2->seq_id,int($first),
 			int($second) ), "\n";
 	$count++;
     }
@@ -714,8 +723,8 @@ sub _get_from_searchio {
         my $first=(split("e-",$expect))[0];
         my $second=(split("e-",$expect))[1];
         print $tfh join("\t",
-			$hsp->feature1->seqname, 
-			$hsp->feature2->seqname,
+			$hsp->feature1->seq_id, 
+			$hsp->feature2->seq_id,
 			int($first),
 			int($second) ), "\n";
         

@@ -45,8 +45,8 @@ my $bequiet = 1 ;
 $fact->quiet($bequiet);
 
 my ($fam) = $fact->run($blast_out);
-my @members = $fam->members;
-ok $fam->isa("Bio::Cluster::Family");
+my @members = $fam->get_members;
+ok $fam->isa("Bio::Cluster::SequenceFamily");
 ok $members[0]->isa("Bio::Seq");
 ok ($members[0]->id, 'ENSANGP00000008485');
 ok ($members[1]->id, 'ENSDRMP3263');
@@ -69,7 +69,7 @@ $bequiet =1 ;
 $fact->quiet($bequiet);
 
 ($fam) = $fact->run($sio);
-ok $fam->isa("Bio::Cluster::Family");
+ok $fam->isa("Bio::Cluster::SequenceFamily");
 ok $members[0]->isa("Bio::Seq");
 ok ($members[0]->id, 'ENSANGP00000008485');
 ok ($members[1]->id, 'ENSDRMP3263');
@@ -86,7 +86,7 @@ $fact->quiet($bequiet);
 
 ($fam) = $fact->run( [[qw(ENSP00000257547 ENSP00000261659 1 50)],
 		    [qw(O42187 ENSP00000257547 1 119)]]);
-my @members = $fam->members;
+@members = $fam->get_members;
 ok ($members[0]->id, 'ENSP00000257547');
 ok ($members[1]->id, 'ENSP00000261659');
 ok ($members[2]->id, 'O42187');
