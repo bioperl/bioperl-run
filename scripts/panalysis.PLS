@@ -15,7 +15,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.4 2003-05-30 15:43:22 jason Exp $
+#   $Id: panalysis.PLS,v 1.5 2003-11-25 18:09:56 bosborne Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -48,7 +48,7 @@ where 'options' are:
    -w             create job from [input-data], run it and wait for it
    -x -j <job-id> run a previously created job
    -w -j <job-id> run a previously created job and wait for it
-   -k -j <job-id> kill a previoulsy created job
+   -k -j <job-id> kill a previously created job
 
 
    -s             show job status
@@ -112,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q$Id: panalysis.PLS,v 1.4 2003-05-30 15:43:22 jason Exp $;
+    $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q$Id: panalysis.PLS,v 1.5 2003-11-25 18:09:56 bosborne Exp $;
 
 
     # help wanted?
@@ -362,10 +362,10 @@ calls methods from the C<Bio::Tools::Run::AnalysisFactory> module, a module
 providing lists of available analyses.
 
 Primarily, this client is meant as an example how to use analysis
-modules, and also to test them. However, because it has a lot options
-in order to cover as many methods as possible, it can be also used as
-a fully functional command-line client for accessing various analysis
-tools.
+modules, and also to test them. However, because it has a lot of
+options in order to cover as many methods as possible, it can be also
+used as a fully functional command-line client for accessing various
+analysis tools.
 
 =head2 Defining location and access method
 
@@ -431,7 +431,7 @@ C<analysis.pl> priorities them in the order C<-x>, C<-w>, and
 C<-b>).
 
 All of these options take input data from the command-line (see next
-section about it) and all of them returns (internally) an object
+section about it) and all of them return (internally) an object
 representing a job. There are many methods (options) dealing with the
 job objects (see one after next section about them).
 
@@ -454,12 +454,12 @@ C<analysis.pl> reads the file and uses its contents instead. Examples:
    analysis.pl ...
                sequence_direct_data=@/my/data/my.seq
 
-The names of input data comes from the C<input specification> that can
+The names of input data come from the C<input specification> that can
 be shown by the C<-i> or C<-I> options. The input specification (when
 using option C<-I>) shows also - for some inputs - a list of allowed
 values.  The specification, however, does not tell what input data are
 mutually exclusive, or what other constrains apply. If there is a
-conflict, an error message is produces later (before the job starts).
+conflict, an error message is produced later (before the job starts).
 
 Input data are used when any of the options C<-b>, C<-x>, or C<-w> is
 present, but option C<-j> is not present (see next section about this
@@ -469,12 +469,12 @@ job option).
 
 Each service (defined by a name given in the C<-n> option) can be
 executed one or more times, with the same, but usually with different
-input data. Each execution creates a I<job object>, Actually, the job
+input data. Each execution creates a I<job object>. Actually, the job
 is created even before execution (remember that option C<-b> builds a
 job but does not execute it yet).
 
 Any job, executed or not, is persistent and can be used again later
-from another invocation of the C<analusis.pl> script. Unless you
+from another invocation of the C<analysis.pl> script. Unless you
 explicitly destroy the job using option C<-z>.
 
 A job created by options C<-b>, C<-x> and C<-w> (and by input data)
@@ -552,7 +552,7 @@ binary results by saving them automatically to local files (actually
 it is the module C<Bio::Tools::Run::Analysis> and its submodules
 who do help with the binary data).
 
-So why not to use a traditional shell re-direction to a file? They are
+So why not to use a traditional shell re-direction to a file? There are
 two reasons. First, a job can produce more than one result, so they
 would be mixed together. But mainly, because each result can consist
 of several parts whose number is not known in advance and which cannot
@@ -626,7 +626,7 @@ the given template (using the same rules as described above).
 
 =back
 
-Examples;
+Examples:
 
    -r
    -R report
