@@ -19,7 +19,7 @@ use Bio::Seq;
 
 END {
     for ( $Test::ntest..$NTESTS ) {
-        skip("genewise program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
+        skip("promoterwise program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
     }
 }
 
@@ -29,7 +29,7 @@ my @params = ('-verbose' => $verbose, 'silent' => 1, 'quiet' => 1);
 my  $factory = Bio::Tools::Run::Promoterwise->new(@params);
 ok $factory->isa('Bio::Tools::Run::Promoterwise');
 unless ($factory->executable) {
-   warn("Genewise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+   warn("Promoterwise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
    exit 0;
 }
 
