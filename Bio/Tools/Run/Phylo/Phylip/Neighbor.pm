@@ -460,7 +460,7 @@ sub _setparams {
     my $type ="";
 	foreach  my $attr ( @NEIGHBOR_PARAMS) {
         	$value = $self->$attr();
-	        next unless (defined $value);
+	        next unless (defined $value && $value);
       		if ($attr =~/TYPE/i){
 			if ($value=~/UPGMA/i){
 				$type = "UPGMA";
