@@ -136,7 +136,7 @@ tree. B<Bioperl note basically, doing this interactively is not going
 to work very well, so this module is really focused around using the 0
 or 1 parameters.  Read the program documentation if you'd like some more detail instructions>.
 
-B<Nsites> specifies models that allow the dN/dS ratio (omega) to vary
+B<NSsites> specifies models that allow the dN/dS ratio (omega) to vary
 among sites (Nielsen and Yang 1998, Yang et al. 2000) B<Nssites> = m
 corresponds to model Mm in Yang et al (2000).  The variable B<ncatG>
 is used to specify the number of categories in the omega distribution
@@ -289,7 +289,7 @@ BEGIN {
 		     'alpha'    => [0], # initial of fixed alpha
 		                        # 0: infinity (constant rate)
 		     'Malpha'   => [0], # different alphas for genes
-		     'ncatG'    => [8], # number of categories in 
+		     'ncatG'    => [1..10], # number of categories in 
 		                        # dG of NSsites models
 
 		     # (clock)
@@ -327,6 +327,12 @@ BEGIN {
  Args    : -alignment => the L<Bio::Align::AlignI> object
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
+           -tree => the L<Bio::Tree::TreeI> object
+           -branchlengths => 0: ignore any branch lengths found on the tree
+                             1: use as initial values
+                             2: fix branch lengths
+           -params => a hashref of PAML parameters (all passed to set_parameter)
+           -executable => where the codeml executable resides
 
 =cut
 
@@ -334,12 +340,17 @@ sub new {
   my($class,@args) = @_;
 
   my $self = $class->SUPER::new(@args);
-  my ($aln,$st) = $self->_rearrange([qw(ALIGNMENT SAVE_TEMPFILES)],
+  $self->{_branchLengths} = 0;
+  my ($aln, $tree, $st, $params, $exe, $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES PARAMS EXECUTABLE BRANCHLENGTHS)],
 				    @args);
   defined $aln && $self->alignment($aln);
+  defined $tree && $self->tree($tree, branchLengths => ($ubl || 0) );
   defined $st  && $self->save_tempfiles($st);
+  defined $exe && $self->executable($exe);
   
   $self->set_default_parameters();
+  defined $params && map { $self->set_parameter($_, $$params{$_}) } keys %$params;
+
   return $self;
 }
 
@@ -363,8 +374,8 @@ sub run{
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
-   my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir);
-   my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir);
+   my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+   my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
 
    # now let's print the codeml.ctl file.
    # many of the these programs are finicky about what the filename is 
@@ -384,8 +395,8 @@ sub run{
    $alnout->close();
    undef $alnout;   close($tempseqFH);
    if( $tree ) {
-       my $treeout = new Bio::AlignIO('-format' => 'newick',
-				      '-fh'     => $temptreeFH);
+       my $treeout = new Bio::TreeIO('-format' => 'newick',
+				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();
        print CODEML "treefile = $temptreefile\n";
@@ -400,8 +411,8 @@ sub run{
    {
        chdir($tmpdir);
        my $codemlexe = $self->executable();
-       $self->throw("unable to find executable for 'codeml'") unless $codemlexe;
-       open(RUN, "$codemlexe |");
+       $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
+       open(RUN, "echo $self->{_branchLengths} | $codemlexe |");
        my @output = <RUN>;
        close(RUN);
        $self->error_string(join('',@output));
@@ -461,7 +472,11 @@ sub error_string{
 =cut
 
 sub executable{
-   my ($self) = @_;
+   my ($self, $exe) = @_;
+
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
 
    unless( defined $self->{'_pathtoexe'} ) {
        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
@@ -510,10 +525,14 @@ sub alignment{
 =head2 tree
 
  Title   : tree
- Usage   : $codeml->tree($tree);
+ Usage   : $codeml->tree($tree, %params);
  Function: Get/Set the L<Bio::Tree::TreeI> object
  Returns : L<Bio::Tree::TreeI> 
- Args    : [optional] L<Bio::Tree::TreeI>
+ Args    : [optional] $tree => L<Bio::Tree::TreeI>,
+           [optional] %parameters => hash of tree-specific parameters:
+                  branchLengths: 0, 1 or 2
+                  out
+
  Comment : We could potentially add support for running directly on a file
            but we shall keep it simple
  See also: L<Bio::Tree::Tree>
@@ -521,12 +540,19 @@ sub alignment{
 =cut
 
 sub tree {
-   my ($self,$tree) = @_;
+   my ($self, $tree, %params) = @_;
    if( defined $tree ) { 
        if( ! ref($tree) || ! $tree->isa('Bio::Tree::TreeI') ) { 
 	   $self->warn("Must specify a valid Bio::Tree::TreeI object to the alignment function");
        }
        $self->{'_tree'} = $tree;
+       if ( defined $params{branchLengths} ) {
+	 my $ubl = $params{branchLengths};
+	 if ($ubl !~ m/^(0|1|2)$/) {
+	   $self->throw("The branchLengths parameter to tree() must be 0 (ignore), 1 (initial values) or 2 (fixed values) only");
+	 }
+	 $self->{_branchLengths} = $ubl;
+       }
    }
    return $self->{'_tree'};
 }
@@ -555,12 +581,12 @@ sub get_parameters{
  Usage   : $codeml->set_parameter($param,$val);
  Function: Sets a codeml parameter, will be validated against
            the valid values as set in the %VALIDVALUES class variable.  
-           The checks can be ignored if on turns of param checks like this:
+           The checks can be ignored if one turns off param checks like this:
              $codeml->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
            then no warning will be reported
- Args    : $paramname => name of the parameter
-           $value     => value to set the parameter to
+ Args    : $param => name of the parameter
+           $value => value to set the parameter to
  See also: L<no_param_checks()>
 
 =cut
@@ -568,13 +594,13 @@ sub get_parameters{
 sub set_parameter{
    my ($self,$param,$value) = @_;
    if( ! defined $VALIDVALUES{$param} ) { 
-       $self->warn("unknown parameter $param will not set unless you force by setting no_param_checks to true");
+       $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
        return 0;
    } 
    if( ref( $VALIDVALUES{$param}) =~ /ARRAY/i &&
        scalar @{$VALIDVALUES{$param}} > 0 ) {
        
-       unless ( grep {$value} @{ $VALIDVALUES{$param} } ) {
+       unless ( grep { $value eq $_ } @{ $VALIDVALUES{$param} } ) {
 	   $self->warn("parameter $param specified value $value is not recognized, please see the documentation and the code for this module or set the no_param_checks to a true value");
 	   return 0;
        }
