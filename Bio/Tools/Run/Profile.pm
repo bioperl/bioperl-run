@@ -251,7 +251,7 @@ sub _run {
 
      while(my $profile_feat = $profile_parser->next_result){
 
-        $profile_feat->seqname($display_id); 
+        $profile_feat->seq_id($display_id); 
          push @profile_feat, $profile_feat;
      }
      
