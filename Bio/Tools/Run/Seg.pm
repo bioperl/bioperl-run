@@ -228,7 +228,7 @@ sub _run {
      my $str =$self->executable." ".$self->_input." -l > ".$outfile;
      my $status = system($str);
      $self->throw( "Seg call ($str) crashed: $? \n") unless $status==0;
-#    print 'result dir: ', $outfile;
+     
      my $filehandle;
      if (ref ($outfile) !~ /GLOB/) {
         open (SEG, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
