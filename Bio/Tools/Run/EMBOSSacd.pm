@@ -34,15 +34,15 @@ Bio::Tools::Run::EMBOSSacd - class for EMBOSS Application qualifiers
   my @seqs_to_check; # this would be a list of seqs to compare 
                      # (could be just 1)
   my $wateroutfile = 'out.water';
-  $water->run({ '-sequencea' => $seq_to_test,
-              '-seqall'    => \@seqs_to_check,
-              '-gapopen'   => '10.0',
-              '-gapextend' => '0.5',
-              '-outfile'   => $wateroutfile});
+  $water->run({ -sequencea => $seq_to_test,
+                -seqall    => \@seqs_to_check,
+                -gapopen   => '10.0',
+                -gapextend => '0.5',
+                -outfile   => $wateroutfile});
   # now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = new Bio::AlignIO(-format => 'emboss',
-			       -file   => $wateroutfile);
+			                      -file   => $wateroutfile);
 
   while( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
@@ -156,9 +156,16 @@ sub new {
     # reset global hash
     %OPT = ();
 
-
-    # reading from EMBOSS program acdc stdout
-    my $file = `acdc $prog -help -verbose -acdtable 2>&1`;
+    my $version = `embossversion`;
+    my $file;
+    if ($version lt "2.8.0") {
+		 # reading from EMBOSS program acdc stdout (prior to version 2.8.0)
+       $file = `acdc $prog -help -verbose -acdtable 2>&1`;
+    }
+    else {
+		 # reading from EMBOSS program acdtable stdout (version 2.8.0 or greater)
+		 $file = `acdtable $prog -help -verbose 2>&1`;
+    }
 
     # converting HTML -> XHTML for XML parsing
     $file =~ s/(border)/$1="1"/;
@@ -166,10 +173,10 @@ sub new {
     $file =~ s/<br>/<br><\/br>/g;
     $file =~ s/&nbsp;//g;
 
-    my $t= new XML::Twig( TwigHandlers =>
-			  {
-			   '/table/tr' => \&_row  }
-			);
+    my $t = new XML::Twig( TwigHandlers =>
+									{
+									 '/table/tr' => \&_row  }
+								 );
 
     $t->parse( $file); # results written into global %OPT
 
