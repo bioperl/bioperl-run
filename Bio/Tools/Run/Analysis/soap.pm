@@ -91,7 +91,7 @@ with an underscore _.
 
 
 package Bio::Tools::Run::Analysis::soap;
-use vars qw(@ISA $VERSION $Revision $DEFAULT_LOCATION);
+use vars qw(@ISA $Revision $DEFAULT_LOCATION);
 use strict;
 
 use Bio::Tools::Run::Analysis;
@@ -112,8 +112,6 @@ use SOAP::Lite
 @ISA = qw(Bio::Tools::Run::Analysis);
 
 BEGIN { 
-    # set the version for version checking
-    $VERSION = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d.%-02d", @r };
     $Revision = q$Id$;
 
     # where to go

@@ -138,7 +138,7 @@ Bio::Tools::Run::PiseApplication
 
 package Bio::Tools::Run::PiseJob;
 
-use vars qw(@ISA $VERSION);
+use vars qw(@ISA);
 use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
@@ -149,7 +149,6 @@ use HTTP::Request::Common;
 use POSIX;
 
 @ISA = qw(Bio::Root::Root);
-$VERSION = '1.0';
 
 =head2 new
 

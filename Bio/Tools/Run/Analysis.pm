@@ -203,15 +203,14 @@ with an underscore _.
 # Let the code begin...
 
 package Bio::Tools::Run::Analysis;
-use vars qw(@ISA $VERSION $Revision);
+use vars qw(@ISA $Revision);
 use strict;
 
 use Bio::Root::Root;
 use Bio::AnalysisI;
 @ISA = qw(Bio::Root::Root Bio::AnalysisI);
 
-BEGIN { 
-    $VERSION = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d.%-02d", @r };
+BEGIN {
     $Revision = q$Id$;
 }
 

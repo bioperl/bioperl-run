@@ -85,7 +85,7 @@ C<Bio::Factory::AnalysisI>.
 # Let the code begin...
 
 package Bio::Tools::Run::AnalysisFactory::soap;
-use vars qw(@ISA $VERSION $Revision $DEFAULT_LOCATION $DEFAULT_DIR_SERVICE);
+use vars qw(@ISA $Revision $DEFAULT_LOCATION $DEFAULT_DIR_SERVICE);
 use strict;
 
 use Bio::Tools::Run::AnalysisFactory;
@@ -106,9 +106,7 @@ use SOAP::Lite
 
 @ISA = qw(Bio::Tools::Run::AnalysisFactory);
 
-BEGIN { 
-    # set the version for version checking
-    $VERSION = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d.%-02d", @r };
+BEGIN {
     $Revision = q$Id$;
 
     # where to go...
