@@ -25,13 +25,8 @@ use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::Seq;
 
-my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","FingerPRINTScan");
-#my $db =  Bio::Root::IO->catfile("","data0","prints35_0.pval_blos62");
 my $db =  Bio::Root::IO->catfile("t","data","prints.dat");
 my @params = ('DB',$db);
-if( -e $paramfile ) { 
-    push @params, 'PROGRAM',$paramfile;
-}
 
 my  $factory = Bio::Tools::Run::Prints->new(@params);
 ok $factory->isa('Bio::Tools::Run::Prints');
@@ -54,5 +49,5 @@ ok $feat[0]->isa('Bio::SeqFeatureI');
 ok ($feat[0]->start,29);
 ok ($feat[0]->end,53);
 
-   
+1;  
 
