@@ -21,7 +21,7 @@ use Bio::Root::IO;
 
 END {
     for ( $Test::ntest..$NTESTS ) {
-        skip("sim4 program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
+        skip("sim4 program not found. Skipping. (Be sure you have installed Sim4)",1);
     }
 }
 
