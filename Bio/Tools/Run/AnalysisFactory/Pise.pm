@@ -56,34 +56,34 @@ cancel any requests from your address...). And if you plan to run a
 lot of heavy jobs, or to do a course with many students, please
 ask the maintainer before. 
 
-The remote parameter stands for the actual CGI location, except when 
+The location parameter stands for the actual CGI location, except when 
 set at the factory creation step, where it is rather the root of all CGI.
 There are default values for most of Pise programs. 
 
-You can either set remote at:
+You can either set location at:
 
 =over 3
 
 =item 1 factory creation
 
   my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
-                                 -remote => 'http://somewhere/Pise/cgi-bin',
+                                 -location => 'http://somewhere/Pise/cgi-bin',
 				 -email => 'me@myhome');
 
 =item 2 program creation:
 
   my $program = $factory->program('water', 
-	  		   -remote => 'http://somewhere/Pise/cgi-bin/water.pl'
+	  		   -location => 'http://somewhere/Pise/cgi-bin/water.pl'
 				  );
 
 =item 3 any time before running:
 
-  $program->remote('http://somewhere/Pise/cgi-bin/water.pl');
+  $program->location('http://somewhere/Pise/cgi-bin/water.pl');
   $job = $program->run();
 
 =item 4 when running:
 
-  $job = $program->run(-remote => 'http://somewhere/Pise/cgi-bin/water.pl');
+  $job = $program->run(-location => 'http://somewhere/Pise/cgi-bin/water.pl');
 
 =back
 
@@ -139,7 +139,7 @@ Bio::Tools::Run::PiseJob
 
 package Bio::Tools::Run::AnalysisFactory::Pise;
 
-use vars qw($AUTOLOAD $DEFAULT_PISE_EMAIL @ISA %REMOTE);
+use vars qw($AUTOLOAD $DEFAULT_PISE_EMAIL @ISA %LOCATION);
 use strict;
 
 use Bio::Root::Root;
@@ -149,9 +149,10 @@ use Bio::Factory::ApplicationFactoryI;
 
 @ISA = qw(Bio::Root::Root Bio::Factory::ApplicationFactoryI );
 
-%REMOTE = (
+%LOCATION = (
     'default' => 'http://bioweb.pasteur.fr/cgi-bin/seqanal',
-    'clustalw' => 'http://bioweb.pasteur.fr/cgi-bin/seqanal/clustalw.pl'
+    'clustalw' => 'http://bioweb.pasteur.fr/cgi-bin/seqanal/clustalw.pl',
+    'coils2' => 'http://tofu.tamu.edu/cgi-bin/seqanal/coils2.pl'
 );
 
 $DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
@@ -160,7 +161,7 @@ $DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
 
  Title   : new()
  Usage   : my $program = Bio::Tools::Run::AnalysisFactory::Pise->new(
-                               -remote => 'http://somewhere/cgi-bin/Pise', 
+                               -location => 'http://somewhere/cgi-bin/Pise', 
                                -email => $email);
  Function: Creates a Bio::Tools::Run::AnalysisFactory::Pise object, which 
            function is to create interface object 
@@ -173,8 +174,8 @@ $DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    my ($remote) =
-	$self->_rearrange([qw(REMOTE )],
+    my ($location) =
+	$self->_rearrange([qw(LOCATION )],
 			  @args);
     my ($email) =
 	$self->_rearrange([qw(EMAIL )],
@@ -184,8 +185,8 @@ sub new {
 	$self->_rearrange([qw(VERBOSE )],
 			  @args);
     
-    if (defined $remote) {
-	$self->{REMOTE} = $remote;
+    if (defined $location) {
+	$self->{LOCATION} = $location;
     }
 
     if (defined $email) {
@@ -206,7 +207,7 @@ sub new {
  Title   : program()
  Usage   : my $program = Bio::Tools::Run::AnalysisFactory::Pise->program(
                              $program, 
-                             -remote => 'http://somewhere/cgi-bin/Pise', 
+                             -location => 'http://somewhere/cgi-bin/Pise', 
                              -email => $email, 
                              @params);
  Function: Creates a representation of a single Pise program.
@@ -218,8 +219,8 @@ sub new {
 sub program {
     my ($self, $program, @args) = @_;
 
-    my ($remote) =
-      $self->_rearrange([qw(REMOTE )],
+    my ($location) =
+      $self->_rearrange([qw(LOCATION )],
 			@args);
     my ($email) =
 	$self->_rearrange([qw(EMAIL )],
@@ -228,18 +229,18 @@ sub program {
     my ($verbose) =
 	$self->_rearrange([qw(VERBOSE )],
 			  @args);
-    if (! $remote) {
-	if (defined $self->{REMOTE}) {
-	    if ($self->{REMOTE} =~ /$program/) {
-		$remote = $self->{REMOTE};
+    if (! $location) {
+	if (defined $self->{LOCATION}) {
+	    if ($self->{LOCATION} =~ /$program/) {
+		$location = $self->{LOCATION};
 	    } else {
-		$remote = $self->{REMOTE} . "/$program.pl";
+		$location = $self->{LOCATION} . "/$program.pl";
 	    }
 	} else {
-	    if (defined $REMOTE{$program}) {
-		$remote = $REMOTE{$program};
+	    if (defined $LOCATION{$program}) {
+		$location = $LOCATION{$program};
 	    } else {
-		$remote = $REMOTE{'default'} . "/$program.pl";
+		$location = $LOCATION{'default'} . "/$program.pl";
 	    }
 	}
     }
@@ -259,7 +260,7 @@ sub program {
     $self->throw("Problem to load Bio::Tools::Run::PiseApplication::${program}\n\n$@")
 	if $@;
 
-    eval($pise_program = $package->new($remote, $email) );
+    eval($pise_program = $package->new($location, $email) );
     use strict "subs";
 
     foreach my $param ($pise_program->parameters_order) {

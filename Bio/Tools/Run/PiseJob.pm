@@ -762,12 +762,12 @@ sub results_type {
 
     my $ua = $self->_get_ua;
     
-    my $remote = $self->{REMOTE};
-    $remote =~ s/$command\.pl//;
-    $remote .= "lib/results.pl";
-    print STDERR "Bio::Tools::Run::PiseJob::results_type: running $remote to change results type ($results_type scratch_dir: $scratch_dir)\n" if $self->{VERBOSE};
+    my $location = $self->{LOCATION};
+    $location =~ s/$command\.pl//;
+    $location .= "lib/results.pl";
+    print STDERR "Bio::Tools::Run::PiseJob::results_type: running $location to change results type ($results_type scratch_dir: $scratch_dir)\n" if $self->{VERBOSE};
 
-    my $res = $ua->request(POST $remote, [command => $command, email => $email, results_type => $results_type, scratch_dir => $scratch_dir]);
+    my $res = $ua->request(POST $location, [command => $command, email => $email, results_type => $results_type, scratch_dir => $scratch_dir]);
 
     if ($res->is_success) {
 	return 1;
@@ -821,7 +821,7 @@ sub _init {
     my $application = $self->{APPLICATION};
 
     $self->{PROGRAM} = $application->program;
-    $self->{REMOTE} = $application->remote;
+    $self->{LOCATION} = $application->location;
     $self->{EMAIL} = $application->email;
     $self->{JOBID} = undef;
     $self->{ERROR} = undef;
@@ -911,7 +911,7 @@ sub _submit {
 
     }
 
-    my $remote = $self->{REMOTE};
+    my $location = $self->{LOCATION};
 
     my $application = $self->{APPLICATION};
     my $type;
@@ -981,11 +981,11 @@ sub _submit {
 	}
     }
 
-    print STDERR ref($self), "::_submit: submitting request ($remote)...\n"  if $self->{VERBOSE};
+    print STDERR ref($self), "::_submit: submitting request ($location)...\n"  if $self->{VERBOSE};
 
     my $ua = $self->_get_ua;
 
-    my $res = $ua->request(POST $remote,
+    my $res = $ua->request(POST $location,
 			   Content_Type => 'form-data', 
 			   Content      => \@content);
 

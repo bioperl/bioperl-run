@@ -105,37 +105,37 @@ filename, or filehandle. Parameter of type "Sequence" may also be given as Bio::
 
 See Bio::Tools::Run::PiseJob for how to fetch results and chain programs.
 
-=head2 Remote and email parameters
+=head2 Location and email parameters
 
 Email can be set at factory creation.
 
-The remote parameter stands for the actual CGI location. There are default 
+The location parameter stands for the actual CGI location. There are default 
 values for most of Pise programs.
 
-You can either set remote at:
+You can either set location at:
 
 =over 3
 
 =item 1 factory creation
 
   my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
-                                 -remote = 'http://somewhere/Pise/cgi-bin',
+                                 -location = 'http://somewhere/Pise/cgi-bin',
 			       	 -email => 'me@myhome');
 
 =item 2 program creation
 
   my $program = $factory->program('water', 
-		    -remote = 'http://somewhere/Pise/cgi-bin/water.pl'
+		    -location = 'http://somewhere/Pise/cgi-bin/water.pl'
 				  );
 
 =item 3 any time before running:
 
-  $program->remote('http://somewhere/Pise/cgi-bin/water.pl');
+  $program->location('http://somewhere/Pise/cgi-bin/water.pl');
   $program->run();
 
 =item 4 when running:
 
-  $job = $program->run(-remote => 'http://somewhere/Pise/cgi-bin/water.pl');
+  $job = $program->run(-location => 'http://somewhere/Pise/cgi-bin/water.pl');
 
 =back
 
@@ -197,7 +197,7 @@ $DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
 =head2 new
 
  Title   : new()
- Usage   : my $program = Bio::Tools::Run::PiseApplication->new($remote, 
+ Usage   : my $program = Bio::Tools::Run::PiseApplication->new($location, 
 							       $email);
  Function: Creates a Bio::Tools::Run::PiseApplication::program object, 
            where program stands for any 
@@ -210,13 +210,13 @@ $DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
 =cut
 
 sub new {
-    my ($class, $remote, $email, $verbose) = @_;
+    my ($class, $location, $email, $verbose) = @_;
 
     my $self = $class->SUPER::new;
-    if (! defined $remote) {
-	$self->throw(ref($self) . ": You must provide a Pise CGI url (-remote).");
+    if (! defined $location) {
+	$self->throw(ref($self) . ": You must provide a Pise CGI url (-location).");
     }
-    $self->{REMOTE} = $remote;
+    $self->{LOCATION} = $location;
     if (defined $email) {
 	$self->{EMAIL} = $email;
     } else {
@@ -231,10 +231,10 @@ sub new {
     return $self;
 }
 
-=head2 remote
+=head2 location
 
- Title   : remote
- Usage   : my $remote = $program->remote;
+ Title   : location
+ Usage   : my $location = $program->location;
  Function: Called from Bio::Tools::Run::PiseJob to get/set program/Pise 
            configuration informations from the 
            Bio::Tools::Run::PiseApplication::program class.
@@ -243,10 +243,10 @@ sub new {
 
 =cut
 
-sub remote {
+sub location {
     my $self = shift;
-    if (@_) { 	$self->{REMOTE} = shift ;    }
-    return $self->{REMOTE} ;
+    if (@_) { 	$self->{LOCATION} = shift ;    }
+    return $self->{LOCATION} ;
 }
 
 =head2 email
@@ -324,11 +324,11 @@ sub param_type {
 sub run {
     my ($self, @args) = @_;
 
-    my ($remote) =
-	$self->_rearrange([qw(REMOTE )],
+    my ($location) =
+	$self->_rearrange([qw(LOCATION )],
 			  @args);
-    if (defined $remote) {
-	$self->{REMOTE} = $remote;
+    if (defined $location) {
+	$self->{LOCATION} = $location;
     }
 
     my ($interval) =
@@ -387,11 +387,11 @@ sub run {
 sub submit {
     my ($self, @args) = @_;
 
-    my ($remote) =
-	$self->_rearrange([qw(REMOTE )],
+    my ($location) =
+	$self->_rearrange([qw(LOCATION )],
 			  @args);
-    if (defined $remote) {
-	$self->{REMOTE} = $remote;
+    if (defined $location) {
+	$self->{LOCATION} = $location;
     }
 
     foreach my $param ($self->parameters_order) {
