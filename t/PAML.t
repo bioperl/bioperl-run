@@ -56,7 +56,10 @@ use Bio::Tools::Run::Phylo::PAML::Codeml;
 use Bio::Tools::Run::Phylo::PAML::Yn00;
 use Bio::AlignIO;
 my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml(-verbose => $verbose);
-exit(0) unless( $codeml->executable );
+unless ($codeml->executable) {
+  warn("PAML not is installed. skipping tests $Test::ntest to $NUMTESTS\n");
+  exit(0) ;
+}
 
 my $in = new Bio::AlignIO(-format => 'phylip',
 			  -file   => Bio::Root::IO->catfile(qw(t data 

@@ -60,7 +60,10 @@ my %args = ( 'models' => 'jtt',
 	     "other" => [ '-information', '-w']); 
 my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
 							-flags => \%args);
-exit(0) unless( $protml->executable );
+unless ($protml->executable){
+  warn("Molphy package not installed. Skipping tests $Test::ntest to $NUMTESTS.\n");
+exit(0) ;
+}
 
 my $in = new Bio::AlignIO(-format => 'clustalw',
 			  -file   => Bio::Root::IO->catfile('t','data',
