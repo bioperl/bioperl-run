@@ -220,7 +220,7 @@ BEGIN {
     $MINNAMELEN = 25;
     $PROGRAMNAME = 'codeml';
     if( defined $ENV{'PAMLDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catdir($ENV{'PAMLDIR'},$PROGRAMNAME);
+	$PROGRAM = Bio::Root::IO->catfile($ENV{'PAMLDIR'},$PROGRAMNAME);
     }
     # valid values for parameters, the default one is always
     # the first one in the array
@@ -417,7 +417,7 @@ sub run{
        close(RUN);
        $self->error_string(join('',@output));
 
-       if( grep { /Error/ } @output  ) {
+       if( grep { /\berr(or)?: /io } @output  ) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }
