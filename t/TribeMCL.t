@@ -19,10 +19,11 @@ use Bio::SearchIO;
 
 END {
     for ( $Test::ntest..$NTESTS ) {
-        skip("dba program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
+        skip("TribeMCL program not found. Skipping. (Be sure you have the TribeMCL package",1);
     }
 }
 
+open(STDERR, ">/dev/null"); 
 my $blast_out = Bio::Root::IO->catfile("t","data","TribeMCL.bls");
 
 #do from raw blast output
