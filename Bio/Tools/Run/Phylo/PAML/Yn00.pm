@@ -91,12 +91,14 @@ Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::PAML::Yn00;
 use vars qw(@ISA %VALIDVALUES $MINNAMELEN $PROGRAMNAME $PROGRAM);
 use strict;
+use Cwd;
 use Bio::Root::Root;
 use Bio::AlignIO;
 use Bio::TreeIO;
-use Bio::Tools::Run::Phylo::PAML::PAMLBase;
+use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Phylo::PAML;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::Phylo::PAML::PAMLBase);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 
 =head2 Default Values
@@ -194,8 +196,23 @@ sub run{
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
-   my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir);
-
+   my ($tempseqFH,$tempseqfile);
+   if( ! ref($aln) && -e $aln ) { 
+       $tempseqfile = $aln;
+   } else { 
+       ($tempseqFH,$tempseqfile) = $self->io->tempfile
+	   ('DIR' => $tmpdir, 
+	    UNLINK => ($self->save_tempfiles ? 0 : 1));
+       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+				     '-fh'          => $tempseqFH,
+				     '-interleaved' => 0,
+				     '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
+       
+       $alnout->write_aln($aln);
+       $alnout->close();
+       undef $alnout;   
+       close($tempseqFH);
+   } 
    # now let's print the yn.ctl file.
    # many of the these programs are finicky about what the filename is 
    # and won't even run without the properly named file.  Ack
@@ -205,23 +222,16 @@ sub run{
    print YN "seqfile = $tempseqfile\n";
 
    my $outfile = $self->outfile_name;
-   my $alnout = new Bio::AlignIO('-format'      => 'phylip',
-				 '-fh'          => $tempseqFH,
-				 '-interleaved' => 0,
-				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length());
-   
-   $alnout->write_aln($aln);
-   $alnout->close();
-   undef $alnout;   
-   close($tempseqFH);
+
    print YN "outfile = $outfile\n";
    my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
        print YN "$param = $val\n";
    }
    close(YN);
-   my ($rc,%data,%nei,@labels) = (1);
+   my ($rc,$parser) = (1);
    {
+       my $cwd = cwd();
        chdir($tmpdir);
        my $ynexe = $self->executable();
        $self->throw("unable to find executable for 'yn'") unless $ynexe;
@@ -229,60 +239,26 @@ sub run{
        my @output = <RUN>;
        close(RUN);
        $self->error_string(join('',@output));
-
-       if( grep { /Error/ } @output  ) {
+  if( grep { /\berr(or)?: /io } @output  ) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }
-       open(OUTPUT, $outfile) or $self->throw("Cannot open outfile $outfile");
-       # pretty dumb parser but works for this format, at least 
-       # PAML 3.12
-       my $lastline = '';
-       while(<OUTPUT>) {
-	   next if( /^\s+$/);
-	   if( /^Nei\s+\&\s+Gojobori/ ) {
-	       while(<OUTPUT>) {
-		   last if( /^\s+$/);
-		   my ($label, $vals) = split(/\s+/,$_,2);
-		   push @labels, $label;
-		   my $c = 0;
-		   while( $vals =~ /(\d+\.\d+)\((\d+\.\d+)\s+(\d+\.\d+)\)/g ) {
-		       $nei{$label}->{$labels[$c]} = 
-			   $nei{$labels[$c]}->{$label} = 
-			   {'N' =>  $1,
-			    'S' => $2,
-			    'dNdS' => $3} ;
-		       $c++;
-		   }
-	       }
-	       next;
-	   }
-	   if( /^seq\.\s+seq\.\s+/) {
-	       while( <OUTPUT> ) {
-		   next if( /^\s+$/);
-		   s/^\s+//;
-		   my @line = split;
-		   my ($seq_a,$seq_b) = ($labels[(shift @line) - 1],
-					 $labels[(shift @line) - 1]);
-		       
-		   $data{$seq_a}->{$seq_b} = $data{$seq_b}->{$seq_a} = 
-		   { 'S' => shift @line,
-		     'N' => shift @line,
-		     't' => shift @line,
-		     'kappa' => shift @line,
-		     'dN/dS' => shift @line,
-		     'dN'    => shift @line,
-		     'dS'    => shift @line };
+       eval {
+	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
+						 -dir => "$tmpdir");
 
-	       }
-	   }
+       };
+       if( $@ ) {
+	   $self->warn($self->error_string);
        }
+       chdir($cwd);
    }
+   open(IN,"$tmpdir/mlc");
    unless ( $self->save_tempfiles ) {
-       unlink("$yn_ctl");
-       $self->cleanup();
+      unlink("$yn_ctl");
+      $self->cleanup();
    }
-   return ($rc,\%data, \%nei);
+   return ($rc,$parser);
 }
 
 =head2 error_string
@@ -449,7 +425,7 @@ sub set_default_parameters{
 }
 
 
-=head1 Bio::Tools::Run::Phylo::PAML::PAMLBase methods
+=head1 Bio::Tools::Run::Wrapper methods
 
 =cut
 
