@@ -132,6 +132,7 @@ use strict;
 use Bio::Root::Root;
 use Bio::Tools::Primer3;
 use Bio::Tools::Run::WrapperBase;
+use File::Spec;
 
 use vars qw($AUTOLOAD @ISA @PRIMER3_PARAMS %OK_FIELD);
 
@@ -201,23 +202,20 @@ sub new {
  my $self = $class->SUPER::new(%args);
  $self->io->_initialize_io();
 
- if ($args{-program}) {$self->{program}=$args{-program}}
- unless (defined $self->{program}) {
-  $self->{program}=$self->executable;
- }
+ $self->program_name($args{-program})  if defined $args{'-program'};
  
  if ($args{'-verbose'}) {$self->{'verbose'}=1}
  if ($args{'-seq'}) {
-  $self->{'seqobject'}=$args{'-seq'};
-  my @input;
-  push (@input, ("PRIMER_SEQUENCE_ID=".$self->{'seqobject'}->id),("SEQUENCE=".$self->{'seqobject'}->seq));
-  $self->{'primer3_input'}=\@input;
+     $self->{'seqobject'}=$args{'-seq'};
+     my @input;
+     push (@input, ("PRIMER_SEQUENCE_ID=".$self->{'seqobject'}->id),("SEQUENCE=".$self->{'seqobject'}->seq));
+     $self->{'primer3_input'}=\@input;
  }
  if ($args{'-outfile'}) {$self->{_outfilename}=$args{'-outfile'}}
  if ($args{'-path'}) {
-  $args{'-path'} =~ m#^(.*/)(.*)$#;
-  $self->{'program_dir'}=$1;
-  $self->{'program_name'}=$2;
+     my (undef,$path,$prog) = File::Spec->splitpath($args{'-path'});
+     $self->program_dir($path);
+     $self->program_name($prog);
  }
  return $self;
 }
@@ -233,9 +231,9 @@ sub new {
 =cut
 
 sub program_name {
-  my ($self, $prog) = @_;
-  if ($prog) {$self->{'program_name'}=$prog} else {$self->{'program_name'}='primer3'}
-  return $self->{'program_name'};
+  my $self = shift;
+  return $self->{'program_name'} = shift @_ if @_;
+  return $self->{'program_name'} || 'primer3';
 }
 
 =head2 program_dir
@@ -250,9 +248,13 @@ sub program_name {
 
 sub program_dir {
   my ($self, $dir) = @_;
-  if ($dir) {$self->{'program_dir'}=$dir} 
-  elsif ($ENV{PRIMER3}) {$self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3})}
-  else {$self->{'program_dir'}='/usr/local/bin'}
+  if ($dir) {
+      $self->{'program_dir'}=$dir;
+  } elsif ($ENV{PRIMER3}) {
+      $self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3});
+  } else {
+      $self->{'program_dir'}='/usr/local/bin';
+  }
   return $self->{'program_dir'}
 }
 
@@ -352,7 +354,7 @@ sub add_targets {
 
 sub run {
  my($self,%args) = @_;
- my $executable = $self->{'program_dir'}.$self->{'program'};
+ my $executable = $self->executable;
  my $input = $self->{'primer3_input'};
  unless (-e $executable) {
   $self->throw("$executable was not found. Do not know where primer3 is!");
