@@ -343,7 +343,7 @@ BEGIN {
     else {
         $PROGRAM = $PROGRAMNAME;
     }
-    @CLUSTALW_PARAMS = qw(KTUPLE TOPDIAGS WINDOW PAIRGAP FIXEDGAP
+    @CLUSTALW_PARAMS = qw(OUTPUT KTUPLE TOPDIAGS WINDOW PAIRGAP FIXEDGAP
                    FLOATGAP MATRIX TYPE	TRANSIT DNAMATRIX OUTFILE
                    GAPOPEN GAPEXT MAXDIV GAPDIST HGAPRESIDUES PWMATRIX
                    PWDNAMATRIX PWGAPOPEN PWGAPEXT SCORE TRANSWEIGHT
@@ -542,32 +542,38 @@ sub _run {
     my ($self,$command,$infile1,$infile2,$param_string) = @_;
     my $instring;
     if ($command =~ /align/) {
-	$instring =  "-infile=$infile1";
-	$param_string .= " $infile2";
+    	$instring =  "-infile=$infile1";
+    	$param_string .= " $infile2";
     }
     if ($command =~ /profile/) {
-	$instring =  "-profile1=$infile1  -profile2=$infile2";
-	chmod 0777, $infile1,$infile2;
-	$command = '-profile';
+	    $instring =  "-profile1=$infile1  -profile2=$infile2";
+    	chmod 0777, $infile1,$infile2;
+    	$command = '-profile';
     }
+    my $output = $self->output || 'gcg';
     $self->debug( "Program ".$self->executable."\n");
     my $commandstring = $self->executable." $command"." $instring".
-	" -output=gcg". " $param_string";
+	" -output=$output". " $param_string";
+
     $self->debug( "clustal command = $commandstring");
     	
     my $status = system($commandstring);    
     $self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
     
     my $outfile = $self->outfile() || $TMPOUTFILE ;
+
 # retrieve alignment (Note: MSF format for AlignIO = GCG format of clustalw)
-    my $in  = Bio::AlignIO->new(-file => $outfile, '-format' => 'MSF');
+
+    my $format= $output =~/phylip/i ? "phylip" : "MSF";
+
+    my $in  = Bio::AlignIO->new(-file => $outfile, '-format' => $format);
     my $aln = $in->next_aln();
 
     # Clean up the temporary files created along the way...
     # Replace file suffix with dnd to find name of dendrogram file(s) to delete
     foreach my $f ( $infile1, $infile2 ) {
-	$f =~ s/\.[^\.]*$// ;
-	unlink $f .'.dnd' if( $f ne '' );
+    	$f =~ s/\.[^\.]*$// ;
+    	unlink $f .'.dnd' if( $f ne '' );
     }
     return $aln;
 }
