@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Tools::Run::Lagan
+# BioPerl module for Bio::Tools::Run::Alignment::Lagan
 #
 # Cared for by Stephen Montgomery <smontgom@bcgsc.bc.ca>
 #
@@ -12,14 +12,14 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Lagan - Object for the local execution of the LAGAN suite
+Bio::Tools::Run::Alignment::Lagan - Object for the local execution of the LAGAN suite
 of tools (including MLAGAN for multiple sequence alignments)
 
 =head1 SYNOPSIS
 
 MLAGAN / LAGAN execution and alignment object creation.
 
-  use Bio::Tools::Run::Lagan;
+  use Bio::Tools::Run::Alignment::Lagan;
 
   @params =
       ('chaos' => "The contents of this string will be passed as args to chaos",
@@ -52,14 +52,14 @@ parsing of the alignment format.
 
 TO USE LAGAN:
 
-  my $lagan = new Bio::Tools::Run::Lagan(@params);
+  my $lagan = new Bio::Tools::Run::Alignment::Lagan(@params);
   my $report_out = $lagan->lagan($seq1, $seq2);
 
 A SimpleAlign object is returned.
 
 TO USE MLAGAN:
 
-  my $lagan = new Bio::Tools::Run::Lagan();
+  my $lagan = new Bio::Tools::Run::Alignment::Lagan();
   my $tree = "(($seqname1 $seqname2) $seqname3)";
   my @sequence_objs; 	#an array of bioperl Seq objects
 
@@ -120,7 +120,7 @@ Internal methods are usually preceded with a _
 
 =cut
 
-package Bio::Tools::Run::Lagan;
+package Bio::Tools::Run::Alignment::Lagan;
 
 use vars qw(@ISA $PROGRAM_DIR @LAGAN_PARAMS @MLAGAN_PARAMS %OK_FIELD $AUTOLOAD);
 
