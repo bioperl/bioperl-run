@@ -1,6 +1,6 @@
 # $Id$
 #
-# BioPerl module for Bio::Tools::Run::Phylo::PAML::CodeML
+# BioPerl module for Bio::Tools::Run::Phylo::PAML::Codeml
 #
 # Cared for by Jason Stajich <jason@bioperl.org>
 #
@@ -12,15 +12,25 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phylo::PAML::CodeML - Wrapper aroud the PAML program codeml
+Bio::Tools::Run::Phylo::PAML::Codeml - Wrapper aroud the PAML program codeml
 
 =head1 SYNOPSIS
 
-use Bio::Tools::Run::Phylo::PAML::CodeML;
+use Bio::Tools::Run::Phylo::PAML::Codeml;
 use Bio::AlignIO;
 
-my $alignment = new Bio::AlignIO(-format => 'clustalw',
-				 -file   => 'file1.aln');
+my $alignio = new Bio::AlignIO(-format => 'phylip',
+			       -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
+
+my $aln = $alignio->next_aln;
+
+my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml();
+$codeml->alignment($aln);
+my ($rc,$results) = $codeml->run();
+
+print "Ka = ", $results->{'dN'},"\n";
+print "Ks = ", $results->{'dS'},"\n";
+print "Ka/Ks = ", $results->{'dN/dS'},"\n";
 
 =head1 DESCRIPTION
 
@@ -390,7 +400,7 @@ sub run{
    {
        chdir($tmpdir);
        my $codemlexe = $self->executable();
-       
+       $self->throw("unable to find executable for 'codeml'") unless $codemlexe;
        open(RUN, "$codemlexe |");
        my @output = <RUN>;
        close(RUN);
@@ -403,7 +413,7 @@ sub run{
        open(OUTPUT, $outfile) or $self->throw("Cannot open outfile $outfile");
        while(<OUTPUT>) {
 	   chomp;
-	   # pretty dump parser but works for this format, at least 
+	   # pretty dumb parser but works for this format, at least 
 	   # PAML 3.12
 	   while( /(\S+)=\s*([\d\.]+)/g ) {
 	       $data{$1} = $2;
