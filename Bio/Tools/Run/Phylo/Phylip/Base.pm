@@ -69,7 +69,12 @@ package Bio::Tools::Run::Phylo::Phylip::Base;
 use vars qw(@ISA %DEFAULT);
 use strict;
 
-# Object preamble - inherits from Bio::Root::Root
+BEGIN {
+    eval { require File::Spec };
+    if( $@) { Bio::Root::RootI->throw("Must have installed File::Spec to run Bio::Tools::Run::Phylo::Phylip tools");
+  }
+    
+}
 
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
@@ -101,6 +106,10 @@ BEGIN {
  Title   : outfile
  Usage   : $obj->outfile($newval)
  Function: Get/Set default PHYLIP outfile name ('outfile' usually)
+           Changing this is only necessary when you have compiled
+           PHYLIP to use a different filename for the default 'outfile'
+           This will not change the default output filename by 
+           PHYLIP
  Returns : value of outfile
  Args    : newvalue (optional)
 

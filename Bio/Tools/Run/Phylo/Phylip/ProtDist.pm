@@ -189,6 +189,7 @@ use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
 use Cwd;
 
+
 # inherit from Phylip::Base which has some methods for dealing with
 # Phylip specifics
 @ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
@@ -374,10 +375,15 @@ sub create_distance_matrix{
 sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
+    my $curpath = cwd;    
+    unless( File::Spec->file_name_is_absolute($infile) ) {
+	$infile = $self->io->catfile($curpath,$infile);
+    }
     $instring =  $infile."\n$param_string";
     $self->debug( "Program ".$self->executable." $param_string\n");
-
-	#open a pipe to run protdist to bypass interactive menus
+    
+    chdir($TMPDIR);
+    #open a pipe to run protdist to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
 	open(PROTDIST,"|".$self->executable.">/dev/null");
     }
@@ -386,12 +392,10 @@ sub _run {
     }
     print PROTDIST $instring;
     close(PROTDIST);	
-
-	#get the results
-    my $path = cwd;
-    chomp($path);
-    my $outfile = $self->io->catfile($path,$self->outfile);
-
+    
+    # get the results
+    my $outfile = $self->io->catfile($TMPDIR,$self->outfile);
+    chdir($curpath);
     $self->throw("protdist did not create matrix correctly ($outfile)")
 	unless (-e $outfile);
 

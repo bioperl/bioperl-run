@@ -319,9 +319,13 @@ sub create_tree{
 sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
+    my $curpath = cwd;    
+    unless( File::Spec->file_name_is_absolute($infile) ) {
+	$infile = $self->io->catfile($curpath,$infile);
+    }
     $instring =  $infile."\n$param_string";
     $self->debug( "Program ".$self->executable."\n");
-
+    chdir($TMPDIR);
     #open a pipe to run protpars to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
 	open(PROTPARS,"|".$self->executable.">/dev/null");
@@ -331,13 +335,11 @@ sub _run {
     }
     print PROTPARS $instring;
     close(PROTPARS);	
-
+    chdir($curpath);
     #get the results
-    my $path = cwd;
-    chomp($path);
-    my $treefile = Bio::Root::IO->catfile($path,$self->treefile);
-    my $outfile = Bio::Root::IO->catfile($path, $self->outfile);
-
+    my $outfile = $self->io->catfile($TMPDIR,$self->outfile);
+    my $treefile = $self->io->catfile($TMPDIR,$self->treefile);
+    
     $self->throw("Protpars did not create treefile correctly") 
 	unless (-e $treefile);
 

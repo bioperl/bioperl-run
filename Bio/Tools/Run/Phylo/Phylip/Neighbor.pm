@@ -336,9 +336,13 @@ sub create_tree{
 sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
+    my $curpath = cwd;    
+    unless( File::Spec->file_name_is_absolute($infile) ) {
+	$infile = $self->io->catfile($curpath,$infile);
+    }
     $instring =  $infile."\n$param_string";
     $self->debug( "Program ".$self->executable."\n");
-
+    chdir($TMPDIR);
 	#open a pipe to run neighbor to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
 	open(NEIGHBOR,"|".$self->executable.">/dev/null");
@@ -348,12 +352,10 @@ sub _run {
     }
     print NEIGHBOR $instring;
     close(NEIGHBOR);	
-
-    # get the results
-    my $path = cwd;
-    chomp($path);
-    my $outfile = $self->io->catfile($path,$self->outfile);
-    my $treefile = $self->io->catfile($path,$self->treefile);
+    chdir($curpath);
+    #get the results
+    my $outfile = $self->io->catfile($TMPDIR,$self->outfile);
+    my $treefile = $self->io->catfile($TMPDIR,$self->treefile);
     
     $self->throw("neighbor did not create tree correctly (expected $treefile) ") unless (-e $treefile);
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');

@@ -255,16 +255,24 @@ sub draw_tree{
 sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
-    if( $infile ne $self->treefile ) {
-	$instring =  $infile."\n";
-    }
+    my $curpath = cwd;
     
+    unless( File::Spec->file_name_is_absolute($infile) ) {
+	$infile = $self->io->catfile($curpath,$infile);
+    }
+    $instring = $infile . "\n";
     if( ! defined $self->fontfile ) { 
 	$self->throw("You must have defined a fontfile");
     }
-    if( $self->fontfile ne 'fontfile' ) {
-	$instring .=  $self->fontfile."\n";
+
+    if( -e $self->io->catfile($curpath,'fontfile') ) {
+	$instring .= $self->io->catfile($curpath,'fontfile')."\n";
+    } elsif( File::Spec->file_name_is_absolute($self->fontfile) ) {	 
+	$instring .= $self->io->catfile($TMPDIR,$self->fontfile)."\n";
+    } else {
+	$instring .= $self->io->catfile($curpath,$self->fontfile)."\n";
     }
+    chdir($TMPDIR);
     $instring .= $param_string;
     $self->debug( "Program ".$self->executable." $param_string\n");
     # open a pipe to run drawgram to bypass interactive menus
@@ -276,11 +284,9 @@ sub _run {
     }
     print DRAW $instring;
     close(DRAW);	
-
+    chdir($curpath);
     #get the results
-    my $path = cwd;
-    chomp($path);
-    my $plotfile = $self->io->catfile($path,$self->plotfile);
+    my $plotfile = $self->io->catfile($TMPDIR,$self->plotfile);
 
     $self->throw("drawgram did not create plotfile correctly ($plotfile)")
 	unless (-e $plotfile);    		
