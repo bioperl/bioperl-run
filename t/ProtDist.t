@@ -27,7 +27,8 @@ END {
 
 ok(1);
 my $verbose = -1;
-my @params = ('idlength'=>30,'model'=>'cat','gencode'=>'U','category'=>'H','probchange'=>'0.4','trans'=>'5','freq'=>'0.25,0.5,0.125,0.125');
+my @params = ('idlength'=>30,'model'=>'cat','gencode'=>'U',
+	      'category'=>'H','probchange'=>'0.4','trans'=>'5','freq'=>'0.25,0.5,0.125,0.125');
 my $dist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 unless($dist_factory->executable){
         warn("Protdist program not found. Skipping tests $Test::ntest to $NTESTS.\n");
@@ -103,4 +104,5 @@ unless ($clustal_present) {
 my $aln = $align_factory->align($inputfilename);
 $matrix = $dist_factory->create_distance_matrix($aln);
 
-ok ($matrix->{'ALEU_HORVU'}{'CATL_HUMAN'},3.07376,"failed creating distance matrix");
+ok ($matrix->{'ALEU_HORVU'}{'CATL_HUMAN'},3.07376,
+    "failed creating distance matrix");

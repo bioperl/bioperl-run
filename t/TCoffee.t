@@ -31,7 +31,6 @@ END {
 
 ok(1);
 
-
 my @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
 my  $factory = Bio::Tools::Run::Alignment::TCoffee->new(@params);
 
@@ -63,7 +62,8 @@ unless ($coffee_present) {
 my $version = $factory->version;
 ok ($version >= 1.22, 1, "Code tested only on t_coffee versions > 1.22" );
 $aln = $factory->align($inputfilename);
-ok $aln->no_sequences, 7;
+ok($aln);
+ok( $aln->no_sequences, 7);
 
 my $str = Bio::SeqIO->new('-file' => 
 			Bio::Root::IO->catfile("t","data","cysprot.fa"), 
