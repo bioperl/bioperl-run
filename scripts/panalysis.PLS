@@ -15,7 +15,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.5 2003-11-25 18:09:56 bosborne Exp $
+#   $Id: panalysis.PLS,v 1.6 2004-11-16 18:33:26 jason Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -112,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q$Id: panalysis.PLS,v 1.5 2003-11-25 18:09:56 bosborne Exp $;
+    $VERSION = do { my @r = (q[$Revision: 1.6 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q[$Id: panalysis.PLS,v 1.6 2004-11-16 18:33:26 jason Exp $];
 
 
     # help wanted?
