@@ -31,8 +31,8 @@ Once the job is created, you can get results:
   foreach my $result ($job->get_results) {
     print $job->content($result);
     $job->save($result, "myfile"); # $job->save($result) keeps the name
-    print $job->pise_stdout;            # print job standard output
-    print $job->pise_stderr;            # print job standard error
+    print $job->stdout;            # print job standard output
+    print $job->stderr;            # print job standard error
   }
 
 You can feed a result file as a filehandle to a bioperl parser :
@@ -531,7 +531,7 @@ sub content {
 
 =cut
 
-sub pise_stdout {
+sub stdout {
     my $self = shift;
     
     if (! $self->{JOBID}) {
@@ -547,7 +547,7 @@ sub pise_stdout {
 
 sub output {
     my $self = shift;
-    return($self->pise_stdout);
+    return($self->stdout);
 }
 
 =head2 stderr
@@ -560,7 +560,7 @@ sub output {
 
 =cut
 
-sub pise_stderr {
+sub stderr {
     my $self = shift;
 
     if (! $self->{JOBID}) {
@@ -1019,7 +1019,7 @@ sub _get_ua {
 	$ua = $self->{UA};
     } else {
 	$ua = LWP::UserAgent->new;
-	$ua->agent("Pise/" . $self->{VERSION} . $ua->agent);
+	$ua->agent("Pise/" . $self->{VERSION} . "/" . $ua->agent);
 	$self->{UA} = $ua;
     }
     return $ua;
