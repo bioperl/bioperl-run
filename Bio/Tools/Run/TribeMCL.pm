@@ -33,7 +33,8 @@ Bio::Tools::Run::TribeMCL
   #with a blast score evalue of 1e-119
   #entry would be 
 
-  my @array  = [[ENSP00000257547 ,ENSP00000261659,1,50],[O42187,ENSP00000257547,1,119]];
+  my @array  = [[qw(ENSP00000257547 ENSP00000261659 1 50)],
+		[qw(O42187 ENSP00000257547 1 119)]];
   my @params = ('pairs'=>\@array,I=>'2.0');
 
   OR
@@ -356,8 +357,12 @@ sub _run_mcl {
   my $exe = $self->mcl_executable;
   my ($tfh1,$mclout) = $self->io->tempfile(-dir=>$TMPDIR);
   my $cmd = "$exe $infile -I $inflation -o $mclout";
-  if($self->quiet || ($self->verbose < 0)){
-    $cmd .= " >& /dev/null";
+  if($self->quiet || 
+     ($self->verbose < 0)){
+      $cmd .= " -V all";
+      if( $^O !~ /Mac/ && $^O !~ /Win/ ) {
+	  $cmd .= ' 2> /dev/null';
+      }
   }
   my $status = system($cmd);
   $self->throw( "mcl  call ($cmd) crashed: $? \n") unless $status==0;
@@ -398,37 +403,36 @@ sub _run_matrix {
 =cut
 
 sub _setup_input {
-  my ($self,$input) = @_;
-  my ($type,$array);
-  
-  $type = $self->inputtype();
-  if($type =~/blastfile/i){
-    $self->blastfile($input);
-    $array = $self->_parse_blastfile($self->blastfile);
-  }
-  elsif($type=~/searchio/i){
-    $self->searchio($input);
-    $array = $self->_get_from_searchio($self->searchio);
-  }
-  elsif($type=~/pairs/i) {
-    $self->pairs($input);
-    $array = $self->pairs;
-  }
-  elsif($type =~/hsp/i){
-      $self->hsp($input);
-      $array = $self->_get_from_hsp($self->hsp);
-  }
-  else {
-    $self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
-  }
-  defined($array) || $self->throw("Need inputs for running tribe mcl, nothing provided"); 
-  my ($tfh,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
-  foreach my $line(@{$array}){
-    my $str = join("\t",@{$line});
-    print $tfh $str."\n";
-  }
-  return $outfile;
-  
+    my ($self,$input) = @_;
+    my ($type,$rc);
+
+    my ($tfh,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+
+    $type = $self->inputtype();
+
+    if($type =~/blastfile/i){
+	$self->blastfile($input);
+	$rc = $self->_parse_blastfile($self->blastfile,$tfh);
+    } elsif($type=~/searchio/i){
+	$self->searchio($input);
+	$rc = $self->_get_from_searchio($self->searchio,$tfh);
+    } elsif($type=~/pairs/i) {
+	$self->pairs($input);
+	for my $line (@{ $self->pairs }){
+	    print $tfh join("\t",@{$line}), "\n"; 
+	    $rc++;
+	}
+    } elsif($type =~/hsp/i) {
+	$self->hsp($input);
+	$rc = $self->_get_from_hsp($self->hsp,$tfh);
+    } else {
+	$self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
+    }
+    unless ( $rc ) {
+	$self->throw("Need inputs for running tribe mcl, nothing provided"); 
+    }
+    close($tfh);
+    return $outfile;
 }
 
 =head2 _get_from_hsp
@@ -442,8 +446,9 @@ sub _setup_input {
 =cut
 
 sub _get_from_hsp {
-    my ($self,$hsp) = @_;
+    my ($self,$hsp,$tfh) = @_;
     my @array;
+    my $count;
     foreach my $pair (@{$hsp}){
         my $sig = $pair->score;
         $sig =~ s/^e-/1e-/g;
@@ -455,9 +460,12 @@ sub _get_from_hsp {
         my $first=(split("e-",$expect))[0];
         my $second=(split("e-",$expect))[1];
 
-        push @array, [$pair->feature1->seqname,$pair->feature2->seqname,int($first),int($second)];
+	print $tfh join("\t", $pair->feature1->seqname,
+			$pair->feature2->seqname,int($first),
+			int($second) ), "\n";
+	$count++;
     }
-    return \@array;
+    return $count;
 }
     
 
@@ -472,8 +480,9 @@ sub _get_from_hsp {
 =cut
 
 sub _get_from_searchio {
-  my ($self,$sio) = @_;
+  my ($self,$sio,$tfh) = @_;
   my @array;
+  my $count;
   while( my $result = $sio->next_result ) {
     while( my $hit = $result->next_hit ) {
       while( my $hsp = $hit->next_hsp ) {
@@ -486,12 +495,17 @@ sub _get_from_searchio {
         }
         my $first=(split("e-",$expect))[0];
         my $second=(split("e-",$expect))[1];
-        push @array, [$hsp->feature1->seqname, $hsp->feature2->seqname,int($first),int($second)];
+        print $tfh join("\t",
+			$hsp->feature1->seqname, 
+			$hsp->feature2->seqname,
+			int($first),
+			int($second) ), "\n";
         
+	$count++;
       }
     }
   }
-  return \@array;
+  return $count;
 }
 
 =head2 _parse_blastfile
@@ -505,10 +519,11 @@ sub _get_from_searchio {
 =cut
 
 sub _parse_blastfile {
-  my ($self, $file) = @_;
+  my ($self, $file,$tfh) = @_;
   open(FILE,$file) || $self->throw("Cannot open Blast Output File");
   my ($query,$reference,$first,$second);
   my @array;
+  my $count;
   my $weight = $self->weight;
   while(<FILE>){
     if(/Query=\s+(\S+)/){
@@ -526,18 +541,22 @@ sub _parse_blastfile {
 			}
       $first=(split("e-",$expect))[0];
       $second=(split("e-",$expect))[1];
-      push @array, [$query, $reference,int($first),int($second)];
+      print $tfh join("\t", $query, 
+		      $reference,
+		      int($first),
+		      int($second)), "\n";
+      $count++;
     }
   }
-  return \@array;
+  return $count;
 }
 
 =head2 _parse_mcl
 
  Title   : _parse_mcl
  Usage   : $self->_parse_mcl()
- Function: internal function for quickly parsing mcl output and generating the array of 
-                 clusters
+ Function: internal function for quickly parsing mcl output and 
+           generating the array of clusters
  Returns : Array Ref of clustered Ids
  Args    :  index file path, mcl output file path
 
@@ -566,16 +585,16 @@ sub _parse_mcl {
   open (IND,$ind) || $self->throw("Cannot open $ind for parsing");
   my %hash;
   while(<IND>){
-    /^(\S+)\s+(\S+)/;
-    $hash{$1}=$2;
-	}
-
+      /^(\S+)\s+(\S+)/;
+      $hash{$1}=$2;
+  }
+  
   for (my $j=0;$j<$i+1;$j++)	{
-    my @array=split(" ",$cluster[$j]);
-    for (my $p=1;$p<$#array;$p++){
-      push @{$out[$array[0]]}, $hash{$array[$p]};
-    }
-	}    
+      my @array=split(" ",$cluster[$j]);
+      for (my $p=1;$p<$#array;$p++){
+	  push @{$out[$array[0]]}, $hash{$array[$p]};
+      }
+  }    
   return \@out;
 }
 
