@@ -445,7 +445,12 @@ sub _process_results {
 
 sub is_binary {
     my ($self, $name) = @_;
-    ${ $self->result_spec }{$name} =~ /^byte\[/;
+    foreach my $result (@{ $self->result_spec }) {
+	if ($result->{'name'} eq $name) {
+	    return ($result->{'type'} =~ /^byte\[/);
+	}
+    }
+    return 0;
 }
 
 # ---------------------------------------------------------------------
