@@ -22,7 +22,7 @@ BEGIN {
     }
     use Test;
 
-    $NUMTESTS = 9;
+    $NUMTESTS = 17;
     plan tests => $NUMTESTS;
 }
 
@@ -49,6 +49,7 @@ my $inpaml = new Bio::Tools::Phylo::PAML(-file => 't/data/codeml.mlc');
 ok($inpaml);
 
 use Bio::Tools::Run::Phylo::PAML::Codeml;
+use Bio::Tools::Run::Phylo::PAML::Yn00;
 use Bio::AlignIO;
 my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml(-verbose => -1);
 exit(0) unless( $codeml->executable );
@@ -88,3 +89,22 @@ if( $result->version =~ /3\.12/ ) {
 }
 
 ok($codeml->error_string !~ /Error/); # we don't expect any errors;
+
+my $yn00 = Bio::Tools::Run::Phylo::PAML::Yn00->new();
+$yn00->alignment($aln);
+($rc,$results) = $yn00->run();
+ok($rc,1);
+if( ! defined $results ) { 
+    exit(0);
+}
+$result = $results->next_result;
+$MLmatrix = $result->get_MLmatrix;
+
+ok($MLmatrix->[0]->[1]->{'dN'}, 0.0846);
+ok($MLmatrix->[0]->[1]->{'dS'}, 1.0926);
+ok($MLmatrix->[0]->[1]->{'omega'}, 0.0774);
+ok($MLmatrix->[0]->[1]->{'S'}, 278.4);
+ok($MLmatrix->[0]->[1]->{'N'}, 723.6);
+ok($MLmatrix->[0]->[1]->{'t'}, 1.0941);
+
+ok($yn00->error_string !~ /Error/); # we don't expect any errors;
