@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::blast2
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,14 +28,20 @@ Bio::Tools::Run::PiseApplication::blast2
 		Altschul, Stephen F., Thomas L. Madden, Alejandro A. Schaeffer,Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), Gapped BLAST and PSI-BLAST: a new generation of protein database search programs,  Nucleic Acids Res. 25:3389-3402.
 
 
-      Parameters:
 
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/blast2.html 
+         for available values):
+
+
+		blast_init (String)
 
 		blast2 (Excl)
 			Blast program
 
 		nb_proc (Integer)
-
 
 		query (Sequence)
 			Sequence File
@@ -45,9 +59,6 @@ Bio::Tools::Run::PiseApplication::blast2
 		nucleotid_db (Excl)
 			nucleotid db
 
-		filter_opt (Paragraph)
-			Filtering and masking options
-
 		filter (Switch)
 			Filter query sequence (DUST with blastn, SEG with others) (-F)
 
@@ -56,9 +67,6 @@ Bio::Tools::Run::PiseApplication::blast2
 
 		lower_case (Switch)
 			Use lower case filtering (-U)
-
-		selectivity_opt (Paragraph)
-			Selectivity options
 
 		Expect (Integer)
 			Expect: upper bound on the expected frequency of chance occurrence of a set of HSPs (-e)
@@ -87,9 +95,6 @@ Bio::Tools::Run::PiseApplication::blast2
 		dropoff_final (Integer)
 			X dropoff value for final alignment (in bits) (-Z)
 
-		scoring_opt (Paragraph)
-			Scoring options
-
 		mismatch (Integer)
 			Penalty for a nucleotide mismatch (blastn) (-q)
 
@@ -105,9 +110,6 @@ Bio::Tools::Run::PiseApplication::blast2
 		extend_a_gap (Integer)
 			Cost to extend a gap (-E)
 
-		translation_opt (Paragraph)
-			Translation options
-
 		gc_query (Excl)
 			Query Genetic code to use (blastx) (-Q)
 
@@ -116,9 +118,6 @@ Bio::Tools::Run::PiseApplication::blast2
 
 		strand (Excl)
 			Query strand to search against database (for blastx and tblastx) (-S)
-
-		affichage (Paragraph)
-			Report options
 
 		Descriptions (Integer)
 			How many short descriptions? (-v)
@@ -129,6 +128,9 @@ Bio::Tools::Run::PiseApplication::blast2
 		view_alignments (Excl)
 			Alignment view options  (not with blastx/tblastx) (-m)
 
+		show_gi (Switch)
+			Show GI's in deflines (only available for NCBI db such as nrprot) (-I)
+
 		seqalign_file (OutFile)
 			SeqAlign file (-J option must be true) (-O)
 
@@ -138,11 +140,7 @@ Bio::Tools::Run::PiseApplication::blast2
 		htmloutput (Switch)
 			Html output
 
-		htmlopt (Paragraph)
-			HTML output options (html4blast)
-
 		html4blast_input (String)
-
 
 		external_links (Switch)
 			Use external web sites for databases entries retrieval links (-e instead of -s)
@@ -153,11 +151,8 @@ Bio::Tools::Run::PiseApplication::blast2
 		image_query (Switch)
 			Generate images names based on corresponding query (-q)
 
-		htmlfile (Results)
-
-
-		othersopt (Paragraph)
-			Other Options
+		restrict_db (InFile)
+			Restrict search of database to GI's in file (-l)
 
 		psi_checkpoint (InFile)
 			PSI-TBLASTN checkpoint file (-R)
@@ -165,13 +160,63 @@ Bio::Tools::Run::PiseApplication::blast2
 
 		txtoutput (String)
 
+=head1 FEEDBACK
 
-		tmp_outfile (Results)
+=head2 Mailing Lists
 
-			pipe: blast_output
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
 
-		xmloutput (Results)
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/blast2.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -187,20 +232,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $blast2 = Bio::Tools::Run::PiseApplication::blast2->new($remote, $email, @params);
+ Usage   : my $blast2 = Bio::Tools::Run::PiseApplication::blast2->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::blast2 object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $blast2 = $factory->program('blast2');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::blast2.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/blast2.pm
 
@@ -209,6 +254,8 @@ sub new {
     $self->{TITLE}   = "BLAST2";
 
     $self->{DESCRIPTION}   = "with gaps";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Altschul, Madden, Schaeffer, Zhang, Miller, Lipman";
 
@@ -221,6 +268,7 @@ sub new {
     $self->{_STANDOUT_FILE} = undef;
 
     $self->{TOP_PARAMETERS}  = [ 
+	"blast_init",
 	"blast2",
 	"nb_proc",
 	"query",
@@ -241,6 +289,7 @@ sub new {
     ];
 
     $self->{PARAMETERS_ORDER}  = [
+	"blast_init",
 	"blast2", 	# Blast program
 	"nb_proc",
 	"query", 	# Sequence File
@@ -276,6 +325,7 @@ sub new {
 	"Descriptions", 	# How many short descriptions? (-v)
 	"Alignments", 	# How many alignments? (-b)
 	"view_alignments", 	# Alignment view options  (not with blastx/tblastx) (-m)
+	"show_gi", 	# Show GI's in deflines (only available for NCBI db such as nrprot) (-I)
 	"seqalign_file", 	# SeqAlign file (-J option must be true) (-O)
 	"believe", 	# Believe the query defline (-J)
 	"htmloutput", 	# Html output
@@ -286,6 +336,7 @@ sub new {
 	"image_query", 	# Generate images names based on corresponding query (-q)
 	"htmlfile",
 	"othersopt", 	# Other Options
+	"restrict_db", 	# Restrict search of database to GI's in file (-l)
 	"psi_checkpoint", 	# PSI-TBLASTN checkpoint file (-R)
 	"txtoutput",
 	"tmp_outfile",
@@ -294,6 +345,7 @@ sub new {
     ];
 
     $self->{TYPE}  = {
+	"blast_init" => 'String',
 	"blast2" => 'Excl',
 	"nb_proc" => 'Integer',
 	"query" => 'Sequence',
@@ -329,6 +381,7 @@ sub new {
 	"Descriptions" => 'Integer',
 	"Alignments" => 'Integer',
 	"view_alignments" => 'Excl',
+	"show_gi" => 'Switch',
 	"seqalign_file" => 'OutFile',
 	"believe" => 'Switch',
 	"htmloutput" => 'Switch',
@@ -339,6 +392,7 @@ sub new {
 	"image_query" => 'Switch',
 	"htmlfile" => 'Results',
 	"othersopt" => 'Paragraph',
+	"restrict_db" => 'InFile',
 	"psi_checkpoint" => 'InFile',
 	"txtoutput" => 'String',
 	"tmp_outfile" => 'Results',
@@ -347,6 +401,9 @@ sub new {
     };
 
     $self->{FORMAT}  = {
+	"blast_init" => {
+		"perl" => ' " " ',
+	},
 	"blast2" => {
 		"perl" => '"blastall -p $value"',
 	},
@@ -445,6 +502,9 @@ sub new {
 	"view_alignments" => {
 		"perl" => '($value)? " -m $value" : "" ',
 	},
+	"show_gi" => {
+		"perl" => '($value)? " -I" : "" ',
+	},
 	"seqalign_file" => {
 		"perl" => '($value)? " -O $value" : ""',
 	},
@@ -471,6 +531,9 @@ sub new {
 	"htmlfile" => {
 	},
 	"othersopt" => {
+	},
+	"restrict_db" => {
+		"perl" => '(defined $value) ? " -l $value" : ""',
 	},
 	"psi_checkpoint" => {
 		"perl" => '(defined $value) ? " -R $value" : ""',
@@ -499,6 +562,7 @@ sub new {
     };
 
     $self->{GROUP}  = {
+	"blast_init" => -10,
 	"blast2" => 1,
 	"nb_proc" => 6,
 	"query" => 3,
@@ -530,6 +594,7 @@ sub new {
 	"Descriptions" => 5,
 	"Alignments" => 5,
 	"view_alignments" => 4,
+	"show_gi" => 4,
 	"seqalign_file" => 4,
 	"believe" => 4,
 	"htmloutput" => 20,
@@ -538,6 +603,7 @@ sub new {
 	"one_HSP_per_line" => 25,
 	"image_query" => 25,
 	"othersopt" => 5,
+	"restrict_db" => 7,
 	"psi_checkpoint" => 5,
 	"txtoutput" => 7,
 	"xmloutput" => 7,
@@ -545,48 +611,51 @@ sub new {
     };
 
     $self->{BY_GROUP_PARAMETERS}  = [
-	"htmlfile",
+	"blast_init",
+	"tmp_outfile",
 	"htmlopt",
-	"strand",
+	"htmlfile",
 	"start_region",
 	"affichage",
+	"strand",
 	"translation_opt",
-	"tmp_outfile",
 	"blast2",
 	"protein_db",
 	"query",
 	"nucleotid_db",
-	"open_a_gap",
 	"gc_query",
+	"gc_db",
 	"filter_opt",
 	"filter",
 	"other_filters",
 	"lower_case",
-	"gc_db",
 	"view_alignments",
+	"show_gi",
 	"seqalign_file",
 	"believe",
 	"scoring_opt",
 	"mismatch",
 	"match",
 	"matrix",
+	"open_a_gap",
 	"extend_hit",
 	"end_region",
 	"selectivity_opt",
 	"Expect",
 	"word_size",
 	"dist_hits",
-	"gapped_alig",
 	"Descriptions",
 	"Alignments",
 	"extend_a_gap",
 	"dropoff_final",
 	"dropoff",
+	"gapped_alig",
 	"keep_hits",
 	"dropoff_extent",
 	"othersopt",
 	"psi_checkpoint",
 	"nb_proc",
+	"restrict_db",
 	"txtoutput",
 	"xmloutput",
 	"htmloutput",
@@ -602,6 +671,7 @@ sub new {
     };
 
     $self->{ISHIDDEN}  = {
+	"blast_init" => 1,
 	"blast2" => 0,
 	"nb_proc" => 1,
 	"query" => 0,
@@ -637,6 +707,7 @@ sub new {
 	"Descriptions" => 0,
 	"Alignments" => 0,
 	"view_alignments" => 0,
+	"show_gi" => 0,
 	"seqalign_file" => 0,
 	"believe" => 0,
 	"htmloutput" => 0,
@@ -647,6 +718,7 @@ sub new {
 	"image_query" => 0,
 	"htmlfile" => 0,
 	"othersopt" => 0,
+	"restrict_db" => 0,
 	"psi_checkpoint" => 0,
 	"txtoutput" => 1,
 	"tmp_outfile" => 0,
@@ -655,6 +727,7 @@ sub new {
     };
 
     $self->{ISCOMMAND}  = {
+	"blast_init" => 0,
 	"blast2" => 1,
 	"nb_proc" => 0,
 	"query" => 0,
@@ -690,6 +763,7 @@ sub new {
 	"Descriptions" => 0,
 	"Alignments" => 0,
 	"view_alignments" => 0,
+	"show_gi" => 0,
 	"seqalign_file" => 0,
 	"believe" => 0,
 	"htmloutput" => 0,
@@ -700,6 +774,7 @@ sub new {
 	"image_query" => 0,
 	"htmlfile" => 0,
 	"othersopt" => 0,
+	"restrict_db" => 0,
 	"psi_checkpoint" => 0,
 	"txtoutput" => 0,
 	"tmp_outfile" => 0,
@@ -708,6 +783,7 @@ sub new {
     };
 
     $self->{ISMANDATORY}  = {
+	"blast_init" => 0,
 	"blast2" => 1,
 	"nb_proc" => 0,
 	"query" => 1,
@@ -743,6 +819,7 @@ sub new {
 	"Descriptions" => 0,
 	"Alignments" => 0,
 	"view_alignments" => 0,
+	"show_gi" => 0,
 	"seqalign_file" => 0,
 	"believe" => 0,
 	"htmloutput" => 0,
@@ -753,6 +830,7 @@ sub new {
 	"image_query" => 0,
 	"htmlfile" => 0,
 	"othersopt" => 0,
+	"restrict_db" => 0,
 	"psi_checkpoint" => 0,
 	"txtoutput" => 0,
 	"tmp_outfile" => 0,
@@ -761,6 +839,7 @@ sub new {
     };
 
     $self->{PROMPT}  = {
+	"blast_init" => "",
 	"blast2" => "Blast program",
 	"nb_proc" => "",
 	"query" => "Sequence File",
@@ -796,6 +875,7 @@ sub new {
 	"Descriptions" => "How many short descriptions? (-v)",
 	"Alignments" => "How many alignments? (-b)",
 	"view_alignments" => "Alignment view options  (not with blastx/tblastx) (-m)",
+	"show_gi" => "Show GI's in deflines (only available for NCBI db such as nrprot) (-I)",
 	"seqalign_file" => "SeqAlign file (-J option must be true) (-O)",
 	"believe" => "Believe the query defline (-J)",
 	"htmloutput" => "Html output",
@@ -806,6 +886,7 @@ sub new {
 	"image_query" => "Generate images names based on corresponding query (-q)",
 	"htmlfile" => "",
 	"othersopt" => "Other Options",
+	"restrict_db" => "Restrict search of database to GI's in file (-l)",
 	"psi_checkpoint" => "PSI-TBLASTN checkpoint file (-R)",
 	"txtoutput" => "",
 	"tmp_outfile" => "",
@@ -814,6 +895,7 @@ sub new {
     };
 
     $self->{ISSTANDOUT}  = {
+	"blast_init" => 0,
 	"blast2" => 0,
 	"nb_proc" => 0,
 	"query" => 0,
@@ -849,6 +931,7 @@ sub new {
 	"Descriptions" => 0,
 	"Alignments" => 0,
 	"view_alignments" => 0,
+	"show_gi" => 0,
 	"seqalign_file" => 0,
 	"believe" => 0,
 	"htmloutput" => 0,
@@ -859,6 +942,7 @@ sub new {
 	"image_query" => 0,
 	"htmlfile" => 0,
 	"othersopt" => 0,
+	"restrict_db" => 0,
 	"psi_checkpoint" => 0,
 	"txtoutput" => 0,
 	"tmp_outfile" => 0,
@@ -869,7 +953,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"blast2" => ['blastn','blastn: nucleotide query / nucleotide db','blastp','blastp: amino acid query / protein db','blastx','blastx: nucleotide query translated / protein db','tblastn','tblastn: protein query / translated nucleotide db','tblastx','tblastx: nucleotide query transl. / transl. nucleotide db','psitblastn','psitblastn: protein query / transl. nucleotide db',],
-	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','prodom','prodom: protein domains','sbase','sbase: annotated domains sequences',],
+	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','sbase','sbase: annotated domains sequences',],
 	"nucleotid_db" => ['embl','embl: Embl last release + updates','embl_new','embl_new: Embl updates','genbank','genbank: Genbank last release + updates','genbank_new','genbank_new: Genbank updates','gbbct','gbbct: genbank bacteria','gbpri','gbpri: primates','gbmam','gbmam: other mammals','gbrod','gbrod: rodents','gbvrt','gbvrt: other vertebrates','gbinv','gbinv: invertebrates','gbpln','gbpln: plants (including yeast)','gbvrl','gbvrl: virus','gbphg','gbphg: phages','gbest','gbest: EST (Expressed Sequence Tags)','gbsts','gbsts: STS (Sequence Tagged sites)','gbsyn','gbsyn: synthetic','gbpat','gbpat: patented','gbuna','gbuna: unannotated','gbgss','gbgss: Genome Survey Sequences','gbhtg','gbhtg: GS (high throughput Genomic Sequencing)','imgt','imgt: ImMunoGeneTics','borrelia','borrelia: Borrelia burgdorferi complete genome','ecoli','ecoli: Escherichia Coli complete genome','genitalium','genitalium: Mycoplasma Genitalium complete genome','pneumoniae','pneumoniae: Mycoplasma Pneumoniae complete genome','pylori','pylori: Helicobacter Pylori complete genome','subtilis','subtilis: Bacillus Subtilis complete genome','tuberculosis','tuberculosis: Mycobacterium tuberculosis complete genome','ypestis','Yersinia pestis unfinished genome','yeast','yeast: Yeast chromosomes',],
 	"filter_opt" => ['filter','other_filters','lower_case',],
 	"other_filters" => ['v1','masking instead of filtering (with Seg)','v2','coiled-coiled filter','v3','both seg and coiled-coiled filters','v4','dust filter (DNA query)','v5','lower-case masking (-U must be true)',],
@@ -880,10 +964,10 @@ sub new {
 	"gc_query" => ['1','1: Standard','2','2: Vertebrate Mitochondrial','3','3: Yeast Mitochondrial','4','4: Mold, Protozoan, Coelenterate Mitochondrial and Mycoplasma/Spiroplasma','5','5: Invertebrate Mitochondrial','6','6: Ciliate Macronuclear and Dasycladacean','9','9: Echinoderm Mitochondrial','10','10: Euplotid Nuclear','11','11: Bacterial','12','12: Alternative Yeast Nuclear','13','13: Ascidian Mitochondrial','14','14: Flatworm Mitochondrial','15','15: Blepharisma Macronuclear',],
 	"gc_db" => ['1','1: Standard','2','2: Vertebrate Mitochondrial','3','3: Yeast Mitochondrial','4','4: Mold, Protozoan, Coelenterate Mitochondrial and Mycoplasma/Spiroplasma','5','5: Invertebrate Mitochondrial','6','6: Ciliate Macronuclear and Dasycladacean','9','9: Echinoderm Mitochondrial','10','10: Euplotid Nuclear','11','11: Bacterial','12','12: Alternative Yeast Nuclear','13','13: Ascidian Mitochondrial','14','14: Flatworm Mitochondrial','15','15: Blepharisma Macronuclear',],
 	"strand" => ['1','1: top','2','2: bottom','3','3:both',],
-	"affichage" => ['Descriptions','Alignments','view_alignments','seqalign_file','believe','htmloutput','htmlopt',],
+	"affichage" => ['Descriptions','Alignments','view_alignments','show_gi','seqalign_file','believe','htmloutput','htmlopt',],
 	"view_alignments" => ['0','0: pairwise','1','1: query-anchored showing identities','2','2: query-anchored no identities','3','3: flat query-anchored, show identities','4','4: flat query-anchored, no identities','5','5: query-anchored no identities and blunt ends','6','6: flat query-anchored, no identities and blunt ends','7','7: XML Blast output','8','8: Tabular output',],
 	"htmlopt" => ['html4blast_input','external_links','one_HSP_per_line','image_query','htmlfile',],
-	"othersopt" => ['psi_checkpoint',],
+	"othersopt" => ['restrict_db','psi_checkpoint',],
     };
 
     $self->{FLIST}  = {
@@ -919,6 +1003,7 @@ sub new {
 	"Descriptions" => '500',
 	"Alignments" => '250',
 	"view_alignments" => '0',
+	"show_gi" => '0',
 	"believe" => '0',
 	"htmloutput" => '1',
 	"external_links" => '0',
@@ -928,6 +1013,7 @@ sub new {
     };
 
     $self->{PRECOND}  = {
+	"blast_init" => { "perl" => '1' },
 	"blast2" => { "perl" => '1' },
 	"nb_proc" => { "perl" => '1' },
 	"query" => { "perl" => '1' },
@@ -983,7 +1069,10 @@ sub new {
 	"Descriptions" => { "perl" => '1' },
 	"Alignments" => { "perl" => '1' },
 	"view_alignments" => {
-		"perl" => '($blast2 ne "blastx" && $blast2 ne "tblastx")',
+		"perl" => '$blast2 !~ /blastx$/',
+	},
+	"show_gi" => {
+		"perl" => '$protein_db eq "nrprot"',
 	},
 	"seqalign_file" => {
 		"perl" => '$believe',
@@ -1011,6 +1100,9 @@ sub new {
 		"perl" => '$htmloutput && ($_html) && ($view_alignments !~ /^[78]$/)',
 	},
 	"othersopt" => { "perl" => '1' },
+	"restrict_db" => {
+		"perl" => '$protein_db eq "nrprot"',
+	},
 	"psi_checkpoint" => {
 		"perl" => '$blast2 eq psitblastn',
 	},
@@ -1057,6 +1149,7 @@ sub new {
     };
 
     $self->{ISCLEAN}  = {
+	"blast_init" => 0,
 	"blast2" => 0,
 	"nb_proc" => 0,
 	"query" => 0,
@@ -1092,6 +1185,7 @@ sub new {
 	"Descriptions" => 0,
 	"Alignments" => 0,
 	"view_alignments" => 0,
+	"show_gi" => 0,
 	"seqalign_file" => 0,
 	"believe" => 0,
 	"htmloutput" => 0,
@@ -1102,6 +1196,7 @@ sub new {
 	"image_query" => 0,
 	"htmlfile" => 0,
 	"othersopt" => 0,
+	"restrict_db" => 0,
 	"psi_checkpoint" => 0,
 	"txtoutput" => 0,
 	"tmp_outfile" => 0,
@@ -1110,6 +1205,7 @@ sub new {
     };
 
     $self->{ISSIMPLE}  = {
+	"blast_init" => 0,
 	"blast2" => 1,
 	"nb_proc" => 0,
 	"query" => 1,
@@ -1145,6 +1241,7 @@ sub new {
 	"Descriptions" => 0,
 	"Alignments" => 0,
 	"view_alignments" => 0,
+	"show_gi" => 0,
 	"seqalign_file" => 0,
 	"believe" => 0,
 	"htmloutput" => 0,
@@ -1155,6 +1252,7 @@ sub new {
 	"image_query" => 0,
 	"htmlfile" => 0,
 	"othersopt" => 0,
+	"restrict_db" => 0,
 	"psi_checkpoint" => 0,
 	"txtoutput" => 0,
 	"tmp_outfile" => 0,
@@ -1233,6 +1331,10 @@ sub new {
 	],
 	"Alignments" => [
 		"Maximum number of database sequences for which high-scoring segment pairs will be reported (-b).",
+	],
+	"show_gi" => [
+		"Causes NCBI gi identifiers to be shown in the output, in addition to the accession and/or locus name. ",
+		"Warning: only available for NCBI db such as nrprot.",
 	],
 	"seqalign_file" => [
 		"SeqAlign is in ASN.1 format, so that it can be read with NCBI tools (such as sequin). This allows one to view the results in different formats.",

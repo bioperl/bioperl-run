@@ -1,5 +1,5 @@
 # $Id$
-# BioPerl module for Bio::Tools::Run::PiseApplication::cutseq
+# BioPerl module for Bio::Tools::Run::PiseApplication::tranalign
 #
 # Cared for by Catherine Letondal <letondal@pasteur.fr>
 #
@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::PiseApplication::cutseq
+Bio::Tools::Run::PiseApplication::tranalign
 
 =head1 SYNOPSIS
 
@@ -17,37 +17,37 @@ Bio::Tools::Run::PiseApplication::cutseq
 
 =head1 DESCRIPTION
 
-Bio::Tools::Run::PiseApplication::cutseq
+Bio::Tools::Run::PiseApplication::tranalign
 
       Bioperl class for:
 
-	CUTSEQ	Removes a specified section from a sequence. (EMBOSS)
+	TRANALIGN	Align nucleic coding regions given the aligned proteins (EMBOSS)
 
 
       Parameters: 
 
         (see also:
-          http://bioweb.pasteur.fr/seqanal/interfaces/cutseq.html 
+          http://bioweb.pasteur.fr/seqanal/interfaces/tranalign.html 
          for available values):
 
 
-		cutseq (String)
+		tranalign (String)
 
 		init (String)
 
-		sequence (Sequence)
-			sequence -- gapany [single sequence] (-sequence)
-			pipe: seqfile
+		nsequence (Sequence)
+			Nucleotide sequences to be aligned (-nsequence)
+			pipe: seqsfile
 
-		from (Integer)
-			Start of region to delete (-from)
+		psequence (Sequence)
+			Protein sequence alignment (-psequence)
 
-		to (Integer)
-			End of region to delete (-to)
+		table (Excl)
+			Code to use -- Genetic codes (-table)
 
 		outseq (OutFile)
 			outseq (-outseq)
-			pipe: seqfile
+			pipe: seqsfile
 
 		outseq_sformat (Excl)
 			Output format for: outseq
@@ -96,7 +96,7 @@ This software is provided "as is" without warranty of any kind.
 
 =item *
 
-http://bioweb.pasteur.fr/seqanal/interfaces/cutseq.html
+http://bioweb.pasteur.fr/seqanal/interfaces/tranalign.html
 
 =item *
 
@@ -115,7 +115,7 @@ Bio::Tools::Run::PiseJob
 =cut
 
 #'
-package Bio::Tools::Run::PiseApplication::cutseq;
+package Bio::Tools::Run::PiseApplication::tranalign;
 
 use vars qw(@ISA);
 use strict;
@@ -126,14 +126,14 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $cutseq = Bio::Tools::Run::PiseApplication::cutseq->new($location, $email, @params);
- Function: Creates a Bio::Tools::Run::PiseApplication::cutseq object.
+ Usage   : my $tranalign = Bio::Tools::Run::PiseApplication::tranalign->new($location, $email, @params);
+ Function: Creates a Bio::Tools::Run::PiseApplication::tranalign object.
            This method should not be used directly, but rather by 
            a Bio::Tools::Run::AnalysisFactory::Pise instance.
            my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
-           my $cutseq = $factory->program('cutseq');
+           my $tranalign = $factory->program('tranalign');
  Example : -
- Returns : An instance of Bio::Tools::Run::PiseApplication::cutseq.
+ Returns : An instance of Bio::Tools::Run::PiseApplication::tranalign.
 
 =cut
 
@@ -141,44 +141,44 @@ sub new {
     my ($class, $location, $email, @params) = @_;
     my $self = $class->SUPER::new($location, $email);
 
-# -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/cutseq.pm
+# -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/tranalign.pm
 
-    $self->{COMMAND}   = "cutseq";
+    $self->{COMMAND}   = "tranalign";
     $self->{VERSION}   = "5.a";
-    $self->{TITLE}   = "CUTSEQ";
+    $self->{TITLE}   = "TRANALIGN";
 
-    $self->{DESCRIPTION}   = "Removes a specified section from a sequence. (EMBOSS)";
+    $self->{DESCRIPTION}   = "Align nucleic coding regions given the aligned proteins (EMBOSS)";
 
     $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
-         "edit",
+         "alignment:multiple",
   ];
 
-    $self->{DOCLINK}   = "http://www.uk.embnet.org/Software/EMBOSS/Apps/cutseq.html";
+    $self->{DOCLINK}   = "http://www.uk.embnet.org/Software/EMBOSS/Apps/tranalign.html";
 
     $self->{_INTERFACE_STANDOUT} = undef;
     $self->{_STANDOUT_FILE} = undef;
 
     $self->{TOP_PARAMETERS}  = [ 
-	"cutseq",
+	"tranalign",
 	"init",
 	"input",
-	"required",
+	"advanced",
 	"output",
 	"auto",
 
     ];
 
     $self->{PARAMETERS_ORDER}  = [
-	"cutseq",
+	"tranalign",
 	"init",
 	"input", 	# input Section
-	"sequence", 	# sequence -- gapany [single sequence] (-sequence)
-	"required", 	# required Section
-	"from", 	# Start of region to delete (-from)
-	"to", 	# End of region to delete (-to)
+	"nsequence", 	# Nucleotide sequences to be aligned (-nsequence)
+	"psequence", 	# Protein sequence alignment (-psequence)
+	"advanced", 	# advanced Section
+	"table", 	# Code to use -- Genetic codes (-table)
 	"output", 	# output Section
 	"outseq", 	# outseq (-outseq)
 	"outseq_sformat", 	# Output format for: outseq
@@ -187,13 +187,13 @@ sub new {
     ];
 
     $self->{TYPE}  = {
-	"cutseq" => 'String',
+	"tranalign" => 'String',
 	"init" => 'String',
 	"input" => 'Paragraph',
-	"sequence" => 'Sequence',
-	"required" => 'Paragraph',
-	"from" => 'Integer',
-	"to" => 'Integer',
+	"nsequence" => 'Sequence',
+	"psequence" => 'Sequence',
+	"advanced" => 'Paragraph',
+	"table" => 'Excl',
 	"output" => 'Paragraph',
 	"outseq" => 'OutFile',
 	"outseq_sformat" => 'Excl',
@@ -207,16 +207,16 @@ sub new {
 	},
 	"input" => {
 	},
-	"sequence" => {
-		"perl" => '" -sequence=$value -sformat=fasta"',
+	"nsequence" => {
+		"perl" => '" -nsequence=$value -sformat=fasta"',
 	},
-	"required" => {
+	"psequence" => {
+		"perl" => '" -psequence=$value -sformat=fasta"',
 	},
-	"from" => {
-		"perl" => '" -from=$value"',
+	"advanced" => {
 	},
-	"to" => {
-		"perl" => '" -to=$value"',
+	"table" => {
+		"perl" => '" -table=$value"',
 	},
 	"output" => {
 	},
@@ -229,8 +229,8 @@ sub new {
 	"auto" => {
 		"perl" => '" -auto -stdout"',
 	},
-	"cutseq" => {
-		"perl" => '"cutseq"',
+	"tranalign" => {
+		"perl" => '"tranalign"',
 	}
 
     };
@@ -240,31 +240,32 @@ sub new {
     };
 
     $self->{SEQFMT}  = {
-	"sequence" => [8],
+	"nsequence" => [8],
+	"psequence" => [8],
 
     };
 
     $self->{GROUP}  = {
 	"init" => -10,
-	"sequence" => 1,
-	"from" => 2,
-	"to" => 3,
+	"nsequence" => 1,
+	"psequence" => 2,
+	"table" => 3,
 	"outseq" => 4,
 	"outseq_sformat" => 5,
 	"auto" => 6,
-	"cutseq" => 0
+	"tranalign" => 0
 
     };
 
     $self->{BY_GROUP_PARAMETERS}  = [
 	"init",
 	"input",
-	"required",
 	"output",
-	"cutseq",
-	"sequence",
-	"from",
-	"to",
+	"tranalign",
+	"advanced",
+	"nsequence",
+	"psequence",
+	"table",
 	"outseq",
 	"outseq_sformat",
 	"auto",
@@ -278,25 +279,25 @@ sub new {
     $self->{ISHIDDEN}  = {
 	"init" => 1,
 	"input" => 0,
-	"sequence" => 0,
-	"required" => 0,
-	"from" => 0,
-	"to" => 0,
+	"nsequence" => 0,
+	"psequence" => 0,
+	"advanced" => 0,
+	"table" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"auto" => 1,
-	"cutseq" => 1
+	"tranalign" => 1
 
     };
 
     $self->{ISCOMMAND}  = {
 	"init" => 0,
 	"input" => 0,
-	"sequence" => 0,
-	"required" => 0,
-	"from" => 0,
-	"to" => 0,
+	"nsequence" => 0,
+	"psequence" => 0,
+	"advanced" => 0,
+	"table" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -307,10 +308,10 @@ sub new {
     $self->{ISMANDATORY}  = {
 	"init" => 0,
 	"input" => 0,
-	"sequence" => 1,
-	"required" => 0,
-	"from" => 1,
-	"to" => 1,
+	"nsequence" => 1,
+	"psequence" => 1,
+	"advanced" => 0,
+	"table" => 1,
 	"output" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 0,
@@ -321,10 +322,10 @@ sub new {
     $self->{PROMPT}  = {
 	"init" => "",
 	"input" => "input Section",
-	"sequence" => "sequence -- gapany [single sequence] (-sequence)",
-	"required" => "required Section",
-	"from" => "Start of region to delete (-from)",
-	"to" => "End of region to delete (-to)",
+	"nsequence" => "Nucleotide sequences to be aligned (-nsequence)",
+	"psequence" => "Protein sequence alignment (-psequence)",
+	"advanced" => "advanced Section",
+	"table" => "Code to use -- Genetic codes (-table)",
 	"output" => "output Section",
 	"outseq" => "outseq (-outseq)",
 	"outseq_sformat" => "Output format for: outseq",
@@ -335,10 +336,10 @@ sub new {
     $self->{ISSTANDOUT}  = {
 	"init" => 0,
 	"input" => 0,
-	"sequence" => 0,
-	"required" => 0,
-	"from" => 0,
-	"to" => 0,
+	"nsequence" => 0,
+	"psequence" => 0,
+	"advanced" => 0,
+	"table" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -348,8 +349,9 @@ sub new {
 
     $self->{VLIST}  = {
 
-	"input" => ['sequence',],
-	"required" => ['from','to',],
+	"input" => ['nsequence','psequence',],
+	"advanced" => ['table',],
+	"table" => ['0','Standard','1','Standard (with alternative initiation codons)','2','Vertebrate Mitochondrial','3','Yeast Mitochondrial','4','Mold, Protozoan, Coelenterate Mitochondrial and Mycoplasma/Spiroplasma','5','Invertebrate Mitochondrial','6','Ciliate Macronuclear and Dasycladacean','9','Echinoderm Mitochondrial','10','Euplotid Nuclear','11','Bacterial','12','Alternative Yeast Nuclear','13','Ascidian Mitochondrial','14','Flatworm Mitochondrial','15','Blepharisma Macronuclear','16','Chlorophycean Mitochondrial','21','Trematode Mitochondrial','22','Scenedesmus obliquus','23','Thraustochytrium Mitochondrial',],
 	"output" => ['outseq','outseq_sformat',],
 	"outseq_sformat" => ['fasta','fasta','gcg','gcg','phylip','phylip','embl','embl','swiss','swiss','ncbi','ncbi','nbrf','nbrf','genbank','genbank','ig','ig','codata','codata','strider','strider','acedb','acedb','staden','staden','text','text','fitch','fitch','msf','msf','clustal','clustal','phylip','phylip','phylip3','phylip3','asn1','asn1',],
     };
@@ -363,7 +365,7 @@ sub new {
     };
 
     $self->{VDEF}  = {
-	"to" => '',
+	"table" => '0',
 	"outseq" => 'outseq.out',
 	"outseq_sformat" => 'fasta',
 
@@ -372,10 +374,10 @@ sub new {
     $self->{PRECOND}  = {
 	"init" => { "perl" => '1' },
 	"input" => { "perl" => '1' },
-	"sequence" => { "perl" => '1' },
-	"required" => { "perl" => '1' },
-	"from" => { "perl" => '1' },
-	"to" => { "perl" => '1' },
+	"nsequence" => { "perl" => '1' },
+	"psequence" => { "perl" => '1' },
+	"advanced" => { "perl" => '1' },
+	"table" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
 	"outseq" => { "perl" => '1' },
 	"outseq_sformat" => { "perl" => '1' },
@@ -389,7 +391,7 @@ sub new {
 
     $self->{PIPEOUT}  = {
 	"outseq" => {
-		 '1' => "seqfile",
+		 '1' => "seqsfile",
 	},
 
     };
@@ -399,8 +401,8 @@ sub new {
     };
 
     $self->{PIPEIN}  = {
-	"sequence" => {
-		 "seqfile" => '1',
+	"nsequence" => {
+		 "seqsfile" => '1',
 	},
 
     };
@@ -412,10 +414,10 @@ sub new {
     $self->{ISCLEAN}  = {
 	"init" => 0,
 	"input" => 0,
-	"sequence" => 0,
-	"required" => 0,
-	"from" => 0,
-	"to" => 0,
+	"nsequence" => 0,
+	"psequence" => 0,
+	"advanced" => 0,
+	"table" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -426,10 +428,10 @@ sub new {
     $self->{ISSIMPLE}  = {
 	"init" => 0,
 	"input" => 0,
-	"sequence" => 1,
-	"required" => 0,
-	"from" => 1,
-	"to" => 1,
+	"nsequence" => 1,
+	"psequence" => 1,
+	"advanced" => 0,
+	"table" => 1,
 	"output" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 1,
@@ -442,12 +444,6 @@ sub new {
     };
 
     $self->{COMMENT}  = {
-	"from" => [
-		"This is the start position (inclusive) of the section of the sequence that you wish to remove.",
-	],
-	"to" => [
-		"This is the end position (inclusive) of the section of the sequence that you wish to remove.",
-	],
 
     };
 
@@ -467,7 +463,7 @@ sub new {
 
     };
 
-# -- end of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/cutseq.pm
+# -- end of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/tranalign.pm
 
 
 

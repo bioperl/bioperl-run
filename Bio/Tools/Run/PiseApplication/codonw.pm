@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::codonw
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,23 +23,20 @@ Bio::Tools::Run::PiseApplication::codonw
 
 	codonw	Correspondence Analysis of Codon Usage (J. Peden)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/codonw.html 
+         for available values):
 
 
 		codonw (String)
 
-
 		outfiles (String)
-
-
-		results_files (Results)
-
 
 		seqfile (Sequence)
 			Sequences File
-
-		defaults (Paragraph)
-			Defaults settings
 
 		gc (Excl)
 			Genetic codes
@@ -47,9 +52,6 @@ Bio::Tools::Run::PiseApplication::codonw
 
 		genes (Switch)
 			Concatenate genes (instead of individual genes)
-
-		CU_options (Paragraph)
-			Codon usage indices
 
 		CAI (Switch)
 			Codon Adaptation Index (CAI)
@@ -86,10 +88,10 @@ Bio::Tools::Run::PiseApplication::codonw
 			All the above indices
 
 		L_sym (Integer)
-			Number of synonymous codons (N_sym)
+			Number of synonymous codons (L_sym)
 
-		N_aa (Switch)
-			Total Number of synonymous and non-synonymous codons (N_aa)
+		L_aa (Switch)
+			Total Number of synonymous and non-synonymous codons (L_aa)
 
 		Hydro (Switch)
 			Hydrophobicity of protein (Hydro)
@@ -99,9 +101,6 @@ Bio::Tools::Run::PiseApplication::codonw
 
 		bulk_output_option (Excl)
 			Other output option
-
-		COA_options (Paragraph)
-			Correspondence analysis options (available for several sequences)
 
 		coa_cu (Switch)
 			COA on codon usage
@@ -122,11 +121,65 @@ Bio::Tools::Run::PiseApplication::codonw
 			Select number of genes to use to identify optimal codons
 
 		cai_coa (OutFile)
-
 			pipe: codonw_coa_file
 
-		coa_files (Results)
+=head1 FEEDBACK
 
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/codonw.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -142,20 +195,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $codonw = Bio::Tools::Run::PiseApplication::codonw->new($remote, $email, @params);
+ Usage   : my $codonw = Bio::Tools::Run::PiseApplication::codonw->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::codonw object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $codonw = $factory->program('codonw');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::codonw.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/codonw.pm
 
@@ -164,6 +217,8 @@ sub new {
     $self->{TITLE}   = "codonw";
 
     $self->{DESCRIPTION}   = "Correspondence Analysis of Codon Usage";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "J. Peden";
 
@@ -206,8 +261,8 @@ sub new {
 	"GC3s", 	# GC of silent 3rd codon posit. (GC3s)
 	"silent_bc", 	# Silent base composition
 	"all_indices", 	# All the above indices
-	"L_sym", 	# Number of synonymous codons (N_sym)
-	"N_aa", 	# Total Number of synonymous and non-synonymous codons (N_aa)
+	"L_sym", 	# Number of synonymous codons (L_sym)
+	"L_aa", 	# Total Number of synonymous and non-synonymous codons (L_aa)
 	"Hydro", 	# Hydrophobicity of protein (Hydro)
 	"Aromo", 	# Aromaticity of protein (Aromo)
 	"bulk_output_option", 	# Other output option
@@ -247,7 +302,7 @@ sub new {
 	"silent_bc" => 'Switch',
 	"all_indices" => 'Switch',
 	"L_sym" => 'Integer',
-	"N_aa" => 'Switch',
+	"L_aa" => 'Switch',
 	"Hydro" => 'Switch',
 	"Aromo" => 'Switch',
 	"bulk_output_option" => 'Excl',
@@ -328,10 +383,10 @@ sub new {
 		"perl" => '($value)? " -all_indices" : "" ',
 	},
 	"L_sym" => {
-		"perl" => '(defined $value)? " -N_sym" : "" ',
+		"perl" => '(defined $value)? " -L_sym" : "" ',
 	},
-	"N_aa" => {
-		"perl" => '($value)? " -N_aa" : "" ',
+	"L_aa" => {
+		"perl" => '($value)? " -L_aa" : "" ',
 	},
 	"Hydro" => {
 		"perl" => '($value)? " -hyd" : "" ',
@@ -402,7 +457,7 @@ sub new {
 	"silent_bc" => 4,
 	"all_indices" => 4,
 	"L_sym" => 4,
-	"N_aa" => 4,
+	"L_aa" => 4,
 	"Hydro" => 4,
 	"Aromo" => 4,
 	"bulk_output_option" => 4,
@@ -440,7 +495,7 @@ sub new {
 	"genes",
 	"all_indices",
 	"L_sym",
-	"N_aa",
+	"L_aa",
 	"Hydro",
 	"Aromo",
 	"bulk_output_option",
@@ -484,7 +539,7 @@ sub new {
 	"silent_bc" => 0,
 	"all_indices" => 0,
 	"L_sym" => 0,
-	"N_aa" => 0,
+	"L_aa" => 0,
 	"Hydro" => 0,
 	"Aromo" => 0,
 	"bulk_output_option" => 0,
@@ -524,7 +579,7 @@ sub new {
 	"silent_bc" => 0,
 	"all_indices" => 0,
 	"L_sym" => 0,
-	"N_aa" => 0,
+	"L_aa" => 0,
 	"Hydro" => 0,
 	"Aromo" => 0,
 	"bulk_output_option" => 0,
@@ -564,7 +619,7 @@ sub new {
 	"silent_bc" => 0,
 	"all_indices" => 0,
 	"L_sym" => 0,
-	"N_aa" => 0,
+	"L_aa" => 0,
 	"Hydro" => 0,
 	"Aromo" => 0,
 	"bulk_output_option" => 0,
@@ -603,8 +658,8 @@ sub new {
 	"GC3s" => "GC of silent 3rd codon posit. (GC3s)",
 	"silent_bc" => "Silent base composition",
 	"all_indices" => "All the above indices",
-	"L_sym" => "Number of synonymous codons (N_sym)",
-	"N_aa" => "Total Number of synonymous and non-synonymous codons (N_aa)",
+	"L_sym" => "Number of synonymous codons (L_sym)",
+	"L_aa" => "Total Number of synonymous and non-synonymous codons (L_aa)",
 	"Hydro" => "Hydrophobicity of protein (Hydro)",
 	"Aromo" => "Aromaticity of protein (Aromo)",
 	"bulk_output_option" => "Other output option",
@@ -644,7 +699,7 @@ sub new {
 	"silent_bc" => 0,
 	"all_indices" => 0,
 	"L_sym" => 0,
-	"N_aa" => 0,
+	"L_aa" => 0,
 	"Hydro" => 0,
 	"Aromo" => 0,
 	"bulk_output_option" => 0,
@@ -666,7 +721,7 @@ sub new {
 	"gc" => ['0','(0) Universal Genetic code [TGA=* TAA=* TAG=*]','1','(1) Vertebrate Mitochondrial code [AGR=* ATA=M TGA=W]','2','(2) Yeast Mitochondrial code [CTN=* ATA=M TGA=W]','3','(3) Filamentous fungi Mitochondrial code [TGA=W]','4','(4) Insects and Plathyhelminthes Mitochondrial co [ATA=M TGA=W AGR=S]','5','(5) Nuclear code of Cilitia [UAA=Q=Gln UAG=Q]','6','(6) Nuclear code of Euplotes [UGA=C]','7','(7) Mitochondrial code of Echinoderms UGA=W AGR=S AAA=N',],
 	"fop_values" => ['0','(0) Escherichia coli','1','(1) Bacillus subtilis','2','(2) Dictyostelium discoideum','3','(3) Aspergillus nidulans','4','(4) Saccharomyces cerevisiae','5','(5) Drosophila melanogaster','6','(6) Caenorhabditis elegans','7','(7) Neurospora crassa',],
 	"cai_values" => ['0','(0) Escherichia coli','1','(1) Bacillus subtilis','2','(2) Saccharomyces cerevisiae',],
-	"CU_options" => ['CAI','Fop','CBI','cai_file','fop_file','cbi_file','ENc','GC','GC3s','silent_bc','all_indices','L_sym','N_aa','Hydro','Aromo','bulk_output_option',],
+	"CU_options" => ['CAI','Fop','CBI','cai_file','fop_file','cbi_file','ENc','GC','GC3s','silent_bc','all_indices','L_sym','L_aa','Hydro','Aromo','bulk_output_option',],
 	"bulk_output_option" => ['-cu','Codon Usage (CU)','-aau','Amino Acid Usage (AAU)','-raau','Relative Amino Acid Usage (RAAU)','-cutab','Tabulation of codon usage','-cutot','Tabulation of dataset\'s codon usage','-rscu','Relative Synonymous Codon Usage (RSCU)','-fasta','fasta format','-reader','Reader format (codons are seperated by spaces)','-transl','Conceptual translation of DNA to amino acid','-base','Detailed report of codon G+C composition','-dinuc','Dinucleotide usage of the three codon pos.','-noblk','No bulk output to be written to file',],
 	"COA_options" => ['coa_cu','coa_rscu','coa_aa','coa_expert','coa_axes','coa_num',],
     };
@@ -733,7 +788,7 @@ sub new {
 	},
 	"all_indices" => { "perl" => '1' },
 	"L_sym" => { "perl" => '1' },
-	"N_aa" => { "perl" => '1' },
+	"L_aa" => { "perl" => '1' },
 	"Hydro" => { "perl" => '1' },
 	"Aromo" => { "perl" => '1' },
 	"bulk_output_option" => { "perl" => '1' },
@@ -801,7 +856,7 @@ sub new {
 	"silent_bc" => 0,
 	"all_indices" => 0,
 	"L_sym" => 0,
-	"N_aa" => 0,
+	"L_aa" => 0,
 	"Hydro" => 0,
 	"Aromo" => 0,
 	"bulk_output_option" => 0,
@@ -841,7 +896,7 @@ sub new {
 	"silent_bc" => 0,
 	"all_indices" => 0,
 	"L_sym" => 0,
-	"N_aa" => 0,
+	"L_aa" => 0,
 	"Hydro" => 0,
 	"Aromo" => 0,
 	"bulk_output_option" => 0,

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::consensus
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,7 +28,12 @@ Bio::Tools::Run::PiseApplication::consensus
 		G.Z. Hertz and G.D. Stormo.  Identification of consensus patterns in unaligned DNA and protein sequences: a large-deviation statistical basis for penalizing gaps. In: Proceedings of the Third International Conference on Bioinformatics and Genome Research (H.A. Lim, and C.R. Cantor, editors). World Scientific Publishing Co., Ltd. Singapore, 1995. pages 201--216.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/consensus.html 
+         for available values):
 
 
 		consensus (Excl)
@@ -35,29 +48,10 @@ Bio::Tools::Run::PiseApplication::consensus
 
 		out (String)
 
-
 		consensus_matrix (String)
-
-
-		matrices (Results)
-
-			pipe: consensus_matrix
-
-		results_file (Results)
-
-			pipe: consensus_results
-
-		sequence_wcons (Results)
-
-
-		input_options (Paragraph)
-			Input options
 
 		complement (Excl)
 			Complement of nucleic acid sequences (-c)
-
-		alphabet_options (Paragraph)
-			Alphabet options
 
 		ascii_alphabet (InFile)
 			Alphabet and normalization information (if not DNA) (-a)
@@ -70,9 +64,6 @@ Bio::Tools::Run::PiseApplication::consensus
 
 		protein (Switch)
 			Alphabet and normalization information for protein
-
-		algorithm_options (Paragraph)
-			Algorithm options
 
 		queue (Integer)
 			Maximum number of matrices to save between cycles of the program -- ie: queue size (-q)
@@ -101,14 +92,69 @@ Bio::Tools::Run::PiseApplication::consensus
 		terminal_gap (Excl)
 			Permit terminal gaps (-pg) (wconsensus only)
 
-		output_options (Paragraph)
-			Output options
-
 		top_matrices (Integer)
 			Number of top matrices to print (-pt)
 
 		final_matrices (Integer)
 			Number of final matrices to print (-pf)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/consensus.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -124,20 +170,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $consensus = Bio::Tools::Run::PiseApplication::consensus->new($remote, $email, @params);
+ Usage   : my $consensus = Bio::Tools::Run::PiseApplication::consensus->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::consensus object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $consensus = $factory->program('consensus');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::consensus.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/consensus.pm
 
@@ -146,6 +192,8 @@ sub new {
     $self->{TITLE}   = "CONSENSUS";
 
     $self->{DESCRIPTION}   = "Identification of consensus patterns in unaligned DNA and protein sequences";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Hertz, Stormo";
 
@@ -246,7 +294,7 @@ sub new {
 		"perl" => '" -f $sequence.wcons"',
 	},
 	"width" => {
-		"perl" => '" -L$value"',
+		"perl" => '(defined $value) ? " -L$value" : ""',
 	},
 	"out" => {
 		"perl" => '" > $consensus.results"',
@@ -300,7 +348,7 @@ sub new {
 		"perl" => '($value)? " $max_cycle$max_cycle_nb" : "" ',
 	},
 	"distance" => {
-		"perl" => '(defined $value)? " -m$value " : "" ',
+		"perl" => '(defined $value) ? " -m$value " : ""',
 	},
 	"terminate" => {
 		"perl" => '(defined $value)? " -t$value " : "" ',

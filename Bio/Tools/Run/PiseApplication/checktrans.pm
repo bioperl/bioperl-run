@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::checktrans
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -13,32 +21,26 @@ Bio::Tools::Run::PiseApplication::checktrans
 
       Bioperl class for:
 
-	CHECKTRANS	Reports STOP codons and ORF statistics of a protein sequence (EMBOSS)
+	CHECKTRANS	Reports STOP codons and ORF statistics of a protein (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/checktrans.html 
+         for available values):
 
 
 		checktrans (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- stopprotein [sequences] (-sequence)
 			pipe: seqsfile
 
-		required (Paragraph)
-			required Section
-
 		orfml (Integer)
 			Minimum ORF Length to report (-orfml)
-
-		output (Paragraph)
-			output Section
 
 		report (OutFile)
 			report (-report)
@@ -51,10 +53,73 @@ Bio::Tools::Run::PiseApplication::checktrans
 			Output format for: Sequence file to hold output ORF sequences
 
 		featout (OutFile)
-			feature file for output (-featout)
+			Feature file for output (-featout)
+
+		featout_offormat (Excl)
+			Feature output format (-offormat)
+
+		addlast (Switch)
+			Force the sequence to end with an asterisk (-addlast)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/checktrans.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -70,20 +135,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $checktrans = Bio::Tools::Run::PiseApplication::checktrans->new($remote, $email, @params);
+ Usage   : my $checktrans = Bio::Tools::Run::PiseApplication::checktrans->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::checktrans object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $checktrans = $factory->program('checktrans');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::checktrans.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/checktrans.pm
 
@@ -91,7 +156,9 @@ sub new {
     $self->{VERSION}   = "5.a";
     $self->{TITLE}   = "CHECKTRANS";
 
-    $self->{DESCRIPTION}   = "Reports STOP codons and ORF statistics of a protein sequence (EMBOSS)";
+    $self->{DESCRIPTION}   = "Reports STOP codons and ORF statistics of a protein (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -109,6 +176,7 @@ sub new {
 	"input",
 	"required",
 	"output",
+	"advanced",
 	"auto",
 
     ];
@@ -124,7 +192,10 @@ sub new {
 	"report", 	# report (-report)
 	"outseq", 	# Sequence file to hold output ORF sequences (-outseq)
 	"outseq_sformat", 	# Output format for: Sequence file to hold output ORF sequences
-	"featout", 	# feature file for output (-featout)
+	"featout", 	# Feature file for output (-featout)
+	"featout_offormat", 	# Feature output format (-offormat)
+	"advanced", 	# advanced Section
+	"addlast", 	# Force the sequence to end with an asterisk (-addlast)
 	"auto",
 
     ];
@@ -141,6 +212,9 @@ sub new {
 	"outseq" => 'OutFile',
 	"outseq_sformat" => 'Excl',
 	"featout" => 'OutFile',
+	"featout_offormat" => 'Excl',
+	"advanced" => 'Paragraph',
+	"addlast" => 'Switch',
 	"auto" => 'String',
 
     };
@@ -173,6 +247,14 @@ sub new {
 	"featout" => {
 		"perl" => '" -featout=$value"',
 	},
+	"featout_offormat" => {
+		"perl" => '($value)? " -offormat=$value" : "" ',
+	},
+	"advanced" => {
+	},
+	"addlast" => {
+		"perl" => '($value)? "" : " -noaddlast"',
+	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
 	},
@@ -199,7 +281,9 @@ sub new {
 	"outseq" => 4,
 	"outseq_sformat" => 5,
 	"featout" => 6,
-	"auto" => 7,
+	"featout_offormat" => 6,
+	"addlast" => 7,
+	"auto" => 8,
 	"checktrans" => 0
 
     };
@@ -209,13 +293,16 @@ sub new {
 	"input",
 	"required",
 	"output",
+	"advanced",
 	"checktrans",
 	"sequence",
 	"orfml",
 	"report",
 	"outseq",
 	"outseq_sformat",
+	"featout_offormat",
 	"featout",
+	"addlast",
 	"auto",
 
     ];
@@ -235,6 +322,9 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
+	"advanced" => 0,
+	"addlast" => 0,
 	"auto" => 1,
 	"checktrans" => 1
 
@@ -251,6 +341,9 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
+	"advanced" => 0,
+	"addlast" => 0,
 	"auto" => 0,
 
     };
@@ -266,6 +359,9 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"featout" => 1,
+	"featout_offormat" => 0,
+	"advanced" => 0,
+	"addlast" => 0,
 	"auto" => 0,
 
     };
@@ -280,7 +376,10 @@ sub new {
 	"report" => "report (-report)",
 	"outseq" => "Sequence file to hold output ORF sequences (-outseq)",
 	"outseq_sformat" => "Output format for: Sequence file to hold output ORF sequences",
-	"featout" => "feature file for output (-featout)",
+	"featout" => "Feature file for output (-featout)",
+	"featout_offormat" => "Feature output format (-offormat)",
+	"advanced" => "advanced Section",
+	"addlast" => "Force the sequence to end with an asterisk (-addlast)",
 	"auto" => "",
 
     };
@@ -296,6 +395,9 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
+	"advanced" => 0,
+	"addlast" => 0,
 	"auto" => 0,
 
     };
@@ -304,8 +406,10 @@ sub new {
 
 	"input" => ['sequence',],
 	"required" => ['orfml',],
-	"output" => ['report','outseq','outseq_sformat','featout',],
+	"output" => ['report','outseq','outseq_sformat','featout','featout_offormat',],
 	"outseq_sformat" => ['fasta','fasta','gcg','gcg','phylip','phylip','embl','embl','swiss','swiss','ncbi','ncbi','nbrf','nbrf','genbank','genbank','ig','ig','codata','codata','strider','strider','acedb','acedb','staden','staden','text','text','fitch','fitch','msf','msf','clustal','clustal','phylip','phylip','phylip3','phylip3','asn1','asn1',],
+	"featout_offormat" => ['embl','embl','gff','gff','swiss','swiss','pir','pir','nbrf','nbrf',],
+	"advanced" => ['addlast',],
     };
 
     $self->{FLIST}  = {
@@ -321,6 +425,8 @@ sub new {
 	"report" => 'report.out',
 	"outseq_sformat" => 'fasta',
 	"featout" => 'featout.out',
+	"featout_offormat" => 'gff',
+	"addlast" => '1',
 
     };
 
@@ -335,6 +441,9 @@ sub new {
 	"outseq" => { "perl" => '1' },
 	"outseq_sformat" => { "perl" => '1' },
 	"featout" => { "perl" => '1' },
+	"featout_offormat" => { "perl" => '1' },
+	"advanced" => { "perl" => '1' },
+	"addlast" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
 
     };
@@ -376,6 +485,9 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
+	"advanced" => 0,
+	"addlast" => 0,
 	"auto" => 0,
 
     };
@@ -391,6 +503,9 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"featout" => 1,
+	"featout_offormat" => 0,
+	"advanced" => 0,
+	"addlast" => 0,
 	"auto" => 0,
 
     };
@@ -402,6 +517,9 @@ sub new {
     $self->{COMMENT}  = {
 	"featout" => [
 		"File for output features",
+	],
+	"addlast" => [
+		"An asterisk in the protein sequence indicates the position of a STOP codon.  Checktrans assumes that all ORFs end in a STOP codon.  Forcing the sequence to end with an asterisk, if there is not one there already, makes checktrans treat the end as a potential ORF. If an asterisk is added, it is not included in the reported count of STOPs.",
 	],
 
     };

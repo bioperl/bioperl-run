@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::cpgplot
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::cpgplot
 
 	CPGPLOT	Plot CpG rich areas (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/cpgplot.html 
+         for available values):
 
 
 		cpgplot (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- DNA [sequences] (-sequence)
 			pipe: seqsfile
-
-		required (Paragraph)
-			required Section
 
 		window (Integer)
 			Window size (-window)
@@ -48,9 +53,6 @@ Bio::Tools::Run::PiseApplication::cpgplot
 
 		minpc (Float)
 			Minimum percentage (-minpc)
-
-		output (Paragraph)
-			output Section
 
 		outfile (OutFile)
 			outfile (-outfile)
@@ -70,23 +72,70 @@ Bio::Tools::Run::PiseApplication::cpgplot
 		featout (OutFile)
 			feature file for output (-featout)
 
-		auto (String)
+		featout_offormat (Excl)
+			Feature output format (-offormat)
 
+		auto (String)
 
 		psouput (String)
 
+=head1 FEEDBACK
 
-		psresults (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
 
-		metaresults (Results)
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
+=head2 Reporting Bugs
 
-		dataresults (Results)
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
 
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
 
-		pngresults (Results)
+=head1 AUTHOR
 
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/cpgplot.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -102,20 +151,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $cpgplot = Bio::Tools::Run::PiseApplication::cpgplot->new($remote, $email, @params);
+ Usage   : my $cpgplot = Bio::Tools::Run::PiseApplication::cpgplot->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::cpgplot object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $cpgplot = $factory->program('cpgplot');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::cpgplot.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/cpgplot.pm
 
@@ -124,6 +173,8 @@ sub new {
     $self->{TITLE}   = "CPGPLOT";
 
     $self->{DESCRIPTION}   = "Plot CpG rich areas (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -168,6 +219,7 @@ sub new {
 	"cg", 	# Show CpG rich regions (-cg)
 	"pc", 	# Show percentage line (-pc)
 	"featout", 	# feature file for output (-featout)
+	"featout_offormat", 	# Feature output format (-offormat)
 	"auto",
 	"psouput",
 	"psresults",
@@ -195,6 +247,7 @@ sub new {
 	"cg" => 'Switch',
 	"pc" => 'Switch',
 	"featout" => 'OutFile',
+	"featout_offormat" => 'Excl',
 	"auto" => 'String',
 	"psouput" => 'String',
 	"psresults" => 'Results',
@@ -250,6 +303,9 @@ sub new {
 	"featout" => {
 		"perl" => '" -featout=$value"',
 	},
+	"featout_offormat" => {
+		"perl" => '($value)? " -offormat=$value" : "" ',
+	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
 	},
@@ -297,6 +353,7 @@ sub new {
 	"cg" => 10,
 	"pc" => 11,
 	"featout" => 12,
+	"featout_offormat" => 12,
 	"auto" => 13,
 	"psouput" => 100,
 	"cpgplot" => 0
@@ -325,6 +382,7 @@ sub new {
 	"cg",
 	"pc",
 	"featout",
+	"featout_offormat",
 	"auto",
 	"psouput",
 
@@ -351,6 +409,7 @@ sub new {
 	"cg" => 0,
 	"pc" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 1,
 	"psouput" => 1,
 	"psresults" => 0,
@@ -378,6 +437,7 @@ sub new {
 	"cg" => 0,
 	"pc" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 0,
 	"psouput" => 0,
 	"psresults" => 0,
@@ -404,6 +464,7 @@ sub new {
 	"cg" => 0,
 	"pc" => 0,
 	"featout" => 1,
+	"featout_offormat" => 0,
 	"auto" => 0,
 	"psouput" => 0,
 	"psresults" => 0,
@@ -430,6 +491,7 @@ sub new {
 	"cg" => "Show CpG rich regions (-cg)",
 	"pc" => "Show percentage line (-pc)",
 	"featout" => "feature file for output (-featout)",
+	"featout_offormat" => "Feature output format (-offormat)",
 	"auto" => "",
 	"psouput" => "",
 	"psresults" => "",
@@ -456,6 +518,7 @@ sub new {
 	"cg" => 0,
 	"pc" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 0,
 	"psouput" => 0,
 	"psresults" => 0,
@@ -469,8 +532,9 @@ sub new {
 
 	"input" => ['sequence',],
 	"required" => ['window','shift','minlen','minoe','minpc',],
-	"output" => ['outfile','graph','obsexp','cg','pc','featout',],
+	"output" => ['outfile','graph','obsexp','cg','pc','featout','featout_offormat',],
 	"graph" => ['x11','x11','hp7470','hp7470','postscript','postscript','cps','cps','hp7580','hp7580','null','null','data','data','colourps','colourps','text','text','none','none','tek4107t','tek4107t','tekt','tekt','xwindows','xwindows','hpgl','hpgl','xterm','xterm','meta','meta','ps','ps','tek','tek','png','png','tektronics','tektronics',],
+	"featout_offormat" => ['embl','embl','gff','gff','swiss','swiss','pir','pir','nbrf','nbrf',],
     };
 
     $self->{FLIST}  = {
@@ -493,6 +557,7 @@ sub new {
 	"cg" => '1',
 	"pc" => '1',
 	"featout" => 'featout.out',
+	"featout_offormat" => 'gff',
 
     };
 
@@ -513,6 +578,7 @@ sub new {
 	"cg" => { "perl" => '1' },
 	"pc" => { "perl" => '1' },
 	"featout" => { "perl" => '1' },
+	"featout_offormat" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
 	"psouput" => {
 		"perl" => '$graph eq "postscript" || $graph eq "ps" || $graph eq "colourps"  || $graph eq "cps" || $graph eq "png"',
@@ -572,6 +638,7 @@ sub new {
 	"cg" => 0,
 	"pc" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 0,
 	"psouput" => 0,
 	"psresults" => 0,
@@ -598,6 +665,7 @@ sub new {
 	"cg" => 0,
 	"pc" => 0,
 	"featout" => 1,
+	"featout_offormat" => 0,
 	"auto" => 0,
 	"psouput" => 0,
 	"psresults" => 0,

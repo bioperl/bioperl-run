@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::bl2seq
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,7 +23,12 @@ Bio::Tools::Run::PiseApplication::bl2seq
 
 	BL2SEQ	Blast on 2 sequences (NCBI) (Altschul, Madden, Schaeffer, Zhang, Miller, Lipman)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/bl2seq.html 
+         for available values):
 
 
 		bl2seq (Excl)
@@ -37,9 +50,6 @@ Bio::Tools::Run::PiseApplication::bl2seq
 		Expect (Float)
 			Expect: upper bound on the expected frequency of chance occurrence of a set of HSPs (-e)
 
-		filter_opt (Paragraph)
-			Filtering and masking options
-
 		filter (Switch)
 			Filter query sequence (DUST with blastn, SEG with others) (-F)
 
@@ -48,9 +58,6 @@ Bio::Tools::Run::PiseApplication::bl2seq
 
 		lower_case (Switch)
 			Use lower case filtering (-U)
-
-		selectivity_opt (Paragraph)
-			Selectivity options
 
 		word_size (Integer)
 			Wordsize (-W) (zero invokes default behavior)
@@ -70,9 +77,6 @@ Bio::Tools::Run::PiseApplication::bl2seq
 		matrix (Excl)
 			Matrix (-M)
 
-		blastn_opt (Paragraph)
-			BLASTN Options
-
 		mismatch (Integer)
 			Penalty for a nucleotide mismatch (-q)
 
@@ -82,20 +86,72 @@ Bio::Tools::Run::PiseApplication::bl2seq
 		strand (Excl)
 			Query strands to search against database (-S)
 
-		othersopt (Paragraph)
-			Other Options
-
 		dbsize (Integer)
 			theor. db size (zero is real size) (-d)
 
 		searchspacesize (Float)
 			Effective length of the search space (use zero for the real size) (-Y)
 
-		output_opt (Paragraph)
-			Output options
-
 		outformat (Excl)
 			Output format (-D)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/bl2seq.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -111,20 +167,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $bl2seq = Bio::Tools::Run::PiseApplication::bl2seq->new($remote, $email, @params);
+ Usage   : my $bl2seq = Bio::Tools::Run::PiseApplication::bl2seq->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::bl2seq object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $bl2seq = $factory->program('bl2seq');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::bl2seq.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/bl2seq.pm
 
@@ -133,6 +189,8 @@ sub new {
     $self->{TITLE}   = "BL2SEQ";
 
     $self->{DESCRIPTION}   = "Blast on 2 sequences (NCBI)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Altschul, Madden, Schaeffer, Zhang, Miller, Lipman";
 
@@ -224,13 +282,13 @@ sub new {
 		"perl" => '" -i $value" ',
 	},
 	"first_seq_loc" => {
-		"perl" => '($value) ? " -I $value" : ""',
+		"perl" => '(defined $value) ? " -I $value" : ""',
 	},
 	"second_sequence" => {
 		"perl" => '" -j $value" ',
 	},
 	"second_seq_loc" => {
-		"perl" => '($value) ? " -J $value" : "" ',
+		"perl" => '(defined $value) ? " -J $value" : "" ',
 	},
 	"Expect" => {
 		"perl" => '(defined $value && $value != $vdef)? " -e $value":""',
@@ -243,27 +301,27 @@ sub new {
 	"other_filters" => {
 	},
 	"lower_case" => {
-		"perl" => '($value)? " -U T" : ""',
+		"perl" => '(defined $value) ? " -U T" : ""',
 	},
 	"selectivity_opt" => {
 	},
 	"word_size" => {
-		"perl" => '($value)? " -W $value":""',
+		"perl" => '(defined $value) ? " -W $value" : ""',
 	},
 	"gapped_alig" => {
-		"perl" => '($value)? "": " -g F"',
+		"perl" => '($value) ? "" : " -g F"',
 	},
 	"dropoff" => {
-		"perl" => '(defined $value)? " -X $value":""',
+		"perl" => '(defined $value) ? " -X $value" : ""',
 	},
 	"gap_open" => {
-		"perl" => '(defined $value)? " -G $value":""',
+		"perl" => '(defined $value) ? " -G $value" : ""',
 	},
 	"gap_extend" => {
-		"perl" => '(defined $value)? " -E $value":""',
+		"perl" => '(defined $value) ? " -E $value" : ""',
 	},
 	"matrix" => {
-		"perl" => '($value && $value ne $vdef)? " -M $value" : ""',
+		"perl" => '(defined $value && $value ne $vdef) ? " -M $value" : ""',
 	},
 	"blastn_opt" => {
 	},
@@ -279,15 +337,15 @@ sub new {
 	"othersopt" => {
 	},
 	"dbsize" => {
-		"perl" => '($value)? " -d $value":""',
+		"perl" => '(defined $value) ? " -d $value" : ""',
 	},
 	"searchspacesize" => {
-		"perl" => '($value)? " -Y $value":""',
+		"perl" => '(defined $value) ? " -Y $value" : ""',
 	},
 	"output_opt" => {
 	},
 	"outformat" => {
-		"perl" => '($value && $value != $vdef) ? " -D $value" : ""',
+		"perl" => '(defined $value && $value != $vdef) ? " -D $value" : ""',
 	},
 
     };

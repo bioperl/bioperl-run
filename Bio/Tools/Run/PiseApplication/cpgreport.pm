@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::cpgreport
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,30 +23,24 @@ Bio::Tools::Run::PiseApplication::cpgreport
 
 	CPGREPORT	Reports all CpG rich regions (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/cpgreport.html 
+         for available values):
 
 
 		cpgreport (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- DNA [sequences] (-sequence)
 			pipe: seqsfile
 
-		required (Paragraph)
-			required Section
-
 		score (Integer)
 			CpG score (-score)
-
-		output (Paragraph)
-			output Section
 
 		outfile (OutFile)
 			outfile (-outfile)
@@ -46,8 +48,68 @@ Bio::Tools::Run::PiseApplication::cpgreport
 		featout (OutFile)
 			feature file for output (-featout)
 
+		featout_offormat (Excl)
+			Feature output format (-offormat)
+
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/cpgreport.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -63,20 +125,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $cpgreport = Bio::Tools::Run::PiseApplication::cpgreport->new($remote, $email, @params);
+ Usage   : my $cpgreport = Bio::Tools::Run::PiseApplication::cpgreport->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::cpgreport object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $cpgreport = $factory->program('cpgreport');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::cpgreport.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/cpgreport.pm
 
@@ -85,6 +147,8 @@ sub new {
     $self->{TITLE}   = "CPGREPORT";
 
     $self->{DESCRIPTION}   = "Reports all CpG rich regions (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -116,6 +180,7 @@ sub new {
 	"output", 	# output Section
 	"outfile", 	# outfile (-outfile)
 	"featout", 	# feature file for output (-featout)
+	"featout_offormat", 	# Feature output format (-offormat)
 	"auto",
 
     ];
@@ -130,6 +195,7 @@ sub new {
 	"output" => 'Paragraph',
 	"outfile" => 'OutFile',
 	"featout" => 'OutFile',
+	"featout_offormat" => 'Excl',
 	"auto" => 'String',
 
     };
@@ -156,6 +222,9 @@ sub new {
 	"featout" => {
 		"perl" => '" -featout=$value"',
 	},
+	"featout_offormat" => {
+		"perl" => '($value)? " -offormat=$value" : "" ',
+	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
 	},
@@ -180,6 +249,7 @@ sub new {
 	"score" => 2,
 	"outfile" => 3,
 	"featout" => 4,
+	"featout_offormat" => 4,
 	"auto" => 5,
 	"cpgreport" => 0
 
@@ -188,13 +258,14 @@ sub new {
     $self->{BY_GROUP_PARAMETERS}  = [
 	"init",
 	"input",
-	"cpgreport",
 	"required",
 	"output",
+	"cpgreport",
 	"sequence",
 	"score",
 	"outfile",
 	"featout",
+	"featout_offormat",
 	"auto",
 
     ];
@@ -212,6 +283,7 @@ sub new {
 	"output" => 0,
 	"outfile" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 1,
 	"cpgreport" => 1
 
@@ -226,6 +298,7 @@ sub new {
 	"output" => 0,
 	"outfile" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 0,
 
     };
@@ -239,6 +312,7 @@ sub new {
 	"output" => 0,
 	"outfile" => 1,
 	"featout" => 1,
+	"featout_offormat" => 0,
 	"auto" => 0,
 
     };
@@ -252,6 +326,7 @@ sub new {
 	"output" => "output Section",
 	"outfile" => "outfile (-outfile)",
 	"featout" => "feature file for output (-featout)",
+	"featout_offormat" => "Feature output format (-offormat)",
 	"auto" => "",
 
     };
@@ -265,6 +340,7 @@ sub new {
 	"output" => 0,
 	"outfile" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 0,
 
     };
@@ -273,7 +349,8 @@ sub new {
 
 	"input" => ['sequence',],
 	"required" => ['score',],
-	"output" => ['outfile','featout',],
+	"output" => ['outfile','featout','featout_offormat',],
+	"featout_offormat" => ['embl','embl','gff','gff','swiss','swiss','pir','pir','nbrf','nbrf',],
     };
 
     $self->{FLIST}  = {
@@ -288,6 +365,7 @@ sub new {
 	"score" => '17',
 	"outfile" => 'outfile.out',
 	"featout" => 'featout.out',
+	"featout_offormat" => 'gff',
 
     };
 
@@ -300,6 +378,7 @@ sub new {
 	"output" => { "perl" => '1' },
 	"outfile" => { "perl" => '1' },
 	"featout" => { "perl" => '1' },
+	"featout_offormat" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
 
     };
@@ -336,6 +415,7 @@ sub new {
 	"output" => 0,
 	"outfile" => 0,
 	"featout" => 0,
+	"featout_offormat" => 0,
 	"auto" => 0,
 
     };
@@ -349,6 +429,7 @@ sub new {
 	"output" => 0,
 	"outfile" => 1,
 	"featout" => 1,
+	"featout_offormat" => 0,
 	"auto" => 0,
 
     };

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::clustalw
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::clustalw
 		Thompson, J.D., Higgins, D.G. and Gibson, T.J. (1994) CLUSTAL W: improving the sensitivity of progressive multiple sequence alignment through sequence weighting, positions-specific gap penalties and weight matrix choice. Nucleic Acids Research, 22:4673-4680.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/clustalw.html 
+         for available values):
 
 
 		clustalw (String)
-
 
 		infile (Sequence)
 			Sequences File  (or Alignment File for Bootstrap and Tree actions) (-infile)
@@ -36,9 +48,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 
 		phylip_alig (Switch)
 			Phylip alignment output format (-output)
-
-		multalign (Paragraph)
-			Multiple Alignments parameters
 
 		quicktree (Excl)
 			Toggle Slow/Fast pairwise alignments (-quicktree)
@@ -88,9 +97,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 		usetree (InFile)
 			File for old guide tree (-usetree)
 
-		fastpw (Paragraph)
-			Fast Pairwise Alignments parameters
-
 		ktuple (Integer)
 			Word size (-ktuple)
 
@@ -106,9 +112,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 		score (Excl)
 			Percent or absolute score ? (-score)
 
-		slowpw (Paragraph)
-			Slow Pairwise Alignments parameters
-
 		pwmatrix (Excl)
 			Protein weight matrix (-pwmatrix)
 
@@ -120,9 +123,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 
 		pwgapext (Float)
 			Gap extension penalty (-pwgapext)
-
-		trees (Paragraph)
-			Tree parameters
 
 		kimura (Switch)
 			Use Kimura's correction (multiple substitutions) ? (-kimura)
@@ -142,9 +142,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 		outputtree (Excl)
 			Output tree/distance format (-outputtree)
 
-		outputparam (Paragraph)
-			Output parameters
-
 		outfile (OutFile)
 			Alignment File (-outfile)
 			pipe: readseq_ok_alig
@@ -160,24 +157,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 
 		seqnos (Switch)
 			Output sequence numbers in the output file (clustalw format) (-seqnos)
-
-		aligfile (Results)
-
-			pipe: readseq_ok_alig
-
-		readseq_ok_aligfile (Results)
-
-			pipe: readseq_ok_alig
-
-		newtreefile (Results)
-
-
-		phylipnewtreefile (Results)
-
-			pipe: phylip_tree
-
-		profile (Paragraph)
-			Profile Alignments parameters
 
 		profile1 (InFile)
 			Profile 1 (-profile1)
@@ -196,9 +175,6 @@ Bio::Tools::Run::PiseApplication::clustalw
 
 		newtree2 (OutFile)
 			File for new guide tree for profile2 (-newtree2)
-
-		structure (Paragraph)
-			Structure Alignments parameters
 
 		nosecstr1 (Switch)
 			Use profile 1 secondary structure / penalty mask (-nosecstr1)
@@ -233,6 +209,64 @@ Bio::Tools::Run::PiseApplication::clustalw
 		secstrout (Excl)
 			Output in alignment (-secstrout)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/clustalw.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
+
 =cut
 
 #'
@@ -247,20 +281,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $clustalw = Bio::Tools::Run::PiseApplication::clustalw->new($remote, $email, @params);
+ Usage   : my $clustalw = Bio::Tools::Run::PiseApplication::clustalw->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::clustalw object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $clustalw = $factory->program('clustalw');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::clustalw.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/clustalw.pm
 
@@ -269,6 +303,8 @@ sub new {
     $self->{TITLE}   = "Clustalw";
 
     $self->{DESCRIPTION}   = "Multiple Alignments";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Des Higgins";
 

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::blimps_block
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,32 +30,28 @@ Bio::Tools::Run::PiseApplication::blimps_block
 		Steven Henikoff and Jorja G. Henikoff, Automated assembly of protein blocks for database searching, Nucleic Acids Research, 19:23, p. 6565-6572. (1991)
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/blimps_block.html 
+         for available values):
 
 
 		blimps_block (String)
 
-
 		action (String)
-
 
 		blocks_db (String)
 
-
 		sequence_file (Sequence)
 			Sequence file (SQ)
-
-		control_parameters (Paragraph)
-			Control parameters
 
 		genetic_code (Excl)
 			The Genetic code to use (if DNA sequence or database)
 
 		strands (Integer)
 			The number of strands to search (if DNA sequence or database)
-
-		output_parameters (Paragraph)
-			Output parameters
 
 		outfile (OutFile)
 			Output file filename
@@ -64,8 +68,63 @@ Bio::Tools::Run::PiseApplication::blimps_block
 		repeats (Switch)
 			Repeats are allowed in the scoring list
 
-		config_file (Results)
+=head1 FEEDBACK
 
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/blimps_block.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -81,20 +140,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $blimps_block = Bio::Tools::Run::PiseApplication::blimps_block->new($remote, $email, @params);
+ Usage   : my $blimps_block = Bio::Tools::Run::PiseApplication::blimps_block->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::blimps_block object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $blimps_block = $factory->program('blimps_block');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::blimps_block.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/blimps_block.pm
 
@@ -103,6 +162,8 @@ sub new {
     $self->{TITLE}   = "BLIMPS";
 
     $self->{DESCRIPTION}   = "score a query sequence against Blocks database";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Wallace & Henikoff";
 

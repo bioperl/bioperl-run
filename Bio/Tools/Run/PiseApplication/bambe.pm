@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::bambe
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,14 +30,15 @@ Bio::Tools::Run::PiseApplication::bambe
 		Simon, D. and B. Larget. 1998. Bayesian analysis in molecular biology and evolution (BAMBE), version 1.01 beta. Department of Mathematics and Computer Science, Duquesne University.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/bambe.html 
+         for available values):
 
 
 		bambe (String)
-
-
-		rcfile (Results)
-
 
 		data_file (Sequence)
 			Alignment file (data-file)
@@ -37,9 +46,6 @@ Bio::Tools::Run::PiseApplication::bambe
 
 		bambe_format (Switch)
 			Alignement file in BAMBE format ?
-
-		run_options (Paragraph)
-			Run characteristics
 
 		seed (Integer)
 			Seed for random number generator (seed)
@@ -58,9 +64,6 @@ Bio::Tools::Run::PiseApplication::bambe
 
 		use_beta (Switch)
 			Use scaled beta distribution modification of the local algorithm (use-beta)
-
-		model_options (Paragraph)
-			Model specification
 
 		molecular_clock (Switch)
 			Use a molecular clock (molecular-clock)
@@ -101,9 +104,6 @@ Bio::Tools::Run::PiseApplication::bambe
 		initial_gamma (String)
 			Comma separated list of positive gamma values ((TN93 model) (initial-gamma)
 
-		param_update (Paragraph)
-			Parameter updating
-
 		parameter_update_interval (Integer)
 			Parameter update interval (parameter-update-interval)
 
@@ -121,9 +121,6 @@ Bio::Tools::Run::PiseApplication::bambe
 
 		update_gamma (Switch)
 			Update gamma value for (TN93 model) (update-gamma)
-
-		tuning_options (Paragraph)
-			Tuning parameters
 
 		tune_interval (Integer)
 			Tune interval (tune-interval)
@@ -152,30 +149,13 @@ Bio::Tools::Run::PiseApplication::bambe
 		beta_tune (Float)
 			Beta parameter for local update (beta-tune)
 
-		output_options (Paragraph)
-			Output options
-
 		sample_interval (Integer)
 			Sample interval (sample-interval)
 
 		newick_format (Switch)
 			Newick format of tree file (newick-format)
 
-		results_files (Results)
-
-
-		result_tree (Results)
-
-			pipe: phylip_tree
-
-		top_file (Results)
-
-
 		file_root (String)
-
-
-		input_options (Paragraph)
-			Input options
 
 		outgroup (Integer)
 			Outgroup
@@ -188,6 +168,64 @@ Bio::Tools::Run::PiseApplication::bambe
 
 		max_initial_tree_height (Float)
 			Initial tree height used to generate an initial random tree (max-initial-tree-height)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/bambe.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -203,20 +241,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $bambe = Bio::Tools::Run::PiseApplication::bambe->new($remote, $email, @params);
+ Usage   : my $bambe = Bio::Tools::Run::PiseApplication::bambe->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::bambe object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $bambe = $factory->program('bambe');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::bambe.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/bambe.pm
 
@@ -225,6 +263,8 @@ sub new {
     $self->{TITLE}   = "BAMBE";
 
     $self->{DESCRIPTION}   = "Bayesian Analysis in Molecular Biology and Evolution";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Simon, Larget";
 

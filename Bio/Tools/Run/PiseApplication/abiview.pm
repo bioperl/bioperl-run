@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::abiview
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,23 +23,20 @@ Bio::Tools::Run::PiseApplication::abiview
 
 	ABIVIEW	Reads ABI file and display the trace (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/abiview.html 
+         for available values):
 
 
 		abiview (String)
 
-
 		init (String)
 
-
-		input (Paragraph)
-			input Section
-
-		fname (String)
+		fname (InFile)
 			Name of the ABI trace file (-fname)
-
-		output (Paragraph)
-			output Section
 
 		outseq (OutFile)
 			Sequence file (-outseq)
@@ -42,6 +47,12 @@ Bio::Tools::Run::PiseApplication::abiview
 
 		graph (Excl)
 			graph (-graph)
+
+		startbase (Integer)
+			First base to report or display (-startbase)
+
+		endbase (Integer)
+			Last base to report or display (-endbase)
 
 		separate (Switch)
 			Separate the trace graphs for the 4 bases (-separate)
@@ -60,21 +71,65 @@ Bio::Tools::Run::PiseApplication::abiview
 
 		auto (String)
 
-
 		psouput (String)
 
+=head1 FEEDBACK
 
-		psresults (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
 
-		metaresults (Results)
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
+=head2 Reporting Bugs
 
-		dataresults (Results)
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
 
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
 
-		pngresults (Results)
+=head1 AUTHOR
 
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/abiview.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -90,20 +145,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $abiview = Bio::Tools::Run::PiseApplication::abiview->new($remote, $email, @params);
+ Usage   : my $abiview = Bio::Tools::Run::PiseApplication::abiview->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::abiview object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $abiview = $factory->program('abiview');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::abiview.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/abiview.pm
 
@@ -112,6 +167,8 @@ sub new {
     $self->{TITLE}   = "ABIVIEW";
 
     $self->{DESCRIPTION}   = "Reads ABI file and display the trace (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -146,6 +203,8 @@ sub new {
 	"outseq", 	# Sequence file (-outseq)
 	"outseq_sformat", 	# Output format for: Sequence file
 	"graph", 	# graph (-graph)
+	"startbase", 	# First base to report or display (-startbase)
+	"endbase", 	# Last base to report or display (-endbase)
 	"separate", 	# Separate the trace graphs for the 4 bases (-separate)
 	"yticks", 	# Display y-axis ticks (-yticks)
 	"sequence", 	# Display the sequence on the graph (-sequence)
@@ -164,11 +223,13 @@ sub new {
 	"abiview" => 'String',
 	"init" => 'String',
 	"input" => 'Paragraph',
-	"fname" => 'String',
+	"fname" => 'InFile',
 	"output" => 'Paragraph',
 	"outseq" => 'OutFile',
 	"outseq_sformat" => 'Excl',
 	"graph" => 'Excl',
+	"startbase" => 'Integer',
+	"endbase" => 'Integer',
 	"separate" => 'Switch',
 	"yticks" => 'Switch',
 	"sequence" => 'Switch',
@@ -202,6 +263,12 @@ sub new {
 	},
 	"graph" => {
 		"perl" => '($value)? " -graph=$value" : ""',
+	},
+	"startbase" => {
+		"perl" => '(defined $value && $value != $vdef)? " -startbase=$value" : ""',
+	},
+	"endbase" => {
+		"perl" => '(defined $value && $value != $vdef)? " -endbase=$value" : ""',
 	},
 	"separate" => {
 		"perl" => '($value)? " -separate" : ""',
@@ -256,12 +323,14 @@ sub new {
 	"outseq" => 2,
 	"outseq_sformat" => 3,
 	"graph" => 4,
-	"separate" => 5,
-	"yticks" => 6,
-	"sequence" => 7,
-	"window" => 8,
-	"bases" => 9,
-	"auto" => 10,
+	"startbase" => 5,
+	"endbase" => 6,
+	"separate" => 7,
+	"yticks" => 8,
+	"sequence" => 9,
+	"window" => 10,
+	"bases" => 11,
+	"auto" => 12,
 	"psouput" => 100,
 	"abiview" => 0
 
@@ -280,6 +349,8 @@ sub new {
 	"outseq",
 	"outseq_sformat",
 	"graph",
+	"startbase",
+	"endbase",
 	"separate",
 	"yticks",
 	"sequence",
@@ -302,6 +373,8 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"graph" => 0,
+	"startbase" => 0,
+	"endbase" => 0,
 	"separate" => 0,
 	"yticks" => 0,
 	"sequence" => 0,
@@ -325,6 +398,8 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"graph" => 0,
+	"startbase" => 0,
+	"endbase" => 0,
 	"separate" => 0,
 	"yticks" => 0,
 	"sequence" => 0,
@@ -347,6 +422,8 @@ sub new {
 	"outseq" => 1,
 	"outseq_sformat" => 0,
 	"graph" => 0,
+	"startbase" => 0,
+	"endbase" => 0,
 	"separate" => 0,
 	"yticks" => 0,
 	"sequence" => 0,
@@ -369,6 +446,8 @@ sub new {
 	"outseq" => "Sequence file (-outseq)",
 	"outseq_sformat" => "Output format for: Sequence file",
 	"graph" => "graph (-graph)",
+	"startbase" => "First base to report or display (-startbase)",
+	"endbase" => "Last base to report or display (-endbase)",
 	"separate" => "Separate the trace graphs for the 4 bases (-separate)",
 	"yticks" => "Display y-axis ticks (-yticks)",
 	"sequence" => "Display the sequence on the graph (-sequence)",
@@ -391,6 +470,8 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"graph" => 0,
+	"startbase" => 0,
+	"endbase" => 0,
 	"separate" => 0,
 	"yticks" => 0,
 	"sequence" => 0,
@@ -408,7 +489,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"input" => ['fname',],
-	"output" => ['outseq','outseq_sformat','graph','separate','yticks','sequence','window','bases',],
+	"output" => ['outseq','outseq_sformat','graph','startbase','endbase','separate','yticks','sequence','window','bases',],
 	"outseq_sformat" => ['fasta','fasta','gcg','gcg','phylip','phylip','embl','embl','swiss','swiss','ncbi','ncbi','nbrf','nbrf','genbank','genbank','ig','ig','codata','codata','strider','strider','acedb','acedb','staden','staden','text','text','fitch','fitch','msf','msf','clustal','clustal','phylip','phylip','phylip3','phylip3','asn1','asn1',],
 	"graph" => ['x11','x11','hp7470','hp7470','postscript','postscript','cps','cps','hp7580','hp7580','null','null','data','data','colourps','colourps','text','text','none','none','tek4107t','tek4107t','tekt','tekt','xwindows','xwindows','hpgl','hpgl','xterm','xterm','meta','meta','ps','ps','tek','tek','png','png','tektronics','tektronics',],
     };
@@ -425,6 +506,8 @@ sub new {
 	"outseq" => 'outseq.out',
 	"outseq_sformat" => 'fasta',
 	"graph" => 'postscript',
+	"startbase" => '0',
+	"endbase" => '0',
 	"separate" => '0',
 	"yticks" => '0',
 	"sequence" => '1',
@@ -441,6 +524,8 @@ sub new {
 	"outseq" => { "perl" => '1' },
 	"outseq_sformat" => { "perl" => '1' },
 	"graph" => { "perl" => '1' },
+	"startbase" => { "perl" => '1' },
+	"endbase" => { "perl" => '1' },
 	"separate" => { "perl" => '1' },
 	"yticks" => { "perl" => '1' },
 	"sequence" => { "perl" => '1' },
@@ -496,6 +581,8 @@ sub new {
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"graph" => 0,
+	"startbase" => 0,
+	"endbase" => 0,
 	"separate" => 0,
 	"yticks" => 0,
 	"sequence" => 0,
@@ -518,6 +605,8 @@ sub new {
 	"outseq" => 1,
 	"outseq_sformat" => 1,
 	"graph" => 0,
+	"startbase" => 0,
+	"endbase" => 0,
 	"separate" => 0,
 	"yticks" => 0,
 	"sequence" => 0,
@@ -537,6 +626,9 @@ sub new {
     };
 
     $self->{COMMENT}  = {
+	"endbase" => [
+		"Last sequence base to report or display. If the default is set to zero then the value of this  is taken as the maximum number of bases.",
+	],
 
     };
 

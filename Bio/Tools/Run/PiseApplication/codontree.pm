@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::codontree
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,29 +28,23 @@ Bio::Tools::Run::PiseApplication::codontree
 		Graziano Pesole, Marcella Attimonelli and Sabino Liuni (CNR-Bari). NAR (16):5:1988 pp. 1715-1728
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/codontree.html 
+         for available values):
 
 
 		codontree (String)
 
-
 		seqfile (Sequence)
 			Sequences File
 
-		files (Results)
-
-
 		tabfile (String)
-
-
-		control_options (Paragraph)
-			Control options
 
 		ntable (Excl)
 			Translation  table to be used for the computation of distance and codon usage (-NTAble)
-
-		output_options (Paragraph)
-			Output options
 
 		bc (List)
 			Bases composition to be computed (-BC)
@@ -58,9 +60,65 @@ Bio::Tools::Run::PiseApplication::codontree
 
 		bcfile (String)
 
-
 		matfile (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/codontree.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -76,20 +134,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $codontree = Bio::Tools::Run::PiseApplication::codontree->new($remote, $email, @params);
+ Usage   : my $codontree = Bio::Tools::Run::PiseApplication::codontree->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::codontree object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $codontree = $factory->program('codontree');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::codontree.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/codontree.pm
 
@@ -98,6 +156,8 @@ sub new {
     $self->{TITLE}   = "codontree";
 
     $self->{DESCRIPTION}   = "codon usage table, distance matrix and bases composition";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Pesole, Attimonelli and Liuni";
 

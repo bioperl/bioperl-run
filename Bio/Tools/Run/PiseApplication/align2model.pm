@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::align2model
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::align2model
 		R. Hughey and A. Krogh., SAM: Sequence alignment and modeling software system. Technical Report UCSC-CRL-96-22, University of California, Santa Cruz, CA, September 1996. 
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/align2model.html 
+         for available values):
 
 
 		align2model (String)
-
 
 		run (String)
 			Run name
@@ -36,21 +48,11 @@ Bio::Tools::Run::PiseApplication::align2model
 			Model (-i)
 			pipe: sam_model
 
-		a2m (Results)
-
-			pipe: readseq_ok_alig
-
-		input (Paragraph)
-			Input options
-
 		id (String)
 			Sequence identifier(s) selection (separated by commas) (-id)
 
 		nscoreseq (Integer)
 			Maximum number of sequences to be read (-nscoreseq)
-
-		control (Paragraph)
-			Control options
 
 		adpstyle (Excl)
 			Dynamic programming style (-adpstyle
@@ -67,14 +69,69 @@ Bio::Tools::Run::PiseApplication::align2model
 		jump_out_prob (Float)
 			Probability cost of jumping out the center of the model (-jump_out_prob)
 
-		output (Paragraph)
-			Output options
-
 		a2mdots (Switch)
 			Print dots to fill space need for other sequences' insertions (-a2mdots)
 
 		dump_parameters (Excl)
 			(-dump_parameters)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/align2model.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -90,20 +147,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $align2model = Bio::Tools::Run::PiseApplication::align2model->new($remote, $email, @params);
+ Usage   : my $align2model = Bio::Tools::Run::PiseApplication::align2model->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::align2model object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $align2model = $factory->program('align2model');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::align2model.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/align2model.pm
 
@@ -112,6 +169,8 @@ sub new {
     $self->{TITLE}   = "SAM";
 
     $self->{DESCRIPTION}   = "align2model - create a multiple alignment of sequences to an existing model";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "R. Hughey, A. Krogh";
 
