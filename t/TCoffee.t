@@ -54,7 +54,7 @@ my $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 my $aln;
 
 
-my $coffee_present = Bio::Tools::Run::Alignment::TCoffee->exists_tcoffee();
+my $coffee_present = $factory->executable();
 unless ($coffee_present) {
     warn "tcoffee program not found. Skipping tests $Test::ntest to $NUMTESTS.\n";
     exit(0);
