@@ -109,9 +109,9 @@ use  Bio::Tools::Run::WrapperBase;
 
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
-    @PROBCONS_PARAMS = qw (clustalw consistency iterative-refinement 
-                           pre-training annot train paramfile matrixfile );
-    @OTHER_SWITCHES = qw(pairs viterbi verbose );
+    @PROBCONS_PARAMS = qw (CONSISTENCY ITERATIVE-REFINEMENT 
+                           PRE-TRAINING ANNOT TRAIN PARAMFILE MATRIXFILE );
+    @OTHER_SWITCHES = qw(CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS);
 
 # Authorize attribute fields
     foreach my $attr ( @PROBCONS_PARAMS, @OTHER_SWITCHES ) {
