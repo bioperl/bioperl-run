@@ -23,13 +23,15 @@ ok(1);
 use Bio::Tools::Run::Prints;
 use Bio::Root::IO;
 use Bio::SeqIO;
-use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use Bio::BioToEns::Beacon;
+use Bio::Seq;
 
 my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","FingerPRINTScan");
 #my $db =  Bio::Root::IO->catfile("","data0","prints35_0.pval_blos62");
 my $db =  Bio::Root::IO->catfile("t","data","prints.dat");
-my @params = ('DB',$db,'PROGRAM',$paramfile);
+my @params = ('DB',$db);
+if( -e $paramfile ) { 
+    push @params, 'PROGRAM',$paramfile;
+}
 
 my  $factory = Bio::Tools::Run::Prints->new(@params);
 ok $factory->isa('Bio::Tools::Run::Prints');
@@ -39,13 +41,11 @@ my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file => $prot_file, -fmt => 'Fasta');
 $seq1 = $seqstream->next_seq();
 
-
-
 my $prints_present = $factory->executable();
 
 unless ($prints_present) {
-       warn("prints program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-       exit 0;
+    warn("prints program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+    exit 0;
 }
 
 my @feat = $factory->predict_protein_features($seq1);
