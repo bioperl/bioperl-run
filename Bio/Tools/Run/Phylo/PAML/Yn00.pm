@@ -16,28 +16,27 @@ Bio::Tools::Run::Phylo::PAML::CodeML - Wrapper aroud the PAML program codeml
 
 =head1 SYNOPSIS
 
-use Bio::Tools::Run::Phylo::PAML::Codeml;
-use Bio::AlignIO;
+  use Bio::Tools::Run::Phylo::PAML::Codeml;
+  use Bio::AlignIO;
+  my $alignio = new Bio::AlignIO(-format => 'phylip',
+  	 		         -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
+  my $aln = $alignio->next_aln;
 
-my $alignio = new Bio::AlignIO(-format => 'phylip',
-			       -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
-my $aln = $alignio->next_aln;
+  my $yn = new Bio::Tools::Run::Phylo::PAML::Yn00();
+  $yn->alignment($aln);
+  my ($rc,$results,$neiresults) = $yn->run();
 
-my $yn = new Bio::Tools::Run::Phylo::PAML::Yn00();
-$yn->alignment($aln);
-my ($rc,$results,$neiresults) = $yn->run();
-
-my %seen;
-while( my ($seqname1,$seqvalues) = each %{$results} ) {
-    while( my ($seqname2, $values) = each %{$seqvalues} ) {
-	foreach my $datatype ( keys %{$values} ) {
-	    print "$seqname1 $seqname2 -> $datatype $values->{$datatype}\n";
-	}
-    } 
-}
-print "Ka = ", $results->{'dN'},"\n";
-print "Ks = ", $results->{'dS'},"\n";
-print "Ka/Ks = ", $results->{'dN/dS'},"\n";
+  my %seen;
+  while( my ($seqname1,$seqvalues) = each %{$results} ) {
+      while( my ($seqname2, $values) = each %{$seqvalues} ) {
+  	foreach my $datatype ( keys %{$values} ) {
+  	    print "$seqname1 $seqname2 -> $datatype $values->{$datatype}\n";
+  	}
+      }
+  }
+  print "Ka = ", $results->{'dN'},"\n";
+  print "Ks = ", $results->{'dS'},"\n";
+  print "Ka/Ks = ", $results->{'dN/dS'},"\n";
 
 =head1 DESCRIPTION
 

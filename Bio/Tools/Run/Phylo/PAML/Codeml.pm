@@ -16,21 +16,21 @@ Bio::Tools::Run::Phylo::PAML::Codeml - Wrapper aroud the PAML program codeml
 
 =head1 SYNOPSIS
 
-use Bio::Tools::Run::Phylo::PAML::Codeml;
-use Bio::AlignIO;
+  use Bio::Tools::Run::Phylo::PAML::Codeml;
+  use Bio::AlignIO;
 
-my $alignio = new Bio::AlignIO(-format => 'phylip',
-			       -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
+  my $alignio = new Bio::AlignIO(-format => 'phylip',
+  			       -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
 
-my $aln = $alignio->next_aln;
+  my $aln = $alignio->next_aln;
 
-my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml();
-$codeml->alignment($aln);
-my ($rc,$results) = $codeml->run();
+  my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml();
+  $codeml->alignment($aln);
+  my ($rc,$results) = $codeml->run();
 
-print "Ka = ", $results->{'dN'},"\n";
-print "Ks = ", $results->{'dS'},"\n";
-print "Ka/Ks = ", $results->{'dN/dS'},"\n";
+  print "Ka = ", $results->{'dN'},"\n";
+  print "Ks = ", $results->{'dS'},"\n";
+  print "Ka/Ks = ", $results->{'dN/dS'},"\n";
 
 =head1 DESCRIPTION
 
@@ -96,7 +96,8 @@ use Bio::Tools::Run::Phylo::PAML::PAMLBase;
 
 Valid and default values for codeml programs are listed below.  The
 default values are always the first one listed.  These descriptions
-are essentially lifted from the example codeml.ctl file and pamlDOC documentation provided by the author.
+are essentially lifted from the example codeml.ctl file and pamlDOC
+documentation provided by the author.
 
 B<CodonFreq> specifies the equilibrium codon frequencies in codon
 substitution model. These frequencies can be assumed to be equal (1/61
@@ -161,8 +162,8 @@ particular, M12 and M13. Recommended models are 0 (one-ratio), 1
 (neutral), 2 (selection), 3 (discrete), 7 (beta), and 8
 (beta&amp;omega ). Some of the models like M2 and M8 are noted to be
 prone to the problem of multiple local optima. You are advised to run
-the program at least twice, once with a starting omega value <1 and a
-second time with a value > 1, and use the results corresponding to the
+the program at least twice, once with a starting omega value E<lt>1 and a
+second time with a value E<gt>1, and use the results corresponding to the
 highest likelihood. The continuous neutral and selection models of
 Nielsen and Yang (1998) are not implemented in the program.
 
@@ -180,7 +181,6 @@ transl table.
   8:alternative yeast nu.
   9:ascidian mt
   10:blepharisma nu
-  
 
 B<RateAncestor> For codon sequences, ancestral reconstruction is not
 implemented for the models of variable dN/dS ratios among sites. The
