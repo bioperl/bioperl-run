@@ -11,16 +11,36 @@ Bio::Tools::Run::Hmmpfam
 
   Build a Hmmpfam factory
 
-  my @params = ('DB',$dbfile);
+  my @params = ('DB'=>$dbfile,'E'=>0.0001);
   my $factory = Bio::Tools::Run::Hmmpfam->new($params);
 
-  # Pass the factory a Bio::Seq object
-  # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->run($seq);
+  # Pass the factory a Bio::Seq object or a file name
+
+  # returns a Bio::SearchIO object
+  my $search = $factory->run($seq);
+
+
+  my @feat;
+  while (my $result = $searchio->next_result){
+   while(my $hit = $result->next_hit){
+    while (my $hsp = $hit->next_hsp){
+      push @feat, $hsp;
+    }
+   }
+  }
+
+  Available params:
+   n        : nucleic acid models/sequence (default protein)
+   E <x>    : sets E value cutoff (globE) to <x>; default 10
+   T <x>    : sets T bit threshold (globT) to <x>; no threshold by default
+   Z <n>    : sets Z (# models) for E-value calculation
+
+
 
 =head1 DESCRIPTION
 
-  wrapper module for Hmmpfam program 
+  Wrapper module for Hmmpfam program that allows one to search a sequence against
+  an HMM database. Binary is available at http://hmmer.wustl.edu/
 
 =head1 FEEDBACK
 
@@ -44,7 +64,11 @@ Bio::Tools::Run::Hmmpfam
 
 =head1 AUTHOR - Bala
 
- Email savikalpa@fugu-sg.org
+ Email: bala@tll.org.sg
+
+=head1 CONTRIBUTORS 
+
+ Shawn Hoon shawnh@fugu-sg.org
 
 =head1 APPENDIX
 
@@ -55,21 +79,19 @@ Bio::Tools::Run::Hmmpfam
 
 package Bio::Tools::Run::Hmmpfam;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
-            $PROGRAMNAME @HMMPFAM_PARAMS %OK_FIELD);
+use vars qw($AUTOLOAD @ISA @HMMPFAM_PARAMS @HMMPFAM_SWITCHES %OK_FIELD);
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
-use Bio::Root::IO;
-use Bio::Factory::ApplicationFactoryI;
-use Bio::Tools::Hmmpfam;
+use Bio::SearchIO;
 use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-       @HMMPFAM_PARAMS=qw(DB PROGRAM OPTIONS VERBOSE);
-       foreach my $attr ( @HMMPFAM_PARAMS)
+       @HMMPFAM_PARAMS=qw(DB PROGRAM E T Z);
+       @HMMPFAM_SWITCHES=qw(N);
+       foreach my $attr ( @HMMPFAM_PARAMS,@HMMPFAM_SWITCHES)
                         { $OK_FIELD{$attr}++; }
 }
 
@@ -167,52 +189,16 @@ sub run{
     my ($self,$seq) = @_;
     my @feats;
 
-    if  (ref($seq) ){# it is an object
+    if  (ref $seq && $seq->isa("Bio::PrimarySeqI") ){# it is an object
         
-        if (ref($seq) =~ /GLOB/) {
-           $self->throw("cannot use filehandle");
-        }
-    
         my $infile1 = $self->_writeSeqFile($seq);
         
-        $self->_input($infile1);
-        
-        @feats = $self->_run();
-         unlink $infile1;
+        return  $self->_run($infile1);
     }
     else {
-        #The clone object is not a seq object but a file.
-        #Perhaps should check here or before if this file is fasta format...if not die
-        #Here the file does not need to be created or deleted. Its already written and may be used by other runnables.
-
-        $self->_input($seq);
-
-         @feats = $self->_run();
+        return  $self->_run($seq);
     }
    
-    return @feats;
-
-}
-
-=head2 _input
-
- Title   :   _input
- Usage   :   obj->_input($seqFile)
- Function:   Internal(not to be used directly)
- Returns :
- Args    :
-
-=cut
-
-sub _input() {
-     my ($self,$infile1) = @_;
-     
-     if(defined $infile1){
-         
-        $self->{'input'}=$infile1;
-     }   
-     return $self->{'input'};
-
 }
 
 =head2 _run
@@ -226,38 +212,52 @@ sub _input() {
 =cut
 
 sub _run {
-     my ($self)= @_;
-     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
-     close($tfh);
-     undef $tfh;
-     my $str=$self->executable;
-     $str.=' '.$self->options if $self->options;
-     $str.=' '.$self->DB .' '.$self->_input.' > '.$outfile;
-     
+     my ($self,$file)= @_;
 
-     my $status = system($str);
-     $self->throw( "Hmmpfam call ($str) crashed: $? \n") unless $status==0;
+     my $str = $self->executable;
+     my $param_str = $self->_setparams;
+     $str.=" $param_str ".$file;
+   
+    $self->debug("hmmpfam command = $str"); 
+
+    open(HMM,"$str |") || $self->throw("Hmmpfam call ($str) crashed: $?\n");
+
+     my $searchio= Bio::SearchIO->new(-fh=>\*HMM,-format=>"hmmer");
      
-     my $filehandle;
-     if (ref ($outfile) !~ /GLOB/) {
-        open (HMMPFAM, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
-        $filehandle = \*HMMPFAM;
-     }
-     else {
-        $filehandle = $outfile;
-     }
-     my $hmmpfam_parser = Bio::Tools::Hmmpfam->new(-fh=>$filehandle);
-     my @hmmpfam_feat;
+     return $searchio; 
      
-     while(my $hmmpfam_feat = $hmmpfam_parser->next_result){
-         push @hmmpfam_feat, $hmmpfam_feat;
-     }
-     
-     
-     $self->cleanup();
-     unlink $outfile;    
-     return @hmmpfam_feat;
-     
+}
+
+=head2 _setparams
+
+ Title   :  _setparams
+ Usage   :  Internal function, not to be called directly
+ Function:  creates a string of params to be used in the command string
+ Example :
+ Returns :  string of params
+ Args    :  
+
+=cut
+
+sub _setparams {
+    my ($self) = @_;
+    my $param_string;
+    foreach my $attr(@HMMPFAM_PARAMS){
+        next if $attr=~/DB/i;
+        my $value = $self->$attr();
+        next unless (defined $value);
+        my $attr_key = ' -'.(uc $attr);
+        $param_string .= $attr_key.' '.$value;
+    }
+    foreach my $attr(@HMMPFAM_SWITCHES){
+        my $value = $self->$attr();
+        next unless (defined $value);
+        my $attr_key = ' -'.($attr);
+        $param_string .=$attr_key;
+    }
+    $param_string.=' '.$self->DB; 
+
+    return $param_string;
 }
 
 
