@@ -5,7 +5,7 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 
 =head1 SYNOPSIS
 
-  #
+   #
 
 =head1 DESCRIPTION
 
@@ -19,7 +19,7 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 
 
 		clustalw_convert (String)
-
+			
 
 		seqfile (Sequence)
 			Alignment to convert (-infile)
@@ -29,10 +29,22 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 			Output format (-output)
 
 		gdefile (Results)
+			
 
+		clufile (Results)
+			
+			pipe: readseq_ok_alig
 
-		otherfile (Results)
+		phyfile (Results)
+			
+			pipe: readseq_ok_alig
 
+		gcgfile (Results)
+			
+			pipe: readseq_ok_alig
+
+		pirfile (Results)
+			
 			pipe: readseq_ok_alig
 
 =cut
@@ -82,7 +94,10 @@ sub new {
 	"seqfile",
 	"formats",
 	"gdefile",
-	"otherfile",
+	"clufile",
+	"phyfile",
+	"gcgfile",
+	"pirfile",
 
     ];
 
@@ -91,7 +106,10 @@ sub new {
 	"seqfile", 	# Alignment to convert (-infile)
 	"formats", 	# Output format (-output)
 	"gdefile",
-	"otherfile",
+	"clufile",
+	"phyfile",
+	"gcgfile",
+	"pirfile",
 
     ];
 
@@ -100,7 +118,10 @@ sub new {
 	"seqfile" => 'Sequence',
 	"formats" => 'Excl',
 	"gdefile" => 'Results',
-	"otherfile" => 'Results',
+	"clufile" => 'Results',
+	"phyfile" => 'Results',
+	"gcgfile" => 'Results',
+	"pirfile" => 'Results',
 
     };
 
@@ -116,14 +137,23 @@ sub new {
 	},
 	"gdefile" => {
 	},
-	"otherfile" => {
+	"clufile" => {
+	},
+	"phyfile" => {
+	},
+	"gcgfile" => {
+	},
+	"pirfile" => {
 	},
 
     };
 
     $self->{FILENAMES}  = {
 	"gdefile" => '*.gde',
-	"otherfile" => '*.phy *.msf *.pir',
+	"clufile" => '*.aln',
+	"phyfile" => '*.ph*',
+	"gcgfile" => '*.msf',
+	"pirfile" => '*.pir',
 
     };
 
@@ -140,8 +170,11 @@ sub new {
 
     $self->{BY_GROUP_PARAMETERS}  = [
 	"clustalw_convert",
+	"pirfile",
+	"clufile",
 	"gdefile",
-	"otherfile",
+	"phyfile",
+	"gcgfile",
 	"seqfile",
 	"formats",
 
@@ -156,7 +189,10 @@ sub new {
 	"seqfile" => 0,
 	"formats" => 0,
 	"gdefile" => 0,
-	"otherfile" => 0,
+	"clufile" => 0,
+	"phyfile" => 0,
+	"gcgfile" => 0,
+	"pirfile" => 0,
 
     };
 
@@ -165,7 +201,10 @@ sub new {
 	"seqfile" => 0,
 	"formats" => 0,
 	"gdefile" => 0,
-	"otherfile" => 0,
+	"clufile" => 0,
+	"phyfile" => 0,
+	"gcgfile" => 0,
+	"pirfile" => 0,
 
     };
 
@@ -174,7 +213,10 @@ sub new {
 	"seqfile" => 1,
 	"formats" => 1,
 	"gdefile" => 0,
-	"otherfile" => 0,
+	"clufile" => 0,
+	"phyfile" => 0,
+	"gcgfile" => 0,
+	"pirfile" => 0,
 
     };
 
@@ -183,7 +225,10 @@ sub new {
 	"seqfile" => "Alignment to convert (-infile)",
 	"formats" => "Output format (-output)",
 	"gdefile" => "",
-	"otherfile" => "",
+	"clufile" => "",
+	"phyfile" => "",
+	"gcgfile" => "",
+	"pirfile" => "",
 
     };
 
@@ -192,13 +237,16 @@ sub new {
 	"seqfile" => 0,
 	"formats" => 0,
 	"gdefile" => 0,
-	"otherfile" => 0,
+	"clufile" => 0,
+	"phyfile" => 0,
+	"gcgfile" => 0,
+	"pirfile" => 0,
 
     };
 
     $self->{VLIST}  = {
 
-	"formats" => ['','CLUSTALW','GCG','GCG/MSF','PIR','NBRF/PIR','GDE','GDE','PHYLIP','PHYLIP',],
+	"formats" => ['CLU','CLUSTALW','GCG','GCG/MSF','PIR','NBRF/PIR','GDE','GDE','PHYLIP','PHYLIP',],
     };
 
     $self->{FLIST}  = {
@@ -221,8 +269,17 @@ sub new {
 	"gdefile" => {
 		"perl" => '$formats eq "GDE"',
 	},
-	"otherfile" => {
-		"perl" => '$formats ne "GDE"',
+	"clufile" => {
+		"perl" => '$formats eq "CLU"',
+	},
+	"phyfile" => {
+		"perl" => '$formats eq "PHYLIP"',
+	},
+	"gcgfile" => {
+		"perl" => '$formats eq "GCG"',
+	},
+	"pirfile" => {
+		"perl" => '$formats eq "PIR"',
 	},
 
     };
@@ -232,7 +289,16 @@ sub new {
     };
 
     $self->{PIPEOUT}  = {
-	"otherfile" => {
+	"clufile" => {
+		 '1' => "readseq_ok_alig",
+	},
+	"phyfile" => {
+		 '1' => "readseq_ok_alig",
+	},
+	"gcgfile" => {
+		 '1' => "readseq_ok_alig",
+	},
+	"pirfile" => {
 		 '1' => "readseq_ok_alig",
 	},
 
@@ -258,7 +324,10 @@ sub new {
 	"seqfile" => 0,
 	"formats" => 0,
 	"gdefile" => 0,
-	"otherfile" => 0,
+	"clufile" => 0,
+	"phyfile" => 0,
+	"gcgfile" => 0,
+	"pirfile" => 0,
 
     };
 
@@ -267,7 +336,10 @@ sub new {
 	"seqfile" => 1,
 	"formats" => 1,
 	"gdefile" => 0,
-	"otherfile" => 0,
+	"clufile" => 0,
+	"phyfile" => 0,
+	"gcgfile" => 0,
+	"pirfile" => 0,
 
     };
 

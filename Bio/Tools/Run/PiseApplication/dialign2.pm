@@ -5,7 +5,7 @@ Bio::Tools::Run::PiseApplication::dialign2
 
 =head1 SYNOPSIS
 
-  #
+   #
 
 =head1 DESCRIPTION
 
@@ -24,7 +24,7 @@ Bio::Tools::Run::PiseApplication::dialign2
 
 
 		dialign2 (String)
-
+			
 
 		sequence (Sequence)
 			Sequences
@@ -52,7 +52,7 @@ Bio::Tools::Run::PiseApplication::dialign2
 			Alignment in fasta format
 
 		ali (Results)
-
+			
 
 =cut
 
@@ -164,7 +164,7 @@ sub new {
 		"perl" => '($protein_dna eq "n" && $value)? "t" : "" ',
 	},
 	"max_simil" => {
-		"perl" => '($value && $value != $vdef)? " -pln $value" : "" ',
+		"perl" => '($value && $value != $vdef)? " -stars $value" : "" ',
 	},
 	"output_options" => {
 	},

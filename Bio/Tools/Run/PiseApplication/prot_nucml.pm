@@ -5,8 +5,6 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 
 =head1 SYNOPSIS
 
-  #
-
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prot_nucml
@@ -22,17 +20,17 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 			Program
 
 		interleaved (String)
-
+			
 
 		tee (String)
-
+			
 
 		results (OutFile)
-
+			
 			pipe: phylip_dist
 
 		outtree (OutFile)
-
+			
 			pipe: phylip_tree
 
 		sequences (Sequence)
@@ -61,7 +59,7 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 			Strategy or Mode
 
 		topology (InFile)
-			Topology File (if Users Tree mode or Exhaustive search)
+			Topology File (if Users Tree mode or Exhaustive	      search or local Rearrangement search)
 
 		output (Paragraph)
 			Output Parameters
@@ -157,7 +155,7 @@ sub new {
 	"n2", 	# n2 AlphaY/AlphaR ratio (default:1.0) (option : -t n1,n2)
 	"search", 	# Search strategy or Mode (ProtML or NucML)
 	"mode", 	# Strategy or Mode
-	"topology", 	# Topology File (if Users Tree mode or Exhaustive search)
+	"topology", 	# Topology File (if Users Tree mode or Exhaustive	      search or local Rearrangement search)
 	"output", 	# Output Parameters
 	"num", 	# Retained top ranking trees (-n)
 	"verbose", 	# Verbose to stderr (-v)
@@ -412,7 +410,7 @@ sub new {
 	"n2" => "n2 AlphaY/AlphaR ratio (default:1.0) (option : -t n1,n2)",
 	"search" => "Search strategy or Mode (ProtML or NucML)",
 	"mode" => "Strategy or Mode",
-	"topology" => "Topology File (if Users Tree mode or Exhaustive search)",
+	"topology" => "Topology File (if Users Tree mode or Exhaustive	      search or local Rearrangement search)",
 	"output" => "Output Parameters",
 	"num" => "Retained top ranking trees (-n)",
 	"verbose" => "Verbose to stderr (-v)",
@@ -454,8 +452,8 @@ sub new {
 
 	"prot_nucml" => ['protml','protml','nucml','nucml',],
 	"model" => ['modelprot','modeldna','n1','n2',],
-	"modelprot" => ['-j','JTT (Jones, Taylor & Thornton) (-j)','-jf','JTT-F (Jones, Taylor & Thornton) (-jf)','-d','Dayhoff (Dayhoff & al) (-d)','-df','Dayhoff-F (Dayhoff & al) (-df)','-m','mtREV4 (Adachi & Asegawa) (-m)','-mf','mtREV4-F (Adachi & Asegawa) (-mf)','-p','Poisson (-p)','-pf','Proportional (-pf)','-r','users RSF (Relative Substitution Frequencies) (-r)','-rf','users RSF-F (-rf)','-f','with data Frequencies (-f)',],
-	"modeldna" => ['-t','Alpha/Beta (Hasegawa, Kishino & Yano) and/or AlphaY/AlphaR (Tamura & Nei) (-t)','-p','Proportional (-p)','-pf','Poisson (-pf)','-r','users RSR-F (Relative Substitution Rate)','-rf','users RSR (-rf)','-f','-f withOUT data Frequencies',],
+	"modelprot" => ['-j','JTT (Jones, Taylor & Thornton) (-j)','-jf','JTT-F (Jones, Taylor & Thornton) (-jf)','-d','Dayhoff (Dayhoff & al) (-d)','-df','Dayhoff-F (Dayhoff & al) (-df)','-m','mtREV24 (Adachi & Hasegawa) (-m)','-mf','mtREV24-F (Adachi & Hasegawa) (-mf)','-p','Poisson (-p)','-pf','Proportional (-pf)','-r','users RSR (Relative Substitution Rate) (-r)','-rf','users RSR-F (-rf)','-f','with data Frequencies (-f)',],
+	"modeldna" => ['-t','Alpha/Beta (Hasegawa, Kishino & Yano) and/or AlphaY/AlphaR (Tamura & Nei) (-t)','-p','Proportional (-p)','-pf','Poisson (-pf)','-r','users RSR-F (Relative Substitution Rate) (-r)','-rf','users RSR (-rf)','-f','-f withOUT data Frequencies',],
 	"search" => ['mode','topology',],
 	"mode" => ['-u','Users trees (need users_trees file) (-u)','-R','local Rearrangement search (-R)','-RX','LBP (local bootstrap probability only) (-RX)','-e','Exhaustive search (with/without constrained_tree file) (-e)','-s','Star decomposition search (may not be the ML tree) (-s)','-q','Quick add OTUs search (may not be the ML tree) (-q)','-D','maximum likelihood Distance matrix (for NJDIST) (-D)',],
 	"output" => ['num','verbose','info',],
@@ -509,7 +507,7 @@ sub new {
 	"search" => { "perl" => '1' },
 	"mode" => { "perl" => '1' },
 	"topology" => {
-		"perl" => '($mode eq "-u" || $mode eq "-e" )',
+		"perl" => '($mode eq "-u" || $mode eq "-e" || $mode eq "-R" )',
 	},
 	"output" => { "perl" => '1' },
 	"num" => { "perl" => '1' },

@@ -5,7 +5,7 @@ Bio::Tools::Run::PiseApplication::grailclnt
 
 =head1 SYNOPSIS
 
-  #
+   #
 
 =head1 DESCRIPTION
 
@@ -24,7 +24,7 @@ Bio::Tools::Run::PiseApplication::grailclnt
 
 
 		grailclnt (String)
-
+			
 
 		seq (Sequence)
 			Sequence
@@ -95,19 +95,19 @@ Bio::Tools::Run::PiseApplication::grailclnt
 			Strand
 
 		rpttv_organism (String)
-
+			
 
 		start_seq (String)
-
+			
 
 		end_seq (String)
-
+			
 
 		end_request (String)
-
+			
 
 		input_file (Results)
-
+			
 
 		outfile (OutFile)
 			Result file
@@ -599,7 +599,7 @@ sub new {
 	"forward_strand" => '0',
 	"reverse_strand" => '0',
 	"fserr_strand" => 'AUTO_STRAND',
-	"outfile" => 'grailclnt.out',
+	"outfile" => 'grailclnt.txt',
 
     };
 

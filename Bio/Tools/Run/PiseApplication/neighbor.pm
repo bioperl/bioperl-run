@@ -5,7 +5,7 @@ Bio::Tools::Run::PiseApplication::neighbor
 
 =head1 SYNOPSIS
 
-  #
+   #
 
 =head1 DESCRIPTION
 
@@ -26,7 +26,7 @@ Bio::Tools::Run::PiseApplication::neighbor
 
 
 		neighbor (String)
-
+			
 
 		distance_method (Excl)
 			Distance method
@@ -42,7 +42,7 @@ Bio::Tools::Run::PiseApplication::neighbor
 			Randomize (jumble) input order (J)
 
 		jumble_seed (Integer)
-			Random number seed (must be odd)
+			Random number seed for jumble (must be odd)
 
 		bootstrap (Paragraph)
 			Bootstrap options
@@ -53,20 +53,24 @@ Bio::Tools::Run::PiseApplication::neighbor
 		datasets_nb (Integer)
 			How many data sets
 
+		multiple_seed (Integer)
+			Random number seed for multiple dataset (must be odd)
+
 		consense (Switch)
 			Compute a consensus tree
 
 		consense_confirm (String)
-
+			
 
 		consense_terminal_type (String)
-
+			
 
 		consense_outfile (Results)
-
+			
 
 		consense_treefile (Results)
-
+			
+			pipe: phylip_tree
 
 		output (Paragraph)
 			Output options
@@ -93,26 +97,26 @@ Bio::Tools::Run::PiseApplication::neighbor
 			Matrix format
 
 		outfile (Results)
-
+			
 
 		treefile (Results)
-
+			
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-
+			
 
 		params (Results)
-
+			
 
 		confirm (String)
-
+			
 
 		terminal_type (String)
-
+			
 
 		tmp_params (Results)
-
+			
 
 =cut
 
@@ -193,10 +197,11 @@ sub new {
 	"infile", 	# Distances matrix File
 	"jumble_opt", 	# Randomize options
 	"jumble", 	# Randomize (jumble) input order (J)
-	"jumble_seed", 	# Random number seed (must be odd)
+	"jumble_seed", 	# Random number seed for jumble (must be odd)
 	"bootstrap", 	# Bootstrap options
 	"multiple_dataset", 	# Analyze multiple data sets (M)
 	"datasets_nb", 	# How many data sets
+	"multiple_seed", 	# Random number seed for multiple dataset (must be odd)
 	"consense", 	# Compute a consensus tree
 	"consense_confirm",
 	"consense_terminal_type",
@@ -230,6 +235,7 @@ sub new {
 	"bootstrap" => 'Paragraph',
 	"multiple_dataset" => 'Switch',
 	"datasets_nb" => 'Integer',
+	"multiple_seed" => 'Integer',
 	"consense" => 'Switch',
 	"consense_confirm" => 'String',
 	"consense_terminal_type" => 'String',
@@ -274,9 +280,12 @@ sub new {
 	"bootstrap" => {
 	},
 	"multiple_dataset" => {
-		"perl" => '($value) ? "M\\n$datasets_nb\\n$jumble_seed\\n" : ""',
+		"perl" => '($value) ? "M\\n$datasets_nb\\n$multiple_seed\\n" : ""',
 	},
 	"datasets_nb" => {
+		"perl" => '""',
+	},
+	"multiple_seed" => {
 		"perl" => '""',
 	},
 	"consense" => {
@@ -381,6 +390,7 @@ sub new {
 	"bootstrap",
 	"indented_treefile",
 	"params",
+	"multiple_seed",
 	"tmp_params",
 	"consense_outfile",
 	"consense_treefile",
@@ -416,6 +426,7 @@ sub new {
 	"bootstrap" => 0,
 	"multiple_dataset" => 0,
 	"datasets_nb" => 0,
+	"multiple_seed" => 0,
 	"consense" => 0,
 	"consense_confirm" => 1,
 	"consense_terminal_type" => 1,
@@ -449,6 +460,7 @@ sub new {
 	"bootstrap" => 0,
 	"multiple_dataset" => 0,
 	"datasets_nb" => 0,
+	"multiple_seed" => 0,
 	"consense" => 0,
 	"consense_confirm" => 0,
 	"consense_terminal_type" => 0,
@@ -482,6 +494,7 @@ sub new {
 	"bootstrap" => 0,
 	"multiple_dataset" => 0,
 	"datasets_nb" => 1,
+	"multiple_seed" => 1,
 	"consense" => 0,
 	"consense_confirm" => 0,
 	"consense_terminal_type" => 0,
@@ -511,10 +524,11 @@ sub new {
 	"infile" => "Distances matrix File",
 	"jumble_opt" => "Randomize options",
 	"jumble" => "Randomize (jumble) input order (J)",
-	"jumble_seed" => "Random number seed (must be odd)",
+	"jumble_seed" => "Random number seed for jumble (must be odd)",
 	"bootstrap" => "Bootstrap options",
 	"multiple_dataset" => "Analyze multiple data sets (M)",
 	"datasets_nb" => "How many data sets",
+	"multiple_seed" => "Random number seed for multiple dataset (must be odd)",
 	"consense" => "Compute a consensus tree",
 	"consense_confirm" => "",
 	"consense_terminal_type" => "",
@@ -548,6 +562,7 @@ sub new {
 	"bootstrap" => 0,
 	"multiple_dataset" => 0,
 	"datasets_nb" => 0,
+	"multiple_seed" => 0,
 	"consense" => 0,
 	"consense_confirm" => 0,
 	"consense_terminal_type" => 0,
@@ -575,7 +590,7 @@ sub new {
 
 	"distance_method" => ['neighbor','Neighbor-joining','upgma','UPGMA',],
 	"jumble_opt" => ['jumble','jumble_seed',],
-	"bootstrap" => ['multiple_dataset','datasets_nb','consense',],
+	"bootstrap" => ['multiple_dataset','datasets_nb','multiple_seed','consense',],
 	"output" => ['print_tree','print_treefile','indent_tree','printdata',],
 	"other_options" => ['outgroup','triangular',],
 	"triangular" => ['square','Square','lower','Lower-triangular','upper','Upper-triangular',],
@@ -618,11 +633,14 @@ sub new {
 		"perl" => 'not $multiple_dataset',
 	},
 	"jumble_seed" => {
-		"perl" => '$jumble or $multiple_dataset',
+		"perl" => '$jumble',
 	},
 	"bootstrap" => { "perl" => '1' },
 	"multiple_dataset" => { "perl" => '1' },
 	"datasets_nb" => {
+		"perl" => '$multiple_dataset',
+	},
+	"multiple_seed" => {
 		"perl" => '$multiple_dataset',
 	},
 	"consense" => {
@@ -675,6 +693,11 @@ sub new {
 			'$value > 1000' => "there must be no more than 1000 datasets for this server",
 		},
 	},
+	"multiple_seed" => {
+		"perl" => {
+			'$value <= 0 || (($value % 2) == 0)' => "Random number seed must be odd",
+		},
+	},
 	"outgroup" => {
 		"perl" => {
 			'defined $value && $value < 1' => "Please enter a value greater than 0",
@@ -684,6 +707,9 @@ sub new {
     };
 
     $self->{PIPEOUT}  = {
+	"consense_treefile" => {
+		 '1' => "phylip_tree",
+	},
 	"treefile" => {
 		 '1' => "phylip_tree",
 	},
@@ -715,6 +741,7 @@ sub new {
 	"bootstrap" => 0,
 	"multiple_dataset" => 0,
 	"datasets_nb" => 0,
+	"multiple_seed" => 0,
 	"consense" => 0,
 	"consense_confirm" => 0,
 	"consense_terminal_type" => 0,
@@ -748,6 +775,7 @@ sub new {
 	"bootstrap" => 0,
 	"multiple_dataset" => 0,
 	"datasets_nb" => 0,
+	"multiple_seed" => 0,
 	"consense" => 0,
 	"consense_confirm" => 0,
 	"consense_terminal_type" => 0,
@@ -775,6 +803,7 @@ sub new {
 	"distance_method" => "params",
 	"jumble" => "params",
 	"multiple_dataset" => "params",
+	"multiple_seed" => "params",
 	"consense_confirm" => "consense.params",
 	"consense_terminal_type" => "consense.params",
 	"print_tree" => "params",

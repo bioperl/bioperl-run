@@ -690,8 +690,9 @@ sub results_type {
     $remote =~ s/$command\.pl//;
     $remote .= "lib/results.pl";
     print STDERR "Bio::Tools::Run::PiseJob::results_type: running $remote to change results type ($results_type scratch_dir: $scratch_dir)\n" if $self->{VERBOSE};
+    my $email = $self->{EMAIL};
 
-    my $res = $ua->request(POST $remote, [command => $command, email => $ENV{'USER'}, results_type => $results_type, scratch_dir => $scratch_dir]);
+    my $res = $ua->request(POST $remote, [command => $command, email => $email, results_type => $results_type, scratch_dir => $scratch_dir]);
 
     if ($res->is_success) {
 	return 1;
@@ -784,7 +785,6 @@ sub _init {
 			# bioperl 1.0
 			my $out = Bio::AlignIO->new(-file => ">$tmpfile", '-format' => 'fasta');
 			$out->write_aln($value);
-			close(TMP);
 			push (@{$self->{TMPFILES}}, $tmpfile);
 			print STDERR "Bio::Tools::Run::PiseJob::_init written alignment to $tmpfile\n" if $self->{VERBOSE};
 			$self->{ARGS}{$param} = $tmpfile;
@@ -961,7 +961,7 @@ sub _parse {
     }
     my $parser = XML::Parser::PerlSAX->new  (Handler => $handler);
     $self->{PARSER} = $parser;
-    my $content = $self->_clean_content($content);
+    $content = $self->_clean_content($content);
 
     eval {$parser->parse($content)};
 
