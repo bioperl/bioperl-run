@@ -25,8 +25,16 @@ my $aln = $alignio->next_aln;
 
 my $yn = new Bio::Tools::Run::Phylo::PAML::Yn00();
 $yn->alignment($aln);
-my ($rc,$results) = $yn->run();
+my ($rc,$results,$neiresults) = $yn->run();
 
+my %seen;
+while( my ($seqname1,$seqvalues) = each %{$results} ) {
+    while( my ($seqname2, $values) = each %{$seqvalues} ) {
+	foreach my $datatype ( keys %{$values} ) {
+	    print "$seqname1 $seqname2 -> $datatype $values->{$datatype}\n";
+	}
+    } 
+}
 print "Ka = ", $results->{'dN'},"\n";
 print "Ks = ", $results->{'dS'},"\n";
 print "Ka/Ks = ", $results->{'dN/dS'},"\n";
@@ -167,8 +175,14 @@ sub new {
  Usage   : $yn->run();
  Function: run the yn00 analysis using the default or updated parameters
            the alignment parameter must have been set
- Returns : 
- Args    :
+ Returns : 3 values, 
+           $rc = 1 for success, 0 for errors
+           hash reference of the Yang calculated Ka/Ks values
+                    this is a set of pairwise observations keyed as
+                    sequencenameA->sequencenameB->datatype
+           hash reference same as the previous one except it for the 
+           Nei and Gojobori calculated Ka,Ks,omega values
+ Args    : none
 
 
 =cut
@@ -208,7 +222,7 @@ sub run{
        print YN "$param = $val\n";
    }
    close(YN);
-   my ($rc,%data) = (1);
+   my ($rc,%data,%nei,@labels) = (1);
    {
        chdir($tmpdir);
        my $ynexe = $self->executable();
@@ -217,7 +231,7 @@ sub run{
        my @output = <RUN>;
        close(RUN);
        $self->error_string(join('',@output));
-       
+
        if( grep { /Error/ } @output  ) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
@@ -226,39 +240,51 @@ sub run{
        # pretty dumb parser but works for this format, at least 
        # PAML 3.12
        my $lastline = '';
-       my ($nei_gojoboridN, $nei_gojoboridS, $nei_gojoboridNdS);  
        while(<OUTPUT>) {
 	   next if( /^\s+$/);
-	   chomp;
 	   if( /^Nei\s+\&\s+Gojobori/ ) {
-	       <OUTPUT>;
-	       my $l = <OUTPUT>;
-	       ($nei_gojoboridN, 
-		$nei_gojoboridS, 
-		$nei_gojoboridNdS) = 
-		    ($l =~ /(\d+\.\d+)\((\d+\.\d+)\s+(\d+\.\d+)\)/);
+	       while(<OUTPUT>) {
+		   last if( /^\s+$/);
+		   my ($label, $vals) = split(/\s+/,$_,2);
+		   push @labels, $label;
+		   my $c = 0;
+		   while( $vals =~ /(\d+\.\d+)\((\d+\.\d+)\s+(\d+\.\d+)\)/g ) {
+		       $nei{$label}->{$labels[$c]} = 
+			   $nei{$labels[$c]}->{$label} = 
+			   {'N' =>  $1,
+			    'S' => $2,
+			    'dNdS' => $3} ;
+		       $c++;
+		   }
+	       }
 	       next;
 	   }
-	   $lastline = $_;
-       }
-       my @splitline = split(/\s+/,$lastline);
-       %data = ( 'Nei_Gojobori_dN' => $nei_gojoboridN, 
-		 'Nei_Gojobori_dS' => $nei_gojoboridS, 
-		 'Nei_Gojobori_dN/dS' => $nei_gojoboridNdS,
-		 'S' => $splitline[2],
-		 'N' => $splitline[3],
-		 't' => $splitline[4],
-		 'kappa' => $splitline[5],
-		 'dN/dS' => $splitline[6],
-		 'dN'    => $splitline[7],
-		 'dS'    => $splitline[8]);
-   }
+	   if( /^seq\.\s+seq\.\s+/) {
+	       while( <OUTPUT> ) {
+		   next if( /^\s+$/);
+		   s/^\s+//;
+		   my @line = split;
+		   my ($seq_a,$seq_b) = ($labels[(shift @line) - 1],
+					 $labels[(shift @line) - 1]);
+		       
+		   $data{$seq_a}->{$seq_b} = $data{$seq_b}->{$seq_a} = 
+		   { 'S' => shift @line,
+		     'N' => shift @line,
+		     't' => shift @line,
+		     'kappa' => shift @line,
+		     'dN/dS' => shift @line,
+		     'dN'    => shift @line,
+		     'dS'    => shift @line };
 
-   unless ( $self->save_tempfiles ) {
-      unlink("$yn_ctl");
-      $self->cleanup();
+	       }
+	   }
+       }
    }
-   return ($rc,\%data);
+   unless ( $self->save_tempfiles ) {
+       unlink("$yn_ctl");
+       $self->cleanup();
+   }
+   return ($rc,\%data, \%nei);
 }
 
 =head2 error_string
