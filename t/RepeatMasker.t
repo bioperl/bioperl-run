@@ -24,6 +24,10 @@ END {
 my @params=("mam" => 1,"noint"=>1);
 my $fact = Bio::Tools::Run::RepeatMasker->new(@params);
 
+if( ! $fact->executable ) { 
+    exit(0);
+}
+
 ok ($fact->mam, 1);
 ok ($fact->noint,1);
 my $inputfilename= Bio::Root::IO->catfile("t","data","repeatmasker.fa");
@@ -31,11 +35,11 @@ my $inputfilename= Bio::Root::IO->catfile("t","data","repeatmasker.fa");
 my $in  = Bio::SeqIO->new(-file => "$inputfilename" , '-format' => 'fasta');
 my $seq = $in->next_seq();
 my @feats = $fact->mask($seq);
-ok ($feats[0]->feature1->start, 1337);
-ok ($feats[0]->feature1->end, 1407);
-ok ($feats[0]->feature1->strand, 1);
-ok ($feats[1]->feature1->start, 1712);
-ok ($feats[1]->feature1->end, 2225);
+ok ($feats[0]->start, 1337);
+ok ($feats[0]->end, 1407);
+ok ($feats[0]->strand, 1);
+ok ($feats[1]->start, 1712);
+ok ($feats[1]->end, 2225);
 my ($rn) = $feats[0]->each_tag_value('repeat_name');
 my ($rc) = $feats[0]->each_tag_value('repeat_class');
 ok ($rn,'(TTAGGG)n');
