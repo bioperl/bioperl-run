@@ -223,7 +223,7 @@ sub _run {
 	close($tfh);
 	undef $tfh;
 
-	my $str= Bio::Root::IO->catfile($self->executable,$self->program_name);
+	my $str= $self->executable;
 
 	$str.=' -out=psl '.$self->DB .' '.$self->_input.' '.$outfile;
 
