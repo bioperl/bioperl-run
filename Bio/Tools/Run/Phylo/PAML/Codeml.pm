@@ -20,7 +20,7 @@ Bio::Tools::Run::Phylo::PAML::Codeml - Wrapper aroud the PAML program codeml
   use Bio::AlignIO;
 
   my $alignio = new Bio::AlignIO(-format => 'phylip',
-  			       -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
+  			         -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
 
   my $aln = $alignio->next_aln;
 
@@ -239,7 +239,7 @@ BEGIN {
 
 		     'seqtype' => [ 1..3], # 1:codons, 2:AAs, 3:codons->AAs
 
-		     'CodonFreq' => [ 0..3], # 0:1/61 each, 1:F1X4, 
+		     'CodonFreq' => [ 2, 0,1,3], # 0:1/61 each, 1:F1X4, 
 		                                # 2:F3X4, 3:codon table
 
 		     # (aaDist) 0:equal, +:geometric, -:linear, 
