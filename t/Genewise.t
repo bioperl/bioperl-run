@@ -16,7 +16,6 @@ BEGIN {
 use Bio::Tools::Run::Genewise;
 use Bio::Root::IO;
 use Bio::Seq;
-
 END {
     for ( $Test::ntest..$NTESTS ) {
         skip("genewise program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
@@ -45,7 +44,7 @@ my $seqstream1 = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
 my $seq1 = Bio::Seq->new();
 $seq1 = $seqstream1->next_seq();
 
-$inputfilename = Bio::Root::IO->catfile("t/data","new_dna.fa");
+my $inputfilename = Bio::Root::IO->catfile("t/data","new_dna.fa");
 my $seqstream2 = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
 my $seq2 = Bio::Seq->new();
 $seq2 = $seqstream2->next_seq();
