@@ -23,7 +23,6 @@ END {
     }
 }
 
-#open(STDERR, ">/dev/null");  # this is bad to do - won't work on non UNIXes
 my $blast_out = Bio::Root::IO->catfile("t","data","TribeMCL.bls");
 
 #do from raw blast output
@@ -31,6 +30,14 @@ my @params=('inputtype'=>'blastfile',I=>'3.0');
 my $fact = Bio::Tools::Run::TribeMCL->new(@params);
 
 ok $fact->isa('Bio::Tools::Run::TribeMCL');
+unless ($fact->matrix_executable){
+    warn("Tribe Matrix program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+                exit 0;
+}
+unless ($fact->mcl_executable){
+    warn("Markov Clustering program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+                exit 0;
+}
 
 my $bequiet = 1 ;
 $fact->quiet($bequiet);
@@ -47,6 +54,7 @@ my $sio = Bio::SearchIO->new(-format=>'blast',
 
 @params=('inputtype'=>'searchio',I=>'3.0');
 $fact = Bio::Tools::Run::TribeMCL->new(@params);
+
 ok $fact->isa('Bio::Tools::Run::TribeMCL');
 $bequiet =1 ;
 $fact->quiet($bequiet);
