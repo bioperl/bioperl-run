@@ -310,6 +310,8 @@ sub _setinput {
     foreach my $c (@cdna){
       $seqio->write_seq($c);
     }
+    close $tfh1;
+    undef $tfh1;
 
     #if we have a est database, then input will  go second
     if($#cdna > 0){
@@ -330,6 +332,8 @@ sub _setinput {
     ($tfh1,$genomic_file) = $self->io->tempfile(-dir=>$self->tempdir);
     my $seqio = Bio::SeqIO->new(-fh=>$tfh1,-format=>'fasta');
     $seqio->write_seq($genomic);
+    close $tfh1;
+    undef $tfh1;
   }
   else {
      $genomic_file = $genomic;
