@@ -303,7 +303,7 @@ sub _setinput {
   my ($self, $cdna,$genomic) = @_;
   my ($infilename, $seq, $temp, $tfh1,$tfh2,$outfile1,$outfile2);
   my $estfirst=1;
-  my ($cdna_file,$genomic_file,$tfh1);
+  my ($cdna_file,$genomic_file);
   #a sequence obj
   if(ref($cdna)) {
       my @cdna = ref $cdna eq "ARRAY" ? @{$cdna} : ($cdna);

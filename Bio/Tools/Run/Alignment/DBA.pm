@@ -257,11 +257,10 @@ sub _run {
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
     unless( $self->outfile){
-        my $tfh;
-	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
-        close($tfh);
-	undef $tfh;
-	$self->outfile($outfile);
+	  my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+    close($tfh);
+  	undef $tfh;
+  	$self->outfile($outfile);
     }
     my $outfile = $self->outfile(); 
     my $commandstring = $self->executable." $param_string -pff $infile1 $infile2 > $outfile";
