@@ -239,8 +239,9 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::StandAloneBlast;
 
-use vars qw($AUTOLOAD @ISA %PROGRAMS @BLASTALL_PARAMS @BLASTPGP_PARAMS 
-	    @BL2SEQ_PARAMS @OTHER_PARAMS %OK_FIELD $DATADIR $BLASTDIR 
+use vars qw($AUTOLOAD @ISA $PROGRAMDIR  $DATADIR 
+	    @BLASTALL_PARAMS @BLASTPGP_PARAMS 
+	    @BL2SEQ_PARAMS @OTHER_PARAMS %OK_FIELD
 	    );
 use strict;
 use Bio::Root::Root;
@@ -250,6 +251,8 @@ use Bio::SeqIO;
 use Bio::Tools::BPbl2seq;
 use Bio::Tools::BPpsilite;
 use Bio::SearchIO;
+use Bio::Tools::Run::WrapperBase;
+use Bio::Factory::ApplicationFactoryI;
 
 BEGIN {      
 
@@ -280,14 +283,16 @@ BEGIN {
 #  2. include a definition of an environmental variable BLASTDIR in every script that will
 #     use StandAloneBlast.pm.
 #	BEGIN {$ENV{BLASTDIR} = '/home/peter/blast/'; }
-     $BLASTDIR = $ENV{'BLASTDIR'} || '';
+     $PROGRAMDIR = $ENV{'BLASTDIR'} || '';
 
 # If local BLAST databases are not stored in the standard
 # /data directory, the variable BLASTDATADIR will need to be set explicitly 
      $DATADIR =  $ENV{'BLASTDATADIR'} || $ENV{'BLASTDB'} || '';
 }
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO);
+@ISA = qw(Bio::Root::Root 
+	  Bio::Tools::Run::WrapperBase 
+	  Bio::Factory::ApplicationFactoryI);
 
 =head1 BLAST parameters
 
@@ -341,14 +346,9 @@ sub new {
     my ($caller, @args) = @_;
     # chained new
     my $self = $caller->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->_initialize_io();
-    unless (&Bio::Tools::Run::StandAloneBlast::exists_blast()) {
-	$self->debug( "Blast program not found or not executable. \n  Blast can be obtained from ftp://ncbi.nlm.nih.gov/blast\n");    
-    } 
-    # to facilitiate tempfile cleanup
-    $self->_initialize_io();
-    my ($fh,$tempfile) = $self->tempfile();
+ 
+    # to facilitiate tempfile cleanup    
+    my (undef,$tempfile) = $self->io->tempfile();
     $self->outfile($tempfile);
     $self->_READMETHOD('BPlite');
     while (@args)  {
@@ -357,8 +357,6 @@ sub new {
 	next if( $attr eq '-verbose');
 	$self->$attr($value);
     }
-    close($fh);
-    undef $fh;
     return $self;
 }
 
@@ -376,48 +374,44 @@ sub AUTOLOAD {
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
 #    $self->throw("Unallowed parameter: $attr !") unless $ok_field{$attr_letter};
     $self->{$attr_letter} = shift if @_;
-    return $self->{ $attr_letter};
+    return $self->{$attr_letter};
 }
 
 =head1 Methods
 
-=head2  exists_blast
+=head2 executable
 
- Title   : exists_blast
- Usage   : $blastfound = Bio::Tools::Run::StandAloneBlast->exists_blast()
- Function: Determine whether Blast program can be found on current host.
-           Cf. the DESCRIPTION section of this POD for how to make sure
-           for your BLAST installation to be found. This method checks for
-           existence of the blastall executable either in BLASTDIR or in
-           the path.
-           Side effects: if BLASTDATADIR is not set, checks whether data is a
-           subdirectory of the directory where blastall is found, and if so,
-           sets DATADIR accordingly.
- Returns : 1 if Blast program found at expected location, 0 otherwise.
- Args    :  none
+ Title   : executable
+ Usage   : my $exe = $blastfactory->executable('blastall');
+ Function: Finds the full path to the 'codeml' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to 
+           [optional] boolean flag whether or not warn when exe is not found
+
 
 =cut
 
-sub exists_blast {
-    my ($exe) =  shift;
-    # can call as a class method or as a function
-    if( defined $exe && $exe =~ /Bio::Tools/i ) { $exe = shift; }
-    $exe ||= 'blastall';
-    if( $^O =~ /mswin/i) { $exe .= '.exe'; }
-    my $f;
-
-    if((! $DATADIR) && (-d Bio::Root::IO->catfile($BLASTDIR, "data"))) {
-	$DATADIR = Bio::Root::IO->catfile($BLASTDIR, "data");
-    }
-    
-    if( ($f = Bio::Root::IO->exists_exe($exe)) ||
-	($f = Bio::Root::IO->exists_exe(Bio::Root::IO->catfile($BLASTDIR, 
-							       $exe))) ) {
-	$PROGRAMS{$exe} = $f if( -e $f );
-	return 1;
-    }
-    #debug("exe is $exe blastall is $f\n");
-    return 0;
+sub executable{
+   my ($self, $exename, $exe,$warn) = @_;
+   $exename = 'blastall' unless defined $exename;
+   if( defined $exe ) {
+     $self->{'_pathtoexe'}->{$exename} = $exe;
+   }
+   unless( defined $self->{'_pathtoexe'}->{$exename} ) {
+       if( $PROGRAMDIR ) { 
+	   my $f = $self->io->catfile($PROGRAMDIR, $exename);	    
+	   $exe = $self->{'_pathtoexe'}->{$exename} if(-e $f && -x $f );
+       } 
+       if( ! $exe  && # we didn't find it in that last conditional
+	   ( $exe = $self->io->exists_exe($exename) ) &&
+	   -x $exe ) {
+	   $self->{'_pathtoexe'}->{$exename} = $exe;
+       } else { 
+	   $self->warn("Cannot find executable for $exename") if $warn;
+	   $self->{'_pathtoexe'}->{$exename} = undef;
+       }
+   }
+   $self->{'_pathtoexe'}->{$exename};
 }
 
 =head2  blastall
@@ -445,7 +439,7 @@ sub exists_blast {
 
 sub blastall {
     my ($self,$input1) = @_;
-    $self->_io_cleanup();
+    $self->io->_io_cleanup();
     my $executable = 'blastall';
     my $input2;
 # Create input file pointer
@@ -501,7 +495,7 @@ sub blastpgp {
     $self->i($infilename1);	# set file name of sequence to be blasted to inputfilename1 (-i param of blastpgp)
 
     if  ($input2) {
-	unless ($infilename2) {$self->throw("$input2  not SimpleAlign Object in pre-aligned psiblast\n");}
+	unless ($infilename2) {$self->throw("$input2 not SimpleAlign Object in pre-aligned psiblast\n");}
 	$self->B($infilename2);	# set file name of partial alignment to inputfilename2 (-B param of blastpgp)
     }
     my $blast_report = &_generic_local_blast($self, $executable, $input1, $input2);
@@ -537,11 +531,15 @@ sub bl2seq {
 # Create input file pointer
     my  ($infilename1, $infilename2 )  = $self->_setinput($executable, 
 							  $input1, $input2);
-    if (!$infilename1) {$self->throw(" $input1  not Seq Object or file name!");}
-    if  (!$infilename2) {$self->throw("$input2  not Seq Object or file name!");}
+    if (!$infilename1){$self->throw(" $input1  not Seq Object or file name!");}
+    if (!$infilename2){$self->throw("$input2  not Seq Object or file name!");}
 
-    $self->i($infilename1);	# set file name of first sequence to be aligned to inputfilename1 (-i param of bl2seq)
-    $self->j($infilename2);	# set file name of first sequence to be aligned to inputfilename2 (-j param of bl2seq)
+    $self->i($infilename1);	# set file name of first sequence to 
+                                # be aligned to inputfilename1 
+                                # (-i param of bl2seq)
+    $self->j($infilename2);	# set file name of first sequence to 
+                                # be aligned to inputfilename2 
+                                # (-j param of bl2seq)
 
     my $blast_report = &_generic_local_blast($self, $executable);    
 }
@@ -557,14 +555,13 @@ sub bl2seq {
 =cut
 
 sub _generic_local_blast {
-
     my $self = shift;
     my $executable = shift;
 
-# Create parameter string to pass to Blast program
+    # Create parameter string to pass to Blast program
     my $param_string = $self->_setparams($executable);
 
-# run Blast
+    # run Blast
     my $blast_report = &_runblast($self, $executable, $param_string);
 }
 
@@ -584,14 +581,12 @@ sub _generic_local_blast {
 
 sub _runblast {
     my ($self,$executable,$param_string) = @_;
-    my $blast_obj;
-    if( ! defined $PROGRAMS{$executable} ) {
-	unless (&Bio::Tools::Run::StandAloneBlast::exists_blast($executable)) {
-	    $self->warn("cannot find path to $executable");
-	    return undef;
-	}
+    my ($blast_obj,$exe);
+    if( ! ($exe = $self->executable($executable)) ) {
+	$self->warn("cannot find path to $executable");
+	return undef;    
     }
-    my $commandstring = $PROGRAMS{$executable} . $param_string;
+    my $commandstring = $exe. $param_string;
    
     # next line for debugging
     $self->debug( "$commandstring \n");
@@ -643,7 +638,7 @@ sub _setinput {
     my ($seq, $temp, $infilename1, $infilename2,$fh ) ;
 #  If $input1 is not a reference it better be the name of a file with
 #  the sequence/ alignment data...
-    $self->_io_cleanup();
+    $self->io->_io_cleanup();
 
   SWITCH:  {
       unless (ref $input1) {
@@ -652,7 +647,7 @@ sub _setinput {
       }
 #  $input may be an array of BioSeq objects...
       if (ref($input1) =~ /ARRAY/i ) {
-	  ($fh,$infilename1) = $self->tempfile();
+	  ($fh,$infilename1) = $self->io->tempfile();
 	  $temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
 	  foreach $seq (@$input1) {
 	      unless ($seq->isa("Bio::PrimarySeqI")) {return 0;}
@@ -664,7 +659,7 @@ sub _setinput {
       }
 #  $input may be a single BioSeq object...
       elsif ($input1->isa("Bio::PrimarySeqI")) {
-	  ($fh,$infilename1) = $self->tempfile();
+	  ($fh,$infilename1) = $self->io->tempfile();
 
 # just in case $input1 is taken from an alignment and has spaces (ie
 # deletions) indicated within it, we have to remove them - otherwise
@@ -691,7 +686,7 @@ sub _setinput {
 	  last SWITCH2; 
       }
       if ($input2->isa("Bio::PrimarySeqI")  && $executable  eq 'bl2seq' ) {
-	  ($fh,$infilename2) = $self->tempfile();
+	  ($fh,$infilename2) = $self->io->tempfile();
 
 	  $temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
 	  $temp->write_seq($input2);
@@ -703,7 +698,7 @@ sub _setinput {
       elsif ($input2->isa("Bio::SimpleAlign")  && 
 	     $executable  eq 'blastpgp' ) {
 # a bit of a lie since it won't be a fasta file
-	  ($fh,$infilename2) = $self->tempfile(); 
+	  ($fh,$infilename2) = $self->io->tempfile(); 
 
 # first we retrieve the "mask" that determines which residues should
 # by scored according to their position and which should be scored
@@ -774,6 +769,88 @@ sub _setparams {
 # if ($self->quiet()) { $param_string .= '  >/dev/null';}
 
     return $param_string;
+}
+
+
+=head1 Bio::Tools::Run::Wrapper methods
+
+=cut
+
+=head2 no_param_checks
+
+ Title   : no_param_checks
+ Usage   : $obj->no_param_checks($newval)
+ Function: Boolean flag as to whether or not we should
+           trust the sanity checks for parameter values  
+ Returns : value of no_param_checks
+ Args    : newvalue (optional)
+
+
+=cut
+
+=head2 save_tempfiles
+
+ Title   : save_tempfiles
+ Usage   : $obj->save_tempfiles($newval)
+ Function: 
+ Returns : value of save_tempfiles
+ Args    : newvalue (optional)
+
+
+=cut
+
+=head2 outfile_name
+
+ Title   : outfile_name
+ Usage   : my $outfile = $tcoffee->outfile_name();
+ Function: Get/Set the name of the output file for this run
+           (if you wanted to do something special)
+ Returns : string
+ Args    : [optional] string to set value to
+
+
+=cut
+
+
+=head2 tempdir
+
+ Title   : tempdir
+ Usage   : my $tmpdir = $self->tempdir();
+ Function: Retrieve a temporary directory name (which is created)
+ Returns : string which is the name of the temporary directory
+ Args    : none
+
+
+=cut
+
+=head2 cleanup
+
+ Title   : cleanup
+ Usage   : $tcoffee->cleanup();
+ Function: Will cleanup the tempdir directory after a PAML run
+ Returns : none
+ Args    : none
+
+
+=cut
+
+=head2 io
+
+ Title   : io
+ Usage   : $obj->io($newval)
+ Function:  Gets a L<Bio::Root::IO> object
+ Returns : L<Bio::Root::IO>
+ Args    : none
+
+
+=cut
+
+sub DESTROY {
+    my $self= shift;
+    unless ( $self->save_tempfiles ) {
+	$self->cleanup();
+    }
+    $self->SUPER::DESTROY();
 }
 
 1;
