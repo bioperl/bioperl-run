@@ -10,7 +10,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 3;
+   $NTESTS = 5;
    plan tests => $NTESTS;
 }
 
@@ -27,12 +27,13 @@ use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use Bio::BioToEns::Beacon;
 
 my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","FingerPRINTScan");
-my $db =  Bio::Root::IO->catfile("","data0","prints35_0.pval_blos62");
+#my $db =  Bio::Root::IO->catfile("","data0","prints35_0.pval_blos62");
+my $db =  Bio::Root::IO->catfile("t","data","prints.dat");
 my @params = ('DB',$db,'PROGRAM',$paramfile);
 
 my  $factory = Bio::Tools::Run::Prints->new(@params);
 ok $factory->isa('Bio::Tools::Run::Prints');
-my $prot_file=  Bio::Root::IO->catfile("data","Prints_prot.FastA");
+my $prot_file=  Bio::Root::IO->catfile("t","data","Prints_prot.FastA");
 
 my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file => $prot_file, -fmt => 'Fasta');
@@ -50,6 +51,8 @@ unless ($prints_present) {
 my @feat = $factory->predict_protein_features($seq1);
 
 ok $feat[0]->isa('Bio::SeqFeatureI');
+ok ($feat[0]->start,29);
+ok ($feat[0]->end,53);
 
    
 
