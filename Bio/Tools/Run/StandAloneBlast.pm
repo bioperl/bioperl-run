@@ -397,21 +397,20 @@ sub executable{
    if( defined $exe ) {
      $self->{'_pathtoexe'}->{$exename} = $exe;
    }
-   unless( defined $self->{'_pathtoexe'}->{$exename} ) {
-       if( $PROGRAMDIR ) { 
+   unless(defined $self->{'_pathtoexe'}->{$exename} ) {
+       if( $PROGRAMDIR ) {
 	   my $f = $self->io->catfile($PROGRAMDIR, $exename);	    
-	   $exe = $self->{'_pathtoexe'}->{$exename} if(-e $f && -x $f );
+           $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
        } 
-       if( ! $exe  && # we didn't find it in that last conditional
-	   ( $exe = $self->io->exists_exe($exename) ) &&
-	   -x $exe ) {
-	   $self->{'_pathtoexe'}->{$exename} = $exe;
-       } else { 
+       elsif( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
+ 	   $self->{'_pathtoexe'}->{$exename} = $exe;
+       } 
+       else { 
 	   $self->warn("Cannot find executable for $exename") if $warn;
 	   $self->{'_pathtoexe'}->{$exename} = undef;
        }
    }
-   $self->{'_pathtoexe'}->{$exename};
+   return $self->{'_pathtoexe'}->{$exename};
 }
 
 =head2  blastall
