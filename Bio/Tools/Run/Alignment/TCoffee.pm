@@ -401,7 +401,6 @@ object, or through get/set methods of the same name (lowercase).
                              plot in HTML
                 score_pdf : idem in PDF.
                 score_ps : idem in postscript.
-                score_ascii : idem in raw ascii text.
 
     More than one format can be indicated:
                 -output=clustalw,gcg, score_html
@@ -594,23 +593,22 @@ sub program_dir {
 }
 
 sub new {
-    my ($class,@args) = @_;
-    my $self = $class->SUPER::new(@args);
-    my ($attr, $value);    
-    
-    while (@args)  {
-	$attr =   shift @args;
-	$value =  shift @args;
-	next if( $attr =~ /^-/); # don't want named parameters
-	$self->$attr($value);	
-    }
-    $self->matrix($DEFAULTS{'MATRIX'}) unless( $self->matrix );
-    $self->output($DEFAULTS{'OUTPUT'}) unless( $self->output );
-#    $self->aformat($DEFAULTS{'AFORMAT'}) unless $self->aformat;
+	my ($class,@args) = @_;
+	my $self = $class->SUPER::new(@args);
+	my ($attr, $value);
 
-    $self->methods($DEFAULTS{'METHODS'}) unless $self->methods;
+	while (@args) {
+		$attr =   shift @args;
+		$value =  shift @args;
+		next if( $attr =~ /^-/); # don't want named parameters
+		$self->$attr($value);
+	}
+	$self->matrix($DEFAULTS{'MATRIX'}) unless( $self->matrix );
+	$self->output($DEFAULTS{'OUTPUT'}) unless( $self->output );
+	$self->methods($DEFAULTS{'METHODS'}) unless $self->methods;
+	# $self->aformat($DEFAULTS{'AFORMAT'}) unless $self->aformat;
 
-    return $self;
+	return $self;
 }
 
 sub AUTOLOAD {
@@ -808,13 +806,8 @@ sub _run {
         my $infile = shift ;
 	my $type;
 	($infilename,$type) = @$infile;
-	unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
-	  $instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
-					$self->methods));
-	} else {
-	  $instring =  '-in='.join(',',($infilename, $self->methods));
-	}
-
+	$instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
+				      $self->methods));
     }
     if ($command =~ /profile/) {
 	my $in1 = shift ;
@@ -822,14 +815,9 @@ sub _run {
 	my ($type1,$type2);
 	($infile1,$type1) = @$in1;
 	($infile2,$type2) = @$in2;
-	unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
-	  $instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
-				       'X'.$self->matrix,
-				       $self->methods));	
-	} else {
-	  $instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
-				       $self->methods));	
-	}
+	$instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
+				     'X'.$self->matrix,
+				     $self->methods));	
     }
     my $param_string = shift;
 #    my ($paramfh,$parameterFile) = $self->io->tempfile;
@@ -1006,9 +994,7 @@ sub _setparams {
 	next unless (defined $value);	
 	my $attr_key = lc $attr;
 	if( $attr_key =~ /matrix/ ) {
-	  unless (($value =~ /none/i) || ($value =~ /null/i) ) {
 	    $self->{'_in'} = [ "X".lc($value) ];
-	  }
 	} else {
 	    $attr_key = ' -'.$attr_key;
 	    $param_string .= $attr_key .'='.$value;
