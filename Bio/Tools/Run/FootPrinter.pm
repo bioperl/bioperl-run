@@ -119,7 +119,7 @@ Available Parameters:
   details                   1/0           Shows some of the details about the progress of the computation
   html                      1/0           produce html output (never deleted)
   ps                        1/0           produce postscript output (never deleted)
- 
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
