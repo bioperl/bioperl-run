@@ -134,28 +134,16 @@ In addition, sequence input may be in the form of either a Bio::Seq
  $blast_report = $factory->blastall($input);
 
 For blastall and non-psiblast blastpgp runs, report object is either a
-BPlite.pm or Bio::SearchIO object, selected by the user with the parameter
-_READMETHOD.  (The leading underscore is needed to distinguish this
-option from options which are passed to the BLAST executable.) The
-default parser is BPlite.  For (multiple iteration) psiblast and
-bl2seq runs the report is automatically parsed by the BPpsilite.pm and
-BPbl2seq.pm parsers respectively, since neither Blast.pm nor BPlite
-can parse these reports. In any case, the "raw" blast report is also
-available. The filename is set by the in the 'outfile' parameter and
-has the default value of "blastreport.out".
-
-When using the Blast.pm parser, only a default configuration is currently supported:
-
-        -signif => $self->e()  || 1e-5, # where $self->e(), if set, is the BLAST cutoff value
-	-parse  => 1,
-	-stats  => 1,
-	-check_all_hits => 1,
-
-If it is desired to parse the resulting report with Blast.pm with
-other values, the user can save the report in the file given by
- $factory-E<gt>outfile('outputfilelocation') 
-and then reading that file with Blast.pm using any parameters desired.
-
+BPlite.pm or Bio::SearchIO object, selected by the user with the
+parameter _READMETHOD.  (The leading underscore is needed to
+distinguish this option from options which are passed to the BLAST
+executable.) The default parser is Bio::SearchIO::blast.  For
+(multiple iteration) psiblast and bl2seq runs the report is
+automatically parsed by the BPpsilite.pm and BPbl2seq.pm parsers
+respectively, since neither Blast.pm nor BPlite can parse these
+reports. In any case, the "raw" blast report is also available. The
+filename is set by the in the 'outfile' parameter and has the default
+value of "blastreport.out".
 
 For psiblast execution in BLAST's "jumpstart" mode, the program must
 be passed (in addition to the query sequence itself) an alignment
@@ -195,9 +183,10 @@ For more examples of syntax and use of Blast.pm, the user is
 encouraged to run the scripts standaloneblast.pl in the bioperl
 /examples directory and StandAloneBlast.t in the bioperl /t directory.
 
-Note: There is a similar (but older) perl object interface offered by nhgri. The nhgri module
-only supports blastall and does not support blastpgp, psiblast, phiblast, bl2seq etc.
-This module can be found at http://genome.nhgri.nih.gov/blastall/.
+Note: There is a similar (but older) perl object interface offered by
+nhgri. The nhgri module only supports blastall and does not support
+blastpgp, psiblast, phiblast, bl2seq etc.  This module can be found at
+http://genome.nhgri.nih.gov/blastall/.
 
 =head1 DEVELOPERS NOTES
 
