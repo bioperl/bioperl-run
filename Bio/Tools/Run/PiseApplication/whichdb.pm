@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::whichdb
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,14 +23,17 @@ Bio::Tools::Run::PiseApplication::whichdb
 
 	WHICHDB	Search all databases for an entry (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/whichdb.html 
+         for available values):
 
 
 		whichdb (String)
 
-
 		init (String)
-
 
 		entry (String)
 			ID or Accession number (-entry)
@@ -30,11 +41,71 @@ Bio::Tools::Run::PiseApplication::whichdb
 		get (Switch)
 			Retrieve sequences (-get)
 
+		showall (Switch)
+			Show failed attempts (-showall)
+
 		outfile (OutFile)
 			outfile (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/whichdb.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -50,20 +121,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $whichdb = Bio::Tools::Run::PiseApplication::whichdb->new($remote, $email, @params);
+ Usage   : my $whichdb = Bio::Tools::Run::PiseApplication::whichdb->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::whichdb object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $whichdb = $factory->program('whichdb');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::whichdb.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/whichdb.pm
 
@@ -72,6 +143,8 @@ sub new {
     $self->{TITLE}   = "WHICHDB";
 
     $self->{DESCRIPTION}   = "Search all databases for an entry (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -88,6 +161,7 @@ sub new {
 	"init",
 	"entry",
 	"get",
+	"showall",
 	"outfile",
 	"auto",
 
@@ -98,6 +172,7 @@ sub new {
 	"init",
 	"entry", 	# ID or Accession number (-entry)
 	"get", 	# Retrieve sequences (-get)
+	"showall", 	# Show failed attempts (-showall)
 	"outfile", 	# outfile (-outfile)
 	"auto",
 
@@ -108,6 +183,7 @@ sub new {
 	"init" => 'String',
 	"entry" => 'String',
 	"get" => 'Switch',
+	"showall" => 'Switch',
 	"outfile" => 'OutFile',
 	"auto" => 'String',
 
@@ -122,6 +198,9 @@ sub new {
 	},
 	"get" => {
 		"perl" => '($value)? " -get" : ""',
+	},
+	"showall" => {
+		"perl" => '($value)? " -showall" : ""',
 	},
 	"outfile" => {
 		"perl" => '($value)? " -outfile=$value" : ""',
@@ -147,8 +226,9 @@ sub new {
 	"init" => -10,
 	"entry" => 1,
 	"get" => 2,
-	"outfile" => 3,
-	"auto" => 4,
+	"showall" => 3,
+	"outfile" => 4,
+	"auto" => 5,
 	"whichdb" => 0
 
     };
@@ -158,6 +238,7 @@ sub new {
 	"whichdb",
 	"entry",
 	"get",
+	"showall",
 	"outfile",
 	"auto",
 
@@ -171,6 +252,7 @@ sub new {
 	"init" => 1,
 	"entry" => 0,
 	"get" => 0,
+	"showall" => 0,
 	"outfile" => 0,
 	"auto" => 1,
 	"whichdb" => 1
@@ -181,6 +263,7 @@ sub new {
 	"init" => 0,
 	"entry" => 0,
 	"get" => 0,
+	"showall" => 0,
 	"outfile" => 0,
 	"auto" => 0,
 
@@ -190,6 +273,7 @@ sub new {
 	"init" => 0,
 	"entry" => 1,
 	"get" => 0,
+	"showall" => 0,
 	"outfile" => 0,
 	"auto" => 0,
 
@@ -199,6 +283,7 @@ sub new {
 	"init" => "",
 	"entry" => "ID or Accession number (-entry)",
 	"get" => "Retrieve sequences (-get)",
+	"showall" => "Show failed attempts (-showall)",
 	"outfile" => "outfile (-outfile)",
 	"auto" => "",
 
@@ -208,6 +293,7 @@ sub new {
 	"init" => 0,
 	"entry" => 0,
 	"get" => 0,
+	"showall" => 0,
 	"outfile" => 0,
 	"auto" => 0,
 
@@ -227,6 +313,7 @@ sub new {
 
     $self->{VDEF}  = {
 	"get" => '0',
+	"showall" => '0',
 
     };
 
@@ -234,6 +321,7 @@ sub new {
 	"init" => { "perl" => '1' },
 	"entry" => { "perl" => '1' },
 	"get" => { "perl" => '1' },
+	"showall" => { "perl" => '1' },
 	"outfile" => {
 		"acd" => '@(!$(get))',
 	},
@@ -265,6 +353,7 @@ sub new {
 	"init" => 0,
 	"entry" => 0,
 	"get" => 0,
+	"showall" => 0,
 	"outfile" => 0,
 	"auto" => 0,
 
@@ -274,6 +363,7 @@ sub new {
 	"init" => 0,
 	"entry" => 1,
 	"get" => 0,
+	"showall" => 0,
 	"outfile" => 0,
 	"auto" => 0,
 

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::vectorstrip
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,27 +23,21 @@ Bio::Tools::Run::PiseApplication::vectorstrip
 
 	VECTORSTRIP	Strips out DNA between a pair of vector sequences (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/vectorstrip.html 
+         for available values):
 
 
 		vectorstrip (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- dna [sequences] (-sequence)
 			pipe: seqsfile
-
-		required (Paragraph)
-			required Section
-
-		vectorfilesection (Paragraph)
-			vectorfilesection Section
 
 		vectorfile (Switch)
 			Are your vector sequences in a file? (-vectorfile)
@@ -49,17 +51,11 @@ Bio::Tools::Run::PiseApplication::vectorstrip
 		besthits (Switch)
 			Show only the best hits (minimise mismatches)? (-besthits)
 
-		advanced (Paragraph)
-			advanced Section
-
 		linkera (String)
 			5' sequence (-linkera)
 
 		linkerb (String)
 			3' sequence (-linkerb)
-
-		output (Paragraph)
-			output Section
 
 		outf (OutFile)
 			outf (-outf)
@@ -73,6 +69,63 @@ Bio::Tools::Run::PiseApplication::vectorstrip
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/vectorstrip.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -88,20 +141,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $vectorstrip = Bio::Tools::Run::PiseApplication::vectorstrip->new($remote, $email, @params);
+ Usage   : my $vectorstrip = Bio::Tools::Run::PiseApplication::vectorstrip->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::vectorstrip object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $vectorstrip = $factory->program('vectorstrip');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::vectorstrip.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/vectorstrip.pm
 
@@ -110,6 +163,8 @@ sub new {
     $self->{TITLE}   = "VECTORSTRIP";
 
     $self->{DESCRIPTION}   = "Strips out DNA between a pair of vector sequences (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 

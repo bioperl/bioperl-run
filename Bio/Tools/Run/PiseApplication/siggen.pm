@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::siggen
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,17 @@ Bio::Tools::Run::PiseApplication::siggen
 
 	SIGGEN	Generates a sparse protein signature (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/siggen.html 
+         for available values):
 
 
 		siggen (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		algpath (InFile)
 			Location of alignment files for input (-algpath)
@@ -33,17 +41,11 @@ Bio::Tools::Run::PiseApplication::siggen
 		algextn (String)
 			Extension of alignment files for input (-algextn)
 
-		required (Paragraph)
-			required Section
-
 		sparsity (Integer)
 			% sparsity of signature (-sparsity)
 
 		randomise (Switch)
 			Generate a randomised signature (-randomise)
-
-		advanced (Paragraph)
-			advanced Section
 
 		seqoption (List)
 			Select number -- Sequence variability scoring method [select  values] (-seqoption)
@@ -75,17 +77,68 @@ Bio::Tools::Run::PiseApplication::siggen
 		filterpsim (Switch)
 			Ignore alignment postitions with post_similar value of 0 (-filterpsim)
 
-		output (Paragraph)
-			output Section
-
-		sigpath (Results)
-			Location of signature files for output (-sigpath)
-
 		sigextn (String)
 			Extension of signature files for output (-sigextn)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/siggen.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -101,20 +154,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $siggen = Bio::Tools::Run::PiseApplication::siggen->new($remote, $email, @params);
+ Usage   : my $siggen = Bio::Tools::Run::PiseApplication::siggen->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::siggen object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $siggen = $factory->program('siggen');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::siggen.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/siggen.pm
 
@@ -123,6 +176,8 @@ sub new {
     $self->{TITLE}   = "SIGGEN";
 
     $self->{DESCRIPTION}   = "Generates a sparse protein signature (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 

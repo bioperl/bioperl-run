@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::sigcleave
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,48 +23,90 @@ Bio::Tools::Run::PiseApplication::sigcleave
 
 	SIGCLEAVE	Reports protein signal cleavage sites (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/sigcleave.html 
+         for available values):
 
 
 		sigcleave (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- PureProtein [sequences] (-sequence)
 			pipe: seqsfile
 
-		required (Paragraph)
-			required Section
-
 		minweight (Float)
 			Minimum weight (-minweight)
 
-		advanced (Paragraph)
-			advanced Section
-
 		prokaryote (Switch)
 			Use prokaryotic cleavage data (-prokaryote)
-
-		pval (Integer)
-			Pval (-pval)
-
-		nval (Integer)
-			Nval (-nval)
-
-		output (Paragraph)
-			output Section
 
 		outfile (OutFile)
 			outfile (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/sigcleave.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -72,20 +122,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $sigcleave = Bio::Tools::Run::PiseApplication::sigcleave->new($remote, $email, @params);
+ Usage   : my $sigcleave = Bio::Tools::Run::PiseApplication::sigcleave->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::sigcleave object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $sigcleave = $factory->program('sigcleave');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::sigcleave.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/sigcleave.pm
 
@@ -94,6 +144,8 @@ sub new {
     $self->{TITLE}   = "SIGCLEAVE";
 
     $self->{DESCRIPTION}   = "Reports protein signal cleavage sites (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -125,8 +177,6 @@ sub new {
 	"minweight", 	# Minimum weight (-minweight)
 	"advanced", 	# advanced Section
 	"prokaryote", 	# Use prokaryotic cleavage data (-prokaryote)
-	"pval", 	# Pval (-pval)
-	"nval", 	# Nval (-nval)
 	"output", 	# output Section
 	"outfile", 	# outfile (-outfile)
 	"auto",
@@ -142,8 +192,6 @@ sub new {
 	"minweight" => 'Float',
 	"advanced" => 'Paragraph',
 	"prokaryote" => 'Switch',
-	"pval" => 'Integer',
-	"nval" => 'Integer',
 	"output" => 'Paragraph',
 	"outfile" => 'OutFile',
 	"auto" => 'String',
@@ -168,12 +216,6 @@ sub new {
 	},
 	"prokaryote" => {
 		"perl" => '($value)? " -prokaryote" : ""',
-	},
-	"pval" => {
-		"perl" => '(defined $value && $value != $vdef)? " -pval=$value" : ""',
-	},
-	"nval" => {
-		"perl" => '(defined $value && $value != $vdef)? " -nval=$value" : ""',
 	},
 	"output" => {
 	},
@@ -203,10 +245,8 @@ sub new {
 	"sequence" => 1,
 	"minweight" => 2,
 	"prokaryote" => 3,
-	"pval" => 4,
-	"nval" => 5,
-	"outfile" => 6,
-	"auto" => 7,
+	"outfile" => 4,
+	"auto" => 5,
 	"sigcleave" => 0
 
     };
@@ -214,15 +254,13 @@ sub new {
     $self->{BY_GROUP_PARAMETERS}  = [
 	"init",
 	"input",
-	"required",
 	"advanced",
+	"required",
 	"output",
 	"sigcleave",
 	"sequence",
 	"minweight",
 	"prokaryote",
-	"pval",
-	"nval",
 	"outfile",
 	"auto",
 
@@ -240,8 +278,6 @@ sub new {
 	"minweight" => 0,
 	"advanced" => 0,
 	"prokaryote" => 0,
-	"pval" => 0,
-	"nval" => 0,
 	"output" => 0,
 	"outfile" => 0,
 	"auto" => 1,
@@ -257,8 +293,6 @@ sub new {
 	"minweight" => 0,
 	"advanced" => 0,
 	"prokaryote" => 0,
-	"pval" => 0,
-	"nval" => 0,
 	"output" => 0,
 	"outfile" => 0,
 	"auto" => 0,
@@ -273,8 +307,6 @@ sub new {
 	"minweight" => 1,
 	"advanced" => 0,
 	"prokaryote" => 0,
-	"pval" => 0,
-	"nval" => 0,
 	"output" => 0,
 	"outfile" => 1,
 	"auto" => 0,
@@ -289,8 +321,6 @@ sub new {
 	"minweight" => "Minimum weight (-minweight)",
 	"advanced" => "advanced Section",
 	"prokaryote" => "Use prokaryotic cleavage data (-prokaryote)",
-	"pval" => "Pval (-pval)",
-	"nval" => "Nval (-nval)",
 	"output" => "output Section",
 	"outfile" => "outfile (-outfile)",
 	"auto" => "",
@@ -305,8 +335,6 @@ sub new {
 	"minweight" => 0,
 	"advanced" => 0,
 	"prokaryote" => 0,
-	"pval" => 0,
-	"nval" => 0,
 	"output" => 0,
 	"outfile" => 0,
 	"auto" => 0,
@@ -317,7 +345,7 @@ sub new {
 
 	"input" => ['sequence',],
 	"required" => ['minweight',],
-	"advanced" => ['prokaryote','pval','nval',],
+	"advanced" => ['prokaryote',],
 	"output" => ['outfile',],
     };
 
@@ -331,8 +359,6 @@ sub new {
 
     $self->{VDEF}  = {
 	"minweight" => '3.5',
-	"pval" => '-13',
-	"nval" => '',
 	"outfile" => 'outfile.out',
 
     };
@@ -345,8 +371,6 @@ sub new {
 	"minweight" => { "perl" => '1' },
 	"advanced" => { "perl" => '1' },
 	"prokaryote" => { "perl" => '1' },
-	"pval" => { "perl" => '1' },
-	"nval" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
 	"outfile" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
@@ -384,8 +408,6 @@ sub new {
 	"minweight" => 0,
 	"advanced" => 0,
 	"prokaryote" => 0,
-	"pval" => 0,
-	"nval" => 0,
 	"output" => 0,
 	"outfile" => 0,
 	"auto" => 0,
@@ -400,8 +422,6 @@ sub new {
 	"minweight" => 1,
 	"advanced" => 0,
 	"prokaryote" => 0,
-	"pval" => 0,
-	"nval" => 0,
 	"output" => 0,
 	"outfile" => 1,
 	"auto" => 0,
@@ -418,12 +438,6 @@ sub new {
 	],
 	"prokaryote" => [
 		"Specifies the sequence is prokaryotic and changes the default scoring data file name",
-	],
-	"pval" => [
-		"Specifies the number of columns before the residue at the cleavage site in the weight matrix table",
-	],
-	"nval" => [
-		"specifies the number of columns after the residue at the cleavage site in the weight matrix table",
 	],
 
     };

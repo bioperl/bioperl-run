@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::wublast2
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -28,7 +36,12 @@ Bio::Tools::Run::PiseApplication::wublast2
 		Altschul, Stephen F., Warren Gish, Webb Miller, Eugene W. Myers, and David J. Lipman (1990).  Basic local alignment search tool.  J. Mol. Biol. 215:403-10.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/wublast2.html 
+         for available values):
 
 
 		wublast2 (Excl)
@@ -50,9 +63,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 		compat (Excl)
 			BLAST version
 
-		filter_opt (Paragraph)
-			Filtering and masking options
-
 		wordmask (Switch)
 			Use masking instead of filtering (-wordmask)
 
@@ -64,9 +74,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 
 		lc (Excl)
 			Filter lower-case letters in query
-
-		selectivite (Paragraph)
-			Selectivity Options
 
 		Expect (Float)
 			Expect: upper bound on the expected frequency of chance occurrence of a set of HSPs (E)
@@ -122,9 +129,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 		gapall (Switch)
 			Generate a gapped alignment for every ungapped HSP found (-gapall)
 
-		gap_selectivite (Paragraph)
-			Selectivity options for gapped alignments
-
 		gapE (Float)
 			Expectation threshold of sets of ungapped HSPs for subsequent use in seeding gapped alignments (-gapE)
 
@@ -146,9 +150,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 		gapsepsmax (Integer)
 			Maximal permitted distance on the subject sequence between two consistent gapped alignments (-gapsepsmax)
 
-		scoring_opt (Paragraph)
-			Scoring options
-
 		M (Integer)
 			Reward for a nucleotid match (blastwun) (M)
 
@@ -164,9 +165,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 		R (Integer)
 			Extending a gap penalty (R)
 
-		translation_opt (Paragraph)
-			Translation Option
-
 		gcode (Excl)
 			Genetic code to translate the query (blastx,tblastx) (-gcode)
 
@@ -178,9 +176,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 
 		dbstrand (Excl)
 			which strands of the database sequences (tblastwun,tblastwux)
-
-		statistics (Paragraph)
-			Statistic options
 
 		stat (Excl)
 			Use statistics
@@ -206,9 +201,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 		gapdecayrate (Float)
 			gapdecayrate
 
-		kastats (Paragraph)
-			Parameters for Karlin-Altschul statistics
-
 		K (Integer)
 			K parameter for ungapped alignment scores (K)
 
@@ -227,9 +219,6 @@ Bio::Tools::Run::PiseApplication::wublast2
 		gapH (Integer)
 			H parameter for gapped alignment scores (gapH)
 
-		affichage (Paragraph)
-			Report options
-
 		Histogram (Switch)
 			Histogram (H)
 
@@ -245,8 +234,10 @@ Bio::Tools::Run::PiseApplication::wublast2
 		postsw (Switch)
 			Perform full Smith-Waterman before output (blastwup only) (-postsw)
 
+		output_file (String)
+
 		output_format (Excl)
-			output format?
+			Output format
 
 		echofilter (Switch)
 			Display filter sequences in output (-echofilter)
@@ -266,18 +257,65 @@ Bio::Tools::Run::PiseApplication::wublast2
 		noseqs (Switch)
 			Do not display sequence alignments (-noseqs)
 
-		tmp_outfile (Results)
-
-			pipe: blast_output
-
-		htmlfile (Results)
-
-
-		xmloutput (Results)
-
-
 		cpus (Integer)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/wublast2.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -293,20 +331,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $wublast2 = Bio::Tools::Run::PiseApplication::wublast2->new($remote, $email, @params);
+ Usage   : my $wublast2 = Bio::Tools::Run::PiseApplication::wublast2->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::wublast2 object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $wublast2 = $factory->program('wublast2');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::wublast2.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/wublast2.pm
 
@@ -315,6 +353,8 @@ sub new {
     $self->{TITLE}   = "WUBLAST2";
 
     $self->{DESCRIPTION}   = "Wash-U. multi-processors BLAST, with gaps";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Gish. W";
 
@@ -426,7 +466,8 @@ sub new {
 	"Alignments", 	# How many alignments? (B)
 	"sort", 	# Sort order for reporting database sequences
 	"postsw", 	# Perform full Smith-Waterman before output (blastwup only) (-postsw)
-	"output_format", 	# output format?
+	"output_file",
+	"output_format", 	# Output format
 	"echofilter", 	# Display filter sequences in output (-echofilter)
 	"prune", 	# Do not prune insignificant HSPs from the output lists (-prune)
 	"topcomboN", 	# Report this number of consistent (colinear) groups of HSPs (-topcomboN)
@@ -512,6 +553,7 @@ sub new {
 	"Alignments" => 'Integer',
 	"sort" => 'Excl',
 	"postsw" => 'Switch',
+	"output_file" => 'String',
 	"output_format" => 'Excl',
 	"echofilter" => 'Switch',
 	"prune" => 'Switch',
@@ -731,8 +773,10 @@ sub new {
 	"postsw" => {
 		"perl" => '($value) ? " -postsw" : ""',
 	},
+	"output_file" => {
+		"perl" => '" > blastwu.txt"',
+	},
 	"output_format" => {
-		"perl" => '($value) ? " > blastwu.txt && $value" : ""',
 	},
 	"echofilter" => {
 		"perl" => '($value) ? " -echofilter" : ""',
@@ -846,6 +890,7 @@ sub new {
 	"Alignments" => 5,
 	"sort" => 5,
 	"postsw" => 5,
+	"output_file" => 499,
 	"output_format" => 500,
 	"echofilter" => 5,
 	"prune" => 5,
@@ -939,6 +984,7 @@ sub new {
 	"strand",
 	"dbgcode",
 	"cpus",
+	"output_file",
 	"output_format",
 
     ];
@@ -1019,6 +1065,7 @@ sub new {
 	"Alignments" => 0,
 	"sort" => 0,
 	"postsw" => 0,
+	"output_file" => 1,
 	"output_format" => 0,
 	"echofilter" => 0,
 	"prune" => 0,
@@ -1105,6 +1152,7 @@ sub new {
 	"Alignments" => 0,
 	"sort" => 0,
 	"postsw" => 0,
+	"output_file" => 0,
 	"output_format" => 0,
 	"echofilter" => 0,
 	"prune" => 0,
@@ -1191,6 +1239,7 @@ sub new {
 	"Alignments" => 0,
 	"sort" => 0,
 	"postsw" => 0,
+	"output_file" => 0,
 	"output_format" => 0,
 	"echofilter" => 0,
 	"prune" => 0,
@@ -1277,7 +1326,8 @@ sub new {
 	"Alignments" => "How many alignments? (B)",
 	"sort" => "Sort order for reporting database sequences",
 	"postsw" => "Perform full Smith-Waterman before output (blastwup only) (-postsw)",
-	"output_format" => "output format?",
+	"output_file" => "",
+	"output_format" => "Output format",
 	"echofilter" => "Display filter sequences in output (-echofilter)",
 	"prune" => "Do not prune insignificant HSPs from the output lists (-prune)",
 	"topcomboN" => "Report this number of consistent (colinear) groups of HSPs (-topcomboN)",
@@ -1363,6 +1413,7 @@ sub new {
 	"Alignments" => 0,
 	"sort" => 0,
 	"postsw" => 0,
+	"output_file" => 0,
 	"output_format" => 0,
 	"echofilter" => 0,
 	"prune" => 0,
@@ -1380,7 +1431,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"wublast2" => ['blastwun','blastwun: nucleotide query / nucleotide db','blastwup','blastwup: amino acid query / protein db','blastwux','blastwux: nucleotide query translated / protein db','tblastwun','tblastwun: protein query / translated nucleotide db','tblastwux','tblastwux: nucleotide query transl. / transl. nucleotide db',],
-	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','prodom','prodom: protein domains','sbase','sbase: annotated domains sequences',],
+	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','sbase','sbase: annotated domains sequences',],
 	"nucleotid_db" => ['embl','embl: Embl last release + updates','embl_new','embl_new: Embl updates','genbank','genbank: Genbank last release + updates','genbank_new','genbank_new: Genbank updates','gbbct','gbbct: genbank bacteria','gbpri','gbpri: primates','gbmam','gbmam: other mammals','gbrod','gbrod: rodents','gbvrt','gbvrt: other vertebrates','gbinv','gbinv: invertebrates','gbpln','gbpln: plants (including yeast)','gbvrl','gbvrl: virus','gbphg','gbphg: phages','gbest','gbest: EST (Expressed Sequence Tags)','gbsts','gbsts: STS (Sequence Tagged sites)','gbsyn','gbsyn: synthetic','gbpat','gbpat: patented','gbuna','gbuna: unannotated','gbgss','gbgss: Genome Survey Sequences','gbhtg','gbhtg: GS (high throughput Genomic Sequencing)','imgt','imgt: ImMunoGeneTics','borrelia','borrelia: Borrelia burgdorferi complete genome','ecoli','ecoli: Escherichia Coli complete genome','genitalium','genitalium: Mycoplasma Genitalium complete genome','pneumoniae','pneumoniae: Mycoplasma Pneumoniae complete genome','pylori','pylori: Helicobacter Pylori complete genome','subtilis','subtilis: Bacillus Subtilis complete genome','tuberculosis','tuberculosis: Mycobacterium tuberculosis complete genome','ypestis','Yersinia pestis unfinished genome','yeast','yeast: Yeast chromosomes',],
 	"compat" => ['current','current version 2.0','compat1.4','compat1.4: revert to BLAST version 1.4 (with bug fixes)','compat1.3','compat1.3: revert to BLAST version 1.3 (with bug fixes)',],
 	"filter_opt" => ['wordmask','filter','maskextra','lc',],
@@ -1398,13 +1449,19 @@ sub new {
 	"statistics" => ['stat','wordstats','ctxfactor','olf','golf','olmax','golmax','gapdecayrate','kastats',],
 	"stat" => ['poissonp','poissonp: Poisson statistics to evaluate multiple HSPs','kap','kap: Karlin-Altschul statistics on individual alignment scores','sump','sump: Karlin-Altschul \'Sum\' statistics',],
 	"kastats" => ['K','L','H','gapK','gapL','gapH',],
-	"affichage" => ['Histogram','Descriptions','Alignments','sort','postsw','output_format','echofilter','prune','topcomboN','topcomboE','gi','noseqs',],
+	"affichage" => ['Histogram','Descriptions','Alignments','sort','postsw','output_file','output_format','echofilter','prune','topcomboN','topcomboE','gi','noseqs',],
 	"sort" => ['-sort_by_pvalue','-sort_by_pvalue: from most significant to least significant','-sort_by_count','-sort_by_count: from highest to lowest by the number of HSPs found','-sort_by_highscore','-sort_by_highscore: from highest to lowest by the score of the highest segment','-sort_by_totalscore','-sort_by_totalscore: from highest to the lowest by the sum total score',],
-	"output_format" => ['','text','blast2XML blastwu.txt > blastwu.xml','xml','"html4blast -o blastwu.html -s -g blastwu.txt"','html',],
+	"output_format" => ['text','"text only"','html','"text + html"','xml','"text + xml"',],
     };
 
     $self->{FLIST}  = {
 
+	"output_format" => {
+		'xml' => '" && blast2XML blastwu.txt > blastwu.xml"',
+		'text' => '""',
+		'html' => '" && html4blast -o blastwu.html -s -g blastwu.txt"',
+
+	},
     };
 
     $self->{SEPARATOR}  = {
@@ -1444,6 +1501,7 @@ sub new {
 	"Alignments" => '250',
 	"sort" => '-sort_by_pvalue',
 	"postsw" => '0',
+	"output_format" => 'html',
 	"echofilter" => '0',
 	"prune" => '0',
 	"gi" => '0',
@@ -1585,6 +1643,7 @@ sub new {
 	"postsw" => {
 		"perl" => '$wublast2 =~ /^blastwup/',
 	},
+	"output_file" => { "perl" => '1' },
 	"output_format" => { "perl" => '1' },
 	"echofilter" => { "perl" => '1' },
 	"prune" => { "perl" => '1' },
@@ -1593,12 +1652,8 @@ sub new {
 	"gi" => { "perl" => '1' },
 	"noseqs" => { "perl" => '1' },
 	"tmp_outfile" => { "perl" => '1' },
-	"htmlfile" => {
-		"perl" => '$output_format =~ /^html4blast/',
-	},
-	"xmloutput" => {
-		"perl" => '$output_format =~ /^blast2XML/',
-	},
+	"htmlfile" => { "perl" => '1' },
+	"xmloutput" => { "perl" => '1' },
 	"cpus" => { "perl" => '1' },
 
     };
@@ -1701,6 +1756,7 @@ sub new {
 	"Alignments" => 0,
 	"sort" => 0,
 	"postsw" => 0,
+	"output_file" => 0,
 	"output_format" => 0,
 	"echofilter" => 0,
 	"prune" => 0,
@@ -1787,6 +1843,7 @@ sub new {
 	"Alignments" => 0,
 	"sort" => 0,
 	"postsw" => 0,
+	"output_file" => 0,
 	"output_format" => 0,
 	"echofilter" => 0,
 	"prune" => 0,

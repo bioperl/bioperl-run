@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::showalign
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::showalign
 
 	SHOWALIGN	Displays a multiple sequence alignment (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/showalign.html 
+         for available values):
 
 
 		showalign (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- gapany [set of sequences] (-sequence)
 			pipe: seqsfile
-
-		advanced (Paragraph)
-			advanced Section
 
 		refseq (String)
 			The number or the name of the reference sequence (-refseq)
@@ -67,9 +72,6 @@ Bio::Tools::Run::PiseApplication::showalign
 		margin (Integer)
 			Length of margin for sequence names (-margin)
 
-		names (Switch)
-			Show sequence IDs (-names)
-
 		html (Switch)
 			Use HTML formatting (-html)
 
@@ -88,14 +90,68 @@ Bio::Tools::Run::PiseApplication::showalign
 		consensus (Switch)
 			Display the consensus line (-consensus)
 
-		output (Paragraph)
-			output Section
-
 		outfile (OutFile)
 			Output sequence details to a file (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/showalign.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -111,20 +167,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $showalign = Bio::Tools::Run::PiseApplication::showalign->new($remote, $email, @params);
+ Usage   : my $showalign = Bio::Tools::Run::PiseApplication::showalign->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::showalign object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $showalign = $factory->program('showalign');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::showalign.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/showalign.pm
 
@@ -133,6 +189,8 @@ sub new {
     $self->{TITLE}   = "SHOWALIGN";
 
     $self->{DESCRIPTION}   = "Displays a multiple sequence alignment (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -173,7 +231,6 @@ sub new {
 	"ruler", 	# Display ruler (-ruler)
 	"width", 	# Width of sequence to display (-width)
 	"margin", 	# Length of margin for sequence names (-margin)
-	"names", 	# Show sequence IDs (-names)
 	"html", 	# Use HTML formatting (-html)
 	"highlight", 	# Regions to colour in HTML (eg: 4-57 red 78-94 green) (-highlight)
 	"plurality", 	# Plurality check % for consensus (-plurality)
@@ -203,7 +260,6 @@ sub new {
 	"ruler" => 'Switch',
 	"width" => 'Integer',
 	"margin" => 'Integer',
-	"names" => 'Switch',
 	"html" => 'Switch',
 	"highlight" => 'Integer',
 	"plurality" => 'Float',
@@ -260,9 +316,6 @@ sub new {
 	"margin" => {
 		"perl" => '(defined $value && $value != $vdef)? " -margin=$value" : ""',
 	},
-	"names" => {
-		"perl" => '($value)? "" : " -nonames"',
-	},
 	"html" => {
 		"perl" => '($value)? " -html" : ""',
 	},
@@ -318,15 +371,14 @@ sub new {
 	"ruler" => 10,
 	"width" => 11,
 	"margin" => 12,
-	"names" => 13,
-	"html" => 14,
-	"highlight" => 15,
-	"plurality" => 16,
-	"setcase" => 17,
-	"identity" => 18,
-	"consensus" => 19,
-	"outfile" => 20,
-	"auto" => 21,
+	"html" => 13,
+	"highlight" => 14,
+	"plurality" => 15,
+	"setcase" => 16,
+	"identity" => 17,
+	"consensus" => 18,
+	"outfile" => 19,
+	"auto" => 20,
 	"showalign" => 0
 
     };
@@ -349,7 +401,6 @@ sub new {
 	"ruler",
 	"width",
 	"margin",
-	"names",
 	"html",
 	"highlight",
 	"plurality",
@@ -381,7 +432,6 @@ sub new {
 	"ruler" => 0,
 	"width" => 0,
 	"margin" => 0,
-	"names" => 0,
 	"html" => 0,
 	"highlight" => 0,
 	"plurality" => 0,
@@ -411,7 +461,6 @@ sub new {
 	"ruler" => 0,
 	"width" => 0,
 	"margin" => 0,
-	"names" => 0,
 	"html" => 0,
 	"highlight" => 0,
 	"plurality" => 0,
@@ -440,7 +489,6 @@ sub new {
 	"ruler" => 0,
 	"width" => 0,
 	"margin" => 0,
-	"names" => 0,
 	"html" => 0,
 	"highlight" => 0,
 	"plurality" => 0,
@@ -469,7 +517,6 @@ sub new {
 	"ruler" => "Display ruler (-ruler)",
 	"width" => "Width of sequence to display (-width)",
 	"margin" => "Length of margin for sequence names (-margin)",
-	"names" => "Show sequence IDs (-names)",
 	"html" => "Use HTML formatting (-html)",
 	"highlight" => "Regions to colour in HTML (eg: 4-57 red 78-94 green) (-highlight)",
 	"plurality" => "Plurality check % for consensus (-plurality)",
@@ -498,7 +545,6 @@ sub new {
 	"ruler" => 0,
 	"width" => 0,
 	"margin" => 0,
-	"names" => 0,
 	"html" => 0,
 	"highlight" => 0,
 	"plurality" => 0,
@@ -514,7 +560,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"input" => ['sequence',],
-	"advanced" => ['refseq','bottom','show','order','similarcase','matrix','uppercase','number','ruler','width','margin','names','html','highlight','plurality','setcase','identity','consensus',],
+	"advanced" => ['refseq','bottom','show','order','similarcase','matrix','uppercase','number','ruler','width','margin','html','highlight','plurality','setcase','identity','consensus',],
 	"show" => ['A','All of the sequences','I','Identities between the sequences','N','Non-identities between the sequences','S','Similarities between the sequences','D','Dissimilarities between the sequences',],
 	"order" => ['I','Input order - no change','A','Alphabetical order of the names','S','Similarity to the reference sequence',],
 	"matrix" => ['I','','A','','S','',],
@@ -539,13 +585,12 @@ sub new {
 	"ruler" => '1',
 	"width" => '60',
 	"margin" => '-1',
-	"names" => '1',
 	"html" => '0',
 	"plurality" => '50.0',
 	"setcase" => '0',
 	"identity" => '0.0',
 	"consensus" => '1',
-	"outfile" => 'stdout',
+	"outfile" => 'outfile.out',
 
     };
 
@@ -565,7 +610,6 @@ sub new {
 	"ruler" => { "perl" => '1' },
 	"width" => { "perl" => '1' },
 	"margin" => { "perl" => '1' },
-	"names" => { "perl" => '1' },
 	"html" => { "perl" => '1' },
 	"highlight" => { "perl" => '1' },
 	"plurality" => { "perl" => '1' },
@@ -617,7 +661,6 @@ sub new {
 	"ruler" => 0,
 	"width" => 0,
 	"margin" => 0,
-	"names" => 0,
 	"html" => 0,
 	"highlight" => 0,
 	"plurality" => 0,
@@ -646,7 +689,6 @@ sub new {
 	"ruler" => 0,
 	"width" => 0,
 	"margin" => 0,
-	"names" => 0,
 	"html" => 0,
 	"highlight" => 0,
 	"plurality" => 0,
@@ -676,6 +718,9 @@ sub new {
 	"similarcase" => [
 		"If this is set True, then when -show is set to \'Similarities\' or \'Non-identities\' and a residue is similar but not identical to the reference sequence residue, it will be changed to lower-case. If -show is set to \'All\' then non-identical, non-similar residues will be changed to lower-case. If this is False then no change to the case of the residues is made on the basis of their similarity to the reference sequence.",
 	],
+	"matrix" => [
+		"This is the scoring matrix file used when comparing sequences.  By default it is the file \'EBLOSUM62\' (for proteins) or the file \'EDNAFULL\' (for nucleic sequences).  These files are found in the \'data\' directory of the EMBOSS installation.",
+	],
 	"uppercase" => [
 		"Regions to put in uppercase. <BR> If this is left blank, then the sequence case is left alone. <BR> A set of regions is specified by a set of pairs of positions. <BR> The positions are integers. <BR> They are separated by any non-digit, non-alpha character. <BR> Examples of region specifications are: <BR> 24-45, 56-78 <BR> 1:45, 67=99;765..888 <BR> 1,5,8,10,23,45,57,99",
 	],
@@ -687,9 +732,6 @@ sub new {
 	],
 	"margin" => [
 		"This sets the length of the left-hand margin for sequence names. If the margin is set at 0 then no margin and no names are displayed. If the margin is set to a value that is less than the length of a sequence name then the sequence name is displayed truncated to the length of the margin. If the margin is set to -1 then the minimum margin width that will allow all the sequence names to be displayed in full plus a space at the end of the name will automatically be selected.",
-	],
-	"names" => [
-		"Set this to be false if you do not wish to display the ID name of the sequences",
 	],
 	"highlight" => [
 		"Regions to colour if formatting for HTML. <BR> If this is left blank, then the sequence is left alone. <BR> A set of regions is specified by a set of pairs of positions. <BR> The positions are integers. <BR> They are followed by any valid HTML font colour. <BR> Examples of region specifications are: <BR> 24-45 blue 56-78 orange <BR> 1-100 green 120-156 red <BR> A file of ranges to colour (one range per line) can be specified as \'\@filename\'.",

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::tacg
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,18 @@ Bio::Tools::Run::PiseApplication::tacg
 
 	TACG	Restriction Enzyme analysis (Mangalam)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/tacg.html 
+         for available values):
 
 
 		tacg (String)
 
-
 		sequence (Sequence)
 			DNA Sequence (raw sequence)
-
-		input_options (Paragraph)
-			Input options
 
 		beginning (Integer)
 			Beginning of a subsequence in your sequence (-b)
@@ -42,9 +51,6 @@ Bio::Tools::Run::PiseApplication::tacg
 		codon (Excl)
 			Codon Usage table to use for translation (-C)
 
-		output_options (Paragraph)
-			Output options
-
 		order_by_cut (Switch)
 			Order the output by number of cuts/fragments (-c)
 
@@ -56,9 +62,6 @@ Bio::Tools::Run::PiseApplication::tacg
 
 		binsize (Integer)
 			Step size in histogram
-
-		selection_options (Paragraph)
-			Enzymes Selection options
 
 		enzymes (String)
 			Enzymes selection list (separated by comma)
@@ -74,9 +77,6 @@ Bio::Tools::Run::PiseApplication::tacg
 
 		overhang (Excl)
 			Select enzymes by overhang generated (-o)
-
-		analyses (Paragraph)
-			Analyses
 
 		summary (Switch)
 			Summary of site information (-s)
@@ -96,9 +96,6 @@ Bio::Tools::Run::PiseApplication::tacg
 		cutoff (Integer)
 			Low-end cutoff in number of bases for gel map (>= 10) 
 
-		linear_map_options (Paragraph)
-			Linear map
-
 		linear_map (Switch)
 			Linear map a la Strider (-L)
 
@@ -111,9 +108,6 @@ Bio::Tools::Run::PiseApplication::tacg
 		three_letter (Switch)
 			Translation in 3-letter code (-T)
 
-		orf_options (Paragraph)
-			Open Reading Frames
-
 		orf (Switch)
 			Do an ORF analysis
 
@@ -122,9 +116,6 @@ Bio::Tools::Run::PiseApplication::tacg
 
 		min_size (Integer)
 			Min ORF size
-
-		pattern_search_options (Paragraph)
-			Pattern Search
 
 		pattern_search (Switch)
 			Do a pattern search (-p)
@@ -137,9 +128,6 @@ Bio::Tools::Run::PiseApplication::tacg
 
 		name (String)
 			Label of pattern
-
-		proximity_options (Paragraph)
-			Search for spatial relationships between factors (-P)
 
 		proximity (Switch)
 			Do a proximity search
@@ -155,6 +143,63 @@ Bio::Tools::Run::PiseApplication::tacg
 
 		quiet (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/tacg.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -170,20 +215,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $tacg = Bio::Tools::Run::PiseApplication::tacg->new($remote, $email, @params);
+ Usage   : my $tacg = Bio::Tools::Run::PiseApplication::tacg->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::tacg object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $tacg = $factory->program('tacg');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::tacg.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/tacg.pm
 
@@ -192,6 +237,8 @@ sub new {
     $self->{TITLE}   = "TACG";
 
     $self->{DESCRIPTION}   = "Restriction Enzyme analysis";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 

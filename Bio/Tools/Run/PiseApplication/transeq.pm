@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::transeq
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::transeq
 
 	TRANSEQ	Translate nucleic acid sequences (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/transeq.html 
+         for available values):
 
 
 		transeq (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- nucleotide [sequences] (-sequence)
 			pipe: seqsfile
-
-		advanced (Paragraph)
-			advanced Section
 
 		frame (List)
 			Frame(s) to translate -- Translation frames [select  values] (-frame)
@@ -46,8 +51,8 @@ Bio::Tools::Run::PiseApplication::transeq
 		trim (Switch)
 			Trim trailing X's and *'s (-trim)
 
-		output (Paragraph)
-			output Section
+		alternative (Switch)
+			Define frame '-1' as starting in the last codon (-alternative)
 
 		outseq (OutFile)
 			outseq (-outseq)
@@ -58,6 +63,63 @@ Bio::Tools::Run::PiseApplication::transeq
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/transeq.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -73,20 +135,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $transeq = Bio::Tools::Run::PiseApplication::transeq->new($remote, $email, @params);
+ Usage   : my $transeq = Bio::Tools::Run::PiseApplication::transeq->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::transeq object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $transeq = $factory->program('transeq');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::transeq.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/transeq.pm
 
@@ -95,6 +157,8 @@ sub new {
     $self->{TITLE}   = "TRANSEQ";
 
     $self->{DESCRIPTION}   = "Translate nucleic acid sequences (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -126,6 +190,7 @@ sub new {
 	"table", 	# Code to use -- Genetic codes (-table)
 	"regions", 	# Regions to translate (eg: 4-57,78-94) (-regions)
 	"trim", 	# Trim trailing X's and *'s (-trim)
+	"alternative", 	# Define frame '-1' as starting in the last codon (-alternative)
 	"output", 	# output Section
 	"outseq", 	# outseq (-outseq)
 	"outseq_sformat", 	# Output format for: outseq
@@ -143,6 +208,7 @@ sub new {
 	"table" => 'Excl',
 	"regions" => 'Integer',
 	"trim" => 'Switch',
+	"alternative" => 'Switch',
 	"output" => 'Paragraph',
 	"outseq" => 'OutFile',
 	"outseq_sformat" => 'Excl',
@@ -172,6 +238,9 @@ sub new {
 	},
 	"trim" => {
 		"perl" => '($value)? " -trim" : ""',
+	},
+	"alternative" => {
+		"perl" => '($value)? " -alternative" : ""',
 	},
 	"output" => {
 	},
@@ -206,9 +275,10 @@ sub new {
 	"table" => 3,
 	"regions" => 4,
 	"trim" => 5,
-	"outseq" => 6,
-	"outseq_sformat" => 7,
-	"auto" => 8,
+	"alternative" => 6,
+	"outseq" => 7,
+	"outseq_sformat" => 8,
+	"auto" => 9,
 	"transeq" => 0
 
     };
@@ -224,6 +294,7 @@ sub new {
 	"table",
 	"regions",
 	"trim",
+	"alternative",
 	"outseq",
 	"outseq_sformat",
 	"auto",
@@ -243,6 +314,7 @@ sub new {
 	"table" => 0,
 	"regions" => 0,
 	"trim" => 0,
+	"alternative" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -260,6 +332,7 @@ sub new {
 	"table" => 0,
 	"regions" => 0,
 	"trim" => 0,
+	"alternative" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -276,6 +349,7 @@ sub new {
 	"table" => 1,
 	"regions" => 0,
 	"trim" => 0,
+	"alternative" => 0,
 	"output" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 0,
@@ -292,6 +366,7 @@ sub new {
 	"table" => "Code to use -- Genetic codes (-table)",
 	"regions" => "Regions to translate (eg: 4-57,78-94) (-regions)",
 	"trim" => "Trim trailing X's and *'s (-trim)",
+	"alternative" => "Define frame '-1' as starting in the last codon (-alternative)",
 	"output" => "output Section",
 	"outseq" => "outseq (-outseq)",
 	"outseq_sformat" => "Output format for: outseq",
@@ -308,6 +383,7 @@ sub new {
 	"table" => 0,
 	"regions" => 0,
 	"trim" => 0,
+	"alternative" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -318,7 +394,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"input" => ['sequence',],
-	"advanced" => ['frame','table','regions','trim',],
+	"advanced" => ['frame','table','regions','trim','alternative',],
 	"frame" => ['1','1','2','2','3','3','F','Forward three frames','-1','-1','-2','-2','-3','-3','R','Reverse three frames','6','All six frames',],
 	"table" => ['0','Standard','1','Standard (with alternative initiation codons)','2','Vertebrate Mitochondrial','3','Yeast Mitochondrial','4','Mold, Protozoan, Coelenterate Mitochondrial and Mycoplasma/Spiroplasma','5','Invertebrate Mitochondrial','6','Ciliate Macronuclear and Dasycladacean','9','Echinoderm Mitochondrial','10','Euplotid Nuclear','11','Bacterial','12','Alternative Yeast Nuclear','13','Ascidian Mitochondrial','14','Flatworm Mitochondrial','15','Blepharisma Macronuclear','16','Chlorophycean Mitochondrial','21','Trematode Mitochondrial','22','Scenedesmus obliquus','23','Thraustochytrium Mitochondrial',],
 	"output" => ['outseq','outseq_sformat',],
@@ -339,6 +415,7 @@ sub new {
 	"table" => '0',
 	"regions" => '',
 	"trim" => '0',
+	"alternative" => '0',
 	"outseq" => 'outseq.out',
 	"outseq_sformat" => 'fasta',
 
@@ -353,6 +430,7 @@ sub new {
 	"table" => { "perl" => '1' },
 	"regions" => { "perl" => '1' },
 	"trim" => { "perl" => '1' },
+	"alternative" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
 	"outseq" => { "perl" => '1' },
 	"outseq_sformat" => { "perl" => '1' },
@@ -395,6 +473,7 @@ sub new {
 	"table" => 0,
 	"regions" => 0,
 	"trim" => 0,
+	"alternative" => 0,
 	"output" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
@@ -411,6 +490,7 @@ sub new {
 	"table" => 1,
 	"regions" => 0,
 	"trim" => 0,
+	"alternative" => 0,
 	"output" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 1,
@@ -428,6 +508,9 @@ sub new {
 	],
 	"trim" => [
 		"This removes all X and * characters from the right end of the translation. The trimming process starts at the end and continues until the next character is not a X or a *",
+	],
+	"alternative" => [
+		"The default definition of frame \'-1\' is the reverse-complement of the set of codons used in frame 1.  (Frame -2 is the set of codons used by frame 2, similarly frames -3 and 3).  This is a common standard, used by the Staden package and other programs.  If you prefer to define frame \'-1\' as using the set of codons starting with the last codon of the sequence, then set this to be true.",
 	],
 
     };
