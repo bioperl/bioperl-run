@@ -27,15 +27,15 @@ MLAGAN / LAGAN execution and alignment object creation.
        #Read you chaos README file for more info/This functionality
        #has not been tested and will be integrated in future versions.
 
-       'order' => "-gs -7 -gc -2 -mt 2 -ms -1",
+       'order' => "\"-gs -7 -gc -2 -mt 2 -ms -1\"",
        #Where gap start penalty of- 7, gap continue of -2, match of 2,
        #and mismatch of -1.
 
-       'recurf1' => "(12,25),(7,25),(4,30)",
+       'recurse' => "\"(12,25),(7,25),(4,30)"\",
        #A list of (wordlength,score cutoff) pairs to be used in the
        #recursive anchoring
 
-       'tree' => "(sample1 (sample2 sample3))",
+       'tree' => "\"(sample1 (sample2 sample3))"\",
        #Used by mlagan / tree can also be passed when calling mlagan directly
 
        #SCORING PARAMETERS FOR MLAGAN:
@@ -122,7 +122,7 @@ Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::Lagan;
 
-use vars qw(@ISA $PROGRAM_DIR @LAGAN_PARAMS @MLAGAN_PARAMS 
+use vars qw(@ISA $PROGRAM_DIR @LAGAN_PARAMS @MLAGAN_PARAMS @LAGAN_SWITCHES
 	    %OK_FIELD $AUTOLOAD);
 
 use strict;
@@ -142,15 +142,15 @@ BEGIN {
 
     @LAGAN_PARAMS = qw(chaos order recurse mfa out lazy maskedonly
                        usebounds rc translate draft info fastreject);
-
-    @MLAGAN_PARAMS = qw(nested postir lazy verbose tree match mismatch
+    @LAGAN_SWITCHES = qw(silent quiet);
+    @MLAGAN_PARAMS = qw(nested postir translate lazy verbose tree match mismatch
                         gapstart gapend gapcont out version);
 
     #Not all of these parameters are useful in this context, care
     #should be used in setting only standard ones
 
     #Authorize Attribute fields
-    foreach my $attr (@LAGAN_PARAMS, @MLAGAN_PARAMS) {
+    foreach my $attr (@LAGAN_PARAMS, @LAGAN_SWITCHES, @MLAGAN_PARAMS) {
         $OK_FIELD{$attr}++;
     }
 
@@ -255,7 +255,7 @@ sub _setinput {
             foreach $seq1 (@$input1) {
                 ($fh, $infile1) = $self->io->tempfile();
                 my $temp = Bio::SeqIO->new(	-fh => $fh,
-                                                -format => 'Fasta' );
+                                            -format => 'Fasta' );
                 unless ($seq1->isa("Bio::PrimarySeqI")) {
                     return 0;
                 }
@@ -397,6 +397,12 @@ sub _runlagan {
         print $command_string;
     }
 
+    if (($self->silent ||  $self->quiet) &&
+        ($^O !~ /os2|dos|MSWin32|amigaos/)) {
+      $command_string .= ' 2> /dev/null';
+
+    }
+    
     $self->debug("$command_string\n");
     my $status = system($command_string);
     my $outfile = $self->out();
