@@ -60,11 +60,5 @@ ok $sub[0]->start,4;
 ok $sub2[0]->start,29;
 ok $sub[0]->end,18;
 ok $sub2[0]->end,43;
-ok $sub[0]->seq->seq,'GTTGTGCTGGGGGGG',
-ok $sub[0]->score,1596.49
-
-
-
-
-
-
+ok $sub[0]->seq->seq,'GTTGTGCTGGGGGGG';
+ok $sub[0]->score,1596.49;
