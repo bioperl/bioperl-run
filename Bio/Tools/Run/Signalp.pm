@@ -179,12 +179,6 @@ sub run {
             $self->throw("cannot use filehandle");
         } 
 
-  #first 50 aa is enough for signalp
-	if ($seq->length>50){
-
-	    my $sub_seq = $seq->subseq(1, 50);
-	    $seq->seq($sub_seq);
-	}
 	my $infile1 = $self->_writeSeqFile($seq);
 
 	$self->_input($infile1);
@@ -197,11 +191,7 @@ sub run {
 	my $in  = Bio::SeqIO->new(-file => $seq, '-format' =>'fasta');
 	my $infile1;  
 
-  #first 50 aa is enough for signalp
 	while ( my $tmpseq = $in->next_seq() ) {
-
-	    my $sub_seq = $tmpseq->length > 50 ? $tmpseq->subseq(1,50) : $tmpseq->seq;
-	    $tmpseq->seq($sub_seq);
 	    $infile1 = $self->_writeSeqFile($tmpseq);  
 	}
 
@@ -241,9 +231,9 @@ sub _input() {
 
 sub _run {
      my ($self)= @_;
-     
+
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $str =$self->executable." -t euk ".$self->{'input'}." > ".$outfile;
+     my $str =$self->executable." -t euk -trunc 50 ".$self->{'input'}." > ".$outfile;
      my $status = system($str);
      $self->throw( "Signalp call ($str) crashed: $? \n") unless $status==0;
      
