@@ -11,8 +11,7 @@ Bio::Tools::Run::Prints
 
   Build a Prints factory
 
-  # $paramfile is the full path to the Prints binary file
-  my @params = ('DB',$dbfile,'PROGRAM',$paramfile);
+  my @params = ('DB',$dbfile);
   my $factory = Bio::Tools::Run::Prints->new($params);
 
   # Pass the factory a Bio::Seq object
@@ -21,7 +20,7 @@ Bio::Tools::Run::Prints
 
 =head1 DESCRIPTION
 
-  PRINTScan II is a PRINTS fingerprint identification algorithm.
+  FingerPRINTScan II is a PRINTS fingerprint identification algorithm.
   Copyright (C) 1998,1999  Phil Scordis
 =head1 FEEDBACK
 
@@ -73,15 +72,15 @@ use Bio::Tools::Run::WrapperBase;
 
 
 BEGIN {
-       $PROGRAMNAME = 'Prints'  . ($^O =~ /mswin/i ?'.exe':'');
+       $PROGRAMNAME = 'FingerPRINTScan'  . ($^O =~ /mswin/i ?'.exe':'');
 
-       if (defined $ENV{PRINTSDIR}) {
+       if (defined $ENV{'PRINTSDIR'}) {
           $PROGRAMDIR = $ENV{PRINTSDIR} || '';
           $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                           'Prints'.($^O =~ /mswin/i ?'.exe':''));
+                                           'FingerPRINTScan'.($^O =~ /mswin/i ?'.exe':''));
        }
        else {
-          $PROGRAM = 'Prints';
+          $PROGRAM = 'FingerPRINTScan';
        }
       
        @PRINTS_PARAMS=qw(DB PROGRAM VERBOSE);
