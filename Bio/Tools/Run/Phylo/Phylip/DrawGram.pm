@@ -258,7 +258,7 @@ sub _run {
     if( -e $self->io->catfile($curpath,'fontfile') ) {
 	$instring .= $self->io->catfile($curpath,'fontfile')."\n";
     } elsif( File::Spec->file_name_is_absolute($self->fontfile) ) {	 
-	$instring .= $self->io->catfile($self->tempdir,$self->fontfile)."\n";
+	$instring .= $self->io->catfile($self->fontfile)."\n";
     } else {
 	$instring .= $self->io->catfile($curpath,$self->fontfile)."\n";
     }    
