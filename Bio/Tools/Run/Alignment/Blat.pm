@@ -15,7 +15,7 @@ Bio::Tools::Run::Blat
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->align($seq,$DB);
+  my @feats = $factory->run($seq,$DB);
 
 =head1 DESCRIPTION
 
@@ -52,7 +52,7 @@ Bio::Tools::Run::Blat
 
 =cut
 
-package Bio::Tools::Run::Blat;
+package Bio::Tools::Run::Alignment::Blat;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
             $PROGRAMNAME @BLAT_PARAMS %OK_FIELD);
@@ -60,13 +60,15 @@ use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
 use Bio::Factory::ApplicationFactoryI;
-use Bio::Tools::Blat;
+use Bio::SearchIO;
 use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-       @BLAT_PARAMS=qw(DB PROGRAM OPTIONS VERBOSE);
+       @BLAT_PARAMS=qw(DB PROGRAM OOC DB_TYPE QUERY_TYPE TILESIZE ONEOFF MINMATCH
+                       MINSCORE MINIDENTITY MAXGAP MAKEOOC REPMATCH MASK QMASK 
+                       MINREPDIV TRIMT NOTRIMA VERBOSE);
        foreach my $attr ( @BLAT_PARAMS)
                         { $OK_FIELD{$attr}++; }
 }
@@ -136,35 +138,36 @@ sub new {
     return $self;
 }
 
-=head2 align
+=head2 run
 
- Title   :   align()
- Usage   :   $obj->align($query)
+ Title   :   run()
+ Usage   :   $obj->run($query)
  Function:   Runs Blat  and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
 
 =cut
 
-sub align {
+sub run {
     my ($self,$query) = @_;
     my @feats;
 
     if  (ref($query) ) {	# it is an object
-	if (ref($query) =~ /GLOB/) {
-	    $self->throw("cannot use filehandle");
-	}
-	my $infile1 = $self->_writeSeqFile($query);
-	$self->_input($infile1);
-        @feats = $self->_run();
-	unlink $infile1;
+    	if (ref($query) =~ /GLOB/) {
+	      $self->throw("cannot use filehandle");
+    	}
+    	my $infile1 = $self->_writeSeqFile($query);
+    	$self->_input($infile1);
+      return  $self->_run();
     }
     else {
         $self->_input($query);
-        @feats = $self->_run();
+        return $self->_run();
     }
+}
 
-    return @feats;
+sub align {
+  return shift->run(@_);
 }
 
 =head2 _input
@@ -218,7 +221,7 @@ sub _run {
      my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
      my $str= $self->executable;
 
-     $str.=' '.$self->DB .' '.$self->_input.' '.$outfile;
+     $str.=' -out=blast '.$self->DB .' '.$self->_input.' '.$outfile;
      
 
      my $status = system($str);
@@ -232,19 +235,11 @@ sub _run {
      else {
         $filehandle = $outfile;
      }
-     my $blat_parser = Bio::Tools::Blat->new(-fh=>$filehandle);
-     my @blat_feat;
-     
-     while(my $blat_feat = $blat_parser->next_result){
-         push @blat_feat, $blat_feat;
-     }
-     
+     my $blat_obj= Bio::SearchIO->new(-format=>'blast',-fh=>$filehandle);
+
      
      $self->cleanup();
-     close($tfh);
-     undef $tfh;   
-     unlink $outfile;      
-     return @blat_feat;     
+     return $blat_obj;
 }
 
 

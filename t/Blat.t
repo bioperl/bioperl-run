@@ -10,7 +10,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 7;
+   $NTESTS = 12;
    plan tests => $NTESTS;
 }
 
@@ -20,7 +20,7 @@ END {
    }
 }
 ok(1);
-use Bio::Tools::Run::Blat;
+use Bio::Tools::Run::Alignment::Blat;
 use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::Seq;
@@ -29,8 +29,8 @@ my $db =  Bio::Root::IO->catfile("t","data","blat_dna.fa");
 
 my $query = Bio::Root::IO->catfile("t","data","blat_dna.fa");    
 
-my  $factory = Bio::Tools::Run::Blat->new("DB"=>$db);
-ok $factory->isa('Bio::Tools::Run::Blat');
+my  $factory = Bio::Tools::Run::Alignment::Blat->new("DB"=>$db);
+ok $factory->isa('Bio::Tools::Run::Alignment::Blat');
 
 my $blat_present = $factory->executable();
 
@@ -39,15 +39,29 @@ unless ($blat_present) {
        exit 0;
 }
 
-my @feat = $factory->align($query);
+my $searchio = $factory->align($query);
+my $result = $searchio->next_result;
+my $hit    = $result->next_hit;
+my $hsp    = $hit->next_hsp;
+ok $hsp->isa("Bio::Search::HSP::HSPI");
+ok ($hsp->feature1->start,1);
+ok ($hsp->feature1->end,1775);
+ok ($hsp->feature2->start,1);
+ok ($hsp->feature2->end,1775);
+my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
 
-ok $feat[0]->isa('Bio::SeqFeatureI');
-my @sub_feat = $feat[0]->get_SeqFeatures;
+my $seq  = $sio->next_seq ;
 
-ok ($sub_feat[0]->feature1->start,1);
-ok ($sub_feat[0]->feature1->end,1775);
-ok ($sub_feat[0]->feature2->start,1);
-ok ($sub_feat[0]->feature2->end,1775);
+$searchio = $factory->align($seq);
+$result = $searchio->next_result;
+$hit    = $result->next_hit;
+$hsp    = $hit->next_hsp;
+ok $hsp->isa("Bio::Search::HSP::HSPI");
+ok ($hsp->feature1->start,1);
+ok ($hsp->feature1->end,1775);
+ok ($hsp->feature2->start,1);
+ok ($hsp->feature2->end,1775);
+
  
 1; 
 
