@@ -90,14 +90,11 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 
-use vars qw($AUTOLOAD);
+use vars qw($AUTOLOAD $PROGRAMNAME @ARGNAMES $VERSION @ISA);
 
-our @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
-
-our $VERSION = '0.01';
-
-our @ARGNAMES = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
-
+@ISA         = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+@ARGNAMES    = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
+$PROGRAMNAME = 'mdust';
 
 =head2 new
 
@@ -109,10 +106,13 @@ our @ARGNAMES = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
                   wsize - word size for masking (default = 3)
                   cutoff - cutoff score for masking (default = 28)
                   maskchar - character for replacing masked regions (default = N)
-                  coords - boolean - indicate low-complexity regions as Bio::SeqFeature::Generic 
-                           objects with primary tag 'Excluded', do not change sequence (default 0)
+                  coords - boolean - indicate low-complexity regions as 
+                           Bio::SeqFeature::Generic 
+                           objects with primary tag 'Excluded', 
+                           do not change sequence (default 0)
                   tmpdir - directory for storing temporary files
-                  debug - boolean - toggle debugging output, do not remove temporary files
+                  debug - boolean - toggle debugging output, 
+                          do not remove temporary files
   Note		: All of the arguments can also be get/set with their own accessors, such as:
                   my $wsize = $mdust->wsize();
 
@@ -138,8 +138,7 @@ sub new {
     $self->{'coords'} = $args{'COORDS'} || 0;
     $self->{'tmpdir'} = $args{'TMPDIR'} || $ENV{'TMPDIR'} || $ENV{'TMP'} || '.';
     # set debugging
-    $self->{'debug'} = $args{'DEBUG'} || 0;
-
+    $self->verbose($args{'DEBUG'});
     return $self;
 }
 
@@ -169,18 +168,7 @@ sub program_dir {
 
 
 sub program_name {
-    return 'mdust';
-}
-    
-sub tmpdir {
-    my ($self, $tmpdir) = @_;
-
-    if ($tmpdir) {
-	$self->{'tmpdir'} = $tmpdir;
-    }
-    else {
-	return $self->{'tmpdir'};
-    }
+    return $PROGRAMNAME;
 }
 
 sub _run_mdust {
@@ -221,7 +209,7 @@ sub _run_mdust {
 	# now swap masked seq for original
 	$target->seq( $masked->seq );
     }
-    unlink $maskedfile unless ($self->debug);
+    unlink $maskedfile unless $self->save_tempfiles;
 
     return 1;
 
@@ -269,14 +257,14 @@ sub _set_target {
 
 sub _maskedfile {
     my ($self, $file) = @_;
-    my $tmpdir = $self->tmpdir;
+    my $tmpdir = $self->tempdir;
 
     if ($file) {
 	$self->{'maskedfile'} = $file;
 	# add some sanity chex for writability?
     }
     elsif (!$self->{'maskedfile'}) {
-	$self->{'maskedfile'} = Bio::Root::IO->catfile($tmpdir, int(rand(1000000)) . '.tfa');
+	$self->{'maskedfile'} = $self->io->tempfile(-dir=>$self->tempdir());
     }
     return $self->{'maskedfile'};
 
