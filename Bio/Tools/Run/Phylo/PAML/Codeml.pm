@@ -88,6 +88,7 @@ use Bio::Root::Root;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Phylo::PAML;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -217,7 +218,7 @@ INCOMPLETE DOCUMENTATION OF ALL METHODS
 BEGIN { 
 
     $MINNAMELEN = 25;
-    $PROGRAMNAME = 'codeml';
+    $PROGRAMNAME = 'codeml' . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'PAMLDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'PAMLDIR'},$PROGRAMNAME);
     }
@@ -381,8 +382,21 @@ sub run{
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
-   my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
-
+   my ($tempseqFH,$tempseqfile);
+   if( ! ref($aln) && -e $aln ) { 
+       $tempseqfile = $aln;
+   } else { 
+       ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+				     '-fh'          => $tempseqFH,
+				 '-interleaved' => 0,
+				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
+       
+       $alnout->write_aln($aln);
+       $alnout->close();
+       undef $alnout;   
+       close($tempseqFH);
+   }
    # now let's print the codeml.ctl file.
    # many of the these programs are finicky about what the filename is 
    # and won't even run without the properly named file.  Ack
@@ -392,15 +406,7 @@ sub run{
    print CODEML "seqfile = $tempseqfile\n";
 
    my $outfile = $self->outfile_name;
-   my $alnout = new Bio::AlignIO('-format'      => 'phylip',
-				 '-fh'          => $tempseqFH,
-				 '-interleaved' => 0,
-				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
-   
-   $alnout->write_aln($aln);
-   $alnout->close();
-   undef $alnout;   
-   close($tempseqFH);
+
    if( $tree ) {
        my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
 
@@ -417,7 +423,7 @@ sub run{
        print CODEML "$param = $val\n";
    }
    close(CODEML);
-   my ($rc,%data) = (1);
+   my ($rc,$parser) = (1);
    {
        chdir($tmpdir);
        my $codemlexe = $self->executable();
@@ -431,14 +437,13 @@ sub run{
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }
-       open(OUTPUT, $outfile) or $self->throw("Cannot open outfile $outfile");
-       while(<OUTPUT>) {
-	   chomp;
-	   # pretty dumb parser but works for this format, at least 
-	   # PAML 3.12
-	   while( /(\S+)=\s*([\d\.]+)/g ) {
-	       $data{$1} = $2;
-	   }
+       eval {
+	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/".$self->outfile, 
+						 -dir => "$tmpdir");
+
+       };
+       if( $@ ) {
+	   $self->warn($self->error_string);
        }
    }
 
@@ -447,7 +452,7 @@ sub run{
       unlink("$codeml_ctl");
       $self->cleanup();
    }
-   return ($rc,\%data);
+   return ($rc,$parser);
 }
 
 =head2 error_string
@@ -521,12 +526,16 @@ sub executable{
 
 sub alignment{
    my ($self,$aln) = @_;
+
    if( defined $aln ) { 
-       if( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
-	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function");
+       if( -e $aln ) { 
+	   $self->{'_alignment'} = $aln;
+       } elsif( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
+	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function not $aln");
 	   return undef;
+       } else {
+	   $self->{'_alignment'} = $aln;
        }
-       $self->{'_alignment'} = $aln;
    }
    return  $self->{'_alignment'};
 }
