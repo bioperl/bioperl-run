@@ -54,13 +54,40 @@ implemented using (unix) system calls, extensive modification may be
 necessary before Clustalw.pm would work under non-Unix operating
 systems (eg Windows, MacOS).  Clustalw.pm has only been tested using
 version 1.8 of clustalw.  Compatibility with earlier versions of the
-clustalw program is currently unknown. Before running Clustalw.pm
+clustalw program is currently unknown. Before running Clustalw
 successfully it will be necessary: to install clustalw on your system,
 to edit the variable $clustdir in Clustalw.pm to point to the clustalw
 program, and to ensure that users have execute privilieges for the
 clustalw program.
 
-Bio::Tools::Run::Alignment::Clustalw.pm: is an object for performing a
+=head2 Helping the module find your executable 
+
+You will need to enable Clustalw to find the clustalw program. This
+can be done in (at least) three ways:
+
+ 1. Make sure the clustalw executable is in your path so that
+    which clustalw
+    returns a clustalw executable on your system.
+ 2. Define an environmental variable CLUSTALDIR which is a 
+    directory which contains the 'clustalw' application:
+   In bash 
+   export CLUSTALDIR=/home/username/clustalw1.8
+   In csh/tcsh
+   setenv CLUSTALDIR /home/username/clustalw1.8
+   
+ 3. Include a definition of an environmental variable CLUSTALDIR in
+   every script that will use this Clustalw wrapper module.
+   BEGIN { $ENV{CLUSTALDIR} = '/home/username/clustalw1.8/' }
+   use Bio::Tools::Run::Alignment::Clustalw;
+
+  If you are running an application on a webserver make sure the
+  webserver environment has the proper PATH set or use the options 2
+  or 3 to set the variables.
+
+
+=head2 How it works
+
+Bio::Tools::Run::Alignment::Clustalw is an object for performing a
 multiple sequence alignment from a set of unaligned sequences and/or
 sub-alignments by means of the clustalw program.
 
@@ -78,7 +105,7 @@ in clustalw) may also be set.  Currently, the only such parameter is
 terminal output. Not all clustalw parameters are supported at this
 stage.
 
-By default, Clustalw.pm output is returned solely in a the form of a
+By default, Clustalw output is returned solely in a the form of a
 BioPerl Bio::SimpleAlign object which can then be printed and/or saved
 in multiple formats using the AlignIO.pm module. Optionally the raw
 clustalw output file can be saved if the calling script specifies an
@@ -163,15 +190,15 @@ or
 In either case, profile_align() returns a reference to a SimpleAlign
 object containing an (super)alignment of the two input alignments.
 
-For more examples of syntax and use of Clustalw.pm, the user is
+For more examples of syntax and use of Clustalw, the user is
 encouraged to run the script Clustalw.t is the bioperl/t directory.
 
-Note: Clustalw.pm is still under development. Various features of the
+Note: Clustalw is still under development. Various features of the
 clustalw program have not yet been implemented.  If you would like
 that a specific clustalw feature be added to this perl interface, let
 me know.
 
-These can be specified as paramters when instantiating a new TCoffee
+These can be specified as paramters when instantiating a new Clustalw
 object, or through get/set methods of the same name (lowercase).
 
 =head1 PARAMETER FOR ALIGNMENT COMPUTATION
@@ -328,17 +355,6 @@ use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
-
-
-# You will need to enable Clustalw to find the clustalw program. This
-# can be done in (at least) two ways:
-#
-# 1. define an environmental variable CLUSTALDIR:
-# export CLUSTALDIR=/home/peter/clustalw1.8
-#
-# 2. include a definition of an environmental variable CLUSTALDIR in
-# every script that will use Clustal.pm.
-# $ENV{CLUSTALDIR} = '/home/peter/clustalw1.8/';
 
 BEGIN {
     @CLUSTALW_PARAMS = qw(OUTPUT KTUPLE TOPDIAGS WINDOW PAIRGAP FIXEDGAP

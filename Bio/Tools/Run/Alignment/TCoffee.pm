@@ -51,6 +51,32 @@ alignments using the TCoffee program
 Note: this DESCRIPTION only documents the (Bio)perl interface to
 TCoffee.
 
+=head2 Helping the module find your executable 
+
+You will need to enable TCoffee to find the t_coffee program. This
+can be done in (at least) three ways:
+
+ 1. Make sure the t_coffee executable is in your path so that
+    which t_coffee
+    returns a t_cofee executable on your system.
+ 2. Define an environmental variable TCOFFEEDIR which is a dir 
+    which contains the 't_coffee' app:
+   In bash 
+   export TCOFFEEDIR=/home/username/progs/T-COFFEE_distribution_Version_1.37/bin
+   In csh/tcsh
+   setenv TCOFFEEDIR /home/username/progs/T-COFFEE_distribution_Version_1.37/bin
+   
+ 3. Include a definition of an environmental variable TCOFFEEDIR in
+   every script that will use this TCoffee wrapper module.
+   BEGIN { $ENV{TCOFFEDIR} = '/home/username/progs/T-COFFEE_distribution_Version_1.37/bin' }
+   use Bio::Tools::Run::Alignment::TCoffee;
+
+  If you are running an application on a webserver make sure the
+  webserver environment has the proper PATH set or use the options 2
+  or 3 to set the variables.
+
+=head1 PARAMETERS FOR ALIGNMENT COMPUTATION
+
 There are a number of possible parameters one can pass in TCoffee.
 One should really read the online manual for the best explaination of
 all the features.  See
@@ -58,8 +84,6 @@ http://igs-server.cnrs-mrs.fr/~cnotred/Documentation/t_coffee/t_coffee_doc.html
 
 These can be specified as parameters when instantiating a new TCoffee
 object, or through get/set methods of the same name (lowercase).
-
-=head1 PARAMETERS FOR ALIGNMENT COMPUTATION
 
 =head2 IN
 
@@ -314,7 +338,7 @@ object, or through get/set methods of the same name (lowercase).
  Default     : no file
  Description : Indicates the name of the new tree to compute. The
                default will be <sequence_name>.dnd, or <run_name.dnd>.
-               Format is Phylips tree format
+               Format is Phylip/Newick tree format
 
 =head2 USETREE
 
@@ -469,8 +493,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
+  bioperl-l@bioperl.org              - General discussion
+  http://bio.perl.org/MailList.html  - About the mailing lists
 
 =head2 Reporting Bugs
 
@@ -481,7 +505,7 @@ the bugs and their resolution.  Bug reports can be submitted via the web:
 
 =head1 AUTHOR -  Jason Stajich, Peter Schattner
 
-Email jason@bioperl.org, schattner@alum.mit.edu
+Email jason-at-bioperl-dot-org, schattner@alum.mit.edu
 
 =head1 APPENDIX
 
