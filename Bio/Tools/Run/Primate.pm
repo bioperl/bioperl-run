@@ -333,7 +333,7 @@ sub _setinput {
       $self->_query_seq(\%query);
     }
   }
-  if(ref($query)&& $query->isa("Bio::PrimarySeqI")){
+  elsif(ref($query)&& $query->isa("Bio::PrimarySeqI")){
       ($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
        my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
       my %query;
