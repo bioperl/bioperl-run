@@ -469,7 +469,7 @@ sub run{
        my $exit_status;
        chdir($tmpdir);
        my $codemlexe = $self->executable();
-       $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
+       $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x $codemlexe;
        if( $self->{'_branchLengths'} ) { 
 	   open(RUN, "echo $self->{'_branchLengths'} | $codemlexe |") or $self->throw("Cannot open exe $codemlexe");
        } else {
