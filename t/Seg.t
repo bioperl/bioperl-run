@@ -25,12 +25,11 @@ use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::Seq;
 my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","seg_dir","seg");
-if( ! -e $paramfile ) { 
-    warn("Seg program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
+my @params;
 
-my @params = ('PROGRAM',$paramfile);
+if( -e $paramfile ) { 
+   push @params, ('PROGRAM',$paramfile);
+}
 
 my  $factory = Bio::Tools::Run::Seg->new(@params);
 ok $factory->isa('Bio::Tools::Run::Seg');

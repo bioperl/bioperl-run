@@ -1,3 +1,8 @@
+# $Id$
+# Copyright Balamurugan Kumarasamy
+# You may distribute this module under the same terms as perl itself
+#  POD documentation - main docs before the code
+
 =head1 
  
   Copyright Balamurugan Kumarasamy
@@ -73,9 +78,6 @@ use Bio::Tools::Seg;
 use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
-
-
-
 
 BEGIN {
        $PROGRAMNAME = 'seg'  . ($^O =~ /mswin/i ?'.exe':'');
