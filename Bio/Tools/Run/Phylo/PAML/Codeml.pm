@@ -324,7 +324,7 @@ BEGIN {
 =head2 program_name
 
  Title   : program_name
- Usage   : >program_name()
+ Usage   : $factory->program_name()
  Function: holds the program name
  Returns:  string
  Args    : None
