@@ -44,25 +44,32 @@ my $verbose = 0;
 ## total number of tests that will be run. 
 
 use Bio::Tools::Phylo::PAML; # PAML parser
+use Bio::Root::IO;
 
-my $inpaml = new Bio::Tools::Phylo::PAML(-file => 't/data/codeml.mlc');
+my $inpaml = new Bio::Tools::Phylo::PAML(-file => 
+					 Bio::Root::IO->catfile(qw(t data 
+								   codeml.mlc)));
+
 ok($inpaml);
 
 use Bio::Tools::Run::Phylo::PAML::Codeml;
 use Bio::Tools::Run::Phylo::PAML::Yn00;
 use Bio::AlignIO;
-my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml(-verbose => -1);
+my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml(-verbose => $verbose);
 exit(0) unless( $codeml->executable );
 
 my $in = new Bio::AlignIO(-format => 'phylip',
-			  -file   => 't/data/gf-s85.phylip');
+			  -file   => Bio::Root::IO->catfile(qw(t data 
+							       gf-s85.phylip)));
 my $aln = $in->next_aln;
 $codeml->alignment($aln);
 my ($rc,$results) = $codeml->run();
+
 ok($rc,1);
 if( ! defined $results ) { 
     exit(0);
 }
+
 my $result = $results->next_result;
 my $MLmatrix = $result->get_MLmatrix;
 
