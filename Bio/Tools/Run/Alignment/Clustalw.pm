@@ -299,6 +299,10 @@ Report bugs to the Bioperl bug tracking system to help us keep track
 
 Email schattner@alum.mit.edu
 
+=head1 CONTRIBUTORS
+
+Jason Stajich jason@bioperl.org
+
 =head1 APPENDIX
 
 The rest of the documentation details each of the object
@@ -474,6 +478,7 @@ sub align {
     my ($temp,$infilename, $seq);
     my ($attr, $value, $switch);
 
+    $self->io->_io_cleanup();
 # Create input file pointer
     $infilename = $self->_setinput($input);
     if (!$infilename) {$self->throw("Bad input data (sequences need an id ) or less than 2 sequences in $input !");}
@@ -507,7 +512,7 @@ sub profile_align {
     my ($self,$input1,$input2) = @_;
     my ($temp,$infilename1,$infilename2,$input,$seq);
 
-
+    $self->io->_io_cleanup();
 # Create input file pointer
     $infilename1 = $self->_setinput($input1,1);
     $infilename2 = $self->_setinput($input2,2);
