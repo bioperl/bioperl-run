@@ -188,7 +188,7 @@ BEGIN {
         $MCL = 'mcl';
         $MATRIX = 'tribe-matrix';
     }
-    @TRIBEMCL_PARAMS = qw(I INPUTTYPE BLASTFILE SEARCHIO PAIRS MCL MATRIX WEIGHT);
+    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE SEARCHIO PAIRS MCL MATRIX WEIGHT);
     @OTHER_SWITCHES = qw(VERBOSE QUIET); 
 
     # Authorize attribute fields
@@ -412,15 +412,19 @@ sub _setup_input {
   my $type = $self->inputtype();
   if($type =~/blastfile/i){
     $self->blastfile($input);
-    $array = $self->_parse_blastfile($self->BLASTFILE);
+    $array = $self->_parse_blastfile($self->blastfile);
   }
   elsif($type=~/searchio/i){
     $self->searchio($input);
-    $array = $self->_get_from_searchio($self->SEARCHIO);
+    $array = $self->_get_from_searchio($self->searchio);
   }
-  elsif($type=~/pairs/) {
+  elsif($type=~/pairs/i) {
     $self->pairs($input);
     $array = $self->pairs;
+  }
+  elsif($type =~/hsp/i){
+      $self->hsp($input);
+      $array = $self->_get_from_hsp($self->hsp);
   }
   else {
     $self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
@@ -434,6 +438,36 @@ sub _setup_input {
   return $outfile;
   
 }
+
+=head2 _get_from_hsp
+
+ Title   : _get_from_hsp
+ Usage   : $self->_get_from_hsp()
+ Function: internal function for getting blast scores from hsp 
+ Returns : array ref to ids and score [protein1 protein2 magnitude factor]
+ Args    :  L<Bio::Search::HSP::GenericHSP>
+
+=cut
+
+sub _get_from_hsp {
+    my ($self,$hsp) = @_;
+    my @array;
+    foreach my $pair (@{$hsp}){
+        my $sig = $pair->score;
+        $sig =~ s/^e-/1e-/g;
+        my $expect=sprintf("%e",$sig);
+        if ($expect==0){
+          my $wt = $self->weight;
+          $expect=sprintf("%e","1e-$wt");
+        }
+        my $first=(split("e-",$expect))[0];
+        my $second=(split("e-",$expect))[1];
+
+        push @array, [$pair->feature1->seqname,$pair->feature2->seqname,int($first),int($second)];
+    }
+    return \@array;
+}
+    
 
 =head2 _get_from_searchio
 
