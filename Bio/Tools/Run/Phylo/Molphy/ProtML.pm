@@ -16,7 +16,46 @@ Bio::Tools::Run::Phylo::Molphy::ProtML - A wrapper for the Molphy pkg app ProtML
 
 =head1 SYNOPSIS
 
-Give standard usage here
+use Bio::AlignIO;
+use Bio::TreeIO;
+use Bio::Tools::Run::Phylo::Molphy::ProtML;
+
+my %args = ( 'models' => 'jtt', 
+	     'search' => 'quick', 
+	     "other" => [ '-information', '-w']); 
+my $verbose = 0; # change to 1 if you want some debugging output
+my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
+							-flags => \%args);
+
+die("cannot find the protml executable") unless $protml->executable;
+
+# read in a previously built protein alignment
+my $in = new Bio::AlignIO(-format => 'clustalw',
+			  -file   => 't/data/cel-cbr-fam.aln');
+my $aln = $in->next_aln;
+$protml->alignment($aln);
+
+my ($rc,$results) = $protml->run();
+
+# This may be a bit of overkill, but it is possible we could
+# have a bunch of results and $results is a 
+# Bio::Tools::Phylo::Molphy object
+
+my $r = $results->next_result;
+# $r is a Bio::Tools::Phylo::Molphy::Result object
+
+my @trees;
+while( my $t = $r->next_tree ) { 
+    push @trees, $t;
+}
+
+print "search space is ", $r->search_space, "\n";
+      "1st tree score is ", $tree[0]->score, "\n";
+
+my $out = new Bio::TreeIO(-file => ">saved_MLtrees.tre",
+                          -format => "newick");
+$out->write_tree($tree[0]);
+$out = undef;
 
 =head1 DESCRIPTION
 
