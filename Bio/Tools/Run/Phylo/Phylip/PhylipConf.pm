@@ -19,7 +19,8 @@ Bio::Tools::Run::Phylo::Phylip::PhylipConf
 
 =head1 DESCRIPTION
 
-A configuration for managing menu configuration differences between version 3.5 and 3.6
+A configuration for managing menu configuration differences 
+between version 3.5 and 3.6
 
 =head1 FEEDBACK
 
@@ -140,7 +141,7 @@ use vars qw(%Menu %FileName);
                                    'KIMURA'=>"P\nP\nY\n",
                                    'SIMILARITY'=>"P\nP\nP\nY\n",
                                    'CAT'   =>"P\nP\nP\nP\n",
-                                   'JIT'   =>"Y\n"
+                                   'JTT'   =>"Y\n"
                                    },
                       'GENCODE'=>  {
                                    'ALLOWED'=>"UMVFY",
