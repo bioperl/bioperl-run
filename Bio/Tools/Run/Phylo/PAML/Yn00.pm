@@ -1,4 +1,4 @@
-# $Id$
+# Yn00.pm,v 1.3 2002/06/21 12:57:49 heikki Exp
 #
 # BioPerl module for Bio::Tools::Run::Phylo::PAML::Yn00
 #
@@ -213,7 +213,6 @@ sub run{
    
    $alnout->write_aln($aln);
    $alnout->close();
-   `cp $tempseqfile /tmp/ynfile.dna`;
    undef $alnout;   close($tempseqFH);
    print YN "outfile = $outfile\n";
    my %params = $self->get_parameters;
