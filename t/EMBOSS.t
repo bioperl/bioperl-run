@@ -139,7 +139,7 @@ ok $compseq_mand_acd->mandatory->qualifier('-supper1'), 0;
 ok $acd->qualifier('-ppppppp'), 0;
 ok $acd->qualifier('-reverse');
 ok $acd->category('-reverse'), 'optional';
-ok $acd->values('-reverse'), 'Yes/No';
+ok $acd->values('-reverse'), qr/Yes\/No/;
 ok $acd->descr('-reverse'), 'Set this to be true if you also wish to also count words in the reverse complement of a nucleic sequence.';
 ok $acd->unnamed('-reverse'), 0;
 ok $acd->default('-reverse'), 'No';
