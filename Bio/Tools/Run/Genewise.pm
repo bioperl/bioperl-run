@@ -15,17 +15,32 @@ given sequence given a protein
 =head1 SYNOPSIS
 
   # Build a Genewise alignment factory
-  my  $factory = Bio::Tools::Run::Genewise->new();
+  my $factory = Bio::Tools::Run::Genewise->new();
 
-  # Pass the factory 2 Bio:SeqI objects (in the order of query peptide and
-     target_genomic)
-  # $genes is a Bio::SeqFeature::Gene::GeneStructure object  
+  # Pass the factory 2 Bio:SeqI objects (in the order of query peptide
+  # and target_genomic).
+
+  # $genes is a Bio::SeqFeature::Gene::GeneStructure object
   my $genes = $factory->run($protein_seq, $genomic_seq);
 
-  Available Params
+  # Alternatively pass the factory a profile HMM filename and a
+  # Bio:SeqI object (in the order of query HMM and target_genomic).
+
+  # Set hmmer switch first to tell genewise to expect an HMM
+  $factory->hmmer(1);
+  my $genes = $factory->run($hmmfile, $genomic_seq);
+
+  Available Params:
+
+  NB: These should be passed without the '-' or they will be ignored,
+  except switches such as 'hmmer' (which have no corresponding value)
+  which should be set on the factory object using the AUTOLOADed
+  methods of the same name.
+
   Model    [-codon,-gene,-cfreq,-splice,-subs,-indel,-intron,-null]
   Alg      [-kbyte,-alg]
-  ..cont  [-gff,-gener,-alb,-pal,-block,-divide]
+  HMM      [-hmmer]
+  Output   [-gff,-gener,-alb,-pal,-block,-divide]
   Standard [-help,-version,-silent,-quiet,-errorlog]
 
 =head1 DESCRIPTION
@@ -41,9 +56,10 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
-d2 Reporting Bugs
+  bioperl-l@bioperl.org             - General discussion
+  http://bio.perl.org/MailList.html - About the mailing lists
+
+=head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
  the bugs and their resolution.  Bug reports can be submitted via
@@ -58,6 +74,7 @@ Email: fugui@worf.fugu-sg.org
 =head1 CONTRIBUTORS
 
 Jason Stajich jason@bioperl.org
+Keith James kdj@sanger.ac.uk
 
 =head1 APPENDIX
 
@@ -72,10 +89,10 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
             @OTHER_SWITCHES %OK_FIELD);
 use Bio::SeqIO;
 use Bio::SeqFeature::Generic;
-use Bio::SeqFeature::Gene::Exon; 
+use Bio::SeqFeature::Gene::Exon;
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
-use Bio::SeqFeature::FeaturePair; 
+use Bio::SeqFeature::FeaturePair;
 use Bio::SeqFeature::Gene::Transcript;
 use Bio::SeqFeature::Gene::GeneStructure;
 use Bio::Tools::Genewise;
@@ -94,11 +111,11 @@ use strict;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-    @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE 
-			   SUBS INDEL INTRON NULL INSERT 
+    @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE
+			   SUBS INDEL INTRON NULL INSERT
 			   KBYTE HNAME ALG BLOCK DIVIDE GENER U V S T G E M);
 
-    @GENEWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD TREV 
+    @GENEWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD TREV
 			    TFOR TABS BOTH HMMER );
 
     # Authorize attribute fields
@@ -145,9 +162,9 @@ sub new {
     next if( $attr =~ /^-/ ); # don't want named parameters
     $self->$attr($value);
   }
+
   return $self;
 }
-
 
 sub AUTOLOAD {
     my $self = shift;
@@ -178,14 +195,12 @@ sub version {
     my $string = `$prog -version`;
     $string =~ /(Version *)/i;
     return $1 || undef;
-
 }
-
 
 =head2 predict_genes
 
  Title   : predict_genes
- Usage   : DEPRECATED. Use $factory->run($seq1,$seq2) 
+ Usage   : DEPRECATED. Use $factory->run($seq1,$seq2)
  Function: Predict genes
  Returns : A Bio::Seqfeature::Gene:GeneStructure object
  Args    : Name of a file containing a set of 2 fasta sequences in the order of
@@ -203,21 +218,23 @@ sub predict_genes {
 	return shift->run(@_);
 }
 
-=head2 run 
+=head2 run
 
- Title   : run 
+ Title   : run
  Usage   : 2 sequence objects
            $genes = $factory->run($seq1, $seq2);
- Function: run 
+ Function: run
  Returns : A Bio::Seqfeature::Gene:GeneStructure object
- Args    : Name of a file containing a set of 2 fasta sequences in the order of
-           peptide and genomic sequences
-           or else 2  Bio::Seq objects.
+ Args    : Names of a files each containing a fasta sequence in the order
+           of either (peptide sequence, genomic sequence) or (profile HMM,
+           genomic sequence). Alternatively any of the fasta sequence
+           filenames may be substituted with a Bio::Seq object.
 
  Throws an exception if argument is not either a string (eg a
- filename) or 2 Bio::Seq objects.  If
- arguments are strings, throws exception if file corresponding to string
- name can not be found.
+ filename) or Bio::Seq objects. If arguments are strings, throws exception
+ if file corresponding to string name can not be found. Also throws an
+ exception if a profile HMM is expected (the -hmmer genewise switch has
+ been set).
 
 =cut
 
@@ -225,24 +242,22 @@ sub run{
     my ($self, $seq1, $seq2)=@_;
     my ($attr, $value, $switch);
     $self->io->_io_cleanup();
-# Create input file pointer
+    # Create input file pointer
     my ($infile1,$infile2)= $self->_setinput($seq1, $seq2);
     if (!($infile1 && $infile2)) {$self->throw("Bad input data (sequences need an id ) ");}
 
-
-# run genewise
+    # run genewise
     my @genes = $self->_run($infile1,$infile2);
     return @genes;
 }
 
-
 =head2  _run
 
- Title   :  _run
- Usage   :  Internal function, not to be called directly
- Function:   makes actual system call to a genewise program
+ Title   : _run
+ Usage   : Internal function, not to be called directly
+ Function: Makes actual system call to a genewise program
  Example :
- Returns : L<Bio::SeqFeature::Gene::GeneStructure> 
+ Returns : L<Bio::SeqFeature::Gene::GeneStructure>
  Args    : Name of a files containing 2 sequences in the order of peptide and genomic
 
 =cut
@@ -250,26 +265,26 @@ sub run{
 sub _run {
     my ($self,$infile1,$infile2) = @_;
     my $instring;
-    $self->debug( "Program ".$self->executable."\n");
+    $self->debug("Program ".$self->executable."\n");
     unless ( $self->executable ) {
-	$self->throw("Cannot run Genewise unless the executable is found.  Check your environment variables or make sure genewise is in your path.");
+      $self->throw("Cannot run Genewise unless the executable is found.  Check your environment variables or make sure genewise is in your path.");
     }
     my $paramstring = $self->_setparams;
-    
+
     my $commandstring = $self->executable." $paramstring $infile1 $infile2";
     # this is to capture STDERR messages which leak out when you run programs
     # with open(FH, "... |");
-    if( ( $self->silent && $self->quiet) &&
-	($^O !~ /os2|dos|MSWin32|amigaos/) ) {
-	# yeah, like genewise is really going to run on Windows...
-	$commandstring .= ' 2> /dev/null';
+    if (($self->silent && $self->quiet) &&
+        ($^O !~ /os2|dos|MSWin32|amigaos/)) {
+      # yeah, like genewise is really going to run on Windows...
+      $commandstring .= ' 2> /dev/null';
     }
-    $self->debug( "genewise command = $commandstring");
+    $self->debug("genewise command = $commandstring");
     open(GW, "$commandstring |") || $self->throw( "Genewise call ($commandstring) crashed: $? \n");
-        
+
     my $genewiseParser = Bio::Tools::Genewise->new(-fh=> \*GW);
     my @genes;
-    while ( my $gene = $genewiseParser->next_prediction()){
+    while (my $gene = $genewiseParser->next_prediction()) {
         push @genes, $gene;
     }
     close(GW);
@@ -294,48 +309,59 @@ sub get_strand {
 }
 
 sub _setinput {
-    my ($self, $seq1, $seq2) = @_;
+    my ($self, $arg1, $seq2) = @_;
     my ($tfh1,$tfh2,$outfile1,$outfile2);
 
-    $self->throw("calling with not enough arguments") unless $seq1 && $seq2;
+    $self->throw("calling with not enough arguments") unless $arg1 && $seq2;
 
-    # Not going to set _query_pep/_subject_dna_seq 
-    # if you pass in a filename
+    # Not going to set _query_pep/_subject_dna_seq if you pass in a
+    # filename
 
-    unless( ref($seq1) ) {
-	    unless( -e $seq1 ) {
-	      $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+    unless( ref($arg1) ) {
+	    unless( -e $arg1 ) {
+            if ($self->hmmer) {
+                $self->throw("Argument1 was not a HMMER profile HMM file\n")
+            }
+            else {
+                $self->throw("Argument1 is not a Bio::PrimarySeqI object nor file\n");
+            }
 	    }
-    	$outfile1 = $seq1;
-    } 
-    else { 
-	    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
-      my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
-			                      	   '-format' => 'fasta');
-	    $out1->write_seq($seq1);
-    	$self->_query_pep_seq($seq1);
-    	# Make sure you close things - this is what creates
-    	# Out of filehandle errors 
-    	close($tfh1);
-    	undef $tfh1;
+    	$outfile1 = $arg1;
     }
+    else {
+        if ($self->hmmer) {
+            $self->throw("Argument1 was not a HMMER profile HMM file\n")
+        }
+        else {
+            ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+            my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
+                                       '-format' => 'fasta');
+            $out1->write_seq($arg1);
+            $self->_query_pep_seq($arg1);
+            # Make sure you close things - this is what creates
+            # Out of filehandle errors
+            close($tfh1);
+            undef $tfh1;
+        }
+    }
+
     unless( ref($seq2) ) {
-    	unless( -e $seq2 ) { 
-	     $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");    
+    	unless( -e $seq2 ) {
+	     $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");
 	  }
-       $outfile2 = $seq2;	
-    } 
-    else { 
+       $outfile2 = $seq2;
+    }
+    else {
     	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
-	    my $out2 = Bio::SeqIO->new('-fh'     => $tfh2, 
-		                      		   '-format' => 'fasta');
+	    my $out2 = Bio::SeqIO->new('-fh'     => $tfh2,
+                                   '-format' => 'fasta');
     	$out2->write_seq($seq2);
-	
-	$self->_subject_dna_seq($seq2);
-	# Make sure you close things - this is what creates
-	# Out of filehandle errors 
-	close($tfh2);
-	undef $tfh2;
+
+        $self->_subject_dna_seq($seq2);
+        # Make sure you close things - this is what creates
+        # Out of filehandle errors
+        close($tfh2);
+        undef $tfh2;
     }
     return ($outfile1,$outfile2);
 }
@@ -347,7 +373,7 @@ sub _setinput {
  Function:  creates a string of params to be used in the command string
  Example :
  Returns :  string of params
- Args    :  
+ Args    :
 
 =cut
 
@@ -377,7 +403,7 @@ sub _setparams {
  Usage   :  Internal function, not to be called directly
  Function:  get/set for the query sequence
  Example :
- Returns :  
+ Returns :
  Args    :
 
 =cut
@@ -409,6 +435,7 @@ sub _subject_dna_seq {
   }
   return $self->{'_subject_dna_seq'};
 }
-1; 
+
+1;
 
 
