@@ -35,7 +35,7 @@ use Bio::Tools::Run::AnalysisFactory::Pise;
 use Bio::Tools::Genscan;
 use Bio::SeqIO;
 
-exit(0);
+#exit(0);
 my $golden_outfile = 'golden.out';
 my $actually_submit;
 
@@ -59,12 +59,17 @@ if( -e "t/pise-email.test" ) {
     if( open(T, "t/pise-email.test") ) {
 	chomp($email = <T>);
     } else { 
-	print "skipping tests, cannot run without read access to testfile data";
-	exit;
+	#email not mandatory anymore
+	#print "skipping tests, cannot run without read access to testfile data";
+	#exit;
     }
 }
-
-my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+my $factory;
+if ($email) {
+    $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+} else {
+    $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
+}
 ok($factory);
 
 my $golden = $factory->program('golden', 
