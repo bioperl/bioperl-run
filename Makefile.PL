@@ -18,13 +18,13 @@ use ExtUtils::MakeMaker;
 %packages = (
 	     'IO::String'               => '0.0/IO handle to read or write to a string/GenBank+GenPept sequence retrieval, Variation code/Bio::DB::*,Bio::Variation::*,Bio::Tools::Blast::Run::Webblast, Bio::Index::Blast',
 	     'File::Temp'               => '0.0/Temporary File creation/Bio::Root::IO uses if present/Bio::DB::WebDBSeqI, Bio::Seq::LargePrimarySeq',
-	     );
+	     'XML::Parser::SAX'          => '0.0/XML SAX parser/Pise Applications/Pise::Job');
 
 sub check_package {
     my ($name,$str) = @_;
     my ($ver,$desc,$expl,$module) = split( /\// , $str);
     if( !eval "require($name)") {
-	print "External Module $name, $desc,\n is not installed on this computer.\n  The $module in bioperl-pipeline needs it for $expl\n\n";
+	print "External Module $name, $desc,\n is not installed on this computer.\n  The $module in bioperl-run  needs it for $expl\n\n";
 	return 1;
     }
 
@@ -103,7 +103,7 @@ if( $error == 1 ) {
 Warning:
 
    There are some external packages and perl modules, listed above, which 
-   bioperl-pipeline uses. This only effects the functionality which is listed above:
+   bioperl-run uses. This only effects the functionality which is listed above:
 the rest of bioperl will work fine.
 
    The installation of these external packages is very simple. You
