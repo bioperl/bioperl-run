@@ -153,7 +153,9 @@ use Bio::Root::IO;
 use Bio::Cluster::SequenceFamily;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Run::WrapperBase;
+use Bio::Annotation::DBLink;
 use Bio::Seq;
+use Bio::Species;
 use Algorithm::Diff qw(LCS);;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
@@ -194,7 +196,7 @@ BEGIN {
         $MATRIXPROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,$MATRIXPROGRAM_NAME.($^O =~ /mswin/i ?'.exe':''));
     }
 
-    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE DESCRIPTION_FILE SEARCHIO PAIRS MCL MATRIX WEIGHT DESCRIPTION FAMILY_TAG);
+    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP HIT SCOREFILE BLASTFILE DESCRIPTION_FILE SEARCHIO PAIRS MCL MATRIX WEIGHT DESCRIPTION FAMILY_TAG USE_DB);
     @OTHER_SWITCHES = qw(VERBOSE QUIET); 
 
     # Authorize attribute fields
@@ -358,15 +360,45 @@ sub _generate_families {
           my @mem;
           foreach my $member (@{$clusters->[$i]}){
               my $mem = Bio::Seq->new(-id=>$member,
-                                             -alphabet=>"protein",
-                                             -desc=>$description{$member});
+                                      -alphabet=>"protein",
+                                      -desc=>$description{$member}->[1]);
+              my $annot = Bio::Annotation::DBLink->new(-database=>$description{$member}->[0],
+                                                       -primary_id=>$member);
+
+              $mem->annotation->add_Annotation('dblink',$annot);
+
+              #store species information
+              my $taxon_str = $description{$member}->[2];
+              #parse taxon info into hash
+              my %taxon;
+              $taxon_str=~s/=;/=undef;/g;
+              %taxon = map{split '=',$_}split';',$taxon_str;
+              my $name = $taxon{'taxon_common_name'} eq 'undef' ? undef : $taxon{'taxon_common_name'};
+              my @classification = $taxon{'taxon_classification'} eq 'undef' ? undef : split(':',$taxon{'taxon_classification'});
+              my $tax_id = $taxon{'taxon_id'} eq 'undef' ? undef : $taxon{'taxon_id'};
+              my $sub_species = $taxon{'taxon_sub_species'} eq 'undef'? undef : $taxon{'taxon_sub_species'};
+
+              my $species;
+
+              eval {
+                  $species = Bio::Species->new( -classification=>\@classification);
+              };
+              if($@){
+                $self->warn("Problems creating Species $@");
+                next; 
+              }
+              $species->common_name($name);
+              $species->sub_species($sub_species);
+              $species->ncbi_taxid($tax_id);              
+              $mem->species($species); 
+
               push @mem, $mem;
           }
           my $id = $family_tag."_".$i;
           my $fam = Bio::Cluster::SequenceFamily->new(-family_id=>$id,
-						      -description=>$consensus{$i}{desc},
-						      -annotation_score=>$consensus{$i}{conf},
-						      -members=>\@mem);
+                                              -description=>$consensus{$i}{desc},
+                                              -annotation_score=>$consensus{$i}{conf},
+                                              -members=>\@mem);
           push @fam, $fam;
       }
      return \@fam;
@@ -376,12 +408,12 @@ sub _generate_families {
           my @mem;
           foreach my $member (@{$clusters->[$i]}){
               my $mem = Bio::Seq->new(-id=>$member,
-                                             -alphabet=>"protein");
+                                      -alphabet=>"protein");
               push @mem, $mem;
           }
           my $id = $family_tag."_".$i;
           my $fam = Bio::Cluster::SequenceFamily->new(-family_id=>$id,
-						      -members=>\@mem);
+                                              -members=>\@mem);
           push @fam, $fam;
       }
      return \@fam;
@@ -395,6 +427,12 @@ sub _consensifier {
     my %description = %{$self->description}; 
     my %consensus;
     my $best_annotation;
+    my %use_db;
+    if($self->use_db){
+      foreach my $key(split(',',$self->use_db)){
+        $use_db{$key}++;
+      }
+    }
 CLUSTER:
     for(my $i = 0; $i < scalar(@{$clusters}); $i++){
         my @desc;
@@ -402,8 +440,18 @@ CLUSTER:
         my $total_members = scalar(@{$clusters->[$i]});
 
         foreach my $member(@{$clusters->[$i]}){
-          push @desc, $description{$member} if $description{$member};
-          push @orig_desc, $description{$member} if $description{$member};
+          #if specify which dbs to use for consensifying
+          if($self->use_db){
+              if($use_db{$description{$member}->[0]}){
+                push @desc, $description{$member}->[1] if $description{$member}->[1];
+                push @orig_desc, $description{$member}->[1] if $description{$member}->[1];
+              }
+          }
+          else {
+            push @desc, $description{$member}->[1] if $description{$member}->[1];
+            push @orig_desc, $description{$member}->[1] if $description{$member}->[1];
+          }
+
         }
         if($#desc < 0){ #truly unknown
             $consensus{$i}{desc} = "UNKNOWN";
@@ -412,6 +460,7 @@ CLUSTER:
         }
         if($#desc == 0){#only a single description
             $consensus{$i}{desc} = grep(/S+/,@desc);
+            $consensus{$i}{desc} = $consensus{$i}{desc} || "UNKNOWN";
             $consensus{$i}{conf} = 100 * int(1/$total_members);            
             next CLUSTER;
         }
@@ -494,9 +543,9 @@ CLUSTER:
           }
       }
       if ($best_perc==0 || $best_perc >= 100 )  {
-        $best_perc=100;
+        $best_perc='NA';
       }
-      if  ( $best_annotation eq  '')  {
+      if  ($best_annotation eq  '')  {
         $best_annotation = 'AMBIGUOUS';
       }
       $consensus{$i}{desc} = $best_annotation;
@@ -515,14 +564,14 @@ sub _setup_description {
     my %description;
     while(<FILE>){
         chomp;
-        my ($acc,$description) = split("\t",$_);
+        my ($db,$acc,$description,$taxon_str) = split("\t",$_);
         $description || $self->throw("Wrongly formated description file");
         $description = $self->_apply_edits($description);
 
         if($description{$acc}){
             $self->warn("Duplicated entry $acc in description file, overwriting..");
         }
-        $description{$acc} = $description;
+        $description{$acc} = [$db,$description,$taxon_str];
     }
     $self->description(\%description);
 }
@@ -583,11 +632,10 @@ sub _run_mcl {
       }
   }
   my $status = system($cmd);
-  close($tfh1);
-  undef $tfh1;
+  close ($tfh1);
+  undef ($tfh1);
   $self->throw( "mcl  call ($cmd) crashed: $? \n") unless $status==0;
   my $families = $self->_parse_mcl($ind_file,$mclout);
-  
   return $families;
 }
   
@@ -608,7 +656,6 @@ sub _run_matrix {
   my ($tfh2,$matrixfile) = $self->io->tempfile(-dir=>$TMPDIR);
   my $cmd = $exe. " $parse_file -ind $indexfile -out $matrixfile > /dev/null ";
   my $status = system($cmd);
-  # free resources
   close($tfh1);
   close($tfh2);
   undef $tfh1;
@@ -635,30 +682,41 @@ sub _setup_input {
     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
 
     $type = $self->inputtype();
-
+    if($type=~/scorefile/i){
+        -e $self->scorefile || $self->throw("Scorefile doesn't seem to exist or accessible");
+        return $self->scorefile;
+    }
     if($type =~/blastfile/i){
-	$self->blastfile($input);
-	$rc = $self->_parse_blastfile($self->blastfile,$tfh);
-    } elsif($type=~/searchio/i){
-	$self->searchio($input);
-	$rc = $self->_get_from_searchio($self->searchio,$tfh);
-    } elsif($type=~/pairs/i) {
-	$self->pairs($input);
-	for my $line (@{ $self->pairs }){
-	    print $tfh join("\t",@{$line}), "\n"; 
-	    $rc++;
-	}
-    } elsif($type =~/hsp/i) {
-	$self->hsp($input);
-	$rc = $self->_get_from_hsp($self->hsp,$tfh);
-    } else {
-	$self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
+	    $self->blastfile($input);
+	    $rc = $self->_parse_blastfile($self->blastfile,$tfh);
+    } 
+    elsif($type=~/searchio/i){
+	    $self->searchio($input);
+	    $rc = $self->_get_from_searchio($self->searchio,$tfh);
+    } 
+    elsif($type=~/pairs/i) {
+	    $self->pairs($input);
+	    for my $line (@{ $self->pairs }){
+	      print $tfh join("\t",@{$line}), "\n"; 
+	      $rc++;
+	    }
+    } 
+    elsif($type =~/hsp/i) {
+	    $self->hsp($input);
+	    $rc = $self->_get_from_hsp($self->hsp,$tfh);
+    }
+    elsif($type=~/hit/i){
+      $self->hit($input);
+      $rc = $self->_get_from_hit($self->hit,$tfh);
+    }
+    else {
+	    $self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
     }
     unless ( $rc ) {
-	$self->throw("Need inputs for running tribe mcl, nothing provided"); 
+	    $self->throw("Need inputs for running tribe mcl, nothing provided"); 
     }
     close($tfh);
-    $tfh = undef;
+    $tfh= undef;
     return $outfile;
 }
 
@@ -694,6 +752,26 @@ sub _get_from_hsp {
     }
     return $count;
 }
+
+sub _get_from_hit {
+    my ($self,$hit,$tfh) = @_;
+    my $count; 
+    foreach my $pair(@{$hit}){
+        my $sig = $pair->raw_score;
+        $sig =~s/^e-/1e-/g;
+        my $expect = sprintf("%e",$sig);
+        if ($expect==0){
+          my $wt = $self->weight;
+          $expect=sprintf("%e","1e-$wt");
+        }
+        my $first=(split("e-",$expect))[0];
+        my $second=(split("e-",$expect))[1];
+        print $tfh join("\t",$pair->name,$pair->description,int($first),int($second)),"\n";
+        $count++;
+    }
+    return $count;
+}
+
     
 
 =head2 _get_from_searchio
