@@ -74,6 +74,8 @@ use Bio::Tools::Run::WrapperBase;
 use Bio::SeqFeature::FeaturePair; 
 use Bio::SeqFeature::Gene::Transcript;
 use Bio::SeqFeature::Gene::GeneStructure;
+use Bio::Tools::Genewise;
+use Bio::Tools::AnalysisResult;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -254,9 +256,21 @@ sub _run {
     $self->throw( "Genewise call ($commandstring) crashed: $? \n") unless $status==0;
 
     #parse the outpur and return a Bio::SeqFeature::Gene::GeneStructure object
-    my $genes   = $self->_parse_results($outfile);
+    my $genewiseParser = Bio::Tools::Genewise->new(-fh=> \*GENEWISE);
+    my $filehandle;
+    if (ref ($outfile) !~ /GLOB/) {
+        open (GENEWISE, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
+        $filehandle = \*GENEWISE;
+    }
+    else {
+        $filehandle = $outfile;
+    }
 
-    return $genes;
+    my $gene = $genewiseParser->next_prediction($filehandle);
+
+    #my $genes   = $self->_parse_results($outfile);
+
+    return $gene;
 }
 
 =head2  _parse_results
@@ -273,64 +287,68 @@ sub _run {
 sub _parse_results {
     my ($self,$outfile) = @_;
     $outfile||$self->throw("No outfile specified");
-
-
     my $filehandle;
-    if (ref ($outfile) !~ /GLOB/)
-    {
-        open (GENEWISE, "<".$outfile)
-            or $self->throw ("Couldn't open file ".$outfile.": $!\n");
+    if (ref ($outfile) !~ /GLOB/) {
+        open (GENEWISE, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
         $filehandle = \*GENEWISE;
     }
-    else
-    {
+    else {
         $filehandle = $outfile;
     }
     my $genes = new Bio::SeqFeature::Gene::GeneStructure ;
     my $transcript = new Bio::SeqFeature::Gene::Transcript ;
     my $curr_exon;
     my $score;
+    my $seqname;
+    my $start;
+    my $end;
+    my $strand;
+    my $phaseno;
+    my $pf;
+    my $gf;
     #The big parsing loop - parses exons and predicted peptides
-    $/ = "\n//\n";
+    #$/ = "\n//\n";
     while (<$filehandle>) {
         chomp;
         my @f = split;
-        if (scalar(@f)>50) { #super tedious way of fetching the score from the
-	  $score = $f[82];
-        }  
-        if (scalar(@f)<50) { #this condition ignores the "irrelevant"(in ensembl context) part of the results 
-          my $seqname = $f[0]." ".$f[1];
-          my $start = $f[3];
-          my $end = $f[4];
-          my $strand = 1;
-          if ( $f[3] > $f[4] ) {
+        if($f[0] eq 'Score'){
+          $score = $f[1];
+        }
+        elsif (($f[0] eq 'Gene') && (scalar(@f)==2)) {
+          $seqname = $f[0]." ".$f[1];
+        }
+        elsif ($f[0] eq 'Exon') {
+          $start = $f[1];
+          $end = $f[2];
+          $phaseno = $f[4];
+          $strand = 1;
+          if ( $f[1] > $f[2] ) {
               $strand = -1;
-              $start = $f[4]; 
-              $end = $f[3];
+              $start = $f[2]; 
+              $end = $f[1];
           }
-          $curr_exon = new Bio::SeqFeature::Gene::Exon (-seqname=>$seqname, -start=>$start, -end=>$end, -strand=>$strand); 
-	        $curr_exon->add_tag_value( $f[8] => $f[9] );
-           
-          my $gstart = $f[11];
-          my $gend = $f[12];
+        }
+        elsif ($f[0] eq 'Supporting') {
+          my $gstart = $f[1];
+          my $gend = $f[2];
           my $gstrand = 1;
           if ($gstart > $gend){
-              $gstart = $f[12];
-              $gend = $f[11];
+              $gstart = $f[2];
+              $gend = $f[1];
               $gstrand = -1;
           }
-          if ( $gstrand != $strand ) {
+            if ( $gstrand != $strand ) {
               $self->throw("incompatible strands between exon and supporting feature - cannot add suppfeat\n");
-          }
-
-          my $pstart = $f[13];
-          my $pend = $f[14];
+            }
+               
+          my $pstart = $f[3];
+          my $pend = $f[4];
           my $pstrand = 1;          
-          if($pstart > $pend){
+            if($pstart > $pend){
               $self->warn("Protein start greater than end! Skipping this suppfeat\n");
-          }
-
-      	  my $pf = new Bio::SeqFeature::Generic( -start   => $pstart,
+            }
+              
+      	  $pf = new Bio::SeqFeature::Generic( -start   => $pstart,
 						  -end     => $pend,
 						  -seqname => 'protein',
 					    -score   => $score,
@@ -340,7 +358,7 @@ sub _parse_results {
               ); 
 					$pf->source_tag('genewise');
           $pf->primary_tag('supporting_protein_feature');
-      	  my $gf  = new Bio::SeqFeature::Generic( -start   => $gstart,
+      	  $gf  = new Bio::SeqFeature::Generic( -start   => $gstart,
 						  -end     => $gend,
 						  -seqname => 'genomic',
               -score   => $score,
@@ -350,21 +368,17 @@ sub _parse_results {
               );
 					$gf->source_tag('genewise');
           $gf->primary_tag('supporting_genomic_feature');
-	        
-          $curr_exon->add_tag_value( 'supporting_protein_feature' => $pf );
-	        $curr_exon->add_tag_value( 'supporting_genomic_feature' => $gf );
-
-          
-          #my $fp = new Bio::SeqFeature::FeaturePair( -feature1 => $pf,
-					#	  -feature2 => $gf);
-	        #$curr_exon->add_sub_SeqFeature($fp);
-          
+	      }  
          # for listing out elements of the array
          # for ( my $i=0; $i<scalar(@f); $i++) { 
          #     print "$i "."$f[$i]\n";
          # } 
-        }
     }
+    $curr_exon = new Bio::SeqFeature::Gene::Exon (-seqname=>$seqname, -start=>$start, -end=>$end, -strand=>$strand); 
+	  $curr_exon->add_tag_value( 'phase' => $phaseno );
+    $curr_exon->add_tag_value( 'supporting_protein_feature' => $pf );
+	  $curr_exon->add_tag_value( 'supporting_genomic_feature' => $gf );
+
     $transcript->add_exon($curr_exon);
     $genes->add_transcript($transcript);
     return $genes
