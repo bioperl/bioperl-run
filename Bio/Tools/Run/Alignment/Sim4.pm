@@ -157,6 +157,10 @@ sub new {
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
+    if ($attr =~/est_first/i )  {      #NEW
+       $self->{est_first} = $value;    #NEW
+       next;                           #NEW
+    }                                  #NEW
     next if( $attr =~ /^-/ ); # don't want named parameters
     if ($attr =~/'PROGRAM'/i )  {
       $self->executable($value);
@@ -302,7 +306,8 @@ sub _run {
 sub _setinput {
   my ($self, $cdna,$genomic) = @_;
   my ($infilename, $seq, $temp, $tfh1,$tfh2,$outfile1,$outfile2);
-  my $estfirst=1;
+  #my $estfirst=1;
+  my $estfirst= defined($self->{est_first}) ? $self->{_est_first} : 1;
   my ($cdna_file,$genomic_file);
   #a sequence obj
   if(ref($cdna)) {
