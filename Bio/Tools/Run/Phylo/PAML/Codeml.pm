@@ -377,6 +377,10 @@ sub new {
 
 sub run{
    my ($self) = @_;
+    unless ( $self->save_tempfiles ) {
+	# brush so we don't get plaque buildup ;)
+	$self->cleanup();
+    }
    my ($aln,$tree) = ($self->alignment(),$self->tree);
    if( ! $aln ) { 
        $self->warn("must have supplied a valid aligment file in order to run codeml");
@@ -387,7 +391,7 @@ sub run{
    if( ! ref($aln) && -e $aln ) { 
        $tempseqfile = $aln;
    } else { 
-       ($tempseqFH,$tempseqfile) = $self->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+       ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
        my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
 				 '-interleaved' => 0,
@@ -731,5 +735,13 @@ sub set_default_parameters{
 
 
 =cut
+
+sub DESTROY {
+    my $self= shift;
+    unless ( $self->save_tempfiles ) {
+	$self->cleanup();
+    }
+    $self->SUPER::DESTROY();
+}
 
 1;
