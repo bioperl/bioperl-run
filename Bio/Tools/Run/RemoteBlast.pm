@@ -50,7 +50,7 @@ Remote-blast "factory object" creation and blast-parameter initialization:
   	  } else { 
           #save the output
           my $filename = $result->query_accession()."\.out";
-          $factory->save_output($rid, $filename);
+          $factory->save_output($filename);
   	      $factory->remove_rid($rid);
   	      while ( my $hit = $rc->nextSbjct ) {
   		  next unless ( $v > 0);
