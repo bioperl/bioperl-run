@@ -19,7 +19,7 @@ program protdist
   @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
   $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
   $inputfilename = 't/data/cysprot.fa';
-  $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
+  $aln = $factory->run($inputfilename); # $aln is a SimpleAlign object.
 
 
   # Create the Distance Matrix using a default PAM matrix and id name
@@ -30,7 +30,7 @@ program protdist
   @params = ('MODEL' => 'PAM');
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 
-  my ($matrix)  = $protdist_factory->create_distance_matrix($aln); # an array of Bio::Matrix::PhylipDist matrix
+  my ($matrix)  = $protdist_factory->run($aln); # an array of Bio::Matrix::PhylipDist matrix
 
   #finding the distance between two sequences
   my $distance = $matrix->get_entry('protein_name_1','protein_name_2');
@@ -43,8 +43,7 @@ program protdist
   #Alternatively, one can create the matrix by passing in a file 
   #name containing a multiple alignment in phylip format
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-  my ($matrix)  = 
-  $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
+  my ($matrix)  = $protdist_factory->run('/home/shawnh/prot.phy');
 
 =head1 DESCRIPTION
 
@@ -92,6 +91,7 @@ Description: (optional)
           number of aligments given.
 
 =head2 ALL SUBSEQUENT PARAMETERS WILL ONLY WORK IN CONJUNCTION WITH
+
 THE Categories Distance MODEL*
 
 =head2 GENCODE
@@ -329,20 +329,20 @@ sub idlength{
 }
 
 
-=head2  create_distance_matrix 
+=head2  run 
 
- Title   : create_distance_matrix 
+ Title   : run 
  Usage   :
-	$inputfilename = 't/data/prot.phy';
-	$matrix= $prodistfactory->create_distance_matrix($inputfilename);
+        $inputfilename = 't/data/prot.phy';
+        $matrix= $prodistfactory->run($inputfilename);
 or
-	$seq_array_ref = \@seq_array; @seq_array is array of Seq objs
-	$aln = $protdistfactory->align($seq_array_ref);
-	$matrix = $protdistfactory->create_distance_matrix($aln);
+        $seq_array_ref = \@seq_array; @seq_array is array of Seq objs
+        $aln = $protdistfactory->align($seq_array_ref);
+        $matrix = $protdistfactory->run($aln);
 
  Function: Create a distance matrix from a SimpleAlign object or a multiple alignment file 
  Example :
- Returns : Hash ref to a hash of a hash 
+ Returns : L<Bio::Matrix::PhylipDist>
  Args    : Name of a file containing a multiple alignment in Phylip format
            or an SimpleAlign object 
 
@@ -353,20 +353,18 @@ or
 
 =cut
 
-sub create_distance_matrix{
+sub run{
 
     my ($self,$input) = @_;
     my ($infilename);
 
-# Create input file pointer
-  	$infilename = $self->_setinput($input);
-    if (!$infilename) {$self->throw("Problems setting up for protdist. Probably bad input data in $input !");}
-
-# Create parameter string to pass to protdist program
+ # Create input file pointer
+  $infilename = $self->_setinput($input);
+   if (!$infilename) {$self->throw("Problems setting up for protdist. Probably bad input data in $input !");}
+    # Create parameter string to pass to protdist program
     my $param_string = $self->_setparams();
-# run protdist
+   # run protdist
     my @mat = $self->_run($infilename,$param_string);
-   
     return  wantarray ? @mat:\@mat;
 }
 
@@ -425,6 +423,25 @@ sub _run {
     return @matrix;
 }
 
+=head2 create_distance_matrix
+
+ Title   : create_distance_matrix
+ Usage   : my $file = $app->create_distance_matrix($treefile);
+ Function: This method is deprecated. Please use run method. 
+ Returns : L<Bio::Matrix::PhylipDist>
+ Args    : Name of a file containing a multiple alignment in Phylip format
+           or an SimpleAlign object 
+
+ Throws an exception if argument is not either a string (eg a
+ filename) or a Bio::SimpleAlign object. If
+ argument is string, throws exception if file corresponding to string
+ name can not be found. 
+
+=cut 
+
+sub create_distance_matrix{
+  return shift->run(@_);
+}
 
 =head2  _setinput()
 

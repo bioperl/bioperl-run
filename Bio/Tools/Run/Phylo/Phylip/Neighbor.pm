@@ -24,7 +24,7 @@ Works with Phylip version 3.6
   @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
   $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
   $inputfilename = 't/data/cysprot.fa';
-  $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
+  $aln = $factory->run($inputfilename); # $aln is a SimpleAlign object.
 
   # Create the Distance Matrix
   # using a default PAM matrix and id name lengths limit of 30 note to
@@ -32,7 +32,7 @@ Works with Phylip version 3.6
   # will need to modify the neighbor source code
 
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-  my $matrix  = $protdist_factory->create_distance_matrix($aln);
+  my $matrix  = $protdist_factory->run($aln);
 
   #Create the tree passing in the distance matrix
   @params = ('type'=>'NJ','outgroup'=>2,'lowtri'=>1,
@@ -49,13 +49,13 @@ Works with Phylip version 3.6
   #or
   $neighbor_factory->outgroup(1);
 
-  my ($tree) = $neighbor_factory->create_tree($matrix);
+  my ($tree) = $neighbor_factory->run($matrix);
 
   # Alternatively, one can create the tree by passing in a file name 
   # containing a phylip formatted distance matrix(using protdist)
   my $neighbor_factory = 
     Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
-  my ($tree) = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
+  my ($tree) = $neighbor_factory->run('/home/shawnh/prot.dist');
 
 =head1 PARAMTERS FOR NEIGHBOR COMPUTATION
 
@@ -316,16 +316,16 @@ sub idlength{
 }
 
 
-=head2 create_tree 
+=head2 run 
 
- Title   : create_tree 
+ Title   : run 
  Usage   :
 	$inputfilename = 't/data/prot.dist';
-	$tree = $neighborfactory->create_tree($inputfilename);
-or
+	$tree = $neighborfactory->run($inputfilename);
+ or
 	$protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 	$matrix  = $protdist_factory->create_distance_matrix($aln);
-	$tree= $neighborfactory->create_tree($matrix);
+	$tree= $neighborfactory->run($matrix);
 
  Function: a Bio:Tree from a protein distance matrix created by protidst 
  Example :
@@ -339,7 +339,7 @@ or
 
 =cut
 
-sub create_tree{
+sub run{
 
     my ($self,$input) = @_;
     my ($temp,$infilename, $seq);
@@ -355,6 +355,23 @@ sub create_tree{
     my @tree = $self->_run($infilename,$param_string);
     return wantarray ? @tree: \@tree;
 }
+
+=head2 create_tree
+
+ Title   : create_tree
+ Usage   : my $file = $app->create_tree($treefile);
+ Function: This method is deprecated. Please use run method. 
+ Returns : File containing the rendered tree 
+ Args    : either a Bio::Tree::TreeI 
+            OR
+           filename of a tree in newick format
+
+=cut 
+
+sub create_tree{
+  return shift->run(@_);
+}
+
 
 #################################################
 

@@ -20,7 +20,7 @@ Works with Phylip version 3.6
   @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
   $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
   $inputfilename = 't/data/cysprot.fa';
-  $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
+  $aln = $factory->run($inputfilename); # $aln is a SimpleAlign object.
 
   #Create the Tree
   #using a threshold value of 30 and id name lengths limit of 30
@@ -28,14 +28,14 @@ Works with Phylip version 3.6
   # you will need to modify the protpars source code
   $tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->
      new(idlength=>30,threshold=>10,jumble=>"17,10",outgroup=>2);
-  $tree = $tree_factory->create_tree($aln);
+  $tree = $tree_factory->run($aln);
 
   #Or one can pass in a file name containing a multiple alignment 
   #in phylip format:
 
   $tree_factory =
     Bio::Tools::Run::Phylo::Phylip::ProtPars->new(idlength=>30,threshold=>10);
-  $tree = $tree_factory->create_tree("/usr/users/shawnh/COMPARA/prot.phy");
+  $tree = $tree_factory->run("/usr/users/shawnh/COMPARA/prot.phy");
 
 =head1 PARAMTERS FOR PROTPARS COMPUTATION
 
@@ -242,19 +242,19 @@ sub idlength{
 }
 
 
-=head2  create_tree 
+=head2  run 
 
- Title   : create_tree 
+ Title   : run 
  Usage   :
 	$inputfilename = 't/data/prot.phy';
-	$tree = $factory->create_tree($inputfilename);
+	$tree = $factory->run($inputfilename);
 or
 	$seq_array_ref = \@seq_array; @seq_array is array of Seq objs
-	$aln = $factory->align($seq_array_ref);
-	$tree = $treefactory->create_tree($aln);
+	$aln = $factory->run($seq_array_ref);
+	$tree = $treefactory->run($aln);
  Function: Create a protpars tree from a SimpleAlign object 
  Example :
- Returns : Bio::Tree object 
+ Returns : L<Bio::Tree> object 
  Args    : Name of a file containing a multiple alignment in Phylip format
            or an SimpleAlign object 
 
@@ -265,7 +265,7 @@ or
 
 =cut
 
-sub create_tree{
+sub run{
 
     my ($self,$input) = @_;
     my ($infilename);
@@ -279,6 +279,33 @@ sub create_tree{
 
 # run protpars
     my $aln = $self->_run($infilename,$param_string);
+}
+
+=head2  create_tree 
+
+ Title   : create_tree 
+ Usage   :
+  $inputfilename = 't/data/prot.phy';
+  $tree = $factory->create_tree($inputfilename);
+or
+  $seq_array_ref = \@seq_array; @seq_array is array of Seq objs
+  $aln = $factory->align($seq_array_ref);
+  $tree = $treefactory->create_tree($aln);
+ Function: Create a protpars tree from a SimpleAlign object 
+ Example :
+ Returns : L<Bio::Tree> object 
+ Args    : Name of a file containing a multiple alignment in Phylip format
+           or an SimpleAlign object 
+
+ Throws an exception if argument is not either a string (eg a
+ filename) or a Bio::SimpleAlign object. If
+ argument is string, throws exception if file corresponding to string
+ name can not be found. 
+
+=cut
+
+sub create_tree{
+  return shift->run(@_);
 }
 
 #################################################

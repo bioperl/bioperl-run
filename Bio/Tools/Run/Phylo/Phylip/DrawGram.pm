@@ -16,10 +16,10 @@ Bio::Tools::Run::Phylo::Phylip::DrawGram - use Phylip DrawTree program to draw p
 
 =head1 SYNOPSIS
 
-use Bio::Tools::Run::Phylo::Phylip::DrawGram;
+  use Bio::Tools::Run::Phylo::Phylip::DrawGram;
 
-my $drawfact = new Bio::Tools::Run::Phylo::Phylip::DrawGram();
-my $treeimage = $drawfact->draw_tree($tree);
+  my $drawfact = new Bio::Tools::Run::Phylo::Phylip::DrawGram();
+  my $treeimage = $drawfact->run($tree);
 
 =head1 DESCRIPTION
 
@@ -185,20 +185,19 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
-=head2 draw_tree
+=head2 run
 
- Title   : draw_tree
- Usage   : my $file = $app->draw_tree($treefile);
+ Title   : run
+ Usage   : my $file = $app->run($treefile);
  Function: Draw a tree
  Returns : File containing the rendered tree 
  Args    : either a Bio::Tree::TreeI 
             OR
            filename of a tree in newick format
 
-
 =cut
 
-sub draw_tree{
+sub run{
    my ($self,$input) = @_;
    
    # Create input file pointer
@@ -215,6 +214,21 @@ sub draw_tree{
     return $plotfile;
 }
 
+=head2 draw_tree
+
+ Title   : draw_tree
+ Usage   : my $file = $app->draw_tree($treefile);
+ Function: This method is deprecated. Please use run instead. 
+ Returns : File containing the rendered tree 
+ Args    : either a Bio::Tree::TreeI 
+            OR
+           filename of a tree in newick format
+
+=cut
+
+sub draw_tree{
+  return shift->run(@_);
+}
 
 =head2  _run
 
