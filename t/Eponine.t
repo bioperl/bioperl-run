@@ -21,8 +21,19 @@ END {
         skip("Eponine program not found. Skipping. (Be sure you have the Eponine-scanpackage )",1);
     }
 }
+if( ! $ENV{'EPONINEDIR'}  ) {
+    print STDERR "must have defined EPONINEDIR to run these tests\n";
+    exit(0);
+}
 my $inputfilename= Bio::Root::IO->catfile("t","data","eponine.fa");
-my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999,"EPOJAR" =>"/home/tania/progs/eponine-scan.jar", "seq" =>$inputfilename);
+my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999,
+					 "EPOJAR" => $ENV{'EPONINEDIR'},
+					 "seq" =>$inputfilename);
+
+if( ! $fact->java || ! $fact->epojar) {
+    print STDERR "must have defined EPONINEDIR to run these tests\n";
+    exit(0);
+}
 #my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.998,"java"=>'',"EPOJAR" =>"/home/tania/progs/eponine-scan.jar", "seq" =>$inputfilename);
 #my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.998,"java"=>'/usr/java/jre1.3.1.02/bin/java',"EPOJAR" =>"/home/tania/progs/eponine-scan.jar", "seq" =>$inputfilename);
 ok ($fact->threshold, 0.999);
