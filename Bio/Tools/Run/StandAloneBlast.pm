@@ -485,7 +485,6 @@ sub blastpgp {
 							  $mask);
     if (!$infilename1) {$self->throw(" $input1  not Bio::Seq object or array of Bio::Seq objects or file name!");}
     $self->i($infilename1);	# set file name of sequence to be blasted to inputfilename1 (-i param of blastpgp)
-
     if  ($input2) {
 	unless ($infilename2) {$self->throw("$input2 not SimpleAlign Object in pre-aligned psiblast\n");}
 	$self->B($infilename2);	# set file name of partial alignment to inputfilename2 (-B param of blastpgp)
@@ -602,6 +601,7 @@ sub _runblast {
     }
     elsif ($executable =~ /blastpgp/i && defined $self->j() && 
 	   $self->j() > 1)  {
+	print "using psilite parser\n";
 	$blast_obj = Bio::Tools::BPpsilite->new(-file => $outfile);
     }
     elsif ($self->_READMETHOD =~ /^Blast/i )  {
@@ -691,20 +691,20 @@ sub _setinput {
 # Option for using psiblast's pre-alignment "jumpstart" feature
       elsif ($input2->isa("Bio::SimpleAlign")  && 
 	     $executable  eq 'blastpgp' ) {
-# a bit of a lie since it won't be a fasta file
+           # a bit of a lie since it won't be a fasta file
 	  ($fh,$infilename2) = $self->io->tempfile(); 
 
 # first we retrieve the "mask" that determines which residues should
 # by scored according to their position and which should be scored
 # using the non-position-specific matrices
 
-	  my @mask = split("", shift ); #  get mask
+	  my @mask = split("", shift );	#  get mask
 
 # then we have to convert all the residues in every sequence to upper
 # case at the positions that we want psiblast to use position specific
 # scoring
 
-	  foreach $seq ( $input2->eachSeq() ) {
+	  foreach $seq ( $input2->each_seq() ) {
 	      my @seqstringlist = split("",$seq->seq());
 	      for (my $i = 0; $i < scalar(@mask); $i++) {
 		  unless ( $seqstringlist[$i] =~ /[a-zA-Z]/ ) {next}
@@ -713,7 +713,9 @@ sub _setinput {
 	      my $newseqstring = join("", @seqstringlist);
 	      $seq->seq($newseqstring);
 	  }
-#  Now we need to write out the alignment to a file in the "psi format" which psiblast is expecting
+          #  Now we need to write out the alignment to a file 
+          # in the "psi format" which psiblast is expecting
+	  $input2->map_chars('\.','-');
 	  $temp =  Bio::AlignIO->new(-fh=> $fh, '-format' => 'psi');
 	  $temp->write_aln($input2);
 	  close $fh;
