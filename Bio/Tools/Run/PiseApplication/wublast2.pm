@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::wublast2
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::wublast2
@@ -265,17 +267,17 @@ Bio::Tools::Run::PiseApplication::wublast2
 			Do not display sequence alignments (-noseqs)
 
 		tmp_outfile (Results)
-			
+
 			pipe: blast_output
 
 		htmlfile (Results)
-			
+
 
 		xmloutput (Results)
-			
+
 
 		cpus (Integer)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::codnocod
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::codnocod
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::codnocod
 
 
 		codnocod (String)
-			
+
 
 		seq (Sequence)
 			Genbank sequence File

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::coderet
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::coderet
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::coderet
 
 
 		coderet (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -52,7 +54,7 @@ Bio::Tools::Run::PiseApplication::coderet
 			Output format for: seqout
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cusp
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cusp
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::cusp
 
 
 		cusp (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -42,7 +44,7 @@ Bio::Tools::Run::PiseApplication::cusp
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmbuild
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmbuild
@@ -17,17 +19,17 @@ Bio::Tools::Run::PiseApplication::hmmbuild
 
 
 		hmmbuild (String)
-			
+
 
 		alignfile (Sequence)
 			Aligned sequences File
 			pipe: hmmer_alig
 
 		hmmfile (OutFile)
-			
+
 
 		hmmfile_res (Results)
-			
+
 			pipe: hmmer_HMM
 
 		configure_options (Paragraph)
@@ -130,7 +132,7 @@ Bio::Tools::Run::PiseApplication::hmmbuild
 			Use the Sibbald/Argos Voronoi sequence weighting algorithm in place of the default GSC weighting. (--wvoronoi)
 
 		counts_file (Results)
-			
+
 
 =cut
 

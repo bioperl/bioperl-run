@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::vectorstrip
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::vectorstrip
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::vectorstrip
 
 
 		vectorstrip (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -70,7 +72,7 @@ Bio::Tools::Run::PiseApplication::vectorstrip
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::fitch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::fitch
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::fitch
 
 
 		fitch (String)
-			
+
 
 		infile (InFile)
 			Distances matrix File
@@ -67,16 +69,16 @@ Bio::Tools::Run::PiseApplication::fitch
 			Compute a consensus tree
 
 		consense_confirm (String)
-			
+
 
 		consense_terminal_type (String)
-			
+
 
 		consense_outfile (Results)
-			
+
 
 		consense_treefile (Results)
-			
+
 
 		user_tree_opt (Paragraph)
 			User tree options
@@ -121,26 +123,26 @@ Bio::Tools::Run::PiseApplication::fitch
 			Global rearrangements (G)
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

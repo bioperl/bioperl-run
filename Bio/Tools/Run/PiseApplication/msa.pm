@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::msa
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::msa
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::msa
 
 
 		msa (String)
-			
+
 
 		seqs (Sequence)
 			Sequences File

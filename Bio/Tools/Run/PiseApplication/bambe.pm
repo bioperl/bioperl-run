@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::bambe
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::bambe
@@ -24,10 +26,10 @@ Bio::Tools::Run::PiseApplication::bambe
 
 
 		bambe (String)
-			
+
 
 		rcfile (Results)
-			
+
 
 		data_file (Sequence)
 			Alignment file (data-file)
@@ -160,17 +162,17 @@ Bio::Tools::Run::PiseApplication::bambe
 			Newick format of tree file (newick-format)
 
 		results_files (Results)
-			
+
 
 		result_tree (Results)
-			
+
 			pipe: phylip_tree
 
 		top_file (Results)
-			
+
 
 		file_root (String)
-			
+
 
 		input_options (Paragraph)
 			Input options

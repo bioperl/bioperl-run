@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::alistat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::alistat
@@ -17,13 +19,13 @@ Bio::Tools::Run::PiseApplication::alistat
 
 
 		alistat (String)
-			
+
 
 		description (Paragraph)
 			description of alistat
 
 		toto (String)
-			
+
 
 		multali_file (Sequence)
 			multiple alignment file

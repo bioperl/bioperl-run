@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::fasta
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::fasta
@@ -164,11 +166,11 @@ Bio::Tools::Run::PiseApplication::fasta
 			Lower case filtering (-S)
 
 		outfile (OutFile)
-			
+
 			pipe: mview_input
 
 		html_outfile (OutFile)
-			
+
 
 =cut
 

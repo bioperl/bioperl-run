@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::sigscan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::sigscan
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::sigscan
 
 
 		sigscan (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -66,7 +68,7 @@ Bio::Tools::Run::PiseApplication::sigscan
 			Name of signature alignments file for output (-alignf)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::druid
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::druid
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::druid
 
 
 		druid (String)
-			
+
 
 		sequences (Sequence)
 			Sequence File (at least 4 sequences)

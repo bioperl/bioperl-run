@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pestfind
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pestfind
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::pestfind
 
 
 		pestfind (String)
-			
+
 
 		pest_params (Results)
-			
+
 
 		in_file (Sequence)
 			Sequence file
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::pestfind
 			Print invalid sequences
 
 		out_file (OutFile)
-			
+
 
 =cut
 

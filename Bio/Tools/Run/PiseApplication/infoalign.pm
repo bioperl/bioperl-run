@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::infoalign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::infoalign
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::infoalign
 
 
 		infoalign (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -93,7 +95,7 @@ Bio::Tools::Run::PiseApplication::infoalign
 			Display 'description' column (-description)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dnadist
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dnadist
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::dnadist
 
 
 		dnadist (String)
-			
+
 
 		infile (Sequence)
 			Alignment File
@@ -100,29 +102,29 @@ Bio::Tools::Run::PiseApplication::dnadist
 			Print out the data at start of run (1)
 
 		outfile (Results)
-			
+
 			pipe: phylip_dist
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		multiple_dataset (String)
-			
+
 
 		seqboot_confirm (String)
-			
+
 
 		seqboot_terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::octanol
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::octanol
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::octanol
 
 
 		octanol (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -54,22 +56,22 @@ Bio::Tools::Run::PiseApplication::octanol
 			Do not display the difference plot (-differenceplot)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

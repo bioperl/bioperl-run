@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::btwisted
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::btwisted
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::btwisted
 
 
 		btwisted (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,7 +47,7 @@ Bio::Tools::Run::PiseApplication::btwisted
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

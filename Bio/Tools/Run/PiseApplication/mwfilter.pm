@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::mwfilter
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::mwfilter
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::mwfilter
 
 
 		mwfilter (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -47,7 +49,7 @@ Bio::Tools::Run::PiseApplication::mwfilter
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

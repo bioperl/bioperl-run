@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::marscan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::marscan
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::marscan
 
 
 		marscan (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -36,7 +38,7 @@ Bio::Tools::Run::PiseApplication::marscan
 			Output feature file (-outf)
 
 		auto (String)
-			
+
 
 =cut
 

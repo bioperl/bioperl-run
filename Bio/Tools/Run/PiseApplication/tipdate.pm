@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::tipdate
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::tipdate
@@ -22,10 +24,10 @@ Bio::Tools::Run::PiseApplication::tipdate
 
 
 		tipdate (String)
-			
+
 
 		outtree (Results)
-			
+
 			pipe: phylip_tree
 
 		alignment (Sequence)
@@ -129,7 +131,7 @@ Bio::Tools::Run::PiseApplication::tipdate
 			Memory usage information (-vm)
 
 		progress (Switch)
-			
+
 
 =cut
 

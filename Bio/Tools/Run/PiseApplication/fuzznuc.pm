@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::fuzznuc
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::fuzznuc
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::fuzznuc
 
 
 		fuzznuc (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -63,7 +65,7 @@ Bio::Tools::Run::PiseApplication::fuzznuc
 			Show USA (-usashow)
 
 		auto (String)
-			
+
 
 =cut
 

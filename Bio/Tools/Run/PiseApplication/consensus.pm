@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::consensus
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::consensus
@@ -32,21 +34,21 @@ Bio::Tools::Run::PiseApplication::consensus
 			Width of pattern (consensus only) (-L)
 
 		out (String)
-			
+
 
 		consensus_matrix (String)
-			
+
 
 		matrices (Results)
-			
+
 			pipe: consensus_matrix
 
 		results_file (Results)
-			
+
 			pipe: consensus_results
 
 		sequence_wcons (Results)
-			
+
 
 		input_options (Paragraph)
 			Input options

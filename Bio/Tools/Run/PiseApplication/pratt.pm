@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pratt
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pratt
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::pratt
 
 
 		pratt (String)
-			
+
 
 		seq (Sequence)
 			Sequence File
@@ -83,7 +85,7 @@ Bio::Tools::Run::PiseApplication::pratt
 			Distances File (if Scoring = dist)
 
 		swissprotdb (String)
-			
+
 
 		mdl_param (Paragraph)
 			MDL parameters (Z0-Z3) (if MDL scoring)
@@ -125,7 +127,7 @@ Bio::Tools::Run::PiseApplication::pratt
 			OF: Output Filename
 
 		outfiles (Results)
-			
+
 
 		OP (Switch)
 			OP: PROSITE Pattern Format
@@ -146,7 +148,7 @@ Bio::Tools::Run::PiseApplication::pratt
 			MV: print vertically
 
 		report (Results)
-			
+
 
 =cut
 

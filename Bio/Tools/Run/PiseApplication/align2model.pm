@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::align2model
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::align2model
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::align2model
 
 
 		align2model (String)
-			
+
 
 		run (String)
 			Run name
@@ -35,7 +37,7 @@ Bio::Tools::Run::PiseApplication::align2model
 			pipe: sam_model
 
 		a2m (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		input (Paragraph)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::gibbs
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::gibbs
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::gibbs
 
 
 		gibbs (String)
-			
+
 
 		sequence (Sequence)
 			Sequences file
@@ -117,13 +119,13 @@ Bio::Tools::Run::PiseApplication::gibbs
 			Use xnu to mask low complexity regions (-x)
 
 		purge_sep (String)
-			
+
 
 		purged_sequence (Results)
-			
+
 
 		scan_file (OutFile)
-			
+
 			pipe: gibbs_motif
 
 =cut

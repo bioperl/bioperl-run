@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::wise2
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::wise2
@@ -26,7 +28,7 @@ Bio::Tools::Run::PiseApplication::wise2
 			DNA sequence File
 
 		quiet (String)
-			
+
 
 		dna_options (Paragraph)
 			DNA sequence Options

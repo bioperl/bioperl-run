@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnaheat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnaheat
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::rnaheat
 
 
 		rnaheat (String)
-			
+
 
 		seq (Sequence)
 			RNA Sequences File
@@ -69,7 +71,7 @@ Bio::Tools::Run::PiseApplication::rnaheat
 			Energy parameters for the artificial ABCD... alphabet (-e)
 
 		readseq (String)
-			
+
 
 =cut
 

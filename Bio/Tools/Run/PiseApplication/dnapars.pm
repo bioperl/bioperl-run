@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dnapars
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dnapars
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::dnapars
 
 
 		dnapars (String)
-			
+
 
 		infile (Sequence)
 			Alignement File
@@ -64,13 +66,13 @@ Bio::Tools::Run::PiseApplication::dnapars
 			Compute a consensus tree
 
 		multiple_dataset (String)
-			
+
 
 		bootconfirm (String)
-			
+
 
 		bootterminal_type (String)
-			
+
 
 		jumble_opt (Paragraph)
 			Randomize options
@@ -131,38 +133,38 @@ Bio::Tools::Run::PiseApplication::dnapars
 			Outgroup species (default, use as outgroup species 1) (O)
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 		consense_confirm (String)
-			
+
 
 		consense_terminal_type (String)
-			
+
 
 		consense_outfile (Results)
-			
+
 
 		consense_treefile (Results)
-			
+
 
 =cut
 

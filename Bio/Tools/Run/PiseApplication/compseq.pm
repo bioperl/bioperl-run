@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::compseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::compseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::compseq
 
 
 		compseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -60,7 +62,7 @@ Bio::Tools::Run::PiseApplication::compseq
 			Display the words that have a frequency of zero (-zerocount)
 
 		auto (String)
-			
+
 
 =cut
 

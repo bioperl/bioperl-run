@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::wordmatch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::wordmatch
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::wordmatch
 
 
 		wordmatch (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -51,7 +53,7 @@ Bio::Tools::Run::PiseApplication::wordmatch
 			feature file for output bseq (-bfeatout)
 
 		auto (String)
-			
+
 
 =cut
 

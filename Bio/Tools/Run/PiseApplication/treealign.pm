@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::treealign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::treealign
@@ -26,13 +28,13 @@ Bio::Tools::Run::PiseApplication::treealign
 
 
 		treealign (String)
-			
+
 
 		param (Results)
-			
+
 
 		results (Results)
-			
+
 
 		fileseq (Sequence)
 			Sequences File
@@ -63,10 +65,10 @@ Bio::Tools::Run::PiseApplication::treealign
 			Your tree file
 
 		filetree (OutFile)
-			
+
 
 		fileali (OutFile)
-			
+
 
 =cut
 

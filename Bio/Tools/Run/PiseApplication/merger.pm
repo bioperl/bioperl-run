@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::merger
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::merger
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::merger
 
 
 		merger (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -62,7 +64,7 @@ Bio::Tools::Run::PiseApplication::merger
 			Alignment output format (-aformat)
 
 		auto (String)
-			
+
 
 =cut
 

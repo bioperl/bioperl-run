@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::patser
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::patser
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::patser
 
 
 		patser (String)
-			
+
 
 		matrix (InFile)
 			Matrix file (-m)

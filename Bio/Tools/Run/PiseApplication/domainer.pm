@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::domainer
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::domainer
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::domainer
 
 
 		domainer (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -53,7 +55,7 @@ Bio::Tools::Run::PiseApplication::domainer
 			Name of log file for the pdb format build (-pdberrf)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::filtersites
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::filtersites
@@ -17,14 +19,14 @@ Bio::Tools::Run::PiseApplication::filtersites
 
 
 		filtersites (String)
-			
+
 
 		outalig (OutFile)
-			
+
 			pipe: readseq_ok_alig
 
 		outweights (OutFile)
-			
+
 			pipe: phylip_weights
 
 		infile (Sequence)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::getblock
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::getblock
@@ -24,10 +26,10 @@ Bio::Tools::Run::PiseApplication::getblock
 
 
 		getblock (String)
-			
+
 
 		dbs (String)
-			
+
 
 		query (String)
 			query (Accession Nr)

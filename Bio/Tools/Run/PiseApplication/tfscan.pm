@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::tfscan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::tfscan
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::tfscan
 
 
 		tfscan (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,7 +47,7 @@ Bio::Tools::Run::PiseApplication::tfscan
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dan
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::dan
 
 
 		dan (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -90,22 +92,22 @@ Bio::Tools::Run::PiseApplication::dan
 			Output data file (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

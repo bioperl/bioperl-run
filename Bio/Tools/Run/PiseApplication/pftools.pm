@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pftools
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pftools
@@ -25,10 +27,10 @@ Bio::Tools::Run::PiseApplication::pftools
 			PFTOOLS program
 
 		clean_output (String)
-			
+
 
 		fastaformat (Switch)
-			
+
 
 		pfscan (Paragraph)
 			PFSCAN parameters
@@ -71,7 +73,7 @@ Bio::Tools::Run::PiseApplication::pftools
 			reformat PSA result file to Fasta multiple sequence alignment file?
 
 		stdinput (Switch)
-			
+
 
 		control (Paragraph)
 			Control options

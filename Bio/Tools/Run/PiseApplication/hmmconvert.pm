@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmconvert
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmconvert
@@ -17,20 +19,20 @@ Bio::Tools::Run::PiseApplication::hmmconvert
 
 
 		hmmconvert (String)
-			
+
 
 		description (Paragraph)
 			description of hmmconvert
 
 		toto (String)
-			
+
 
 		oldhmmfile (InFile)
 			Old HMM file
 			pipe: hmmer_HMM
 
 		result_file (Results)
-			
+
 
 		new_format (Excl)
 			new format

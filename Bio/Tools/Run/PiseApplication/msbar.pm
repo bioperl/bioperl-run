@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::msbar
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::msbar
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::msbar
 
 
 		msbar (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -67,7 +69,7 @@ Bio::Tools::Run::PiseApplication::msbar
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

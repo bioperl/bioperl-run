@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pima
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pima
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::pima
 
 
 		pima (String)
-			
+
 
 		sequence (Sequence)
 			Sequences
@@ -64,7 +66,7 @@ Bio::Tools::Run::PiseApplication::pima
 			secondary structure gap penalty (-t)
 
 		results (Results)
-			
+
 
 =cut
 

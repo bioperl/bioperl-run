@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::stretcher
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::stretcher
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::stretcher
 
 
 		stretcher (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -55,7 +57,7 @@ Bio::Tools::Run::PiseApplication::stretcher
 			Alignment output format (-aformat)
 
 		auto (String)
-			
+
 
 =cut
 

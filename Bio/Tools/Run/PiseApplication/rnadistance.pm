@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnadistance
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnadistance
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::rnadistance
 
 
 		rnadistance (String)
-			
+
 
 		struct (InFile)
 			Structures File
@@ -48,7 +50,7 @@ Bio::Tools::Run::PiseApplication::rnadistance
 			Analysis methods to be used (-X)
 
 		psfiles (Results)
-			
+
 
 		shapiro (Switch)
 			Use the Bruce Shapiro's cost matrix for comparing coarse structures (-S)

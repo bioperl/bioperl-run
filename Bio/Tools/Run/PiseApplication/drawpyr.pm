@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::drawpyr
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::drawpyr
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::drawpyr
 
 
 		drawpyr (String)
-			
+
 
 		infile (InFile)
 			Pyramidal representations file (.pyr or .pyt)
@@ -30,10 +32,10 @@ Bio::Tools::Run::PiseApplication::drawpyr
 			Display quality information (-Q)
 
 		out_file (OutFile)
-			
+
 
 		res (Results)
-			
+
 
 =cut
 

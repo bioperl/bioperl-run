@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::toppred
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::toppred
@@ -26,7 +28,7 @@ Bio::Tools::Run::PiseApplication::toppred
 
 
 		toppred (String)
-			
+
 
 		query (Sequence)
 			Sequence
@@ -74,10 +76,10 @@ Bio::Tools::Run::PiseApplication::toppred
 			Hydrophobicity Profile file format
 
 		graphicfiles (Results)
-			
+
 
 		outputfiles (Results)
-			
+
 
 =cut
 

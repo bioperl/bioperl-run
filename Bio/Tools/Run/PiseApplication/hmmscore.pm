@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmscore
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmscore
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::hmmscore
 
 
 		hmmscore (String)
-			
+
 
 		run (String)
 			Run name
@@ -35,11 +37,11 @@ Bio::Tools::Run::PiseApplication::hmmscore
 			pipe: sam_model
 
 		scorefile (Results)
-			
+
 			pipe: sam_score
 
 		outfiles (Results)
-			
+
 
 		input (Paragraph)
 			Input options
@@ -51,7 +53,7 @@ Bio::Tools::Run::PiseApplication::hmmscore
 			Maximum number of sequences to be read (-nscoreseq)
 
 		read_smooth (Switch)
-			
+
 
 		smooth_file (InFile)
 			Read a smooth curve from this smooth_file (-smooth_file and -read_smooth)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::trimest
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::trimest
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::trimest
 
 
 		trimest (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -55,7 +57,7 @@ Bio::Tools::Run::PiseApplication::trimest
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

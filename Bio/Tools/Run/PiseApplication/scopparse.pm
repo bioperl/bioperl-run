@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::scopparse
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::scopparse
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::scopparse
 
 
 		scopparse (String)
-			
+
 
 		init (String)
-			
+
 
 		infilea (InFile)
 			Name of scop classification file for input (raw format dir.cla.scop.txt_X.XX file) (-infilea)
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::scopparse
 			Name of scop file for output (embl-like format) (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

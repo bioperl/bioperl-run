@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::interface
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::interface
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::interface
 
 
 		interface (String)
-			
+
 
 		init (String)
-			
+
 
 		in (InFile)
 			Coordinate file for input (embl-like format) (-in)
@@ -41,7 +43,7 @@ Bio::Tools::Run::PiseApplication::interface
 			Name of log file for the build (-conerrf)
 
 		auto (String)
-			
+
 
 =cut
 

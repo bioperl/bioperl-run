@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::repeats
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::repeats
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::repeats
 
 
 		repeats (String)
-			
+
 
 		seq (Sequence)
 			Sequence File

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::blimps_block
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::blimps_block
@@ -24,13 +26,13 @@ Bio::Tools::Run::PiseApplication::blimps_block
 
 
 		blimps_block (String)
-			
+
 
 		action (String)
-			
+
 
 		blocks_db (String)
-			
+
 
 		sequence_file (Sequence)
 			Sequence file (SQ)
@@ -63,7 +65,7 @@ Bio::Tools::Run::PiseApplication::blimps_block
 			Repeats are allowed in the scoring list
 
 		config_file (Results)
-			
+
 
 =cut
 

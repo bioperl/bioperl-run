@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prettyalign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prettyalign
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::prettyalign
 
 
 		prettyalign (String)
-			
+
 
 		a2m (Sequence)
 			Alignment

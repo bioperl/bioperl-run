@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::tacg
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::tacg
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::tacg
 
 
 		tacg (String)
-			
+
 
 		sequence (Sequence)
 			DNA Sequence (raw sequence)
@@ -152,7 +154,7 @@ Bio::Tools::Run::PiseApplication::tacg
 			Name of second factor (nameB)
 
 		quiet (String)
-			
+
 
 =cut
 

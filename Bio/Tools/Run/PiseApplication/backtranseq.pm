@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::backtranseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::backtranseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::backtranseq
 
 
 		backtranseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -46,7 +48,7 @@ Bio::Tools::Run::PiseApplication::backtranseq
 			Output format for: outfile
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pepwindow
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pepwindow
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::pepwindow
 
 
 		pepwindow (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,22 +47,22 @@ Bio::Tools::Run::PiseApplication::pepwindow
 			graph (-graph)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

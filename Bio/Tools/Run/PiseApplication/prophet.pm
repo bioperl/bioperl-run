@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prophet
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prophet
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::prophet
 
 
 		prophet (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -48,7 +50,7 @@ Bio::Tools::Run::PiseApplication::prophet
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::lgicsearch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::lgicsearch
@@ -37,23 +39,23 @@ Bio::Tools::Run::PiseApplication::lgicsearch
 			Nucleotid Database
 
 		ktup (Integer)
-			
+
 
 		threeframe (Switch)
 			(tfasta only) only the three forward frames are searched
 
 		tmp_outfile (Results)
-			
+
 			pipe: mview_input
 
 		txtoutput (String)
-			
+
 
 		lgicdbf2h (Switch)
-			
+
 
 		html_outfile (Results)
-			
+
 
 =cut
 

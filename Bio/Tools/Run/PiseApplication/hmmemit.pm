@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmemit
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmemit
@@ -20,21 +22,21 @@ Bio::Tools::Run::PiseApplication::hmmemit
 			Description of hmmemit
 
 		toto (String)
-			
+
 
 		hmmemit (String)
-			
+
 
 		hmmfile (InFile)
 			HMM file
 			pipe: hmmer_HMM
 
 		fasta_output (Results)
-			
+
 			pipe: seqsfile
 
 		selex_output (Results)
-			
+
 			pipe: hmmer_alig
 
 		output_format (Switch)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::phiblast
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::phiblast
@@ -27,10 +29,10 @@ Bio::Tools::Run::PiseApplication::phiblast
 			Program (-p)
 
 		pattern_file (Results)
-			
+
 
 		nb_proc (Integer)
-			
+
 
 		query (Sequence)
 			Sequence File (-i)
@@ -106,13 +108,13 @@ Bio::Tools::Run::PiseApplication::phiblast
 			Believe the query defline (-J)
 
 		html_file (Results)
-			
+
 
 		txtoutput (String)
-			
+
 
 		txt_file (Results)
-			
+
 			pipe: blast_output
 
 =cut

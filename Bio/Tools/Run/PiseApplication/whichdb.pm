@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::whichdb
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::whichdb
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::whichdb
 
 
 		whichdb (String)
-			
+
 
 		init (String)
-			
+
 
 		entry (String)
 			ID or Accession number (-entry)
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::whichdb
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

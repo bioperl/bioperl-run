@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::digest
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::digest
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::digest
 
 
 		digest (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -57,7 +59,7 @@ Bio::Tools::Run::PiseApplication::digest
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

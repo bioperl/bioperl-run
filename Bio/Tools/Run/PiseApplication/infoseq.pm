@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::infoseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::infoseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::infoseq
 
 
 		infoseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -66,7 +68,7 @@ Bio::Tools::Run::PiseApplication::infoseq
 			Display 'description' column (-description)
 
 		auto (String)
-			
+
 
 =cut
 

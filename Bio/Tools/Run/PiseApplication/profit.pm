@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::profit
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::profit
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::profit
 
 
 		profit (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -39,7 +41,7 @@ Bio::Tools::Run::PiseApplication::profit
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

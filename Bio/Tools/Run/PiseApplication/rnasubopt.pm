@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnasubopt
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnasubopt
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::rnasubopt
 
 
 		rnasubopt (String)
-			
+
 
 		seq (Sequence)
 			RNA Sequences File
@@ -73,10 +75,10 @@ Bio::Tools::Run::PiseApplication::rnasubopt
 			Parameter file (-P)
 
 		readseq (String)
-			
+
 
 		psfiles (Results)
-			
+
 
 =cut
 

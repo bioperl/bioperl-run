@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pam
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pam
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::pam
 
 
 		pam (String)
-			
+
 
 		scale (Float)
 			Scale 0. < scale <= 1000 (-s)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::sampleseqs
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::sampleseqs
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::sampleseqs
 
 
 		sampleseqs (String)
-			
+
 
 		run (String)
 			Run name
@@ -30,7 +32,7 @@ Bio::Tools::Run::PiseApplication::sampleseqs
 			How many sequences (-nseq)
 
 		seqfile (Results)
-			
+
 			pipe: seqsfile
 
 =cut

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::map
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::map
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::map
 
 
 		map (String)
-			
+
 
 		seq (Sequence)
 			Sequences File

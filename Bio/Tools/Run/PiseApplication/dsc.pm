@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dsc
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dsc
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::dsc
 
 
 		dsc (String)
-			
+
 
 		seq (Sequence)
 			Protein sequence(s) File

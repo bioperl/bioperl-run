@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::con_filter
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::con_filter
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::con_filter
 
 
 		con_filter (String)
-			
+
 
 		consensus_results (InFile)
 			consensus results file

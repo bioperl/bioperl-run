@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::protdist
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::protdist
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::protdist
 
 
 		protdist (String)
-			
+
 
 		infile (Sequence)
 			Alignement File
@@ -61,13 +63,13 @@ Bio::Tools::Run::PiseApplication::protdist
 			Weights file
 
 		multiple_dataset (String)
-			
+
 
 		bootconfirm (String)
-			
+
 
 		bootterminal_type (String)
-			
+
 
 		output (Paragraph)
 			Output options
@@ -94,20 +96,20 @@ Bio::Tools::Run::PiseApplication::protdist
 			Base frequencies for A, C, G, T/U (separated by commas)
 
 		outfile (Results)
-			
+
 			pipe: phylip_dist
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

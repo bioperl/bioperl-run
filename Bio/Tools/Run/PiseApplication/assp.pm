@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::assp
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::assp
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::assp
 
 
 		assp (String)
-			
+
 
 		aligfile (InFile)
 			Alignement File (in BLOCK format)
@@ -26,7 +28,7 @@ Bio::Tools::Run::PiseApplication::assp
 			Convert CLUSTAL NBRF-PIR format to AMPS Blockfile format
 
 		nbrf_file (String)
-			
+
 
 		output (Paragraph)
 			Output parameters

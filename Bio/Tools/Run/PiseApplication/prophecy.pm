@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prophecy
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prophecy
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::prophecy
 
 
 		prophecy (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -66,7 +68,7 @@ Bio::Tools::Run::PiseApplication::prophecy
 			outf (-outf)
 
 		auto (String)
-			
+
 
 =cut
 

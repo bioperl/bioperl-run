@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::gruppi
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::gruppi
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::gruppi
 
 
 		gruppi (String)
-			
+
 
 		seq (Sequence)
 			Sequence File

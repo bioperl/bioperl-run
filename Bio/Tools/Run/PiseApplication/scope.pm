@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::scope
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::scope
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::scope
 
 
 		scope (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -35,7 +37,7 @@ Bio::Tools::Run::PiseApplication::scope
 			Name of scop file for output (embl-like format) (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::newcpgreport
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::newcpgreport
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::newcpgreport
 
 
 		newcpgreport (String)
-			
+
 
 		init (String)
-			
+
 
 		sequence (Sequence)
 			sequence -- DNA [sequences] (-sequence)
@@ -53,7 +55,7 @@ Bio::Tools::Run::PiseApplication::newcpgreport
 			Show percentage line (-pc)
 
 		auto (String)
-			
+
 
 =cut
 

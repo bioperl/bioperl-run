@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::gb2xml
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::gb2xml
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::gb2xml
 
 
 		gb2xml (String)
-			
+
 
 		query (String)
 			Accession
@@ -29,10 +31,10 @@ Bio::Tools::Run::PiseApplication::gb2xml
 			File
 
 		xmldtdcopy (String)
-			
+
 
 		dtdfile (Results)
-			
+
 
 =cut
 

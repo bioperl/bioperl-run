@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::clustalw_convert
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 
 
 		clustalw_convert (String)
-			
+
 
 		seqfile (Sequence)
 			Alignment to convert (-infile)
@@ -27,10 +29,10 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 			Output format (-output)
 
 		gdefile (Results)
-			
+
 
 		otherfile (Results)
-			
+
 			pipe: readseq_ok_alig
 
 =cut

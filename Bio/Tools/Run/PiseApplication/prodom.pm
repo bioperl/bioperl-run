@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prodom
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prodom

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pars
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pars
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::pars
 
 
 		pars (String)
-			
+
 
 		infile (InFile)
 			Input File
@@ -123,38 +125,38 @@ Bio::Tools::Run::PiseApplication::pars
 			Outgroup root (default, use as outgroup species 1) (O)
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 		consense_confirm (String)
-			
+
 
 		consense_terminal_type (String)
-			
+
 
 		consense_outfile (Results)
-			
+
 
 		consense_treefile (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::recoder
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::recoder
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::recoder
 
 
 		recoder (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -48,7 +50,7 @@ Bio::Tools::Run::PiseApplication::recoder
 			Results file name (-outf)
 
 		auto (String)
-			
+
 
 =cut
 

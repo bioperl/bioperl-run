@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::listor
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::listor
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::listor
 
 
 		listor (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,7 +47,7 @@ Bio::Tools::Run::PiseApplication::listor
 			Output list file (-outlist)
 
 		auto (String)
-			
+
 
 =cut
 

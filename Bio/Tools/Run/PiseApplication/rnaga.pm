@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnaga
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnaga
@@ -22,13 +24,13 @@ Bio::Tools::Run::PiseApplication::rnaga
 
 
 		rnaga (String)
-			
+
 
 		mv_files (String)
-			
+
 
 		result_files (Results)
-			
+
 
 		seqfile (Sequence)
 			Sequence(s)

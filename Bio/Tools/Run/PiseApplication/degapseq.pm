@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::degapseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::degapseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::degapseq
 
 
 		degapseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -40,7 +42,7 @@ Bio::Tools::Run::PiseApplication::degapseq
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

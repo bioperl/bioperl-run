@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dca
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dca
@@ -24,14 +26,14 @@ Bio::Tools::Run::PiseApplication::dca
 
 
 		dca (String)
-			
+
 
 		seq (Sequence)
 			Sequences File
 			pipe: seqsfile
 
 		outfile (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		control (Paragraph)
@@ -59,7 +61,7 @@ Bio::Tools::Run::PiseApplication::dca
 			Output parameters
 
 		quiet (Switch)
-			
+
 
 		output_format (Excl)
 			Output format (-f)

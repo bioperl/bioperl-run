@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::showfeat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::showfeat
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::showfeat
 
 
 		showfeat (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -99,7 +101,7 @@ Bio::Tools::Run::PiseApplication::showfeat
 			Output feature details to a file (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

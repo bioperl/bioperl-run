@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::bionj
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::bionj
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::bionj
 
 
 		bionj (String)
-			
+
 
 		infile (InFile)
 			Distances matrix File

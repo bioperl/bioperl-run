@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prose
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prose
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::prose
 
 
 		prose (String)
-			
+
 
 		outfile (OutFile)
-			
+
 
 		infile (Sequence)
 			Protein Sequence File

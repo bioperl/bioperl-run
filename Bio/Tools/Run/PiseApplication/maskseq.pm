@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::maskseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::maskseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::maskseq
 
 
 		maskseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -49,7 +51,7 @@ Bio::Tools::Run::PiseApplication::maskseq
 			Character to mask with (-maskchar)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::modelfromalign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::modelfromalign
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::modelfromalign
 
 
 		modelfromalign (String)
-			
+
 
 		run (String)
 			Run name
@@ -26,7 +28,7 @@ Bio::Tools::Run::PiseApplication::modelfromalign
 			Aligned sequences (-alignfile)
 
 		sam_model_file (Results)
-			
+
 			pipe: sam_model
 
 		input (Paragraph)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::fmtseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::fmtseq
@@ -17,14 +19,14 @@ Bio::Tools::Run::PiseApplication::fmtseq
 
 
 		fmtseq (String)
-			
+
 
 		seq (InFile)
 			Sequence File
 			pipe: readseq_ok_alig
 
 		outfile (OutFile)
-			
+
 			pipe: seqsfile
 
 		outformat (Excl)

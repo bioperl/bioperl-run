@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pyramids
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pyramids
@@ -17,27 +19,27 @@ Bio::Tools::Run::PiseApplication::pyramids
 
 
 		pyramids (String)
-			
+
 
 		infile (InFile)
 			Distances matrix File
 			pipe: phylip_dist
 
 		out_file (OutFile)
-			
+
 
 		rect (Excl)
 			Matrix format
 
 		pyr_file (OutFile)
-			
+
 			pipe: pyramid_file
 
 		uti_file (OutFile)
-			
+
 
 		pyt_file (OutFile)
-			
+
 			pipe: pyramid_file
 
 =cut

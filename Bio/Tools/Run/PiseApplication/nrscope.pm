@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::nrscope
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::nrscope
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::nrscope
 
 
 		nrscope (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -59,7 +61,7 @@ Bio::Tools::Run::PiseApplication::nrscope
 			Name of log file for the build (-errf)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prettyplot
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prettyplot
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::prettyplot
 
 
 		prettyplot (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -120,22 +122,22 @@ Bio::Tools::Run::PiseApplication::prettyplot
 			graph [device to be displayed on] (-graph)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

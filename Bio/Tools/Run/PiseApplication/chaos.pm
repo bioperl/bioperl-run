@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::chaos
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::chaos
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::chaos
 
 
 		chaos (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -42,22 +44,22 @@ Bio::Tools::Run::PiseApplication::chaos
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

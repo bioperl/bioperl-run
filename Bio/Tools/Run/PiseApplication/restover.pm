@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::restover
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::restover
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::restover
 
 
 		restover (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -93,7 +95,7 @@ Bio::Tools::Run::PiseApplication::restover
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

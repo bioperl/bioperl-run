@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dssp
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dssp
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::dssp
 
 
 		dssp (String)
-			
+
 
 		pdbfile (Sequence)
 			PDB File
@@ -40,7 +42,7 @@ Bio::Tools::Run::PiseApplication::dssp
 			Classic (pre-July 1995) format (-c)
 
 		outfile (Results)
-			
+
 			pipe: dssp_outfile
 
 =cut

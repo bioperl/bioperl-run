@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::plotcon
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::plotcon
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::plotcon
 
 
 		plotcon (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -54,22 +56,22 @@ Bio::Tools::Run::PiseApplication::plotcon
 			Display as data (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

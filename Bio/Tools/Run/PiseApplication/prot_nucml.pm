@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prot_nucml
@@ -20,17 +22,17 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 			Program
 
 		interleaved (String)
-			
+
 
 		tee (String)
-			
+
 
 		results (OutFile)
-			
+
 			pipe: phylip_dist
 
 		outtree (OutFile)
-			
+
 			pipe: phylip_tree
 
 		sequences (Sequence)

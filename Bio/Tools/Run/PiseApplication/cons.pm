@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cons
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cons
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::cons
 
 
 		cons (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -58,7 +60,7 @@ Bio::Tools::Run::PiseApplication::cons
 			Define a threshold above which the consensus is given in uppercase (-setcase)
 
 		auto (String)
-			
+
 
 =cut
 

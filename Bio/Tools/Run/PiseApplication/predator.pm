@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::predator
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::predator
@@ -28,7 +30,7 @@ Bio::Tools::Run::PiseApplication::predator
 
 
 		predator (String)
-			
+
 
 		seq (Sequence)
 			Protein sequence(s) File

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::abiview
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::abiview
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::abiview
 
 
 		abiview (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -57,22 +59,22 @@ Bio::Tools::Run::PiseApplication::abiview
 			Base graphs to be displayed (-bases)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

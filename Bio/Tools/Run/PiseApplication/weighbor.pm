@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::weighbor
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::weighbor
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::weighbor
 
 
 		weighbor (String)
-			
+
 
 		infile (InFile)
 			Distances matrix File (-i)
@@ -38,10 +40,10 @@ Bio::Tools::Run::PiseApplication::weighbor
 			Verbose (-v)
 
 		outfile (String)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 =cut

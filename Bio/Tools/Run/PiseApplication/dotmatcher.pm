@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dotmatcher
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dotmatcher
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::dotmatcher
 
 
 		dotmatcher (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -63,22 +65,22 @@ Bio::Tools::Run::PiseApplication::dotmatcher
 			Display as data (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

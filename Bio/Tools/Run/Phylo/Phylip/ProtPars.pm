@@ -14,60 +14,72 @@ Bio::Tools::Run::Phylo::Phylip::ProtPars - Object for creating a L<Bio::Tree> ob
 
 =head1 SYNOPSIS
 
-	#Create a SimpleAlign object
-	@params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
-  	$factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
-  	$inputfilename = 't/data/cysprot.fa';
-  	$aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
-	
-	#Create the Tree
-	#using a threshold value of 30 and id name lengths limit of 30
-	#note to use id name length greater than the standard 10 in protpars, you will need
-	#to modify the protpars source code
-	$tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->new(idlength=>30,threshold=>10,jumble=>"17,10",outgroup=>2);
-	$tree = $tree_factory->create_tree($aln);
+  #Create a SimpleAlign object
+  @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
+  $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
+  $inputfilename = 't/data/cysprot.fa';
+  $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
 
-	#Or one can pass in a file name containing a multiple alignment in phylip format
+  #Create the Tree
+  #using a threshold value of 30 and id name lengths limit of 30
+  #note to use id name length greater than the standard 10 in protpars, 
+  # you will need to modify the protpars source code
+  $tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->
+     new(idlength=>30,threshold=>10,jumble=>"17,10",outgroup=>2);
+  $tree = $tree_factory->create_tree($aln);
 
-	$tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->new(idlength=>30,threshold=>10);
-	$tree = $tree_factory->create_tree("/usr/users/shawnh/COMPARA/prot.phy");
+  #Or one can pass in a file name containing a multiple alignment 
+  #in phylip format:
+
+  $tree_factory =
+    Bio::Tools::Run::Phylo::Phylip::ProtPars->new(idlength=>30,threshold=>10);
+  $tree = $tree_factory->create_tree("/usr/users/shawnh/COMPARA/prot.phy");
 
 =head1 PARAMTERS FOR PROTPARS COMPUTATION
 
 =head2 THRESHOLD
-	Title 		:THRESHOLD
-	Description	:(optional) This sets a  threshold  such  that  if  the
-                            number of steps counted in a character is higher 
-                            than the threshold, it will be taken to be the threshold 
-                            value rather than the actual number  of  steps.
-                            You should use a positive real number greater than 1.
-                            Please see the documetation from the phylip package for more information.
-	
+
+Title 		: THRESHOLD
+Description	: (optional)
+                  This sets a threshold such that if the number of
+                  steps counted in a character is higher than the
+                  threshold, it will be taken to be the threshold
+                  value rather than the actual number of steps.  You
+                  should use a positive real number greater than 1.
+                  Please see the documetation from the phylip package
+                  for more information.
+
 =head2 OUTGROUP
-	Title		: OUTGROUP
-	Description	: (optional)    This specifies which species is to  be  used
-                                to  root  the tree by having it become the outgroup. 
-                                Input values are integers specifying which species to use.
-                                Defaults to 1
+
+Title		: OUTGROUP
+Description	: (optional)
+
+                  This specifies which species is to be used to root
+                  the tree by having it become the outgroup.  Input
+                  values are integers specifying which species to use.
+                  Defaults to 1
+
 =head2 JUMBLE
-	Title		: JUMBLE
-	Description : (optional)This enables  you  to  tell  the program to use a random number
-                                generator to choose the input order of species.
-                                Input values is of the format: seed,iterations eg 17,10
-                                seed:
-                                an integer between 1 and 32767 and of the form 4n+1 
-                                which means that it must give a remainder of 1 when divided by 4.
-                                Each different seed leads to a different sequence of addition
-                                of species.  By simply changing the random number seed 
-                                and re-running programs one can look for other, and better trees.
-                                iterations:
-                                For a value of 10, this will tell the program to try ten 
-                                different orders of species in constructing the trees, 
-                                and the results  printed out  will  reflect this entire
-                                search process (that is, the best trees found
-                                among all 10 runs will be printed out, not the best 
-                                trees from each  individual run).
-	
+
+Title		: JUMBLE
+Description     : (optional)
+                  This enables you to tell the program to use a random
+                  number generator to choose the input order of
+                  species.  Input values is of the format:
+                  seed,iterations eg 17,10 seed: an integer between 1
+                  and 32767 and of the form 4n+1 which means that it
+                  must give a remainder of 1 when divided by 4.  Each
+                  different seed leads to a different sequence of
+                  addition of species.  By simply changing the random
+                  number seed and re-running programs one can look for
+                  other, and better trees.  iterations: For a value of
+                  10, this will tell the program to try ten different
+                  orders of species in constructing the trees, and the
+                  results printed out will reflect this entire search
+                  process (that is, the best trees found among all 10
+                  runs will be printed out, not the best trees from
+                  each individual run).
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists

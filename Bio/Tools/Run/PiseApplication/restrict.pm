@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::restrict
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::restrict
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::restrict
 
 
 		restrict (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -90,7 +92,7 @@ Bio::Tools::Run::PiseApplication::restrict
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnainverse
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnainverse
@@ -30,7 +32,7 @@ Bio::Tools::Run::PiseApplication::rnainverse
 
 
 		rnainverse (String)
-			
+
 
 		seqstruct (InFile)
 			Sequences/Structures File
@@ -78,7 +80,7 @@ Bio::Tools::Run::PiseApplication::rnainverse
 			Energy parameters for the artificial ABCD... alphabet (-e)
 
 		readseq (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::parciquart
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::parciquart
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::parciquart
 
 
 		parciquart (String)
-			
+
 
 		infile (Sequence)
 			Nucleotide Sequences Alignement File
@@ -30,7 +32,7 @@ Bio::Tools::Run::PiseApplication::parciquart
 			Use gap position whenever is possible for computing the distance between two taxa (-g)
 
 		quartfile (Results)
-			
+
 			pipe: quartfile
 
 =cut

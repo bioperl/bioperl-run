@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::readnexus
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::readnexus
@@ -17,18 +19,18 @@ Bio::Tools::Run::PiseApplication::readnexus
 
 
 		readnexus (String)
-			
+
 
 		seq (Sequence)
 			Nexus File
 			pipe: nexus_file
 
 		fastafile (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		megfile (Results)
-			
+
 
 		outformat (Excl)
 			Output format

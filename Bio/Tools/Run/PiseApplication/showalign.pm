@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::showalign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::showalign
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::showalign
 
 
 		showalign (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -93,7 +95,7 @@ Bio::Tools::Run::PiseApplication::showalign
 			Output sequence details to a file (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

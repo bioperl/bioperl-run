@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::readseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::readseq
@@ -17,14 +19,14 @@ Bio::Tools::Run::PiseApplication::readseq
 
 
 		readseq (String)
-			
+
 
 		seq (InFile)
 			Sequence File
 			pipe: readseq_ok_alig
 
 		outfile (OutFile)
-			
+
 			pipe: seqfile
 
 		outformat (Excl)
@@ -37,7 +39,7 @@ Bio::Tools::Run::PiseApplication::readseq
 			select Item number(s) from several
 
 		allseq (Switch)
-			
+
 
 		output (Paragraph)
 			Output parameters

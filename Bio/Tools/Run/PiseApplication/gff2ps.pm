@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::gff2ps
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::gff2ps
@@ -17,13 +19,13 @@ Bio::Tools::Run::PiseApplication::gff2ps
 
 
 		gff2ps (String)
-			
+
 
 		outfile (OutFile)
-			
+
 
 		rcfile (Results)
-			
+
 
 		gff_file (InFile)
 			GFF file

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::kitsch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::kitsch
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::kitsch
 
 
 		kitsch (String)
-			
+
 
 		infile (InFile)
 			Distances matrix File
@@ -67,16 +69,16 @@ Bio::Tools::Run::PiseApplication::kitsch
 			Compute a consensus tree
 
 		consense_confirm (String)
-			
+
 
 		consense_terminal_type (String)
-			
+
 
 		consense_outfile (Results)
-			
+
 
 		consense_treefile (Results)
-			
+
 
 		user_tree_opt (Paragraph)
 			User tree options
@@ -112,26 +114,26 @@ Bio::Tools::Run::PiseApplication::kitsch
 			Matrix format
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

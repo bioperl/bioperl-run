@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::seqboot
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::seqboot
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::seqboot
 
 
 		seqboot (String)
-			
+
 
 		infile (InFile)
 			Alignement File
@@ -54,16 +56,16 @@ Bio::Tools::Run::PiseApplication::seqboot
 			Number of enzymes: not present in input file (E)
 
 		outfile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 =cut
 

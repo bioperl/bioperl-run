@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::sreformat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::sreformat
@@ -17,26 +19,26 @@ Bio::Tools::Run::PiseApplication::sreformat
 
 
 		sreformat (String)
-			
+
 
 		seqfile (InFile)
 			Sequence(s) file
 			pipe: hmmer_alig
 
 		single_seq_file (Results)
-			
+
 			pipe: seqfile
 
 		multi_seq_file (Results)
-			
+
 			pipe: seqsfile
 
 		alig_file (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		selex_alig_file (Results)
-			
+
 			pipe: hmmer_alig
 
 		output_format (Excl)

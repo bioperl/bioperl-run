@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::makehist
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::makehist
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::makehist
 
 
 		makehist (String)
-			
+
 
 		run (String)
 			Run name
@@ -27,7 +29,7 @@ Bio::Tools::Run::PiseApplication::makehist
 			pipe: sam_score
 
 		outfiles (Results)
-			
+
 
 		output (Paragraph)
 			Output options

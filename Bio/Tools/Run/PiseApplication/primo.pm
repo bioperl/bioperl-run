@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::primo
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::primo
@@ -17,13 +19,13 @@ Bio::Tools::Run::PiseApplication::primo
 
 
 		primo (String)
-			
+
 
 		input_file_name (InFile)
 			Sequence data
 
 		all (String)
-			
+
 
 		cover (Switch)
 			cover template with walking-primers on both strands (-cover)
@@ -44,13 +46,13 @@ Bio::Tools::Run::PiseApplication::primo
 			Oligo file
 
 		rf (String)
-			
+
 
 		qf (String)
-			
+
 
 		results_files (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::mspcrunch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::mspcrunch
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::mspcrunch
 
 
 		mspcrunch (String)
-			
+
 
 		blast_output (InFile)
 			BLAST output File

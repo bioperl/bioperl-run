@@ -17,101 +17,118 @@ based on amino substitution rate.
 
 =head1 SYNOPSIS
 
-#Create a SimpleAlign object
-@params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
-$factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
-$inputfilename = 't/data/cysprot.fa';
-$aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
-	
-# Create the Distance Matrix 
-# using a default PAM matrix and id name lengths limit of 30 note to
-# use id name length greater than the standard 10 in neighbor, you
-# will need to modify the neighbor source code
+  #Create a SimpleAlign object
+  @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
+  $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
+  $inputfilename = 't/data/cysprot.fa';
+  $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
 
-$protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-my $matrix  = $protdist_factory->create_distance_matrix($aln);
+  # Create the Distance Matrix
+  # using a default PAM matrix and id name lengths limit of 30 note to
+  # use id name length greater than the standard 10 in neighbor, you
+  # will need to modify the neighbor source code
 
-#Create the tree passing in the distance matrix
-@params = ('type'=>'NJ','outgroup'=>2,'lowtri'=>1,'upptri'=>1,'subrep'=>1,'subrep'=>1);
+  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
+  my $matrix  = $protdist_factory->create_distance_matrix($aln);
 
-my $neighbor_factory = Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
-my $tree = $neighbor_factory->create_tree($matrix);
-	
+  #Create the tree passing in the distance matrix
+  @params = ('type'=>'NJ','outgroup'=>2,'lowtri'=>1,
+             'upptri'=>1,'subrep'=>1,'subrep'=>1);
 
-# Alternatively, one can create the tree by passing in a file name containing 
-# a phylip formatted distance matrix(using protdist)
-my $neighbor_factory = Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
-my $tree = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
+  my $neighbor_factory = 
+     Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
+  my $tree = $neighbor_factory->create_tree($matrix);
 
+  # Alternatively, one can create the tree by passing in a file name 
+  # containing a phylip formatted distance matrix(using protdist)
+  my $neighbor_factory = 
+     Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
+  my $tree = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
 
 =head1 PARAMTERS FOR NEIGHBOR COMPUTATION
 
+=cut
+
 =head2 TYPE
-Title 		: TYPE
-Description	:(optional) 	This sets the type of tree to construct, using neighbor joining or UPGMA.
-				NJ	Neighbor Joining
-				UPGMA	UPGMA
-				Usage: 
-				@params = ('type'=>'X');#where X is one of the values above
-				Defaults to NJ 
-				For more information on the usage of the different models, 
-                                please refer to the documentation found in the phylip package.
+
+  Title 	: TYPE
+  Description	: (optional)
+                  This sets the type of tree to construct, using
+                  neighbor joining or UPGMA.
+
+		  NJ	Neighbor Joining
+		  UPGMA	UPGMA
+
+  Usage         : @params = ('type'=>'X');#where X is one of the values above
+		  Defaults to NJ 
+
+ 		  For more information on the usage of the different
+                  models, please refer to the documentation found in
+                  the phylip package.
 
 =head2 OUTGROUP (*ONLY AVAILABLE FOR NEIGHBOR JOINING)
 
-Title		: OUTGROUP 
-Description	: (optional)	This option selects the species to be used as the outgroup
-				Acceptable Values: integer 
-Usage:
-				@params = ('outgroup'=>'X'); 
-                                where X is an positive integer not more than the 
-                                number of sequences 
-				Defaults to 1
+  Title		: OUTGROUP 
+  Description	: (optional)
+                  This option selects the species to be used as the outgroup
+  Acceptable Values: integer 
+  Usage         : @params = ('outgroup'=>'X'); 
+                  where X is an positive integer not more than the 
+                  number of sequences 
+		  Defaults to 1
 
-=head2 LOWTRI 
+=head2 LOWTRI
 
-Title		: LOWTRI 
-Description : (optional)	This indicates that the distance matrix is 
-                                input  in  Lower-triangular form  (the  lower-left  
-				half of the distance matrix only, without the zero 
-				diagonal elements)
-Usage:		
-				@params = ('lowtri'=>'X'); where X is either 1 or 0 
-				Defaults to 0 
-=head2 UPPTRI 
+  Title		: LOWTRI
+  Description   : (optional)
+                  This indicates that the distance matrix is 
+                  input  in  Lower-triangular form  (the  lower-left 
+		  half of the distance matrix only, without the zero 
+		  diagonal elements)
+  Usage         : @params = ('lowtri'=>'X'); where X is either 1 or 0 
+		  Defaults to 0 
 
-Title           : UPPTRI 
-Description : (optional)        This indicates that the distance matrix is input  in  
-                                upper-triangular form  (the  upper-right half of the 
-				distance matrix only, without the zero diagonal elements.)
-Usage:          
-                                @params = ('upptri'=>'X'); where X is either 1 or 0 
-                                Defaults to 0 
-=head2 SUBREP 
+=head2 UPPTRI
 
-Title           : SUBREP 
-Description : (optional)        This is the Subreplication option.  
-				It informs the program that  after
-			        each distance will be provided an integer indicating that the
-			        distance is a mean of that many replicates.
-Usage:          
-                                @params = ('subrep'=>'X'); where X is either 1 or 0 
-                                Defaults to 0 
-=head2 JUMBLE 
-Title           : JUMBLE 
-Description : (optional)        This enables  you  to  tell  the program to use a random number
-                                generator to choose the input order of species.
-                                seed:
-                                an integer between 1 and 32767 and of the form 4n+1 
-                                which means that it must give a remainder of 1 when divided by 4.
-                                Each different seed leads to a different sequence of addition
-                                of species.  By simply changing the random number seed 
-                                and re-running programs one can look for other, and better trees.
-                                iterations:
-                                Usage:          
-                                @params = ('jumble'=>'17); where 17 is the random seed
-                                Defaults to no jumble 
-	
+  Title         : UPPTRI 
+  Description   : (optional)
+                  This indicates that the distance matrix is input  in  
+                  upper-triangular form  (the  upper-right half of the 
+		  distance matrix only, without the zero diagonal elements.)
+Usage           : @params = ('upptri'=>'X'); where X is either 1 or 0 
+                  Defaults to 0 
+
+=head2 SUBREP
+
+  Title         : SUBREP 
+  Description   : (optional)
+                  This is the Subreplication option.  
+
+		  It informs the program that after each distance will
+		  be provided an integer indicating that the distance
+		  is a mean of that many replicates.
+
+  Usage         : @params = ('subrep'=>'X'); where X is either 1 or 0 
+                  Defaults to 0 
+
+=head2 JUMBLE
+
+  Title        : JUMBLE 
+  Description  : (optional)
+
+                 This enables you to tell the program to use a random
+                 number generator to choose the input order of
+                 species.  seed: an integer between 1 and 32767 and of
+                 the form 4n+1 which means that it must give a
+                 remainder of 1 when divided by 4.  Each different
+                 seed leads to a different sequence of addition of
+                 species.  By simply changing the random number seed
+                 and re-running programs one can look for other, and
+                 better trees.  iterations:
+
+  Usage        : @params = ('jumble'=>'17); where 17 is the random seed
+                 Defaults to no jumble
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -120,8 +137,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
+  bioperl-l@bioperl.org                     - General discussion
+  http://bio.perl.org/MailList.html         - About the mailing lists
 
 =head2 Reporting Bugs
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::etandem
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::etandem
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::etandem
 
 
 		etandem (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -57,7 +59,7 @@ Bio::Tools::Run::PiseApplication::etandem
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::satellites
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::satellites
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::satellites
 
 
 		satellites (String)
-			
+
 
 		param (Results)
-			
+
 
 		seq (Sequence)
 			Sequence File
@@ -29,22 +31,22 @@ Bio::Tools::Run::PiseApplication::satellites
 			Alphabets and score system (-a)
 
 		outputbase (String)
-			
+
 
 		scoreN (String)
-			
+
 
 		maxsym (String)
-			
+
 
 		resultsfiles (Results)
-			
+
 
 		range (String)
-			
+
 
 		gap (Integer)
-			
+
 
 		minlen (Integer)
 			Minimum length of repeats (minlen)
@@ -86,16 +88,16 @@ Bio::Tools::Run::PiseApplication::satellites
 			Inverted occurences allowed (inverted)
 
 		ngroup (String)
-			
+
 
 		xml (Switch)
 			XML output (xml)
 
 		xmldtdcopy (String)
-			
+
 
 		dtdfile (Results)
-			
+
 
 =cut
 

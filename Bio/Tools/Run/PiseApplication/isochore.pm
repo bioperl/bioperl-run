@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::isochore
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::isochore
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::isochore
 
 
 		isochore (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -48,22 +50,22 @@ Bio::Tools::Run::PiseApplication::isochore
 			graph (-graph)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

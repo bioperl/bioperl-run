@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::combat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::combat
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::combat
 
 
 		combat (String)
-			
+
 
 		sequence1 (Sequence)
 			First Sequence
@@ -31,10 +33,10 @@ Bio::Tools::Run::PiseApplication::combat
 			Second Sequence
 
 		output_aln (OutFile)
-			
+
 
 		alignment_file (OutFile)
-			
+
 			pipe: readseq_ok_alig
 
 		protein_distance_matrix (Excl)
@@ -56,13 +58,13 @@ Bio::Tools::Run::PiseApplication::combat
 			Gap extension cost for dna
 
 		results_files (Results)
-			
+
 
 		gnuplot_call (String)
-			
+
 
 		gnuplot_commands (String)
-			
+
 
 =cut
 

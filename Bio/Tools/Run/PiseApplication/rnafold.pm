@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnafold
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnafold
@@ -30,7 +32,7 @@ Bio::Tools::Run::PiseApplication::rnafold
 
 
 		rnafold (String)
-			
+
 
 		seq (Sequence)
 			RNA Sequences File
@@ -91,13 +93,13 @@ Bio::Tools::Run::PiseApplication::rnafold
 			converts the bracket notation produced by RNAfold into an .ct file, as produced by Zukers mfold
 
 		readseq (String)
-			
+
 
 		ctfiles (Results)
-			
+
 
 		psfiles (Results)
-			
+
 
 =cut
 

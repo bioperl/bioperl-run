@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::codcmp
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::codcmp
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::codcmp
 
 
 		codcmp (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -38,7 +40,7 @@ Bio::Tools::Run::PiseApplication::codcmp
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

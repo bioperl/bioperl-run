@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::blimps_matrix
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::blimps_matrix
@@ -24,10 +26,10 @@ Bio::Tools::Run::PiseApplication::blimps_matrix
 
 
 		blimps_matrix (String)
-			
+
 
 		action (String)
-			
+
 
 		sequence_db (Excl)
 			Sequences database
@@ -72,7 +74,7 @@ Bio::Tools::Run::PiseApplication::blimps_matrix
 			Repeats are allowed in the scoring list
 
 		config_file (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::plotorf
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::plotorf
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::plotorf
 
 
 		plotorf (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,22 +47,22 @@ Bio::Tools::Run::PiseApplication::plotorf
 			graph (-graph)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

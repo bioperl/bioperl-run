@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::rnapdist
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::rnapdist
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::rnapdist
 
 
 		rnapdist (String)
-			
+
 
 		seq (Sequence)
 			RNA Sequences File
@@ -64,10 +66,10 @@ Bio::Tools::Run::PiseApplication::rnapdist
 			Energy parameters for the artificial ABCD... alphabet (-e)
 
 		readseq (String)
-			
+
 
 		psfiles (Results)
-			
+
 
 =cut
 

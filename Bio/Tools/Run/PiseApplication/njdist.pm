@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::njdist
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::njdist
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::njdist
 
 
 		njdist (String)
-			
+
 
 		distances (InFile)
 			Distance Matrix File
@@ -48,13 +50,13 @@ Bio::Tools::Run::PiseApplication::njdist
 			Output Topology (.tpl) file? (-t)
 
 		tre_file (Results)
-			
+
 
 		tpl_file (Results)
-			
+
 
 		eps_file (Results)
-			
+
 
 =cut
 

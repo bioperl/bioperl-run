@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::xblast
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::xblast
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::xblast
 
 
 		xblast (String)
-			
+
 
 		blast_output (InFile)
 			Blast Output File (does not work on Blast2 or Blast-Wu output)

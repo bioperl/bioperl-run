@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::psiblast
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::psiblast
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::psiblast
 
 
 		psiblast (String)
-			
+
 
 		query (Sequence)
 			Sequence File
@@ -123,13 +125,13 @@ Bio::Tools::Run::PiseApplication::psiblast
 			Save PSI-BLAST Matrix as text to file (-Q)
 
 		html_file (Results)
-			
+
 
 		txt_output (Results)
-			
+
 
 		nb_proc (Integer)
-			
+
 
 =cut
 

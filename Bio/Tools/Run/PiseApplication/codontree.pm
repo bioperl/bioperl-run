@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::codontree
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::codontree
@@ -22,16 +24,16 @@ Bio::Tools::Run::PiseApplication::codontree
 
 
 		codontree (String)
-			
+
 
 		seqfile (Sequence)
 			Sequences File
 
 		files (Results)
-			
+
 
 		tabfile (String)
-			
+
 
 		control_options (Paragraph)
 			Control options
@@ -55,10 +57,10 @@ Bio::Tools::Run::PiseApplication::codontree
 			Prints on the screen some useful information (-VERbose)
 
 		bcfile (String)
-			
+
 
 		matfile (String)
-			
+
 
 =cut
 

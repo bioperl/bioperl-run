@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::seqgen
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::seqgen
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::seqgen
 
 
 		seqgen (String)
-			
+
 
 		tree (InFile)
 			Tree File
@@ -80,7 +82,7 @@ Bio::Tools::Run::PiseApplication::seqgen
 			6 values  for  the general reversable  model's rate matrix (ACTG x ACTG) (REV model), separated by commas (-r)
 
 		outfile (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		output (Paragraph)

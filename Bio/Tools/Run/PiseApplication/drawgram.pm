@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::drawgram
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::drawgram
@@ -24,14 +26,14 @@ Bio::Tools::Run::PiseApplication::drawgram
 
 
 		drawgram (String)
-			
+
 
 		treefile (InFile)
 			Tree File
 			pipe: phylip_tree
 
 		screen_type (String)
-			
+
 
 		options (Paragraph)
 			Drawgram options
@@ -61,7 +63,7 @@ Bio::Tools::Run::PiseApplication::drawgram
 			Paintbrush PCX resolution
 
 		screen (String)
-			
+
 
 		grows (Excl)
 			Tree grows...
@@ -97,25 +99,25 @@ Bio::Tools::Run::PiseApplication::drawgram
 			Font (PostScript only)
 
 		plotfile (Results)
-			
+
 
 		psfile (Results)
-			
+
 
 		pictfile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		tops (String)
-			
+
 
 		topict (String)
-			
+
 
 		confirm (String)
-			
+
 
 =cut
 

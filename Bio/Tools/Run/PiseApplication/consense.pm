@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::consense
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::consense
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::consense
 
 
 		consense (String)
-			
+
 
 		infile (InFile)
 			Trees File
@@ -58,26 +60,26 @@ Bio::Tools::Run::PiseApplication::consense
 			Trees to be treated as rooted
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

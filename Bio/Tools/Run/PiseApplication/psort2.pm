@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::psort2
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::psort2
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::psort2
 
 
 		psort2 (String)
-			
+
 
 		seqfile (Sequence)
 			Protein sequence file
@@ -31,7 +33,7 @@ Bio::Tools::Run::PiseApplication::psort2
 			Verbose mode
 
 		htmlfile (OutFile)
-			
+
 
 =cut
 

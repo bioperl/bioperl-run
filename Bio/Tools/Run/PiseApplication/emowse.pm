@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::emowse
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::emowse
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::emowse
 
 
 		emowse (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -66,7 +68,7 @@ Bio::Tools::Run::PiseApplication::emowse
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

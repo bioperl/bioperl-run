@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dollop
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dollop
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::dollop
 
 
 		dollop (String)
-			
+
 
 		infile (InFile)
 			Input File
@@ -105,38 +107,38 @@ Bio::Tools::Run::PiseApplication::dollop
 			Threshold value (if use threshold parsimony)
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 		consense_confirm (String)
-			
+
 
 		consense_terminal_type (String)
-			
+
 
 		consense_outfile (Results)
-			
+
 
 		consense_treefile (Results)
-			
+
 
 =cut
 

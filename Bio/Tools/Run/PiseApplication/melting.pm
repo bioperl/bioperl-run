@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::melting
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::melting
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::melting
 
 
 		melting (String)
-			
+
 
 		hybridation_type (Excl)
 			Hybridisation type (-H)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::findkm
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::findkm
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::findkm
 
 
 		findkm (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -44,22 +46,22 @@ Bio::Tools::Run::PiseApplication::findkm
 			graphlb (-graphlb)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

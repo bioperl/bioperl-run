@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::most
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::most
@@ -62,7 +64,7 @@ Bio::Tools::Run::PiseApplication::most
 			use only one representative of each group of sequence segments that are #% or more identical
 
 		tmpfile (Results)
-			
+
 
 =cut
 

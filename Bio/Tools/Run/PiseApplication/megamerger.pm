@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::megamerger
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::megamerger
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::megamerger
 
 
 		megamerger (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -52,7 +54,7 @@ Bio::Tools::Run::PiseApplication::megamerger
 			Output report (-report)
 
 		auto (String)
-			
+
 
 =cut
 

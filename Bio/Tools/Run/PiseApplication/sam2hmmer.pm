@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::sam2hmmer
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::sam2hmmer
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::sam2hmmer
 
 
 		sam2hmmer (String)
-			
+
 
 		run (String)
 			Run name
@@ -27,7 +29,7 @@ Bio::Tools::Run::PiseApplication::sam2hmmer
 			pipe: sam_model
 
 		hmmfile (Results)
-			
+
 			pipe: hmmfile
 
 =cut

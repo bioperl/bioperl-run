@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::mview_blast
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::mview_blast
 
 
 		mview_blast (String)
-			
+
 
 		blast_output (InFile)
 			Blast/FASTA Output File
@@ -207,13 +209,13 @@ Bio::Tools::Run::PiseApplication::mview_blast
 			Report only these query strand orientations (-strand)
 
 		html_output_file (OutFile)
-			
+
 
 		html_file (Results)
-			
+
 
 		alig_file (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		out (Excl)

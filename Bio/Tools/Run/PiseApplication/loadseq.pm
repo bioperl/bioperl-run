@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::loadseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::loadseq
@@ -17,13 +19,13 @@ Bio::Tools::Run::PiseApplication::loadseq
 
 
 		loadseq (String)
-			
+
 
 		explanation (String)
-			
+
 
 		howto (Results)
-			
+
 
 		seq (Sequence)
 			Sequence to load
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::loadseq
 			You may give a name to your sequence
 
 		loadresult (String)
-			
+
 
 		efetch_params (Paragraph)
 			Efetch parameters
@@ -47,7 +49,7 @@ Bio::Tools::Run::PiseApplication::loadseq
 			Search with Accession number (except nrl3d)
 
 		outfile (OutFile)
-			
+
 			pipe: seqsfile
 
 		other_options (Paragraph)

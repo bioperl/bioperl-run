@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::trnascan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::trnascan
@@ -28,7 +30,7 @@ Bio::Tools::Run::PiseApplication::trnascan
 
 
 		trnascan (String)
-			
+
 
 		sequence (Sequence)
 			Sequence File
@@ -127,7 +129,7 @@ Bio::Tools::Run::PiseApplication::trnascan
 			Display the breakdown of the two components of the bit score (-H)
 
 		results (Results)
-			
+
 
 =cut
 

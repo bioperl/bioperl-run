@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::fastdnaml
@@ -24,10 +26,10 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 
 
 		fastdnaml (String)
-			
+
 
 		clean_tmp (String)
-			
+
 
 		alignment (Sequence)
 			Sequence Alignment File
@@ -82,13 +84,13 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 			maximum attempts at replicating inferred tree (max jumble)
 
 		concat (String)
-			
+
 
 		in_file (String)
-			
+
 
 		bootfiles (Results)
-			
+
 
 		outputopt (Paragraph)
 			Output and Results Options
@@ -103,10 +105,10 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 			Echo of the data in addition to the usual output (printdata)
 
 		tmpfiles (Results)
-			
+
 
 		tmpaligfiles (Results)
-			
+
 
 		arrgtopt (Paragraph)
 			Rearrangements Options
@@ -145,7 +147,7 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 			user trees to be read with branch lengths
 
 		tree (Results)
-			
+
 			pipe: phylip_tree
 
 =cut

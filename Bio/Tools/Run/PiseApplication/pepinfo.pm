@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pepinfo
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pepinfo
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::pepinfo
 
 
 		pepinfo (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -57,22 +59,22 @@ Bio::Tools::Run::PiseApplication::pepinfo
 			Enter user defined file of hydropathy data or leave blank (-aahydropathy)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

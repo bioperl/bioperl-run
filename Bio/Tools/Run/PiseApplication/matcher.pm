@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::matcher
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::matcher
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::matcher
 
 
 		matcher (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -58,7 +60,7 @@ Bio::Tools::Run::PiseApplication::matcher
 			Alignment output format (-aformat)
 
 		auto (String)
-			
+
 
 =cut
 

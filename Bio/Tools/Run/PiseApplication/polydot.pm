@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::polydot
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::polydot
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::polydot
 
 
 		polydot (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -66,22 +68,22 @@ Bio::Tools::Run::PiseApplication::polydot
 			Extension for feature file (-ext)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

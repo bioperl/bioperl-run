@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::lassap
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::lassap
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::lassap
 
 
 		lassap (String)
-			
+
 
 		method (Excl)
 			Comparison method
@@ -32,10 +34,10 @@ Bio::Tools::Run::PiseApplication::lassap
 			Second sequence
 
 		dr1 (String)
-			
+
 
 		dr2 (String)
-			
+
 
 		control_options (Paragraph)
 			Control options
@@ -137,13 +139,13 @@ Bio::Tools::Run::PiseApplication::lassap
 			Maximum retained
 
 		flag_algo_opt (String)
-			
+
 
 		flag_algo_opt2 (String)
-			
+
 
 		gc2 (String)
-			
+
 
 =cut
 

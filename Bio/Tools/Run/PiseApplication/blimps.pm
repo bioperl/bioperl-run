@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::blimps
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::blimps
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::blimps
 
 
 		blimps (String)
-			
+
 
 		action (Excl)
 			Action
@@ -77,10 +79,10 @@ Bio::Tools::Run::PiseApplication::blimps
 			Repeats are allowed in the scoring list
 
 		error_file (OutFile)
-			
+
 
 		config_file (Results)
-			
+
 
 =cut
 

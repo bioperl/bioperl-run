@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::confmat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::confmat
@@ -22,10 +24,10 @@ Bio::Tools::Run::PiseApplication::confmat
 
 
 		confmat (String)
-			
+
 
 		result_files (Results)
-			
+
 
 		pdbfile (InFile)
 			PDB file
@@ -41,7 +43,7 @@ Bio::Tools::Run::PiseApplication::confmat
 			Number of cycles you want to perform
 
 		logfile (OutFile)
-			
+
 
 =cut
 

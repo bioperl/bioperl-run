@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::blast2
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::blast2
@@ -25,7 +27,7 @@ Bio::Tools::Run::PiseApplication::blast2
 			Blast program
 
 		nb_proc (Integer)
-			
+
 
 		query (Sequence)
 			Sequence File
@@ -140,7 +142,7 @@ Bio::Tools::Run::PiseApplication::blast2
 			HTML output options (html4blast)
 
 		html4blast_input (String)
-			
+
 
 		external_links (Switch)
 			Use external web sites for databases entries retrieval links (-e instead of -s)
@@ -152,7 +154,7 @@ Bio::Tools::Run::PiseApplication::blast2
 			Generate images names based on corresponding query (-q)
 
 		htmlfile (Results)
-			
+
 
 		othersopt (Paragraph)
 			Other Options
@@ -162,14 +164,14 @@ Bio::Tools::Run::PiseApplication::blast2
 			pipe: psiblast_matrix
 
 		txtoutput (String)
-			
+
 
 		tmp_outfile (Results)
-			
+
 			pipe: blast_output
 
 		xmloutput (Results)
-			
+
 
 =cut
 

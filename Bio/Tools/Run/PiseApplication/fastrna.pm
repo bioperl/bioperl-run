@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::fastrna
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::fastrna
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::fastrna
 
 
 		fastrna (Excl)
-			
+
 
 		seq (Sequence)
 			Sequence File

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::helixturnhelix
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::helixturnhelix
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::helixturnhelix
 
 
 		helixturnhelix (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -51,7 +53,7 @@ Bio::Tools::Run::PiseApplication::helixturnhelix
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::qstar
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::qstar
@@ -17,27 +19,27 @@ Bio::Tools::Run::PiseApplication::qstar
 
 
 		qstar (String)
-			
+
 
 		quartfile (InFile)
 			quartfile containing the list of quartets
 			pipe: quartfile
 
 		quartfile_res (OutFile)
-			
+
 
 		quartfile_left (OutFile)
-			
+
 
 		bipfile (OutFile)
-			
+
 			pipe: bipfile
 
 		tree_pop (Switch)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 =cut

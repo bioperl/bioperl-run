@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::remap
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::remap
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::remap
 
 
 		remap (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -129,7 +131,7 @@ Bio::Tools::Run::PiseApplication::remap
 			Use HTML formatting (-html)
 
 		auto (String)
-			
+
 
 =cut
 

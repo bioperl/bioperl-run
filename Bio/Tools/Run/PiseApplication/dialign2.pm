@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dialign2
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dialign2
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::dialign2
 
 
 		dialign2 (String)
-			
+
 
 		sequence (Sequence)
 			Sequences
@@ -50,7 +52,7 @@ Bio::Tools::Run::PiseApplication::dialign2
 			Alignment in fasta format
 
 		ali (Results)
-			
+
 
 =cut
 

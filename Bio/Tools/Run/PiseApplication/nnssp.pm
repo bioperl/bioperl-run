@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::nnssp
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::nnssp
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::nnssp
 
 
 		nnssp (String)
-			
+
 
 		infile (Sequence)
 			Clustalw Alignment File
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::nnssp
 			Name of the sequence to analyze
 
 		nnsspfile (Results)
-			
+
 
 		outfile (OutFile)
 			Output File

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::seqsblast
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::seqsblast
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::seqsblast
 
 
 		seqsblast (String)
-			
+
 
 		infile (InFile)
 			Blast output File
@@ -48,7 +50,7 @@ Bio::Tools::Run::PiseApplication::seqsblast
 			Extend to # additional position on the right (-r)
 
 		seqsfile (Results)
-			
+
 			pipe: seqsfile
 
 =cut

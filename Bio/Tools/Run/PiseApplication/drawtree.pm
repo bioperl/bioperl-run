@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::drawtree
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::drawtree
@@ -24,14 +26,14 @@ Bio::Tools::Run::PiseApplication::drawtree
 
 
 		drawtree (String)
-			
+
 
 		treefile (InFile)
 			Tree File
 			pipe: phylip_tree
 
 		screen_type (String)
-			
+
 
 		options (Paragraph)
 			Drawtree options
@@ -61,7 +63,7 @@ Bio::Tools::Run::PiseApplication::drawtree
 			Paintbrush PCX resolution
 
 		preview (String)
-			
+
 
 		branch_lengths (Switch)
 			Use branch lengths
@@ -97,31 +99,31 @@ Bio::Tools::Run::PiseApplication::drawtree
 			Font (PostScript only)
 
 		plotfile (Results)
-			
+
 
 		psfile (Results)
-			
+
 
 		pictfile (Results)
-			
+
 
 		xbmfile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		tops (String)
-			
+
 
 		topict (String)
-			
+
 
 		toxbm (String)
-			
+
 
 		confirm (String)
-			
+
 
 =cut
 

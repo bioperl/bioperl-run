@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::banana
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::banana
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::banana
 
 
 		banana (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -51,22 +53,22 @@ Bio::Tools::Run::PiseApplication::banana
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

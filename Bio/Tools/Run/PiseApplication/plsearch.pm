@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::plsearch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::plsearch
@@ -22,13 +24,13 @@ Bio::Tools::Run::PiseApplication::plsearch
 
 
 		plsearch (String)
-			
+
 
 		type (String)
-			
+
 
 		no_detach (String)
-			
+
 
 		protein (Sequence)
 			Protein sequence File
@@ -40,7 +42,7 @@ Bio::Tools::Run::PiseApplication::plsearch
 			Maximum number of alignments
 
 		params (Results)
-			
+
 
 =cut
 

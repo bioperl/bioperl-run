@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::eprimer3
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::eprimer3
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::eprimer3
 
 
 		eprimer3 (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -225,7 +227,7 @@ Bio::Tools::Run::PiseApplication::eprimer3
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

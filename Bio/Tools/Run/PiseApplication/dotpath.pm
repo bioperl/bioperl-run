@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dotpath
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dotpath
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::dotpath
 
 
 		dotpath (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -60,22 +62,22 @@ Bio::Tools::Run::PiseApplication::dotpath
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::CSR
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::CSR
@@ -22,13 +24,13 @@ Bio::Tools::Run::PiseApplication::CSR
 
 
 		CSR (String)
-			
+
 
 		param (Results)
-			
+
 
 		endparams (String)
-			
+
 
 		pdbfile (InFile)
 			File containing both molecules
@@ -50,10 +52,10 @@ Bio::Tools::Run::PiseApplication::CSR
 			Cutoff distance (CUT-OFF DIST)
 
 		substructure (OutFile)
-			
+
 
 		pdb_outfile (Results)
-			
+
 			pipe: pdbfile
 
 =cut

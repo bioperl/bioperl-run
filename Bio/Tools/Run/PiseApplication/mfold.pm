@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::mfold
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::mfold
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::mfold
 
 
 		mfold (String)
-			
+
 
 		SEQ (Sequence)
 			Sequence File (SEQ)
@@ -55,13 +57,13 @@ Bio::Tools::Run::PiseApplication::mfold
 			3' base number (default = end) (STOP)
 
 		htmlfile (Results)
-			
+
 
 		outfiles (Results)
-			
+
 
 		psfiles (Results)
-			
+
 
 =cut
 

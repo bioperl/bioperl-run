@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cds
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cds
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::cds
 
 
 		cds (String)
-			
+
 
 		seq (Sequence)
 			Sequence File
@@ -65,10 +67,10 @@ Bio::Tools::Run::PiseApplication::cds
 			XML output (-x)
 
 		xmldtdcopy (String)
-			
+
 
 		xmldtd (Results)
-			
+
 
 		others (Paragraph)
 			Other parameters

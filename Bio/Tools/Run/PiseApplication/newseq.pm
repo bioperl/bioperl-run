@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::newseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::newseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::newseq
 
 
 		newseq (String)
-			
+
 
 		init (String)
-			
+
 
 		output (Paragraph)
 			output Section
@@ -51,7 +53,7 @@ Bio::Tools::Run::PiseApplication::newseq
 			Enter the sequence (-sequence)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::comalign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::comalign
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::comalign
 
 
 		comalign (String)
-			
+
 
 		seq (Sequence)
 			Sequences File (-f)

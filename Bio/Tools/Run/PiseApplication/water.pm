@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::water
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::water
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::water
 
 
 		water (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -62,7 +64,7 @@ Bio::Tools::Run::PiseApplication::water
 			Alignment output format (-aformat)
 
 		auto (String)
-			
+
 
 =cut
 

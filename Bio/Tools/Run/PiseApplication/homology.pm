@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::homology
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::homology
@@ -22,13 +24,13 @@ Bio::Tools::Run::PiseApplication::homology
 
 
 		homology (String)
-			
+
 
 		result_files (Results)
-			
+
 
 		pdb_file (Results)
-			
+
 
 		pdbfile (InFile)
 			PDB data for the template protein

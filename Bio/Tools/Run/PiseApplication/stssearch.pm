@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::stssearch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::stssearch
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::stssearch
 
 
 		stssearch (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -39,7 +41,7 @@ Bio::Tools::Run::PiseApplication::stssearch
 			out (-out)
 
 		auto (String)
-			
+
 
 =cut
 

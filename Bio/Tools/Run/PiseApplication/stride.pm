@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::stride
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::stride
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::stride
 
 
 		stride (String)
-			
+
 
 		pdbfile (Sequence)
 			PDB File
@@ -55,10 +57,10 @@ Bio::Tools::Run::PiseApplication::stride
 			Generate SeQuence file in FASTA format (-q)
 
 		molscript_file (Results)
-			
+
 
 		outfile (Results)
-			
+
 			pipe: stride_outfile
 
 =cut

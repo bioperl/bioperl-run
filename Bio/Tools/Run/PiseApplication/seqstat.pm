@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::seqstat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::seqstat
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::seqstat
 
 
 		seqstat (String)
-			
+
 
 		seqfile (Sequence)
 			Sequences file

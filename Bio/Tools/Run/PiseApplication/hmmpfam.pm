@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmpfam
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmpfam
@@ -17,13 +19,13 @@ Bio::Tools::Run::PiseApplication::hmmpfam
 
 
 		hmmpfam (String)
-			
+
 
 		description (Paragraph)
 			Description of hmmpfam
 
 		toto (String)
-			
+
 
 		seqfile (Sequence)
 			Sequence file

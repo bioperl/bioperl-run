@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::dreg
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::dreg
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::dreg
 
 
 		dreg (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -42,7 +44,7 @@ Bio::Tools::Run::PiseApplication::dreg
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

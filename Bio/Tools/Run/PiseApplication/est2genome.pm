@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::est2genome
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::est2genome
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::est2genome
 
 
 		est2genome (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -88,7 +90,7 @@ Bio::Tools::Run::PiseApplication::est2genome
 			Alignment width (-width)
 
 		auto (String)
-			
+
 
 =cut
 

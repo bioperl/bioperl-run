@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmsearch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmsearch
@@ -20,10 +22,10 @@ Bio::Tools::Run::PiseApplication::hmmsearch
 			Description of hmmsearch
 
 		toto (String)
-			
+
 
 		hmmsearch (String)
-			
+
 
 		hmmfile (InFile)
 			HMM file

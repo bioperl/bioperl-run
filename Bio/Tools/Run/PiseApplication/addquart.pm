@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::addquart
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::addquart
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::addquart
 
 
 		addquart (String)
-			
+
 
 		bipfile (InFile)
 			bipfile: contains the edges of the tree T to complete
@@ -30,13 +32,13 @@ Bio::Tools::Run::PiseApplication::addquart
 			quartfile.res: contains the set of satisfied quartets
 
 		outbipfile (Results)
-			
+
 
 		tree_pop (Switch)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 =cut

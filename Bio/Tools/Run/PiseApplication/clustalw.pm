@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::clustalw
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::clustalw
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::clustalw
 
 
 		clustalw (String)
-			
+
 
 		infile (Sequence)
 			Sequences File  (or Alignment File for Bootstrap and Tree actions) (-infile)
@@ -160,18 +162,18 @@ Bio::Tools::Run::PiseApplication::clustalw
 			Output sequence numbers in the output file (clustalw format) (-seqnos)
 
 		aligfile (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		readseq_ok_aligfile (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		newtreefile (Results)
-			
+
 
 		phylipnewtreefile (Results)
-			
+
 			pipe: phylip_tree
 
 		profile (Paragraph)

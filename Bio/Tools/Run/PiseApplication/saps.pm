@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::saps
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::saps
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::saps
 
 
 		saps (String)
-			
+
 
 		seq (Sequence)
 			Protein sequence(s) File
@@ -55,7 +57,7 @@ Bio::Tools::Run::PiseApplication::saps
 			Analyze spacings of amino acids X, Y, .... (-a)
 
 		tablefile (Results)
-			
+
 
 =cut
 

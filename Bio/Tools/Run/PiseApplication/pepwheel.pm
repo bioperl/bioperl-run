@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::pepwheel
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::pepwheel
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::pepwheel
 
 
 		pepwheel (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -69,22 +71,22 @@ Bio::Tools::Run::PiseApplication::pepwheel
 			graph [device to be displayed on] (-graph)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::protal2dna
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::protal2dna
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::protal2dna
 
 
 		protal2dna (String)
-			
+
 
 		outfile (OutFile)
-			
+
 			pipe: readseq_ok_alig
 
 		alig (Sequence)
@@ -31,7 +33,7 @@ Bio::Tools::Run::PiseApplication::protal2dna
 			DNA Sequences File
 
 		fasta (String)
-			
+
 
 		same_ids (Switch)
 			Identify corresponding DNA sequences by same ID or name (-i)

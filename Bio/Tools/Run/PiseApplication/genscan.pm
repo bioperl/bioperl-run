@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::genscan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::genscan
@@ -28,7 +30,7 @@ Bio::Tools::Run::PiseApplication::genscan
 
 
 		genscan (String)
-			
+
 
 		seq (Sequence)
 			DNA Sequence File

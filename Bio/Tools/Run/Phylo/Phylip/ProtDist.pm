@@ -17,96 +17,128 @@ L<Bio::SimpleAlign> object and returns a hash ref to the table
 
 =head1 SYNOPSIS
 
-#Create a SimpleAlign object
-@params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
-$factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
-$inputfilename = 't/data/cysprot.fa';
-$aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
-	
+  #Create a SimpleAlign object
+  @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
+  $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
+  $inputfilename = 't/data/cysprot.fa';
+  $aln = $factory->align($inputfilename); # $aln is a SimpleAlign object.
 
-# Create the Distance Matrix using a default PAM matrix and id name
-# lengths limit of 30 note to use id name length greater than the
-# standard 10 in protdist, you will need to modify the protdist source
-# code
 
-$protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-my $matrix  = $protdist_factory->create_distance_matrix($aln);
-	
-#finding the distance between two sequences
-my $distance = $matrix->{'protein_name_1'}{'protein_name_2'};
+  # Create the Distance Matrix using a default PAM matrix and id name
+  # lengths limit of 30 note to use id name length greater than the
+  # standard 10 in protdist, you will need to modify the protdist source
+  # code
 
-#Alternatively, one can create the matrix by passing in a file name containing a multiple alignment in phylip format
-$protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-my $matrix  = $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
+  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
+  my $matrix  = $protdist_factory->create_distance_matrix($aln);
+
+  #finding the distance between two sequences
+  my $distance = $matrix->{'protein_name_1'}{'protein_name_2'};
+
+  #Alternatively, one can create the matrix by passing in a file 
+  #name containing a multiple alignment in phylip format
+  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
+  my $matrix  = 
+    $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
 
 
 =head1 PARAMETERS FOR PROTDIST COMPUTATION
 
-=head2 
-Title 		:MODEL
-Description	:(optional) 	This sets the model of amino acid substitution used in the calculation of the distances.
- 				3 different models are supported: 
-				PAM	Dayhoff PAM Matrix(default) 
-				KIMURA	Kimura's Distance
-				CAT	Categories Distance
-				Usage: 
-				@params = ('model'=>'X');#where X is one of the values above
-				Defaults to PAM
-				For more information on the usage of the different models, please refer to the documentation
-			        defaults to Equal (0.25,0.25,0.25,0.25)
-				found in the phylip package.
-							
-*ALL SUBSEQUENT PARAMETERS WILL ONLY WORK IN CONJUNCTION WITH THE Categories Distance MODEL*
+=head2 MODEL
 
-=head2 GENCODE 
-	Title		: GENCODE 
-	Description	: (optional)	This option allows the  user to select among various nuclear and mitochondrial genetic codes.
-			Acceptable Values:
-			U           Universal
-   			M           Mitochondrial
-			V           Vertebrate mitochondrial
-			F           Fly mitochondrial
-			Y           Yeast mitochondrial
-			Usage:
-			@params = ('gencode'=>'X'); where X is one of the letters above	
-			Defaults to U 
+Title		: MODEL
+Description	: (optional)
 
-=head2 CATEGORY 
+                  This sets the model of amino acid substitution used
+ 		  in the calculation of the distances.  3 different
+ 		  models are supported: PAM Dayhoff PAM
+ 		  Matrix(default) KIMURA Kimura's Distance CAT
+ 		  Categories Distance Usage: @params =
+ 		  ('model'=>'X');#where X is one of the values above
+ 		  Defaults to PAM For more information on the usage of
+ 		  the different models, please refer to the
+ 		  documentation defaults to Equal
+ 		  (0.25,0.25,0.25,0.25) found in the phylip package.
+
+=head2 ALL SUBSEQUENT PARAMETERS WILL ONLY WORK IN CONJUNCTION WITH
+THE Categories Distance MODEL*
+
+=cut
+
+=head2 GENCODE
+
+  Title		: GENCODE 
+  Description	: (optional)
+
+                  This option allows the user to select among various
+                  nuclear and mitochondrial genetic codes.
+
+		  Acceptable Values:
+		  U           Universal
+   		  M           Mitochondrial
+		  V           Vertebrate mitochondrial
+		  F           Fly mitochondrial
+		  Y           Yeast mitochondrial
+  Usage         : @params = ('gencode'=>'X'); 
+                  where X is one of the letters above
+		  Defaults to U
+
+=head2 CATEGORY
+
 Title		: CATEGORY 
-Description : (optional)This option sets the categorization of amino acids
-			all have groups: (Glu Gln Asp Asn), (Lys Arg His), (Phe Tyr Trp)
-			plus:
-			G	George/Hunt/Barker: (Cys), (Met   Val  Leu  Ileu), (Gly  Ala  Ser  Thr    Pro)
-			C	Chemical:           (Cys   Met), (Val  Leu  Ileu    Gly  Ala  Ser  Thr), (Pro)
-			H	Hall:               (Cys), (Met   Val  Leu  Ileu), (Gly  Ala  Ser  Thr), (Pro)
-			Usage:		
-			@params = ('category'=>'X'); where X is one of the letters above
-			Defaults to G
+Description     : (optional)
 
-=head2 PROBCHANGE 
-    Title       : PROBCHANGE 
-    Description : (optional)    This option sets the ease of changing category of amino acid.
-				(1.0 if no difficulty of changing,less if less easy. Can't be negative)
-				Usage:
-				@params = ('probchange'=>X) where 0<=X<=1							
-				Defaults to 0.4570
+                  This option sets the categorization of amino acids
+		  all have groups: (Glu Gln Asp Asn), (Lys Arg His),
+                  (Phe Tyr Trp)  plus:
+		  G   George/Hunt/Barker:
+                          (Cys), (Met   Val  Leu  Ileu), 
+                          (Gly  Ala  Ser  Thr  Pro)
+		  C   Chemical:
+                          (Cys   Met), (Val  Leu  Ileu  Gly  Ala  Ser  Thr),
+                          (Pro)
+		  H   Hall:
+                        (Cys), (Met   Val  Leu  Ileu), (Gly  Ala  Ser  Thr),
+                        (Pro)
+
+  Usage         : @params = ('category'=>'X'); 
+                  where X is one of the letters above
+		  Defaults to G
+
+=head2 PROBCHANGE
+
+  Title       : PROBCHANGE
+  Description : (optional)
+                 This option sets the ease of changing category of amino
+                 acid.  (1.0 if no difficulty of changing,less if less
+                 easy. Can't be negative)
+
+  Usage       : @params = ('probchange'=>X) where 0<=X<=1
+	        Defaults to 0.4570
+
 =head2 TRANS 
-    Title       : TRANS
-    Description : (optional)    This option sets transition/transversion ratio
-				can be any positive number
-                                Usage:
-                                @params = ('trans'=>X) where X >= 0 
-                                Defaults to 2
-=head2 FREQ 
-    Title       : FREQ 
-    Description : (optional)    This option sets the frequency of each base (A,C,G,T)
-				The sum of the frequency must sum to 1.
-				For example A,C,G,T = (0.25,0.5,0.125,0.125) 
-                                Usage:
-                                @params = ('freq'=>('W','X','Y','Z') where W + X + Y + Z = 1 
-				Defaults to Equal (0.25,0.25,0.25,0.25)
 
-	
+  Title       : TRANS
+  Description : (optional)
+                This option sets transition/transversion ratio can be
+                any positive number
+
+  Usage        : @params = ('trans'=>X) where X >= 0
+                 Defaults to 2
+
+=head2 FREQ
+
+  Title       : FREQ 
+  Description : (optional)
+                This option sets the frequency of each base (A,C,G,T)
+		The sum of the frequency must sum to 1.
+		For example A,C,G,T = (0.25,0.5,0.125,0.125) 
+
+  Usage       : @params = ('freq'=>('W','X','Y','Z')
+                where W + X + Y + Z = 1
+		Defaults to Equal (0.25,0.25,0.25,0.25)
+
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cpgreport
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cpgreport
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::cpgreport
 
 
 		cpgreport (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,7 +47,7 @@ Bio::Tools::Run::PiseApplication::cpgreport
 			feature file for output (-featout)
 
 		auto (String)
-			
+
 
 =cut
 

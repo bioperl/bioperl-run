@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::shuffleseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::shuffleseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::shuffleseq
 
 
 		shuffleseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -46,7 +48,7 @@ Bio::Tools::Run::PiseApplication::shuffleseq
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::supermatcher
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::supermatcher
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::supermatcher
 
 
 		supermatcher (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -67,7 +69,7 @@ Bio::Tools::Run::PiseApplication::supermatcher
 			Error file to be written to (-errorfile)
 
 		auto (String)
-			
+
 
 =cut
 

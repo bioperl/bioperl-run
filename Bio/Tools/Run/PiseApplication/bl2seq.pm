@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::bl2seq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::bl2seq

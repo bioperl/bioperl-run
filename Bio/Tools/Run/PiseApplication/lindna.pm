@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::lindna
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::lindna
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::lindna
 
 
 		lindna (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -65,22 +67,22 @@ Bio::Tools::Run::PiseApplication::lindna
 			space between text and ticks, blocks, and ranges (enter a number to multiply the default space) (-postext)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::decorate
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::decorate
@@ -22,13 +24,13 @@ Bio::Tools::Run::PiseApplication::decorate
 
 
 		decorate (String)
-			
+
 
 		result_files (Results)
-			
+
 
 		pdb_file (Results)
-			
+
 
 		pdbfile (InFile)
 			PDB data for the template backbone

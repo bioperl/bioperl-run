@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::golden
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::golden
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::golden
 
 
 		golden (String)
-			
+
 
 		db (Excl)
 			Database
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::golden
 			Search with entry name only (-i)
 
 		outfile (OutFile)
-			
+
 			pipe: seqfile
 
 		convert (Switch)

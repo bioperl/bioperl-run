@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::iep
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::iep
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::iep
 
 
 		iep (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -57,22 +59,22 @@ Bio::Tools::Run::PiseApplication::iep
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

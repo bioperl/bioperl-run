@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::redata
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::redata
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::redata
 
 
 		redata (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -44,7 +46,7 @@ Bio::Tools::Run::PiseApplication::redata
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

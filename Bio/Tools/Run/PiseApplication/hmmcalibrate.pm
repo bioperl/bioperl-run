@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmcalibrate
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmcalibrate
@@ -17,20 +19,20 @@ Bio::Tools::Run::PiseApplication::hmmcalibrate
 
 
 		hmmcalibrate (String)
-			
+
 
 		description (Paragraph)
 			description of hmmcalibrate
 
 		toto (String)
-			
+
 
 		hmmfile (InFile)
 			HMM file
 			pipe: hmmer_HMM
 
 		new_hmmfile (Results)
-			
+
 			pipe: hmmer_HMM
 
 		expert_options (Paragraph)

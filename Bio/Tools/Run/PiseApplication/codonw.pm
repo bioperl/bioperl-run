@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::codonw
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::codonw
@@ -17,13 +19,13 @@ Bio::Tools::Run::PiseApplication::codonw
 
 
 		codonw (String)
-			
+
 
 		outfiles (String)
-			
+
 
 		results_files (Results)
-			
+
 
 		seqfile (Sequence)
 			Sequences File
@@ -120,11 +122,11 @@ Bio::Tools::Run::PiseApplication::codonw
 			Select number of genes to use to identify optimal codons
 
 		cai_coa (OutFile)
-			
+
 			pipe: codonw_coa_file
 
 		coa_files (Results)
-			
+
 
 =cut
 

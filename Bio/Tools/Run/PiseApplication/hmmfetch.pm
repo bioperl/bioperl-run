@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmfetch
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmfetch
@@ -20,10 +22,10 @@ Bio::Tools::Run::PiseApplication::hmmfetch
 			Description of hmmfetch
 
 		toto (String)
-			
+
 
 		hmmfetch (String)
-			
+
 
 		name (String)
 			name of the HMM
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::hmmfetch
 			HMM database
 
 		hmmfile (Results)
-			
+
 			pipe: hmmer_HMM
 
 =cut

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::Puzzle
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::Puzzle
@@ -22,27 +24,27 @@ Bio::Tools::Run::PiseApplication::Puzzle
 
 
 		Puzzle (String)
-			
+
 
 		stdinput (String)
-			
+
 
 		confirm (String)
-			
+
 
 		outfile (Results)
-			
+
 
 		outtree (Results)
-			
+
 			pipe: phylip_tree
 
 		outdist (Results)
-			
+
 			pipe: phylip_dist
 
 		params (Results)
-			
+
 
 		infile (Sequence)
 			Alignement File

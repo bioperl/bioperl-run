@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cpgplot
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cpgplot
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::cpgplot
 
 
 		cpgplot (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -69,22 +71,22 @@ Bio::Tools::Run::PiseApplication::cpgplot
 			feature file for output (-featout)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

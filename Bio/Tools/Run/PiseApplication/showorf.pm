@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::showorf
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::showorf
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::showorf
 
 
 		showorf (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -60,7 +62,7 @@ Bio::Tools::Run::PiseApplication::showorf
 			Width of screen (-width)
 
 		auto (String)
-			
+
 
 =cut
 

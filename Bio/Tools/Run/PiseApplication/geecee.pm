@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::geecee
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::geecee
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::geecee
 
 
 		geecee (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -36,7 +38,7 @@ Bio::Tools::Run::PiseApplication::geecee
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

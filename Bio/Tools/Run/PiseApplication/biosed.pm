@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::biosed
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::biosed
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::biosed
 
 
 		biosed (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -55,7 +57,7 @@ Bio::Tools::Run::PiseApplication::biosed
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::mview_alig
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::mview_alig
@@ -22,7 +24,7 @@ Bio::Tools::Run::PiseApplication::mview_alig
 
 
 		mview_alig (String)
-			
+
 
 		alig (Sequence)
 			Alignment File
@@ -32,7 +34,7 @@ Bio::Tools::Run::PiseApplication::mview_alig
 			Type of alignment (-in)
 
 		from_phylip (String)
-			
+
 
 		main_formatting_options (Paragraph)
 			Main formatting options
@@ -164,13 +166,13 @@ Bio::Tools::Run::PiseApplication::mview_alig
 			Use Cascading Style Sheets (-css)
 
 		html_output_file (OutFile)
-			
+
 
 		html_file (Results)
-			
+
 
 		alig_file (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		out (Excl)

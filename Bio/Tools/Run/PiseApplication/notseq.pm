@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::notseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::notseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::notseq
 
 
 		notseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -52,7 +54,7 @@ Bio::Tools::Run::PiseApplication::notseq
 			Output format for: file of excluded sequences
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cap
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cap
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::cap
 
 
 		cap (String)
-			
+
 
 		seq (Sequence)
 			Fragments File

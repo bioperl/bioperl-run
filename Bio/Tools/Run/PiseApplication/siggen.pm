@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::siggen
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::siggen
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::siggen
 
 
 		siggen (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -83,7 +85,7 @@ Bio::Tools::Run::PiseApplication::siggen
 			Extension of signature files for output (-sigextn)
 
 		auto (String)
-			
+
 
 =cut
 

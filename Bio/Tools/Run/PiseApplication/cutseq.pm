@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::cutseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::cutseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::cutseq
 
 
 		cutseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -49,7 +51,7 @@ Bio::Tools::Run::PiseApplication::cutseq
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

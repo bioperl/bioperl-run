@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::oddcomp
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::oddcomp
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::oddcomp
 
 
 		oddcomp (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -51,7 +53,7 @@ Bio::Tools::Run::PiseApplication::oddcomp
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

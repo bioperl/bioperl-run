@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::tmap
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::tmap
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::tmap
 
 
 		tmap (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -39,22 +41,22 @@ Bio::Tools::Run::PiseApplication::tmap
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::html4blast
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::html4blast
@@ -17,14 +19,14 @@ Bio::Tools::Run::PiseApplication::html4blast
 
 
 		html4blast (String)
-			
+
 
 		input (InFile)
 			Blast output file
 			pipe: blast_output
 
 		output (Results)
-			
+
 
 		links (Excl)
 			Database links

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::distmat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::distmat
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::distmat
 
 
 		distmat (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -60,7 +62,7 @@ Bio::Tools::Run::PiseApplication::distmat
 			Enter a name for the distance matrix (-outf)
 
 		auto (String)
-			
+
 
 =cut
 

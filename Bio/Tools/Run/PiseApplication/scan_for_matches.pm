@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::scan_for_matches
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::scan_for_matches
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::scan_for_matches
 
 
 		scan_for_matches (String)
-			
+
 
 		pattern_file (Results)
-			
+
 
 		sequence (Sequence)
 			Input sequence

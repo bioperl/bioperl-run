@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmalign
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmalign
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::hmmalign
 
 
 		hmmalign (String)
-			
+
 
 		seqfile (Sequence)
 			Sequences File
@@ -28,14 +30,14 @@ Bio::Tools::Run::PiseApplication::hmmalign
 			pipe: hmmer_HMM
 
 		align_file (Results)
-			
+
 			pipe: hmmer_alig
 
 		output_format (Switch)
 			Additional output in GCG MSF format (default is SELEX format)
 
 		msf_align_file (Results)
-			
+
 			pipe: readseq_ok_alig
 
 		match_states (Switch)

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::gibbs_scan
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::gibbs_scan
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::gibbs_scan
 
 
 		gibbs_scan (String)
-			
+
 
 		motif_file (InFile)
 			Motif scan file (file.sn)

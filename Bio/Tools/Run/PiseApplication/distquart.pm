@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::distquart
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::distquart
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::distquart
 
 
 		distquart (String)
-			
+
 
 		dist (Switch)
 			Reads as input inter-species distances (as opposed to sequences) (-d)
@@ -46,11 +48,11 @@ Bio::Tools::Run::PiseApplication::distquart
 			Lower triangular distances matrix (-l)
 
 		quartfile (Results)
-			
+
 			pipe: quartfile
 
 		outdistfile (OutFile)
-			
+
 			pipe: phylip_dist
 
 =cut

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::diffseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::diffseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::diffseq
 
 
 		diffseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -54,7 +56,7 @@ Bio::Tools::Run::PiseApplication::diffseq
 			Output in columns format (-columns)
 
 		auto (String)
-			
+
 
 =cut
 

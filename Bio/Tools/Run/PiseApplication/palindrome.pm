@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::palindrome
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::palindrome
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::palindrome
 
 
 		palindrome (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -54,7 +56,7 @@ Bio::Tools::Run::PiseApplication::palindrome
 			Report overlapping matches (-overlap)
 
 		auto (String)
-			
+
 
 =cut
 

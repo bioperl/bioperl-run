@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::wobble
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::wobble
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::wobble
 
 
 		wobble (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -48,22 +50,22 @@ Bio::Tools::Run::PiseApplication::wobble
 			outf (-outf)
 
 		auto (String)
-			
+
 
 		psouput (String)
-			
+
 
 		psresults (Results)
-			
+
 
 		metaresults (Results)
-			
+
 
 		dataresults (Results)
-			
+
 
 		pngresults (Results)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::extractfeat
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::extractfeat
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::extractfeat
 
 
 		extractfeat (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -70,7 +72,7 @@ Bio::Tools::Run::PiseApplication::extractfeat
 			Output format for: outseq
 
 		auto (String)
-			
+
 
 =cut
 

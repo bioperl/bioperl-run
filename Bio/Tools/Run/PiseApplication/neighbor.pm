@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::neighbor
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::neighbor
@@ -24,7 +26,7 @@ Bio::Tools::Run::PiseApplication::neighbor
 
 
 		neighbor (String)
-			
+
 
 		distance_method (Excl)
 			Distance method
@@ -55,16 +57,16 @@ Bio::Tools::Run::PiseApplication::neighbor
 			Compute a consensus tree
 
 		consense_confirm (String)
-			
+
 
 		consense_terminal_type (String)
-			
+
 
 		consense_outfile (Results)
-			
+
 
 		consense_treefile (Results)
-			
+
 
 		output (Paragraph)
 			Output options
@@ -91,26 +93,26 @@ Bio::Tools::Run::PiseApplication::neighbor
 			Matrix format
 
 		outfile (Results)
-			
+
 
 		treefile (Results)
-			
+
 			pipe: phylip_tree
 
 		indented_treefile (Results)
-			
+
 
 		params (Results)
-			
+
 
 		confirm (String)
-			
+
 
 		terminal_type (String)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

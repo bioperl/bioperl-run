@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::emma
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::emma
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::emma
 
 
 		emma (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -148,7 +150,7 @@ Bio::Tools::Run::PiseApplication::emma
 			The dendogram output filename (-dendoutfile)
 
 		auto (String)
-			
+
 
 =cut
 

@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::equicktandem
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::equicktandem
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::equicktandem
 
 
 		equicktandem (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -45,7 +47,7 @@ Bio::Tools::Run::PiseApplication::equicktandem
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

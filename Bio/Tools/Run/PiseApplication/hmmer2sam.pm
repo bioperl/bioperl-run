@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::hmmer2sam
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::hmmer2sam
@@ -17,7 +19,7 @@ Bio::Tools::Run::PiseApplication::hmmer2sam
 
 
 		hmmer2sam (String)
-			
+
 
 		hmmfile (InFile)
 			HMMER model file

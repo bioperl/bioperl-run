@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::boxshade
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::boxshade
@@ -17,14 +19,14 @@ Bio::Tools::Run::PiseApplication::boxshade
 
 
 		boxshade (String)
-			
+
 
 		alignment (Sequence)
 			Alignment File
 			pipe: readseq_ok_alig
 
 		input_format (String)
-			
+
 
 		output_params (Paragraph)
 			Output parameters
@@ -120,25 +122,25 @@ Bio::Tools::Run::PiseApplication::boxshade
 			Create identity / similarity matrix
 
 		print_position (Excl)
-			
+
 
 		outfile (OutFile)
-			
+
 
 		psfile (OutFile)
-			
+
 
 		htmlfile (OutFile)
-			
+
 
 		pictfile (OutFile)
-			
+
 
 		matrixfile (OutFile)
-			
+
 
 		tmp_params (Results)
-			
+
 
 =cut
 

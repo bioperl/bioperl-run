@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prettyseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prettyseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::prettyseq
 
 
 		prettyseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -60,7 +62,7 @@ Bio::Tools::Run::PiseApplication::prettyseq
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

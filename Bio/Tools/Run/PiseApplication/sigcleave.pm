@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::sigcleave
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::sigcleave
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::sigcleave
 
 
 		sigcleave (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -54,7 +56,7 @@ Bio::Tools::Run::PiseApplication::sigcleave
 			outfile (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 

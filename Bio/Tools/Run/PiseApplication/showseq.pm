@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::showseq
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::showseq
@@ -17,10 +19,10 @@ Bio::Tools::Run::PiseApplication::showseq
 
 
 		showseq (String)
-			
+
 
 		init (String)
-			
+
 
 		input (Paragraph)
 			input Section
@@ -159,7 +161,7 @@ Bio::Tools::Run::PiseApplication::showseq
 			Output sequence details to a file (-outfile)
 
 		auto (String)
-			
+
 
 =cut
 
