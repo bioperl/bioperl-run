@@ -46,6 +46,10 @@ DESCRIPTION section for details.
 
 wrapper for eponine.. a mammalian TSS predictor
 
+The environment variable EPONINEDIR must be set to point at either the
+directory which contains eponine-scan.jar or directly at the jar which
+eponine-scan classfiles.
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -79,52 +83,57 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Eponine;
 
-
-
 #tgot to take inmore parameters
 
-use vars qw($AUTOLOAD @ISA @EPONINE_PARAMS  %EPONINE_PARAMS  $EPOJAR $JAVA $PROGRAMDIR 
-            $TMPDIR $TMPOUTFILE 
+use vars qw($AUTOLOAD @ISA @EPONINE_PARAMS  %EPONINE_PARAMS  
+	    $EPOJAR $JAVA $PROGRAMDIR $PROGRAMNAME $PROGRAM
+            $TMPDIR $TMPOUTFILE  $DEFAULT_THRESHOLD
             %OK_FIELD);
 use strict;
 
 use Bio::Tools::Eponine;
 use Bio::Root::Root;
 use Bio::Root::IO;
+use Bio::Tools::Run::WrapperBase;
 
 BEGIN {      
+    $DEFAULT_THRESHOLD = 50;
+    $PROGRAMNAME = 'java';
+    $EPOJAR = 'eponine-scan.jar';
 
+    if( ! defined $PROGRAMDIR ) { 
+	$PROGRAMDIR = $ENV{'JAVA_HOME'} || $ENV{'JAVA_DIR'};
+    }
+    if (defined $PROGRAMDIR) {
+	foreach my $progname ( [qw(java)],[qw(bin java)] ) { 
+	    my $f = Bio::Root::IO->catfile($PROGRAMDIR, @$progname);
+	    if( -e $f && -x $f ) {
+		$PROGRAM = $f;
+		last;
+	    } 
+	}
+    }
+    
+    if( defined $ENV{'EPONINEDIR'} ) { 
+	$EPOJAR = Bio::Root::IO->catfile($ENV{'EPONINEDIR'}, $EPOJAR);
+    }
 
-  if (defined $ENV{EPONINEDIR}) {
-       $PROGRAMDIR = $ENV{EPONINEDIR} || '';
-        $EPOJAR = Bio::Root::IO->catfile($PROGRAMDIR, 'eponine-scan.jar'.($^O =~ /mswin/i ?'.exe':''));
-	# $JAVA = Bio::Root::IO->catfile($PROGRAMDIR, 'java'.($^O =~ /mswin/i ?'.exe':''));
-   
-  }
-  else {                                                                 
-      $EPOJAR= 'eponine-scan.jar';
-      #$JAVA = 'java';
-  }
-
-  %EPONINE_PARAMS = ('SEQ'      => '/tmp/test.fa',
-                     'THRESHOLD' => '0.999',
-		     'EPOJAR'   => '/usr/local/bin/eponine-scan.jar',
-		     'JAVA'     => '/usr/java/jre1.3.1_02/bin/java');
- 
-  @EPONINE_PARAMS=qw(SEQ THRESHOLD JAVA EPOJAR);
-
- foreach my $attr ( @EPONINE_PARAMS)
-                  { $OK_FIELD{$attr}++; }
-
-
-
+    %EPONINE_PARAMS = ('SEQ'      => '/tmp/test.fa',
+		       'THRESHOLD' => '0.999',
+		       'EPOJAR'   => '/usr/local/bin/eponine-scan.jar',
+		       'JAVA'     => '/usr/java/jre1.3.1_02/bin/java');
+    
+    @EPONINE_PARAMS=qw(SEQ THRESHOLD JAVA EPOJAR);
+    
+    foreach my $attr ( @EPONINE_PARAMS)
+    { $OK_FIELD{$attr}++; }    
 }
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 sub AUTOLOAD {
     my $self = shift;
     my $attr = $AUTOLOAD;
-    print "************ attr:  $attr\n";
+    $self->debug( "************ attr:  $attr\n");
     $attr =~ s/.*:://;
     $attr = uc $attr;
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
@@ -132,24 +141,20 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
-
-
 sub new {
     my ($caller, @args) = @_;
     # chained new
     my $self = $caller->SUPER::new(@args);
     # so that tempfiles are cleaned up
-    $self->_initialize_io();
 
     my $java;
     my $seq;
     my $threshold;
     my $epojar;
 
-
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
        $attr =   shift @args;
        $value =  shift @args;
@@ -179,61 +184,28 @@ sub new {
     $self->{'_filename'} = undef; #location of seq 
     $seq = $EPONINE_PARAMS{'seq'}     unless defined $seq;
     $threshold = $EPONINE_PARAMS{'threshold'}     unless defined $threshold;
+    
     $java = $EPONINE_PARAMS{'JAVA'} unless defined $java; 
     $epojar = $EPONINE_PARAMS{'epojar'} unless defined $epojar; 
-    $self->filename($seq) if ($seq);       
-
+    $self->filename($seq) if ($seq);
 
     if (-x $java) {
         # full path assumed
         $self->java($java);
     }
-=head
-    else {
-        # search shell $PATH
-	     eval {
-	       $self->java($self->exist_java('java'));
-          };
-        if ($@) {
-           $self->throw("Can't find executable java");
-
-         }
-    }
-=cut
-						     
-    if (-e $epojar) {
-	 $self->epojar($epojar);
-    } else {
-        $self->throw("Can't find eponine-scan.jar");
-    }
+    
+    $self->epojar($epojar) if (defined $epojar && -e $epojar);
 
     if (defined $threshold && $threshold >=0 ){
         $self->threshold($threshold);
     } else {
-        $self->threshold(50); 
+        $self->threshold($DEFAULT_THRESHOLD); 
     }
 				  
     return $self;
 }
 
 
-=head2 exist_java 
-
- Title   : exist_java 
- Usage   : my $exist = $self->exist_java()
- Function: Determine whether genscan program can be found on current host
- Returns :  1 if genscan program found at expected location, 0 otherwise. 
- Args    : 
-
-=cut
-
-sub exists_java{
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($JAVA) ) {
-        $JAVA= $f if( -e $f );
-        return 1;
-   }
-}
 
 =head2 filename 
 
@@ -262,17 +234,30 @@ sub filename{
 
 =cut
 
+sub executable { shift->java(@_); }
+
 sub java {
-    my ($self, $location) = @_;
-    if ($location)
-    {
-      $self->throw("java not found at $location: $!\n")
-        unless (-e $location);
-        $self->{'_java'} = $location ;
-      $self->throw("java not executable: $!\n")
-        unless (-x $location);
-    }
-    return $self->{'_java'};
+   my ($self, $exe,$warn) = @_;
+
+   if( defined $exe ) {
+     $self->{'_pathtojava'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtojava'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+	   $self->{'_pathtojava'} = $PROGRAM;
+       } else { 
+	   my $exe;
+	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+	       -x $exe ) {
+	       $self->{'_pathtojava'} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+	       $self->{'_pathtojava'} = undef;
+	   }
+       }
+   }
+   $self->{'_pathtojava'};
 }
 
 
@@ -289,8 +274,10 @@ sub epojar {
     my ($self, $location) = @_;
     if ($location)
     {
-      $self->throw("eponine-scan.jar not found at $location: $!\n")
-          unless (-e $location);
+	unless( $location ) { 
+	    $self->warn("eponine-scan.jar not found at $location: $!\n");
+	    return undef;
+	}
       $self->{'_epojar'} = $location ;
     }
     return $self->{'_epojar'};
@@ -370,7 +357,17 @@ sub run_eponine {
     my $result = $TMPOUTFILE;
     my @tss;
     #run eponine
-    print "Running eponine-scan\n";
+    $self->debug( "Running eponine-scan\n");
+    my ($java,$epojar) = ( $self->java,
+			   $self->epojar);
+    unless( defined $java && -e $java && -x $java ) {
+	$self->warn("Cannot find java");
+	return undef;
+    }
+    unless(defined $epojar && -e $epojar ) {
+	$self->warn("Cannot find Eponine jar");
+	return undef;
+    }
     my $cmd  =   $self->java.' -jar '.$self->epojar.' -seq '.$self->filename.' -threshold '.$self->threshold." > ".$result;
     $self->throw("Error running eponine-scan on ".$self->filename." \n Eponine crashed ($cmd) crashed: $? \n")
          if (system ($cmd));
