@@ -1,0 +1,6 @@
+SEQ	EMBL/GenBank/SwissProt	CDS	50	100	.	+	.	gene HoxD3a;
+SEQ	EMBL/GenBank/SwissProt	CDS	120	190	.	+	.	gene HoxD3a;
+SEQ	EMBL/GenBank/SwissProt	CDS	250	350	.	+	.	gene HoxD3a;
+SEQ	EMBL/GenBank/SwissProt	CDS	450	900	.	+	.	gene HoxD3a;
+SEQ	EMBL/GenBank/SwissProt	CDS	1200	1580	.	+	.	gene HoxD3a;
+SEQ	EMBL/GenBank/SwissProt	CDS	1700	2000	.	+	.	gene HoxD3a;
