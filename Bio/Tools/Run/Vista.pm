@@ -484,6 +484,7 @@ sub _make_plotfile {
   print $tfh1 "NUM_WINDOWS ".$self->numwindows."\n\n";
   print $tfh1 "AXIS_LABEL ".$self->axis_label ."\n\n" if $self->axis_label;
   print $tfh1 "TICKS_FILE ".$self->ticks_file ."\n\n" if $self->ticks_file;
+  print $tfh1 "SNPS_FILE"." ".$self->snps_file."\n\n" if $self->snps_file;
   print $tfh1 "GAPS ".$self->gaps ."\n\n"if $self->gaps;
   print $tfh1 "REPEATS_FILE ".$self->repeats_file ."\n\n" if $self->repeats_file;
   print $tfh1 "FILTER_REPEATS ".$self->filter_repeats ."\n\n" if $self->filter_repeats;
