@@ -16,7 +16,7 @@ BEGIN {
 
 END { 
     foreach( $Test::ntest..NUMTESTS) {
-	skip('Blast or env variables not installed correctly',1);
+	skip('Fasta or env variables not installed correctly',1);
     }
     unlink('blastreport.out');
 }
@@ -27,9 +27,15 @@ use Bio::SeqIO;
 ok(1);
 my $verbose = -1;
 
-my @params = ( 'b' =>'15', 'O' =>'resultfile', 'm'=>'1',"program"=>'fasta33');
-my  $factory = Bio::Tools::Run::Alignment::StandAloneFasta->new('-verbose' => $verbose,
-						     @params);
+my $version = '34';
+my @params = ( 'b' =>'15', 
+	       'd' => 0,
+	       'O' =>'resultfile', 
+	       'm'=>'9',
+	       "program"=>"fasta$version");
+my $factory = Bio::Tools::Run::Alignment::StandAloneFasta->new
+    ('-verbose' => $verbose,
+     @params);
 ok $factory;
 my $inputfilename = Bio::Root::IO->catfile("t","data","fasta.fa");
 
@@ -50,7 +56,7 @@ ok $hsp->algorithm, 'FASTN';
 ok $hsp->num_identical, 2982;
 ok $hsp->length, 2982;
 
-$factory->program('ssearch34');
+$factory->program_name('ssearch'.$version);
 ($fastareport) = $factory->run($inputfilename);
 $result = $fastareport->next_result;
 $hit    = $result->next_hit();
@@ -59,7 +65,7 @@ ok $hsp->algorithm, 'SMITH-WATERMAN';
 ok $hsp->num_identical, 2982;
 ok $hsp->length, 2982;
 
-$factory->program('fastx34');
+$factory->program_name('fastx'.$version);
 $factory->library(Bio::Root::IO->catfile("t","data","fastaprot.fa"));
 ($fastareport) = $factory->run($inputfilename);
 $result = $fastareport->next_result;
@@ -69,7 +75,8 @@ ok $hsp->algorithm, 'FASTX';
 ok $hsp->num_identical, 994;
 ok $hsp->length, 994;
 
-my $sio = Bio::SeqIO->new(-file=>$inputfilename,-format=>"fasta");
+my $sio = Bio::SeqIO->new(-file=>$inputfilename,
+			  -format=>"fasta");
 my $seq = $sio->next_seq;
 
 #test with objects
