@@ -305,7 +305,7 @@ sub run {
 	$cmdstring .= " \-$param $val";
     }
     my ($tmpdir) = $self->tempdir();
-   my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+    my ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
 
     my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				  '-fh'          => $tempseqFH,
@@ -317,6 +317,7 @@ sub run {
     $alnout->close();
     undef $alnout;   
     close($tempseqFH);
+
     $cmdstring .= " $tempseqfile";
     if( $tree && defined $flags{'search'} eq 'u' ) { 
 	my ($temptreeFH,$temptreefile) = $self->io->tempfile
@@ -334,7 +335,7 @@ sub run {
     unless( open(PROTML, "$cmdstring |") ) {
 	$self->warn("Cannot run $cmdstring");
 	return undef;
-    }    
+    }
     my $parser= new Bio::Tools::Phylo::Molphy(-fh => \*PROTML);
     unless ( $self->save_tempfiles ) {
 	$self->cleanup();
