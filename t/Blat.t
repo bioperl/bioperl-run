@@ -3,6 +3,7 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
+my $verbose = $ENV{'BIOPERLDEBUG'} || 0;
 BEGIN {
    eval { require Test; };
    if( $@ ) {
@@ -10,7 +11,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 12;
+   $NTESTS = 11;
    plan tests => $NTESTS;
 }
 
@@ -19,7 +20,7 @@ END {
        skip('Unable to run Blat  tests, exe may not be installed',1);
    }
 }
-ok(1);
+
 use Bio::Tools::Run::Alignment::Blat;
 use Bio::Root::IO;
 use Bio::SeqIO;
@@ -29,7 +30,9 @@ my $db =  Bio::Root::IO->catfile("t","data","blat_dna.fa");
 
 my $query = Bio::Root::IO->catfile("t","data","blat_dna.fa");    
 
-my  $factory = Bio::Tools::Run::Alignment::Blat->new("DB"=>$db);
+my  $factory = Bio::Tools::Run::Alignment::Blat->new('quiet'  => 1,
+						     -verbose => $verbose,
+						     "DB"     => $db);
 ok $factory->isa('Bio::Tools::Run::Alignment::Blat');
 
 my $blat_present = $factory->executable();
@@ -44,10 +47,10 @@ my $result = $searchio->next_result;
 my $hit    = $result->next_hit;
 my $hsp    = $hit->next_hsp;
 ok $hsp->isa("Bio::Search::HSP::HSPI");
-ok ($hsp->feature1->start,1);
-ok ($hsp->feature1->end,1775);
-ok ($hsp->feature2->start,1);
-ok ($hsp->feature2->end,1775);
+ok ($hsp->query->start,1);
+ok ($hsp->query->end,1775);
+ok ($hsp->hit->start,1);
+ok ($hsp->hit->end,1775);
 my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
 
 my $seq  = $sio->next_seq ;
@@ -57,10 +60,10 @@ $result = $searchio->next_result;
 $hit    = $result->next_hit;
 $hsp    = $hit->next_hsp;
 ok $hsp->isa("Bio::Search::HSP::HSPI");
-ok ($hsp->feature1->start,1);
-ok ($hsp->feature1->end,1775);
-ok ($hsp->feature2->start,1);
-ok ($hsp->feature2->end,1775);
+ok ($hsp->query->start,1);
+ok ($hsp->query->end,1775);
+ok ($hsp->hit->start,1);
+ok ($hsp->hit->end,1775);
 
  
 1; 
