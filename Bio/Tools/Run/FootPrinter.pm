@@ -271,12 +271,10 @@ sub run {
   $#seq > 0 || $self->throw("Need at least two sequences");
   $self->tree || $self->throw("Need to specify a phylogenetic tree using -tree option");
 
-  my ($infile_tfh,$infile) = $self->_setinput(@seq);
+  my $infile = $self->_setinput(@seq);
 
   my $param_string = $self->_setparams();
   my @footprint_feats = $self->_run($infile,$self->tree,$param_string);
-  close ($infile_tfh);
-  undef ($infile_tfh);
   return @footprint_feats;
 
 }
@@ -379,12 +377,14 @@ sub _setparams {
 sub _setinput {
   my ($self,@seq) = @_;
   my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+  my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
   foreach my $seq(@seq){
       $seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
-      my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
       $out1->write_seq($seq);
   }  
-  return ($tfh1,$outfile1);
+  $tfh1->close;
+  undef($tfh1);
+  return ($outfile1);
 }
 
 
