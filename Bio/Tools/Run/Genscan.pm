@@ -61,7 +61,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Genscan;
  
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR                
-            $TMPDIR $TMPOUTFILE  @GENSCAN_PARAMS
+            $TMPDIR $PROGRAMNAME @GENSCAN_PARAMS
              %OK_FIELD);
 use strict;
 use Bio::Seq;
@@ -70,12 +70,14 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Genscan;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 
 
 BEGIN {
+   $PROGRAMNAME = 'genscan'  . ($^O =~ /mswin/i ?'.exe':'');
 
    if (defined $ENV{GENSCANDIR}) {
         $PROGRAMDIR = $ENV{GENSCANDIR} || '';
@@ -86,7 +88,7 @@ BEGIN {
         $PROGRAM = 'genscan';
     }
               
-     @GENSCAN_PARAMS=qw(MATRIX);
+     @GENSCAN_PARAMS=qw(MATRIX VERBOSE);
       foreach my $attr ( @GENSCAN_PARAMS)
                         { $OK_FIELD{$attr}++; }
 }
@@ -104,73 +106,59 @@ sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     # to facilitiate tempfile cleanup
-    $self->_initialize_io();
+    $self->io->_initialize_io();
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
     while (@args)  {
         $attr =   shift @args;
         $value =  shift @args;
         next if( $attr =~ /^-/ ); # don't want named parameters
         if ($attr =~/'PROGRAM'/i) {
-            $self->program($value);
+            $self->executable($value);
             next;
         }
         $self->$attr($value);
     }
-    if (! defined $self->program) {
-         $self->program($PROGRAM);
-     }
-    unless ($self->exists_genscan()) {
-        if( $self->verbose >= 0 ) {
-            warn "Genscan program not found as ".$self->program." or not executable. \n ";
-      }
-    }
-
     return $self;
 }
 
 
-=head2  exists_genscan()
+=head2 executable
 
- Title   : exists_genscan
- Usage   : $genscanfound = Bio::Tools::Run::Genscan->exists_genscan()
- Function: Determine whether genscan program can be found on current host
- Returns : 1 if genscan program found at expected location, 0 otherwise.
- Args    : none
-
-=cut
-
-
-sub exists_genscan {
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-        $PROGRAM = $f if( -e $f );
-        return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function:
- Returns : value of program
- Args    : newvalue (optional)
+ Title   : executable
+ Usage   : my $exe = $genscan->executable();
+ Function: Finds the full path to the 'genscan' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
 
 
 =cut
 
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
+sub executable{
+   my ($self, $exe,$warn) = @_;
 
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+           $self->{'_pathtoexe'} = $PROGRAM;
+       } else {
+           my $exe;
+           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+               -x $exe ) {
+               $self->{'_pathtoexe'} = $exe;
+           } else {
+               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+               $self->{'_pathtoexe'} = undef;
+           }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
+
 
 
 =head2 predict_genes()
@@ -207,16 +195,22 @@ sub _run {
     my ($self) = @_;
     my @genes;
     my $gene;
-    my $result = $TMPOUTFILE;
 
-    my $str = $self->program.' '.$self->MATRIX.' '.$self->{'input'}." > $result";
-    system($str);
-    $self->throw($result." not created by Genscan\n") unless (-e $result);
-    my $genScanParser = Bio::Tools::Genscan->new(-file => $result);
+    my $str = $self->executable.' '.$self->MATRIX.' '.$self->{'input'};
+    if($self->verbose){
+       $str.=" -v ";
+    }
+    print STDERR "$str\n";
+    unless (open(GENSCAN, "$str |")){
+	    $self->warn("Cannot run $str");
+    }
+    my $genScanParser = Bio::Tools::Genscan->new(-fh=> \*GENSCAN);
+
     
     while( $gene = $genScanParser->next_prediction()){
        push(@genes, $gene);
     }     
+   $self->cleanup();
    return @genes;
 }
 
@@ -248,8 +242,8 @@ sub _set_input() {
 
 sub _writeSeqFile(){
   my ($self,$seq) = @_;
-  my($tfh,$inputfile);
- ($tfh,$inputfile) = $self->tempfile(-dir=>$TMPDIR);
+  my $tmpdir = $self->io->tempdir(CLEANUP=>1);
+  my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$tmpdir);
   my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
   $in->write_seq($seq);
  
