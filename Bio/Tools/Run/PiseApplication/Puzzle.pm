@@ -25,26 +25,19 @@ Bio::Tools::Run::PiseApplication::Puzzle
 
 		Puzzle (String)
 
-
 		stdinput (String)
-
 
 		confirm (String)
 
-
 		outfile (Results)
 
-
 		outtree (Results)
-
 			pipe: phylip_tree
 
 		outdist (Results)
-
 			pipe: phylip_dist
 
 		params (Results)
-
 
 		infile (Sequence)
 			Alignement File
@@ -189,6 +182,8 @@ sub new {
 
     $self->{DESCRIPTION}   = "Tree reconstruction for sequences by quartet puzzling and maximum likelihood";
 
+    $self->{OPT_EMAIL}   = 0;
+
     $self->{AUTHORS}   = "Strimmer, von Haeseler";
 
     $self->{REFERENCE}   = [
@@ -313,10 +308,10 @@ sub new {
 
     $self->{FORMAT}  = {
 	"Puzzle" => {
-		"perl" => ' "Puzzle" ',
+		"perl" => '"Puzzle"',
 	},
 	"stdinput" => {
-		"perl" => ' " < params" ',
+		"perl" => '" < params"',
 	},
 	"confirm" => {
 		"perl" => '"y\\n"',
@@ -330,7 +325,7 @@ sub new {
 	"params" => {
 	},
 	"infile" => {
-		"perl" => '"ln -s $infile infile; "',
+		"perl" => '" $infile"',
 	},
 	"seqtype" => {
 		"perl" => '""',
@@ -426,9 +421,9 @@ sub new {
     };
 
     $self->{FILENAMES}  = {
-	"outfile" => 'outfile',
-	"outtree" => 'outtree',
-	"outdist" => 'outdist',
+	"outfile" => '*.puzzle',
+	"outtree" => '*.tree',
+	"outdist" => '*.dist',
 	"params" => 'params',
 
     };
@@ -442,7 +437,7 @@ sub new {
 	"Puzzle" => 0,
 	"stdinput" => 2,
 	"confirm" => 1000,
-	"infile" => -10,
+	"infile" => 1,
 	"seqtype" => -10,
 	"approximate" => 1,
 	"puzzling_step" => 1,
@@ -475,20 +470,20 @@ sub new {
 
     $self->{BY_GROUP_PARAMETERS}  = [
 	"seqtype",
-	"infile",
 	"Puzzle",
-	"nuc_freq",
+	"dna_options",
 	"rate_options",
 	"outfile",
 	"outtree",
 	"outdist",
 	"params",
+	"nuc_freq",
 	"control_options",
 	"user_tree_options",
 	"output_options",
 	"protein_options",
-	"dna_options",
 	"list_trees",
+	"infile",
 	"approximate",
 	"puzzling_step",
 	"ratio",
@@ -758,7 +753,7 @@ sub new {
 	"seqtype" => ['DNA','DNA','protein','protein',],
 	"control_options" => ['approximate','puzzling_step','protein_options','dna_options','rate_options','user_tree_options',],
 	"protein_options" => ['protein_model',],
-	"protein_model" => ['1','Dayhoff (Dayhoff et al. 1978)','2','JTT (Jones et al. 1992)','3','mtREV24 (Adachi-Hasegawa 1996)','4','BLOSUM 62 (Henikoff-Henikoff 1992)',],
+	"protein_model" => ['0','','1','Dayhoff (Dayhoff et al. 1978)','2','JTT (Jones et al. 1992)','3','mtREV24 (Adachi-Hasegawa 1996)','4','BLOSUM 62 (Henikoff-Henikoff 1992)','5','VT (Mueller-Vingron 2000)','6','WAG (Whelan-Goldman 2000)',],
 	"dna_options" => ['ratio','nuc_freq',],
 	"nuc_freq" => ['use_specified','a_freq','c_freq','g_freq',],
 	"dna_model" => ['1','HKY (Hasegawa et al. 1985)','2','TN (Tamura-Nei 1993)','3','SH (Schoeniger-von Haeseler 1994)',],
@@ -773,11 +768,13 @@ sub new {
     $self->{FLIST}  = {
 
 	"protein_model" => {
-		'' => '""',
-		'1' => '""',
-		'2' => '"m\\n"',
-		'3' => '"m\\nm\\n"',
-		'4' => '"m\\nm\\nm\\n"',
+		'0' => '""',
+		'1' => '"m\\n"',
+		'2' => '"m\\nm\\n"',
+		'3' => '"m\\nm\\nm\\n"',
+		'4' => '"m\\nm\\nm\\nm\\n"',
+		'5' => '"m\\nm\\nm\\nm\\nm\\n"',
+		'6' => '"m\\nm\\nm\\nm\\nm\\nm\\n"',
 
 	},
 	"dna_model" => {
