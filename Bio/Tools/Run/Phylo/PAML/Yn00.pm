@@ -109,7 +109,7 @@ documentation of the default values.
 BEGIN { 
 
     $MINNAMELEN = 25;
-    $PROGRAMNAME = 'yn00';
+    $PROGRAMNAME = 'yn00'  . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'PAMLDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catdir($ENV{'PAMLDIR'},$PROGRAMNAME);
     }
