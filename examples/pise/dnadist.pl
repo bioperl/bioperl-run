@@ -1,12 +1,12 @@
 
 use Bio::Tools::Run::AnalysisFactory::Pise;
 
-#my $email = $ENV{USER} . "\@pasteur.fr";
-
-my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+# email is optional (although useful)
+#my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
 
 my $dnadist = $factory->program('dnadist');
-my $job = $dnadist->run(-infile => $ARGV[0]);
+my $job = $dnadist->run(-infile => $ARGV[0]);   # see dnadist.data
 
 if ($job->error) {
     print ".............error: ",$job->error_message,".............\n";

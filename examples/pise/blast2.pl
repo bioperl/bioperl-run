@@ -7,8 +7,10 @@ $_in_seq = Bio::SeqIO->newFh (-file => $ARGV[0],
                               -format => "fasta");
 my $seq = <$_in_seq>; 
 
-#$email = 'letondal@pasteur.fr'; # your email
-$factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+# email is optional (although useful)
+#$factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+$factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
+
 my $blast2 = $factory->program('blast2');
 
 $blast2->blast2('blastp');

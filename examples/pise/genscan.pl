@@ -3,19 +3,19 @@ use Bio::Tools::Run::AnalysisFactory::Pise;
 use Bio::SeqIO;
 use Bio::Tools::Genscan;
 
-#my $email = $ENV{USER} . "\@pasteur.fr";
-
 $_in_seq = Bio::SeqIO->newFh (-file => $ARGV[0],
 			      -format => "fasta");
 my $seq = <$_in_seq>; 
 
-my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+# email is optional (although useful)
+# my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
+my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
 
 my $genscan = $factory->program('genscan',
 				# other values: Arabidopsis.smat, Maize.smat
 				-parameter_file => "HumanIso.smat"
 				);
-$genscan->seq($seq);
+$genscan->seq($seq);	# see t/data/Genscan.FastA
 my $job = $genscan->run();
 
 if ($job->error) {
