@@ -107,12 +107,13 @@ You can either set remote at:
 
 package Bio::Tools::Run::PiseApplication;
 
-use vars qw($AUTOLOAD @ISA);
+use vars qw($AUTOLOAD $DEFAULT_PISE_EMAIL @ISA);
 use strict;
 use Bio::Root::Root;
 use Bio::Tools::Run::PiseJob;
 
 @ISA = qw(Bio::Root::Root);
+$DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
 
 =head2 new
 
@@ -137,10 +138,11 @@ sub new {
 	$self->throw(ref($self) . ": You must provide a Pise CGI url (-remote).");
     }
     $self->{REMOTE} = $remote;
-    if (! defined $email) {
-	$self->throw(ref($self) . ": You must provide a valid email.");
+    if (defined $email) {
+	$self->{EMAIL} = $email;
+    } else {
+	$self->{EMAIL} = $DEFAULT_PISE_EMAIL;
     }
-    $self->{EMAIL} = $email;
     if (defined $verbose) {
 	$self->{VERBOSE} = $verbose;
     } else {

@@ -18,12 +18,12 @@ Bio::Tools::Run::AnalysisFactory::Pise
 
        my $program = $factory->program('genscan');
 
-    The email is mandatory, as in the Web interface. This is due to
-    the fact that your program might enter infinite loops, or just run
-    many jobs: the Pise server maintainer needs a contact (s/he
-    could of course cancel any requests from your address...).
-    If you plan to run a lot of heavy jobs, or to do a course with many 
-    students, please ask the maintainer before.
+    The email is optional (there is default one). It can be useful, though.
+    Your program might enter infinite loops, or just run many jobs:
+    the Pise server maintainer needs a contact (s/he could of course
+    cancel any requests from your address...). And if you plan to run a
+    lot of heavy jobs, or to do a course with many students, please
+    ask the maintainer before. 
 
     The remote parameter stands for the actual CGI location, except when 
     set at the factory creation step, where it is rather the root of all CGI.
@@ -58,7 +58,7 @@ Bio::Tools::Run::AnalysisFactory::Pise
 
 package Bio::Tools::Run::AnalysisFactory::Pise;
 
-use vars qw($AUTOLOAD @ISA %REMOTE);
+use vars qw($AUTOLOAD $DEFAULT_PISE_EMAIL @ISA %REMOTE);
 use strict;
 
 use Bio::Root::Root;
@@ -73,16 +73,17 @@ use Bio::Factory::ApplicationFactoryI;
     'clustalw' => 'http://bioweb.pasteur.fr/cgi-bin/seqanal/clustalw.pl'
 );
 
+$DEFAULT_PISE_EMAIL = 'pise-bioapi@pasteur.fr';
+
 =head2 new
 
  Title   : new()
  Usage   : my $program = Bio::Tools::Run::AnalysisFactory::Pise->new(
                                -remote => 'http://somewhere/cgi-bin/Pise', 
-                               -email -> $email);
+                               -email => $email);
  Function: Creates a Bio::Tools::Run::AnalysisFactory::Pise object, which 
            function is to create interface object 
            (Bio::Tools::Run::PiseApplication::program) for programs.
-           Email is mandatory.
  Example :
  Returns : An instance of Bio::Tools::Run::AnalysisFactory::Pise.
 
@@ -109,7 +110,7 @@ sub new {
     if (defined $email) {
 	$self->{EMAIL} = $email;
     } else {
-	$self->throw("Email is mandatory.")
+	$self->{EMAIL} = 'pise-bioapi@pasteur.fr';
     }
     if (defined $verbose) {
 	$self->{VERBOSE} = $verbose;
@@ -125,7 +126,7 @@ sub new {
  Usage   : my $program = Bio::Tools::Run::AnalysisFactory::Pise->program(
                              $program, 
                              -remote => 'http://somewhere/cgi-bin/Pise', 
-                             -email -> $email, 
+                             -email => $email, 
                              @params);
  Function: Creates a representation of a single Pise program.
  Example :
