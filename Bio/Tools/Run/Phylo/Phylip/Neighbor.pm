@@ -8,9 +8,9 @@
 
 # POD documentation - main docs before the code
 
-=head 1 NAME
-Bio::Tools::Run::Phylo::Phylip::Neighbor - Wrapper for the phylip program neighbor by Joseph Felsentein for
- creating a phylogenetic tree(either through Neighbor or UPGMA) based on protein distances based on amino substitution rate
+=head1 NAME
+
+Bio::Tools::Run::Phylo::Phylip::Neighbor - Wrapper for the phylip program neighbor by Joseph Felsenstein for creating a phylogenetic tree(either through Neighbor or UPGMA) based on protein distances based on amino substitution rate.
 
 =head1 SYNOPSIS
 
@@ -35,7 +35,8 @@ my $neighbor_factory = Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
 my $tree = $neighbor_factory->create_tree($matrix);
 	
 
-#Alternatively, one can create the tree by passing in a file name containing a phylip formatted distance matrix(using protdist)
+# Alternatively, one can create the tree by passing in a file name containing 
+# a phylip formatted distance matrix(using protdist)
 my $neighbor_factory = Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
 my $tree = $neighbor_factory->create_tree('/home/shawnh/prot.dist');
 
@@ -50,39 +51,47 @@ Description	:(optional) 	This sets the type of tree to construct, using neighbor
 				Usage: 
 				@params = ('type'=>'X');#where X is one of the values above
 				Defaults to NJ 
-				For more information on the usage of the different models, please refer to the documentation
-				found in the phylip package.
+				For more information on the usage of the different models, 
+                                please refer to the documentation found in the phylip package.
 
 =head2 OUTGROUP (*ONLY AVAILABLE FOR NEIGHBOR JOINING)
+
 Title		: OUTGROUP 
 Description	: (optional)	This option selects the species to be used as the outgroup
 				Acceptable Values: integer 
-				Usage:
-				@params = ('outgroup'=>'X'); where X is an positive integer not more than the number of sequences 
+Usage:
+				@params = ('outgroup'=>'X'); 
+                                where X is an positive integer not more than the 
+                                number of sequences 
 				Defaults to 1
 
 =head2 LOWTRI 
+
 Title		: LOWTRI 
-Description : (optional)	This indicates that the distance matrix is input  in  Lower-triangular
-		                form  (the  lower-left  half of the distance matrix only, without
-		                the zero diagonal elements)
-				Usage:		
+Description : (optional)	This indicates that the distance matrix is 
+                                input  in  Lower-triangular form  (the  lower-left  
+				half of the distance matrix only, without the zero 
+				diagonal elements)
+Usage:		
 				@params = ('lowtri'=>'X'); where X is either 1 or 0 
 				Defaults to 0 
 =head2 UPPTRI 
+
 Title           : UPPTRI 
-Description : (optional)        This indicates that the distance matrix is input  in  upper-triangular
-		                form  (the  upper-right half of the distance matrix only, without
-		                the zero diagonal elements.
-                                Usage:          
+Description : (optional)        This indicates that the distance matrix is input  in  
+                                upper-triangular form  (the  upper-right half of the 
+				distance matrix only, without the zero diagonal elements.)
+Usage:          
                                 @params = ('upptri'=>'X'); where X is either 1 or 0 
                                 Defaults to 0 
 =head2 SUBREP 
+
 Title           : SUBREP 
-Description : (optional)         This is the Subreplication option.  It informs the program that  after
-			         each distance will be provided an integer indicating that the
-			         distance is a mean of that many replicates.
-                                Usage:          
+Description : (optional)        This is the Subreplication option.  
+				It informs the program that  after
+			        each distance will be provided an integer indicating that the
+			        distance is a mean of that many replicates.
+Usage:          
                                 @params = ('subrep'=>'X'); where X is either 1 or 0 
                                 Defaults to 0 
 =head2 JUMBLE 
@@ -320,7 +329,6 @@ sub create_tree{
     my ($self,$input) = @_;
     my ($temp,$infilename, $seq);
     my ($attr, $value, $switch);
-
 # Create input file pointer
     $infilename = $self->_setinput($input);
     if (!$infilename) {$self->throw("Problems setting up for neighbor. Probably bad input data in $input !");}
@@ -369,8 +377,8 @@ sub _run {
     chomp($path);
     my $outfile = $path."/outfile";
     my $treefile = $path."/treefile";
-
-    $self->throw("neighbor did not create tree correctly") unless (-e $treefile);
+    
+    $self->throw("neighbor did not create tree correctly (expected $treefile) ") unless (-e $treefile);
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
     my $tree = $in->next_tree();
 
@@ -383,12 +391,13 @@ sub _run {
 
 =head2  _setinput()
 
- Title   :  _setinput
- Usage   :  Internal function, not to be called directly	
- Function:   Create input file for neighbor program
+ Title   : _setinput
+ Usage   : Internal function, not to be called directly	
+ Function: Create input file for neighbor program
  Example :
  Returns : name of file containing the protein distance matrix in Phylip format 
- Args    : name of file created by protdist or ref to hash created by Bio::Tools:Run::Phylo::Phylip::ProtDist 
+ Args    : name of file created by protdist or ref to hash created by 
+           Bio::Tools:Run::Phylo::Phylip::ProtDist 
 
 
 =cut

@@ -8,9 +8,9 @@
 
 # POD documentation - main docs before the code
 
-=head 1 NAME
-Bio::Tools::Run::Phylo::Phylip::ProtPars - Object for creating a Bio:Tree object
-from a multiple alignment file or a SimpleAlign object
+=head1 NAME 
+
+Bio::Tools::Run::Phylo::Phylip::ProtPars - Object for creating a L<Bio::Tree> object from a multiple alignment file or a SimpleAlign object
 
 =head1 SYNOPSIS
 

@@ -8,10 +8,9 @@
 
 # POD documentation - main docs before the code
 
-=head 1 NAME
-Bio::Tools::Run::Phylo::Phylip::ProtDist - Wrapper for the phylip program protdist by Joseph Felsentein for
- creating a distance matrix comparing protein sequences
-from a multiple alignment file or a SimpleAlign object and returns a hash ref to the table
+=head1 NAME 
+
+Bio::Tools::Run::Phylo::Phylip::ProtDist - Wrapper for the phylip program protdist by Joseph Felsentein for creating a distance matrix comparing protein sequences from a multiple alignment file or a L<Bio::SimpleAlign> object and returns a hash ref to the table
 
 =head1 SYNOPSIS
 
