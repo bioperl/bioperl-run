@@ -34,7 +34,7 @@ my  $factory = Bio::Tools::Run::Alignment::StandAloneFasta->new('-verbose' => $v
 ok $factory;
 my $inputfilename = Bio::Root::IO->catfile("t","data","fasta.fa");
 
-my $fasta_present = $factory->executable('fasta34');
+my $fasta_present = $factory->executable();
 if( ! $fasta_present ) {
     skip('Fasta  not installed',1);
     exit;
