@@ -18,18 +18,17 @@ use Bio::SeqIO;
 
 #Java and java version check
 my $v;
-eval {
-    system("java -version >& versiontest");
-};
-if ($@) {
+if (-d "java") {
     print STDERR "You must have java to run eponine\n";
     for ($Test::ntest..$NTESTS) {
 	skip("Skipping because no java present to run eponine",1);
     }
     exit(0);
 }
-open (TEST,"versiontest");
-while (<TEST>) {
+my $output = `java -version 2>&1`;
+open(PIPE,"java -version 2>&1 |");
+
+while (<PIPE>) { 
     if (/Java\sVersion\:\s(\d+\.\d+)/) {
 	$v = $1;
 	last;
@@ -38,9 +37,11 @@ while (<TEST>) {
 	$v = $1;
 	last;
     }
+    elsif (/java version\s\"(\d\.\d)/) {
+	 $v = $1;
+        last;
+    }
 }
-close TEST;
-unlink "versiontest";
 if ($v < 1.2) {
     print STDERR "You need at least version 1.2 of JDK to run eponine\n";
     for ($Test::ntest..$NTESTS) {
