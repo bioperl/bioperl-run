@@ -193,8 +193,6 @@ sub program_dir {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->io->_initialize_io();
 
     my ($attr, $value);
     while (@args)  {
@@ -398,6 +396,7 @@ sub _setinput {
 	$alnIO->write_aln($input);
 	$alnIO->close();
 	close($tfh);
+	$tfh = undef;
 	return $alnfilename;		
     }
     return 0;

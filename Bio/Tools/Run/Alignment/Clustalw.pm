@@ -625,13 +625,13 @@ sub _setinput {
 	return $infilename;
     }
 #  $input may be a SimpleAlign object.
-   elsif (ref($input) eq "Bio::SimpleAlign") {
+    elsif (ref($input) eq "Bio::SimpleAlign") {
 	#  Open temporary file for both reading & writing of SimpleAlign object
 	if ($suffix ==1 || $suffix== 2 ) {
 	    ($tfh,$infilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	}
 	$temp =  Bio::AlignIO->new('-fh'=> $tfh,
-				   '-format' => 'Fasta');
+				   '-format' => 'fasta');
 	$temp->write_aln($input);
 	close($tfh);
 	undef $tfh;
@@ -689,15 +689,17 @@ sub _setparams {
 
 # Set default output file if no explicit output file selected
     unless ($param_string =~ /outfile/) {
-       my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-       $self->outfile($outfile);
+	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+	close($tfh);
+	undef $tfh;
+	$self->outfile($outfile);
     	$param_string .= " -outfile=$outfile" ;
     }
-
+    
     if ($self->quiet() || $self->verbose() < 0) { 
 	$param_string .= '  >/dev/null 2>/dev/null';
     }
-
+    
     return $param_string;
 }
 

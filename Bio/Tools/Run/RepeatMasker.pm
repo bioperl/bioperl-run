@@ -97,9 +97,11 @@ use Bio::Tools::RepeatMasker;
 BEGIN {
     @RM_PARAMS = qw(DIV LIB CUTOFF PARALLEL GC FRAG );
 
-    @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD RODENT MAM MAMMAL COW AR 
-                       ARABIDOPSIS DR DROSOPHILA EL ELEGANS IS_ONLY IS_CLIP NO_IS RODSPEC
-		       PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT); 
+    @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD 
+		      RODENT MAM MAMMAL COW AR 
+		      ARABIDOPSIS DR DROSOPHILA EL ELEGANS 
+		      IS_ONLY IS_CLIP NO_IS RODSPEC
+		      PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT); 
     @OTHER_SWITCHES = qw(NOISY QUIET SILENT);
 
     # Authorize attribute fields
@@ -173,8 +175,7 @@ sub new {
       warn "RepeatMasker program not found as ".$self->executable.
 	  " or not executable. \n"; 
     }
-  }
-
+  }  
   return $self;
 }
 
@@ -378,7 +379,7 @@ sub _setinput {
       $self->throw("Need a Bio::PrimarySeq compliant object for RepeatMasker");
 #  my  $in  = Bio::SeqIO->new(-file => $infilename , '-format' => 'Fasta');
   my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
-  my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+  my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'fasta');
   $out1->write_seq($seq);
   close($tfh1);
   undef $tfh1;

@@ -128,7 +128,6 @@ sub AUTOLOAD {
 sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
-       $self->io->_initialize_io();
  
        my ($attr, $value);
        while (@args)  {
@@ -168,54 +167,51 @@ sub predict_protein_features{
 
 =cut
 
-sub run{
+sub run {
     my ($self,$seq) = @_;
     my @feats;
-        
-     if (ref($seq) ) {
+
+    if (ref($seq) ) {
 
         if (ref($seq) =~ /GLOB/) {
             $self->throw("cannot use filehandle");
         } 
-        
-       if ($seq->length>50){
-           
-         my $sub_seq = $seq->subseq(1, 50);
-         $seq->seq($sub_seq);
-       }
-       my $infile1 = $self->_writeSeqFile($seq);
-        
-       $self->_input($infile1);
-        
-       @feats = $self->_run();
-       unlink $infile1;
-       
+
+	if ($seq->length>50){
+
+	    my $sub_seq = $seq->subseq(1, 50);
+	    $seq->seq($sub_seq);
+	}
+	my $infile1 = $self->_writeSeqFile($seq);
+
+	$self->_input($infile1);
+
+	@feats = $self->_run();
+	unlink $infile1;
+
     }
     else {
-        #The clone object is not a seq object but a file.
-        #Perhaps should check here or before if this file is fasta format...if not die
-        #Here the file does not need to be created or deleted. Its already written and may be used by other runnables.
+        # The clone object is not a seq object but a file.
+        # Perhaps should check here or before if this file is 
+	# fasta format...if not die
+        # Here the file does not need to be created or deleted. 
+	# Its already written and may be used by other runnables.
 
-         my $in  = Bio::SeqIO->new(-file => $seq, '-format' =>'Fasta');
-         my $infile1;  
+	my $in  = Bio::SeqIO->new(-file => $seq, '-format' =>'fasta');
+	my $infile1;  
 
-         while ( my $tmpseq = $in->next_seq() ) {
-               my $sub_seq = $tmpseq->subseq(1,40);
+	while ( my $tmpseq = $in->next_seq() ) {
+	    my $sub_seq = $tmpseq->subseq(1,40);
+	    $tmpseq->seq($sub_seq);
+	    $infile1 = $self->_writeSeqFile($tmpseq);  
+	}
 
-               $tmpseq->seq($sub_seq);
-               $infile1 = $self->_writeSeqFile($tmpseq);  
-        
-         } 
-           
-       
-         $self->_input($infile1);
+	$self->_input($infile1);
 
-         @feats = $self->_run();
-        
+	@feats = $self->_run();
     }
-   
-    return @feats;
 
+    return @feats;
 }
 
 =head2 _input
@@ -230,13 +226,9 @@ sub run{
 
 sub _input() {
      my ($self,$infile1) = @_;
-     if(defined $infile1){
-    
-        $self->{'input'}=$infile1;
-     }
-
+     $self->{'input'} = $infile1 if(defined $infile1);
      return $self->{'input'};
-}
+ }
 
 =head2 _run
 
@@ -252,7 +244,7 @@ sub _run {
      my ($self)= @_;
      
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-      my $str =$self->executable." -t euk ".$self->{'input'}." > ".$outfile;
+     my $str =$self->executable." -t euk ".$self->{'input'}." > ".$outfile;
      my $status = system($str);
      $self->throw( "Signalp call ($str) crashed: $? \n") unless $status==0;
      
@@ -274,13 +266,12 @@ sub _run {
         push @signalp_feat, $signalp_feat;
     }
      
-     
      $self->cleanup();
-     
+     close($tfh1);
+     undef $tfh1;    
      unlink $outfile;
      
      return @signalp_feat;
-
 }
 
 
@@ -297,9 +288,11 @@ sub _run {
 sub _writeSeqFile{
     my ($self,$seq) = @_;
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
-    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
+    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
     $in->write_seq($seq);
-
+    $in->close();
+    close($tfh);
+    undef $tfh;
     return $inputfile;
 
 }

@@ -271,34 +271,34 @@ sub _setinput {
     # if you pass in a filename
 
     unless( ref($seq1) ) {
-	    unless( -e $seq1 ) {
-	      $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
-	    }
+	unless( -e $seq1 ) {
+	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+	}
     	$outfile1 = $seq1;
     } 
     else { 
-	    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
-      my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
-			                      	   '-format' => 'fasta');
-	    $out1->write_seq($seq1);
-    	$self->_query1_seq($seq1);
-    	# Make sure you close things - this is what creates
-    	# Out of filehandle errors 
-    	close($tfh1);
-    	undef $tfh1;
+	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+	my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
+				   '-format' => 'fasta');
+	$out1->write_seq($seq1);
+	$self->_query1_seq($seq1);
+	# Make sure you close things - this is what creates
+	# Out of filehandle errors 
+	close($tfh1);
+	undef $tfh1;
     }
     unless( ref($seq2) ) {
     	unless( -e $seq2 ) { 
-	     $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");    
-	  }
-       $outfile2 = $seq2;	
+	    $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");    
+	}
+	$outfile2 = $seq2;	
     } 
     else { 
     	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
-	    my $out2 = Bio::SeqIO->new('-fh'     => $tfh2, 
-		                      		   '-format' => 'fasta');
+	my $out2 = Bio::SeqIO->new('-fh'     => $tfh2, 
+				   '-format' => 'fasta');
     	$out2->write_seq($seq2);
-	
+
 	$self->_query2_seq($seq2);
 	# Make sure you close things - this is what creates
 	# Out of filehandle errors 

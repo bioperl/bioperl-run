@@ -59,7 +59,6 @@ use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
-use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Blat;
 use Bio::Tools::Run::WrapperBase;
@@ -121,22 +120,20 @@ sub AUTOLOAD {
 =cut
 
 sub new {
-       my ($class,@args) = @_;
-       my $self = $class->SUPER::new(@args);
-       $self->io->_initialize_io();
- 
-       my ($attr, $value);
-       while (@args)  {
-           $attr =   shift @args;
-           $value =  shift @args;
-           next if( $attr =~ /^-/ ); # don't want named parameters
-           if ($attr =~/PROGRAM/i) {
-              $self->executable($value);
-              next;
-           }
-           $self->$attr($value);
-       }
-       return $self;
+    my ($class,@args) = @_;
+    my $self = $class->SUPER::new(@args);
+    my ($attr, $value);
+    while (@args)  {
+	$attr =   shift @args;
+	$value =  shift @args;
+	next if( $attr =~ /^-/ ); # don't want named parameters
+	if ($attr =~/PROGRAM/i) {
+	    $self->executable($value);
+	    next;
+	}
+	$self->$attr($value);
+    }
+    return $self;
 }
 
 =head2 align
@@ -149,49 +146,35 @@ sub new {
 
 =cut
 
-sub align{
+sub align {
     my ($self,$query,$db) = @_;
     my @feats;
 
-    if  (ref($query) ){# it is an object
-        
-        if (ref($query) =~ /GLOB/) {
-           $self->throw("cannot use filehandle");
-        }
-    
-        my $infile1 = $self->_writeSeqFile($query);
-        
-        $self->_input($infile1);
-        
-        unlink $infile1;
+    if  (ref($query) ) {	# it is an object
+	if (ref($query) =~ /GLOB/) {
+	    $self->throw("cannot use filehandle");
+	}
+	my $infile1 = $self->_writeSeqFile($query);
+	$self->_input($infile1);
+	unlink $infile1;
     }
     else {
-
         $self->_input($query);
-
     }
-    if  (ref($db) ){# it is an object
-
-        if (ref($db) =~ /GLOB/) {
-           $self->throw("cannot use filehandle");
-        }
-
-        my $infile1 = $self->_writeSeqFile($db);
-
-        $self->_database($infile1);
-
-        unlink $infile1; 
+    if  (ref($db) ) {		# it is an object
+	if (ref($db) =~ /GLOB/) {
+	    $self->throw("cannot use filehandle");
+	}
+	my $infile1 = $self->_writeSeqFile($db);
+	$self->_database($infile1);
+	unlink $infile1; 
     }
     else {
-
         $self->_database($db);
-
     }
-    
-    @feats = $self->_run();
- 
-    return @feats;
 
+    @feats = $self->_run();
+    return @feats;
 }
 
 =head2 _input
@@ -205,14 +188,11 @@ sub align{
 =cut
 
 sub _input() {
-     my ($self,$infile1) = @_;
-     
-     if(defined $infile1){
-         
+    my ($self,$infile1) = @_;
+    if(defined $infile1){
         $self->{'input'}=$infile1;
      }   
      return $self->{'input'};
-
 }
 
 =head2 _database
@@ -226,14 +206,9 @@ sub _input() {
 =cut
 
 sub _database() {
-     my ($self,$infile1) = @_;
-    
-     if(defined $infile1){
-
-        $self->{'db'}=$infile1;
-     }  
-     return $self->{'db'};
-
+    my ($self,$infile1) = @_;
+    $self->{'db'} = $infile1 if(defined $infile1);
+    return $self->{'db'};
 }
 
 
@@ -249,9 +224,10 @@ sub _database() {
 
 sub _run {
      my ($self)= @_;
-     
-     my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $str=$self->executable;
+     my $tfh;
+     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+     my $str= $self->executable;
+
      #$str.=' '.$self->options if $self->options;
      $str.=' '.$self->_database .' '.$self->_input.' '.$outfile;
      
@@ -276,9 +252,10 @@ sub _run {
      
      
      $self->cleanup();
-     unlink $outfile;    
-     return @blat_feat;
-     
+     close($tfh);
+     undef $tfh;   
+     unlink $outfile;      
+     return @blat_feat;     
 }
 
 
@@ -292,13 +269,15 @@ sub _run {
 
 =cut
 
-sub _writeSeqFile{
+sub _writeSeqFile {
     my ($self,$seq) = @_;
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
-    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
+    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
     $in->write_seq($seq);
-
+    $in->close();
+    undef $in;
+    close($tfh);
+    undef $tfh;
     return $inputfile;
-
 }
 1;

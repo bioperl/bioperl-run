@@ -83,10 +83,11 @@ use Bio::Tools::Run::WrapperBase;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-    @PSEUDOWISE_PARAMS = qw(SPLICE_MAX_COLLAR SPLICE_MIN_COLLAR SPLICE_SCORE_OFFSET
-                     GENESTATS
-                     NOMATCHN PARAMS KBYTE DYMEM DYDEBUG PALDEBUG 
-                     ERRORLOG);
+    @PSEUDOWISE_PARAMS = qw(SPLICE_MAX_COLLAR SPLICE_MIN_COLLAR 
+			    SPLICE_SCORE_OFFSET
+			    GENESTATS NOMATCHN PARAMS KBYTE 
+			    DYMEM DYDEBUG PALDEBUG 
+			    ERRORLOG);
 
     @PSEUDOWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD);
 
@@ -127,8 +128,6 @@ sub program_dir {
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  # to facilitiate tempfile cleanup
-  $self->io->_initialize_io();
 
   my ($attr, $value);
   while (@args) {
@@ -258,7 +257,8 @@ sub _run {
 
     #parse the outpur and return a Bio::Seqfeature array
     my $genes   = $self->_parse_results($prot_name,$outfile);
-
+    close($tfh1);
+    undef $tfh1;
     return @{$genes};
 }
 
@@ -377,18 +377,25 @@ sub _setinput {
     ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
     ($tfh3,$outfile3) = $self->io->tempfile(-dir=>$tempdir);
 
-    my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , '-format' => 'Fasta');
-    my $out2 = Bio::SeqIO->new(-file=> ">$outfile2", '-format' => 'Fasta');
-    my $out3 = Bio::SeqIO->new(-file=> ">$outfile3", '-format' => 'Fasta');
-
-    $out1->write_seq($seq1);
-    $out2->write_seq($seq2);
-    $out3->write_seq($seq3);
-    $self->_query_pep_seq($seq1);
-    $self->_query_cdna_seq($seq2);
-    $self->_subject_dna_seq($seq3);
-    return $outfile1,$outfile2,$outfile3;
+    my $out1 = Bio::SeqIO->new(-fh => $tfh1 , '-format' => 'Fasta');
+    my $out2 = Bio::SeqIO->new(-fh => $tfh2, '-format' => 'Fasta');
+    my $out3 = Bio::SeqIO->new(-fh => $tfh3, '-format' => 'Fasta');
   
+  $out1->write_seq($seq1);
+  $out2->write_seq($seq2);
+  $out3->write_seq($seq3);
+  $self->_query_pep_seq($seq1);
+  $self->_query_cdna_seq($seq2);
+  $self->_subject_dna_seq($seq3);
+
+  close($tfh1);
+  close($tfh2);
+  close($tfh3);
+  undef ($tfh1);
+  undef ($tfh2);
+  undef ($tfh3);
+
+  return $outfile1,$outfile2,$outfile3;  
 }
 
 sub _setparams {

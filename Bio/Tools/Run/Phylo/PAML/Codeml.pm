@@ -422,7 +422,9 @@ sub run{
    if( ! ref($aln) && -e $aln ) { 
        $tempseqfile = $aln;
    } else { 
-       ($tempseqFH,$tempseqfile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+       ($tempseqFH,$tempseqfile) = $self->io->tempfile
+	   ('-dir' => $tmpdir, 
+	    UNLINK => ($self->save_tempfiles ? 0 : 1));
        my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
 				 '-interleaved' => 0,
@@ -444,7 +446,9 @@ sub run{
    my $outfile = $self->outfile_name;
 
    if( $tree ) {
-       my ($temptreeFH,$temptreefile) = $self->io->tempfile('DIR' => $tmpdir, UNLINK => ($self->save_tempfiles ? 0 : 1));
+       my ($temptreeFH,$temptreefile) = $self->io->tempfile
+	   ('-dir' => $tmpdir, 
+	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
        my $treeout = new Bio::TreeIO('-format' => 'newick',
 				     '-fh'     => $temptreeFH);

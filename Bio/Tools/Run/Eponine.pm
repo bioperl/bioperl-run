@@ -156,8 +156,11 @@ sub new {
     my $epojar;
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    ($TMPDIR) = $self->tempdir(CLEANUP=>1);
+    my $tfh;
+    ($tfh,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    close($tfh);
+    undef $tfh;
     while (@args)  {
        $attr =   shift @args;
        $value =  shift @args;
@@ -384,14 +387,15 @@ sub run_eponine {
 	return undef;
     }
     my $cmd  =   $self->java.' -jar '.$self->epojar.' -seq '.$self->filename.' -threshold '.$self->threshold." > ".$result;
-    $self->throw("Error running eponine-scan on ".$self->filename." \n Check your java version, it has to be version 1.2 or later. Eponine crashed ($cmd) crashed: $? \n")
-         if (system ($cmd));
-
-   #parse results even though it's wierd.. thought parser and wrapper should be separate
-   my $epoParser =  Bio::Tools::Eponine->new(-file =>$result);
-
+    $self->throw("Error running eponine-scan on ".$self->filename.
+		 " \n Check your java version, it has to be version 1.2 or later. Eponine crashed ($cmd) crashed: $? \n")
+	if (system ($cmd));
+    
+    #parse results even though it's wierd.. thought parser and wrapper should be separate
+    my $epoParser =  Bio::Tools::Eponine->new(-file =>$result);
+    
    while (my $tss = $epoParser->next_prediction()){
-        push (@tss, $tss);
+       push (@tss, $tss);
    }
     return @tss;
 }

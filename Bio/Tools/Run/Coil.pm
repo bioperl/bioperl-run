@@ -130,9 +130,7 @@ sub program_dir {
 
 sub new {
        my ($class,@args) = @_;
-       my $self = $class->SUPER::new(@args);
-       $self->io->_initialize_io();
- 
+       my $self = $class->SUPER::new(@args); 
        my ($attr, $value);
        while (@args)  {
            $attr =   shift @args;
@@ -214,11 +212,11 @@ sub run{
 
 sub _input() {
     my ($self,$infile1) = @_;
-     if(defined $infile1){
-
-         $self->{'input'}=$infile1;
+    if(defined $infile1){
+	
+	$self->{'input'}=$infile1;
      }
-     return $self->{'input'};
+    return $self->{'input'};
 
 }
 
@@ -261,7 +259,9 @@ sub _run {
      }
      
      $self->cleanup();
-     
+     close($tfh1);
+     undef $tfh1;
+
      unlink $outfile;
      return @coil_feat;
 

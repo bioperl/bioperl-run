@@ -230,7 +230,7 @@ sub run{
        $tempseqfile = $aln;
    } else { 
        ($tempseqFH,$tempseqfile) = $self->io->tempfile
-	   ('DIR' => $tmpdir, 
+	   ('-dir' => $tmpdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
        my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
@@ -241,6 +241,7 @@ sub run{
        $alnout->close();
        undef $alnout;   
        close($tempseqFH);
+       undef $tempseqFH;
    } 
    # now let's print the yn.ctl file.
    # many of the these programs are finicky about what the filename is 

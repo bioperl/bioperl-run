@@ -375,7 +375,7 @@ sub run {
     my ($tempseqFH,$tempseqfile) = $self->io->tempfile
 	('DIR' => $tmpdir,
 	 UNLINK => ($self->save_tempfiles ? 0 : 1));
-
+    
     my $alnout = new Bio::AlignIO('-format'      => 'phylip',
 				  '-fh'          => $tempseqFH,
 				  '-interleaved' => 0,
@@ -386,7 +386,7 @@ sub run {
     $alnout->close();
     $alnout = undef;
     close($tempseqFH);
-
+    $tempseqFH = undef;
     $cmdstring .= " $tempseqfile";
     if( $tree && defined $flags{'search'} eq 'u' ) {
 	my ($temptreeFH,$temptreefile) = $self->io->tempfile

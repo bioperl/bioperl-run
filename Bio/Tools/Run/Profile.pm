@@ -230,9 +230,10 @@ sub _input() {
 
 sub _run {
      my ($self,$display_id)= @_;
-     
-     my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-      my $str =$self->executable.' -fz '.$self->_input." ".$self->DB." > ".$outfile;
+     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+     close($tfh);
+     undef $tfh;
+     my $str =$self->executable.' -fz '.$self->_input." ".$self->DB." > ".$outfile;
      my $status = system($str);
      $self->throw( "Profile call ($str) crashed: $? \n") unless $status==0;
      
@@ -275,9 +276,12 @@ sub _run {
 sub _writeSeqFile{
     my ($self,$seq) = @_;
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
-    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
+    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
     $in->write_seq($seq);
-
+    $in->close();
+    undef $in;
+    close($tfh);
+    undef $tfh;
     return $inputfile;
 
 }

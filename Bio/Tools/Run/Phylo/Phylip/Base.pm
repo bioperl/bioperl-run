@@ -12,7 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phylo::Phylip::Base - DESCRIPTION of Object
+Bio::Tools::Run::Phylo::Phylip::Base - Base object for Phylip modules
 
 =head1 SYNOPSIS
 
@@ -23,6 +23,12 @@ Bio::Tools::Run::Phylo::Phylip::Base - DESCRIPTION of Object
 =head1 DESCRIPTION
 
 This module is just a base object for Bioperl Phylip wrappers.
+
+IMPORTANT PHYLIP VERSION ISSUES
+By default we assume you have Phylip 3.5 installed, if you
+have installed Phylip 3.6 you need to set the environment variable
+PHYLIPVERSION
+
 
 =head1 FEEDBACK
 
@@ -83,8 +89,8 @@ use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 BEGIN {
     %DEFAULT = ( 
-     'VERSION'   => '3.5',
-		);
+     'VERSION'   => $ENV{'PHYLIPVERSION'} || '3.5',
+		 );
     %FILENAME = %Bio::Tools::Run::Phylo::Phylip::PhylipConf::FileName;
 }
 

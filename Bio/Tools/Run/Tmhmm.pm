@@ -141,7 +141,6 @@ sub AUTOLOAD {
 sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
-       $self->io->_initialize_io();
 
        my ($attr, $value);
        while (@args)  {

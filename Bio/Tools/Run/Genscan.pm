@@ -121,9 +121,6 @@ sub program_dir {
 sub new {                                                       
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->io->_initialize_io();
-
     my ($attr, $value);
     while (@args)  {
         $attr =   shift @args;
@@ -232,8 +229,9 @@ sub _set_input() {
 sub _writeSeqFile(){
   my ($self,$seq) = @_;
   my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
-  my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
+  my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
   $in->write_seq($seq);
+  $in->close();
   close($tfh);
   undef $tfh;
   return $inputfile;

@@ -61,8 +61,8 @@ use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
                          %OK_FIELD);
 use strict;
 use Bio::SeqIO;
-use Bio::Root::Root;
 use Bio::Root::IO;
+use Bio::Root::Root;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Prints;
 use Bio::Tools::Run::WrapperBase;
@@ -231,9 +231,10 @@ sub _input() {
 
 sub _run {
      my ($self)= @_;
-     
-     my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-      my $str =$self->executable." ".$self->DB." ".$self->_input." -fjR >".$outfile;
+     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+     close($tfh);
+     undef $tfh;
+     my $str =$self->executable." ".$self->DB." ".$self->_input." -fjR >".$outfile;
      my $status = system($str);
      $self->throw( "Prints call ($str) crashed: $? \n") unless $status==0;
      
@@ -275,7 +276,10 @@ sub _writeSeqFile{
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
     my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
     $in->write_seq($seq);
-
+    $in->close();
+    undef $in;
+    close($tfh);
+    undef $tfh;
     return $inputfile;
 
 }

@@ -224,8 +224,6 @@ sub AUTOLOAD {
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  # to facilitiate tempfile cleanup
-
   my ($attr, $value);
   while (@args) { 
     $attr =   shift @args;
@@ -382,11 +380,10 @@ sub _setinput {
   my ($self,@seq) = @_;
   my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
   foreach my $seq(@seq){
-    $seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
-    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-    $out1->write_seq($seq);
-  }
-
+      $seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
+      my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+      $out1->write_seq($seq);
+  }  
   return ($tfh1,$outfile1);
 }
 

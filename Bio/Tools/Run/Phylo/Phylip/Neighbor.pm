@@ -264,8 +264,6 @@ sub program_dir {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->io->_initialize_io();
 
     my ($attr, $value);
     while (@args)  {
@@ -447,7 +445,7 @@ sub _setinput {
 
     #  a phy formatted alignment file created by protdist 
     unless (ref $input) {
-    # check that file exists or throw
+	# check that file exists or throw
   	$alnfilename= $input;
    	unless (-e $input) {return 0;}
     	return $alnfilename;
@@ -456,23 +454,22 @@ sub _setinput {
     my @input = ref($input) eq "ARRAY" ? @{$input} : ($input);
     ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
     foreach my $input(@input){
-     if ($input->isa("Bio::Matrix::PhylipDist")){
-        #  Open temporary file for both reading & writing of distance matrix
-        print $tfh $input->print_matrix;
-     }
+	if ($input->isa("Bio::Matrix::PhylipDist")){
+	    #  Open temporary file for both reading & writing of distance matrix
+	    print $tfh $input->print_matrix;
+	}
     }
-	  close($tfh);
+    close($tfh);
     #get names from the first matrix, to be used in outgroup ordering
     my %names;
     $input = shift @input;
     #set the species names
     my @names = @{$input->names};
     for(my $i=0; $i<= $#names; $i++){
-      $names{$names[$i]} = $i+1;
+	$names{$names[$i]} = $i+1;
     }
     $self->names(\%names);
-
-   return $alnfilename;		
+    return $alnfilename;		
 }
 
 =head2  names()

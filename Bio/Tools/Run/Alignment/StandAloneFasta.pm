@@ -286,8 +286,9 @@ sub run {
 
 	    my $temp = Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'Fasta');
 	    $temp->write_seq($seq);
+	    $temp->close();
 	    close $fhinput;
-
+	    undef $fhinput;
 	    my $para= $self->_setparams;
 
 	    $para .=" $teminputfile $library $ktup";
@@ -318,8 +319,9 @@ sub run {
 	
 	foreach my $seq (@seqs){
 	    my ($fhinput,$teminputfile)=$self->io->tempfile(-dir=>$self->tempdir);
-	    my $temp=Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'Fasta');
+	    my $temp=Bio::SeqIO->new(-fh=>$fhinput, '-format'=>'fasta');
 	    $temp->write_seq($seq);
+	    $temp->close();
 	    close $fhinput;
 	    undef $fhinput;
 	    

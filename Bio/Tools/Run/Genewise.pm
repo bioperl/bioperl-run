@@ -353,7 +353,7 @@ sub _setinput {
     }
     else {
     	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
-	    my $out2 = Bio::SeqIO->new('-fh'     => $tfh2,
+	my $out2 = Bio::SeqIO->new('-fh'     => $tfh2,
                                    '-format' => 'fasta');
     	$out2->write_seq($seq2);
 

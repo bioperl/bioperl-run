@@ -103,14 +103,13 @@ methods. Internal methods are usually preceded with a _
 # Let the code begin...
 
 package Bio::Tools::Run::EMBOSSApplication;
-use vars qw(@ISA);
+use vars qw(@ISA $SEQIOLOADED $ALIGNIOLOADED);
 use strict;
 use Data::Dumper;
 use Bio::Root::Root;
-use Bio::Root::IO;
 use Bio::Tools::Run::EMBOSSacd;
-
-@ISA = qw(Bio::Root::Root);
+use Bio::Tools::Run::WrapperBase;
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 sub new {
   my($class, $args) = @_;
@@ -121,7 +120,6 @@ sub new {
 
   $self->acd if $self->verbose > 0;
 
-  $self->{'_io'} = new Bio::Root::IO('-verbose' => $self->verbose);
   return $self;
 }
 
@@ -137,7 +135,7 @@ sub new {
 
 sub run {
     my ($self, $input) = @_;
-    $self->{'_io'}->_io_cleanup();
+    $self->io->_io_cleanup();
     # test input
     $self->debug( Dumper($input) ) if $self->verbose > 0;
 
@@ -168,8 +166,11 @@ sub run {
 		$input->{$attr} = undef;
 		return;
 	    } elsif( $pieces[0]->isa('Bio::PrimarySeqI') ) {
-		require Bio::SeqIO;
-		my ($tfh,$tempfile) = $self->{'_io'}->tempfile();
+		unless(  $SEQIOLOADED ) { 
+		    require Bio::SeqIO;
+		    $SEQIOLOADED = 1;
+		}
+		my ($tfh,$tempfile) = $self->io->tempfile(-dir => $self->tempdir);
 		my $out = new Bio::SeqIO(-format => 'fasta',
 					 -fh     => $tfh);
 		foreach my $seq ( @pieces ) {
@@ -180,8 +181,11 @@ sub run {
 		close($tfh);
 		undef $tfh;
 	    } elsif( $pieces[0]->isa('Bio::Align::AlignI') ) {
-		require Bio::AlignIO;
-		my ($tfh,$tempfile) = $self->{'_io'}->tempfile();
+		unless(  $ALIGNIOLOADED ) { 
+		    require Bio::AlignIO;
+		    $ALIGNIOLOADED = 1;
+		}
+		my ($tfh,$tempfile) = $self->io->tempfile();
 		my $out = new Bio::AlignIO(-format => 'msf',
 					   -fh     => $tfh);
 		foreach my $p ( @pieces ) {

@@ -78,7 +78,7 @@ use Bio::SeqFeature::Generic;
 use Bio::Tools::Run::WrapperBase;
 
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Tools::Run::WrapperBase);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 
 BEGIN {
@@ -89,6 +89,7 @@ BEGIN {
     # Authorize attribute fields
     foreach my $attr ( @PRIMATE_PARAMS,@OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
 }
+
 =head2 program_name
 
  Title   : program_name
@@ -134,9 +135,7 @@ sub program_dir {
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  # to facilitiate tempfile cleanup
-  $self->_initialize_io();
-
+  
   my ($attr, $value);
 
   while (@args) {
@@ -244,7 +243,10 @@ sub _run {
     my ($self,$query_file,$target_file,$param_string) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+    my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+    close($tfh); # this is to make sure we don't have 
+                 # open filehandles
+    undef $tfh;
     my $commandstring = $self->executable." $param_string -q $query_file -t $target_file > $outfile";
     $self->debug( "primate command = $commandstring");
     my $status = system($commandstring);
@@ -314,56 +316,56 @@ sub _setinput {
     my @query = ref ($query) eq "ARRAY" ? @{$query} : ($query);
     foreach my $query(@query){
 
-     if(ref($query)&& $query->isa("Bio::PrimarySeqI")){
-    	($tfh1,$query_file) = $self->io->tempfile(-dir=>$self->tempdir);
-	    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-    	my %query;
-    	$query{$query->primary_id} = $query->seq;
-    	$self->_query_seq(\%query);
-    	$out1->write_seq($query) || return 0;
-      close ($tfh1);
-      undef $tfh1;
+	if(ref($query)&& $query->isa("Bio::PrimarySeqI")){
+	    ($tfh1,$query_file) = $self->io->tempfile(-dir=>$self->tempdir);
+	    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'fasta');
+	    my %query;
+	    $query{$query->primary_id} = $query->seq;
+	    $self->_query_seq(\%query);
+	    $out1->write_seq($query) || return 0;
+	    close ($tfh1);
+	    undef $tfh1;
+	}
+	elsif (-e $query){
+	    my $in  = Bio::SeqIO->new(-file => $query , '-format' => 'fasta');
+	    ($tfh1,$query_file) = $self->io->tempfile(-dir=>$self->tempdir);
+	    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'fasta');
+	    my %query;
+	    while(my $seq1 = $in->next_seq()){
+		$out1->write_seq($seq1) || return 0;
+		$query{$seq1->primary_id} = $seq1->seq;
+	    }
+	    close($tfh1);
+	    undef $tfh1;
+	    $self->_query_seq(\%query);    
+	}
+	else {
+	    return 0;
+	}
     }
-    elsif (-e $query){
-	    my  $in  = Bio::SeqIO->new(-file => $query , '-format' => 'Fasta');
-      ($tfh1,$query_file) = $self->io->tempfile(-dir=>$self->tempdir);
-    	my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-    	my %query;
-    	while(my $seq1 = $in->next_seq()){
-	     $out1->write_seq($seq1) || return 0;
-	     $query{$seq1->primary_id} = $seq1->seq;
-    	}
-    	close($tfh1);
-    	undef $tfh1;
-    	$self->_query_seq(\%query);    
-    }
-    else {
-    	return 0;
-    }
-   }
-   if(ref($target) && $target->isa("Bio::PrimarySeqI")){
-    ($tfh2,$target_file) = $self->io->tempfile(-dir=>$self->tempdir);
-	  my $out1 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-	  $out1->write_seq($target)|| return 0;
+    if(ref($target) && $target->isa("Bio::PrimarySeqI")){
+	($tfh2,$target_file) = $self->io->tempfile(-dir=>$self->tempdir);
+	my $out1 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+	$out1->write_seq($target)|| return 0;
    	$self->_target_seq($target);
   	close($tfh2);
   	undef $tfh2;
-   }  
-   elsif (-e $target){
-    my  $in  = Bio::SeqIO->new(-file => $target , '-format' => 'Fasta');
-	  ($tfh2,$target_file) = $self->io->tempfile(-dir=>$self->tempdir);
-  	my $out = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-	  my $seq1 = $in->next_seq() || return 0;
+    }  
+    elsif (-e $target){
+	my  $in  = Bio::SeqIO->new(-file => $target , '-format' => 'fasta');
+	($tfh2,$target_file) = $self->io->tempfile(-dir=>$self->tempdir);
+  	my $out = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'fasta');
+	my $seq1 = $in->next_seq() || return 0;
   	$out->write_seq($seq1);
   	close($tfh2);
   	undef $tfh2;
   	$self->_target_seq($seq1);
-   }
-   else {
+    }
+    else {
   	return 0;
-   }
+    }
 
-   return $query_file,$target_file;
+    return $query_file,$target_file;
 }
 
 =head2  _setparams()

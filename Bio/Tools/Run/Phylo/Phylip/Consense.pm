@@ -212,14 +212,14 @@ BEGIN {
 	@CONSENSE_PARAMS = qw(TYPE OUTGROUP ROOTED);
 	@OTHER_SWITCHES = qw(QUIET);
 	foreach my $attr(@CONSENSE_PARAMS,@OTHER_SWITCHES) {
-		$OK_FIELD{$attr}++;
+	    $OK_FIELD{$attr}++;
 	}
 }
 
 =head2 program_name
 
  Title   : program_name
- Usage   : >program_name()
+ Usage   : $obj->program_name()
  Function: holds the program name
  Returns:  string
  Args    : None
@@ -247,13 +247,12 @@ sub program_dir {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->io->_initialize_io();
     
     my ($attr, $value);
     while (@args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
+	
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~/PROGRAM/i) {
 	    $self->executable($value);
@@ -328,10 +327,12 @@ sub run{
     my ($self,$input) = @_;
     my ($infilename);
 
-# Create input file pointer
-  	$infilename = $self->_setinput($input);
-    if (!$infilename) {$self->throw("Problems setting up for Consense. Probably bad input data in $input !");}
-
+    # Create input file pointer
+    $infilename = $self->_setinput($input);
+    if (!$infilename) {
+	$self->throw("Problems setting up for Consense. Probably bad input data in $input !");
+    }
+    
 # Create parameter string to pass to Consense program
     my $param_string = $self->_setparams();
 # run Consense
@@ -356,19 +357,18 @@ sub run{
 sub _run {
     my ($self,$infile,$param_string) = @_;
     my $instring;
-    my $curpath = cwd;    
+    my $curpath = cwd; 
     unless( File::Spec->file_name_is_absolute($infile) ) {
     	$infile = $self->io->catfile($curpath,$infile);
     }
-
-
+    my $tmpdir = $self->tempdir;
     chdir($self->tempdir);
-    #open a pipe to run Consense to bypass interactive menus
+    # open a pipe to run Consense to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-    	open(Consense,"|".$self->executable .">/dev/null");
+   	open(Consense,"| ".$self->executable .">/dev/null");
     }
     else {
-    	open(Consense,"|".$self->executable);
+    	open(Consense,"| ".$self->executable);
     }
     $instring = $infile."\n".$param_string;
     $self->debug( "Program ".$self->executable." $instring\n");
@@ -377,7 +377,8 @@ sub _run {
     
     # get the results
     my $outfile = $self->io->catfile($self->tempdir,$self->treefile);
-    chdir($curpath);
+    chdir($curpath);    
+    
     $self->throw("Consense did not create files correctly ($outfile)")
   	unless (-e $outfile);
 
@@ -425,32 +426,33 @@ sub _set_names_from_tree {
 sub _setinput {
     my ($self, $input) = @_;
     my ($alnfilename,$tfh);
-  
+
     #  a phy formatted alignment file 
-  	unless (ref $input) {
+    unless (ref $input) {
         # check that file exists or throw
         $alnfilename= $input;
-       unless (-e $input) {return 0;}
-       my $tio = Bio::TreeIO->new(-file=>$alnfilename,-format=>'newick');
-       my $tree = $tio->next_tree;
-       $self->_set_names_from_tree($tree);
-		   return $alnfilename;
+	unless (-e $input) {return 0;}
+	my $tio = Bio::TreeIO->new(-file=>$alnfilename,-format=>'newick');
+	my $tree = $tio->next_tree;
+	$self->_set_names_from_tree($tree);
+	return $alnfilename;
     }
 
     #  $input may be a SimpleAlign Object
     my @input = ref($input) eq "ARRAY" ? @{$input} : ($input);
-   ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+    ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
     my $treeIO = Bio::TreeIO->new(-fh => $tfh, 
-	                              	-format=>'newick');
+				  -format=>'newick');
 
     foreach my $tree(@input){
-      $tree->isa('Bio::Tree::TreeI') || $self->throw('Expected a Bio::TreeI object');
-       $treeIO->write_tree($tree);
+	$tree->isa('Bio::Tree::TreeI') || $self->throw('Expected a Bio::TreeI object');
+	$treeIO->write_tree($tree);
     }
     #get the species names in order, using the first one
     $self->_set_names_from_tree($input[0]);
     $treeIO->close();
     close($tfh);
+    undef $tfh;
     return $alnfilename;		
 }
 

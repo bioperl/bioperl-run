@@ -19,7 +19,9 @@ Bio::Tools::Run::Hmmpfam
   my @feats = $factory->run($seq);
 
 =head1 DESCRIPTION
+
   wrapper module for Hmmpfam program 
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -123,7 +125,6 @@ sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
        $self->io->_initialize_io();
- 
        my ($attr, $value);
        while (@args)  {
            $attr =   shift @args;
@@ -226,8 +227,9 @@ sub _input() {
 
 sub _run {
      my ($self)= @_;
-     
-     my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+     close($tfh);
+     undef $tfh;
      my $str=$self->executable;
      $str.=' '.$self->options if $self->options;
      $str.=' '.$self->DB .' '.$self->_input.' > '.$outfile;
@@ -271,10 +273,13 @@ sub _run {
 
 sub _writeSeqFile{
     my ($self,$seq) = @_;
-    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
+    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
     my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
     $in->write_seq($seq);
-
+    $in->close();
+    $in = undef;
+    close($tfh);
+    undef $tfh;
     return $inputfile;
 
 }

@@ -40,7 +40,8 @@ for alignment of cdna to genomic sequences
 
 =head1 DESCRIPTION
 
-Sim4 program is developed by FLorea et al. for aligning cdna/est sequence  to genomic sequences
+Sim4 program is developed by Florea et al. for aligning cdna/est
+sequence to genomic sequences
 
 Florea L, Hartzell G, Zhang Z, Rubin GM, Miller W.
 A computer program for aligning a cDNA sequence with a genomic DNA sequence.
@@ -263,8 +264,10 @@ sub _run {
     my ($self,$estfirst,$infile1,$infile2,$param_string) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    if(!$self->outfile){
-        my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+    if(! $self->outfile){
+        my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+	close($tfh);
+	undef $tfh;
         $self->outfile($outfile);
     }
     my $outfile = $self->outfile(); 
@@ -300,23 +303,22 @@ sub _setinput {
   my ($self, $cdna,$genomic) = @_;
   my ($infilename, $seq, $temp, $tfh1,$tfh2,$outfile1,$outfile2);
   my $estfirst=1;
-  my ($cdna_file,$genomic_file);
+  my ($cdna_file,$genomic_file,$tfh1);
   #a sequence obj
-  if(ref($cdna)){
-     my @cdna = ref $cdna eq "ARRAY" ? @{$cdna} : ($cdna);
-     my $tfh1;
-    ($tfh1,$cdna_file) = $self->io->tempfile(-dir=>$self->tempdir);
-    my $seqio = Bio::SeqIO->new(-fh=>$tfh1,-format=>'fasta');
-    foreach my $c (@cdna){
-      $seqio->write_seq($c);
-    }
-    close $tfh1;
-    undef $tfh1;
+  if(ref($cdna)) {
+      my @cdna = ref $cdna eq "ARRAY" ? @{$cdna} : ($cdna);
+      ($tfh1,$cdna_file) = $self->io->tempfile(-dir=>$self->tempdir);
+      my $seqio = Bio::SeqIO->new(-fh=>$tfh1,-format=>'fasta');
+      foreach my $c (@cdna){
+	  $seqio->write_seq($c);
+      }
+      close $tfh1;
+      undef $tfh1;
 
-    #if we have a est database, then input will  go second
-    if($#cdna > 0){
-        $estfirst=0;
-    }
+      #if we have a est database, then input will  go second
+      if($#cdna > 0){
+	  $estfirst=0;
+      }
   }
   else {
      my $sio = Bio::SeqIO->new(-file=>$cdna,-format=>"fasta");
@@ -327,16 +329,15 @@ sub _setinput {
      $estfirst = $count > 1 ? 0:1;
      $cdna_file = $cdna;
   }
-  if(ref($genomic)){
-    my $tfh1;
-    ($tfh1,$genomic_file) = $self->io->tempfile(-dir=>$self->tempdir);
-    my $seqio = Bio::SeqIO->new(-fh=>$tfh1,-format=>'fasta');
-    $seqio->write_seq($genomic);
-    close $tfh1;
-    undef $tfh1;
+  if( ref($genomic) ) {
+      ($tfh1,$genomic_file) = $self->io->tempfile(-dir=>$self->tempdir);
+      my $seqio = Bio::SeqIO->new(-fh=>$tfh1,-format=>'fasta');
+      $seqio->write_seq($genomic);
+      close $tfh1;
+      undef $tfh1;
   }
   else {
-     $genomic_file = $genomic;
+      $genomic_file = $genomic;
   }
   return ($estfirst,$cdna_file,$genomic_file) if $estfirst;
   return ($estfirst,$genomic_file,$cdna_file);

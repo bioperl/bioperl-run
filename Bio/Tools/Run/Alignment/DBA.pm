@@ -143,8 +143,6 @@ sub program_dir {
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  # to facilitiate tempfile cleanup
-  $self->io->_initialize_io();
 
   my ($attr, $value);
 
@@ -258,9 +256,12 @@ sub _run {
     my ($self,$infile1,$infile2,$param_string) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    if(!$self->outfile){
-        my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
-        $self->outfile($outfile);
+    unless( $self->outfile){
+        my $tfh;
+	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+        close($tfh);
+	undef $tfh;
+	$self->outfile($outfile);
     }
     my $outfile = $self->outfile(); 
     my $commandstring = $self->executable." $param_string -pff $infile1 $infile2 > $outfile";
@@ -425,7 +426,7 @@ sub _setinput {
     my  $in  = Bio::SeqIO->new(-file => $infilename , '-format' => 'Fasta');
     ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
     ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
-
+    
     my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta','-flush'=>1);
     my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta','-flush'=>1);
 
@@ -435,19 +436,25 @@ sub _setinput {
     $out2->write_seq($seq2);
     $self->_query_seq($seq1);
     $self->_subject_seq($seq2);
+    $out1->close();
+    $out2->close();
+    close($tfh1);
+    close($tfh2);
+    undef $tfh1;
+    undef $tfh2;
     return $outfile1,$outfile2;
   }
   else {
     scalar(@{$input}) == 2 || $self->throw("dba alignment can only be run  on 2 sequences not.");
     if(ref($input->[0]) eq ""){#passing in two file names
-      my $in1  = Bio::SeqIO->new(-file => $input->[0], '-format' => 'Fasta');
-      my $in2  = Bio::SeqIO->new(-file => $input->[1], '-format' => 'Fasta');
+      my $in1  = Bio::SeqIO->new(-file => $input->[0], '-format' => 'fasta');
+      my $in2  = Bio::SeqIO->new(-file => $input->[1], '-format' => 'fasta');
 
       ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
       ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
 
-      my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-      my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+      my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'fasta');
+      my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'fasta');
 
       my $seq1 = $in1->next_seq() || return 0; 
       my $seq2 = $in2->next_seq() || return 0; 
@@ -455,19 +462,28 @@ sub _setinput {
       $out2->write_seq($seq2);
       $self->_query_seq($seq1);
       $self->_subject_seq($seq2);
+      close($tfh1);
+      close($tfh2);
+      undef $tfh1;
+      undef $tfh2;
       return $outfile1,$outfile2;
     }
     elsif($input->[0]->isa("Bio::PrimarySeqI") && $input->[1]->isa("Bio::PrimarySeqI")) {
       ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
       ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
 
-      my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-      my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+      my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'fasta');
+      my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'fasta');
 
       $out1->write_seq($input->[0]);
       $out2->write_seq($input->[1]);
       $self->_query_seq($input->[0]);
       $self->_subject_seq($input->[1]);
+
+      close($tfh1);
+      close($tfh2);
+      undef $tfh1;
+      undef $tfh2;
       return $outfile1,$outfile2;
     }  
     else {
@@ -496,27 +512,24 @@ sub _setparams {
 
     my $param_string = "";
     for  $attr ( @DBA_PARAMS ) {
-      $value = $self->$attr();
-      next unless (defined $value);
+	$value = $self->$attr();
+	next unless (defined $value);
 #      next if $attr =~/outfile/i;
-          
-      my $attr_key = lc $attr; #put params in format expected by dba 
-      if($attr_key =~ /match([ABCDabcd])/i){
-          $attr_key = "match".uc($1);
-      }
-      $attr_key = ' -'.$attr_key;
-      $param_string .= $attr_key.' '.$value;
-    }
 
+	my $attr_key = lc $attr; #put params in format expected by dba 
+	if($attr_key =~ /match([ABCDabcd])/i){
+	    $attr_key = "match".uc($1);
+	}
+	$attr_key = ' -'.$attr_key;
+	$param_string .= $attr_key.' '.$value;
+    }
     for  $attr ( @DBA_SWITCHES) {
-      $value = $self->$attr();
-      next unless ($value);
-      my $attr_key = lc $attr; #put switches in format expected by dba 
-      $attr_key = ' -'.$attr_key;
-      $param_string .= $attr_key ;
+	$value = $self->$attr();
+	next unless ($value);
+	my $attr_key = lc $attr; #put switches in format expected by dba 
+	$attr_key = ' -'.$attr_key;
+	$param_string .= $attr_key ;
     }
-
-
     return $param_string;
 }
 

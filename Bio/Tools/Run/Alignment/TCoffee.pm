@@ -573,8 +573,6 @@ sub program_dir {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-
     my ($attr, $value);    
     
     while (@args)  {
@@ -921,11 +919,13 @@ sub _setinput {
 	    $tfh = undef;
 	    $type = 'A';
 	}  else { 
-	    $self->warn( "got an array ref with 1st entry ".$input->[0]." and don't know what to do with it\n");
+	    $self->warn( "got an array ref with 1st entry ".
+			 $input->[0].
+			 " and don't know what to do with it\n");
 	}
 
 	return ($infilename,$type);
-#  $input may be a SimpleAlign object.
+    #  $input may be a SimpleAlign object.
     } elsif ( $input->isa("Bio::Align::AlignI") ) {
 	#  Open temporary file for both reading & writing of SimpleAlign object
 	($tfh, $infilename) = $self->io->tempfile();
@@ -937,8 +937,8 @@ sub _setinput {
 	return ($infilename,'A');
     }
     
-#  or $input may be a single BioSeq object (to be added to
-# a previous alignment)
+    #  or $input may be a single BioSeq object (to be added to
+    # a previous alignment)
     elsif ( $input->isa("Bio::PrimarySeqI")) {
         #  Open temporary file for both reading & writing of BioSeq object
 	($tfh,$infilename) = $self->io->tempfile();
@@ -992,10 +992,12 @@ sub _setparams {
     }
 
     # Set default output file if no explicit output file selected
-    unless ($self->outfile ) {
-      my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-      $self->outfile($outfile);
-      $param_string .= " -outfile=$outfile" ;
+    unless ($self->outfile ) {	
+	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+	close($tfh);
+	undef $tfh;
+	$self->outfile($outfile);
+	$param_string .= " -outfile=$outfile" ;
     }
 
     if ($self->quiet() || $self->verbose < 0) { $param_string .= ' -quiet';}
@@ -1111,13 +1113,5 @@ sub methods{
 
 
 =cut
-
-sub DESTROY {
-    my $self= shift;
-    unless ( $self->save_tempfiles ) {
-	$self->cleanup();
-    }
-    $self->SUPER::DESTROY();
-}
 
 1; # Needed to keep compiler happy

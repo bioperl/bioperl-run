@@ -127,7 +127,6 @@ sub AUTOLOAD {
 sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
-       $self->io->_initialize_io();
 
        my ($attr, $value);
        while (@args)  {
@@ -270,6 +269,7 @@ sub _writeSeqFile{
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
     my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
     $in->write_seq($seq);
+    $in->close();
     close($tfh);
     undef $tfh;
     return $inputfile;

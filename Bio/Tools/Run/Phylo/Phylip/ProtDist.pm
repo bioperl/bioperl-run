@@ -275,10 +275,7 @@ sub program_dir {
 
 sub new {
     my ($class,@args) = @_;
-    my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->io->_initialize_io();
-    
+    my $self = $class->SUPER::new(@args);    
     my ($attr, $value);
     while (@args)  {
 	$attr =   shift @args;
@@ -473,19 +470,20 @@ sub _setinput {
 
     #  $input may be a SimpleAlign Object
    ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
-	  my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
-	                    			      -format=>'phylip',
-                    				      -idlength=>$self->idlength());
+    my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
+				  -format=>'phylip',
+				  -idlength=>$self->idlength());
     my $input_count = 0;
     foreach my $input(@input){
-      if ($input->isa("Bio::SimpleAlign")){
-        #  Open temporary file for both reading & writing of BioSeq array
-      	$alnIO->write_aln($input);
-      }
-      $input_count++;
+	if ($input->isa("Bio::SimpleAlign")){
+	    #  Open temporary file for both reading & writing of BioSeq array
+	    $alnIO->write_aln($input);
+	}
+	$input_count++;
     }
     $alnIO->close();
     close($tfh);
+    $tfh = undef;
     $self->_input_nbr($input_count); 
     return $alnfilename;		
 }

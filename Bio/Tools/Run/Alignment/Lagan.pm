@@ -122,7 +122,8 @@ Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::Lagan;
 
-use vars qw(@ISA $PROGRAM_DIR @LAGAN_PARAMS @MLAGAN_PARAMS %OK_FIELD $AUTOLOAD);
+use vars qw(@ISA $PROGRAM_DIR @LAGAN_PARAMS @MLAGAN_PARAMS 
+	    %OK_FIELD $AUTOLOAD);
 
 use strict;
 use Bio::Root::Root;
@@ -160,9 +161,11 @@ BEGIN {
 
 sub new {
     my($class, @args) = @_;
-	
     my $self = $class->SUPER::new(@args);
-    my (undef, $tempfile) = $self->io->tempfile();
+
+    my ($tfh, $tempfile) = $self->io->tempfile();
+    close($tfh);
+    undef $tfh;
     $self->out($tempfile);
     while (@args) {
         my $attr = shift @args;
