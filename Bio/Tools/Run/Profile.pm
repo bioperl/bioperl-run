@@ -75,19 +75,19 @@ use Bio::Tools::Run::WrapperBase;
 
 
 BEGIN {
-       $PROGRAMNAME = 'Profile'  . ($^O =~ /mswin/i ?'.exe':'');
+    $PROGRAMNAME = 'pfscan'  . ($^O =~ /mswin/i ?'.exe':'');
 
-       if (defined $ENV{PROFILEDIR}) {
-          $PROGRAMDIR = $ENV{PROFILEDIR} || '';
-          $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                           'Profile'.($^O =~ /mswin/i ?'.exe':''));
-       }
-       else {
-          $PROGRAM = 'Profile';
-       }
-       @PROFILE_PARAMS=qw(DB PROGRAM VERBOSE);
-       foreach my $attr ( @PROFILE_PARAMS)
-                        { $OK_FIELD{$attr}++; }
+    if (defined $ENV{PROFILEDIR}) {
+	$PROGRAMDIR = $ENV{PROFILEDIR} || '';
+	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
+					  'pfscan'.($^O =~ /mswin/i ?'.exe':''));
+    }
+    else {
+	$PROGRAM = 'pfscan';
+    }
+    @PROFILE_PARAMS=qw(DB PROGRAM VERBOSE);
+    foreach my $attr ( @PROFILE_PARAMS)
+    { $OK_FIELD{$attr}++; }
 }
 
 sub AUTOLOAD {
