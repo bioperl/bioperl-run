@@ -2,7 +2,7 @@ package Bio::Tools::Run::Mdust;
 
 require 5.005_62;
 use strict;
-use warnings;
+#use warnings;
 
 use Bio::SeqIO;
 use Bio::SeqFeature::Generic;
@@ -32,10 +32,17 @@ Mdust - Perl extension for Mdust nucleotide filtering
 
 =head1 DESCRIPTION
 
-Perl wrapper for the nucleic acid complexity filtering program mdust as available from 
-TIGR (http://www.tigr.org/tdb/tgi/software/).  Takes a bioperl primary seq object of type DNA as input. Returns a Bio::Seq object with the low-complexity regions changed to Ns OR a Bio::Seq::RichSeq object with the low-complexity regions identified as a SeqFeature::Generic with primary tag = 'Excluded'.
+Perl wrapper for the nucleic acid complexity filtering program mdust as 
+available from TIGR (http://www.tigr.org/tdb/tgi/software/).  Takes a 
+bioperl primary seq object of type DNA as input. Returns a Bio::Seq 
+object with the low-complexity regions changed to Ns OR a 
+Bio::Seq::RichSeq object with the low-complexity regions identified as 
+a SeqFeature::Generic with primary tag = 'Excluded'.
 
-    This module uses the environment variable MDUSTDIR to find the mdust program.  Set MDUSTDIR to the directory containing the mdust binary (example: if mdust is installed as /usr/local/bin/mdust, set MDUSTDIR to '/usr/local/bin').  
+This module uses the environment variable MDUSTDIR to find the mdust 
+program. Set MDUSTDIR to the directory containing the mdust binary 
+(example: if mdust is installed as /usr/local/bin/mdust, set MDUSTDIR 
+to '/usr/local/bin').
 
 
 =head2 EXPORT
@@ -71,7 +78,7 @@ sub new {
 
     my $self = {};
     bless ($self, $pkg);
-    
+
     @args{@ARGNAMES} = $self->_rearrange(\@ARGNAMES, @args); 
 
     # load target first since it requires special handling
@@ -85,7 +92,7 @@ sub new {
     $self->{'tmpdir'} = $args{'TMPDIR'} || $ENV{'TMPDIR'} || $ENV{'TMP'} || '';
     # set debugging
     $self->{'debug'} = $args{'DEBUG'} || 0;
-    
+
     return $self;
 }
 
@@ -105,10 +112,10 @@ sub run {
     if ($target) {
 	$self->target($target);
     }
-    
+
     return $self->_run_mdust;
 }
-    
+
 sub _run_mdust {
     # open a pipe to the mdust command.  Pass in sequence(s?) as fasta 
     # files on STDIN, recover filtered seqs on STDOUT
@@ -152,7 +159,6 @@ sub _run_mdust {
     unlink $maskedfile unless ($self->debug);
 
     return 1;
-    
 
 }
 
@@ -168,7 +174,7 @@ sub _run_mdust {
 
 sub target {
     my ($self, $targobj) = @_;
-    
+
     if ($targobj) {
 	return $self->_set_target($targobj);
     }
