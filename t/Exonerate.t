@@ -28,6 +28,8 @@ my $verbose = -1;
 my $query= Bio::Root::IO->catfile("t","data","exonerate_cdna.fa");
 my $target= Bio::Root::IO->catfile("t","data","exonerate_genomic.fa");
 my $run = Bio::Tools::Run::Alignment::Exonerate->new(arguments=>'--model est2genome --bestn 10');
+exit unless( $run->executable );
+
 my $searchio= $run->run($query,$target);
 ok $searchio->isa("Bio::SearchIO");
 RESULT: while(my $result = $searchio->next_result){
