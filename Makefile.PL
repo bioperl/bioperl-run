@@ -71,7 +71,7 @@ sub MY::postamble {
 
 my $NAME     = 'Bio';
 my $DISTNAME = "bioperl-run";
-my $VERSION  = "1.2.2";
+my $VERSION  = "1.5.0-RC1";
 
 my $proceed = "n";
 if( $proceed =~ /^[yY]/) {
