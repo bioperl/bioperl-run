@@ -25,7 +25,7 @@ END {
 
 ok(1);
 my $verbose = -1;
-my @params = ('-verbose' => $verbose);
+my @params = ('-verbose' => $verbose, 'silent' => 1, 'quiet' => 1);
 my  $factory = Bio::Tools::Run::Genewise->new(@params);
 ok $factory->isa('Bio::Tools::Run::Genewise');
 my $prog = $factory->program;

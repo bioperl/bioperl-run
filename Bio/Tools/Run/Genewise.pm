@@ -257,7 +257,7 @@ sub _run {
     my $commandstring = $self->executable." $paramstring $infile1 $infile2";
     # this is to capture STDERR messages which leak out when you run programs
     # with open(FH, "... |");
-    if( ( ! ( $self->silent && $self->quiet)) &&
+    if( ( $self->silent && $self->quiet) &&
 	($^O !~ /os2|dos|MSWin32|amigaos/) ) {
 	# yeah, like genewise is really going to run on Windows...
 	$commandstring .= ' 2> /dev/null';
