@@ -1,31 +1,55 @@
 $Id$
 
-bioperl-run contain modules that provides a PERL interface to various 
-bioinformatics applications. This allows various
-applications to be used with common bioperl objects.
 
-See the Changes file for more information about what is
-contained in here.  The installation of this package is identical to
-the core bioperl install.
+o Version
 
-Essentially
+ This is Bioperl-run version 1.2.2., a stable bug fix release
+
+o Description 
+ 
+ bioperl-run contain modules that provides a PERL interface to various
+ bioinformatics applications. This allows various applications to be
+ used with common bioperl objects.
+
+ See the Changes file for more information about what is contained in
+ here.
+
+
+o Installation
+
+ You need to have the core bioperl installation before using
+ bioperl-run. Select a bioperl distribution with the same release
+ version.
+
+ The installation of this package is identical to the core bioperl
+ install.
+
+ Essentially
 
    % perl Makefile.PL
    % make
-   % make test (some tests may not succeed if you do not have the necessary
-	        programs or env variables defined)
+
+   % make test (some tests may not succeed if you do not have the
+                necessary programs or env variables defined)
    % su
    # make install
 
 
-Some important environment variables you need to be aware of.
+o Environmental variables
 
-Variable		Values     Comment
-PHYLIPVERSION		3.5, 3.6   If you want to run Phylip3.6 you 
-				   need to set this env variable to 3.6
-BLASTDIR		DIR PATH   Point to the directory where BLAST 
-	                           is installed
-GENSCAN_DIR		DIR PATH  Point to the directory where HumanIso.smat file 
-				  is installed
-EPONINEDIR          	DIR PATH  Point to the directory where eponine_scan.jar is installed
+ Some important environment variables you need to be aware of.
+
+ Variable		Values     Comment
+ --------------------------------------------------------------------
+ PHYLIPVERSION		3.5, 3.6   If you want to run Phylip3.6 you 
+ 				   Need to set this env variable to 3.6
+
+ BLASTDIR		DIR PATH   Point to the directory where BLAST 
+ 	                           is installed
+
+ GENSCAN_DIR		DIR PATH   Point to the directory where 
+                                    HumanIso.smat file is installed
+
+ EPONINEDIR          	DIR PATH   Point to the directory where 
+                                    eponine_scan.jar is installed
 
