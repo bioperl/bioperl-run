@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 12;
+    $NTESTS = 22;
     plan tests => $NTESTS;
 }
 
@@ -28,6 +28,8 @@ my $blast_out = Bio::Root::IO->catfile("t","data","TribeMCL.bls");
 #do from raw blast output
 my @params=('inputtype'=>'blastfile',I=>'3.0');
 my $fact = Bio::Tools::Run::TribeMCL->new(@params);
+my $desc = Bio::Root::IO->catfile("t","data","TribeMCL.desc");
+$fact->description_file($desc);
 
 ok $fact->isa('Bio::Tools::Run::TribeMCL');
 unless ($fact->matrix_executable){
@@ -42,10 +44,16 @@ unless ($fact->mcl_executable){
 my $bequiet = 1 ;
 $fact->quiet($bequiet);
 
-my $fam = $fact->run($blast_out);
-ok ($fam->[0]->[0], 'ENSANGP00000008485');
-ok ($fam->[1]->[0], 'COE1_MOUSE');
-ok ($fam->[2]->[0], 'ENSANGP00000019582');
+my ($fam) = $fact->run($blast_out);
+my @members = $fam->members;
+ok $fam->isa("Bio::Cluster::Family");
+ok $members[0]->isa("Bio::Seq");
+ok ($members[0]->id, 'ENSANGP00000008485');
+ok ($members[1]->id, 'ENSDRMP3263');
+ok ($members[2]->id, 'ENSMUSP00000026170');
+ok ($fam->description,'ubiquitin');
+ok ($fam->annotation_score,45.0549450549451);
+ok ($fam->size,91);
 
 #do from searchio
 
@@ -54,15 +62,21 @@ my $sio = Bio::SearchIO->new(-format=>'blast',
 
 @params=('inputtype'=>'searchio',I=>'3.0');
 $fact = Bio::Tools::Run::TribeMCL->new(@params);
+$fact->description_file($desc);
 
 ok $fact->isa('Bio::Tools::Run::TribeMCL');
 $bequiet =1 ;
 $fact->quiet($bequiet);
 
-$fam = $fact->run($sio);
-ok ($fam->[0]->[0], 'ENSANGP00000008485');
-ok ($fam->[1]->[0], 'COE1_MOUSE');
-ok ($fam->[2]->[0], 'ENSANGP00000019582');
+($fam) = $fact->run($sio);
+ok $fam->isa("Bio::Cluster::Family");
+ok $members[0]->isa("Bio::Seq");
+ok ($members[0]->id, 'ENSANGP00000008485');
+ok ($members[1]->id, 'ENSDRMP3263');
+ok ($members[2]->id, 'ENSMUSP00000026170');
+ok ($fam->description,'ubiquitin');
+ok ($fam->annotation_score,45.0549450549451);
+ok ($fam->size,91);
 
 @params=('inputtype'=>'pairs',I=>'3.0');
 $fact = Bio::Tools::Run::TribeMCL->new(@params);
@@ -70,8 +84,9 @@ ok $fact->isa('Bio::Tools::Run::TribeMCL');
 $bequiet =1 ;
 $fact->quiet($bequiet);
 
-$fam = $fact->run( [[qw(ENSP00000257547 ENSP00000261659 1 50)],
+($fam) = $fact->run( [[qw(ENSP00000257547 ENSP00000261659 1 50)],
 		    [qw(O42187 ENSP00000257547 1 119)]]);
-ok ($fam->[0]->[0], 'ENSP00000257547');
-ok ($fam->[0]->[1], 'ENSP00000261659');
-ok ($fam->[0]->[2], 'O42187');
+my @members = $fam->members;
+ok ($members[0]->id, 'ENSP00000257547');
+ok ($members[1]->id, 'ENSP00000261659');
+ok ($members[2]->id, 'O42187');

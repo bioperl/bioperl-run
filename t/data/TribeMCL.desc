@@ -1,0 +1,128 @@
+ENSMUSP00000026170	Gene:ENSMUSG00000025171 Clone:19.41000001-42000000 Contig:19.41000001-42000000 Chr:19 Basepair:41830361 Status:known
+ENSMUSP00000039148	Gene:ENSMUSG00000037317 Clone:18.35000001-36000000 Contig:18.35000001-36000000 Chr:18 Basepair:35716573 Status:novel
+ENSMUSP00000039897	Gene:ENSMUSG00000040696 Clone:11.32000001-33000000 Contig:11.32000001-33000000 Chr:11 Basepair:32477720 Status:novel
+ENSMUSP00000043392	Gene:ENSMUSG00000038657 Clone:9.72000001-73000000 Contig:9.72000001-73000000 Chr:9 Basepair:72813705 Status:novel
+ENSP00000298807	Gene:ENSG00000165886 Clone:AL359388 Contig:AL359388.31.1.175558 Chr:10 Basepair:103696225 Status:known
+O49905	Polyubiquitin.
+O49907	Polyubiquitin.
+O49976	Ubiquitin (Fragment).
+O49977	Ubiquitin (Fragment).
+O59964	Poly-ubiquitin.
+O60010	Polyubiquitin.
+O64955	Polyubiquitin (Fragment).
+O65167	Ubiquitin (Fragment).
+O65332	Polyubiquitin.
+O74274	Polyubiquitin.
+O74295	Polyubiquitin.
+O74819	POLYUBIQUITIN (UBI4 - ubiquitin family protein).
+O82527	Polyubiquitin (Fragment).
+P93135	Polyubiquitin.
+P93501	Ubiquitin-like protein.
+P93502	Polyubiquitin (Fragment).
+Q00811	Polyubiquitin.
+Q01867	Ubiquitin.
+Q17076	Polyubiquitin gene (Fragment).
+Q24989	Ubiquitin (Fragment).
+Q25558	Ubiquitin (Fragment).
+Q27192	Ubiquitin.
+Q27196	Ubiquitin.
+Q38744	Ubiquitin (Fragment).
+Q38875	Polyubiquitin.
+Q39257	POLYUBIQUITIN.
+Q39926	Polyubiquitin.
+Q39940	Polyubiquitin protein (Fragment).
+Q40164	Ubiquitin.
+Q40596	Pentameric polyubiquitin.
+Q40641	POLYUBIQUITIN.
+Q41067	Polyubiquitin.
+Q41411	Polyubiquitin.
+Q41751	Polyubiquitin.
+Q41752	Clone MubG1 ubiquitin.
+Q41754	Ubiquitin.
+Q42214	Ubiquitin (Fragment).
+Q42397	HEXAUBIQUITIN protein.
+Q42415	POLYUBIQUITIN.
+Q8W551	Polyubiquitin (Fragment).
+Q8WUN7	Similar to hypothetical protein FLJ11807.
+Q91WB7	Similar to hypothetical protein FLJ11807.
+Q92332	POLYUBIQUITIN.
+Q93ZJ0	AT4g05320/C17L7_240.
+Q93ZS3	Putative polyubiquitin ubq10 protein.
+Q944F6	Polyubiquitin OUB2.
+Q944F7	Polyubiquitin OUB1.
+Q94B30	Unknown protein.
+Q94EA5	P0435H01.26 protein.
+Q966Q5	Ubiquitin 4 (Polyubiquitin).
+Q966Q6	Ubiquitin 3 (Polyubiquitin).
+Q966Q7	Ubiquitin 2 (Polyubiquitin).
+Q96TW1	Putative ubiquitin (Fragment).
+Q9C1I8	Polyubiquitin.
+Q9EMN2	AMV167.
+Q9FHQ6	Polyubiquitin.
+Q9FK69	Genomic DNA, chromosome 5, P1 clone:MRA19.
+Q9FZ55	F6I1.3 protein.
+Q9HAC8	Hypothetical protein.
+Q9HDW4	Hypothetical protein PB2B4.07 in chromosome I (Fragment).
+Q9LYW1	Polyubiquitin (ubq3).
+Q9M0W3	Polyubiquitin (ubq10).
+Q9M5X0	Polyubiquitin (Fragment).
+Q9MAG2	F12M16.29 (Hypothetical 12.7 kDa protein).
+Q9S7H2	UBIQUITIN (POLYUBIQUITIN).
+Q9SAQ6	Ubiquitin (Fragment).
+Q9SB19	Ubiquitin (AT4g05320/C17L7_240).
+Q9SNZ1	Ubiquitin.
+Q9SSU2	Polyubiquitin (Fragment).
+Q9VNB2	CG1172 protein (RE42193p).
+Q9WR83	Polyprotein (Fragment).
+Q9XFL0	Polyubiquitin.
+Q9Y736	Ubiquitin.
+Q9Y848	Polyubiquitin.
+Q9YVU8	ORF MSV144 putative ubiquitin, similar to Neurospora crassa GB:U01220.
+Q9ZRI6	Ubiquitin.
+Q9ZRW9	POLYUBIQUITIN (AT4G05050 protein) (Putative POLYUBIQUITIN) (AT4G05050/T32N4_13).
+Q9ZSV9	Polyubiquitin.
+Q9ZSW0	Tetra-ubiquitin.
+SINFRUP00000063354	Gene: SINFRUG00000062485 Clone:Scaffold_22 Contig:22 Pos: 142213 143408 1
+SINFRUP00000078681	Gene: SINFRUG00000076756 Clone:Scaffold_1142 Contig:1142 Pos: 44344 45218 1
+SINFRUP00000081871	Gene: SINFRUG00000079730 Clone:Scaffold_456 Contig:456 Pos: 91065 93631 1
+UBIQ_NEUCR	Ubiquitin.
+COE1_MOUSE	Transcription factor COE1 (OE-1) (O/E-1) (Early B-cell factor).
+COE1_RAT	Transcription factor COE1 (OE-1) (O/E-1) (Olfactory neuronal transcription factor) (OLF-1).
+COE2_BRARE	Transcription factor COE2.
+COE2_MOUSE	Transcription factor COE2 (Early B-cell factor 2) (EBF-2) (OLF-1/EBF- like 3) (OE-3) (O/E-3) (Metencephalon-mesencephalon-olfactory transcription factor 1) (MET-mesencephalon-olfactory transcription factor 1) (MET-mesencephalon-olfactory TF1).
+COE2_XENLA	Transcription factor COE2 (XCOE2) (OLF-1/EBF-like 3) (OE-3) (XOE-3).
+COE3_HUMAN	Transcription factor COE3 (Early B-cell factor 3) (EBF-3) (OLF-1/EBF- like 2) (OE-2) (O/E-2).
+COE3_MOUSE	Transcription factor COE3 (Early B-cell factor 3) (EBF-3) (OLF-1/EBF- like 2) (OE-2) (O/E-2).
+COE3_XENLA	Transcription factor COE3 (XCOE3) (OLF-1/EBF-like 2) (OE-2) (XOE-2) (XEBF-3).
+COLL_DROME	Transcription factor collier (Transcription factor knot).
+ENSMUSP00000019091	Gene:ENSMUSG00000018947 Clone:11.44000001-45000000 Contig:11.44000001-45000000 Chr:11 Basepair:44988258 Status:novel
+ENSMUSP00000022637	Gene:ENSMUSG00000022053 Clone:14.58000001-59000000 Contig:14.58000001-59000000 Chr:14 Basepair:58370131 Status:known
+ENSMUSP00000028895	Gene:ENSMUSG00000027407 Clone:2.131000001-132000000 Contig:2.131000001-132000000 Chr:2 Basepair:131293401 Status:novel
+ENSMUSP00000028896	Gene:ENSMUSG00000027407 Clone:2.131000001-132000000 Contig:2.131000001-132000000 Chr:2 Basepair:131293401 Status:novel
+ENSMUSP00000033378	Gene:ENSMUSG00000010476 Clone:7.127000001-128000000 Contig:7.127000001-128000000 Chr:7 Basepair:127278607 Status:known
+ENSP00000202634	Gene:ENSG00000088881 Clone:AL035460 Contig:AL035460.15.1.135005 Chr:20 Basepair:2661581 Status:known
+ENSP00000251863	Gene:ENSG00000108001 Clone:AL354950 Contig:AL354950.7.1.166022 Chr:10 Basepair:121797807 Status:known
+ENSP00000274541	Gene:ENSG00000145859 Clone:AC008640 Contig:AC008640.5.104336.107971 Chr:5 Basepair:160206672 Status:novel
+Q9BQW3	DJ860F19.1.1 (KIAA1442 (Similar to olfactory neuronal transcription factors (COE1, COE2, COE3, EBF3, OLF1)) (Isoform 1)).
+Q9I9C6	Early B-cell factor.
+Q9NUB6	DJ860F19.1.2 (Novel protein similar to olfactory neuronal transcription factors (COE1, COE2, COE3, EBF3, OLF1) (Isoform 2)).
+Q9P2A6	Hypothetical protein KIAA1442 (Fragment).
+Q9UH73	Early B-cell transcription factor (Fragment).
+Q9V758	CG10197 protein.
+SINFRUP00000070318	Gene: SINFRUG00000068952 Clone:Scaffold_2199 Contig:2199 Pos: 7587 30585 1
+SINFRUP00000081873	Gene: SINFRUG00000079732 Clone:Scaffold_456 Contig:456 Pos: 114854 117285 1
+SINFRUP00000083458	Gene: SINFRUG00000081199 Clone:Scaffold_7 Contig:7 Pos: 303493 369023 -1
+SINFRUP00000090452	Gene: SINFRUG00000087669 Clone:Scaffold_689 Contig:689 Pos: 49601 100040 -1
+UNC3_CAEEL	Transcription factor unc-3 (CEO/E).
+ENSMUSP00000004414	Gene:ENSMUSG00000004303 Clone:11.16000001-17000000 Contig:11.16000001-17000000 Chr:11 Basepair:16610513 Status:known
+ENSMUSP00000040319	Gene:ENSMUSG00000041231 Clone:11.44000001-45000000 Contig:11.44000001-45000000 Chr:11 Basepair:44822762 Status:novel
+ENSP00000296786	Gene:ENSG00000164332 Clone:AC011418 Contig:AC011418.5.1.108511 Chr:5 Basepair:171868274 Status:known
+O94336	Hypothetical 27.9 kDa protein.
+Q8W3M6	Hypothetical 39.0 kDa protein.
+Q8WVY7	Hypothetical protein.
+Q91FG9	355R.
+Q96DK5	Hypothetical protein FLJ25267.
+Q99LT3	Hypothetical 12.3 kDa protein.
+Q9XZ16	BCDNA:LD21504 protein.
+SINFRUP00000081872	Gene: SINFRUG00000079731 Clone:Scaffold_456 Contig:456 Pos: 99641 101722 -1
+UBPC_SCHPO	Putative ubiquitin carboxyl-terminal hydrolase C6G9.08 (EC 3.1.2.15) (Ubiquitin thiolesterase) (Ubiquitin-specific processing protease) (Deubiquitinating enzyme).
