@@ -255,7 +255,7 @@ BEGIN {
 
 		     # (model) models for codons 
 		     # 0: one, 1:b, 2:2 or more dN/dS ratios for branches
-		     'model'    => [0..2], 
+		     'model'    => [0..2,7], 
 		     
 		     # (NSsites) number of S sites
 		     # 0: one w;1:neutral;2:selection; 3:discrete;4:freqs;
