@@ -31,7 +31,7 @@ END {
 	skip("unable to the Pise tests -- no network connection or site is down",1);
     }
 }
-use Bio::Factory::Pise;
+use Bio::Tools::Run::AnalysisFactory::Pise;
 use Bio::Tools::Genscan;
 use Bio::SeqIO;
 
@@ -64,7 +64,7 @@ if( -e "t/pise-email.test" ) {
     }
 }
 
-my $factory = Bio::Factory::Pise->new(-email => $email);
+my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(-email => $email);
 ok($factory);
 
 my $golden = $factory->program('golden', 
