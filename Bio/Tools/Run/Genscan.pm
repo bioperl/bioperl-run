@@ -175,7 +175,6 @@ sub predict_genes() {
     my ($self,$seq) = @_;
     my $infile1 = $self->_writeSeqFile($seq);  
     $self->_set_input($infile1);  
-    print"matrix". $self->MATRIX;
     my @feat = $self->_run();
     return @feat;
 }
