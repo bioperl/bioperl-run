@@ -179,11 +179,11 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @PROTPARS_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
+use Bio::Tools::Run::WrapperBase;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
-use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
@@ -569,7 +569,7 @@ sub _setparams {
 =head2 outfile_name
 
  Title   : outfile_name
- Usage   : my $outfile = $codeml->outfile_name();
+ Usage   : my $outfile = $protdist->outfile_name();
  Function: Get/Set the name of the output file for this run
            (if you wanted to do something special)
  Returns : string
