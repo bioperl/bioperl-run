@@ -48,7 +48,7 @@ use Bio::Tools::Run::Phylo::Molphy::ProtML;
 use Bio::AlignIO;
 
 END {     
-    for ( $Test::ntest..$NTESTS ) {
+    for ( $Test::ntest..$NUMTESTS) {
         skip("Molphy not found. Skipping.",1);
     }
 }
