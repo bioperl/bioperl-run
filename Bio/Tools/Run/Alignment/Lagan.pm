@@ -12,8 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Alignment::Lagan - Object for the local execution of the LAGAN suite
-of tools (including MLAGAN for multiple sequence alignments)
+Bio::Tools::Run::Alignment::Lagan - Object for the local execution of the LAGAN suite of tools (including MLAGAN for multiple sequence alignments)
 
 =head1 SYNOPSIS
 
@@ -201,7 +200,6 @@ sub lagan {
 		
     #my (undef, $tempfile) = $self->io->tempfile();
     #$self->out($tempfile);
-
     my ($infile1, $infile2) = $self->_setinput($executable, $input1, $input2);
     my $lagan_report = &_generic_lagan(	$self,
                                         $executable,
@@ -221,7 +219,8 @@ sub mlagan {
     my ($self, $input1, $tree) = @_;
     $self->io->_io_cleanup();
     my $executable = 'mlagan';
-    my ($infiles, $tree) = $self->_setinput($executable, $input1, $tree);
+    my $infiles;
+    ($infiles, $tree) = $self->_setinput($executable, $input1, $tree);
     my $lagan_report = &_generic_lagan (	$self,
 						$executable,
 						$infiles,
