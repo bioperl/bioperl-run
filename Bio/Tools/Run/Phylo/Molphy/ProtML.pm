@@ -135,7 +135,7 @@ use Bio::Root::Root;
 
 BEGIN { 
     $MINNAMELEN = 25;
-    $PROGRAMNAME = 'protml';
+    $PROGRAMNAME = 'protml'  . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'MOLPYDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'MOLPHYDIR'},$PROGRAMNAME);
     }
@@ -209,7 +209,7 @@ BEGIN {
            -tree => the Bio::Tree::TreeI object
            -params => a hashref of PAML parameters (all passed to 
 						    set_parameter)
-           -executable => where the codeml executable resides
+           -executable => where the protml executable resides
 
 See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
 
@@ -260,7 +260,7 @@ sub new {
 =head2 run
 
  Title   : run
- Usage   : $codeml->run();
+ Usage   : $protml->run();
  Function: run the protml analysis using the default or updated parameters
            the alignment parameter must have been set
  Returns : Bio::Tools::Phylo::Molphy
@@ -345,8 +345,8 @@ sub run {
 =head2 executable
 
  Title   : executable
- Usage   : my $exe = $codeml->executable();
- Function: Finds the full path to the 'codeml' executable
+ Usage   : my $exe = $protml->executable();
+ Function: Finds the full path to the 'protml' executable
  Returns : string representing the full path to the exe
  Args    : [optional] name of executable to set path to 
            [optional] boolean flag whether or not warn when exe is not found
@@ -382,7 +382,7 @@ sub executable{
 =head2 alignment
 
  Title   : alignment
- Usage   : $codeml->align($aln);
+ Usage   : $protml->align($aln);
  Function: Get/Set the Bio::Align::AlignI object
  Returns : Bio::Align::AlignI object
  Args    : [optional] Bio::Align::AlignI
@@ -407,7 +407,7 @@ sub alignment{
 =head2 tree
 
  Title   : tree
- Usage   : $codeml->tree($tree, %params);
+ Usage   : $protml->tree($tree, %params);
  Function: Get/Set the Bio::Tree::TreeI object
  Returns : Bio::Tree::TreeI
  Args    : [optional] $tree => Bio::Tree::TreeI,
