@@ -218,9 +218,9 @@ sub run {
     if ($self->verbose > 0) {
 	last unless defined $self->acd; # might not have the parser
 #	$self->acd->mandatory->print;
-	if ($self->name eq 'water') {
-	    print Dumper($self->acd->mandatory);
-	}
+#	if ($self->name eq 'water') {
+#	    print Dumper($self->acd->mandatory);
+#	}
 	foreach my $attr (keys %{$self->acd->mandatory} ) {
 	    last unless defined $self->acd; # might not have the parser
 	    unless ($input->{$attr}) {
@@ -232,7 +232,6 @@ sub run {
 	    }
 	}
     }
-
     my $runstring = join (' ', $self->name, $option_string, '-auto');
     print STDERR "Command line: ", $runstring, "\n" if $self->verbose > 0;
     return `$runstring`;
