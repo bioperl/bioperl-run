@@ -28,7 +28,6 @@ my $verbose = -1;
 my @params = ('-verbose' => $verbose, 'silent' => 1, 'quiet' => 1);
 my  $factory = Bio::Tools::Run::Genewise->new(@params);
 ok $factory->isa('Bio::Tools::Run::Genewise');
-my $prog = $factory->program;
 unless ($factory->executable) {
    warn("Genewise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
    exit 0;
