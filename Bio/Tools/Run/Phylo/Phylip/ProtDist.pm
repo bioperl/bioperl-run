@@ -53,8 +53,10 @@ comparing protein sequences from a multiple alignment file or a
 L<Bio::SimpleAlign> object and returns a L<Bio::Matrix::PhylipDist> object;
 
 VERSION Support
-This wrapper currently supports v3.5 of phylip. There is also support for v3.6 although
-this is still experimental as v3.6 is still under alpha release and not all functionalities maybe supported.
+
+This wrapper currently supports v3.5 of phylip. There is also support
+for v3.6 although this is still experimental as v3.6 is still under
+alpha release and not all functionalities maybe supported.
 
 =head1 PARAMETERS FOR PROTDIST COMPUTATION
 
@@ -503,32 +505,32 @@ sub _setparams {
     	$value = $self->$attr();
     	next unless (defined $value);
     	if ($attr =~/MODEL/i){
-	     if ($value=~/CAT/i){
-    		$cat = 1;
-       }
-		   $param_string .= $menu{'MODEL'}{$value};
-   	  }
-      if($attr=~/MULTIPLE/i){
-          $param_string.=$menu{'MULTIPLE'}."$value\n";
-      }
+	    if ($value=~/CAT/i){
+		$cat = 1;
+	    }
+	    $param_string .= $menu{'MODEL'}{$value};
+	}
+	if($attr=~/MULTIPLE/i){
+	    $param_string.=$menu{'MULTIPLE'}."$value\n";
+	}
   	if ($cat == 1){
 	    if($attr =~ /GENCODE/i){		
-        my $allowed = $menu{'GENCODE'}{'ALLOWED'};
+		my $allowed = $menu{'GENCODE'}{'ALLOWED'};
     		$self->throw("Unallowed value for genetic code") unless ($value =~ /[$allowed]/);
-		    $param_string .= $menu{'GENCODE'}{'OPTION'}."$value\n";
+		$param_string .= $menu{'GENCODE'}{'OPTION'}."$value\n";
 	    }
 	    if ($attr =~/CATEGORY/i){
-        my $allowed = $menu{'CATEGORY'}{'ALLOWED'};
+		my $allowed = $menu{'CATEGORY'}{'ALLOWED'};
     		$self->throw("Unallowed value for categorization of amino acids") unless ($value =~/[$allowed]/);
 	    	$param_string .= $menu{'CATEGORY'}{'OPTION'}."$value\n";
 	    }
 	    if ($attr =~/PROBCHANGE/i){
     		if (($value =~ /\d+/)&&($value >= 0) && ($value < 1)){
-		     $param_string .= $menu{'PROBCHANGE'}."$value\n";
-		    }
+		    $param_string .= $menu{'PROBCHANGE'}."$value\n";
+		}
     		else {
 	  	    $self->throw("Unallowed value for probability change category");  
-		    }
+		}
 	    }
 	    if ($attr =~/TRANS/i){
     		if (($value=~/\d+/) && ($value >=0)){
@@ -538,23 +540,23 @@ sub _setparams {
 	    if ($attr =~ /FREQ/i){
     		my @freq = split(",",$value);	
     		if ($freq[0] !~ /\d+/){	#a letter provided (sets frequencies equally to 0.25)
-		     $param_string .=$menu{'FREQ'}.$freq[0]."\n";
+		    $param_string .=$menu{'FREQ'}.$freq[0]."\n";
 	    	}
     		elsif ($#freq ==  3) {#must have 4 digits for each base
 					  $param_string .=$menu{'FREQ'};
 					  foreach my $f (@freq){
 					      $param_string.="$f\n";
 					  }
-				}
-		    else {
-		     $self->throw("Unallowed value for base frequencies");
-		    }
+				      }
+		else {
+		    $self->throw("Unallowed value for base frequencies");
+		}
 	    }
-	  }
+	}
     } 
     #set multiple option is not set and there are more than one sequence
     if (($param_string !~ $menu{'MULTIPLE'}) && (defined ($self->_input_nbr) &&($self->_input_nbr > 1))){
-      $param_string.=$menu{'MULTIPLE'}.$self->_input_nbr."\n";
+	$param_string.=$menu{'MULTIPLE'}.$self->_input_nbr."\n";
     }
     $param_string .=$menu{'SUBMIT'};
 
