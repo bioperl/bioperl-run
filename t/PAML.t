@@ -22,9 +22,8 @@ BEGIN {
     }
     use Test;
 
-    $NUMTESTS = 8;
+    $NUMTESTS = 9;
     plan tests => $NUMTESTS;
-    
 }
 
 if( $error ==  1 ) {
