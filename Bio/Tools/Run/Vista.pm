@@ -156,7 +156,8 @@ BEGIN {
                       'numwindows'=>4);
 
     @VISTA_PARAMS=qw(JAVA JAVA_PARAM OUTFILE MIN_PERC_ID QUIET VERBOSE ANNOTATION_FORMAT
-                     REGION_FILE SCORE_FILE ALIGNMENT_FILE CONTIGS_FILE DIFFS PLOTFILE
+                     REGION_FILE REGION_FILE_DIR SCORE_FILE SCORE_FILE_DIR ALIGNMENT_FILE_DIR
+                     ALIGNMENT_FILE CONTIGS_FILE DIFFS PLOTFILE
                      MIN_LENGTH PLOTMIN ANNOTATION BASES TICKDIST RESOLUTION TITLE PAPER
                      WINDOW NUMWINDOWS START END NUM_PLOT_LINES LEGEND FILENAME NUM_PAGES
                      AXIS_LABEL TICKS_FILE COLOR USE_ORDER GAPS SNPS_FILE REPEATS_FILE 
@@ -325,15 +326,18 @@ sub _mf2bin {
   my %base_code = ('-' => 0, 'A' => 1, 'C' => 2, 'T' => 3, 'G' => 4, 'N' => 5,
                 'a' => 1, 'c' => 2, 't' => 3, 'g' => 4, 'n' => 5);
 
-  my @files;
+ my @files;
 
-  my @ref= (split ('',$reference->seq));
-  my @pairs;
+ my @ref= (split ('',$reference->seq));
+ my @pairs;
+
   foreach my $seq2(@seq){
       my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
       my @seq2= (split('', $seq2->seq)); 
       foreach my $index(0..$#ref){
-        print $tfh1 pack("H2",$base_code{$ref[$index]}.$base_code{$seq2[$index]});
+        unless($ref[$index] eq '-' && $seq2[$index] eq '-'){
+          print $tfh1 pack("H2",$base_code{$ref[$index]}.$base_code{$seq2[$index]});
+        }
       }
       close ($tfh1);
       undef ($tfh1);
@@ -359,9 +363,25 @@ sub _make_plotfile {
     print $tfh1 " REGIONS ".$self->min_perc_id." ".$self->min_length."\n";
     print $tfh1 " MIN ".$self->plotmin."\n";
     print $tfh1 " DIFFS ". $self->diffs ."\n\n" if $self->diffs;
-    print $tfh1 " REGION_FILE ". $self->region_file ."/".$pairs->[$index]->[0]."_".$pairs->[$index]->[1].".aln\n\n" if $self->region_file;
-    print $tfh1 " SCORE_FILE ". $self->score_file ."/".$pairs->[$index]->[0]."_".$pairs->[$index]->[1].".score\n\n" if $self->score_file;
-    print $tfh1 " ALIGNMENT_FILE ". $self->alignment_file ."/".$pairs->[$index]->[0]."_".$pairs->[$index]->[1].".alignment\n\n" if $self->alignment_file;
+    if($self->region_file||$self->region_file_dir){
+      my $file = " REGION_FILE ";
+      $file.=$self->region_file_dir."/" if $self->region_file_dir;
+      $file.=$pairs->[$index]->[0]."_".$pairs->[$index]->[1].".region\n\n";
+      print $tfh1 $file;
+    }
+    if($self->score_file || $self->score_file_dir){
+      my $file = " SCORE_FILE ";
+      $file.=$self->score_file_dir."/" if $self->score_file_dir;
+      $file.=$pairs->[$index]->[0]."_".$pairs->[$index]->[1].".score\n\n";
+      print $tfh1 $file;
+    }
+    if($self->alignment_file || $self->alignment_file_dir){
+      my $file = " ALIGNMENT_FILE ";
+      $file.=$self->alignment_file_dir."/" if $self->alignment_file_dir;
+      $file.=$pairs->[$index]->[0]."_".$pairs->[$index]->[1].".alignment\n\n";
+      print $tfh1 $file;
+    }
+       
     print $tfh1 " CONTIGS_FILE ". $self->contigs_file ."\n\n" if $self->contigs_file;
     print $tfh1 " USE_ORDER ". $self->use_order."\n\n" if $self->use_order;
     print $tfh1 "END \n\n";
