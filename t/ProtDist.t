@@ -4,7 +4,7 @@
 
 use strict;
 use vars qw($DEBUG);
-$DEBUG = $ENV{'BIOPERLDEBUG'} || 0;
+$DEBUG = $ENV{'BIOPERLDEBUG'} || -1;
 
 BEGIN {
     eval { require Test; };
@@ -19,6 +19,7 @@ BEGIN {
 
 use Bio::Tools::Run::Phylo::Phylip::ProtDist;
 use Bio::Tools::Run::Alignment::Clustalw; 
+
 END {     
     for ( $Test::ntest..$NTESTS ) {
 	skip("ProtDist not found. Skipping.",1);
@@ -26,15 +27,15 @@ END {
 }
 
 ok(1);
-my $verbose = -1;
+my $verbose = $DEBUG;
 my @params = (
-	      'idlength'=>30,
-	      'model'=>'pam',
-	      'gencode'=>'U',
-	      'category'=>'H',
+	      'idlength'  =>30,
+	      'model'     =>'pam',
+	      'gencode'   =>'U',
+	      'category'  =>'H',
 	      'probchange'=>'0.4',
-	      'trans'=>'5',
-	      'freq'=>'0.25,0.5,0.125,0.125');
+	      'trans'     =>'5',
+	      'freq'      =>'0.25,0.5,0.125,0.125');
 
 my $dist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 unless($dist_factory->executable){
@@ -91,10 +92,10 @@ unless ($protdist_present) {
     warn("protdist program not found. Skipping tests $Test::ntest to $NTESTS.\n") if($DEBUG);    
     exit 0;
 }
-
+$dist_factory->verbose($verbose);
 $matrix = $dist_factory->create_distance_matrix($inputfilename);
 
-ok defined $matrix->{'ENSP000003'}{'SINFRUP001'};
+ok($matrix->{'ENSP000003'}{'SINFRUP001'},0.27708);
 
 $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 @params = ('ktuple' => 2, 'matrix' => 'BLOSUM', 
