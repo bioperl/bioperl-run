@@ -24,14 +24,14 @@ Revision history for Bioperl run modules
 
      o Select PHYLIP apps: Neighbor, ProtDist, and ProtPars.
 
-0.02 Developer release
+1.2  Developer release
 
      o Analysis Factory framework- currently providing SOAP access to EMBOSS
        applications
 
      o Support for FootPrinter, Genewise, Hmmpfam, Primate, Prints,
        Profile, Promoterwise, Pseudowise, Seg, Signalp, Tmhmm,TribeMCL,
-       Blat,DBA,Lagan,Sim4,Fasta,ProtML
+       Blat,DBA,Lagan,Sim4,Fasta,ProtML,Vista
      
      o Added support for PHYLIP apps: Consense, DrawGram, DrawTree, SeqBoot
 
