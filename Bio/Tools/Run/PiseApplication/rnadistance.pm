@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::rnadistance
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,17 +30,18 @@ Bio::Tools::Run::PiseApplication::rnadistance
 		Fontana W, Konings D A M, Stadler P F, Schuster P, (1993) Statistics of RNA secondary structures, Biopolymers 33, 1389-1404 I.L. Hofacker, W. Fontana, P.F. Stadler, S. Bonhoeffer, M. Tacker, P. Schuster (1994) Fast Folding and Comparison of RNA Secondary Structures. Monatshefte f. Chemie 125, 167-188
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/rnadistance.html 
+         for available values):
 
 
 		rnadistance (String)
 
-
 		struct (InFile)
 			Structures File
-
-		others_options (Paragraph)
-			Other options
 
 		distance (Excl)
 			Representation for distance calculation (-D)
@@ -40,23 +49,75 @@ Bio::Tools::Run::PiseApplication::rnadistance
 		compare (Excl)
 			Which comparisons (-X)
 
-		matrix_options (Paragraph)
-			Analyse the distance matrix
-
 		do_analyse (Switch)
 			Do this analysis (with AnalyseDists program) (-Xm only)?
 
 		method (Excl)
 			Analysis methods to be used (-X)
 
-		psfiles (Results)
-
-
 		shapiro (Switch)
 			Use the Bruce Shapiro's cost matrix for comparing coarse structures (-S)
 
 		alignment_file (OutFile)
 			Alignment file (-B)
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/rnadistance.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -72,20 +133,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $rnadistance = Bio::Tools::Run::PiseApplication::rnadistance->new($remote, $email, @params);
+ Usage   : my $rnadistance = Bio::Tools::Run::PiseApplication::rnadistance->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::rnadistance object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $rnadistance = $factory->program('rnadistance');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::rnadistance.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/rnadistance.pm
 
@@ -94,6 +155,8 @@ sub new {
     $self->{TITLE}   = "VIENNARNA";
 
     $self->{DESCRIPTION}   = "RNAdistance - calculate distances of RNA secondary structures";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Fontana, Hofacker, Stadler";
 

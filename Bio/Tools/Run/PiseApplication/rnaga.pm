@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::rnaga
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,17 +28,17 @@ Bio::Tools::Run::PiseApplication::rnaga
 		Jih-H Chen, Shu-Yun Le and Jacob Maize. Prediction of Common Secondary Structures of RNAs: A genetic Algorithm Approach, Nucleic Acids Res.,2000, Vol.28, No. 4 (991 - 999).
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/rnaga.html 
+         for available values):
 
 
 		rnaga (String)
 
-
 		mv_files (String)
-
-
-		result_files (Results)
-
 
 		seqfile (Sequence)
 			Sequence(s)
@@ -57,9 +65,6 @@ Bio::Tools::Run::PiseApplication::rnaga
 		zeta (Float)
 			zeta: a structure is taken as a common structure if the free energy of the structure is no greater than (average random energy + zeta * standard deviation)
 
-		equivalency (Paragraph)
-			Parameters to determine the equivalency of two stems
-
 		mxdp (Integer)
 			Stem position
 
@@ -71,6 +76,64 @@ Bio::Tools::Run::PiseApplication::rnaga
 
 		mxdrp (Integer)
 			Branches distance
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/rnaga.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -86,20 +149,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $rnaga = Bio::Tools::Run::PiseApplication::rnaga->new($remote, $email, @params);
+ Usage   : my $rnaga = Bio::Tools::Run::PiseApplication::rnaga->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::rnaga object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $rnaga = $factory->program('rnaga');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::rnaga.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/rnaga.pm
 
@@ -108,6 +171,8 @@ sub new {
     $self->{TITLE}   = "RNAGA";
 
     $self->{DESCRIPTION}   = "Prediction of common secondary structures of RNAs by genetic algorithm";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Chen, Le, Maizel";
 
@@ -180,7 +245,7 @@ sub new {
 		"perl" => ' "rnaga < params" ',
 	},
 	"mv_files" => {
-		"perl" => ' " ; mv fort.2 $seqfile.scr; mv fort.4 $seqfile.cm" ',
+		"perl" => '" ; mv fort.2 $seqfile.scr; mv fort.4 $seqfile.cm"',
 	},
 	"result_files" => {
 	},

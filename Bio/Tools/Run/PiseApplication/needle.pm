@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::needle
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,17 @@ Bio::Tools::Run::PiseApplication::needle
 
 	NEEDLE	Needleman-Wunsch global alignment. (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/needle.html 
+         for available values):
 
 
 		needle (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequencea (Sequence)
 			sequencea -- any [single sequence] (-sequencea)
@@ -35,26 +43,17 @@ Bio::Tools::Run::PiseApplication::needle
 			seqall [sequences] (-seqall)
 			pipe: seqsfile
 
-		required (Paragraph)
-			required Section
-
 		gapopen (Float)
 			Gap opening penalty (-gapopen)
 
 		gapextend (Float)
 			Gap extension penalty (-gapextend)
 
-		advanced (Paragraph)
-			advanced Section
-
 		datafile (Excl)
 			Matrix file (-datafile)
 
-		output (Paragraph)
-			output Section
-
-		similarity (Switch)
-			Display percent identity and similarity (-similarity)
+		brief (Switch)
+			Brief identity and similarity (-brief)
 
 		outfile (OutFile)
 			outfile (-outfile)
@@ -65,6 +64,63 @@ Bio::Tools::Run::PiseApplication::needle
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/needle.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -80,20 +136,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $needle = Bio::Tools::Run::PiseApplication::needle->new($remote, $email, @params);
+ Usage   : my $needle = Bio::Tools::Run::PiseApplication::needle->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::needle object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $needle = $factory->program('needle');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::needle.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/needle.pm
 
@@ -102,6 +158,8 @@ sub new {
     $self->{TITLE}   = "NEEDLE";
 
     $self->{DESCRIPTION}   = "Needleman-Wunsch global alignment. (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -136,7 +194,7 @@ sub new {
 	"advanced", 	# advanced Section
 	"datafile", 	# Matrix file (-datafile)
 	"output", 	# output Section
-	"similarity", 	# Display percent identity and similarity (-similarity)
+	"brief", 	# Brief identity and similarity (-brief)
 	"outfile", 	# outfile (-outfile)
 	"outfile_aformat", 	# Alignment output format (-aformat)
 	"auto",
@@ -155,7 +213,7 @@ sub new {
 	"advanced" => 'Paragraph',
 	"datafile" => 'Excl',
 	"output" => 'Paragraph',
-	"similarity" => 'Switch',
+	"brief" => 'Switch',
 	"outfile" => 'OutFile',
 	"outfile_aformat" => 'Excl',
 	"auto" => 'String',
@@ -189,8 +247,8 @@ sub new {
 	},
 	"output" => {
 	},
-	"similarity" => {
-		"perl" => '($value)? "" : " -nosimilarity"',
+	"brief" => {
+		"perl" => '($value)? "" : " -nobrief"',
 	},
 	"outfile" => {
 		"perl" => '" -outfile=$value"',
@@ -224,7 +282,7 @@ sub new {
 	"gapopen" => 3,
 	"gapextend" => 4,
 	"datafile" => 5,
-	"similarity" => 6,
+	"brief" => 6,
 	"outfile" => 7,
 	"outfile_aformat" => 7,
 	"auto" => 8,
@@ -244,7 +302,7 @@ sub new {
 	"gapopen",
 	"gapextend",
 	"datafile",
-	"similarity",
+	"brief",
 	"outfile",
 	"outfile_aformat",
 	"auto",
@@ -266,7 +324,7 @@ sub new {
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
-	"similarity" => 0,
+	"brief" => 0,
 	"outfile" => 0,
 	"outfile_aformat" => 0,
 	"auto" => 1,
@@ -285,7 +343,7 @@ sub new {
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
-	"similarity" => 0,
+	"brief" => 0,
 	"outfile" => 0,
 	"outfile_aformat" => 0,
 	"auto" => 0,
@@ -303,7 +361,7 @@ sub new {
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
-	"similarity" => 0,
+	"brief" => 0,
 	"outfile" => 1,
 	"outfile_aformat" => 0,
 	"auto" => 0,
@@ -321,7 +379,7 @@ sub new {
 	"advanced" => "advanced Section",
 	"datafile" => "Matrix file (-datafile)",
 	"output" => "output Section",
-	"similarity" => "Display percent identity and similarity (-similarity)",
+	"brief" => "Brief identity and similarity (-brief)",
 	"outfile" => "outfile (-outfile)",
 	"outfile_aformat" => "Alignment output format (-aformat)",
 	"auto" => "",
@@ -339,7 +397,7 @@ sub new {
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
-	"similarity" => 0,
+	"brief" => 0,
 	"outfile" => 0,
 	"outfile_aformat" => 0,
 	"auto" => 0,
@@ -352,7 +410,7 @@ sub new {
 	"required" => ['gapopen','gapextend',],
 	"advanced" => ['datafile',],
 	"datafile" => ['EPAM60','EPAM60','EPAM290','EPAM290','EPAM470','EPAM470','EPAM110','EPAM110','EBLOSUM50','EBLOSUM50','EPAM220','EPAM220','EBLOSUM62-12','EBLOSUM62-12','EPAM400','EPAM400','EPAM150','EPAM150','EPAM330','EPAM330','EBLOSUM55','EBLOSUM55','EPAM30','EPAM30','EPAM260','EPAM260','EBLOSUM90','EBLOSUM90','EPAM440','EPAM440','EPAM190','EPAM190','EPAM370','EPAM370','EPAM70','EPAM70','EPAM480','EPAM480','EPAM120','EPAM120','EDNAMAT','EDNAMAT','EPAM300','EPAM300','EBLOSUM60','EBLOSUM60','EPAM230','EPAM230','EBLOSUM62','EBLOSUM62','EPAM410','EPAM410','EPAM160','EPAM160','EPAM340','EPAM340','EBLOSUM65','EBLOSUM65','EPAM40','EPAM40','EPAM270','EPAM270','EPAM450','EPAM450','EPAM380','EPAM380','EPAM80','EPAM80','EPAM490','EPAM490','EBLOSUM30','EBLOSUM30','EBLOSUMN','EBLOSUMN','EPAM200','EPAM200','EPAM130','EPAM130','EBLOSUM35','EBLOSUM35','EPAM310','EPAM310','EBLOSUM70','EBLOSUM70','EPAM10','EPAM10','EPAM240','EPAM240','EPAM420','EPAM420','EPAM170','EPAM170','EBLOSUM75','EBLOSUM75','EPAM350','EPAM350','EPAM280','EPAM280','EPAM50','EPAM50','EPAM460','EPAM460','EPAM390','EPAM390','EPAM90','EPAM90','EPAM100','EPAM100','EBLOSUM40','EBLOSUM40','EPAM210','EPAM210','EPAM140','EPAM140','EBLOSUM45','EBLOSUM45','EPAM320','EPAM320','EBLOSUM80','EBLOSUM80','EPAM500','EPAM500','EPAM20','EPAM20','EPAM250','EPAM250','EPAM430','EPAM430','EPAM180','EPAM180','EBLOSUM85','EBLOSUM85','EPAM360','EPAM360',],
-	"output" => ['similarity','outfile','outfile_aformat',],
+	"output" => ['brief','outfile','outfile_aformat',],
 	"outfile_aformat" => ['','default','fasta','fasta','MSF','MSF',],
     };
 
@@ -366,7 +424,7 @@ sub new {
 
     $self->{VDEF}  = {
 	"gapextend" => '',
-	"similarity" => '1',
+	"brief" => '1',
 	"outfile" => 'outfile.align',
 
     };
@@ -382,7 +440,7 @@ sub new {
 	"advanced" => { "perl" => '1' },
 	"datafile" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
-	"similarity" => { "perl" => '1' },
+	"brief" => { "perl" => '1' },
 	"outfile" => { "perl" => '1' },
 	"outfile_aformat" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
@@ -429,7 +487,7 @@ sub new {
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
-	"similarity" => 0,
+	"brief" => 0,
 	"outfile" => 0,
 	"outfile_aformat" => 0,
 	"auto" => 0,
@@ -447,7 +505,7 @@ sub new {
 	"advanced" => 0,
 	"datafile" => 0,
 	"output" => 0,
-	"similarity" => 0,
+	"brief" => 0,
 	"outfile" => 0,
 	"outfile_aformat" => 0,
 	"auto" => 0,
@@ -465,8 +523,11 @@ sub new {
 	"gapextend" => [
 		"The gap extension, penalty is added to the standard gap penalty for each base or residue in the gap. This is how long gaps are penalized. Usually you will expect a few long gaps rather than many short gaps, so the gap extension penalty should be lower than the gap penalty. An exception is where one or both sequences are single reads with possible sequencing errors in which case you would expect many single base gaps. You can get this result by setting the gap open penalty to zero (or very low) and using the gap extension penalty to control gap scoring. Allowed values: Floating point number from 0.0 to 10.0",
 	],
-	"similarity" => [
-		"Display percent identity and similarity",
+	"datafile" => [
+		"This is the scoring matrix file used when comparing sequences.  By default it is the file \'EBLOSUM62\' (for proteins) or the file \'EDNAFULL\' (for nucleic sequences).  These files are found in the \'data\' directory of the EMBOSS installation.",
+	],
+	"brief" => [
+		"Brief identity and similarity",
 	],
 
     };

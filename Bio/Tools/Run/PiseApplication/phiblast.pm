@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::phiblast
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,17 +30,18 @@ Bio::Tools::Run::PiseApplication::phiblast
 		 S. Wu and U. Manber, Communications of the ACM 35(1992), pp. 83-91.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/phiblast.html 
+         for available values):
 
 
 		phiblast (Excl)
 			Program (-p)
 
-		pattern_file (Results)
-
-
 		nb_proc (Integer)
-
 
 		query (Sequence)
 			Sequence File (-i)
@@ -50,14 +59,8 @@ Bio::Tools::Run::PiseApplication::phiblast
 		protein_db (Excl)
 			protein db (-d)
 
-		filter_opt (Paragraph)
-			Filtering and masking options
-
 		filter (Switch)
 			Filter query sequence with SEG (-F)
-
-		selectivity_opt (Paragraph)
-			Selectivity options
 
 		Expect (Integer)
 			Expect: upper bound on the expected frequency of chance occurrence of a set of HSPs (-e)
@@ -74,9 +77,6 @@ Bio::Tools::Run::PiseApplication::phiblast
 		dropoff_z (Integer)
 			X dropoff value for final gapped alignment (in bits) (-Z)
 
-		scoring (Paragraph)
-			Scoring option
-
 		matrix (Excl)
 			Matrix (-M)
 
@@ -85,9 +85,6 @@ Bio::Tools::Run::PiseApplication::phiblast
 
 		extend_a_gap (Integer)
 			Cost to extend a gap (-E)
-
-		affichage (Paragraph)
-			Report options
 
 		Descriptions (Integer)
 			How many short descriptions? (-v)
@@ -107,15 +104,65 @@ Bio::Tools::Run::PiseApplication::phiblast
 		believe (Switch)
 			Believe the query defline (-J)
 
-		html_file (Results)
-
-
 		txtoutput (String)
 
+=head1 FEEDBACK
 
-		txt_file (Results)
+=head2 Mailing Lists
 
-			pipe: blast_output
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/phiblast.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -131,20 +178,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $phiblast = Bio::Tools::Run::PiseApplication::phiblast->new($remote, $email, @params);
+ Usage   : my $phiblast = Bio::Tools::Run::PiseApplication::phiblast->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::phiblast object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $phiblast = $factory->program('phiblast');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::phiblast.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/phiblast.pm
 
@@ -153,6 +200,8 @@ sub new {
     $self->{TITLE}   = "BLAST2";
 
     $self->{DESCRIPTION}   = "phi-blast - Pattern-Hit Initiated BLAST";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Altschul, Madden, Schaeffer, Zhang, Miller, Lipman";
 
@@ -594,7 +643,7 @@ sub new {
     $self->{VLIST}  = {
 
 	"phiblast" => ['patseedp','patseedp: normal phiblast mode','seedp','seedp: restrict to a subset of pattern occurences',],
-	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','prodom','prodom: protein domains','sbase','sbase: annotated domains sequences',],
+	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','sbase','sbase: annotated domains sequences',],
 	"filter_opt" => ['filter',],
 	"selectivity_opt" => ['Expect','window','extend_hit','dropoff','dropoff_z',],
 	"scoring" => ['matrix','open_a_gap','extend_a_gap',],

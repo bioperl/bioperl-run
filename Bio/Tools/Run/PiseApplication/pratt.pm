@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::pratt
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,11 +23,15 @@ Bio::Tools::Run::PiseApplication::pratt
 
 	Pratt	pattern discovery (K. Sturzrehm, I. Jonassen)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/pratt.html 
+         for available values):
 
 
 		pratt (String)
-
 
 		seq (Sequence)
 			Sequence File
@@ -27,17 +39,11 @@ Bio::Tools::Run::PiseApplication::pratt
 		seqformat (Excl)
 			Sequence File format
 
-		conservation (Paragraph)
-			Pattern conservation parameters
-
 		CM (Integer)
 			CM: min Nr of Seqs to Match (between 2 and 4)
 
 		Cpct (Integer)
 			C%: min Percentage Seqs to Match
-
-		restrictions (Paragraph)
-			Pattern restrictions parameters
 
 		PP (Excl)
 			PP: pos in seq
@@ -72,9 +78,6 @@ Bio::Tools::Run::PiseApplication::pratt
 		BN (Integer)
 			BN: Nr of Pattern Symbols Initial Search
 
-		scoring (Paragraph)
-			Pattern Scoring parameters
-
 		S (Excl)
 			S: Scoring
 
@@ -85,10 +88,6 @@ Bio::Tools::Run::PiseApplication::pratt
 			Distances File (if Scoring = dist)
 
 		swissprotdb (String)
-
-
-		mdl_param (Paragraph)
-			MDL parameters (Z0-Z3) (if MDL scoring)
 
 		Z0 (Integer)
 			Z0
@@ -101,9 +100,6 @@ Bio::Tools::Run::PiseApplication::pratt
 
 		Z3 (Integer)
 			Z3
-
-		search (Paragraph)
-			Search parameters
 
 		G (Excl)
 			G: Pattern Graph from:
@@ -120,14 +116,8 @@ Bio::Tools::Run::PiseApplication::pratt
 		RG (Switch)
 			RG: Generalise ambiguous symbols (if Pattern Refinement on)
 
-		output (Paragraph)
-			Output options
-
 		OF (OutFile)
 			OF: Output Filename
-
-		outfiles (Results)
-
 
 		OP (Switch)
 			OP: PROSITE Pattern Format
@@ -147,8 +137,63 @@ Bio::Tools::Run::PiseApplication::pratt
 		MV (Switch)
 			MV: print vertically
 
-		report (Results)
+=head1 FEEDBACK
 
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/pratt.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -164,20 +209,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $pratt = Bio::Tools::Run::PiseApplication::pratt->new($remote, $email, @params);
+ Usage   : my $pratt = Bio::Tools::Run::PiseApplication::pratt->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::pratt object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $pratt = $factory->program('pratt');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::pratt.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/pratt.pm
 
@@ -186,6 +231,8 @@ sub new {
     $self->{TITLE}   = "Pratt";
 
     $self->{DESCRIPTION}   = "pattern discovery";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "K. Sturzrehm, I. Jonassen";
 

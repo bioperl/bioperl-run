@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::rnapdist
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,26 +28,24 @@ Bio::Tools::Run::PiseApplication::rnapdist
 		Bonhoeffer S, McCaskill J S, Stadler P F, Schuster P, (1993) RNA multistructure landscapes, Euro Biophys J:22,13-24
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/rnapdist.html 
+         for available values):
 
 
 		rnapdist (String)
 
-
 		seq (Sequence)
 			RNA Sequences File
-
-		comparison_options (Paragraph)
-			Comparison options
 
 		compare (Excl)
 			Which comparisons (-X)
 
 		alignment_file (OutFile)
 			Alignment file (-B)
-
-		others_options (Paragraph)
-			Other options
 
 		temperature (Integer)
 			Rescale energy parameters to a temperature of temp C. (-T)
@@ -67,9 +73,63 @@ Bio::Tools::Run::PiseApplication::rnapdist
 
 		readseq (String)
 
+=head1 FEEDBACK
 
-		psfiles (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/rnapdist.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -85,20 +145,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $rnapdist = Bio::Tools::Run::PiseApplication::rnapdist->new($remote, $email, @params);
+ Usage   : my $rnapdist = Bio::Tools::Run::PiseApplication::rnapdist->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::rnapdist object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $rnapdist = $factory->program('rnapdist');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::rnapdist.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/rnapdist.pm
 
@@ -107,6 +167,8 @@ sub new {
     $self->{TITLE}   = "VIENNARNA";
 
     $self->{DESCRIPTION}   = "RNApdist - calculate distances of thermodynamic RNA secondary structures ensembles";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Stadler, Hofacker, Bonhoeffer";
 

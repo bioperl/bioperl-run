@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::psiblast
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::psiblast
 		Altschul, Stephen F., Thomas L. Madden, Alejandro A. Schaeffer,Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), Gapped BLAST and PSI-BLAST: a new generation of protein database search programs,  Nucleic Acids Res. 25:3389-3402.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/psiblast.html 
+         for available values):
 
 
 		psiblast (String)
-
 
 		query (Sequence)
 			Sequence File
@@ -39,14 +51,8 @@ Bio::Tools::Run::PiseApplication::psiblast
 		protein_db (Excl)
 			protein db
 
-		filter_opt (Paragraph)
-			Filtering and masking options
-
 		filter (Switch)
 			Filter query sequence with SEG (-F)
-
-		selectivity_opt (Paragraph)
-			Selectivity options
 
 		Expect (Integer)
 			Expect: upper bound on the expected frequency of chance occurrence of a set of HSPs (-e)
@@ -69,9 +75,6 @@ Bio::Tools::Run::PiseApplication::psiblast
 		dropoff_z (Integer)
 			X dropoff value for final gapped alignment (in bits) (-Z)
 
-		scoring (Paragraph)
-			Scoring option
-
 		matrix (Excl)
 			Matrix (-M)
 
@@ -80,9 +83,6 @@ Bio::Tools::Run::PiseApplication::psiblast
 
 		extend_a_gap (Integer)
 			Cost to extend a gap (-E)
-
-		psi_spec_opt (Paragraph)
-			PSI-Blast specific selectivity options
 
 		max_passes (Integer)
 			Maximum number of passes to use in  multipass version (-j)
@@ -95,9 +95,6 @@ Bio::Tools::Run::PiseApplication::psiblast
 
 		trigger (Float)
 			Number of bits to trigger gapping (-N)
-
-		affichage (Paragraph)
-			Report options
 
 		Descriptions (Integer)
 			How many short descriptions? (-v)
@@ -124,14 +121,65 @@ Bio::Tools::Run::PiseApplication::psiblast
 		save_txt_matrix (OutFile)
 			Save PSI-BLAST Matrix as text to file (-Q)
 
-		html_file (Results)
-
-
-		txt_output (Results)
-
-
 		nb_proc (Integer)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/psiblast.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -147,20 +195,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $psiblast = Bio::Tools::Run::PiseApplication::psiblast->new($remote, $email, @params);
+ Usage   : my $psiblast = Bio::Tools::Run::PiseApplication::psiblast->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::psiblast object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $psiblast = $factory->program('psiblast');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::psiblast.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/psiblast.pm
 
@@ -169,6 +217,8 @@ sub new {
     $self->{TITLE}   = "BLAST2";
 
     $self->{DESCRIPTION}   = "psiblast - Position Specific Iterative Blast";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Altschul, Madden, Schaeffer, Zhang, Miller, Lipman";
 
@@ -674,7 +724,7 @@ sub new {
 
     $self->{VLIST}  = {
 
-	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','prodom','prodom: protein domains','sbase','sbase: annotated domains sequences',],
+	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','sbase','sbase: annotated domains sequences',],
 	"filter_opt" => ['filter',],
 	"selectivity_opt" => ['Expect','window','extend_hit','dropoff_y','gapped_alig','dropoff','dropoff_z',],
 	"scoring" => ['matrix','open_a_gap','extend_a_gap',],

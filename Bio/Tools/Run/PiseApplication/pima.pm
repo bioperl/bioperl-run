@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::pima
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::pima
 		R. D. Smith and T. F. Smith. Pattern-induced multi-sequence alignment (PIMA) algorithm employing secondary structure-dependent gap penalties for use in comparative modelling. protein Engineering, vol5, number 1, pp 35-41, 1992
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/pima.html 
+         for available values):
 
 
 		pima (String)
-
 
 		sequence (Sequence)
 			Sequences
@@ -32,17 +44,11 @@ Bio::Tools::Run::PiseApplication::pima
 		cluster_name (String)
 			cluster_name
 
-		pima_params (Paragraph)
-			Parameters
-
 		ref_seq_name (String)
 			ref_seq_name
 
 		sec_struc_seq_filename (InFile)
 			sec_struc_seq_filename
-
-		pima_options (Paragraph)
-			options
 
 		score_cutoff (Float)
 			 cluster score cutoff (-c) 
@@ -65,8 +71,63 @@ Bio::Tools::Run::PiseApplication::pima
 		sec_struc_gap_cost (Integer)
 			secondary structure gap penalty (-t)
 
-		results (Results)
+=head1 FEEDBACK
 
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/pima.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -82,20 +143,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $pima = Bio::Tools::Run::PiseApplication::pima->new($remote, $email, @params);
+ Usage   : my $pima = Bio::Tools::Run::PiseApplication::pima->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::pima object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $pima = $factory->program('pima');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::pima.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/pima.pm
 
@@ -104,6 +165,8 @@ sub new {
     $self->{TITLE}   = "PIMA";
 
     $self->{DESCRIPTION}   = "Pattern-Induced Multi-sequence Alignment program";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
