@@ -15,16 +15,19 @@ A class to manage Pise programs information, configuring parameters
 and submit jobs. It is the super-class of all the 
 Bio::Tools::Run::PiseApplication::program classes.
 
-This class is preferably created through the Bio::Factory::Pise factory:
+This class is preferably created through the 
+Bio::Tools::Run::AnalysisFactory::Pise factory:
 
-  my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
+                                              -email => 'me@myhome');
   my $program = $factory->program('mfold');
 
 By submitting a job, you create a Bio::Tools::Run::PiseJob instance with 
 the parameters you have just set. Bio::Tools::Run::PiseJob class handles 
 a specific job state and results.
 
-  my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
+					  -email => 'me@myhome');
   my $program = $factory->program('water', 
 				    -sequencea => $seqa,
 				    -seqall => $seqb);
@@ -51,8 +54,7 @@ The @params list should contain a list of -parameter =E<gt> value pairs.
 
 or directly :
 
-  my $program = $factory->program('blast2', query => $file, 
-     protein_db => "genpept");
+  my $program = $factory->program('blast2', query => $file, protein_db => "genpept");
 
 Each program parameter is described in the documentation of the
 corresponding Bio::Tools::Run::PiseApplication::program documentation.
@@ -65,19 +67,18 @@ method, e.g, changing the parameter E in blast2:
   $program->Expect($value);
 
 Parameter of Pise type "Sequence" and "InFile" may be given as string,
-filename, or filehandle.  Parameter of type "Sequence" may also be
-given as Bio::Seq or Bio::SimpleAlign objects.
+filename, or filehandle. Parameter of type "Sequence" may also be given as Bio::Seq or Bio::SimpleAlign objects.
 
 =head2 Job output
 
 See Bio::Tools::Run::PiseJob for how to fetch results and chain programs.
 
-=head2 Remote and email parameters:
+=head2 Remote and email parameters
 
 Email must be set at factory creation.
 
-The remote parameter stands for the actual CGI location.  There are
-default values for most of Pise programs.
+The remote parameter stands for the actual CGI location. There are default 
+values for most of Pise programs.
 
 You can either set remote at:
 
@@ -85,15 +86,14 @@ You can either set remote at:
 
 =item 1 factory creation
 
-  my $factory = Bio::Factory::Pise->new(
-         -remote = 'http://somewhere/Pise/cgi-bin',
-	 -email => 'me@myhome');
-
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
+                                 -remote = 'http://somewhere/Pise/cgi-bin',
+			       	 -email => 'me@myhome');
 =item 2 program creation
 
-  my $program = $factory->program('water',
-	  -remote = 'http://somewhere/Pise/cgi-bin/water.pl');
-
+  my $program = $factory->program('water', 
+		    -remote = 'http://somewhere/Pise/cgi-bin/water.pl'
+					   )
 =item 3 any time before running:
 
   $program->remote('http://somewhere/Pise/cgi-bin/water.pl');
@@ -117,12 +117,13 @@ use Bio::Tools::Run::PiseJob;
 =head2 new
 
  Title   : new()
- Usage   : my $program = Bio::Tools::Run::PiseApplication->new($remote, $email);
+ Usage   : my $program = Bio::Tools::Run::PiseApplication->new($remote, 
+							       $email);
  Function: Creates a Bio::Tools::Run::PiseApplication::program object, 
            where program stands for any 
            of the Pise programs.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance.
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
  Example :
  Returns : An instance of Bio::Tools::Run::PiseApplication::program.
 

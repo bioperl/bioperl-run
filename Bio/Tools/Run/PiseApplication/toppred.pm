@@ -29,7 +29,6 @@ Bio::Tools::Run::PiseApplication::toppred
 
 		toppred (String)
 
-
 		query (Sequence)
 			Sequence
 
@@ -60,10 +59,10 @@ Bio::Tools::Run::PiseApplication::toppred
 		triangle (Integer)
 			Wedge window size: (-q)
 
-		loop length (Integer)
+		loop_length (Integer)
 			Critical loop length (-s)
 
-		Segment distance (Integer)
+		Segment_distance (Integer)
 			Critical transmembrane spacer (-d)
 
 		output_options (Paragraph)
@@ -77,9 +76,7 @@ Bio::Tools::Run::PiseApplication::toppred
 
 		graphicfiles (Results)
 
-
 		outputfiles (Results)
-
 
 =cut
 
@@ -156,8 +153,8 @@ sub new {
 	"putative", 	# Lower cutoff (-p)
 	"core", 	# Core window size:  (-n)
 	"triangle", 	# Wedge window size: (-q)
-	"loop length",
-	"Segment distance",
+	"loop_length", 	# Critical loop length (-s)
+	"Segment_distance", 	# Critical transmembrane spacer (-d)
 	"output_options", 	# Output options
 	"outformat", 	# Output format (-O)
 	"profile_format", 	# Hydrophobicity Profile file format
@@ -178,8 +175,8 @@ sub new {
 	"putative" => 'Float',
 	"core" => 'Integer',
 	"triangle" => 'Integer',
-	"loop length" => 'Integer',
-	"Segment distance" => 'Integer',
+	"loop_length" => 'Integer',
+	"Segment_distance" => 'Integer',
 	"output_options" => 'Paragraph',
 	"outformat" => 'Excl',
 	"profile_format" => 'Excl',
@@ -220,10 +217,10 @@ sub new {
 	"triangle" => {
 		"perl" => '($value && $value != $vdef)? " -q $value" : ""',
 	},
-	"loop length" => {
+	"loop_length" => {
 		"perl" => '($value && $value != $vdef)? " -s $value" :"" ',
 	},
-	"Segment distance" => {
+	"Segment_distance" => {
 		"perl" => '($value && $value != $vdef)? " -d $value" :"" ',
 	},
 	"output_options" => {
@@ -262,8 +259,8 @@ sub new {
 	"putative" => 2,
 	"core" => 2,
 	"triangle" => 2,
-	"loop length" => 2,
-	"Segment distance" => 2,
+	"loop_length" => 2,
+	"Segment_distance" => 2,
 	"outformat" => 5,
 	"profile_format" => 7,
 
@@ -281,8 +278,8 @@ sub new {
 	"putative",
 	"core",
 	"triangle",
-	"loop length",
-	"Segment distance",
+	"loop_length",
+	"Segment_distance",
 	"certain",
 	"outformat",
 	"profile_format",
@@ -307,8 +304,8 @@ sub new {
 	"putative" => 0,
 	"core" => 0,
 	"triangle" => 0,
-	"loop length" => 0,
-	"Segment distance" => 0,
+	"loop_length" => 0,
+	"Segment_distance" => 0,
 	"output_options" => 0,
 	"outformat" => 0,
 	"profile_format" => 0,
@@ -329,8 +326,8 @@ sub new {
 	"putative" => 0,
 	"core" => 0,
 	"triangle" => 0,
-	"loop length" => 0,
-	"Segment distance" => 0,
+	"loop_length" => 0,
+	"Segment_distance" => 0,
 	"output_options" => 0,
 	"outformat" => 0,
 	"profile_format" => 0,
@@ -351,8 +348,8 @@ sub new {
 	"putative" => 0,
 	"core" => 0,
 	"triangle" => 0,
-	"loop length" => 0,
-	"Segment distance" => 0,
+	"loop_length" => 0,
+	"Segment_distance" => 0,
 	"output_options" => 0,
 	"outformat" => 0,
 	"profile_format" => 0,
@@ -373,8 +370,8 @@ sub new {
 	"putative" => "Lower cutoff (-p)",
 	"core" => "Core window size:  (-n)",
 	"triangle" => "Wedge window size: (-q)",
-	"loop length" => "Critical loop length (-s)",
-	"Segment distance" => "Critical transmembrane spacer (-d)",
+	"loop_length" => "Critical loop length (-s)",
+	"Segment_distance" => "Critical transmembrane spacer (-d)",
 	"output_options" => "Output options",
 	"outformat" => "Output format (-O)",
 	"profile_format" => "Hydrophobicity Profile file format",
@@ -395,8 +392,8 @@ sub new {
 	"putative" => 0,
 	"core" => 0,
 	"triangle" => 0,
-	"loop length" => 0,
-	"Segment distance" => 0,
+	"loop_length" => 0,
+	"Segment_distance" => 0,
 	"output_options" => 0,
 	"outformat" => 0,
 	"profile_format" => 0,
@@ -407,7 +404,7 @@ sub new {
 
     $self->{VLIST}  = {
 
-	"control" => ['scale','organism','certain','putative','core','triangle','loop length','Segment distance',],
+	"control" => ['scale','organism','certain','putative','core','triangle','loop_length','Segment_distance',],
 	"scale" => ['KD-scale','KD-scale (Kyte and Doolittle)','GVH-scale','GVH-scale (Gunnar von Heijne)','GES-scale','GES-scale (Goldman Engelman Steitz)',],
 	"output_options" => ['outformat','profile_format',],
 	"outformat" => ['new','New: new text output format','html','HTML','old','Old : output format of the old toppred implementation','xml','Xml',],
@@ -430,8 +427,8 @@ sub new {
 	"putative" => '0.6',
 	"core" => '10',
 	"triangle" => '5',
-	"loop length" => '60',
-	"Segment distance" => '2',
+	"loop_length" => '60',
+	"Segment_distance" => '2',
 	"outformat" => 'new',
 	"profile_format" => 'png',
 
@@ -449,8 +446,8 @@ sub new {
 	"putative" => { "perl" => '1' },
 	"core" => { "perl" => '1' },
 	"triangle" => { "perl" => '1' },
-	"loop length" => { "perl" => '1' },
-	"Segment distance" => { "perl" => '1' },
+	"loop_length" => { "perl" => '1' },
+	"Segment_distance" => { "perl" => '1' },
 	"output_options" => { "perl" => '1' },
 	"outformat" => { "perl" => '1' },
 	"profile_format" => { "perl" => '1' },
@@ -491,8 +488,8 @@ sub new {
 	"putative" => 0,
 	"core" => 0,
 	"triangle" => 0,
-	"loop length" => 0,
-	"Segment distance" => 0,
+	"loop_length" => 0,
+	"Segment_distance" => 0,
 	"output_options" => 0,
 	"outformat" => 0,
 	"profile_format" => 0,
@@ -513,8 +510,8 @@ sub new {
 	"putative" => 0,
 	"core" => 0,
 	"triangle" => 0,
-	"loop length" => 0,
-	"Segment distance" => 0,
+	"loop_length" => 0,
+	"Segment_distance" => 0,
 	"output_options" => 0,
 	"outformat" => 0,
 	"profile_format" => 0,
