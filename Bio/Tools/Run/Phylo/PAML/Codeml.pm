@@ -288,13 +288,13 @@ BEGIN {
 		     'fix_kappa'=> [0,1], # 0:estimate kappa, 1:fix kappa
 		     'kappa'    => '2',   # initial or fixed kappa
 		     'fix_omega'=> [0,1], # 0: estimate omega, 1: fix omega
-		     'omega'    => [0.4,1], # initial or fixed omega for 
+		     'omega'    => '0.4', # initial or fixed omega for 
 		                          # codons or codon-base AAs
 		     'fix_alpha'=> [1,0], # 0: estimate gamma shape param
 		                          # 1: fix it at alpha
 		     'alpha'    => '0', # initial of fixed alpha
 		                        # 0: infinity (constant rate)
-		     'Malpha'   => [0], # different alphas for genes
+		     'Malpha'   => [0,1], # different alphas for genes
 		     'ncatG'    => [1..10], # number of categories in 
 		                        # dG of NSsites models
 
