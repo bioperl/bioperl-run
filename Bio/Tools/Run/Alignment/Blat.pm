@@ -131,7 +131,7 @@ sub new {
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~/PROGRAM/i) {
-	    $self->executable($value);
+	    $self->executable(Bio::Root::IO->catfile($value,$self->program_name));
 	    next;
 	}
 	$self->$attr($value);
@@ -218,13 +218,18 @@ sub _database() {
 
 sub _run {
      my ($self)= @_;
-     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+#     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
      # this is because we only want a unique filename
      close($tfh);
      undef $tfh;
-     my $str= $self->executable;
+
+
+     my $str= Bio::Root::IO->catfile($self->executable,$self->program_name);
 
      $str.=' -out=blast '.$self->DB .' '.$self->_input.' '.$outfile;
+warn $str;
+warn $Bio::Root::IO::TEMPDIR;
      if ($self->quiet() || $self->verbose() < 0) { 
 	 $str .= '  >/dev/null 2>/dev/null';
      }

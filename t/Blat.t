@@ -15,11 +15,11 @@ BEGIN {
    plan tests => $NTESTS;
 }
 
-END {
-   foreach ( $Test::ntest..$NTESTS ) {
-       skip('Unable to run Blat  tests, exe may not be installed',1);
-   }
-}
+#END {
+#   foreach ( $Test::ntest..$NTESTS ) {
+#       skip('Unable to run Blat  tests, exe may not be installed',1);
+#   }
+#}
 
 use Bio::Tools::Run::Alignment::Blat;
 use Bio::Root::IO;
@@ -30,9 +30,9 @@ my $db =  Bio::Root::IO->catfile("t","data","blat_dna.fa");
 
 my $query = Bio::Root::IO->catfile("t","data","blat_dna.fa");    
 
-my  $factory = Bio::Tools::Run::Alignment::Blat->new('quiet'  => 1,
-						     -verbose => $verbose,
-						     "DB"     => $db);
+my $factory = Bio::Tools::Run::Alignment::Blat->new('quiet'  => 1,
+						    -verbose => $verbose,
+						    "DB"     => $db);
 ok $factory->isa('Bio::Tools::Run::Alignment::Blat');
 
 my $blat_present = $factory->executable();
