@@ -519,14 +519,18 @@ sub profile_align {
 
  Title   : tree
  Usage   :
-    @params = ('bootstrap', 1000, 'tossgaps', 1, 'kimura', 1, 'seed', 121, 'bootlabels', 'nodes', 'quiet', 1);
+    @params = ('bootstrap' => 1000, 
+	       'tossgaps'  => 1, 
+	       'kimura'    => 1, 
+	       'seed'      => 121, 
+	       'bootlabels'=> 'nodes', 
+	       'quiet'     => 1);
     $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
     $tree_obj = $factory->tree($aln_obj);
 or
     $tree_obj = $factory->tree($treefilename);
  Function: 
- Example :
- Returns : 
+ Returns : Bio::TreeIO object
  Args    : 
 
 
@@ -567,27 +571,26 @@ sub tree {
 sub _run {
     my ($self,$command,$infile1,$infile2,$param_string) = @_;
     my $instring;
-
+    
     if ($command =~ /align/) {
-
+	
 	if( $^O eq 'dec_osf' ) {
 	    $instring =  "$infile1";
 	    $command = '';
 	} else { 
 	    $instring = " -infile=$infile1";
 	}
-    	$param_string .= " $infile2";
+	$param_string .= " $infile2";
 
     }
 
     if ($command =~ /profile/) {
-	    $instring =  "-profile1=$infile1  -profile2=$infile2";
+	$instring =  "-profile1=$infile1  -profile2=$infile2";
     	chmod 0777, $infile1,$infile2;
     	$command = '-profile';
     }
-    
+
     if ($command =~ /tree/) {
-        
     	if( $^O eq 'dec_osf' ) {
 	    $instring =  "$infile1";
 	    $command = '';
@@ -595,22 +598,33 @@ sub _run {
 	    $instring = " $infile1";
 	}
     	$param_string .= " $infile2";
-    	
+
     	$self->debug( "Program ".$self->executable."\n");
-    	
     	my $commandstring = $self->executable."$instring"."$param_string";
         $self->debug( "clustal command = $commandstring");
-    	my $status = system($commandstring);
-    	$self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
-        
+	my $status = system($commandstring);
+	unless( $status == 0 ) {
+	    $self->warn( "Clustalw call ($commandstring) crashed: $? \n");
+	    return undef;
+	}
+
     	my $treefile = $instring;
     	$treefile =~ s/ //g;
-    	$treefile = $instring.'.phb' if $param_string =~ /-bootstrap/;
-        $treefile = $instring.'.ph' if $param_string =~ /-tree/;
-        
-    	my $in = new Bio::TreeIO('-file'=> "$treefile");
-        
-    	return $in;
+	if( $param_string =~ /-bootstrap/ ) {
+	    $treefile = $instring.'.phb';
+	} elsif( $param_string =~ /-tree/ ) {
+	    $treefile = $instring.'.ph';
+	} else { $treefile = $instring.".dnd" }
+	my $in = new Bio::TreeIO('-file'  => $treefile,
+				 '-format'=> 'newick');
+    	my $tree = $in->next_tree;
+	unless ( $self->save_tempfiles ) {
+	    foreach my $f ( $treefile ) {
+		$f =~ s/\.[^\.]*$// ;
+		unlink $f if( $f ne '' );
+	    }
+	}
+	return $tree;
     }
     
     my $output = $self->output || 'gcg';
@@ -620,24 +634,30 @@ sub _run {
 
     $self->debug( "clustal command = $commandstring");
     my $status = system($commandstring);    
-    $self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
-    
+    unless( $status == 0 ) {
+	$self->warn( "Clustalw call ($commandstring) crashed: $? \n");
+	return undef;
+    }
+
     my $outfile = $self->outfile();
-    
+
 # retrieve alignment (Note: MSF format for AlignIO = GCG format of clustalw)
 
     my $format= $output =~/phylip/i ? "phylip" : "MSF";
 
-    my $in  = Bio::AlignIO->new(-file => $outfile);
+    my $in  = Bio::AlignIO->new(-file  => $outfile,
+				-format=> $format);
     my $aln = $in->next_aln();
+    $in->close;
 
     # Clean up the temporary files created along the way...
     # Replace file suffix with dnd to find name of dendrogram file(s) to delete
-    foreach my $f ( $infile1, $infile2 ) {
-    	$f =~ s/\.[^\.]*$// ;
-    	unlink $f .'.dnd' if( $f ne '' );
+    unless ( $self->save_tempfiles ) {
+	foreach my $f ( $infile1, $infile2 ) {
+	    $f =~ s/\.[^\.]*$// ;
+	    unlink $f .'.dnd' if( $f ne '' );
+	}
     }
-    $in->close;
     return $aln;
 }
 
@@ -694,9 +714,7 @@ sub _setinput {
 #  $input may be a SimpleAlign object.
     elsif (ref($input) eq "Bio::SimpleAlign") {
 	#  Open temporary file for both reading & writing of SimpleAlign object
-	if ($suffix ==1 || $suffix== 2 ) {
-	    ($tfh,$infilename) = $self->io->tempfile(-dir=>$self->tempdir);
-	}
+	($tfh,$infilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	$temp =  Bio::AlignIO->new('-fh'=> $tfh,
 				   '-format' => 'fasta');
 	$temp->write_aln($input);
@@ -764,9 +782,11 @@ sub _setparams {
     }
     
     if ($self->quiet() || $self->verbose() < 0) {
-        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR, $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
         if ($^O =~ /mswin/i) { $param_string .= ' >'.$self->outfile().'out'; }
-        elsif ($^O =~ /unix/i) { $param_string .= ' >/dev/null 2>/dev/null'; }
+        elsif ($^O =~ /unix|linux|darwin/i) { $param_string .= ' >/dev/null 2>/dev/null'; }
+	else { 
+	    $self->warn("unknown os $^O\n");
+	}
     }
     
     return $param_string;

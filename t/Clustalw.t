@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 9;
+    $NTESTS = 10;
     plan tests => $NTESTS;
 }
 
@@ -28,6 +28,7 @@ END {
 ok(1);
 my $verbose = -1;
 my @params = ('ktuple' => 2,
+	      'QUIET'  => 1,
 	      -verbose => $verbose);
 my  $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 
@@ -49,9 +50,18 @@ exit(0) unless( $factory->executable );
 ok ($factory->version >= 1.8, 1, "Code tested only on ClustalW versions > 1.8 ");
 
 $aln = $factory->align($inputfilename);
+my $i = 1;
+for my $seq ( $aln->each_seq ) {  
+    last if( $seq->display_id =~ /CATH_HUMAN/ );
+    $i++;
+}
+ok($aln->get_seq_by_pos($i)->get_nse, 'CATH_HUMAN/1-335', 
+   "failed clustalw alignment using input file");
+$factory->bootstrap(100);
+my $tree = $factory->tree($aln);
+ok($tree);
 
-ok ($aln->get_seq_by_pos(1)->get_nse, 'CATH_HUMAN/1-335', 
-    "failed clustalw alignment using input file");
+$factory->bootstrap(undef);
 
 my $str = Bio::SeqIO->new(-file=> $inputfilename, 
 			  '-format' => 'fasta');
@@ -62,15 +72,29 @@ while ( my $seq = $str->next_seq() ) {
     }
 
 $aln = $factory->align(\@seq_array);
-	
-ok ($aln->get_seq_by_pos(1)->get_nse, 'CATH_HUMAN/1-335', 
+
+
+# now seen is the actual number for CATL HUMAN so that is more helpful	
+$i = 1;
+for my $seq ( $aln->each_seq ) {  
+    last if( $seq->display_id =~ /CATH_HUMAN/ );
+    $i++;
+}
+
+ok ($aln->get_seq_by_pos($i)->get_nse, 'CATH_HUMAN/1-335', 
     "failed clustalw alignment using BioSeq array ");
 	
 my $profile1 = Bio::Root::IO->catfile("t","data","cysprot1a.msf");
 my $profile2 = Bio::Root::IO->catfile("t","data","cysprot1b.msf");
 $aln = $factory->profile_align($profile1,$profile2);
 
-ok( $aln->get_seq_by_pos(2)->get_nse, 'CATH_HUMAN/1-335', 
+$i = 1;
+for my $seq ( $aln->each_seq ) {  
+    last if( $seq->display_id =~ /CATH_HUMAN/ );
+    $i++;
+}
+
+ok( $aln->get_seq_by_pos($i)->get_nse, 'CATH_HUMAN/1-335', 
     " failed clustalw profile alignment using input file" );
 
 if ($factory->version > 1.82 ) {
@@ -92,3 +116,4 @@ if ($factory->version > 1.82 ) {
     skip("skipping due to clustalw 1.81 & 1.82 profile align bug",1);
     skip("skipping due to clustalw 1.81 & 1.82 profile align bug",1);
 }
+
