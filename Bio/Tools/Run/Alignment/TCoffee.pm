@@ -377,6 +377,7 @@ object, or through get/set methods of the same name (lowercase).
                              plot in HTML
                 score_pdf : idem in PDF.
                 score_ps : idem in postscript.
+                score_ascii : idem in raw ascii text.
 
     More than one format can be indicated:
                 -output=clustalw,gcg, score_html
@@ -785,8 +786,13 @@ sub _run {
         my $infile = shift ;
 	my $type;
 	($infilename,$type) = @$infile;
-	$instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
-				      $self->methods));
+	unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
+	  $instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
+					$self->methods));
+	} else {
+	  $instring =  '-in='.join(',',($infilename, $self->methods));
+	}
+
     }
     if ($command =~ /profile/) {
 	my $in1 = shift ;
@@ -794,9 +800,14 @@ sub _run {
 	my ($type1,$type2);
 	($infile1,$type1) = @$in1;
 	($infile2,$type2) = @$in2;
-	$instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
-				     'X'.$self->matrix,
-				     $self->methods));	
+	unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
+	  $instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
+				       'X'.$self->matrix,
+				       $self->methods));	
+	} else {
+	  $instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
+				       $self->methods));	
+	}
     }
     my $param_string = shift;
 #    my ($paramfh,$parameterFile) = $self->io->tempfile;
@@ -974,7 +985,9 @@ sub _setparams {
 	next unless (defined $value);	
 	my $attr_key = lc $attr;
 	if( $attr_key =~ /matrix/ ) {
+	  unless (($value =~ /none/i) || ($value =~ /null/i) ) {
 	    $self->{'_in'} = [ "X".lc($value) ];
+	  }
 	} else {
 	    $attr_key = ' -'.$attr_key;
 	    $param_string .= $attr_key .'='.$value;
