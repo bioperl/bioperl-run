@@ -23,10 +23,13 @@ ok(1);
 use Bio::Tools::Run::Seg;
 use Bio::Root::IO;
 use Bio::SeqIO;
-use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use Bio::BioToEns::Beacon;
-
+use Bio::Seq;
 my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","seg_dir","seg");
+if( ! -e $paramfile ) { 
+    warn("Seg program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+    exit 0;
+}
+
 my @params = ('PROGRAM',$paramfile);
 
 my  $factory = Bio::Tools::Run::Seg->new(@params);
@@ -37,13 +40,11 @@ my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file =>$prot_file, -fmt =>'Fasta');
 $seq1 = $seqstream->next_seq();
 
-
-
 my $seg_present = $factory->executable();
 
 unless ($seg_present) {
-       warn("seg  program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-       exit 0;
+    warn("seg  program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+    exit 0;
 }
 
 my @feat = $factory->predict_protein_features($seq1);
