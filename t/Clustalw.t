@@ -47,15 +47,10 @@ ok $what_matrix, 'BLOSUM', "couldn't get factory parameter";
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress clustal messages to terminal
 
-my $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
+my $inputfilename = Bio::Root::IO->catfile("t/","data",'/',"cysprot.fa");
+#my $inputfilename = "t//data/cysprot.fa"; 
 my $aln;
-
-my $clustal_present = $factory->exists_clustal();
-
-unless ($clustal_present) {
-    warn("Clustalw program not found. Skipping tests $Test::ntest to $NTESTS.\n");    
-    exit 0;
-}
+exit(0) unless( $factory->executable );
 
 ok ($factory->version >= 1.8, 1, "Code tested only on ClustalW versions > 1.8 ");
 

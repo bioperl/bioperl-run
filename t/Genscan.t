@@ -31,9 +31,8 @@ ok $factory->matrix;
 
 my $inputfilename = Bio::Root::IO->catfile("t","data","Genscan.FastA");
 my $seq1 = Bio::Seq->new();
-my $seqstream = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
+my $seqstream = Bio::SeqIO->new(-file => $inputfilename, -format => 'Fasta');
 $seq1 = $seqstream->next_seq();
-
 
 my $genscan_present = $factory->executable();
 
@@ -42,7 +41,9 @@ unless ($genscan_present) {
             exit 0;
 }
 my @feat = $factory->predict_genes($seq1);
+    
 my $protein = $feat[0]->predicted_protein();
-ok($feat[0]->isa("Bio::SeqFeatureI"));
-ok($protein->isa("Bio::PrimarySeqI"));
+
+ok $feat[0]->isa("Bio::SeqFeatureI");
+ok $protein->isa("Bio::PrimarySeqI");
 

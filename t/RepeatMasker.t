@@ -42,7 +42,7 @@ ok ($feats[0]->feature1->end, 1407);
 ok ($feats[0]->feature1->strand, 1);
 ok ($feats[0]->feature1->primary_tag, "Simple_repeat");
 ok ($feats[0]->feature1->source_tag, "RepeatMasker");
-ok ($feats[0]->feature2->seqname, "(TTAGGG)n");
+ok ($feats[0]->feature2->seq_id, "(TTAGGG)n");
 
 
 

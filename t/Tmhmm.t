@@ -27,21 +27,9 @@ use Bio::Seq;
 
 # AHEM - Fugu guys, can you make sure this is genericized?
 
-my $paramfile = Bio::Root::IO->catfile("","usr","users","pipeline","programs","TMHMM2.0b","bin","tmhmm");
-if( ! -e $paramfile ) { 
-    warn("tmhmm program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
-my @params = ('PROGRAM',$paramfile);
-
-my  $factory = Bio::Tools::Run::Tmhmm->new(@params);
+my  $factory = Bio::Tools::Run::Tmhmm->new();
 ok $factory->isa('Bio::Tools::Run::Tmhmm');
-my $tmhmm_present = $factory->executable();
-
-unless ($tmhmm_present) {
-       warn("tmhmm program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-       exit 0;
-}
+exit(0) unless $factory->executable();
 
 my $prot_file=  Bio::Root::IO->catfile("t","data","test_prot.FastA");
 

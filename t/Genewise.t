@@ -25,10 +25,10 @@ END {
 
 ok(1);
 my $verbose = -1;
-my @params = ('dymem'=> 'linear','kbyte'=>'5000','erroroffstd'=>1);
+my @params = ('dymem'=> 'linear','kbyte'=>'5000','erroroffstd'=>1,'program'=>'/usr/local/bin/genewise');
 my  $factory = Bio::Tools::Run::Genewise->new(@params);
 ok $factory->isa('Bio::Tools::Run::Genewise');
-
+my $prog = $factory->program;
 unless ($factory->executable) {
    warn("Genewise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
    exit 0;
@@ -54,7 +54,7 @@ my ($genes) = $factory->predict_genes($seq1, $seq2);
 
 my @transcripts = $genes->transcripts;
 my @feat = $transcripts[0]->exons;
-my $seqname = $feat[0]->seqname;
+my $seqid = $feat[0]->seq_id;
 my $start = $feat[0]->start;
 ok($start, 865);#ok3
 my $end = $feat[0]->end;

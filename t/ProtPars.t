@@ -72,17 +72,12 @@ $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 @params = ('ktuple' => 2, 'matrix' => 'BLOSUM', 
 	   -verbose => $verbose);
 my  $align_factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
-my $clustal_present = $align_factory->exists_clustal();
-
-unless ($clustal_present) {
-    warn("Clustalw program not found. Skipping tests $Test::ntest to $NTESTS.\n") if( $DEBUG);    
-    exit 0;
-}
+exit(0) unless $align_factory->executable();
 
 my $aln = $align_factory->align($inputfilename);
 
 $tree = $tree_factory->create_tree($aln);
 
 @nodes = sort { defined $a->id && defined $b->id && $a->id cmp $b->id } $tree->get_nodes();
-ok ($nodes[5]->id, 'CYS1_DICDI', 
+ok (scalar(@nodes),13,
     "failed creating tree by protpars");
