@@ -189,6 +189,7 @@ sub AUTOLOAD {
  Returns : Doesn't return anything. If called with a filename will allow you to retrieve the results
  Args    : -seq (optional) Bio::Seq object of sequence. This is required to run primer3 but can be added later with add_targets()
 	   -outfile file name to output results to (note can also be added with $primer3->outfile_name
+	   -path path to primer3 executable (incl. program. eg. /usr/bin/primer3_core). This can also be set with program_name and program_dir
 	   -verbose (optional) set verbose output
  Notes   : 
 
@@ -213,6 +214,11 @@ sub new {
   $self->{'primer3_input'}=\@input;
  }
  if ($args{'-outfile'}) {$self->{_outfilename}=$args{'-outfile'}}
+ if ($args{'-path'}) {
+  $args{'-path'} =~ m#^(.*/)(.*)$#;
+  $self->{'program_dir'}=$1;
+  $self->{'program_name'}=$2;
+ }
  return $self;
 }
 
@@ -227,7 +233,9 @@ sub new {
 =cut
 
 sub program_name {
-  return 'primer3';
+  my ($self, $prog) = @_;
+  if ($prog) {$self->{'program_name'}=$prog} else {$self->{'program_name'}='primer3'}
+  return $self->{'program_name'};
 }
 
 =head2 program_dir
@@ -241,7 +249,11 @@ sub program_name {
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{PRIMER3}) if $ENV{PRIMER3};
+  my ($self, $dir) = @_;
+  if ($dir) {$self->{'program_dir'}=$dir} 
+  elsif ($ENV{PRIMER3}) {$self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3})}
+  else {$self->{'program_dir'}='/usr/local/bin'}
+  return $self->{'program_dir'}
 }
 
 
@@ -340,7 +352,7 @@ sub add_targets {
 
 sub run {
  my($self,%args) = @_;
- my $executable = $self->{program_dir}.$self->{program};
+ my $executable = $self->{'program_dir'}.$self->{'program'};
  my $input = $self->{'primer3_input'};
  unless (-e $executable) {
   $self->throw("$executable was not found. Do not know where primer3 is!");
