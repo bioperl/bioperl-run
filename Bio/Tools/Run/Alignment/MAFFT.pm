@@ -22,9 +22,8 @@ Bio::Tools::Run::Alignment::MAFFT - run the MAFFT alignment tools
 =head1 DESCRIPTION
 
 You can get MAFFT from 
-http://www.biophys.kyoto-u.ac.jp/~katoh/programs/align/mafft/
-
-Basically fftnsi is the default 
+http://www.biophys.kyoto-u.ac.jp/~katoh/programs/align/mafft4/
+Basically fftnsi is the default in this implementation.
 
 =head1 FEEDBACK
 
@@ -338,7 +337,7 @@ sub _run {
 =head2  _setinput
 
  Title   :  _setinput
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly
  Function:  Create input file for mafft programs
  Example :
  Returns : name of file containing mafft data input 
