@@ -397,7 +397,10 @@ sub submit_blast {
 	if( $response->is_success ) {
 	    if( $self->verbose > 0 ) {
 		my ($tempfh) = $self->tempfile();
+		# Hmm, what exactly are we trying to do here?
 		print $tempfh $response->content;
+		close($tempfh);
+		undef $tempfh;
 	    }
 	    my @subdata = split(/\n/, $response->content );
 	    my $count = 0;
@@ -439,7 +442,7 @@ sub submit_blast {
 
 sub retrieve_blast {
     my($self, $rid) = @_;
-    my ($fh,$tempfile) = $self->tempfile();
+    my (undef,$tempfile) = $self->tempfile();
     my %hdr = %RETRIEVALHEADER;
     $hdr{'RID'} = $rid;
     my $req = POST $URLBASE, [%hdr];
