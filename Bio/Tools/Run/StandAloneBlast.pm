@@ -48,7 +48,7 @@ DESCRIPTION section for details.
 
 =head1 DESCRIPTION
 
-This DESCRIPTION only documents Bio::Tools::Run::StandAloneBlast.pm: - a
+This DESCRIPTION only documents Bio::Tools::Run::StandAloneBlast: - a
 Bioperl object for running the NCBI standAlone BLAST package.  Blast,
 itself, is a large & complex program - for more information regarding
 BLAST, please see the BLAST documentation which accompanies the BLAST
@@ -66,22 +66,22 @@ implemented by using specific combinations of BLAST executables,
 programs and parameters.  They will be referred by their specific
 names - eg PSIBLAST and PHIBLAST. )
 
-StandAloneBlast.pm has been tested so far only under Linux. I expect
+StandAloneBlast has been tested so far only under Linux. I expect
 that it should also work under other Unix systems. However, since the
 module is implemented using (unix) system calls, modification may be
-necessary before StandAloneBlast.pm would work under non-Unix
+necessary before StandAloneBlast would work under non-Unix
 operating systems (eg Windows, MacOS).  Before running
-StandAloneBlast.pm it is necessary: to install BLAST on your system,
+StandAloneBlast it is necessary: to install BLAST on your system,
 to edit set the environmental variable $BLASTDIR or your $PATH
 variable to point to the BLAST directory, and to ensure that users
 have execute privileges for the BLAST program.  If the databases
 which will be searched by BLAST are located in the data subdirectory
 of the blast program directory (the default installation location),
-StandAloneBlast.pm will find them; however, if the database files are
+StandAloneBlast will find them; however, if the database files are
 located in any other location, environmental variable $BLASTDATADIR
 will need to be set to point to that directory.
 
-The use of the StandAloneBlast.pm module is as follows: Initially, a
+The use of the StandAloneBlast module is as follows: Initially, a
 local blast "factory object" is created. The constructor may be passed
 an optional array of (non-default) parameters to be used by the
 factory, eg:
@@ -134,7 +134,7 @@ In addition, sequence input may be in the form of either a Bio::Seq
  $blast_report = $factory->blastall($input);
 
 For blastall and non-psiblast blastpgp runs, report object is either a
-BPlite.pm or Blast.pm object, selected by the user with the parameter
+BPlite.pm or Bio::SearchIO object, selected by the user with the parameter
 _READMETHOD.  (The leading underscore is needed to distinguish this
 option from options which are passed to the BLAST executable.) The
 default parser is BPlite.  For (multiple iteration) psiblast and
@@ -350,7 +350,7 @@ sub new {
     # to facilitiate tempfile cleanup    
     my (undef,$tempfile) = $self->io->tempfile();
     $self->outfile($tempfile);
-    $self->_READMETHOD('BPlite');
+    $self->_READMETHOD('Blast');
     while (@args)  {
 	my $attr =   shift @args;
 	my $value =  shift @args;
@@ -400,14 +400,18 @@ sub executable{
    unless(defined $self->{'_pathtoexe'}->{$exename} ) {
        if( $PROGRAMDIR ) {
 	   my $f = $self->io->catfile($PROGRAMDIR, $exename);	    
-           $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
+	   $exe = $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
        } 
-       elsif( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
- 	   $self->{'_pathtoexe'}->{$exename} = $exe;
-       } 
-       else { 
-	   $self->warn("Cannot find executable for $exename") if $warn;
-	   $self->{'_pathtoexe'}->{$exename} = undef;
+       #  This is how I meant to split up these conditionals --jason
+       # if exe is null we will execute this (handle the case where
+       # PROGRAMDIR pointed to something invalid)
+       unless( $exe )  {  # we didn't find it in that last conditional
+	   if( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
+	       $self->{'_pathtoexe'}->{$exename} = $exe;
+	   } else { 
+	       $self->warn("Cannot find executable for $exename") if $warn;
+	       $self->{'_pathtoexe'}->{$exename} = undef;
+	   }
        }
    }
    return $self->{'_pathtoexe'}->{$exename};
@@ -604,19 +608,21 @@ sub _runblast {
 # BPpsilite).  Otherwise either the Blast parser or the BPlite
 # parsers can be selected.
 
-    if ($executable eq 'bl2seq')  {
+    if ($executable =~ /bl2seq/i)  {
 	$blast_obj = Bio::Tools::BPbl2seq->new(-file => $outfile);
     }
-    elsif ($executable eq 'blastpgp' && defined $self->j() && 
+    elsif ($executable =~ /blastpgp/i && defined $self->j() && 
 	   $self->j() > 1)  {
 	$blast_obj = Bio::Tools::BPpsilite->new(-file => $outfile);
     }
-    elsif ($self->_READMETHOD eq 'Blast')  {
+    elsif ($self->_READMETHOD =~ /^Blast/i )  {
 	$blast_obj = Bio::SearchIO->new(-file=>$outfile,
 					-format => 'blast'   )  ;
     }
-    elsif ($self->_READMETHOD eq 'BPlite')  {
+    elsif ($self->_READMETHOD =~ /^BPlite/i )  {
 	$blast_obj = Bio::Tools::BPlite->new(-file=>$outfile);
+    } else {
+	$self->warn("Unrecognized readmethod ".$self->_READMETHOD. " or executable $executable\n");
     }
     return $blast_obj;
 }
