@@ -247,23 +247,6 @@ sub _setinput {
     $self->io->_io_cleanup();
 	
   SWITCH: {
-        if ($input1->isa("Bio::PrimarySeqI")) {
-            ##INPUTS TO LAGAN
-            ($fh, $infile1) = $self->io->tempfile();
-
-            #Want to make sure their are no white spaces in sequence.
-            #Happens if input1 is taken from an alignment.
-
-            my $sequence = $input1->seq();
-            $sequence =~ s/\W+//g;
-            $input1->seq($sequence);
-            $temp1 = Bio::SeqIO->new(	-fh => $fh,
-                                        -format => 'Fasta' );
-            $temp1->write_seq($input1);
-            close $fh;
-            undef $fh;
-            last SWITCH;		
-        }
         if (ref($input1) =~ /ARRAY/i) {
 
             ##INPUTS TO MLAGAN / WILL hAVE TO BE CHANGED IF LAGAN EVER
@@ -283,6 +266,23 @@ sub _setinput {
             }
             $infile1 = \@infilearr;
             last SWITCH;  
+        }
+        elsif ($input1->isa("Bio::PrimarySeqI")) {
+            ##INPUTS TO LAGAN
+            ($fh, $infile1) = $self->io->tempfile();
+
+            #Want to make sure their are no white spaces in sequence.
+            #Happens if input1 is taken from an alignment.
+
+            my $sequence = $input1->seq();
+            $sequence =~ s/\W+//g;
+            $input1->seq($sequence);
+            $temp1 = Bio::SeqIO->new(	-fh => $fh,
+                                        -format => 'Fasta' );
+            $temp1->write_seq($input1);
+            close $fh;
+            undef $fh;
+            last SWITCH;		
         }
     }
   SWITCH2: {
