@@ -51,7 +51,7 @@ from the program primer3
   }
 
   # what are the arguments, and what do they mean?
-  my $args=$primer3->arguments;
+  my $args = $primer3->arguments;
 
   print "ARGUMENT\tMEANING\n";
   foreach my $key (keys %{$args}) {print "$key\t", $$args{$key}, "\n"}
@@ -61,7 +61,7 @@ from the program primer3
 
   # design the primers. This runs primer3 and returns a 
   # Bio::Tools::Run::Primer3 object with the results
-  $results=$primer3->run;
+  $results = $primer3->run;
 
   # see the Bio::Tools::Run::Primer3 pod for
   # things that you can get from this. For example:
@@ -106,8 +106,7 @@ web:
 
   http://bugzilla.bioperl.org/
 
-
-=head1 AUTHOR - 
+=head1 AUTHOR
 
 Rob Edwards
 
@@ -149,8 +148,8 @@ use vars qw($AUTOLOAD @ISA @PRIMER3_PARAMS $PROGRAMNAME %OK_FIELD);
 
 
 BEGIN { 
-    $PROGRAMNAME = 'primer3';
-    @PRIMER3_PARAMS=qw( PROGRAM EXCLUDED_REGION INCLUDED_REGION
+	$PROGRAMNAME = 'primer3';
+	@PRIMER3_PARAMS=qw( PROGRAM EXCLUDED_REGION INCLUDED_REGION
  PRIMER_COMMENT PRIMER_DNA_CONC PRIMER_EXPLAIN_FLAG PRIMER_FILE_FLAG
  PRIMER_FIRST_BASE_INDEX PRIMER_GC_CLAMP
  PRIMER_INTERNAL_OLIGO_DNA_CONC PRIMER_INTERNAL_OLIGO_EXCLUDED_REGION
@@ -190,18 +189,18 @@ BEGIN {
  PRIMER_WT_GC_PERCENT_LT PRIMER_WT_NUM_NS PRIMER_WT_POS_PENALTY
  PRIMER_WT_REP_SIM PRIMER_WT_SEQ_QUAL PRIMER_WT_SIZE_GT
  PRIMER_WT_SIZE_LT PRIMER_WT_TM_GT PRIMER_WT_TM_LT SEQUENCE TARGET );
-    
-    foreach my $attr (@PRIMER3_PARAMS) {$OK_FIELD{$attr}++}
+
+	foreach my $attr (@PRIMER3_PARAMS) {$OK_FIELD{$attr}++}
 }
 
 sub AUTOLOAD {
- my $self = shift;
- my $attr = $AUTOLOAD;
- $attr =~ s/.*:://;
- $attr = uc $attr;
- $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
- $self->{$attr} = shift if @_;
- return $self->{$attr};
+	my $self = shift;
+	my $attr = $AUTOLOAD;
+	$attr =~ s/.*:://;
+	$attr = uc $attr;
+	$self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
+	$self->{$attr} = shift if @_;
+	return $self->{$attr};
 }
 
 
@@ -230,26 +229,27 @@ sub AUTOLOAD {
 
 
 sub new {
- my($class,%args) = @_;
- my $self = $class->SUPER::new(%args);
- $self->io->_initialize_io();
+	my($class,%args) = @_;
+	my $self = $class->SUPER::new(%args);
+	$self->io->_initialize_io();
 
- $self->program_name($args{-program})  if defined $args{'-program'};
- 
- if ($args{'-verbose'}) {$self->{'verbose'}=1}
- if ($args{'-seq'}) {
-     $self->{'seqobject'}=$args{'-seq'};
-     my @input;
-     push (@input, ("PRIMER_SEQUENCE_ID=".$self->{'seqobject'}->id),("SEQUENCE=".$self->{'seqobject'}->seq));
-     $self->{'primer3_input'}=\@input;
- }
- if ($args{'-outfile'}) {$self->{_outfilename}=$args{'-outfile'}}
- if ($args{'-path'}) {
-     my (undef,$path,$prog) = File::Spec->splitpath($args{'-path'});
-     $self->program_dir($path);
-     $self->program_name($prog);
- }
- return $self;
+	$self->program_name($args{-program}) if defined $args{'-program'};
+
+	if ($args{'-verbose'}) {$self->{'verbose'}=1}
+	if ($args{'-seq'}) {
+		$self->{'seqobject'}=$args{'-seq'};
+		my @input;
+		push (@input, ("PRIMER_SEQUENCE_ID=".$self->{'seqobject'}->id),
+				("SEQUENCE=".$self->{'seqobject'}->seq));
+		$self->{'primer3_input'}=\@input;
+	}
+	if ($args{'-outfile'}) {$self->{_outfilename}=$args{'-outfile'}}
+	if ($args{'-path'}) {
+		my (undef,$path,$prog) = File::Spec->splitpath($args{'-path'});
+		$self->program_dir($path);
+		$self->program_name($prog);
+	}
+	return $self;
 }
 
 =head2 program_name
@@ -263,9 +263,9 @@ sub new {
 =cut
 
 sub program_name {
-  my $self = shift;
-  return $self->{'program_name'} = shift @_ if @_;
-  return $self->{'program_name'} || $PROGRAMNAME;
+	my $self = shift;
+	return $self->{'program_name'} = shift @_ if @_;
+	return $self->{'program_name'} || $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -279,15 +279,15 @@ sub program_name {
 =cut
 
 sub program_dir {
-  my ($self, $dir) = @_;
-  if ($dir) {
+	my ($self, $dir) = @_;
+	if ($dir) {
       $self->{'program_dir'}=$dir;
-  } elsif ($ENV{PRIMER3}) {
+	} elsif ($ENV{PRIMER3}) {
       $self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3});
-  } else {
+	} else {
       $self->{'program_dir'}='/usr/local/bin';
-  }
-  return $self->{'program_dir'}
+	}
+	return $self->{'program_dir'}
 }
 
 
@@ -306,75 +306,76 @@ sub program_dir {
 
 
 sub add_targets {
- my ($self, %args)=@_;
- my $added_args; # a count of what we have added.
- my $inputarray = $self->{'primer3_input'};
- foreach my $key (keys %args) {
-  # we will allow them to add a sequence before checking for arguments
-  if ((uc($key) eq "-SEQ") || (uc($key) eq "-SEQUENCE")) {
-   # adding a new sequence. We need to separate them with an =
-   $self->{'seqobject'}=$args{$key};
-   if (defined $$inputarray[0]) {push (@$inputarray, "=")}
-   push (@$inputarray, ("PRIMER_SEQUENCE_ID=".$self->{'seqobject'}->id), ("SEQUENCE=".$self->{'seqobject'}->seq));
-   next;
-  }
-  
-  unless ($self->{'no_param_checks'}) {
-      unless ($OK_FIELD{$key}) {
-	  $self->warn("Parameter $key is not a valid Primer3 parameter"); next}
-  }
-  
-  if (uc($key) eq "INCLUDED_REGION") {
-   # this must be a comma separated start, length.
-   unless ($args{$key} =~ /\,/) {
-    my $sequencelength;
-    # we don't have a length, hence we need to add the length of the sequence less the start.
-    foreach my $input (@$inputarray) {
-     if ($input =~ /SEQUENCE=(.*)/) {$sequencelength=length($1)}
-    }
-    my $length_of_included = $sequencelength-$args{$key};
-    $args{$key} .= ",".$length_of_included;
-   }
-  }
-  elsif (uc($key) eq "PRIMER_MIN_SIZE") {
-   # minimum size must be less than MAX size and greater than zero
-   if (exists $args{"PRIMER_MAX_SIZE"}) {
-    unless ($args{"PRIMER_MAX_SIZE"} > $args{"PRIMER_MIN_SIZE"}) {
-     $self->warn('Maximum primer size (PRIMER_MAX_SIZE) must be greater than minimum primer size (PRIMER_MIN_SIZE)');
-    }
-   }
-   if ($args{$key} < 0) {
-    $self->warn('Minimum primer size (PRIMER_MIN_SIZE) must be greater than 0');
-   }
-  }
-  elsif ($key eq "PRIMER_MAX_SIZE") {
-   if ($args{$key}>35) {$self->warn('Maximum primer size (PRIMER_MAX_SIZE) must be less than 35')}
-  }
-  
-  
-  # need a check to see whether this is already in the array
-  # and finally add the argument to the list.
+	my ($self, %args)=@_;
+	my $added_args; # a count of what we have added.
+	my $inputarray = $self->{'primer3_input'};
+	foreach my $key (keys %args) {
+		# we will allow them to add a sequence before checking for arguments
+		if ((uc($key) eq "-SEQ") || (uc($key) eq "-SEQUENCE")) {
+			# adding a new sequence. We need to separate them with an =
+			$self->{'seqobject'}=$args{$key};
+			if (defined $$inputarray[0]) {push (@$inputarray, "=")}
+			push (@$inputarray, ("PRIMER_SEQUENCE_ID=".
+			  $self->{'seqobject'}->id),("SEQUENCE=".$self->{'seqobject'}->seq));
+			next;
+		}
 
-  my $toadd=uc($key)."=".$args{$key}; 
-  my $replaced; # don't add it if it is replacing something!
-  my @new_array;
-  foreach my $input (@$inputarray) {
-    my ($array_key, $array_value) = split '=', $input;
-    if (uc($array_key) eq uc($key)) {push @new_array, $toadd; $replaced=1}
-    else {push @new_array, $input}
-  }
-  unless ($replaced) {push @new_array, $toadd}
-  @$inputarray=@new_array;
-  
-  if ($self->{'verbose'}) {print STDERR "Updated ", uc($key), " to $args{$key}\n"}
-  $added_args++;
- }
- 
- $self->{'primer3_input'}=$inputarray;
- return $added_args;
+		unless ($self->{'no_param_checks'}) {
+			unless ($OK_FIELD{$key}) {
+				$self->warn("Parameter $key is not a valid Primer3 parameter"); 
+				next}
+		}
+
+		if (uc($key) eq "INCLUDED_REGION") {
+			# this must be a comma separated start, length.
+			unless ($args{$key} =~ /\,/) {
+				my $sequencelength;
+				# we don't have a length, hence we need to add the length of the 
+				# sequence less the start.
+				foreach my $input (@$inputarray) {
+					if ($input =~ /SEQUENCE=(.*)/) {$sequencelength=length($1)}
+				}
+				my $length_of_included = $sequencelength-$args{$key};
+				$args{$key} .= ",".$length_of_included;
+			}
+		}
+		elsif (uc($key) eq "PRIMER_MIN_SIZE") {
+			# minimum size must be less than MAX size and greater than zero
+			if (exists $args{"PRIMER_MAX_SIZE"}) {
+				unless ($args{"PRIMER_MAX_SIZE"} > $args{"PRIMER_MIN_SIZE"}) {
+					$self->warn('Maximum primer size (PRIMER_MAX_SIZE) must be greater than minimum primer size (PRIMER_MIN_SIZE)');
+				}
+			}
+			if ($args{$key} < 0) {
+				$self->warn('Minimum primer size (PRIMER_MIN_SIZE) must be greater than 0');
+			}
+		}
+		elsif ($key eq "PRIMER_MAX_SIZE") {
+			if ($args{$key}>35) {$self->warn('Maximum primer size (PRIMER_MAX_SIZE) must be less than 35')}
+		}
+
+		# need a check to see whether this is already in the array
+		# and finally add the argument to the list.
+
+		my $toadd=uc($key)."=".$args{$key}; 
+		my $replaced; # don't add it if it is replacing something!
+		my @new_array;
+		foreach my $input (@$inputarray) {
+			my ($array_key, $array_value) = split '=', $input;
+			if (uc($array_key) eq uc($key)) {push @new_array, $toadd; $replaced=1}
+			else {push @new_array, $input}
+		}
+		unless ($replaced) {push @new_array, $toadd}
+		@$inputarray=@new_array;
+
+		if ($self->{'verbose'}) {print STDERR "Updated ",
+											uc($key), " to $args{$key}\n"}
+		$added_args++;
+	}
+
+	$self->{'primer3_input'}=$inputarray;
+	return $added_args;
 }
-
-
 
 =head2 run()
 
@@ -388,76 +389,75 @@ sub add_targets {
 =cut
 
 sub run {
- my($self,%args) = @_;
- my $executable = $self->executable;
- my $input = $self->{'primer3_input'};
- unless (-e $executable) {
-  $self->throw("$executable was not found. Do not know where primer3 is!");
-  exit(-1);
- }
+	my($self,%args) = @_;
+	my $executable = $self->executable;
+	my $input = $self->{'primer3_input'};
+	unless (-e $executable) {
+		$self->throw("$executable was not found. Do not know where primer3 is!");
+		exit(-1);
+	}
 
- # note that I write this to a temp file because we need both read and write access to primer3, therefore,
- # we can't use a simple pipe.
- 
- if ($self->{'verbose'}) {print STDERR "TRYING\n", join "\n", @{$self->{'primer3_input'}}, "=\n"}
- 
- 
- # make a temporary file and print the instructions to it.
- my ($temphandle, $tempfile) = $self->io->tempfile;
- print $temphandle join "\n", @{$self->{'primer3_input'}}, "=\n";
- close($temphandle);
- open (RESULTS, "$executable < $tempfile|") || $self->throw("Can't open RESULTS");
- if ($self->{'_outfilename'}) {
-     
-     # I can't figure out how to use either of these to write the results out.
-     # neither work, what am I doing wrong or missing in the docs?
-     
-#  $self->{output}=$self->_initialize_io(-file=>$self->{'outfile'});
-#  $self->{output}=$self->io;
-     
-     # OK, for now, I will just do it myself, because I need this to check the parser :)
-     open (OUT, ">".$self->{'_outfilename'}) || 
-	 $self->throw("Can't open ".$self->{'_outfilename'}." for writing");
- }
- 
- my @results;
- while (<RESULTS>) {
-     if ($self->{'_outfilename'}) {
-	 # this should work, but isn't
-	 #$self->{output}->_print($_);
-	 print OUT $_;
-     }
-     chomp;
-     my ($return, $value) = split('=',$_);
-     $self->{'results'}->{$return} = $value;
- }
- close RESULTS;
- 
- # close the output file
- if ($self->{'_outfilename'}) { 
-     close OUT;
- }
+	# note that I write this to a temp file because we need both read 
+	# and write access to primer3, therefore,
+	# we can't use a simple pipe.
 
- $self->cleanup;
- # convert the results to individual results
- $self->{results_obj}=new Bio::Tools::Primer3;
- $self->{results_obj}->_set_variable('results', $self->{results});
- $self->{results_obj}->_set_variable('seqobject', $self->{seqobject});
- $self->{results_separated}= $self->{results_obj}->_separate();
- return $self->{results_obj};
+	if ($self->{'verbose'}) {print STDERR "TRYING\n", 
+				 join "\n", @{$self->{'primer3_input'}}, "=\n"}
+
+	# make a temporary file and print the instructions to it.
+	my ($temphandle, $tempfile) = $self->io->tempfile;
+	print $temphandle join "\n", @{$self->{'primer3_input'}}, "=\n";
+	close($temphandle);
+	open (RESULTS, "$executable < $tempfile|") || 
+	  $self->throw("Can't open RESULTS");
+	if ($self->{'_outfilename'}) {
+		# I can't figure out how to use either of these to write the results out.
+		# neither work, what am I doing wrong or missing in the docs?
+		#  $self->{output}=$self->_initialize_io(-file=>$self->{'outfile'});
+		#  $self->{output}=$self->io;
+		# OK, for now, I will just do it myself, because I need this to 
+		# check the parser :)
+		open (OUT, ">".$self->{'_outfilename'}) || 
+		  $self->throw("Can't open ".$self->{'_outfilename'}." for writing");
+	}
+
+	my @results;
+	while (<RESULTS>) {
+		if ($self->{'_outfilename'}) {
+			# this should work, but isn't
+			#$self->{output}->_print($_);
+			print OUT $_;
+		}
+		chomp;
+		my ($return, $value) = split('=',$_);
+		$self->{'results'}->{$return} = $value;
+	}
+	close RESULTS;
+
+	# close the output file
+	if ($self->{'_outfilename'}) { 
+		close OUT;
+	}
+
+	$self->cleanup;
+	# convert the results to individual results
+	$self->{results_obj} = new Bio::Tools::Primer3;
+	$self->{results_obj}->_set_variable('results', $self->{results});
+	$self->{results_obj}->_set_variable('seqobject', $self->{seqobject});
+	$self->{results_separated}= $self->{results_obj}->_separate();
+	return $self->{results_obj};
 }
-
-
-
-
 
 =head2 arguments()
 
  Title   : arguments()
  Usage   : $hashref = $primer3->arguments();
- Function: Describes the options that you can set through Bio::Tools::Primer3, with a brief (one line) description of what they are and their default values
+ Function: Describes the options that you can set through Bio::Tools::Primer3, 
+           with a brief (one line) description of what they are and their 
+           default values
  Returns : A string (if an argument is supplied) or a reference to a hash.
- Args    : If supplied with an argument will return a string of its description.
+ Args    : If supplied with an argument will return a string of its 
+           description.
            If no arguments are supplied, will return all the arguments as a 
            reference to a hash
  Notes   : Much of this is taken from the primer3 README file, and you should 
@@ -465,34 +465,31 @@ sub run {
 
 =cut
 
-
 sub arguments {
- my ($self, $required) = @_;
- unless ($self->{'input_options'}) {$self->_input_args}
- if ($required) {return ${$self->{'input_options'}}{'$required'}}
- else {return $self->{'input_options'}}
+	my ($self, $required) = @_;
+	unless ($self->{'input_options'}) {$self->_input_args}
+	if ($required) {return ${$self->{'input_options'}}{'$required'}}
+	else {return $self->{'input_options'}}
 }
-  
-
 
 =head2 _input_args()
 
  Title   : _input_args()
  Usage   : an internal method to set the input arguments for Primer3
- Function: Define a hash with keys for each of the input arguments and values as a short one line description
+ Function: Define a hash with keys for each of the input arguments and values 
+           as a short one line description
  Returns : A reference to a hash.
  Args    : None.
- Notes   : much of this is taken from the primer3 README file, and you should read that file for a more detailed description.
+ Notes   : Much of this is taken from the primer3 README file, and you should 
+           read that file for a more detailed description.
 
 =cut
 
-
-
 sub _input_args {
- my($self) = shift;
- # just return functions that we can set and what they are 
- my %hash=(
-  'PRIMER_SEQUENCE_ID'=>'(string, optional) an id. Optional. Note must be present if PRIMER_FILE_FLAG is set',
+	my($self) = shift;
+	# just return functions that we can set and what they are 
+	my %hash=(
+	'PRIMER_SEQUENCE_ID'=>'(string, optional) an id. Optional. Note must be present if PRIMER_FILE_FLAG is set',
   'SEQUENCE'=>'(nucleotide sequence, REQUIRED) The sequence itself. Cannot contain newlines',
   'INCLUDED_REGION'=>'(interval, optional) Where to pick primers from. In form <start>,<length>. Based on zero indexing!',
   'TARGET'=>'(interval list, default empty) Regions that must be included in the product. The value should be a space-separated list of <start>,<length>',
@@ -599,57 +596,64 @@ sub _input_args {
  return \%hash;
 }
 
-
-
-
-
-#############################################################################################################
-#                                               COMMENTS                                                    #
-#                                                                                                           #
-#  These comments are taken from the primer3 README file. They have an abbreviated explanation of what's    #
-#  what. You should read the readme file for more information.                                              #
-#                                                                                                           #
-#  I have used this list to generate defaults, and handle output from primer.                               #
-#                                                                                                           #
-#  Note that I have ignored some experimental and/or deprecated things.                                     #
-#                                                                                                           #
-#  Rob Edwards 3/15/03                                                                                      #
-#                                                                                                           #
-#                                                                                                           #
-#############################################################################################################
-
-
-
-
+##############################################################################
+#                      COMMENTS                                              #
+#                                                                            #
+#  These comments are taken from the primer3 README file. They have an       #
+#  abbreviated explanation of what's                                         #
+#  what. You should read the readme file for more information                #
+#                                                                            #
+#  I have used this list to generate defaults, and handle output from primer.#
+#                                                                            #
+#  Note that I have ignored some experimental and/or deprecated things.      #
+#                                                                            #
+#  Rob Edwards 3/15/03                                                       #
+#                                                                            #
+##############################################################################
 
 # OUTPUT TAGS
-#each tage has PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO,PAIR}_<j>_<tag_name>
-
-# PRIMER_ERROR (string)	 describes user-correctible errors detected in the input. Absent if no errors.
-# PRIMER_LEFT (start, length)	The selected left primer. Start is the 0-based index of the FIRST base, length its length.
-# PRIMER_RIGHT (start, length)	The selected right primer. Start is the 0-based index of the LAST base, length its length.
-# PRIMER_INTERNAL_OLIGO (start, length)		The selected internal oligo.Start is the 0-based index of start base of the primer.
+# each tage has PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO,PAIR}_<j>_<tag_name>
+# PRIMER_ERROR (string)	 describes user-correctible errors detected in the input.
+# Absent if no errors.
+# PRIMER_LEFT (start, length)	The selected left primer. Start is the 0-based 
+# index of the FIRST base, length its length.
+# PRIMER_RIGHT (start, length)	The selected right primer. Start is the 0-based 
+# index of the LAST base, length its length.
+# PRIMER_INTERNAL_OLIGO (start, length)		The selected internal oligo.
+# Start is the 0-based index of start base of the primer.
 # PRIMER_PRODUCT_SIZE (integer)	The product size of the PCR product.
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_EXPLAIN (string)	String containing statistics on the possiblities that primer3 considered in selecting a single oligo.
-# PRIMER_PAIR_EXPLAIN (string)	String containing statistics on picking a primer pair (plus internal oligo if requested).
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_EXPLAIN (string)	String containing 
+# statistics on the possiblities that primer3 considered in selecting a single oligo.
+# PRIMER_PAIR_EXPLAIN (string)	String containing statistics on picking a 
+# primer pair (plus internal oligo if requested).
 # PRIMER_PAIR_PENALTY (float)	The score for this pair (lower is better).
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_PENALTY (float)	The score for the primer selected (lower is better).
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SEQUENCE (string)	The sequence of the oligo. All seqs are 5'->3'
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_PENALTY (float)	The score for the primer 
+# selected (lower is better).
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SEQUENCE (string)	The sequence of the 
+# oligo. All seqs are 5'->3'
 # PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_TM (float)	The Tm for the selected oligo.
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_GC_PERCENT (float)	The percent GC for the selected oligo
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SELF_ANY (float)	Score of complimentarity for the oligo
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SELF_END (float)	Score of complimentarity for the oligo
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_GC_PERCENT (float)	The percent GC for 
+# the selected oligo
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SELF_ANY (float)	Score of complimentarity 
+# for the oligo
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SELF_END (float)	Score of complimentarity 
+# for the oligo
 # PRIMER_PAIR_COMPL_ANY (float)	Score of complimentarity for the pair
 # PRIMER_PAIR_COMPL_END (float)	Score of complimentarity for the pair
 # PRIMER_WARNING (string)	Warnings generated by primer (separated by semicolons);
-# PRIMER_{LEFT,RIGHT,PAIR}_MISPRIMING_SCORE (float, string)	Maximum mispriming score for the primer, string is the id of corresponding library sequence.
+# PRIMER_{LEFT,RIGHT,PAIR}_MISPRIMING_SCORE (float, string)	Maximum mispriming 
+# score for the primer, string is the id of corresponding library sequence.
 # PRIMER_PRODUCT_TM (float)	Tm of the product
 # PRIMER_PRODUCT_TM_OLIGO_TM_DIFF (float)	Tm difference
 # PRIMER_PAIR_T_OPT_A (float)
-# PRIMER_INTERNAL_OLIGO_MISHYB_SCORE (float, string)	Maximum mishybridization score and id of the sequence in MISHYB_LIBRARY
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_MIN_SEQ_QUALITY (int)	Minimum SEQUENCE quality from (e.g. phred scores)
-# PRIMER_{LEFT,RIGHT}_END_STABILITY (float)	Delta G of disruption of the five 3' bases of the oligo.
-# PRIMER_STOP_CODON_POSITION (int)	Position of the first base of the stop codon, if Primer3 found one, or -1 if Primer3 did not.
+# PRIMER_INTERNAL_OLIGO_MISHYB_SCORE (float, string)	Maximum mishybridization 
+# score and id of the sequence in MISHYB_LIBRARY
+# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_MIN_SEQ_QUALITY (int)	Minimum SEQUENCE 
+# quality from (e.g. phred scores)
+# PRIMER_{LEFT,RIGHT}_END_STABILITY (float)	Delta G of disruption of the five 
+# 3' bases of the oligo.
+# PRIMER_STOP_CODON_POSITION (int)	Position of the first base of the stop 
+# codon, if Primer3 found one, or -1 if Primer3 did not.
 
 
 # PRIMER3 EXIT STATUS CODES
