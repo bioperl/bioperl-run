@@ -15,11 +15,11 @@ BEGIN {
    plan tests => $NTESTS;
 }
 
-#END {
-#   foreach ( $Test::ntest..$NTESTS ) {
-#       skip('Unable to run Blat  tests, exe may not be installed',1);
-#   }
-#}
+END {
+    foreach ( $Test::ntest..$NTESTS ) {
+	skip('Unable to run Blat  tests, exe may not be installed',1);
+   }
+}
 
 use Bio::Tools::Run::Alignment::Blat;
 use Bio::Root::IO;
@@ -64,7 +64,6 @@ ok ($hsp->query->start,1);
 ok ($hsp->query->end,1776);
 ok ($hsp->hit->start,1);
 ok ($hsp->hit->end,1776);
-
  
 1; 
 
