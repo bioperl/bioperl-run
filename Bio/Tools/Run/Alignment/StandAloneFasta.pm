@@ -1,3 +1,4 @@
+# $Id$
 #StandAloneFasta.pm v1.00 2002/11/01 
 #
 #Bioperl module for Bio::Tools::Run::Alignment::StandAloneFasta
@@ -118,12 +119,13 @@ use Bio::SearchIO;
 use Bio::Tools::Run::WrapperBase;
 
 BEGIN {
-  @FASTA_PARAMS=qw(a A b c E d f g h H i j l L M m n O o p Q q r R s w x y z);
-  @OTHER_PARAMS =qw(program);
+  @FASTA_PARAMS=qw(a A b c E d f g h H i j l L M m n O o p Q q r R s S w x y z);
+  @OTHER_PARAMS =qw(program output database);
   foreach my $att (@FASTA_PARAMS, @OTHER_PARAMS) {$OK_FIELD{$att}++;}
   $ktup=2; 
   %parameters=('H' => '',
-	       'q' =>'', 'm' =>'1', 'O' =>'');
+	       'q' => '', 
+	       'm' =>'1', 'O' =>'');
     
 }
 
@@ -136,7 +138,7 @@ sub new {
   while(@args){
         my $attr = shift @args;
         my $value = shift @args;
-        next if ($attr=~/^-/);
+        next if ($attr=~/^-/ || ! $attr);
         $self->$attr($value); 
   }
   return $self;
@@ -223,7 +225,7 @@ sub program_dir {
 
  Title   : run
 
- Usage   : my @fasta_object = $factory->($program, $input,$onefile);
+ Usage   : my @fasta_object = $factory->($input,$onefile);
            where $factory is the name of executable FASTA program;
            $input is file name containing the sequences in the format 
            of fasta  or Bio::Seq object or array of Bio::Seq object;
@@ -235,8 +237,7 @@ sub program_dir {
  Returns : aray of fasta report object
            If the user specify the output file(s), 
            the raw fasta report will be saved
- Args    : sequence object
-           array reference of sequence objects
+ Args    : sequence object OR array reference of sequence objects
            filename of file containing fasta formatted sequences
 
 =cut
@@ -247,7 +248,7 @@ sub run {
     local * FASTARUN;
 
     $self->io->_io_cleanup;
-    my $program = $self->executable($self->program) ||  
+    my $program = $self->executable($program_i) ||  
 	$self->throw("FASTA program not found or not executable.\n");
     # You should specify a library file
     $self->throw("You didn't choose library.\n") unless ( $library);
@@ -268,6 +269,11 @@ sub run {
     unless( $onfile ) {
 	my $count=0;
 
+	# do some fancy stuff here to test if we are running fasta34 
+	# with mlib so we just pass in a single file rather than
+	# running fasta N times
+	# (not implemented yet)
+	
 	foreach my $seq (@seqs){
 	    $count++; 
             # Decide if the output will be saved into a temporary file   
@@ -383,6 +389,27 @@ sub library {
     }
 
     return $library=$lb;
+}
+
+*database = \&library;
+
+=head2 output
+
+ Title   : output
+ Usage   : $obj->output($newval)
+ Function: The output directory if we want to use this
+ Example : 
+ Returns : value of output (a scalar)
+ Args    : on set, new value (a scalar or undef, optional)
+
+
+=cut
+
+sub output{
+    my $self = shift;
+
+    return $self->{'output'} = shift if @_;
+    return $self->{'output'};
 }
 
 =head2  ktup
