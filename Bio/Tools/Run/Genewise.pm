@@ -19,7 +19,7 @@ given sequence given a protein
   # Pass the factory 2 Bio:SeqI objects (in the order of query peptide and
      target_genomic)
   # $genes is a Bio::SeqFeature::Gene::GeneStructure object  
-  my $genes = $factory->predict_genes($seq1, $seq2);
+  my $genes = $factory->predict_genes($protein_seq, $genomic_seq);
   
   Available Params
   Model    [-codon,-gene,-cfreq,-splice,-subs,-indel,-intron,-null]
@@ -115,7 +115,8 @@ sub new {
   $self->io->_initialize_io();
 
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+  #($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+  ($TMPDIR) = "/usr/users/shawnh/tmp";
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -226,8 +227,8 @@ sub predict_genes {
 
 
 # run genewise
-    my $feats = $self->_run($infile1,$infile2);
-    return $feats;
+    my @genes = $self->_run($infile1,$infile2);
+    return @genes;
 }
 
 
@@ -247,7 +248,7 @@ sub _run {
     my ($self,$infile1,$infile2) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    #my $outfile = $self->outfile() || $TMPOUTFILE ;
+
     my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 > $outfile";
@@ -256,132 +257,33 @@ sub _run {
     $self->throw( "Genewise call ($commandstring) crashed: $? \n") unless $status==0;
 
     #parse the outpur and return a Bio::SeqFeature::Gene::GeneStructure object
-    my $genewiseParser = Bio::Tools::Genewise->new(-fh=> \*GENEWISE);
-    my $filehandle;
-    if (ref ($outfile) !~ /GLOB/) {
-        open (GENEWISE, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
-        $filehandle = \*GENEWISE;
-    }
-    else {
-        $filehandle = $outfile;
+    unless (open (GW, $outfile)) {
+      $self->throw("Cannot open Genewise outfile for parsing");
     }
 
-    my $gene = $genewiseParser->next_prediction($filehandle);
-
-    #my $genes   = $self->_parse_results($outfile);
-
-    return $gene;
+    my $genewiseParser = Bio::Tools::Genewise->new(-fh=> \*GW);
+    my @genes;
+    while ( my $gene = $genewiseParser->next_prediction()){
+        push @genes, $gene;
+    }
+    return @genes;
 }
 
-=head2  _parse_results
-
- Title   :  _parse_results
- Usage   :  Internal function, not to be called directly
- Function:  Parses genewise output
- Example :
- Returns : a Bio::SeqFeature::Gene::GeneStructure object
- Args    : the name of the output file
-
-=cut
-
-sub _parse_results {
-    my ($self,$outfile) = @_;
-    $outfile||$self->throw("No outfile specified");
-    my $filehandle;
-    if (ref ($outfile) !~ /GLOB/) {
-        open (GENEWISE, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
-        $filehandle = \*GENEWISE;
-    }
-    else {
-        $filehandle = $outfile;
-    }
-    my $genes = new Bio::SeqFeature::Gene::GeneStructure ;
-    my $transcript = new Bio::SeqFeature::Gene::Transcript ;
-    my $curr_exon;
-    my $score;
-    my $seqname;
-    my $start;
-    my $end;
-    my $strand;
-    my $phaseno;
-    my $pf;
-    my $gf;
-    #The big parsing loop - parses exons and predicted peptides
-    #$/ = "\n//\n";
-    while (<$filehandle>) {
-        chomp;
-        my @f = split;
-        if($f[0] eq 'Score'){
-          $score = $f[1];
-        }
-        elsif (($f[0] eq 'Gene') && (scalar(@f)==2)) {
-          $seqname = $f[0]." ".$f[1];
-        }
-        elsif ($f[0] eq 'Exon') {
-          $start = $f[1];
-          $end = $f[2];
-          $phaseno = $f[4];
-          $strand = 1;
-          if ( $f[1] > $f[2] ) {
-              $strand = -1;
-              $start = $f[2]; 
-              $end = $f[1];
-          }
-        }
-        elsif ($f[0] eq 'Supporting') {
-          my $gstart = $f[1];
-          my $gend = $f[2];
-          my $gstrand = 1;
-          if ($gstart > $gend){
-              $gstart = $f[2];
-              $gend = $f[1];
-              $gstrand = -1;
-          }
-            if ( $gstrand != $strand ) {
-              $self->throw("incompatible strands between exon and supporting feature - cannot add suppfeat\n");
-            }
-               
-          my $pstart = $f[3];
-          my $pend = $f[4];
-          my $pstrand = 1;          
-            if($pstart > $pend){
-              $self->warn("Protein start greater than end! Skipping this suppfeat\n");
-            }
-              
-      	  $pf = new Bio::SeqFeature::Generic( -start   => $pstart,
-						  -end     => $pend,
-						  -seqname => 'protein',
-					    -score   => $score,
-              -strand  => $pstrand,
-					    -source_tag => 'genewise',
-              -primary_tag => 'supporting_protein_feature',
-              ); 
-					$pf->source_tag('genewise');
-          $pf->primary_tag('supporting_protein_feature');
-      	  $gf  = new Bio::SeqFeature::Generic( -start   => $gstart,
-						  -end     => $gend,
-						  -seqname => 'genomic',
-              -score   => $score,
-						  -strand  => $gstrand,
-						  -source_tag => 'genewise',
-              -primary_tag => 'supporting_genomic_feature',
-              );
-					$gf->source_tag('genewise');
-          $gf->primary_tag('supporting_genomic_feature');
-	      }  
-         # for listing out elements of the array
-         # for ( my $i=0; $i<scalar(@f); $i++) { 
-         #     print "$i "."$f[$i]\n";
-         # } 
-    }
-    $curr_exon = new Bio::SeqFeature::Gene::Exon (-seqname=>$seqname, -start=>$start, -end=>$end, -strand=>$strand); 
-	  $curr_exon->add_tag_value( 'phase' => $phaseno );
-    $curr_exon->add_tag_value( 'supporting_protein_feature' => $pf );
-	  $curr_exon->add_tag_value( 'supporting_genomic_feature' => $gf );
-
-    $transcript->add_exon($curr_exon);
-    $genes->add_transcript($transcript);
-    return $genes
+sub get_strand {
+  my ($self,$start,$end) = @_;
+  $start || $self->throw("Need a start");
+  $end   || $self->throw("Need an end");
+  my $strand;
+  if ($start > $end) {
+    my $tmp = $start;
+    $start = $end;
+    $end = $tmp;
+    $strand = -1;
+  }
+  else {
+    $strand = 1;
+  }
+  return ($start,$end,$strand);
 }
 
 sub _setinput {
@@ -390,7 +292,8 @@ sub _setinput {
 
     if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI")))
       { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
-    my $tempdir = $self->io->tempdir(CLEANUP=>1);
+    #my $tempdir = $self->io->tempdir(CLEANUP=>1);
+    my $tempdir = "/usr/users/shawnh/tmp";
     ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
     ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
 
@@ -404,6 +307,7 @@ sub _setinput {
     return $outfile1,$outfile2;
 
 }
+
 =head2 _setparams
 
  Title   :  _setparams
