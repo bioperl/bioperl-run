@@ -13,11 +13,11 @@
 
 =head1 NAME
 
-installer - downloads and installs runnables
+bioperl_application_installer - downloads and installs runnables
 
 =head1 SYNOPSIS
 
-installer
+bioperl_application_installer
 
 =head1 DESCRIPTION
 
