@@ -357,6 +357,8 @@ sub new {
 	next if( $attr eq '-verbose');
 	$self->$attr($value);
     }
+    close($fh);
+    undef $fh;
     return $self;
 }
 
@@ -657,6 +659,7 @@ sub _setinput {
 	      $temp->write_seq($seq);
 	  }
 	  close $fh;
+	  $fh = undef;
 	  last SWITCH;
       }
 #  $input may be a single BioSeq object...
@@ -675,6 +678,7 @@ sub _setinput {
 	  $temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
 	  $temp->write_seq($seq);
 	  close $fh;
+	  undef $fh;
 #		$temp->write_seq($input1);
 	  last SWITCH;
       }
@@ -692,6 +696,7 @@ sub _setinput {
 	  $temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
 	  $temp->write_seq($input2);
 	  close $fh;
+	  undef $fh;
 	  last SWITCH2;
       }
 # Option for using psiblast's pre-alignment "jumpstart" feature
@@ -723,6 +728,7 @@ sub _setinput {
 	  $temp =  Bio::AlignIO->new(-fh=> $fh, '-format' => 'psi');
 	  $temp->write_aln($input2);
 	  close $fh;
+	  undef $fh;
 	  last SWITCH2;
       }
       $infilename2 = 0;		# Set error flag if you get here

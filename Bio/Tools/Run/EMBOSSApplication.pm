@@ -177,6 +177,8 @@ sub run {
 		}
 		$out->close();
 		$input->{$attr} = $tempfile;
+		close($tfh);
+		undef $tfh;
 	    } elsif( $pieces[0]->isa('Bio::Align::AlignI') ) {
 		require Bio::AlignIO;
 		my ($tfh,$tempfile) = $self->{'_io'}->tempfile();
@@ -186,6 +188,8 @@ sub run {
 		    $out->write_aln($p);
 		}
 		$input->{$attr} = $tempfile;
+		close($tfh);
+		undef $tfh;
 	    }
 	}
 
