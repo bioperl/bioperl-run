@@ -22,4 +22,7 @@ PHYLIPVERSION		3.5, 3.6   If you want to run Phylip3.6 you
 				   need to set this env variable to 3.6
 BLASTDIR		DIR PATH   Point to the directory where BLAST 
 	                           is installed
+GENSCAN_DIR		DIR PATH  Point to the directory where HumanIso.smat file 
+				  is installed
+EPONINEDIR          	DIR PATH  Point to the directory where eponine_scan.jar is installed
 
