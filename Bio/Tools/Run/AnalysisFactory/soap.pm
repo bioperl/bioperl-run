@@ -236,13 +236,13 @@ sub available_categories {
 }
 
 # String[] getAvailableAnalyses()
-# String[] getAvailableAnalyses (String categoryName)
+# String[] getAvailableAnalysesInCategory (String categoryName)
 sub available_analyses {
     my ($self, $category) = @_;
     my $soap = $self->{'_soap'};
     if (defined $category) {
 	return
-	    $soap->getAvailableAnalyses (SOAP::Data->type (string => $category))
+	    $soap->getAvailableAnalysesInCategory (SOAP::Data->type (string => $category))
 	       ->result;
     } else {
 	return

@@ -292,7 +292,7 @@ sub input_spec {
    $self->{'_input_spec'} = $soap->getInputSpec->result;
 }
 
-# Map getResultSpec()
+# Map[] getResultSpec()
 sub result_spec {
    my ($self) = @_;
    return $self->{'_result_spec'} if $self->{'_result_spec'};
@@ -301,6 +301,7 @@ sub result_spec {
 }
 
 # String createJob (Map inputs)
+# String createJob (String id)
 # String createJob ()
 sub create_job {
    my ($self, $params) = @_;
@@ -328,7 +329,7 @@ sub create_job {
    # later using 'set_data' method(s) - see scripts/applmaker.pl
    } else {
        my $soap = $self->{'_soap'};
-       $job_id = $soap->createJob->result;
+       $job_id = $soap->createEmptyJob->result;   # this method may not exist on server (TBD)
    }
 
    if ($force_to_live) {
@@ -348,14 +349,13 @@ sub create_job {
    }
 }
 
-# String run (Map inputs)
-# String run (Map inputs, String notificationDescriptor)   TBD
+# String createAndRun (Map inputs)
 sub run {
    my $self = shift;
    return $self->create_job (@_)->run;
 }
 
-# Map waitFor (Map inputs)
+# Map runAndWaitFor (Map inputs)
 sub wait_for {
    my $self = shift;
    return $self->run (@_)->wait_for;
@@ -656,8 +656,8 @@ sub results {
 	# retrieve only named results
 	return
 	    $self->{'_analysis'}->_process_results
-	        ($soap->getResults (SOAP::Data->type (string => $self->{'_id'}),
-				    [ keys %$rh_names ])->result,
+	        ($soap->getSomeResults (SOAP::Data->type (string => $self->{'_id'}),
+					[ keys %$rh_names ])->result,
 		 $rh_names);
     } else {
 	# no result names given: take all

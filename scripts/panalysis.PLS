@@ -15,7 +15,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.2 2003-03-12 13:11:26 senger Exp $
+#   $Id: panalysis.PLS,v 1.3 2003-04-23 12:23:11 senger Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -112,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q$Id: panalysis.PLS,v 1.2 2003-03-12 13:11:26 senger Exp $;
+    $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q$Id: panalysis.PLS,v 1.3 2003-04-23 12:23:11 senger Exp $;
 
 
     # help wanted?
@@ -239,13 +239,19 @@ if ($opt_i or $opt_I) {
 }
 
 # print result specification (either full, or just names of results)
-# ('$service->result_spec' returns a hash reference where keys are result names)
+# ('$service->result_spec' returns a reference to an array of hashes)
 if ($opt_o or $opt_O) {
-    my $rh_spec = $service->result_spec;
+    my $ra_spec = $service->result_spec;
     my $msg = "Specification of results";
     &msg ("$msg\n" . '-' x length ($msg) . "\n");
-    foreach (sort keys %{ $rh_spec }) {
-	print $_, ($opt_O ? "\t(of type: $$rh_spec{$_})" : ''), "\n";
+    my ($key, $value);
+    foreach (sort { $$a{'name'} cmp $$b{'name'} } @$ra_spec) {
+	print $$_{'name'},"\n";
+	if ($opt_O) {
+	    while (($key, $value) = each %{ $_ }) {
+		print "\t$key => $value\n" unless ($key eq 'name');
+	    }
+	}
     }
 }
 
