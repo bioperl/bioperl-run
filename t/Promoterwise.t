@@ -50,14 +50,18 @@ my $seq2 = Bio::Seq->new();
 $seq2 = $seqstream2->next_seq();
 
 my @fp = $factory->run($seq1, $seq2);
+my $first = $fp[0]->feature1;
+my $second = $fp[0]->feature2;
 
+my @sub = $first->sub_SeqFeature;
+my @sub2 = $second->sub_SeqFeature;
 
-ok $fp[0]->feature1->start,4;
-ok $fp[0]->feature2->start,29;
-ok $fp[0]->feature1->end,18;
-ok $fp[0]->feature2->end,43;
-ok $fp[0]->feature1->seq->seq,'GTTGTGCTGGGGGGG',
-ok $fp[0]->score,1596.49
+ok $sub[0]->start,4;
+ok $sub2[0]->start,29;
+ok $sub[0]->end,18;
+ok $sub2[0]->end,43;
+ok $sub[0]->seq->seq,'GTTGTGCTGGGGGGG',
+ok $sub[0]->score,1596.49
 
 
 

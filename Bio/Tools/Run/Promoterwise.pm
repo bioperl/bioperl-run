@@ -19,11 +19,20 @@ promoterwise
   my  $factory = Bio::Tools::Run::Promoterwise->new(@params);
 
   my (@fp)= $factory->run($seq1,$seq2);
-
+  
+  #each feature pair is a group of hsps
   foreach my $fp(@fp){
-    print "start: ". $fp->feature1->start."\t".$fp->feature1->end."\n";
-    print "end: ". $fp->feature2->start."\t".$fp->feature2->end."\n";
+    print "Hit Length: ".$fp->feature1->length."\n";
+    print "Hit Start: ".$fp->feature1->start."\n";
+    print "Hit End: ".$fp->feature1->end."\n";
+    print "Hsps: \n";
+    my @first_hsp = $fp->feature1->sub_SeqFeature;
+    my @second_hsp = $fp->feature2->sub_SeqFeature;
+    for ($i..$#first_hsp){
+      print $first_hsp[$i]->seq." ".$second_hsp[$i]->seq."\n";
+    }
   }
+    print "end: ". $fp->feature2->start."\t".$fp->feature2->end."\n";
 
   Available parameters include:
   ( S T U V QUERY_START QUERY_END TARGET_START
@@ -43,6 +52,7 @@ http://www.sanger.ac.uk/software/wise2.
 =head1 FEEDBACK
 
 =head2 Mailing Lists
+    irint "end: ". $fp->feature2->start."\t".$fp->feature2->end."\n";
 
 User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
@@ -241,32 +251,58 @@ sub _run {
 	# yeah, like promoterwise is really going to run on Windows...
 	$commandstring .= ' -quiet -silent -erroroffstd  2> /dev/null';
     }
-    $self->debug( "promoterwise command = $commandstring");
+   $self->debug( "promoterwise command = $commandstring");
     open(PW, "$commandstring |") || $self->throw( "Promoterwise call ($commandstring) crashed: $? \n");
    my @fp;
+    my %hash;
     while(<PW>){
       chomp;
-      my ($score,$id1,$start_1,$end_1, $strand_1,$id2,$start_2,$end_2,$strand_2) = split;
-      my $sf1 = Bio::SeqFeature::Generic->new(-start=>$start_1,
+      my @array = split;
+      push @{$hash{$array[$#array]}}, \@array;
+    }
+    foreach my $key(keys %hash){
+      my ($sf1,$sf2);
+      my $sf1 = Bio::SeqFeature::Generic->new(-primary=>"conserved_element",
+                                              -source_tag=>"promoterwise");
+     $sf1->attach_seq($self->_query1_seq);
+      my $sf2 = Bio::SeqFeature::Generic->new(-primary=>"conserved_element",
+                                              -source_tag=>"promoterwise");
+        $sf2->attach_seq($self->_query2_seq);
+
+      foreach my $info(@{$hash{$key}}){
+        my ($score,$id1,$start_1,$end_1, $strand_1,$id2,$start_2,$end_2,$strand_2,$group)= @{$info};
+        if(!$sf1->strand && !$sf2->strand){ 
+          $sf1->strand($strand_1);
+          $sf2->strand($strand_2);
+          $sf1->seq_id($id1);
+          $sf2->seq_id($id2);
+          $sf1->score($score); 
+          $sf2->score($score); 
+        }
+        my $sub1 = Bio::SeqFeature::Generic->new(-start=>$start_1,
                                               -seq_id=>$id1,
                                               -end  =>$end_1,
                                               -strand=>$strand_1,
                                               -primary=>"conserved_element",
                                               -source_tag=>"promoterwise",
                                               -score=>$score); 
-      $sf1->attach_seq($self->_query1_seq);
-      my $sf2 = Bio::SeqFeature::Generic->new(-start=>$start_2,
+        $sub1->attach_seq($self->_query1_seq);
+
+        my $sub2 = Bio::SeqFeature::Generic->new(-start=>$start_2,
                                               -seq_id=>$id2,
                                               -end  =>$end_2,
                                               -strand=>$strand_2,
                                               -primary=>"conserved_element",
                                               -source_tag=>"promoterwise",
                                               -score=>$score); 
-      $sf2->attach_seq($self->_query2_seq);
-      my $fp = Bio::SeqFeature::FeaturePair->new(-feature1=>$sf1,
-                                                 -feature2=>$sf2);
-      push @fp, $fp;
+        $sub2->attach_seq($self->_query2_seq);
+        $sf1->add_SeqFeature($sub1,'EXPAND');
+        $sf2->add_SeqFeature($sub2,'EXPAND');
     }
+    my $fp = Bio::SeqFeature::FeaturePair->new(-feature1=>$sf1,
+                                               -feature2=>$sf2);
+    push @fp, $fp;
+  }
 
     return @fp;
 }
