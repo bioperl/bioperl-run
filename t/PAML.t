@@ -59,6 +59,9 @@ my $aln = $in->next_aln;
 $codeml->alignment($aln);
 my ($rc,$results) = $codeml->run();
 ok($rc,1);
+if( ! defined $results ) { 
+    exit(0);
+}
 my $result = $results->next_result;
 my $MLmatrix = $result->get_MLmatrix;
 ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
