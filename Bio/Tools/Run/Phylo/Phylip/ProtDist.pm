@@ -187,6 +187,7 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
+use Cwd;
 
 # inherit from Phylip::Base which has some methods for dealing with
 # Phylip specifics
@@ -387,7 +388,7 @@ sub _run {
     close(PROTDIST);	
 
 	#get the results
-    my $path = `pwd`;
+    my $path = cwd;
     chomp($path);
     my $outfile = $self->io->catfile($path,$self->outfile);
 
@@ -419,7 +420,7 @@ sub _run {
     }
 		
     # Clean up the temporary files created along the way...
-    unlink $outfile;
+    unlink $outfile unless $self->save_tempfiles;
 	
     return \%dist;
 }
@@ -455,13 +456,16 @@ sub _setinput {
     #  $input may be a SimpleAlign Object
     if ($input->isa("Bio::SimpleAlign")) {
         #  Open temporary file for both reading & writing of BioSeq array
-		($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
-		my $alnIO = Bio::AlignIO->new(-fh => $tfh, -format=>'phylip',idlength=>$self->idlength());
-		$alnIO->write_aln($input);
-		$alnIO->close();
-		return $alnfilename;		
-	}
-	return 0;
+	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
+	my $alnIO = Bio::AlignIO->new(-fh => $tfh, 
+				      -format=>'phylip',
+				      -idlength=>$self->idlength());
+	$alnIO->write_aln($input);
+	$alnIO->close();
+	close($tfh);
+	return $alnfilename;		
+    }
+    return 0;
 }
 
 =head2  _setparams()
@@ -502,11 +506,11 @@ sub _setparams {
 	}
 	if ($cat == 1){
 	    if($attr =~ /GENCODE/i){		
-		$self->throw("Unallowed value for genetic code") unless ($value =~ /[U,M,V,F,Y]/);
+		$self->throw("Unallowed value for genetic code") unless ($value =~ /[UMVFY]/);
 		$param_string .= "C\n$value\n";
 	    }
 	    if ($attr =~/CATEGORY/i){
-		$self->throw("Unallowed value for categorization of amino acids") unless ($value =~/[C,H,G]/);
+		$self->throw("Unallowed value for categorization of amino acids") unless ($value =~/[CHG]/);
 		$param_string .= "A\n$value\n";
 	    }
 	    if ($attr =~/PROBCHANGE/i){

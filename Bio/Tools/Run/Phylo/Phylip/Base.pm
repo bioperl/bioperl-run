@@ -16,11 +16,13 @@ Bio::Tools::Run::Phylo::Phylip::Base - DESCRIPTION of Object
 
 =head1 SYNOPSIS
 
-Give standard usage here
+# Do not use directly
+# This module is for setting basic data sets for the Phylip wrapper
+# modules
 
 =head1 DESCRIPTION
 
-Describe the object here
+This module is just a base object for Bioperl Phylip wrappers.
 
 =head1 FEEDBACK
 
@@ -76,7 +78,11 @@ use Bio::Tools::Run::WrapperBase;
 BEGIN {
     %DEFAULT = ( 'OUTFILE'   => 'outfile',
 		 'TREEFILE'  => 'treefile',
+		 'PLOTFILE'  => 'plotfile',
+		 
 		 );
+
+
 }
 
 =head2 new
@@ -126,5 +132,40 @@ sub treefile{
 }
 
 
+=head2 fontfile
+
+ Title   : fontfile
+ Usage   : $obj->fontfile($newval)
+ Function: Get/Set the fontfile
+ Returns : value of fontfile (a scalar)
+ Args    : on set, new value (a scalar or undef, optional)
+
+
+=cut
+
+sub fontfile{
+    my $self = shift;
+
+    return $self->{'fontfile'} = shift if @_;
+    return $self->{'fontfile'};
+}
+
+=head2 plotfile
+
+ Title   : plotfile
+ Usage   : $obj->plotfile($newval)
+ Function: Get/Set the plotfile
+ Returns : value of plotfile (a scalar)
+ Args    : on set, new value (a scalar or undef, optional)
+
+
+=cut
+
+sub plotfile {
+    my $self = shift;
+
+    return $self->{'plotfile'} = shift if @_;
+    return $self->{'plotfile'} || $DEFAULT{'PLOTFILE'};
+}
 
 1;

@@ -364,26 +364,27 @@ sub _setinput {
     my ($self, $input, $suffix) = @_;
     my ($alnfilename,$infilename, $temp, $tfh,$input_tmp,$input_fh);
 
-    # suffix is used to distinguish alignment files  from an align obkect
-    #If $input is not a  reference it better be the name of a file with the sequence/
+    # If $input is not a  reference it better be the name of a
+    # file with the sequence/
 
     #  a phy formatted alignment file 
-  	unless (ref $input) {
+    unless (ref $input) {
         # check that file exists or throw
         $alnfilename= $input;
         unless (-e $input) {return 0;}
-		return $alnfilename;
+	return $alnfilename;
     }
 
     #  $input may be a SimpleAlign Object
-    if ($input->isa("Bio::SimpleAlign")) {
+    if ($input->isa("Bio::Align::AlignI")) {
         #  Open temporary file for both reading & writing of BioSeq array
 	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$TMPDIR);
 	my $alnIO = Bio::AlignIO->new(-fh => $tfh, -format=>'phylip',idlength=>$self->idlength());
 	$alnIO->write_aln($input);
 	$alnIO->close();
+	close($tfh);
 	return $alnfilename;		
-     }
+    }
     return 0;
 }
 

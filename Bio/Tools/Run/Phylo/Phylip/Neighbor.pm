@@ -182,6 +182,7 @@ use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
+use Cwd;
 			    
 # inherit from Phylip::Base which has some methods for dealing with
 # Phylip specifics
@@ -349,7 +350,7 @@ sub _run {
     close(NEIGHBOR);	
 
     # get the results
-    my $path = `pwd`;
+    my $path = cwd;
     chomp($path);
     my $outfile = $self->io->catfile($path,$self->outfile);
     my $treefile = $self->io->catfile($path,$self->treefile);
@@ -359,8 +360,10 @@ sub _run {
     my $tree = $in->next_tree();
 
     # Clean up the temporary files created along the way...
-    unlink $outfile;
-    unlink $treefile;
+    unless ( $self->save_tempfiles ) { 
+	unlink $outfile;
+	unlink $treefile;
+    }
     return $tree; 
 }
 
@@ -442,6 +445,7 @@ sub _setinput {
        		}
 		print $tfh "\n";
 	}
+	close($tfh);
 	return $alnfilename;		
     }
     return 0;
