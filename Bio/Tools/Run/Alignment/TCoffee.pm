@@ -661,9 +661,6 @@ sub version {
            -profile  => profile to align to, if this is an array ref
                         will specify the first two entries as the two
                         profiles to align to each other
-       
-          
-
 
 =cut
 

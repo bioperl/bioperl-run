@@ -24,7 +24,7 @@ Bio::Tools::Run::PiseApplication::grailclnt
 
 
 		grailclnt (String)
-			
+
 
 		seq (Sequence)
 			Sequence
@@ -95,19 +95,19 @@ Bio::Tools::Run::PiseApplication::grailclnt
 			Strand
 
 		rpttv_organism (String)
-			
+
 
 		start_seq (String)
-			
+
 
 		end_seq (String)
-			
+
 
 		end_request (String)
-			
+
 
 		input_file (Results)
-			
+
 
 		outfile (OutFile)
 			Result file

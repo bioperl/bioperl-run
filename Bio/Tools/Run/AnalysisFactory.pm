@@ -189,6 +189,7 @@ parameter.
 
 It indicates what lower-level module to load.  Default is 'soap'.
 Other (but future) possibilities are:
+
    -access => 'novella'
    -access => 'local'
 

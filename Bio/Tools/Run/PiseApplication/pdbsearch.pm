@@ -19,7 +19,7 @@ Bio::Tools::Run::PiseApplication::pdbsearch
 
 
 		pdbsearch (String)
-			
+
 
 		query (String)
 			query (4 letters)
@@ -28,7 +28,6 @@ Bio::Tools::Run::PiseApplication::pdbsearch
 			Extracts sequence? (-i)
 
 		outfile (OutFile)
-			
 			pipe: pdbfile
 			pipe: seqfile
 

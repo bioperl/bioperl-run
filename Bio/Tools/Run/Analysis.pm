@@ -31,7 +31,7 @@ Bio::Tools::Run::Analysis - Module representing any (remote or local) analysis t
 		          });
   # ...and after a while
   $job->result ('outseq');
-    
+
   # get all results in the same invocation (as a hash reference
   # with result names as keys) - let the module decide which
   # results are binary (images in this examples) and save those
@@ -246,6 +246,7 @@ parameter.
 
 It indicates what lower-level module to load.  Default is 'soap'.
 Other (but future) possibilities are:
+
    -access => 'novella'
    -access => 'local'
 
@@ -266,7 +267,7 @@ no default value (which usually means that this parameter is mandatory
 unless your I<-location> parameter includes also the name (but it is
 then access-dependent).
 
-=item -destroy_on_exit => '0'
+=item -destroy_on_exit =E<gt> '0'
 
 Default value is '1' which means that all Bio::Tools::Run::Analysis::Job
 objects - when being finalised - will send a request

@@ -19,7 +19,7 @@ promoterwise
   my  $factory = Bio::Tools::Run::Promoterwise->new(@params);
 
   my (@fp)= $factory->run($seq1,$seq2);
-  
+
   #each feature pair is a group of hsps
   foreach my $fp(@fp){
     print "Hit Length: ".$fp->feature1->length."\n";
@@ -43,24 +43,24 @@ promoterwise
 
 =head1 DESCRIPTION
 
-Promoterwise is an alignment algorithm that relaxes the constraint that         
-local alignments have to be co-linear. Otherwise it provides a similar      
-model to DBA, which is designed for promoter sequence alignments by Ewan Birney. 
-It is part of the wise2 package available at:
-http://www.sanger.ac.uk/software/wise2.
+Promoterwise is an alignment algorithm that relaxes the constraint
+that local alignments have to be co-linear. Otherwise it provides a
+similar model to DBA, which is designed for promoter sequence
+alignments by Ewan Birney.  It is part of the wise2 package available
+at: http://www.sanger.ac.uk/software/wise2.
 
 =head1 FEEDBACK
 
 =head2 Mailing Lists
-    irint "end: ". $fp->feature2->start."\t".$fp->feature2->end."\n";
 
 User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
-d2 Reporting Bugs
+  bioperl-l@bioperl.org                       - General discussion
+  http://bio.perl.org/MailList.html           - About the mailing lists
+
+=head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
  the bugs and their resolution.  Bug reports can be submitted via
@@ -68,7 +68,7 @@ Report bugs to the Bioperl bug tracking system to help us keep track
 
   http://bugzilla.bioperl.org/
 
-=head1 AUTHOR - Shawn Hoon 
+=head1 AUTHOR - Shawn Hoon
 
 Email: shawnh@fugu-sg.org
 

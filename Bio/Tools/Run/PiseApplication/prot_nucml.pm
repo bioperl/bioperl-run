@@ -5,6 +5,8 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 
 =head1 SYNOPSIS
 
+  #
+
 =head1 DESCRIPTION
 
 Bio::Tools::Run::PiseApplication::prot_nucml
@@ -20,17 +22,15 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 			Program
 
 		interleaved (String)
-			
+
 
 		tee (String)
-			
+
 
 		results (OutFile)
-			
 			pipe: phylip_dist
 
 		outtree (OutFile)
-			
 			pipe: phylip_tree
 
 		sequences (Sequence)
@@ -59,7 +59,8 @@ Bio::Tools::Run::PiseApplication::prot_nucml
 			Strategy or Mode
 
 		topology (InFile)
-			Topology File (if Users Tree mode or Exhaustive	      search or local Rearrangement search)
+			Topology File (if Users Tree mode or Exhaustive
+                        search or local Rearrangement search)
 
 		output (Paragraph)
 			Output Parameters

@@ -174,7 +174,7 @@ There is no default value (which usually means that this parameter is
 mandatory unless your I<-location> parameter includes also the Web
 Service name).
 
-=item -destroy_on_exit => '0'
+=item -destroy_on_exit =E<gt> '0'
 
 Default value is '1' which means that all Bio::Tools::Run::Analysis::Job
 objects - when being finalised - will send a request

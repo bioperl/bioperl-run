@@ -19,7 +19,7 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 
 
 		clustalw_convert (String)
-			
+
 
 		seqfile (Sequence)
 			Alignment to convert (-infile)
@@ -29,22 +29,18 @@ Bio::Tools::Run::PiseApplication::clustalw_convert
 			Output format (-output)
 
 		gdefile (Results)
-			
+
 
 		clufile (Results)
-			
 			pipe: readseq_ok_alig
 
 		phyfile (Results)
-			
 			pipe: readseq_ok_alig
 
 		gcgfile (Results)
-			
 			pipe: readseq_ok_alig
 
 		pirfile (Results)
-			
 			pipe: readseq_ok_alig
 
 =cut
