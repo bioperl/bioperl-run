@@ -453,12 +453,15 @@ sub _setinput {
 
     my @input = ref($input) eq "ARRAY" ? @{$input} : ($input);
     ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+    my $input_count = 0;
     foreach my $input(@input){
-	if ($input->isa("Bio::Matrix::PhylipDist")){
-	    #  Open temporary file for both reading & writing of distance matrix
-	    print $tfh $input->print_matrix;
-	}
+    	if ($input->isa("Bio::Matrix::PhylipDist")){
+	     #  Open temporary file for both reading & writing of distance matrix
+	     print $tfh $input->print_matrix;
+       $input_count++;
+	    }
     }
+    $self->_input_nbr($input_count);
     close($tfh);
     #get names from the first matrix, to be used in outgroup ordering
     my %names;
@@ -472,6 +475,13 @@ sub _setinput {
     return $alnfilename;		
 }
 
+sub _input_nbr {
+    my ($self,$val) = @_;
+    if($val){
+        $self->{'_input_nbr'} = $val;
+    }    return $self->{'_input_nbr'};
+}   
+    
 =head2  names()
 
  Title   :  names
@@ -550,6 +560,10 @@ sub _setparams {
        $param_string .= $menu{uc $attr};
 	    }
     } 
+   if (($param_string !~ $menu{'MULTIPLE'}) && (defined ($self->_input_nbr) &&($self->_input_nbr > 1))){
+  $param_string.=$menu{'MULTIPLE'}.$self->_input_nbr."\n";
+    }
+ 
     $param_string .=$menu{'SUBMIT'};
 
     return $param_string;
