@@ -285,7 +285,7 @@ BEGIN {
 		     'fix_kappa'=> [0,1], # 0:estimate kappa, 1:fix kappa
 		     'kappa'    => [2],   # initial or fixed kappa
 		     'fix_omega'=> [0,1], # 0: estimate omega, 1: fix omega
-		     'omega'    => [0.4], # initial or fixed omega for 
+		     'omega'    => [0.4,1], # initial or fixed omega for 
 		                          # codons or codon-base AAs
 		     'fix_alpha'=> [1,0], # 0: estimate gamma shape param
 		                          # 1: fix it at alpha
@@ -466,6 +466,7 @@ sub run{
    my ($rc,$parser) = (1);
    {
        my $cwd = cwd();
+       my $exit_status;
        chdir($tmpdir);
        my $codemlexe = $self->executable();
        $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
@@ -475,9 +476,9 @@ sub run{
 	   open(RUN, "$codemlexe |") or $self->throw("Cannot open exe $codemlexe");
        }
        my @output = <RUN>;
-       close(RUN);
+       $exit_status = close(RUN);
        $self->error_string(join('',@output));
-       if( grep { /\berr(or)?: /io } @output  ) {
+       if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }

@@ -259,14 +259,15 @@ sub run{
    my ($rc,$parser) = (1);
    {
        my $cwd = cwd();
+       my $exit_status;
        chdir($tmpdir);
        my $ynexe = $self->executable();
        $self->throw("unable to find executable for 'yn'") unless $ynexe;
        open(RUN, "$ynexe |");
        my @output = <RUN>;
-       close(RUN);
+       $exit_status = close(RUN);
        $self->error_string(join('',@output));
-       if( grep { /\berr(or)?: /io } @output  ) {
+       if( (grep { /\berr(or)?: /io } @output) || !$exit_status ) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }
