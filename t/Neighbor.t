@@ -37,7 +37,6 @@ unless ($tree_factory->executable) {
     warn("neighbor program not found. Skipping tests $Test::ntest to $NTESTS.\n") if( $DEBUG);    
     exit 0;
 }
-$tree_factory->treefile('treefile');
 ok $tree_factory->isa('Bio::Tools::Run::Phylo::Phylip::Neighbor');
 
 my $type= "NEIGHBOR";
@@ -76,7 +75,7 @@ $tree_factory->quiet($bequiet);  # Suppress protpars messages to terminal
 my $inputfilename = Bio::Root::IO->catfile("t","data","neighbor.dist");
 my $tree;
 
-$tree = $tree_factory->create_tree($inputfilename);
+($tree) = $tree_factory->create_tree($inputfilename);
 my @nodes = sort { $a->id cmp $b->id } 
             grep { defined $_->id} $tree->get_nodes();
 
@@ -92,8 +91,10 @@ $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
 my  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
 $protdist_factory->quiet(1);
 
-my $matrix = $protdist_factory->create_distance_matrix($inputfilename);
-$tree = $tree_factory->create_tree($matrix);
+my ($matrix) = $protdist_factory->create_distance_matrix($inputfilename);
+
+$tree_factory->outgroup('ENSP000003');
+($tree) = $tree_factory->create_tree($matrix);
 
 @nodes = sort { defined $a->id && 
 		    defined $b->id &&

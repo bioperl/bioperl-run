@@ -93,7 +93,7 @@ unless ($protdist_present) {
     exit 0;
 }
 $dist_factory->verbose($verbose);
-$matrix = $dist_factory->create_distance_matrix($inputfilename);
+($matrix) = $dist_factory->create_distance_matrix($inputfilename);
 
 ok($matrix->get_entry('ENSP000003','SINFRUP001'),0.27708);
 
@@ -105,7 +105,7 @@ my  $align_factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 exit(0) unless $align_factory->executable();
 
 my $aln = $align_factory->align($inputfilename);
-$matrix = $dist_factory->create_distance_matrix($aln);
+($matrix) = $dist_factory->create_distance_matrix($aln);
 
 ok (int($matrix->get_entry('ALEU_HORVU','ALEU_HORVU')),0,
     "failed creating distance matrix");
