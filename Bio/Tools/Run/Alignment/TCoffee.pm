@@ -727,7 +727,8 @@ or
 
 sub align {
     my ($self,$input) = @_;
-# Create input file pointer
+    # Create input file pointer
+    $self->io->_io_cleanup();
     my ($infilename,$type) = $self->_setinput($input);
     if (!$infilename) {
 	$self->throw("Bad input data or less than 2 sequences in $input !");
@@ -762,7 +763,8 @@ sub profile_align {
     my $input2 = shift;
     my ($temp,$infilename1,$infilename2,$type1,$type2,$input,$seq);
 
-# Create input file pointers
+    $self->io->_io_cleanup();
+    # Create input file pointers
     ($infilename1,$type1) = $self->_setinput($input1);
     ($infilename2,$type2) = $self->_setinput($input2);
     
@@ -919,6 +921,8 @@ sub _setinput {
 	    }
 	    $temp->close();
 	    undef $temp;
+	    close($tfh);
+	    $tfh = undef;
 	    $type = 'S';
 	} elsif( $input->[0]->isa('Bio::Align::AlignI' ) ) {
 	    $temp =  Bio::AlignIO->new('-fh' => $tfh,
@@ -930,11 +934,13 @@ sub _setinput {
 	    }
 	    $temp->close();
 	    undef $temp;
+	    close($tfh);
+	    $tfh = undef;
 	    $type = 'A';
 	}  else { 
 	    $self->warn( "got an array ref with 1st entry ".$input->[0]." and don't know what to do with it\n");
 	}
-    	close($tfh);
+
 	return ($infilename,$type);
 #  $input may be a SimpleAlign object.
     } elsif ( $input->isa("Bio::Align::AlignI") ) {
@@ -943,6 +949,8 @@ sub _setinput {
 	$temp =  Bio::AlignIO->new(-fh=>$tfh,
 				   '-format' => 'clustalw');
 	$temp->write_aln($input);
+	close($tfh);
+	undef $tfh;
 	return ($infilename,'A');
     }
     
@@ -954,6 +962,8 @@ sub _setinput {
 	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
 	$temp->write_seq($input);
 	$temp->close();
+	close($tfh);
+	undef $tfh;
 	return ($infilename,'S');
     } else { 
 	$self->warn("Got $input and don't know what to do with it\n");

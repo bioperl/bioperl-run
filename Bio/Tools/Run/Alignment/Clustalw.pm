@@ -629,6 +629,8 @@ sub _setinput {
 	    $temp->write_seq($seq);
 	}
 	$temp->close();
+	close($tfh);
+	undef $tfh;
 	return $infilename;
     }
 #  $input may be a SimpleAlign object.
@@ -640,6 +642,8 @@ sub _setinput {
 	$temp =  Bio::AlignIO->new('-fh'=> $tfh,
 				   '-format' => 'Fasta');
 	$temp->write_aln($input);
+	close($tfh);
+	undef $tfh;
 	return $infilename;
     }
 
@@ -649,6 +653,8 @@ sub _setinput {
 	($tfh,$infilename) = $self->io->tempfile();
 	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
 	$temp->write_seq($input);
+	close($tfh);
+	undef $tfh;
 	return $infilename;
     }
     return 0;
