@@ -20,15 +20,15 @@ given sequence given a protein
   # Pass the factory 2 Bio:SeqI objects (in the order of query peptide
   # and target_genomic).
 
-  # $genes is a Bio::SeqFeature::Gene::GeneStructure object
-  my $genes = $factory->run($protein_seq, $genomic_seq);
+  # @genes is an array of Bio::SeqFeature::Gene::GeneStructure objects
+  my @genes = $factory->run($protein_seq, $genomic_seq);
 
   # Alternatively pass the factory a profile HMM filename and a
   # Bio:SeqI object (in the order of query HMM and target_genomic).
 
   # Set hmmer switch first to tell genewise to expect an HMM
   $factory->hmmer(1);
-  my $genes = $factory->run($hmmfile, $genomic_seq);
+  my @genes = $factory->run($hmmfile, $genomic_seq);
 
 
 =head1 DESCRIPTION
