@@ -151,6 +151,7 @@ use Cwd;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
+use Bio::Tools::Run::WrapperBase;
 use Bio::Root::IO;
 use File::Copy;
 
@@ -235,10 +236,10 @@ sub AUTOLOAD {
  Title   : run 
  Usage   :
 	$inputfilename = '/Users/daniel/nuc.phy';
-	$tree = $factory->run($inputfilename);
- Function: Create an LVB tree from a SimpleAlign object or a
-           file containing a Phylip 3.6-format nucleotide
-           multiple alignment.
+	@trees = $factory->run($inputfilename);
+ Function: Create one or more LVB trees from a SimpleAlign
+           object or a file containing a Phylip 3.6-format
+           nucleotide multiple alignment.
  Example :
  Returns : Array of L<Bio::Tree> objects
  Args    : Name of a file containing a nucleotide multiple
@@ -268,9 +269,10 @@ sub run{
  Title   : create_tree
  Usage   :
         $inputfilename = '/Users/daniel/nuc.phy';
-        $tree = $factory->run($inputfilename);
- Function: Create an LVB tree from a Phylip 3.6-format
-           nucleotide multiple alignment file.
+        @trees = $factory->create_tree($inputfilename);
+ Function: Create one or more LVB trees from a SimpleAlign
+           object or a file containing a Phylip 3.6-format
+           nucleotide multiple alignment.
  Example :
  Returns : Array of L<Bio::Tree> objects
  Args    : Name of a file containing a nucleotide multiple 
@@ -300,13 +302,15 @@ sub create_tree{
 
 sub _run {
     my ($self,$infile,$param_string) = @_;
+    return unless(  $self->executable );
+
     my $instring;
     my $curpath = cwd;    
     unless( File::Spec->file_name_is_absolute($infile) ) {
 	$infile = $self->io->catfile($curpath,$infile);
     }
     $instring =  $param_string;
-    $self->debug( "Program ".$self->executable."\n");
+    $self->debug( "Program ".$self->executable || ''."\n");
 
     # create LVB's working copy of the input file, which must be named "infile"
     # NOTE, we cut trailing spaces since they can cause trouble with LVB 2.1
