@@ -10,33 +10,28 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 12;
+    $NTESTS = 13;
     plan tests => $NTESTS;
 }
-use Bio::Tools::Run::Pseudowise;
-use Bio::Root::IO;
-use Bio::Seq;
 
 END {
-    for ( $Test::ntest..$NTESTS ) {
+    foreach ( $Test::ntest..$NTESTS ) {
         skip("pseudowise program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
     }
 }
 
-ok(1);
+use Bio::Tools::Run::Pseudowise;
+use Bio::Root::IO;
+use Bio::Seq;
+
+#ok(1);
 my $verbose = -1;
+#my @params = ('dymem', 'linear', 'kbyte', '5000','erroroffstd'=>1);
 my @params = ('dymem'=> 'linear','kbyte'=>'5000','erroroffstd'=>1);
 my  $factory = Bio::Tools::Run::Pseudowise->new(@params);
 ok $factory->isa('Bio::Tools::Run::Pseudowise');
-
-unless ($factory->executable) {
-   warn("Pseudowise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-   exit 0;
-}
-
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress pseudowise messages to terminal
-
 
 
 #test with one file with 2 sequences
@@ -50,6 +45,10 @@ $seq2 = $seqstream->next_seq();
 $seq3 = $seqstream->next_seq();
 
 
+unless ($factory->executable) {
+    warn("Pseudowise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
+    exit 0;
+}
 my @feat = $factory->predict_genes($seq1, $seq2, $seq3);
 my $geneno = scalar(@feat);
 my @subfeat = $feat[0]->sub_SeqFeature();
@@ -65,6 +64,8 @@ ok($feat[0]->start, 865);
 ok($subfeat[0]->start, 865);
 ok($feat[0]->end, 897);
 ok($subfeat[0]->end, 897);
+ok($feat[0]->score, 1.67);
+ok($subfeat[0]->score, 1.67);
 
 
 
