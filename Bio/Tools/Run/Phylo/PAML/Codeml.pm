@@ -407,16 +407,17 @@ sub new {
 =head2 run
 
  Title   : run
- Usage   : $codeml->run();
+ Usage   : my ($rc,$parser) = $codeml->run($aln);
  Function: run the codeml analysis using the default or updated parameters
            the alignment parameter must have been set
- Returns : 
- Args    :
+ Returns : Return code, L<Bio::Tools::Phylo::PAML>
+ Args    : L<Bio::Align::AlignI> object,
+	   L<Bio::Tree::TreeI> object [optional]
 
 
 =cut
 
-sub run{
+sub run {
    my ($self,$aln,$tree) = @_;
    unless ( $self->save_tempfiles ) {
        # brush so we don't get plaque buildup ;)
