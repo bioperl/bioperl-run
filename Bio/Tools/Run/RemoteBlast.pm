@@ -29,7 +29,7 @@ Remote-blast "factory object" creation and blast-parameter initialization:
   my @params = ( '-prog' => $prog,
   		 '-data' => $db,
   		 '-expect' => $e_val );
-                 '-readmethod' => 'BPlite' );
+                 '-readmethod' => 'SearchIO' );
 
   my $factory = Bio::Tools::Run::RemoteBlast->new(@params);
   $v = 1;
@@ -48,6 +48,9 @@ Remote-blast "factory object" creation and blast-parameter initialization:
   	      print STDERR "." if ( $v > 0 );
   	      sleep 5;
   	  } else { 
+          #save the output
+          my $filename = $result->query_accession()."\.out";
+          $factory->save_output($rid, $filename);
   	      $factory->remove_rid($rid);
   	      while ( my $hit = $rc->nextSbjct ) {
   		  next unless ( $v > 0);
@@ -145,7 +148,7 @@ BEGIN {
     
     $RIDLINE = 'RID\s+=\s+(\d+-\d+-\d+)';
 
-     %BLAST_PARAMS = ( 'prog' => 'blastp',
+    %BLAST_PARAMS = ( 'prog' => 'blastp',
 		       'data' => 'nr',
 		       'expect' => '1e-3',
 		       'readmethod' => 'SearchIO'
@@ -235,9 +238,10 @@ sub program {
 	    $self->warn("trying to set program to an invalid program name ($val) -- defaulting to blastp");
 	    $val = 'blastp';
 	}
-	$self->{'_program'} = $val;
+#	$self->{'_program'} = $val;
+	$HEADER{'PROGRAM'} = $val;
     }
-    return $self->{'_program'};
+    return $HEADER{'PROGRAM'};
 }
 
 
@@ -254,9 +258,10 @@ sub program {
 sub database {
     my ($self, $val) = @_;
     if( defined $val ) {
-	$self->{'_database'} = $val;
+#	$self->{'_database'} = $val;
+ 	$HEADER{'DATABASE'} = $val;
     }
-    return $self->{'_database'};
+    return $HEADER{'DATABASE'};
 }
 
 
@@ -273,9 +278,10 @@ sub database {
 sub expect {
     my ($self, $val) = @_;
     if( defined $val ) {
-	$self->{'_expect'} = $val;
+#	$self->{'_expect'} = $val;
+ 	$HEADER{'EXPECT'} = $val;
     }
-    return $self->{'_expect'};
+    return $HEADER{'EXPECT'};
 }
 
 =head2 ua
@@ -358,7 +364,9 @@ sub submit_blast {
     my $tcount = 0;
     my %header = $self->header;    
     foreach my $seq ( @seqs ) {
-	$header{'QUERY'} = $seq->seq();
+	#If query has a fasta header, the output has the query line.
+	$header{'QUERY'} = ">".(defined $seq->primary_id() ? $seq->primary_id() : "").
+		" ".(defined $seq->desc() ? $seq->desc() : "")."\n".$seq->seq();
 	my $request = POST $URLBASE, [%header];
 	$self->warn($request->as_string) if ( $self->verbose > 0);
 	my $response = $self->ua->request( $request);
@@ -431,6 +439,8 @@ sub retrieve_blast {
 		$blastobj = new Bio::SearchIO(-file => $tempfile,
 					      -format => 'blast');
 	    }
+	    #save tempfile 
+	    $self->file($tempfile);
 	    return $blastobj;
 	} elsif( $size < 500 ) { # search had a problem
 	    open(ERR, "<$tempfile") or $self->throw("cannot open file $tempfile");
@@ -444,6 +454,43 @@ sub retrieve_blast {
 	$self->warn($response->error_as_HTML);
 	return -1;
     }
+}
+
+=head2 save_output
+
+ Title   : saveoutput
+ Usage   : my $saveoutput = $self->save_output($filename)
+ Function: Method to save the blast report
+ Returns : 1 (throws error otherwise)
+ Args    : string [rid, filename]
+
+=cut
+
+sub save_output {
+    my ($self, $filename) = @_;
+    if( ! defined $filename ) {
+        	$self->throw("Can't save blast output.  You must specify a filename to save to.");
+    }
+    #should be set when retrieving blast
+   	my $blastfile = $self->file;
+   	#open temp file and output file, have to filter out some HTML
+	open(TMP, $blastfile) or $self->throw("cannot open $blastfile");
+	open(SAVEOUT, ">$filename") or $self->throw("cannot open $filename");
+	my $seentop=0;
+	while(<TMP>) { 
+		next if (/<pre>/);	
+		if( /^(?:[T]?BLAST[NPX])\s*.+$/i ||
+	   		/^RPS-BLAST\s*.+$/i ) {
+	   		$seentop=1;
+	   	}
+	   	next if !$seentop;
+	    if( $seentop ) {
+			print SAVEOUT; 
+		}
+	}
+	close SAVEOUT;
+	close TMP;
+	return 1;	
 }
 
 sub _load_input {
