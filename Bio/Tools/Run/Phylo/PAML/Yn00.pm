@@ -239,7 +239,7 @@ sub run{
        my @output = <RUN>;
        close(RUN);
        $self->error_string(join('',@output));
-  if( grep { /\berr(or)?: /io } @output  ) {
+       if( grep { /\berr(or)?: /io } @output  ) {
 	   $self->warn("There was an error - see error_string for the program output");
 	   $rc = 0;
        }
@@ -253,7 +253,13 @@ sub run{
        }
        chdir($cwd);
    }
-   open(IN,"$tmpdir/mlc");
+   if( $self->verbose > 0 ) {
+       open(IN, "$tmpdir/mlc");
+       while(<IN>) {
+	   $self->debug($_);
+       }
+   }
+       
    unless ( $self->save_tempfiles ) {
       unlink("$yn_ctl");
       $self->cleanup();
