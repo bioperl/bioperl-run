@@ -243,7 +243,7 @@ sub new {
 
  Title   : executable
  Usage   : $exe = Bio::Tools::Run::FootPrinter->executable()
- Function: Finds the full path to the 'protdist' executable
+ Function: Finds the full path to the 'footprinter' executable
  Returns : string representing the full path to the exe
  Args    : [optional] name of executable to set path to 
            [optional] boolean flag whether or not warn when exe is not found
@@ -293,23 +293,25 @@ sub run {
   $#seq > 0 || $self->throw("Need at least two sequences");
   $self->tree || $self->throw("Need to specify a phylogenetic tree using -tree option");
 
-  my $infile = $self->_setinput(@seq);
+  my ($infile_tfh,$infile) = $self->_setinput(@seq);
 
   my $param_string = $self->_setparams();
-  my @repeat_feats = $self->_run($infile,$self->tree,$param_string);
-
-  return @repeat_feats;
+  my @footprint_feats = $self->_run($infile,$self->tree,$param_string);
+  close ($infile_tfh);
+  undef ($infile_tfh);
+  return @footprint_feats;
 
 }
 
 =head2  _run
 
  Title   : _run
- Usage   : $rm->_run ($filename,$param_string)
- Function: internal function that runs the repeat masker
+ Usage   : $fp->_run ($filename,$param_string)
+ Function: internal function that runs FootPrinter 
  Example :
- Returns : an array of repeat features
- Args    : the filename to the input sequence and the parameter string
+ Returns : an array of features
+ Args    : the filename to the input sequence, filename to phylo tree
+           and the parameter string
 
 =cut
 
@@ -337,6 +339,9 @@ sub _run {
   while(my $fp_feat = $fp_parser->next_feature){
       push @fp_feat, $fp_feat;
   }
+
+  unlink $outfile;
+
   return @fp_feat;
 }
 
@@ -402,7 +407,7 @@ sub _setinput {
     $out1->write_seq($seq);
   }
 
-  return ($outfile1);
+  return ($tfh1,$outfile1);
 }
 
 
