@@ -80,8 +80,7 @@ use vars qw(%Menu %FileName);
    
   "3.5"=>{'PROTDIST'=>{'MODEL'  => {
                                    'CAT'   =>"P\nP\n",
-                                   'KIMURA'=>"P\nY\n",
-                                   'PAM'   =>"Y\n"
+                                   'KIMURA'=>"P\n",
                                    },
                       'GENCODE'=>  {
                                    'ALLOWED'=>"UMVFY",
