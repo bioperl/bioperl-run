@@ -133,6 +133,7 @@ BEGIN {
              -location
              -name
              -httpproxy
+             -timeout
 	   Additionally, the main module Bio::Tools::Run::Analysis
            recognises also:
              -access
@@ -192,6 +193,14 @@ to specify also a location/URL of an HTTP proxy server
 (if your site requires one). The expected format is C<http://server:port>.
 There is no default value.
 
+=item -timeout
+
+For long(er) running jobs the HTTP connection may be time-outed. In
+order to avoid it (or, vice-versa, to call timeout sooner) you may
+specify C<timeout> with the number of seconds the connection will be
+kept alive. Zero means to keep it alive forever. The default value is
+two minutes.
+
 =back
 
 =cut
@@ -231,10 +240,13 @@ sub _initialize {
     if (defined $self->{'_httpproxy'}) {
 	$self->{'_soap'} = SOAP::Lite
 	    -> proxy ($location,
+		      timeout => (defined $self->{'_timeout'} ? $self->{'_timeout'} : 120),
 		      proxy => ['http' => $self->{'_httpproxy'}]);
     } else {
 	$self->{'_soap'} = SOAP::Lite
-	    -> proxy ($location);
+	    -> proxy ($location,
+		      timeout => (defined $self->{'_timeout'} ? $self->{'_timeout'} : 120),
+		      );
     }
 
     # forget cached things which should not be cloned into new

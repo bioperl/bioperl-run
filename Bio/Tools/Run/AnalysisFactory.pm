@@ -175,6 +175,7 @@ BEGIN {
              -access
              -location
              -httpproxy
+             -timeout
 
 It builds, populates and returns a new C<Bio::Tools::Run::AnalysisFactory> object. This
 is how it is seen from the outside. But in fact, it builds, populates
@@ -207,6 +208,14 @@ a location/URL of an HTTP proxy server (if your site requires
 one). The expected format is C<http://server:port>.  There is no
 default value. It is also an access-specific parameter which may not
 be used by all access methods.
+
+=item -timeout
+
+For long(er) running jobs the HTTP connection may be time-outed. In
+order to avoid it (or, vice-versa, to call timeout sooner) you may
+specify C<timeout> with the number of seconds the connection will be
+kept alive. Zero means to keep it alive forever. The default value is
+two minutes.
 
 =back
 

@@ -15,7 +15,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.1 2003-03-03 14:52:28 senger Exp $
+#   $Id: panalysis.PLS,v 1.2 2003-03-12 13:11:26 senger Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -80,6 +80,7 @@ where 'input-data' are:
 
 Environment variables:
    HTTPPROXY                 HTTP proxy server
+   HTTPTIMEOUT               HTTP timeout (0 means no timeout at all)
    RESULT_FILENAME_TEMPLATE  template for inventing filenames for results
 
 For more details type:  perldoc analysis.pl
@@ -111,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q$Id: panalysis.PLS,v 1.1 2003-03-03 14:52:28 senger Exp $;
+    $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q$Id: panalysis.PLS,v 1.2 2003-03-12 13:11:26 senger Exp $;
 
 
     # help wanted?
@@ -137,12 +138,13 @@ use Bio::Tools::Run::AnalysisFactory; # to access list/factory of analysis tools
 #        -access    (taken from '-A' option, default is 'soap')
 #
 #      Additionally, it uses env. variable HTTPPROXY to create parameter
-#      '-httpproxy'.
+#      '-httpproxy', and env. variable HTTPTIMEOUT to set max HTTP timeout.
 #
 my @access    = ('-access', $opt_A) if defined $opt_A;
 my @location  = ('-location', $opt_l) if defined $opt_l;
 my @httpproxy = ('-httpproxy', $ENV{'HTTPPROXY'}) if defined $ENV{'HTTPPROXY'};
-my $factory = new Bio::Tools::Run::AnalysisFactory (@location, @httpproxy);
+my @timeout   = ('-timeout', $ENV{'HTTPTIMEOUT'}) if defined $ENV{'HTTPTIMEOUT'};
+my $factory = new Bio::Tools::Run::AnalysisFactory (@location, @httpproxy, @timeout);
 
 # --- create an analysis (service) object;
 #     the new() method understands the following parameters:
@@ -150,10 +152,12 @@ my $factory = new Bio::Tools::Run::AnalysisFactory (@location, @httpproxy);
 #        -access    (taken from '-A' option, default is 'soap')
 #        -name      (taken from '-n' option; mandatory!, no default value)
 #        -destroy_on_exit (set to true if '-z' option given)
+#        -httpproxy (taken from an env.variable)
+#        -timeout   (taken from an env.variable)
 #
 my @name      = ('-name', $opt_n) if defined $opt_n;
 my @destroy   = ('-destroy_on_exit', 0) unless $opt_z;
-my $service = new Bio::Tools::Run::Analysis (@name, @location, @httpproxy, @destroy);
+my $service = new Bio::Tools::Run::Analysis (@name, @location, @httpproxy, @timeout, @destroy);
 
 die "Stopped. No success in accessing analysis factory.\n" unless $factory;
 die "Stopped. No success in accessing analysis tools.\n" unless $service;
