@@ -641,10 +641,12 @@ sub _run {
 
     my $outfile = $self->outfile();
 
-# retrieve alignment (Note: MSF format for AlignIO = GCG format of clustalw)
+    # retrieve alignment (Note: MSF format for AlignIO = GCG format of clustalw)
 
-    my $format= $output =~/phylip/i ? "phylip" : "MSF";
-
+    my $format = $output =~ /gcg/i ? 'msf' : $output;
+    if( $format =~ /clustal/i ) { 
+	$format = 'clustalw'; # force clustalw incase 'clustal' is requested
+    }
     my $in  = Bio::AlignIO->new(-file  => $outfile,
 				-format=> $format);
     my $aln = $in->next_aln();
