@@ -16,6 +16,7 @@ BEGIN {
 use Bio::Tools::Run::Genewise;
 use Bio::Root::IO;
 use Bio::Seq;
+
 END {
     for ( $Test::ntest..$NTESTS ) {
         skip("genewise program not found. Skipping. (Be sure you have the wise package > 2.2.0)",1);
@@ -44,12 +45,12 @@ my $seqstream1 = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
 my $seq1 = Bio::Seq->new();
 $seq1 = $seqstream1->next_seq();
 
-my $inputfilename = Bio::Root::IO->catfile("t/data","new_dna.fa");
+$inputfilename = Bio::Root::IO->catfile("t/data","new_dna.fa");
 my $seqstream2 = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
 my $seq2 = Bio::Seq->new();
 $seq2 = $seqstream2->next_seq();
 
-my $genes = $factory->predict_genes($seq1, $seq2);
+my ($genes) = $factory->predict_genes($seq1, $seq2);
 
 my @transcripts = $genes->transcripts;
 my @feat = $transcripts[0]->exons;
@@ -61,36 +62,17 @@ ok($end, 897);#ok4
 my $strand = $feat[0]->strand;
 ok($strand, 1);#ok5
 
-my @tags = $feat[0]->all_tags;
 
-my @seqfeature1 = $feat[0]->each_tag_value($tags[0]);
-my $pseqname = $seqfeature1[0]->seqname;
-my $pstart = $seqfeature1[0]->start;
-ok($pstart, 120);#ok6
-my $pend = $seqfeature1[0]->end;
-ok($pend, 130);#ok7
-my $pstrand = $seqfeature1[0]->strand;
-ok($pstrand, 1);#ok8
-my $pscore = $seqfeature1[0]->score;
-ok($pscore, 17.01);#ok9
-my $ps_tag = $seqfeature1[0]->source_tag;
-my $pp_tag = $seqfeature1[0]->primary_tag;
+my ($featpair)= $feat[0]->each_tag_value('supporting_feature');
+ok($featpair->feature1->start,865);
+ok($featpair->feature1->end,897);
+ok($featpair->feature1->strand,1);
+ok($featpair->feature1->score,17.01);
+ok($featpair->feature2->start,120);
+ok($featpair->feature2->end,130);
+ok($featpair->feature2->strand,1);
+ok($featpair->feature2->score,17.01);
 
-my @seqfeature2 = $feat[0]->each_tag_value($tags[1]);
-my $gseqname = $seqfeature2[0]->seqname;
-my $gstart = $seqfeature2[0]->start;
-ok($gstart, 865);#ok10
-my $gend = $seqfeature2[0]->end;
-ok($gend, 897);#ok11
-my $gstrand = $seqfeature2[0]->strand;
-ok($gstrand, 1);#ok12
-my $gscore = $seqfeature2[0]->score;
-ok($gscore, 17.01);#ok13
-my $gs_tag = $seqfeature2[0]->source_tag;
-my $gp_tag = $seqfeature2[0]->primary_tag;
-
-my @seqfeature3 = $feat[0]->each_tag_value($tags[2]);
-my $phaseno = $seqfeature3[0]; #phase number
 
 
 
