@@ -12,31 +12,28 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phylo::PAML::CodeML - Wrapper aroud the PAML program codeml
+Bio::Tools::Run::Phylo::PAML::Yn00 - Wrapper aroud the PAML program yn00
 
 =head1 SYNOPSIS
 
-  use Bio::Tools::Run::Phylo::PAML::Codeml;
+  use Bio::Tools::Run::Phylo::PAML::Yn00;
   use Bio::AlignIO;
   my $alignio = new Bio::AlignIO(-format => 'phylip',
-  	 		         -file   => 't/data/gf.s85.4_ZC412.1.dna.phylip');
+  	 		         -file   => 't/data/gf-s85.phylip');
   my $aln = $alignio->next_aln;
 
   my $yn = new Bio::Tools::Run::Phylo::PAML::Yn00();
   $yn->alignment($aln);
-  my ($rc,$results,$neiresults) = $yn->run();
-
-  my %seen;
-  while( my ($seqname1,$seqvalues) = each %{$results} ) {
-      while( my ($seqname2, $values) = each %{$seqvalues} ) {
-  	foreach my $datatype ( keys %{$values} ) {
-  	    print "$seqname1 $seqname2 -> $datatype $values->{$datatype}\n";
-  	}
-      }
+  my ($rc,$parser) = $yn->run();
+  while( my $result = $parser->next_result ) {
+    my @otus = $result->get_seqs();
+    my $MLmatrix = $result->get_MLmatrix();
+    # 0 and 1 correspond to the 1st and 2nd entry in the @otus array
+    my $dN = $MLmatrix->[0]->[1]->{dN};
+    my $dS = $MLmatrix->[0]->[1]->{dS};
+    my $kaks =$MLmatrix->[0]->[1]->{omega};
+    print "Ka = $dN Ks = $dS Ka/Ks = $kaks\n";
   }
-  print "Ka = ", $results->{'dN'},"\n";
-  print "Ks = ", $results->{'dS'},"\n";
-  print "Ka/Ks = ", $results->{'dN/dS'},"\n";
 
 =head1 DESCRIPTION
 
