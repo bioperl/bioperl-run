@@ -20,7 +20,7 @@ given sequence given a matrix(for appropriate organisms).
 
   # Pass the factory a Bio::Seq object
   #@genes is an array of Bio::Tools::Predictions::Gene objects
-  my @genes = $factory->predict_genes($seq);
+  my @genes = $factory->run($seq);
 
 =head1 DESCRIPTION
 
