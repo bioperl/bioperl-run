@@ -255,6 +255,9 @@ sub _run {
     my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 $infile3 > $outfile";
+    if($self->silent || $self->quiet || !($self->vebose)){
+        $commandstring .= ' 2> /dev/null';
+    }
     $self->debug( "pseudowise command = $commandstring");
     my $status = system($commandstring);
     $self->throw( "Pseudowise call ($commandstring) crashed: $? \n") unless $status==0;
@@ -279,10 +282,6 @@ sub _run {
 sub _parse_results {
     my ($self,$prot_name,$outfile) = @_;
     $outfile||$self->throw("No outfile specified");
-    #my ($self) = @_;
-
-    print "Parsing the file\n";
-
     my $filehandle;
     if (ref ($outfile) !~ /GLOB/)
     {
@@ -338,7 +337,7 @@ sub _parse_results {
                       #my $seqname = $prot_name.'_'.$count;
                       my $seqname = $prot_name;
                       my $exon = new Bio::SeqFeature::Generic (
-                                -seqname => $seqname,
+                                -seq_id=> $seqname,
                                 -start => $exon_start,
                                 -end => $exon_end,
                                 -primary => 'exon',
