@@ -87,15 +87,14 @@ use strict;
 use Bio::SeqIO;
 use Bio::SeqFeature::Generic;
 use Bio::Root::Root;
+use Bio::Root::IO;
+use Bio::Tools::Run::WrapperBase;
 
 use vars qw($AUTOLOAD);
 
-our @ISA = qw(Bio::Root::Root);
+our @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 our $VERSION = '0.01';
-
-our $MDUST_EXE = $ENV{'MDUSTDIR'} . '/mdust'; # path to mdust executable
-our $TMPDIR = '.'; 
 
 our @ARGNAMES = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
 
@@ -137,7 +136,7 @@ sub new {
     $self->{'cutoff'} = $args{'CUTOFF'} || 28;
     $self->{'maskchar'} = $args{'MASKCHAR'} || 'N';
     $self->{'coords'} = $args{'COORDS'} || 0;
-    $self->{'tmpdir'} = $args{'TMPDIR'} || $ENV{'TMPDIR'} || $ENV{'TMP'} || '';
+    $self->{'tmpdir'} = $args{'TMPDIR'} || $ENV{'TMPDIR'} || $ENV{'TMP'} || '.';
     # set debugging
     $self->{'debug'} = $args{'DEBUG'} || 0;
 
@@ -164,20 +163,38 @@ sub run {
     return $self->_run_mdust;
 }
 
+sub program_dir {
+        return Bio::Root::IO->catfile($ENV{MDUSTDIR}) if $ENV{MDUSTDIR};
+}
+
+
+sub program_name {
+    return 'mdust';
+}
+    
+sub tmpdir {
+    my ($self, $tmpdir) = @_;
+
+    if ($tmpdir) {
+	$self->{'tmpdir'} = $tmpdir;
+    }
+    else {
+	return $self->{'tmpdir'};
+    }
+}
+
 sub _run_mdust {
     # open a pipe to the mdust command.  Pass in sequence(s?) as fasta 
     # files on STDIN, recover filtered seqs on STDOUT
     my ($self) = @_;
-
+    
     my $target = $self->target or warn "No target sequence specified\n" && return undef;
 
     # make sure program is available 
-    unless (-e $MDUST_EXE) {
-	$self->throw( "Unable to find mdust executable (path: $MDUST_EXE).  Did you set the environment variable MDUSTDIR?");
-    } 
+    my $executable = $self->executable('mdust', 1);
 
     # add options
-    my $mdust_cmd = $MDUST_EXE;
+    my $mdust_cmd = $executable;
     $mdust_cmd .= " -w " . $self->wsize;
     $mdust_cmd .= " -v " . $self->cutoff;
     $mdust_cmd .= " -m " . $self->maskchar;
@@ -252,14 +269,14 @@ sub _set_target {
 
 sub _maskedfile {
     my ($self, $file) = @_;
-    my $tmpdir = $self->tmpdir || $TMPDIR;
+    my $tmpdir = $self->tmpdir;
 
     if ($file) {
 	$self->{'maskedfile'} = $file;
 	# add some sanity chex for writability?
     }
     elsif (!$self->{'maskedfile'}) {
-	$self->{'maskedfile'} = $tmpdir . '/' . int(rand(1000000)) . '.tfa';
+	$self->{'maskedfile'} = Bio::Root::IO->catfile($tmpdir, int(rand(1000000)) . '.tfa');
     }
     return $self->{'maskedfile'};
 
