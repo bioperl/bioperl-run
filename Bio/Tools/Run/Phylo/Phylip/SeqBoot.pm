@@ -221,8 +221,6 @@ sub program_dir {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->io->_initialize_io();
     
     my ($attr, $value);
     while (@args)  {
@@ -362,11 +360,16 @@ sub _run {
     chdir($curpath);
     $self->throw("SeqBoot did not create files correctly ($outfile)")
   	unless (-e $outfile);
+    
+    `cp $outfile ~/test.$$`;
 
     #parse the alignments
-    
     my @aln;
-    my $aio = Bio::AlignIO->new(-file=>$outfile,-format=>"phylip");
+    my @parse_params;
+
+    push @parse_params, ('-interleaved' => 1) if $self->version == 3.6;
+    my $aio = Bio::AlignIO->new(-file=>$outfile,-format=>"phylip",
+				@parse_params);
     while (my $aln = $aio->next_aln){
         push @aln, $aln;
     }
