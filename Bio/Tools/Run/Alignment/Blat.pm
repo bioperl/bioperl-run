@@ -5,13 +5,13 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Blat  
+Bio::Tools::Run::Alignment::Blat  
 
 =head1 SYNOPSIS
 
   Build a Blat  factory
 
-  my $factory = Bio::Tools::Run::Blat->new();
+  my $factory = Bio::Tools::Run::Alignment::Blat->new();
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
@@ -117,7 +117,7 @@ sub AUTOLOAD {
  Title   : new
  Usage   : $blat->new(@params)
  Function: creates a new Blat  factory
- Returns:  Bio::Tools::Run::Blat
+ Returns:  Bio::Tools::Run::Alignment::Blat
  Args    :
 
 =cut
@@ -244,7 +244,7 @@ sub _run {
 	 $blat_obj = Bio::SearchIO->new(-format  => 'psl',
 					-fh    => $outfile);
      }
-system('cp',$outfile,'/tmp/blat.out');
+     system('cp',$outfile,'/tmp/blat.out');
      $self->cleanup();     
      return $blat_obj;
 }
