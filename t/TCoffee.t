@@ -11,7 +11,7 @@ BEGIN {
     }
     use Test;
 
-    $NUMTESTS = 17; 
+    $NUMTESTS = 22; 
     plan tests => $NUMTESTS; 
 }
 
@@ -31,11 +31,10 @@ END {
 
 ok(1);
 
-my @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
+my @params;
 my  $factory = Bio::Tools::Run::Alignment::TCoffee->new(@params);
 
 ok ($factory =~ /Bio::Tools::Run::Alignment::TCoffee/);
-
 
 my $ktuple = 3;
 $factory->ktuple($ktuple);
@@ -43,9 +42,8 @@ $factory->ktuple($ktuple);
 my $new_ktuple = $factory->ktuple();
 ok $new_ktuple, 3, " couldn't set factory parameter";
 
-
 my $what_matrix = $factory->matrix();
-ok $what_matrix, 'BLOSUM', "couldn't get factory parameter";
+ok $what_matrix, qr/BLOSUM/i, "couldn't get factory parameter";
 
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress tcoffee messages to terminal
@@ -66,7 +64,7 @@ ok($aln);
 ok( $aln->no_sequences, 7);
 
 my $str = Bio::SeqIO->new('-file' => 
-			Bio::Root::IO->catfile("t","data","cysprot.fa"), 
+			  Bio::Root::IO->catfile("t","data","cysprot.fa"), 
 			  '-format' => 'Fasta');
 my @seq_array =();
 
@@ -78,12 +76,13 @@ my $seq_array_ref = \@seq_array;
 
 $aln = $factory->align($seq_array_ref);
 ok $aln->no_sequences, 7;
-	
+my $s1_perid = $aln->average_percentage_identity;
+
+
 my $profile1 = Bio::Root::IO->catfile("t","data","cysprot1a.msf");
 my $profile2 = Bio::Root::IO->catfile("t","data","cysprot1b.msf");
 $aln = $factory->profile_align($profile1,$profile2);
 ok $aln->no_sequences, 7;
-
 
 my $str1 = Bio::AlignIO->new(-file=> Bio::Root::IO->catfile("t","data","cysprot1a.msf"));
 my $aln1 = $str1->next_aln();
@@ -113,3 +112,23 @@ if( $version <= 1.22 ) {
     ok( int($aln->overall_percentage_identity), 21);
     ok( int($aln->average_percentage_identity), 47);    
 }
+
+# test new 'run' generic running of factory
+
+$aln = $factory->run('-type' => 'profile',
+		     '-profile' => $aln1,
+		     '-seq'  => Bio::Root::IO->catfile("t","data","cysprot1b.fa"));
+
+ok( $aln->no_sequences, 7);
+if( $version <= 1.22 ) {
+    ok( $aln->overall_percentage_identity > 18);    
+    ok( int($aln->average_percentage_identity), 44);
+} else {
+    ok( int($aln->overall_percentage_identity), 14);
+    ok( int($aln->average_percentage_identity),41);    
+}
+
+$aln = $factory->run('-type' => 'align',
+		     '-seq'  => Bio::Root::IO->catfile("t","data","cysprot.fa"));
+ok ($aln->no_sequences, 7);
+ok ($aln->percentage_identity,$s1_perid); #calculated before
