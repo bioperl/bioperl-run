@@ -1,41 +1,108 @@
 $Id$
 Revision history for Bioperl run modules
 
-0.01 Initial release
+1.2.2 Release update in sync with bioperl core
 
-     o Package is broken off from bioperl-live to support just
-       runnable wrapper modules.
+    o Soaplab
+      - API changes
+      - binary input added
 
-     o Support for PAML codeml tested, aaml still waiting
-     
-     o Support for Molphy protml, nucml to come
+    o Pise - changes affecting most Bio::Tools::Run:PiseApplication modules
+      - Numerous documentation fixes in almost all modules
+      - Added code in the SYNOPSIS, as well as the FEEDBACK, COPYRIGHT
+        and SEE ALSO parts.
+      - the DESCRIPTION section now contains *only* the parameters that
+        can be set by the client.
+      - remote parameter to -location to conform to
+        Bio::Tools::Run::AnalysisFactory interface
+      - new programs sirna, tranalign, twofeat (from EMBOSS 2.6).
 
-     o Support for EMBOSS pkg - still need to move component from
-       bioperl-live Bio::Factory::EMBOSS to this package and 
-       rename it Bio::Tools::Run::EMBOSSFactory or something
-       equivalent.
+    o Bio::Tools::Run::Eponine
+      - More standardized way of running
 
-     o Support for Clustalw, TCoffee, Local NCBI BLAST.
-     
-     o RepeatMasker, Genscan, Pseudowise, TribeMCL, Primate, Eponine.
-     
-     o Support for remote analysis through Pise and NCBI Web Blast
-       queue.
+    o Bio::Tools::Run::FootPrinter
+      - Write the files properly
+      - Mark Wagner's enhancements bug #1399
 
-     o Select PHYLIP apps: Neighbor, ProtDist, and ProtPars.
+    o Bio::Tools::Run::Genewise
+      - more options
+
+    o Bio::Tools::Run::Genscan
+      - doc fix
+
+    o Bio::Tools::Run::Hmmpfam
+      - Updated to set params properly and return a SearchIO object
+
+    o Bio::Tools::Run::Mdust
+      - new location
+      - Modified to inherit Bio::Tools::Run::WrapperBase
+      - use Bio::Root::IO to build up paths
+      - Modified documentation to conform to bioperl format
+
+    o Bio::Tools::Run::Signalp
+      - uniform sequence truncation lenght
+
+    o Bio::Tools::Run::Vista
+      - new module
+      - Support more options
+      - More documentation
+      - fix reverse sequence bug
+
+    o Bio::Tools::Run::Phylo::Phylip::SeqBoot
+      - Allow more than one alignment
+
+    o Bio::Tools::Run::Phylo::Phylip::Neighbor
+      - Check for multiple data sets and set parameter accordingly
+
+    o Bio::Tools::Run::Alignment::Blat
+      - moved from Bio::Tools::Run name space
+      - some code cleanup to avoid warnings and insure filehandles are
+        properly closed, etc
+
+    o Bio::Tools::Run::Alignment::Lagan
+      - program name included
+      - small fixes and addition of options
+      - added the right credits.
+      - Bio::Tools::Run::Alignment::DBA and Bio::Tools::Run::Alignment::Sim4
+      - Quiet declaration warnings
+
 
 1.2  Developer release
 
-     o Analysis Factory framework- currently providing SOAP access to EMBOSS
-       applications
+    o Analysis Factory framework- currently providing SOAP access to EMBOSS
+      applications
 
-     o Support for FootPrinter, Genewise, Hmmpfam, Primate, Prints,
-       Profile, Promoterwise, Pseudowise, Seg, Signalp, Tmhmm,TribeMCL,
-       Blat,DBA,Lagan,Sim4,Fasta,ProtML,Vista
-     
-     o Added support for PHYLIP apps: Consense, DrawGram, DrawTree, SeqBoot
+    o Support for FootPrinter, Genewise, Hmmpfam, Primate, Prints,
+      Profile, Promoterwise, Pseudowise, Seg, Signalp, Tmhmm,TribeMCL,
+      Blat,DBA,Lagan,Sim4,Fasta,ProtML,Vista
+    
+    o Added support for PHYLIP apps: Consense, DrawGram, DrawTree, SeqBoot
 
-     o Added INSTALL.PROGRAMS providing references to download the program binaries.
+    o Added INSTALL.PROGRAMS providing references to download the program binaries.
 
-     o Bug Fixes that hopefully solves the 'too many open files' problem
+    o Bug Fixes that hopefully solves the 'too many open files' problem
+
+0.01 Initial release
+
+    o Package is broken off from bioperl-live to support just
+      runnable wrapper modules.
+
+    o Support for PAML codeml tested, aaml still waiting
+    
+    o Support for Molphy protml, nucml to come
+
+    o Support for EMBOSS pkg - still need to move component from
+      bioperl-live Bio::Factory::EMBOSS to this package and 
+      rename it Bio::Tools::Run::EMBOSSFactory or something
+      equivalent.
+
+    o Support for Clustalw, TCoffee, Local NCBI BLAST.
+    
+    o RepeatMasker, Genscan, Pseudowise, TribeMCL, Primate, Eponine.
+    
+    o Support for remote analysis through Pise and NCBI Web Blast
+      queue.
+
+    o Select PHYLIP apps: Neighbor, ProtDist, and ProtPars.
+
 
