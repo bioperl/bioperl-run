@@ -60,11 +60,10 @@ if( ! $ENV{'EPONINEDIR'}  ) {
     exit(0);
 }
 my $inputfilename= Bio::Root::IO->catfile("t","data","eponine.fa");
-my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999,
-					 "seq" =>$inputfilename);
+my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999);
 
 ok ($fact->threshold, 0.999);
-my @feats = $fact->run_eponine();
+my @feats = $fact->run($inputfilename);
 ok ($feats[0]->start, 69);
 ok ($feats[0]->end, 69);
 ok ($feats[0]->strand, 1);

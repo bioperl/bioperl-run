@@ -26,7 +26,7 @@ Object for execution  of the Eponine which is a mammalian TSS predictor
 
   my $factory = Bio::Tools::Run::Eponine->new(@params);
   # run eponine against fasta
-  my $r = $factory->run_eponine();
+  my $r = $factory->run($seq);
   my $parser = Bio::Tools::Eponine->new($r);
 
   while (my $feat = $parser->next_prediction){
@@ -95,6 +95,7 @@ use Bio::Tools::Eponine;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
     $DEFAULT_THRESHOLD = 50;
@@ -132,7 +133,6 @@ BEGIN {
     { $OK_FIELD{$attr}++; }
 }
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Tools::Run::WrapperBase);
 sub AUTOLOAD {
     my $self = shift;
     my $attr = $AUTOLOAD;
@@ -158,7 +158,7 @@ sub new {
     my ($attr, $value);
     ($TMPDIR) = $self->tempdir(CLEANUP=>1);
     my $tfh;
-    ($tfh,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    ($tfh,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     close($tfh);
     undef $tfh;
     while (@args)  {
@@ -218,26 +218,6 @@ sub new {
     }
 				
     return $self;
-}
-
-
-
-=head2 filename
-
- Title   : filename
- Usage   : my $filename= $self->filename
- Function: Get/Set the method to submit the seq
- Returns : string
- Args    :
-
-=cut
-
-sub filename{
-    my ($self, $val) = @_;
-    if( defined $val ) {
-	$self->{'_filename'} = $val;
-    }
-    return $self->{'_filename'};
 }
 
 =head2 java
@@ -320,25 +300,28 @@ sub threshold{
 }
 
 
-=head2 predict_TSS
+=head2 run
 
- Title   : predict_TSS
- Usage   : my @genes = $self->predict_TSS($seq)
- Function: runs Eponine and creates an array of genes
+ Title   : run
+ Usage   : my @genes = $self->run($seq)
+ Function: runs Eponine and creates an array of features
  Returns : An Array of SeqFeatures
  Args    : A Bio::PrimarySeqI
 
 =cut
 
-sub predict_TSS{
+sub run{
     my ($self,$seq) = @_;
     my $infile = $self->_setinput($seq);
-    my @tss = $self->_run_eponine();
+    my @tss = $self->_run_eponine($infile);
     return @tss;
 
 }
 
-
+sub predict_TSS {
+  return shift->run(@_);
+}
+  
 =head2  _setinput()
 
  Title   : _setinput
@@ -352,6 +335,10 @@ sub predict_TSS{
 
 sub _setinput {
     my ($self,$seq) = @_;
+    #better be a file
+    if(!ref $seq){
+      return $seq;
+    }
     my ($tfh1,$inputfile) = $self->tempfile(-dir=>$TMPDIR);
     my $in = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
     $in->write_seq($seq);
@@ -370,8 +357,8 @@ sub _setinput {
 
 =cut
 
-sub run_eponine {
-    my ($self) = @_;
+sub _run_eponine {
+    my ($self,$infile) = @_;
     my $result = $TMPOUTFILE;
     my @tss;
     #run eponine
@@ -386,7 +373,7 @@ sub run_eponine {
 	$self->warn("Cannot find Eponine jar");
 	return undef;
     }
-    my $cmd  =   $self->java.' -jar '.$self->epojar.' -seq '.$self->filename.' -threshold '.$self->threshold." > ".$result;
+    my $cmd  =   $self->java.' -jar '.$self->epojar.' -seq '.$infile.' -threshold '.$self->threshold." > ".$result;
     $self->throw("Error running eponine-scan on ".$self->filename.
 		 " \n Check your java version, it has to be version 1.2 or later. Eponine crashed ($cmd) crashed: $? \n")
 	if (system ($cmd));
@@ -399,9 +386,6 @@ sub run_eponine {
    }
     return @tss;
 }
-
-
-
 
 1;
 __END__
