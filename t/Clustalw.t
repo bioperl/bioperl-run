@@ -47,8 +47,7 @@ ok $what_matrix, 'BLOSUM', "couldn't get factory parameter";
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress clustal messages to terminal
 
-my $inputfilename = Bio::Root::IO->catfile("t/","data",'/',"cysprot.fa");
-#my $inputfilename = "t//data/cysprot.fa"; 
+my $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 my $aln;
 exit(0) unless( $factory->executable );
 
