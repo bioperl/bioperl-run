@@ -16,7 +16,7 @@ BEGIN {
 
 END {
    foreach ( $Test::ntest..$NTESTS ) {
-       skip('Unable to run Prints tests, exe may not be installed',1);
+       skip('Unable to run Hmmer tests, exe may not be installed',1);
    }
   unlink "t/data/hmmer.hmm";
 }
@@ -28,7 +28,7 @@ use Bio::AlignIO;
 use Bio::Seq;
 
 my $db =  Bio::Root::IO->catfile("t","data","pfam_sample_R11");
-my @params = ('DB'=>$db,'E'=>5,'program'=>'hmmpfam');
+my @params = ('DB'=>$db,'E'=>5,'program'=>'hmmpfam','A'=>2);
 
 #test HMMPFAM
 my  $factory = Bio::Tools::Run::Hmmer->new(@params);

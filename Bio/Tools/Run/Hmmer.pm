@@ -97,8 +97,8 @@ use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-       @HMMER_PARAMS=qw(HMM PROGRAM DB N A E T Z );
-       @HMMER_SWITCHES=qw(N);
+       @HMMER_PARAMS=qw(HMM program PROGRAM DB n A E T Z );
+       @HMMER_SWITCHES=qw(n);
        foreach my $attr ( @HMMER_PARAMS,@HMMER_SWITCHES)
                         { $OK_FIELD{$attr}++; }
 }
@@ -136,7 +136,7 @@ sub AUTOLOAD {
        my $self = shift;
        my $attr = $AUTOLOAD;
        $attr =~ s/.*:://;
-       $attr = uc $attr;
+       $attr = $attr;
        $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
        $self->{$attr} = shift if @_;
        return $self->{$attr};
@@ -208,7 +208,7 @@ sub _run {
      my ($self,$file)= @_;
 
      my $str = $self->executable;
-     my $param_str = $self->_setparams;
+     my $param_str = $self->arguments." ".$self->_setparams;
      $str.=" $param_str ".$file;
    
     $self->debug("HMMER command = $str"); 
@@ -244,7 +244,7 @@ sub _setparams {
         next if $attr=~/HMM|PROGRAM|DB/i;
         my $value = $self->$attr();
         next unless (defined $value);
-        my $attr_key = ' -'.(uc $attr);
+        my $attr_key = ' -'.($attr);
         $param_string .= $attr_key.' '.$value;
     }
     foreach my $attr(@HMMER_SWITCHES){
