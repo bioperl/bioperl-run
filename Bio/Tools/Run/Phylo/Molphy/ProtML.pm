@@ -25,13 +25,13 @@ Bio::Tools::Run::Phylo::Molphy::ProtML - A wrapper for the Molphy pkg app ProtML
   	     "other" => [ '-information', '-w']);
   my $verbose = 0; # change to 1 if you want some debugging output
   my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
-  							-flags => \%args);
+  							   -flags => \%args);
 
   die("cannot find the protml executable") unless $protml->executable;
 
   # read in a previously built protein alignment
   my $in = new Bio::AlignIO(-format => 'clustalw',
-  			  -file   => 't/data/cel-cbr-fam.aln');
+  			    -file   => 't/data/cel-cbr-fam.aln');
   my $aln = $in->next_aln;
   $protml->alignment($aln);
 
