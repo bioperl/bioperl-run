@@ -85,7 +85,7 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
 
 use strict;
 use Bio::PrimarySeqI;
-use Bio::SeqFeature::FeaturePair;
+use Bio::SeqFeature::Generic;
 use Bio::Root::Root;
 use Bio::Root::IO;
 
@@ -272,8 +272,10 @@ sub _run {
   my $outfile = $infile.".out";
   my $cmd_str = $self->program." $param_string ". $infile;
   $self->debug("repeat masker command = $cmd_str");
+  if ($self->quiet || $self->verbose <=0){
+      $cmd_str.=" >&/dev/null";
+  }
   my $status = system($cmd_str);
-
   $self->throw("Repeat Masker Call($cmd_str) crashed: $?\n") 
       unless $status == 0;
   my $rpt_feat = $self->_parse_results($outfile);
@@ -370,19 +372,18 @@ sub _parse_results {
 	    }
      #my $rc = $self->_get_consensus($repeat_name, $repeat_class);
 
-	    my $rf = Bio::SeqFeature::FeaturePair->new;
+	    my $rf = Bio::SeqFeature::Generic->new;
+      $rf->seqname          ($query_name);
 	    $rf->score            ($score);
 	    $rf->start            ($query_start);
 	    $rf->end              ($query_end);
 	    $rf->strand           ($strand);
-	    $rf->hstart           ($hit_start);
-	    $rf->hend             ($hit_end);
 	    $rf->add_tag_value("repeat_name", $repeat_name);
 	    $rf->add_tag_value("repeat_class",$repeat_class);
 
 	    #$rf->repeat_consensus ($rc);
 
-            push @repeat_features, $rf;
+      push @repeat_features, $rf;
         }
     }
     close $filehandle;
@@ -427,9 +428,6 @@ sub _setparams {
     }
 
 
-    if ($self->quiet() || $self->verbose() < 0) {
-      $param_string .= '  >/dev/null ';
-    }
     return $param_string;
 }
 
