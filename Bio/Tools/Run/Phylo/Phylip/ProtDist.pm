@@ -40,7 +40,7 @@ $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 my $matrix  = $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
 
 
-=head1 PARAMTERS FOR PROTDIST COMPUTATION
+=head1 PARAMETERS FOR PROTDIST COMPUTATION
 
 =head2 
 Title 		:MODEL
@@ -342,7 +342,7 @@ sub create_distance_matrix{
 
  Title   :  _run
  Usage   :  Internal function, not to be called directly	
- Function:   makes actual system call to protdist program
+ Function:  makes actual system call to protdist program
  Example :
  Returns : Bio::Tree object
  Args    : Name of a file containing a set of multiple alignments in Phylip format 
