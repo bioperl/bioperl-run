@@ -116,6 +116,9 @@ BEGIN {
     
     if( defined $ENV{'EPONINEDIR'} ) { 
 	$EPOJAR = Bio::Root::IO->catfile($ENV{'EPONINEDIR'}, $EPOJAR);
+        if ( ! -e $EPOJAR) {
+	   $EPOJAR =undef;
+	}
     }
 
     %EPONINE_PARAMS = ('SEQ'      => '/tmp/test.fa',
@@ -129,7 +132,7 @@ BEGIN {
     { $OK_FIELD{$attr}++; }    
 }
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Tools::Run::WrapperBase);
 sub AUTOLOAD {
     my $self = shift;
     my $attr = $AUTOLOAD;
@@ -184,21 +187,30 @@ sub new {
     $self->{'_filename'} = undef; #location of seq 
     $seq = $EPONINE_PARAMS{'seq'}     unless defined $seq;
     $threshold = $EPONINE_PARAMS{'threshold'}     unless defined $threshold;
-    
-    $java = $EPONINE_PARAMS{'JAVA'} unless defined $java; 
-    $epojar = $EPONINE_PARAMS{'epojar'} unless defined $epojar; 
+    if  (! defined $epojar && defined $EPOJAR) {
+	    $epojar = $EPOJAR;
+    }
+    else {
+	$epojar = $EPONINE_PARAMS{'epojar'} unless defined $epojar;
+    }
+    if (! defined $java && defined $PROGRAM) {
+	    $java = $PROGRAM;
+    }
+    else {
+       $java = $EPONINE_PARAMS{'JAVA'} unless defined $java; 
+    }
     $self->filename($seq) if ($seq);
 
     if (-x $java) {
-        # full path assumed
-        $self->java($java);
+      # full path assumed
+      $self->java($java);
     }
     
-    $self->epojar($epojar) if (defined $epojar && -e $epojar);
+   $self->epojar($epojar) if (defined $epojar && -e $epojar);
 
-    if (defined $threshold && $threshold >=0 ){
+   if (defined $threshold && $threshold >=0 ){
         $self->threshold($threshold);
-    } else {
+   } else {
         $self->threshold($DEFAULT_THRESHOLD); 
     }
 				  

@@ -27,17 +27,13 @@ if( ! $ENV{'EPONINEDIR'}  ) {
 }
 my $inputfilename= Bio::Root::IO->catfile("t","data","eponine.fa");
 my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999,
-					 "EPOJAR" => $ENV{'EPONINEDIR'},
 					 "seq" =>$inputfilename);
 
-if( ! $fact->java || ! $fact->epojar) {
+if( ! $fact->java || ! $ENV{EPONINEDIR}) {
     print STDERR "must have defined EPONINEDIR to run these tests\n";
     exit(0);
 }
-#my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.998,"java"=>'',"EPOJAR" =>"/home/tania/progs/eponine-scan.jar", "seq" =>$inputfilename);
-#my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.998,"java"=>'/usr/java/jre1.3.1.02/bin/java',"EPOJAR" =>"/home/tania/progs/eponine-scan.jar", "seq" =>$inputfilename);
 ok ($fact->threshold, 0.999);
-#ok ($fact->java,1);
 
 my @feats = $fact->run_eponine();
 ok ($feats[0]->start, 69);
