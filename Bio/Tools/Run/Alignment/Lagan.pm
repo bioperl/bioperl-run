@@ -466,7 +466,7 @@ sub program_path {
     my ($self,$program_name) = @_;
     my @path;
     push @path, $self->program_dir if $self->program_dir;
-   	# push @path, $program_name .($^O =~ /mswin/i ?'':'');
+   	push @path, $program_name .($^O =~ /mswin/i ?'':'');
 	# Option for Windows variants / None so far
 
     return Bio::Root::IO->catfile(@path);
