@@ -213,14 +213,10 @@ sub _run {
     $self->debug("HMMER command = $str"); 
 
     if($self->program_name=~/hmmpfam|hmmsearch|hmmalign/){
-	open(HMM,"$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
-	my $io;
-	while(<HMM>) {
-	    $self->debug($_);
-	    $io .= $_;
-	}
-	use IO::String;
-	my $searchio= Bio::SearchIO->new(-fh    =>IO::String->new($io),
+	my $fh;
+	open($fh,"$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
+	
+	my $searchio= Bio::SearchIO->new(-fh    =>$fh,
 					 -format=>"hmmer");
 	return $searchio; 
     } else {			
