@@ -79,17 +79,7 @@ use Bio::Tools::Run::WrapperBase;
 
 
 BEGIN {
-       $PROGRAMNAME = 'ncoils'  . ($^O =~ /mswin/i ?'.exe':'');
-
-       if (defined $ENV{COILDIR}) {
-          $PROGRAMDIR = $ENV{COILDIR} || '';
-          $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                           'ncoils'.($^O =~ /mswin/i ?'.exe':''));
-       }
-       else {
-          $PROGRAM = 'ncoils';
-       }
-       @COIL_PARAMS=qw(PROGRAM VERBOSE);
+       @COIL_PARAMS=qw(PROGRAM VERBOSE QUIET SILENT);
        foreach my $attr ( @COIL_PARAMS)
                         { $OK_FIELD{$attr}++; }
 }
@@ -102,6 +92,13 @@ sub AUTOLOAD {
        $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
        $self->{$attr} = shift if @_;
        return $self->{$attr};
+}
+
+sub program_name {
+    return 'ncoils';
+}
+sub program_dir {
+    return Bio::Root::IO->catfile($ENV{COILSDIR});
 }
 
 =head2 new
@@ -131,40 +128,6 @@ sub new {
            $self->$attr($value);
        }
        return $self;
-}
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $coil->executable();
- Function: Finds the full path to the Coil executable
- Returns : string representing the full path to the exe
- Args    :
-
-=cut
-
-sub executable{
-    my ($self, $exe,$warn) = @_;
-
-    if( defined $exe ) {
-        $self->{'_pathtoexe'} = $exe;
-    }
-
-    unless( defined $self->{'_pathtoexe'} ) {
-        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-            $self->{'_pathtoexe'} = $PROGRAM;
-        } else {
-            my $exe;
-            if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-                -x $exe ) {
-                  $self->{'_pathtoexe'} = $exe;
-            } else {
-              $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-              $self->{'_pathtoexe'} = undef;
-            }
-        }
-    }
-        return $self->{'_pathtoexe'};
 }
 
 =head2 predict_protein_features
@@ -243,6 +206,9 @@ sub _run {
      
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
      my $str =$self->executable." -f < ".$self->{'input'}." > ".$outfile;
+     if($self->quiet || $self->verbose <=0 || $self->silent){
+         $str.=" 2>/dev/null";
+     }
      my $status = system($str);
      $self->throw( "Coil call ($str) crashed: $? \n") unless $status==0;
      
