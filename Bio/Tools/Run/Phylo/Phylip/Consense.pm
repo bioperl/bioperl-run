@@ -31,7 +31,7 @@ program Consense
   my @params = ('datatype'=>'SEQUENCE','replicates'=>10);
   my $seqboot_factory = Bio::Tools::Run::Phylo::Phylip::SeqBoot->new(@params);
 
-  my $aln_ref= $seqboot->run($aln);
+  my $aln_ref= $seqboot_factory->run($aln);
 
   #next build distance matrices and construct trees
   my $pd_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
