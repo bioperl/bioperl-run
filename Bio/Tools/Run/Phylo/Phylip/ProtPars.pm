@@ -155,20 +155,39 @@ use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 
 BEGIN {
-    $PROGRAMNAME = "protpars";
-    if (defined $ENV{PHYLIPDIR}) {
-	$PROGRAMDIR = $ENV{PHYLIPDIR} || '';
-	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-					  $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {
-	$PROGRAM = $PROGRAMNAME;
-    }
     @PROTPARS_PARAMS = qw(THRESHOLD JUMBLE OUTGROUP);
     @OTHER_SWITCHES = qw(QUIET);
     foreach my $attr(@PROTPARS_PARAMS,@OTHER_SWITCHES) {
 	$OK_FIELD{$attr}++;
     }
+}
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : >program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+            return 'protpars';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : ->program_dir()
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+            return Bio::Root::IO->catfile($ENV{PHYLIPDIR}) if $ENV{PHYLIPDIR};
 }
 
 sub new {
@@ -200,44 +219,6 @@ sub AUTOLOAD {
     $self->{$attr} = shift if @_;
     return $self->{$attr};
 }
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $protpars->executable();
- Function: Finds the full path to the 'protpars' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to
-           [optional] boolean flag whether or not warn when exe is not found
-
-
-=cut
-
-sub executable{
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-           $self->{'_pathtoexe'} = $PROGRAM;
-       } else {
-           my $exe;
-           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-               -x $exe ) {
-               $self->{'_pathtoexe'} = $exe;
-           } else {
-               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-               $self->{'_pathtoexe'} = undef;
-           }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-
-*program = \&executable;
 
 =head2 idlength 
 
@@ -327,10 +308,10 @@ sub _run {
     chdir($self->tempdir);
     #open a pipe to run protpars to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-	open(PROTPARS,"|".$self->executable.">/dev/null");
+    	open(PROTPARS,"|".$self->executable.">/dev/null");
     }
     else {
-	open(PROTPARS,"|".$self->executable);
+    	open(PROTPARS,"|".$self->executable);
     }
     print PROTPARS $instring;
     close(PROTPARS);	
@@ -340,7 +321,7 @@ sub _run {
     my $treefile = $self->io->catfile($self->tempdir,$self->treefile);
     
     $self->throw("Protpars did not create treefile correctly") 
-	unless (-e $treefile);
+  	unless (-e $treefile);
 
     #create the tree
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');

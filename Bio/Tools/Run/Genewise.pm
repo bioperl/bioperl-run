@@ -21,7 +21,7 @@ given sequence given a protein
      target_genomic)
   # $genes is a Bio::SeqFeature::Gene::GeneStructure object  
   my $genes = $factory->predict_genes($protein_seq, $genomic_seq);
-  
+
   Available Params
   Model    [-codon,-gene,-cfreq,-splice,-subs,-indel,-intron,-null]
   Alg      [-kbyte,-alg]
@@ -68,7 +68,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Genewise;
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-            $TMPDIR $TMPOUTFILE @GENEWISE_SWITCHES @GENEWISE_PARAMS
+            @GENEWISE_SWITCHES @GENEWISE_PARAMS
             @OTHER_SWITCHES %OK_FIELD);
 use Bio::SeqIO;
 use Bio::SeqFeature::Generic;
@@ -80,8 +80,9 @@ use Bio::SeqFeature::Gene::Transcript;
 use Bio::SeqFeature::Gene::GeneStructure;
 use Bio::Tools::Genewise;
 use Bio::Tools::AnalysisResult;
+use strict;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
 # Two ways to run the program .....
 # 1. define an environmental variable WISEDIR
@@ -93,15 +94,6 @@ use Bio::Tools::AnalysisResult;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-    $PROGRAMNAME='genewise';
-    if (defined $ENV{WISEDIR}) {
-        $PROGRAMDIR = $ENV{WISEDIR} || '';
-        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR."/src/bin/",
-                                          $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {
-        $PROGRAM = $PROGRAMNAME;
-    }
     @GENEWISE_PARAMS = qw( DYMEM CODON GENE CFREQ SPLICE 
 			   SUBS INDEL INTRON NULL INSERT 
 			   KBYTE HNAME ALG BLOCK DIVIDE GENER U V S T G E M);
@@ -114,13 +106,39 @@ BEGIN {
                        @OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+    return 'genewise';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+    return Bio::Root::IO->catfile($ENV{WISEDIR},"/src/bin/") if $ENV{WISEDIR};
+}
 
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
 
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -140,42 +158,6 @@ sub AUTOLOAD {
     $self->{$attr} = shift if @_;
     return $self->{$attr};
 }
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $factory->executable();
- Function: Finds the full path to the 'genewise' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to
-           [optional] boolean flag whether or not warn when exe is not found
-
-=cut
-
-sub executable{
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-           $self->{'_pathtoexe'} = $PROGRAM;
-       } else {
-           my $exe;
-           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-               -x $exe ) {
-               $self->{'_pathtoexe'} = $exe;
-           } else {
-               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-               $self->{'_pathtoexe'} = undef;
-           }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-*program = \&executable;
 
 =head2  version
 
@@ -239,8 +221,7 @@ sub predict_genes {
  Usage   :  Internal function, not to be called directly
  Function:   makes actual system call to a genewise program
  Example :
- Returns : nothing; genewise  output is written to a
-           temporary file $TMPOUTFILE
+ Returns : L<Bio::SeqFeature::Gene::GeneStructure> 
  Args    : Name of a files containing 2 sequences in the order of peptide and genomic
 
 =cut
@@ -301,34 +282,33 @@ sub _setinput {
     # if you pass in a filename
 
     unless( ref($seq1) ) {
-	unless( -e $seq1 ) {
-	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
-	}
-	$outfile1 = $seq1;
-    } else { 
-	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
-	my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
-				   '-format' => 'fasta');
-
-	$out1->write_seq($seq1);
-	$self->_query_pep_seq($seq1);
-	# Make sure you close things - this is what creates
-	# Out of filehandle errors 
-	close($tfh1);
-	undef $tfh1;
+	    unless( -e $seq1 ) {
+	      $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+	    }
+    	$outfile1 = $seq1;
+    } 
+    else { 
+	    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+      my $out1 = Bio::SeqIO->new('-fh'     => $tfh1,
+			                      	   '-format' => 'fasta');
+	    $out1->write_seq($seq1);
+    	$self->_query_pep_seq($seq1);
+    	# Make sure you close things - this is what creates
+    	# Out of filehandle errors 
+    	close($tfh1);
+    	undef $tfh1;
     }
-
     unless( ref($seq2) ) {
-	unless( -e $seq2 ) { 
-	    $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");    
-	}
-	$outfile2 = $seq2;	
-    } else { 
-	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TEMPDIR);
-
-	my $out2 = Bio::SeqIO->new('-fh'     => $tfh2, 
-				   '-format' => 'fasta');
-	$out2->write_seq($seq2);
+    	unless( -e $seq2 ) { 
+	     $self->throw("Sequence2 is not a Bio::PrimarySeqI object nor file\n");    
+	  }
+       $outfile2 = $seq2;	
+    } 
+    else { 
+    	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
+	    my $out2 = Bio::SeqIO->new('-fh'     => $tfh2, 
+		                      		   '-format' => 'fasta');
+    	$out2->write_seq($seq2);
 	
 	$self->_subject_dna_seq($seq2);
 	# Make sure you close things - this is what creates
@@ -349,7 +329,7 @@ sub _setinput {
  Args    :  
 
 =cut
-      
+
 sub _setparams {
     my ($self) = @_;
     my $param_string;

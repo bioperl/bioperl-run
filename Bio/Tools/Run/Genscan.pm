@@ -61,8 +61,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Genscan;
  
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR                
-            $TMPDIR $PROGRAMNAME @GENSCAN_PARAMS
-             %OK_FIELD);
+            $PROGRAMNAME @GENSCAN_PARAMS %OK_FIELD);
 use strict;
 use Bio::Seq;
 use Bio::SeqIO;
@@ -74,24 +73,41 @@ use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-
-
 BEGIN {
-   $PROGRAMNAME = 'genscan'  . ($^O =~ /mswin/i ?'.exe':'');
-
-   if (defined $ENV{GENSCANDIR}) {
-        $PROGRAMDIR = $ENV{GENSCANDIR} || '';
-        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                          'genscan'.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {                                                                 
-        $PROGRAM = 'genscan';
-    }
-              
      @GENSCAN_PARAMS=qw(MATRIX VERBOSE QUIET);
       foreach my $attr ( @GENSCAN_PARAMS)
                         { $OK_FIELD{$attr}++; }
 }
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'genscan';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{GENSCANDIR});
+}
+
+
  sub AUTOLOAD {
     my $self = shift;
     my $attr = $AUTOLOAD;
@@ -117,45 +133,6 @@ sub new {
     }
     return $self;
 }
-
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $genscan->executable();
- Function: Finds the full path to the 'genscan' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to
-           [optional] boolean flag whether or not warn when exe is not found
-
-
-=cut
-
-sub executable{
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-           $self->{'_pathtoexe'} = $PROGRAM;
-       } else {
-           my $exe;
-           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-               -x $exe ) {
-               $self->{'_pathtoexe'} = $exe;
-           } else {
-               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-               $self->{'_pathtoexe'} = undef;
-           }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-
-*program = \&executable;
 
 =head2 predict_genes()
 
@@ -240,8 +217,7 @@ sub _set_input() {
 
 sub _writeSeqFile(){
   my ($self,$seq) = @_;
-  my $tmpdir = $self->io->tempdir(CLEANUP=>1);
-  my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$tmpdir);
+  my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
   my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
   $in->write_seq($seq);
   close($tfh);

@@ -123,6 +123,33 @@ BEGIN {
     }
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : >program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'drawtree';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : ->program_dir()
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{PHYLIPDIR}) if $ENV{PHYLIPDIR};
+}
 
 =head2 new
 
@@ -169,42 +196,6 @@ sub AUTOLOAD {
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
     $self->{$attr} = shift if @_;
     return $self->{$attr};
-}
-
-
-=head2 executable
-
- Title   : executable
- Usage   : $obj->executable($newval)
- Function: Finds the full path to the 'drawgram' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
-           [optional] boolean flag whether or not warn when exe is not found
-
-=cut
-
-sub executable{
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
-	   my $exe;
-	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};
 }
 
 =head2 draw_tree
@@ -267,7 +258,8 @@ sub _run {
     if( -e $self->io->catfile($curpath,'fontfile') ) {
 	$instring .= $self->io->catfile($curpath,'fontfile')."\n";
     } elsif( File::Spec->file_name_is_absolute($self->fontfile) ) {	 
-	$instring .= $self->io->catfile($self->tempdir,$self->fontfile)."\n";
+	#$instring .= $self->io->catfile($self->tempdir,$self->fontfile)."\n";
+	$instring .= $self->io->catfile($self->fontfile)."\n";
     } else {
 	$instring .= $self->io->catfile($curpath,$self->fontfile)."\n";
     }

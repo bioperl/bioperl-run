@@ -315,7 +315,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Alignment::Clustalw;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-	    $TMPDIR $TMPOUTFILE @CLUSTALW_SWITCHES @CLUSTALW_PARAMS
+	    @CLUSTALW_SWITCHES @CLUSTALW_PARAMS
 	    @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::Seq;
@@ -339,14 +339,6 @@ use Bio::Tools::Run::WrapperBase;
 # $ENV{CLUSTALDIR} = '/home/peter/clustalw1.8/';
 
 BEGIN {
-    $PROGRAMNAME='clustalw';
-    if (defined $ENV{CLUSTALDIR}) {
-        $PROGRAMDIR = $ENV{CLUSTALDIR} || '';
-        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR."/".$PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {
-        $PROGRAM = $PROGRAMNAME;
-    }
     @CLUSTALW_PARAMS = qw(OUTPUT KTUPLE TOPDIAGS WINDOW PAIRGAP FIXEDGAP
                    FLOATGAP MATRIX TYPE	TRANSIT DNAMATRIX OUTFILE
                    GAPOPEN GAPEXT MAXDIV GAPDIST HGAPRESIDUES PWMATRIX
@@ -363,13 +355,39 @@ BEGIN {
 		       @OTHER_SWITCHES ) { $OK_FIELD{$attr}++; }
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'clustalw';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{CLUSTALDIR}) if $ENV{CLUSTALDIR};
+}
+
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
 
     my ($attr, $value);
-    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
 	    $attr =   shift @args;
 	    $value =  shift @args;
@@ -388,42 +406,6 @@ sub AUTOLOAD {
     $self->{$attr} = shift if @_;
     return $self->{$attr};
 }
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $factory->executable();
- Function: Finds the full path to the 'clustalw' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to
-           [optional] boolean flag whether or not warn when exe is not found
-
-=cut
-
-sub executable{
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-           $self->{'_pathtoexe'} = $PROGRAM;
-       } else {
-           my $exe;
-           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-               -x $exe ) {
-               $self->{'_pathtoexe'} = $exe;
-           } else {
-               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-               $self->{'_pathtoexe'} = undef;
-           }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-*program = \&executable;
 
 =head2  version
 
@@ -536,7 +518,7 @@ sub profile_align {
  Function:   makes actual system call to clustalw program
  Example :
  Returns : nothing; clustalw output is written to a
-           temporary file $TMPOUTFILE
+           temporary file 
  Args    : Name of a file containing a set of unaligned fasta sequences
            and hash of parameters to be passed to clustalw
 
@@ -573,7 +555,7 @@ sub _run {
     my $status = system($commandstring);    
     $self->throw( "Clustalw call ($commandstring) crashed: $? \n") unless $status==0;
     
-    my $outfile = $self->outfile() || $TMPOUTFILE ;
+    my $outfile = $self->outfile();
 
 # retrieve alignment (Note: MSF format for AlignIO = GCG format of clustalw)
 
@@ -623,7 +605,7 @@ sub _setinput {
     #  $input may be an array of BioSeq objects...
     if (ref($input) eq "ARRAY") {
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$infilename) = $self->io->tempfile(-dir=>$TMPDIR);
+	($tfh,$infilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	$temp =  Bio::SeqIO->new('-fh'=>$tfh,
 				 '-format' =>'Fasta');
 
@@ -645,7 +627,7 @@ sub _setinput {
    elsif (ref($input) eq "Bio::SimpleAlign") {
 	#  Open temporary file for both reading & writing of SimpleAlign object
 	if ($suffix ==1 || $suffix== 2 ) {
-	    ($tfh,$infilename) = $self->io->tempfile(-dir=>$TMPDIR);
+	    ($tfh,$infilename) = $self->io->tempfile(-dir=>$self->tempdir);
 	}
 	$temp =  Bio::AlignIO->new('-fh'=> $tfh,
 				   '-format' => 'Fasta');
@@ -706,7 +688,9 @@ sub _setparams {
 
 # Set default output file if no explicit output file selected
     unless ($param_string =~ /outfile/) {
-	$param_string .= " -outfile=$TMPOUTFILE" ;
+       my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+       $self->outfile($outfile);
+    	$param_string .= " -outfile=$outfile" ;
     }
 
     if ($self->quiet() || $self->verbose() < 0) { 

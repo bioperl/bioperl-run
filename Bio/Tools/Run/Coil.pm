@@ -64,8 +64,7 @@ Bio::Tools::Run::Coil
 package Bio::Tools::Run::Coil;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
-            $TMPDIR $PROGRAMNAME @COIL_PARAMS
-                         %OK_FIELD);
+            $PROGRAMNAME @COIL_PARAMS %OK_FIELD);
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
@@ -74,9 +73,6 @@ use Bio::Tools::Coil;
 use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
-
-
-
 
 BEGIN {
        @COIL_PARAMS=qw(PROGRAM VERBOSE QUIET SILENT);
@@ -94,11 +90,32 @@ sub AUTOLOAD {
        return $self->{$attr};
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name 
+ Returns:  string 
+ Args    : None
+
+=cut
+
 sub program_name {
     return 'ncoils';
 }
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable. 
+ Returns:  string 
+ Args    :
+
+=cut
+
 sub program_dir {
-    return Bio::Root::IO->catfile($ENV{COILSDIR});
+    return Bio::Root::IO->catfile($ENV{COILSDIR}) if $ENV{COILSDIR};
 }
 
 =head2 new

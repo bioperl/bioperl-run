@@ -76,8 +76,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::DBA;
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-            $TMPDIR $TMPOUTFILE @DBA_SWITCHES @DBA_PARAMS
-            @OTHER_SWITCHES %OK_FIELD);
+            @DBA_SWITCHES @DBA_PARAMS @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::SeqIO;
 use Bio::SimpleAlign;
@@ -102,20 +101,43 @@ use Bio::Tools::Run::WrapperBase;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-    $PROGRAMNAME = 'dba';
-    if( defined $ENV{'WISEDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catfile($ENV{'WISEDIR'},$PROGRAMNAME).($^O =~ /mswin/i ?'.exe':'');
-    }
 
-    @DBA_PARAMS = qw(MATCHA MATCHB MATCHC MATCHD GAP BLOCKOPEN UMATCH SINGLE
-                     NOMATCHN PARAMS KBYTE DYMEM DYDEBUG OUTFILE
-                     ERRORLOG);
-
+    @DBA_PARAMS = qw(MATCHA MATCHB MATCHC MATCHD GAP BLOCKOPEN UMATCH SINGLE 
+                     NOMATCHN PARAMS KBYTE DYMEM DYDEBUG ERRORLOG);
+    @OTHER_SWITCHES = qw(OUTFILE);
     @DBA_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD ALIGN LABEL); 
 
     # Authorize attribute fields
     foreach my $attr ( @DBA_PARAMS, @DBA_SWITCHES,
                        @OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
+}
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'dba';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{WISEDIR},"/src/bin") if $ENV{WISEDIR};
 }
 
 sub new {
@@ -125,8 +147,6 @@ sub new {
   $self->io->_initialize_io();
 
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
 
   while (@args) {
     $attr =   shift @args;
@@ -149,41 +169,6 @@ sub AUTOLOAD {
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
     $self->{$attr} = shift if @_;
     return $self->{$attr};
-}
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $codeml->executable();
- Function: Finds the full path to the 'dba' executable
- Returns : string representing the full path to the exe
- Args    : none
-
-
-=cut
-
-sub executable{
-   my ($self, $exe) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
-	   my $exe;
-	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME");
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};
 }
 
 =head2  version
@@ -263,8 +248,7 @@ sub align {
  Usage   :  Internal function, not to be called directly
  Function:   makes actual system call to dba program
  Example :
- Returns : nothing; dba  output is written to a
-           temporary file $TMPOUTFILE
+ Returns : nothing; dba  output is written to a temp file
  Args    : Name of a file containing a set of unaligned fasta sequences
            and hash of parameters to be passed to dba
 
@@ -274,12 +258,15 @@ sub _run {
     my ($self,$infile1,$infile2,$param_string) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    my $outfile = $self->outfile() || $TMPOUTFILE ;
+    if(!$self->outfile){
+        my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+        $self->outfile($outfile);
+    }
+    my $outfile = $self->outfile(); 
     my $commandstring = $self->executable." $param_string -pff $infile1 $infile2 > $outfile";
     $self->debug( "dba command = $commandstring");
     my $status = system($commandstring);
     $self->throw( "DBA call ($commandstring) crashed: $? \n") unless $status==0;
-
     #parse pff format and return a Bio::Search::HSP::GenericHSP array
     my $hsps   = $self->_parse_results($outfile);
 
@@ -436,8 +423,8 @@ sub _setinput {
     $infilename = $input;
     unless(-e $input){return 0;}
     my  $in  = Bio::SeqIO->new(-file => $infilename , '-format' => 'Fasta');
-    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
-    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TMPDIR);
+    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
 
     my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta','-flush'=>1);
     my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta','-flush'=>1);
@@ -456,8 +443,8 @@ sub _setinput {
       my $in1  = Bio::SeqIO->new(-file => $input->[0], '-format' => 'Fasta');
       my $in2  = Bio::SeqIO->new(-file => $input->[1], '-format' => 'Fasta');
 
-      ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
-      ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TMPDIR);
+      ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+      ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
 
       my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
       my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
@@ -471,8 +458,8 @@ sub _setinput {
       return $outfile1,$outfile2;
     }
     elsif($input->[0]->isa("Bio::PrimarySeqI") && $input->[1]->isa("Bio::PrimarySeqI")) {
-      ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
-      ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TMPDIR);
+      ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+      ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
 
       my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
       my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
@@ -511,6 +498,7 @@ sub _setparams {
     for  $attr ( @DBA_PARAMS ) {
       $value = $self->$attr();
       next unless (defined $value);
+#      next if $attr =~/outfile/i;
           
       my $attr_key = lc $attr; #put params in format expected by dba 
       if($attr_key =~ /match([ABCDabcd])/i){

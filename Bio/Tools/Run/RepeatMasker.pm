@@ -80,8 +80,7 @@ methods. Internal methods are usually preceded with a "_".
 package Bio::Tools::Run::RepeatMasker;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-            $TMPDIR $TMPOUTFILE @RM_SWITCHES @RM_PARAMS
-            @OTHER_SWITCHES %OK_FIELD);
+            @RM_SWITCHES @RM_PARAMS @OTHER_SWITCHES %OK_FIELD);
 
 use strict;
 use Bio::SeqFeature::Generic;
@@ -96,14 +95,6 @@ use Bio::Tools::RepeatMasker;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
 BEGIN {
-    $PROGRAMNAME = "RepeatMasker" . ($^O =~ /mswin/i ?'.exe':'');
-    if (defined $ENV{'REPEATMASKERDIR'}) {
-        $PROGRAMDIR = $ENV{REPEATMASKERDIR} || '';
-        $PROGRAM = Bio::Root::IO->
-	    catfile($PROGRAMDIR,
-		    'RepeatMasker'.($^O =~ /mswin/i ?'.exe':''));
-    }
-
     @RM_PARAMS = qw(DIV LIB CUTOFF PARALLEL GC FRAG );
 
     @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD RODENT MAM MAMMAL COW AR 
@@ -115,6 +106,35 @@ BEGIN {
     foreach my $attr ( @RM_PARAMS, @RM_SWITCHES,
                        @OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
 }
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'RepeatMasker';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{REPEATMASKERDIR}) if $ENV{REPEATMASKER};
+}
+
 
 sub AUTOLOAD {
     my $self = shift;
@@ -139,20 +159,15 @@ sub AUTOLOAD {
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  # to facilitiate tempfile cleanup
 
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-
   # Need to check that filehandle is not left open here...
-  (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
   while (@args) { 
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
     $self->$attr($value);
   }
-
   unless ($self->executable()) {
     if( $self->verbose >= 0 ) {
       warn "RepeatMasker program not found as ".$self->executable.
@@ -162,43 +177,6 @@ sub new {
 
   return $self;
 }
-
-=head2  executable()
-
- Title   : executable
- Usage   : $exe = Bio::Tools::Run::RepeatMasker->executable()
- Function: Finds the full path to the 'protdist' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
-           [optional] boolean flag whether or not warn when exe is not found
-
-=cut
-
-sub executable {
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
-	   my $exe;
-	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};    
-}
-
-*program = \&executable;
 
 =head2  version
 
@@ -382,7 +360,7 @@ sub _setinput {
   $seq->isa("Bio::PrimarySeqI") || 
       $self->throw("Need a Bio::PrimarySeq compliant object for RepeatMasker");
 #  my  $in  = Bio::SeqIO->new(-file => $infilename , '-format' => 'Fasta');
-  my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
+  my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
   my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
   $out1->write_seq($seq);
   close($tfh1);

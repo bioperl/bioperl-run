@@ -493,8 +493,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::TCoffee;
 
-use vars qw($AUTOLOAD @ISA $TMPOUTFILE $PROGRAMNAME $PROGRAM
-            %DEFAULTS
+use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
             @TCOFFEE_PARAMS @TCOFFEE_SWITCHES @OTHER_SWITCHES %OK_FIELD
             );
 use strict;
@@ -519,10 +518,6 @@ use  Bio::Tools::Run::WrapperBase;
 #	BEGIN {$ENV{TCOFFEEDIR} = '/home/progs/tcoffee'; }
 
 BEGIN {
-    $PROGRAMNAME = 't_coffee' . ($^O =~ /mswin/i ?'.exe':'');
-    if( defined $ENV{'TCOFFEEDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catfile($ENV{'TCOFFEEDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
-    }
     %DEFAULTS = ( 'MATRIX' => 'blosum',
                   'OUTPUT' => 'clustalw',
                   'AFORMAT'=> 'msf',
@@ -547,6 +542,34 @@ BEGIN {
 	$OK_FIELD{$attr}++; }
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+        return 't_coffee';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+        return Bio::Root::IO->catfile($ENV{TCOFFEEDIR}) if $ENV{TCOFFEEDIR};
+}
+
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
@@ -562,9 +585,6 @@ sub new {
     }
     $self->matrix($DEFAULTS{'MATRIX'}) unless( $self->matrix );
     $self->output($DEFAULTS{'OUTPUT'}) unless( $self->output );
-    unless( $self->outfile ) {
-	(undef,$TMPOUTFILE) = $self->io->tempfile();	
-    }
 #    $self->aformat($DEFAULTS{'AFORMAT'}) unless $self->aformat;
 
     $self->methods($DEFAULTS{'METHODS'}) unless $self->methods;
@@ -583,42 +603,6 @@ sub AUTOLOAD {
 
     $self->{$attr} = shift if @_;
     return $self->{$attr};
-}
-
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $t_coffee->executable();
- Function: Finds the full path to the 't_cofee' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
-           [optional] boolean flag whether or not warn when exe is not found
-
-
-=cut
-
-sub executable{
-   my ($self, $exe, $warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
-	   my $exe;
-	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};
 }
 
 =head2 error_string
@@ -790,8 +774,7 @@ sub profile_align {
  Function:  makes actual system call to tcoffee program
  Example :
  Returns : nothing; tcoffee output is written to a
-           temporary file $TMPOUTFILE OR
-           specified output file
+           temporary file OR specified output file
  Args    : Name of a file containing a set of unaligned fasta sequences
            and hash of parameters to be passed to tcoffee
 
@@ -831,7 +814,7 @@ sub _run {
     $self->debug( "tcoffee command = $commandstring \n");
 
     my $status = system($commandstring);
-    my $outfile = $self->outfile() || $TMPOUTFILE;
+    my $outfile = $self->outfile(); 
 
     $self->throw( "TCoffee call crashed: $? [command $commandstring]\n") 
 	if( !-e $outfile || -z $outfile );
@@ -1010,7 +993,9 @@ sub _setparams {
 
     # Set default output file if no explicit output file selected
     unless ($self->outfile ) {
-	$param_string .= " -outfile=$TMPOUTFILE" ;
+      my (undef, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+      $self->outfile($outfile);
+      $param_string .= " -outfile=$outfile" ;
     }
 
     if ($self->quiet() || $self->verbose < 0) { $param_string .= ' -quiet';}

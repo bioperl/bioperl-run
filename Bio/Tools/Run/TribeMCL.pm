@@ -140,11 +140,10 @@ methods. Internal methods are usually preceded with a "_".
 # Let the code begin...
 package Bio::Tools::Run::TribeMCL;
 use vars qw($AUTOLOAD @ISA  $PROGRAMDIR
-            $TMPDIR $TMPOUTFILE @TRIBEMCL_PARAMS
-	    @MATRIXPROGRAM_PARAMS @MCLPROGRAM_PARAMS
+            @TRIBEMCL_PARAMS @MATRIXPROGRAM_PARAMS @MCLPROGRAM_PARAMS
             @OTHER_SWITCHES %OK_FIELD
-	    $MATRIXPROGRAM_NAME $MCLPROGRAM_NAME
-	    $MCLPROGRAM $MATRIXPROGRAM
+      	    $MATRIXPROGRAM_NAME $MCLPROGRAM_NAME
+      	    $MCLPROGRAM $MATRIXPROGRAM
 	    );
 use strict;
 
@@ -172,7 +171,7 @@ use Bio::Species;
 #
 # 2. include a definition of an environmental variable TRIBEDIR in
 # every script that will use TRIBEMCL.pm
-# $ENV{WISEDIR} = '/usr/local/share/mclbin/;
+# $ENV{TRIBEDIR} = '/usr/local/share/mclbin/;
 #
 #3. Manually set the path to the executabes in your code:
 #
@@ -214,7 +213,6 @@ sub new {
   my $self = $class->SUPER::new(@args);
   
   my ($attr, $value);
-  $TMPDIR = $self->io->tempdir(CLEANUP=>1);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -635,7 +633,7 @@ sub _run_mcl {
   my $exe = $self->mcl_executable || $self->throw("mcl not found.");
   my $cmd = $exe . " $infile";
   unless (defined $self->o) {
-    my ($fh,$o) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($fh,$o) = $self->io->tempfile(-dir=>$self->tempdir);
     $self->o($o);
     # file handle not use later so deleted
     close($fh);
@@ -680,14 +678,14 @@ sub _run_matrix {
   my $exe = $self->matrix_executable || $self->throw("tribe-matrix not found.");
   my $cmd = $exe . " $parse_file";
   unless (defined $self->ind) {
-    my ($fh,$indexfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($fh,$indexfile) = $self->io->tempfile(-dir=>$self->tempdir);
     $self->ind($indexfile);
     # file handle not use later so deleted
     close($fh);
     undef $fh;
   }
   unless (defined $self->out) {
-    my ($fh,$matrixfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($fh,$matrixfile) = $self->io->tempfile(-dir=>$self->tempdir);
     $self->out($matrixfile);
     # file handle not use later so deleted
     close($fh);
@@ -720,7 +718,7 @@ sub _setup_input {
     my ($self,$input) = @_;
     my ($type,$rc);
 
-    my ($tfh,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
 
     $type = $self->inputtype();
     if($type=~/scorefile/i){

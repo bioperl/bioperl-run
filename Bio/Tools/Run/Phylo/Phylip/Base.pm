@@ -96,7 +96,6 @@ BEGIN {
  Returns : an instance of Bio::Tools::Run::Phylo::Phylip::Base
  Args    :
 
-
 =cut
 
 =head2 outfile

@@ -68,23 +68,20 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Primate;
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR @PRIMATE_PARAMS $PROGRAMNAME
-            $TMPDIR $TMPOUTFILE  @OTHER_SWITCHES %OK_FIELD);
+            @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::SeqIO;
 use Bio::SeqFeature::Generic;
+use Bio::Tools::Run::WrapperBase;
 
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Tools::Run::WrapperBase);
 
 
 BEGIN {
-    $PROGRAMNAME = 'primate';
-    if( defined $ENV{'PRIMATEDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catfile($ENV{'PRIMATEDIR'},$PROGRAMNAME).($^O =~ /mswin/i ?'.exe':'');
-    }
 
     @PRIMATE_PARAMS = qw(V Q T M B QUERY TARGET OUTFILE PROGRAM EXECUTABLE);
     @OTHER_SWITCHES = qw(QUIET VERBOSE);
@@ -92,7 +89,33 @@ BEGIN {
     # Authorize attribute fields
     foreach my $attr ( @PRIMATE_PARAMS,@OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
 }
+=head2 program_name
 
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'primate';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{PRIMATEDIR}) if $ENV{PRIMATEDIR};
+}
 
 =head2 new
 
@@ -115,8 +138,6 @@ sub new {
   $self->_initialize_io();
 
   my ($attr, $value);
-  ($TMPDIR) = $self->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
 
   while (@args) {
     $attr =   shift @args;
@@ -142,43 +163,6 @@ sub AUTOLOAD {
     $self->{$attr} = shift if @_;
     return $self->{$attr};
 }
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $primate->executable();
- Function: Finds the full path to the 'primate' executable
- Returns : string representing the full path to the exe
- Args    : optional
-
-
-=cut
-
-sub executable{
-   my ($self, $exe) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM
-       } else {
-	   my $exe;
-	   if( ( $exe = $self->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else {
-	       $self->warn("Cannot find executable for $PROGRAMNAME");
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-
-*program = \&executable;
 
 =head2  version
 
@@ -246,7 +230,7 @@ sub _run {
     my ($self,$query_file,$target_file,$param_string) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    my $outfile = $self->outfile() || $TMPOUTFILE ;
+    my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
     my $commandstring = $self->executable." $param_string -q $query_file -t $target_file > $outfile";
     $self->debug( "primate command = $commandstring");
     my $status = system($commandstring);
@@ -313,71 +297,59 @@ sub _setinput {
     my ($self, $query,$target) = @_;
     my ($query_file,$target_file,$tfh1,$tfh2);
 
-    if (ref($query) eq "ARRAY"){
-	if($query->[0]->can("isa") && $query->[0]->isa("Bio::PrimarySeqI")){
-	    ($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
-	    my $out1 = Bio::SeqIO->new(-fh=>$tfh1,'-format'=>'Fasta');
-	    my %query;
-	    foreach my $seq(@{$query}){
-		$out1->write_seq($seq) || return 0;
-		$query{$seq->primary_id} = $seq->seq;
-	    }
-	    close($tfh1);
-	    undef $tfh1;
-	    $self->_query_seq(\%query);
-	}
-    }
-    elsif(ref($query)&& $query->isa("Bio::PrimarySeqI")){
-	($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
-	my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-	my %query;
-	$query{$query->primary_id} = $query->seq;
-	$self->_query_seq(\%query);
-	$out1->write_seq($query) || return 0;
+    my @query = ref ($query) eq "ARRAY" ? @{$query} : ($query);
+    foreach my $query(@query){
 
+     if(ref($query)&& $query->isa("Bio::PrimarySeqI")){
+    	($tfh1,$query_file) = $self->io->tempfile(-dir=>$self->tempdir);
+	    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+    	my %query;
+    	$query{$query->primary_id} = $query->seq;
+    	$self->_query_seq(\%query);
+    	$out1->write_seq($query) || return 0;
+      close ($tfh1);
+      undef $tfh1;
     }
     elsif (-e $query){
-	my  $in  = Bio::SeqIO->new(-file => $query , '-format' => 'Fasta');
-	($tfh1,$query_file) = $self->tempfile(-dir=>$TMPDIR);
-	my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-	my %query;
-	while(my $seq1 = $in->next_seq()){
-	    $out1->write_seq($seq1) || return 0;
-	    $query{$seq1->primary_id} = $seq1->seq;
-	}
-	close($tfh1);
-	undef $tfh1;
-	$self->_query_seq(\%query);    
+	    my  $in  = Bio::SeqIO->new(-file => $query , '-format' => 'Fasta');
+      ($tfh1,$query_file) = $self->io->tempfile(-dir=>$self->tempdir);
+    	my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+    	my %query;
+    	while(my $seq1 = $in->next_seq()){
+	     $out1->write_seq($seq1) || return 0;
+	     $query{$seq1->primary_id} = $seq1->seq;
+    	}
+    	close($tfh1);
+    	undef $tfh1;
+    	$self->_query_seq(\%query);    
     }
     else {
-	return 0;
+    	return 0;
     }
-    if(ref($target) && $target->isa("Bio::PrimarySeqI")){
-	($tfh2,$target_file) = $self->tempfile(-dir=>$TMPDIR);
+   }
+   if(ref($target) && $target->isa("Bio::PrimarySeqI")){
+    ($tfh2,$target_file) = $self->io->tempfile(-dir=>$self->tempdir);
+	  my $out1 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+	  $out1->write_seq($target)|| return 0;
+   	$self->_target_seq($target);
+  	close($tfh2);
+  	undef $tfh2;
+   }  
+   elsif (-e $target){
+    my  $in  = Bio::SeqIO->new(-file => $target , '-format' => 'Fasta');
+	  ($tfh2,$target_file) = $self->io->tempfile(-dir=>$self->tempdir);
+  	my $out = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
+	  my $seq1 = $in->next_seq() || return 0;
+  	$out->write_seq($seq1);
+  	close($tfh2);
+  	undef $tfh2;
+  	$self->_target_seq($seq1);
+   }
+   else {
+  	return 0;
+   }
 
-	my $out1 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-
-	$out1->write_seq($target)|| return 0;
-	$self->_target_seq($target);
-	close($tfh2);
-	undef $tfh2;
-    }  
-    elsif (-e $target){
-	my  $in  = Bio::SeqIO->new(-file => $target , '-format' => 'Fasta');
-	($tfh2,$target_file) = $self->tempfile(-dir=>$TMPDIR);
-	my $out = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-
-	my $seq1 = $in->next_seq() || return 0;
-	$out->write_seq($seq1);
-	close($tfh2);
-	undef $tfh2;
-	$self->_target_seq($seq1);
-    }
-    else {
-	return 0;
-    }
-
-    return $query_file,$target_file;
+   return $query_file,$target_file;
 }
 
 =head2  _setparams()

@@ -145,6 +145,35 @@ BEGIN {
 		     );
 }
 
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : >program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+            return 'yn00';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : ->program_dir()
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+            return Bio::Root::IO->catfile($ENV{PAMLDIR}) if $ENV{PAMLDIR};
+}
+
 =head2 new
 
  Title   : new
@@ -286,44 +315,6 @@ sub error_string{
     return $self->{'error_string'};
 
 }
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $codeml->executable();
- Function: Finds the full path to the 'codeml' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
-           [optional] boolean flag whether or not warn when exe is not found
-
-
-=cut
-
-sub executable{
-   my ($self,$exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
-	   my $exe;
-	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-
-
 
 =head2 alignment
 

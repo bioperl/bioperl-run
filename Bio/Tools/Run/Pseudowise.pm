@@ -61,7 +61,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Pseudowise;
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-            $TMPDIR $TMPOUTFILE @PSEUDOWISE_SWITCHES @PSEUDOWISE_PARAMS 
+            @PSEUDOWISE_SWITCHES @PSEUDOWISE_PARAMS 
             @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::SeqIO;
@@ -83,15 +83,6 @@ use Bio::Tools::Run::WrapperBase;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-    $PROGRAMNAME='pseudowise';
-    if (defined $ENV{WISEDIR}) {
-        $PROGRAMDIR = $ENV{WISEDIR} || '';
-        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR."/src/bin/",
-                                          $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
-    }
-    else {
-        $PROGRAM = $PROGRAMNAME;
-    }
     @PSEUDOWISE_PARAMS = qw(SPLICE_MAX_COLLAR SPLICE_MIN_COLLAR SPLICE_SCORE_OFFSET
                      GENESTATS
                      NOMATCHN PARAMS KBYTE DYMEM DYDEBUG PALDEBUG 
@@ -105,6 +96,34 @@ BEGIN {
 
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'pseudowise';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{WISEDIR},"/src/bin") if $ENV{WISEDIR};
+}
+
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
@@ -112,7 +131,6 @@ sub new {
   $self->io->_initialize_io();
 
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -136,42 +154,6 @@ sub AUTOLOAD {
     $self->{$attr} = shift if @_;
     return $self->{$attr};
 }
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $genscan->executable();
- Function: Finds the full path to the 'pseudowise' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to
-           [optional] boolean flag whether or not warn when exe is not found
-
-
-=cut
-
-sub executable{
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-           $self->{'_pathtoexe'} = $PROGRAM;
-       } else {
-           my $exe;
-           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-               -x $exe ) {
-               $self->{'_pathtoexe'} = $exe;
-           } else {
-               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-           }
-       }
-   }
-   $self->{'_pathtoexe'};
-}
-
 
 =head2  version
 
@@ -200,9 +182,8 @@ sub version {
  Usage   :
             3 sequence objects 
             @feats = $factory->predict_genes($seq1, $seq2, $seq3);
- 
-Function: Predict pseudogenes
 
+Function: Predict pseudogenes
 
  Returns : An array of Bio::Seqfeature::Generic objects 
  Args    : Name of a file containing a set of 3 fasta sequences in the order of 
@@ -248,8 +229,7 @@ sub _run {
     my ($self,$prot_name, $infile1,$infile2,$infile3) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
-    #my $outfile = $self->outfile() || $TMPOUTFILE ;
-    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 $infile3 > $outfile";
     if($self->silent || $self->quiet || !($self->vebose)){
@@ -375,7 +355,7 @@ sub _setinput {
 
     if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI")&& $seq2->isa("Bio::PrimarySeqI"))) 
       { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
-    my $tempdir = $self->io->tempdir(CLEANUP=>1);
+    my $tempdir = $self->tempdir();
     ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
     ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
     ($tfh3,$outfile3) = $self->io->tempfile(-dir=>$tempdir);

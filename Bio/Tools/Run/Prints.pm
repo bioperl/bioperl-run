@@ -56,7 +56,7 @@ Bio::Tools::Run::Prints
 package Bio::Tools::Run::Prints;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
-            $TMPDIR $PROGRAMNAME @PRINTS_PARAMS
+            $PROGRAMNAME @PRINTS_PARAMS
                          %OK_FIELD);
 use strict;
 use Bio::SeqIO;
@@ -68,24 +68,39 @@ use Bio::Tools::Run::WrapperBase;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-
-
-
 BEGIN {
-       $PROGRAMNAME = 'FingerPRINTScan'  . ($^O =~ /mswin/i ?'.exe':'');
 
-       if (defined $ENV{'PRINTSDIR'}) {
-          $PROGRAMDIR = $ENV{PRINTSDIR} || '';
-          $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                           'FingerPRINTScan'.($^O =~ /mswin/i ?'.exe':''));
-       }
-       else {
-          $PROGRAM = 'FingerPRINTScan';
-       }
-      
        @PRINTS_PARAMS=qw(DB PROGRAM VERBOSE);
        foreach my $attr ( @PRINTS_PARAMS)
                         { $OK_FIELD{$attr}++; }
+}
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'FingerPRINTScan';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+return Bio::Root::IO->catfile($ENV{PRINTSDIR}) if $ENV{PRINTSDIR};
 }
 
 sub AUTOLOAD {
@@ -125,42 +140,6 @@ sub new {
            $self->$attr($value);
        }
        return $self;
-}
-
-=head2 executable
-
- Title   : executable
- Usage   : my $exe = $prints->executable();
- Function: Finds the full path to the Prints executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to
-          [optional] boolean flag whether or not warn when exe is not found
-
-
-=cut
-
-sub executable{
-    my ($self, $exe,$warn) = @_;
-
-    if( defined $exe ) {
-        $self->{'_pathtoexe'} = $exe;
-    }
-
-    unless( defined $self->{'_pathtoexe'} ) {
-        if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-            $self->{'_pathtoexe'} = $PROGRAM;
-        } else {
-            my $exe;
-            if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-                -x $exe ) {
-                  $self->{'_pathtoexe'} = $exe;
-            } else {
-              $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-              $self->{'_pathtoexe'} = undef;
-            }
-        }
-    }
-      return $self->{'_pathtoexe'};
 }
 
 =head2 predict_protein_features

@@ -148,8 +148,7 @@ methods. Internal methods are usually preceded with a "_".
 package Bio::Tools::Run::FootPrinter;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
-            $TMPDIR $TMPOUTFILE @FP_SWITCHES @FP_PARAMS
-            @OTHER_SWITCHES %OK_FIELD);
+            @FP_SWITCHES @FP_PARAMS @OTHER_SWITCHES %OK_FIELD);
 
 use strict;
 use Bio::Root::Root;
@@ -162,14 +161,6 @@ use Bio::Tools::FootPrinter;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
 BEGIN {
-    $PROGRAMNAME = "FootPrinter" . ($^O =~ /mswin/i ?'.exe':'');
-    if (defined $ENV{'FootPrinterDIR'}) {
-        $PROGRAMDIR = $ENV{FOOTPRINTER_DIR} || '';
-        $PROGRAM = Bio::Root::IO->
-	      catfile($PROGRAMDIR,
-		    'FootPrinter'.($^O =~ /mswin/i ?'.exe':''));
-    }
-
     @FP_PARAMS = qw(SEQUENCE_TYPE SIZE MAX_MUTATIONS MAX_MUTATIONS_PER_BRANCH LOSSES LOSS_COST TREE PROGRAM
                     SUBREGION_SIZE POSITION_CHANGE_COST INDEL_COST INVERSION_COST );
     @FP_SWITCHES = qw(TRIPLET_FILTERING PAIR_FILTERING POST_FILTERING DETAILS);
@@ -179,6 +170,35 @@ BEGIN {
     foreach my $attr ( @FP_PARAMS, @FP_SWITCHES,
                        @OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
 }
+
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns:  string
+ Args    : None
+
+=cut
+
+sub program_name {
+  return 'FootPrinter';
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns:  string
+ Args    :
+
+=cut
+
+sub program_dir {
+  return Bio::Root::IO->catfile($ENV{FOOTPRINTER_DIR}) if $ENV{FOOTPRINTER_DIR};
+}
+
 
 sub AUTOLOAD {
     my $self = shift;
@@ -206,8 +226,6 @@ sub new {
   # to facilitiate tempfile cleanup
 
   my ($attr, $value);
-  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
   while (@args) { 
     $attr =   shift @args;
     $value =  shift @args;
@@ -234,43 +252,6 @@ sub new {
 
   return $self;
 }
-
-=head2  executable()
-
- Title   : executable
- Usage   : $exe = Bio::Tools::Run::FootPrinter->executable()
- Function: Finds the full path to the 'footprinter' executable
- Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
-           [optional] boolean flag whether or not warn when exe is not found
-
-=cut
-
-sub executable {
-   my ($self, $exe,$warn) = @_;
-
-   if( defined $exe ) {
-     $self->{'_pathtoexe'} = $exe;
-   }
-
-   unless( defined $self->{'_pathtoexe'} ) {
-       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
-	   $self->{'_pathtoexe'} = $PROGRAM;
-       } else { 
-	   my $exe;
-	   if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
-	       -x $exe ) {
-	       $self->{'_pathtoexe'} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-	       $self->{'_pathtoexe'} = undef;
-	   }
-       }
-   }
-   $self->{'_pathtoexe'};    
-}
-
-*program = \&executable;
 
 =head2  run
 
@@ -398,7 +379,7 @@ sub _setparams {
 
 sub _setinput {
   my ($self,@seq) = @_;
-  my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TMPDIR);
+  my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
   foreach my $seq(@seq){
     $seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
     my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
