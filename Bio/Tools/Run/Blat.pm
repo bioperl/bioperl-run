@@ -11,15 +11,16 @@ Bio::Tools::Run::Blat
 
   Build a Blat  factory
 
-  my @params = ('DB',$dbfile);
-  my $factory = Bio::Tools::Run::Hmmpfam->new($params);
+  my $factory = Bio::Tools::Run::Blat->new();
 
   # Pass the factory a Bio::Seq object
   # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->predict_protein_features($seq);
+  my @feats = $factory->align($seq,$DB);
 
 =head1 DESCRIPTION
-  wrapper module for Blat  program 
+
+ wrapper module for Blat  program
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -42,7 +43,7 @@ Bio::Tools::Run::Blat
 
 =head1 AUTHOR - Bala
 
- Email savikalpa@fugu-sg.org
+ Email bala@tll.org.sg
 
 =head1 APPENDIX
 
@@ -141,7 +142,7 @@ sub new {
 =head2 align
 
  Title   :   align()
- Usage   :   $obj->align($seqFile)
+ Usage   :   $obj->align($query,$db)
  Function:   Runs Blat  and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
@@ -166,7 +167,7 @@ sub align{
     }
     else {
 
-        $self->_input($seq);
+        $self->_input($query);
 
     }
     if  (ref($db) ){# it is an object
@@ -235,29 +236,6 @@ sub _database() {
 
 }
 
-
-=head2 _target_sequence
-
- Title   :   _target_sequence 
- Usage   :   obj->_target_sequence($seqFile)
- Function:   Internal(not to be used directly)
- Returns :
- Args    :
-
-=cut
-
-
-sub _target_sequence(){
-     my ($self,$seq = @_;
- 
-     if(defined $seq){
-
-        $self->{'target_seq'}=$seq;
-     } 
-     return $self->{'target_seq'};
-
-}
-   
 
 =head2 _run
 
