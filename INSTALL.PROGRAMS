@@ -98,3 +98,11 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 24.	Tcoffee - Multiple Sequence Alignment Package
 	Bio::Tools::Run::Alignment::Tcoffee
 	http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.html
+
+25.     BLAST - Basic Local Alignment Search Tool
+        Bio::Tools::Run::StandAloneBlast (in bioperl-live CVS repository)
+        ftp://ftp.ncbi.nih.gov/blast/executables
+
+26.     FASTA,SSEARCH - Pairwise sequence alignment
+        Bio::Tools::Run::StandAloneFasta
+        ftp://ftp.virginia.edu/pub/fasta
