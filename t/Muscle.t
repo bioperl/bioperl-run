@@ -24,7 +24,7 @@ use Bio::Root::IO;
 
 END {     
     for ( $Test::ntest..$NUMTESTS ) {
-	skip("TCoffee program not found. Skipping.\n",1);
+	skip("Muscle program not found. Skipping.\n",1);
     }
 }
 
