@@ -26,24 +26,35 @@ program protdist
   # lengths limit of 30 note to use id name length greater than the
   # standard 10 in protdist, you will need to modify the protdist source
   # code
+
   @params = ('MODEL' => 'PAM');
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
-  my $matrix  = $protdist_factory->create_distance_matrix($aln);
+
+  my $matrix  = $protdist_factory->create_distance_matrix($aln); # Bio::Matrix::PhylipDist matrix
 
   #finding the distance between two sequences
-  my $distance = $matrix->{'protein_name_1'}{'protein_name_2'};
+  my $distance = $matrix->get_entry('protein_name_1','protein_name_2');
+  my @column   = $matrix->get_column('protein_name_1');
+  my @row      = $martrix->get_row('protein_name_1');
+  my @diag     = $matrix->get_diagonal();
+  print $matrix->print_matrix;
+
 
   #Alternatively, one can create the matrix by passing in a file 
   #name containing a multiple alignment in phylip format
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
   my $matrix  = 
-    $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
+  $protdist_factory->create_distance_matrix('/home/shawnh/prot.phy');
 
 =head1 DESCRIPTION
 
 Wrapper for protdist Joseph Felsentein for creating a distance matrix
 comparing protein sequences from a multiple alignment file or a
-L<Bio::SimpleAlign> object and returns a hash ref to the table
+L<Bio::SimpleAlign> object and returns a L<Bio::Matrix::PhylipDist> object;
+
+VERSION Support
+This wrapper currently supports v3.5 of phylip. There is also support for v3.6 although
+this is still experimental as v3.6 is still under alpha release and not all functionalities maybe supported.
 
 =head1 PARAMETERS FOR PROTDIST COMPUTATION
 
@@ -190,6 +201,8 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use Bio::Matrix::PhylipDist;
 use Cwd;
 
 
@@ -220,7 +233,7 @@ BEGIN {
 	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
 					  'protdist'.($^O =~ /mswin/i ?'.exe':''));
     }
-	@PROTDIST_PARAMS = qw(MODEL GENCODE CATEGORY PROBCHANGE TRANS FREQ);
+	@PROTDIST_PARAMS = qw(MODEL GENCODE CATEGORY PROBCHANGE TRANS WEIGHTS FREQ);
 	@OTHER_SWITCHES = qw(QUIET);
 	foreach my $attr(@PROTDIST_PARAMS,@OTHER_SWITCHES) {
 		$OK_FIELD{$attr}++;
@@ -386,7 +399,7 @@ sub _run {
     chdir($self->tempdir);
     #open a pipe to run protdist to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-	open(PROTDIST,"|".$self->executable.">/dev/null");
+	open(PROTDIST,"|".$self->executable .">/dev/null");
     }
     else {
 	open(PROTDIST,"|".$self->executable);
@@ -401,34 +414,12 @@ sub _run {
 	unless (-e $outfile);
 
 	#Create the distance matrix here
-    my @values;
-    
-    open(DIST, $outfile);
-    my @names;
-    my %seen;
-    while (<DIST>){
-	next if (/^\s+\d+$/);
-        my ($n,@line) = split( /\s+/,$_);
-	if( $seen{$n}++ ) {
-	    $n = $n."_".$seen{$n};
-	}
-	push @names, $n;
-        push @values, [@line];
-    }
-    close(DIST);    
-    my %dist;
-    # create the matrix using a hash of hash     
-    foreach my $name (@names) {
-	my $row = shift @values;
-        foreach my $n (@names) {
-	    $dist{$name}{$n} = shift @$row;
-	}
-    }
-		
+    my $matrix = Bio::Matrix::PhylipDist->new(-file=>$outfile,-program=>"protdist");
+
     # Clean up the temporary files created along the way...
     unlink $outfile unless $self->save_tempfiles;
 	
-    return \%dist;
+    return $matrix;
 }
 
 
@@ -492,64 +483,59 @@ sub _setparams {
     $self = shift;
     my $param_string = "";
     my $cat = 0;
+    my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'PROTDIST'}};
+
     foreach  my $attr ( @PROTDIST_PARAMS) {
-	$value = $self->$attr();
-	next unless (defined $value);
-	if ($attr =~/MODEL/i){
-	    if ($value=~/CAT/i){
-		$cat = 1;
-		$param_string .= "P\nP\n";
-		next;
-	    }
-	    elsif($value=~/KIMURA/i){
-		$param_string .= "P\nY\n";
-		return $param_string;
-	    }
-	    else {
-		$param_string.="Y\n";
-		return $param_string;
-	    }
-	}
-	if ($cat == 1){
+    	$value = $self->$attr();
+    	next unless (defined $value);
+    	if ($attr =~/MODEL/i){
+	     if ($value=~/CAT/i){
+    		$cat = 1;
+       }
+		   $param_string .= $menu{'MODEL'}{$value};
+   	}
+  	if ($cat == 1){
 	    if($attr =~ /GENCODE/i){		
-		$self->throw("Unallowed value for genetic code") unless ($value =~ /[UMVFY]/);
-		$param_string .= "C\n$value\n";
+        my $allowed = $menu{'GENCODE'}{'ALLOWED'};
+    		$self->throw("Unallowed value for genetic code") unless ($value =~ /[$allowed]/);
+		    $param_string .= $menu{'GENCODE'}{'OPTION'}."$value\n";
 	    }
 	    if ($attr =~/CATEGORY/i){
-		$self->throw("Unallowed value for categorization of amino acids") unless ($value =~/[CHG]/);
-		$param_string .= "A\n$value\n";
+        my $allowed = $menu{'CATEGORY'}{'ALLOWED'};
+    		$self->throw("Unallowed value for categorization of amino acids") unless ($value =~/[$allowed]/);
+	    	$param_string .= $menu{'CATEGORY'}{'OPTION'}."$value\n";
 	    }
 	    if ($attr =~/PROBCHANGE/i){
-		if (($value =~ /\d+/)&&($value >= 0) && ($value < 1)){
-		    $param_string .= "E\n$value\n";
-		}
-		else {
-		    $self->throw("Unallowed value for probability change category");  
-		}
+    		if (($value =~ /\d+/)&&($value >= 0) && ($value < 1)){
+		     $param_string .= $menu{'PROBCHANGE'}."$value\n";
+		    }
+    		else {
+	  	    $self->throw("Unallowed value for probability change category");  
+		    }
 	    }
 	    if ($attr =~/TRANS/i){
-		if (($value=~/\d+/) && ($value >=0)){
-		    $param_string .="T\n$value\n";
-		}
+    		if (($value=~/\d+/) && ($value >=0)){
+	  	    $param_string .=$menu{'TRANS'}."$value\n";
+	    	}
 	    }
 	    if ($attr =~ /FREQ/i){
-		my @freq = split(",",$value);	
-		if ($freq[0] !~ /\d+/){	#a letter provided (sets frequencies equally to 0.25)
-		    $param_string .="F\n".$freq[0]."\n";
-		}
+    		my @freq = split(",",$value);	
+    		if ($freq[0] !~ /\d+/){	#a letter provided (sets frequencies equally to 0.25)
+		     $param_string .=$menu{'FREQ'}.$freq[0]."\n";
+	    	}
 		elsif ($#freq ==  3) {#must have 4 digits for each base
-					  $param_string .="F\n";
+					  $param_string .=$menu{'FREQ'};
 					  foreach my $f (@freq){
 					      $param_string.="$f\n";
 					  }
 				      }
 		else {
-		    $self->throw("Unallowed value fo base frequencies");
+		    $self->throw("Unallowed value for base frequencies");
 		}
 	    }
 	}
     } 
-    $param_string .="Y\n";
+    $param_string .=$menu{'SUBMIT'};
 
     return $param_string;
 }

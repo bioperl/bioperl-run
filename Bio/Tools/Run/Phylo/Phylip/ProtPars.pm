@@ -134,6 +134,7 @@ use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 @ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
 
@@ -408,23 +409,20 @@ sub _setinput {
 sub _setparams {
     my ($attr, $value, $self);
 
-	#do nothing for now
     $self = shift;
     my $param_string = "";
-	for  $attr ( @PROTPARS_PARAMS) {
+    my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'PROTPARS'}};
+
+	  for $attr ( @PROTPARS_PARAMS) {
         $value = $self->$attr();
         next unless (defined $value);
-      	if ($attr =~/THRESHOLD/i){
-		$param_string .= "T\n$value\n";
-	}
-	if ($attr =~/JUMBLE/i){
-		my ($seed,$itr) = split(",",$value);
-		$param_string .="J\n$seed\n$itr\n";
-	}
-        if ($attr =~/OUTGROUP/i){
-		$param_string .= "O\n$value\n";
-	}
-		
+	      if ($attr =~/JUMBLE/i){
+      		my ($seed,$itr) = split(",",$value);
+      		$param_string .=$menu{'JUMBLE'}."$seed\n$itr\n";
+      	}
+        else {
+          $param_string .= $menu{uc $attr}."$value\n";
+        }
     } 
     $param_string .="Y\n";
 

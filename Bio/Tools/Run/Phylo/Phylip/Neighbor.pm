@@ -182,6 +182,8 @@ use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+
 use Cwd;
 			    
 # inherit from Phylip::Base which has some methods for dealing with
@@ -433,21 +435,14 @@ sub _setinput {
     }
 
     #  $input may be a hash ref to a distance matrix
-    if (ref($input) eq "HASH") {
+    if ($input->isa("Bio::Matrix::PhylipDist")){
         #  Open temporary file for both reading & writing of distance matrix
-	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
-	my $num_species = scalar(keys %{$input});
-	print $tfh "   $num_species\n";
-	foreach my $key (keys %{$input}){
-		print $tfh $key.(" " x int($self->idlength/2));#neighbor requires at least this amount of space 
-	        foreach my $k (keys %{$input->{$key}}){
-			print $tfh $input->{$key}{$k}."  ";
-       		}
-		print $tfh "\n";
-	}
-	close($tfh);
-	return $alnfilename;		
+      	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
+        print $tfh $input->print_matrix;
+	      close($tfh);
+      	return $alnfilename;		
     }
+
     return 0;
 }
 
@@ -469,40 +464,36 @@ sub _setparams {
     $self = shift;
     my $param_string = "";
     my $type ="";
+    my $version = $self->version;
+    my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$version}->{'NEIGHBOR'}};
+
     foreach  my $attr ( @NEIGHBOR_PARAMS) {
-	$value = $self->$attr();
-	next unless (defined $value && $value);
-	if ($attr =~/TYPE/i){
-	    if ($value=~/UPGMA/i){
-		$type = "UPGMA";
-		$param_string .= "N\n";
+    	$value = $self->$attr();
+    	next unless (defined $value && $value);
+  	  if ($attr =~/TYPE/i){
+	     if ($value=~/UPGMA/i){
+    		$type = "UPGMA";
+    		$param_string .= $menu{'TYPE'}{'UPGMA'};
+       }
 	    }
-	}
-	elsif($attr =~ /OUTGROUP/i){
-	    if ($type ne "UPGMA"){
-		$self->throw("Unallowed value for outgroup") unless ($value =~ /\d+/);
-		$param_string .= "O\n$value\n";
+    	elsif($attr =~ /OUTGROUP/i){
+	      if ($type ne "UPGMA"){
+      		$self->throw("Unallowed value for outgroup") unless ($value =~ /\d+/);
+      		$param_string .= $menu{'OUTGROUP'}."$value\n";
+	      }
+	       else {
+        		$self->throw("Can't set outgroup using UPGMA. Use Neighbor-Joining instead");
+	       }
+    	}
+	    elsif ($attr =~ /JUMBLE/i){
+	     $self->throw("Unallowed value for random seed") unless ($value =~ /\d+/);
+	     $param_string .=$menu{'JUMBLE'}."$value\n";
 	    }
-	    else {
-		$self->throw("Can't set outgroup using UPGMA. Use Neighbor-Joining instead");
+    	else{
+       $param_string .= $menu{uc $attr};
 	    }
-	}
-	elsif ($attr =~ /LOWTRI/i){
-	    $param_string .="L\n";
-	}
-	elsif ($attr =~ /UPPTRI/i){
-	    $param_string .="R\n";
-	}
-	elsif ($attr =~ /SUBREP/i){
-	    $param_string .="S\n";
-	}
-	elsif ($attr =~ /JUMBLE/i){
-	    $self->throw("Unallowed value for random seed") unless ($value =~ /\d+/);
-	    $param_string .="J\n$value\n";
-	}
-	else{}
     } 
-    $param_string .="Y\n";
+    $param_string .=$menu{'SUBMIT'};
 
     return $param_string;
 }
