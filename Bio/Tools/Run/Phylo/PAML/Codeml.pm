@@ -134,7 +134,7 @@ rather easy to use. Otherwise, the program will ask the user to input
 a branch mark for the dN/dS ratio assumed for each branch. This should
 be an integral number between 0 to k - 1 if k different dN/dS ratios
 (omega_0 - omega_k - 1) are assumed for the branches of the
-tree. B<Bioperl note basically, doing this interactively is not going
+tree. B<Bioperl> note basically, doing this interactively is not going
 to work very well, so this module is really focused around using the 0
 or 1 parameters.  Read the program documentation if you'd like some more 
 detailed instructions.

@@ -17,7 +17,6 @@ Bio::Tools::Run::Alignment::MAFFT - run the MAFFT alignment tools
 =head1 SYNOPSIS
 
   use Bio::Tools::Run::Alignment::MAFFT;
-  
 
 =head1 DESCRIPTION
 

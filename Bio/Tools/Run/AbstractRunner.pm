@@ -58,7 +58,6 @@ __END__
 
 Bio::Tools::Run::AbstractRunner
 
-
 =head1 SYNOPSIS
 
 
@@ -68,22 +67,24 @@ Bio::Tools::Run::AbstractRunner
 
 The problems of bioperl-run wrapper before the time this module is made are:
 
-=over 4
+=over 3
 
-=item * There are a lot of duplicate code among bioperl-run modules
+=item *
 
-=item * 
+There are a lot of duplicate code among bioperl-run modules
 
-It seems only to support object-in-object-out process, while sometimes people
-just need file-in-file-out one, which has been actually implemented but not
-exposed as a public method.
+=item *
+
+It seems only to support object-in-object-out process, while sometimes
+people just need file-in-file-out one, which has been actually
+implemented but not exposed as a public method.
 
 =item *
 
 the different implementations, which should be similar and easy,
-confuse the new developers who wants to make wrappers for their own programs 
-but did not know how. 
-So it is better to review bioperl-run and make the simple things as they should be.
+confuse the new developers who wants to make wrappers for their own
+programs but did not know how. So it is better to review bioperl-run
+and make the simple things as they should be.
 
 =back
 

@@ -70,19 +70,19 @@ can be done in (at least) three ways:
     returns a clustalw executable on your system.
  2. Define an environmental variable CLUSTALDIR which is a 
     directory which contains the 'clustalw' application:
-   In bash 
-   export CLUSTALDIR=/home/username/clustalw1.8
-   In csh/tcsh
-   setenv CLUSTALDIR /home/username/clustalw1.8
-   
- 3. Include a definition of an environmental variable CLUSTALDIR in
-   every script that will use this Clustalw wrapper module.
-   BEGIN { $ENV{CLUSTALDIR} = '/home/username/clustalw1.8/' }
-   use Bio::Tools::Run::Alignment::Clustalw;
+    In bash 
+    export CLUSTALDIR=/home/username/clustalw1.8
+    In csh/tcsh
+    setenv CLUSTALDIR /home/username/clustalw1.8
 
-  If you are running an application on a webserver make sure the
-  webserver environment has the proper PATH set or use the options 2
-  or 3 to set the variables.
+ 3. Include a definition of an environmental variable CLUSTALDIR in
+    every script that will use this Clustalw wrapper module.
+    BEGIN { $ENV{CLUSTALDIR} = '/home/username/clustalw1.8/' }
+    use Bio::Tools::Run::Alignment::Clustalw;
+
+If you are running an application on a webserver make sure the
+webserver environment has the proper PATH set or use the options 2 or
+3 to set the variables.
 
 
 =head2 How it works

@@ -29,7 +29,6 @@ Bio::Tools::Run::Phylo::PAML::Baseml - Wrapper aroud the PAML program baseml
     my @otus = $result->get_seqs();
     my $MLmatrix = $result->get_MLmatrix();
     # 0 and 1 correspond to the 1st and 2nd entry in the @otus array
-    
   }
 
 =head1 DESCRIPTION
@@ -72,7 +71,7 @@ The values you can feed to the configuration file are documented here.
     # 9: REVu
     #10: UNRESTu
     # See Yang 1994 JME 39:105-111
-    
+
     # model 8 special case of the REV model
     # model 9 is special case of unrestricted model
     # can also supply special rate parameters
@@ -82,7 +81,7 @@ The values you can feed to the configuration file are documented here.
     # $model  = '9 [1 (TC CT AG GA)]; # K80
     # $model  = '9 [0]'; # JC69
     # $model  = '9 [11 (TA) (TG) (CT) (CA) (CG) (AT) (AC) (AG) (GT) (GC) (GA)],
-    
+
     'outfile' => 'mlb',
     'fix_kappa'=> [0,1], # 0:estimate kappa, 1:fix kappa
     'kappa'    => '2.5', # initial or fixed kappa
@@ -91,34 +90,34 @@ The values you can feed to the configuration file are documented here.
     'alpha'    => '0', # initial of fixed alpha
     # 0: infinity (constant rate)
     'Malpha'   => [0,1], # different alphas for genes
-    
+
     'fix_rho'=> [1,0], # 0: estimate gamma shape param
 		                          # 1: fix it at alpha
     'rho'    => '0', # initial of fixed alpha
     # 0: infinity (constant rate)
-    
+
     'ncatG'    => '5', # number of categories in the dD,AdG, or nparkK models of rates
     'nparK'    => [0..4], # rate-class models 
     # 1:rk 2:rk&fK 
     # 3:rK&MK(1/K) 4:rK&MK
-    'nhomo'    => [0..4], # 0 & 1: homogeneous, 
+    'nhomo'    => [0..4], # 0 & 1: homogeneous,
     # 2: kappa for brances
     # 3:N1 4:N2
     'getSE'    => [0,1],
-    'RateAncestor' => [1,0,2], # rates (alpha > 0) or 
+    'RateAncestor' => [1,0,2], # rates (alpha > 0) or
     # ancestral states
     'cleandata' => [1,0], # remove sites with 
     # ambiguity data (1:yes or 0:no)
-    
-    'fix_blength' => [-1,0,1,2], # 0: ignore, -1: random, 
+
+    'fix_blength' => [-1,0,1,2], # 0: ignore, -1: random,
     # 1: initial, 2: fixed
-    
-# 'icode'    => [ 0..10], # (with RateAncestor=1. 
+
+    # 'icode'    => [ 0..10], # (with RateAncestor=1.
     #try "GC" in data,model=4,Mgene=4)
     'ndata'    => [5,1..10],
     'clock'    => [0..3], # 0: no clock, 1: clock, 2: local clock, 3: CombinedAnalysis
     'Small_Diff' => '1e-6', #underflow issues?
-    
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists

@@ -64,7 +64,7 @@ You can either set location at:
 
 =over 3
 
-=item 1 factory creation
+=item 1 factory creation:
 
   my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
                                  -location => 'http://somewhere/Pise/cgi-bin',

@@ -59,21 +59,22 @@ can be done in (at least) three ways:
  1. Make sure the t_coffee executable is in your path so that
     which t_coffee
     returns a t_cofee executable on your system.
+
  2. Define an environmental variable TCOFFEEDIR which is a dir 
     which contains the 't_coffee' app:
-   In bash 
-   export TCOFFEEDIR=/home/username/progs/T-COFFEE_distribution_Version_1.37/bin
-   In csh/tcsh
-   setenv TCOFFEEDIR /home/username/progs/T-COFFEE_distribution_Version_1.37/bin
-   
- 3. Include a definition of an environmental variable TCOFFEEDIR in
-   every script that will use this TCoffee wrapper module.
-   BEGIN { $ENV{TCOFFEDIR} = '/home/username/progs/T-COFFEE_distribution_Version_1.37/bin' }
-   use Bio::Tools::Run::Alignment::TCoffee;
+    In bash 
+    export TCOFFEEDIR=/home/username/progs/T-COFFEE_distribution_Version_1.37/bin
+    In csh/tcsh
+    setenv TCOFFEEDIR /home/username/progs/T-COFFEE_distribution_Version_1.37/bin
 
-  If you are running an application on a webserver make sure the
-  webserver environment has the proper PATH set or use the options 2
-  or 3 to set the variables.
+ 3. Include a definition of an environmental variable TCOFFEEDIR in
+    every script that will use this TCoffee wrapper module.
+    BEGIN { $ENV{TCOFFEDIR} = '/home/username/progs/T-COFFEE_distribution_Version_1.37/bin' }
+    use Bio::Tools::Run::Alignment::TCoffee;
+
+If you are running an application on a webserver make sure the
+webserver environment has the proper PATH set or use the options 2 or
+3 to set the variables.
 
 =head1 PARAMETERS FOR ALIGNMENT COMPUTATION
 
