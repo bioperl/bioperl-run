@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 8;
+    $NTESTS = 12;
     plan tests => $NTESTS;
 }
 
