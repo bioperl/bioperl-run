@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::dnadist
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,18 +30,19 @@ Bio::Tools::Run::PiseApplication::dnadist
 		Felsenstein, J.  1989.  PHYLIP -- Phylogeny Inference Package (Version 3.2). Cladistics  5: 164-166.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/dnadist.html 
+         for available values):
 
 
 		dnadist (String)
 
-
 		infile (Sequence)
 			Alignment File
 			pipe: readseq_ok_alig
-
-		dnadist_opt (Paragraph)
-			dnadist options
 
 		distance (Excl)
 			Distance (D)
@@ -56,9 +65,6 @@ Bio::Tools::Run::PiseApplication::dnadist
 		base_frequencies (String)
 			Base frequencies for A, C, G, T/U (if not empirical) (separated by commas)
 
-		categ_opt (Paragraph)
-			Categories options
-
 		one_category (Switch)
 			One category of substitution rates (C)
 
@@ -68,17 +74,11 @@ Bio::Tools::Run::PiseApplication::dnadist
 		categ_rates (String)
 			Rate for each category (separated by commas)
 
-		weight_opt (Paragraph)
-			Weight options
-
 		weights (Switch)
 			Use weights for sites (W)
 
 		weights_file (InFile)
 			Weights file
-
-		bootstrap (Paragraph)
-			Bootstrap options
 
 		seqboot (Switch)
 			Perform a bootstrap before analysis
@@ -92,39 +92,79 @@ Bio::Tools::Run::PiseApplication::dnadist
 		replicates (Integer)
 			How many replicates
 
-		output (Paragraph)
-			Output options
-
 		matrix_form (Switch)
 			Lower-triangular distance matrix (L)
 
 		printdata (Switch)
 			Print out the data at start of run (1)
 
-		outfile (Results)
-
-			pipe: phylip_dist
-
-		params (Results)
-
-
 		confirm (String)
-
 
 		terminal_type (String)
 
-
 		multiple_dataset (String)
-
 
 		seqboot_confirm (String)
 
-
 		seqboot_terminal_type (String)
 
+=head1 FEEDBACK
 
-		tmp_params (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/dnadist.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -140,20 +180,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $dnadist = Bio::Tools::Run::PiseApplication::dnadist->new($remote, $email, @params);
+ Usage   : my $dnadist = Bio::Tools::Run::PiseApplication::dnadist->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::dnadist object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $dnadist = $factory->program('dnadist');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::dnadist.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/dnadist.pm
 
@@ -162,6 +202,8 @@ sub new {
     $self->{TITLE}   = "Phylip";
 
     $self->{DESCRIPTION}   = "dnadist - Compute distance matrix from nucleotide sequences";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Felsenstein";
 

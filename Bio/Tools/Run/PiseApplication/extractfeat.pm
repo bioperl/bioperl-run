@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::extractfeat
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::extractfeat
 
 	EXTRACTFEAT	Extract features from a sequence (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/extractfeat.html 
+         for available values):
 
 
 		extractfeat (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- any [sequences] (-sequence)
 			pipe: seqsfile
-
-		advanced (Paragraph)
-			advanced Section
 
 		before (Integer)
 			Amount of sequence before feature to extract (-before)
@@ -61,8 +66,11 @@ Bio::Tools::Run::PiseApplication::extractfeat
 		value (String)
 			Value of feature tags to extract (-value)
 
-		output (Paragraph)
-			output Section
+		join (Switch)
+			Output introns etc. as one sequence (-join)
+
+		featinname (Switch)
+			Append type of feature to output sequence name (-featinname)
 
 		outseq (OutFile)
 			outseq (-outseq)
@@ -73,6 +81,63 @@ Bio::Tools::Run::PiseApplication::extractfeat
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/extractfeat.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -88,20 +153,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $extractfeat = Bio::Tools::Run::PiseApplication::extractfeat->new($remote, $email, @params);
+ Usage   : my $extractfeat = Bio::Tools::Run::PiseApplication::extractfeat->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::extractfeat object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $extractfeat = $factory->program('extractfeat');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::extractfeat.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/extractfeat.pm
 
@@ -110,6 +175,8 @@ sub new {
     $self->{TITLE}   = "EXTRACTFEAT";
 
     $self->{DESCRIPTION}   = "Extract features from a sequence (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -149,6 +216,8 @@ sub new {
 	"tag", 	# Tag of feature to extract (-tag)
 	"value", 	# Value of feature tags to extract (-value)
 	"output", 	# output Section
+	"join", 	# Output introns etc. as one sequence (-join)
+	"featinname", 	# Append type of feature to output sequence name (-featinname)
 	"outseq", 	# outseq (-outseq)
 	"outseq_sformat", 	# Output format for: outseq
 	"auto",
@@ -171,6 +240,8 @@ sub new {
 	"tag" => 'String',
 	"value" => 'String',
 	"output" => 'Paragraph',
+	"join" => 'Switch',
+	"featinname" => 'Switch',
 	"outseq" => 'OutFile',
 	"outseq_sformat" => 'Excl',
 	"auto" => 'String',
@@ -217,6 +288,12 @@ sub new {
 	},
 	"output" => {
 	},
+	"join" => {
+		"perl" => '($value)? " -join" : ""',
+	},
+	"featinname" => {
+		"perl" => '($value)? " -featinname" : ""',
+	},
 	"outseq" => {
 		"perl" => '" -outseq=$value"',
 	},
@@ -253,9 +330,11 @@ sub new {
 	"maxscore" => 8,
 	"tag" => 9,
 	"value" => 10,
-	"outseq" => 11,
-	"outseq_sformat" => 12,
-	"auto" => 13,
+	"join" => 11,
+	"featinname" => 12,
+	"outseq" => 13,
+	"outseq_sformat" => 14,
+	"auto" => 15,
 	"extractfeat" => 0
 
     };
@@ -276,6 +355,8 @@ sub new {
 	"maxscore",
 	"tag",
 	"value",
+	"join",
+	"featinname",
 	"outseq",
 	"outseq_sformat",
 	"auto",
@@ -301,6 +382,8 @@ sub new {
 	"tag" => 0,
 	"value" => 0,
 	"output" => 0,
+	"join" => 0,
+	"featinname" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"auto" => 1,
@@ -323,6 +406,8 @@ sub new {
 	"tag" => 0,
 	"value" => 0,
 	"output" => 0,
+	"join" => 0,
+	"featinname" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"auto" => 0,
@@ -344,6 +429,8 @@ sub new {
 	"tag" => 0,
 	"value" => 0,
 	"output" => 0,
+	"join" => 0,
+	"featinname" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 0,
 	"auto" => 0,
@@ -365,6 +452,8 @@ sub new {
 	"tag" => "Tag of feature to extract (-tag)",
 	"value" => "Value of feature tags to extract (-value)",
 	"output" => "output Section",
+	"join" => "Output introns etc. as one sequence (-join)",
+	"featinname" => "Append type of feature to output sequence name (-featinname)",
 	"outseq" => "outseq (-outseq)",
 	"outseq_sformat" => "Output format for: outseq",
 	"auto" => "",
@@ -386,6 +475,8 @@ sub new {
 	"tag" => 0,
 	"value" => 0,
 	"output" => 0,
+	"join" => 0,
+	"featinname" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"auto" => 0,
@@ -396,7 +487,7 @@ sub new {
 
 	"input" => ['sequence',],
 	"advanced" => ['before','after','source','type','sense','minscore','maxscore','tag','value',],
-	"output" => ['outseq','outseq_sformat',],
+	"output" => ['join','featinname','outseq','outseq_sformat',],
 	"outseq_sformat" => ['fasta','fasta','gcg','gcg','phylip','phylip','embl','embl','swiss','swiss','ncbi','ncbi','nbrf','nbrf','genbank','genbank','ig','ig','codata','codata','strider','strider','acedb','acedb','staden','staden','text','text','fitch','fitch','msf','msf','clustal','clustal','phylip','phylip','phylip3','phylip3','asn1','asn1',],
     };
 
@@ -418,6 +509,8 @@ sub new {
 	"maxscore" => '0.0',
 	"tag" => 'all',
 	"value" => 'all',
+	"join" => '0',
+	"featinname" => '0',
 	"outseq" => 'outseq.out',
 	"outseq_sformat" => 'fasta',
 
@@ -438,6 +531,8 @@ sub new {
 	"tag" => { "perl" => '1' },
 	"value" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
+	"join" => { "perl" => '1' },
+	"featinname" => { "perl" => '1' },
 	"outseq" => { "perl" => '1' },
 	"outseq_sformat" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
@@ -485,6 +580,8 @@ sub new {
 	"tag" => 0,
 	"value" => 0,
 	"output" => 0,
+	"join" => 0,
+	"featinname" => 0,
 	"outseq" => 0,
 	"outseq_sformat" => 0,
 	"auto" => 0,
@@ -506,6 +603,8 @@ sub new {
 	"tag" => 0,
 	"value" => 0,
 	"output" => 0,
+	"join" => 0,
+	"featinname" => 0,
 	"outseq" => 1,
 	"outseq_sformat" => 1,
 	"auto" => 0,
@@ -542,7 +641,13 @@ sub new {
 		"Tags are the types of extra values that a feature may have. For example in the EMBL feature table, a \'CDS\' type of feature may have the tags \'/codon\', \'/codon_start\', \'/db_xref\', \'/EC_number\', \'/evidence\', \'/exception\', \'/function\', \'/gene\', \'/label\', \'/map\', \'/note\', \'/number\', \'/partial\', \'/product\', \'/protein_id\', \'/pseudo\', \'/standard_name\', \'/translation\', \'/transl_except\', \'/transl_table\', or \'/usedin\'. Some of these tags also have values, for example \'/gene\' can have the value of the gene name. <BR> By default any feature tag in the feature table is extracted. You can set this to match any feature tag you wish to show. <BR> The tag may be wildcarded by using \'*\'. <BR> If you wish to extract more than one tag, separate their names with the character \'|\', eg: <BR> gene | label",
 	],
 	"value" => [
-		"Tag values are the values associated with a feature tag. Tags are the types of extra values that a feature may have. For example in the EMBL feature table, a \'CDS\' type of feature may have the tags \'/codon\', \'/codon_start\', \'/db_xref\', \'/EC_number\', \'/evidence\', \'/exception\', \'/function\', \'/gene\', \'/label\', \'/map\', \'/note\', \'/number\', \'/partial\', \'/product\', \'/protein_id\', \'/pseudo\', \'/standard_name\', \'/translation\', \'/transl_except\', \'/transl_table\', or \'/usedin\'. Only some of these tags can have values, for example \'/gene\' can have the value of the gene name. By default any feature tag value in the feature table is shown. You can set this to match any feature tag valueyou wish to show. <BR> The tag value may be wildcarded by using \'*\'. <BR> If you wish to show more than one tag value, separate their names with the character \'|\', eg: <BR> pax* | 10",
+		"Tag values are the values associated with a feature tag. Tags are the types of extra values that a feature may have. For example in the EMBL feature table, a \'CDS\' type of feature may have the tags \'/codon\', \'/codon_start\', \'/db_xref\', \'/EC_number\', \'/evidence\', \'/exception\', \'/function\', \'/gene\', \'/label\', \'/map\', \'/note\', \'/number\', \'/partial\', \'/product\', \'/protein_id\', \'/pseudo\', \'/standard_name\', \'/translation\', \'/transl_except\', \'/transl_table\', or \'/usedin\'. Only some of these tags can have values, for example \'/gene\' can have the value of the gene name. By default any feature tag value in the feature table is shown. You can set this to match any feature tag valueyou wish to show. <BR> The tag value may be wildcarded by using \'*\'. <BR> If you wish to show more than one tag value, separate their names with a space or the character \'|\', eg: <BR> pax* | 10",
+	],
+	"join" => [
+		"Some features, such as CDS (coding sequence) and mRNA are composed of introns concatenated together.  There may be other forms of \'joined\' sequence, depending on the feature table.  If this option is set TRUE, then any group of these features will be output as a single sequence.  If the \'before\' and \'after\' qualifiers have been set, then only the sequence before the first feature and after the last feature are added.",
+	],
+	"featinname" => [
+		"To aid you in identifying the type of feature that has been output, the type of feature is added to the start of the description of the output sequence.  Sometimes the description of a sequence is lost in subsequent processing of the sequences file, so it is useful for the type to be a part of the sequence ID name.  If you set this to be TRUE then the name is added to the ID name of the output sequence.",
 	],
 
     };

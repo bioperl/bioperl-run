@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::fasta
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -26,7 +34,12 @@ Bio::Tools::Run::PiseApplication::fasta
 		Pearson, W. R. (1996) Effective protein sequence comparison. In Meth. Enz., R. F. Doolittle, ed. (San Diego: Academic Press) 266:227-258
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/fasta.html 
+         for available values):
 
 
 		fasta (Excl)
@@ -48,9 +61,6 @@ Bio::Tools::Run::PiseApplication::fasta
 		break_long (Integer)
 			Break long library sequences into blocks (-N)
 
-		slectivity_opt (Paragraph)
-			Selectivity options
-
 		ktup (Integer)
 			ktup : sensitivity and speed of the search (protein:2, DNA:6)
 
@@ -69,9 +79,6 @@ Bio::Tools::Run::PiseApplication::fasta
 		low_expect (Float)
 			Minimal expectation value threshold for displaying scores and alignments (-F)
 
-		score_opt (Paragraph)
-			Scoring options
-
 		nucleotid_match (Integer)
 			Reward for a nucleotid match (-r)
 
@@ -83,9 +90,6 @@ Bio::Tools::Run::PiseApplication::fasta
 
 		X_penalty (Integer)
 			Penalty for a match to 'X' (independently of the PAM matrix) (-x)
-
-		frame_transl_opt (Paragraph)
-			Frameshift and translation options
 
 		frameshift (Integer)
 			Penalty for frameshift between codon (fast[xy]/tfast[xy])(-h)
@@ -102,9 +106,6 @@ Bio::Tools::Run::PiseApplication::fasta
 		genetic_code (Excl)
 			Use genetic code for translation (tfasta/tfast[xy]/fast[xy]) (-t)
 
-		optimize_opt (Paragraph)
-			Optimization options
-
 		band (Integer)
 			band-width used for optimization (-y)
 
@@ -119,9 +120,6 @@ Bio::Tools::Run::PiseApplication::fasta
 
 		random (Switch)
 			Estimate stat parameters from shuffled copies of each library sequence (-z)
-
-		affichage (Paragraph)
-			Report options
 
 		histogram (Switch)
 			No histogram (-H)
@@ -159,18 +157,71 @@ Bio::Tools::Run::PiseApplication::fasta
 		statfile (OutFile)
 			Write out the sequence identifier, superfamily number, and similarity scores to this file (-R)
 
-		other_opt (Paragraph)
-			Other options
-
 		filter (Switch)
 			Lower case filtering (-S)
 
 		outfile (OutFile)
-
 			pipe: mview_input
 
 		html_outfile (OutFile)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/fasta.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -186,20 +237,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $fasta = Bio::Tools::Run::PiseApplication::fasta->new($remote, $email, @params);
+ Usage   : my $fasta = Bio::Tools::Run::PiseApplication::fasta->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::fasta object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $fasta = $factory->program('fasta');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::fasta.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/fasta.pm
 
@@ -208,6 +259,8 @@ sub new {
     $self->{TITLE}   = "FASTA";
 
     $self->{DESCRIPTION}   = "Sequence database search (version 3)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "W. Pearson";
 
@@ -359,7 +412,7 @@ sub new {
 		"perl" => ' " /local/databases/fasta/$value"',
 	},
 	"nucleotid_db" => {
-		"perl" => ' " /local/databases/fasta/$value" ',
+		"perl" => ' " /local/databases/fasta/$value"',
 	},
 	"break_long" => {
 		"perl" => '(defined $value) ? " -N $value" : ""',
@@ -855,7 +908,7 @@ sub new {
 
 	"fasta" => ['fasta_t','fasta: protein or DNA query vs similar db (FASTA release 3.0)','tfasta_t','tfasta: protein query vs translated DNA db','fastx_t','fastx: DNA query (translated, 3 frames) vs protein db (frameshifts only between codons) ','tfastx_t','tfastx: protein query vs translated DNA db (frameshifts only between codons)','fasty_t','fasty = fastx + frameshifts anywhere','tfasty_t','tfasty = tfastx + frameshifts anywhere','fastf_t','fastf: mixed peptide seq vs protein db (modified algorithm)','tfastf_t','tfastf: mixed peptide seq vs translated DNA db (modified algorithm)','fasts_t','fasts: several short peptide seq vs protein db (modified algorithm)','tfasts_t','tfasts: several short peptide seq vs translated DNA db (modified algorithm)',],
 	"seqtype" => ['DNA','DNA','protein','protein',],
-	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','prodom','prodom: protein domains','sbase','sbase: annotated domains sequences',],
+	"protein_db" => ['sptrnrdb','sptrnrdb: non-redundant SWISS-PROT + TrEMBL','swissprot','swissprot (last release + updates)','sprel','swissprot release','swissprot_new','swissprot_new: updates','pir','pir: Protein Information Resource','nrprot','nrprot: NCBI non-redundant Genbank CDS translations+PDB+Swissprot+PIR','nrprot_month','nrprot_month: NCBI month non-redundant Genbank CDS translations+PDB+Swissprot+PIR','genpept','genpept: Genbank translations (last rel. + upd.)','genpept_new','genpept_new: genpept updates','gpbct','gpbct: genpept bacteries','gppri','gppri: primates','gpmam','gpmam: other mammals','gprod','gprod: rodents','gpvrt','gpvrt: other vertebrates','gpinv','gpinv: invertebrates','gppln','gppln: plants (including yeast)','gpvrl','gpvrl: virus','gpphg','gpphg: phages','gpsts','gpsts: STS','gpsyn','gpsyn: synthetic','gppat','gppat: patented','gpuna','gpuna: unatotated','gphtg','gphtg: GS (high throughput Genomic Sequencing)','nrl3d','nrl3d: sequences from PDB','sbase','sbase: annotated domains sequences',],
 	"nucleotid_db" => ['embl','embl: Embl last release + updates','embl_new','embl_new: Embl updates','genbank','genbank: Genbank last release + updates','genbank_new','genbank_new: Genbank updates','gbbct','gbbct: genbank bacteria','gbpri','gbpri: primates','gbmam','gbmam: other mammals','gbrod','gbrod: rodents','gbvrt','gbvrt: other vertebrates','gbinv','gbinv: invertebrates','gbpln','gbpln: plants (including yeast)','gbvrl','gbvrl: virus','gbphg','gbphg: phages','gbest','gbest: EST (Expressed Sequence Tags)','gbsts','gbsts: STS (Sequence Tagged sites)','gbsyn','gbsyn: synthetic','gbpat','gbpat: patented','gbuna','gbuna: unannotated','gbgss','gbgss: Genome Survey Sequences','gbhtg','gbhtg: GS (high throughput Genomic Sequencing)','imgt','imgt: ImMunoGeneTics','borrelia','borrelia: Borrelia burgdorferi complete genome','ecoli','ecoli: Escherichia Coli complete genome','genitalium','genitalium: Mycoplasma Genitalium complete genome','pneumoniae','pneumoniae: Mycoplasma Pneumoniae complete genome','pylori','pylori: Helicobacter Pylori complete genome','subtilis','subtilis: Bacillus Subtilis complete genome','tuberculosis','tuberculosis: Mycobacterium tuberculosis complete genome','ypestis','Yersinia pestis unfinished genome','yeast','yeast: Yeast chromosomes',],
 	"slectivity_opt" => ['ktup','optcut','gapinit','gapext','high_expect','low_expect',],
 	"score_opt" => ['nucleotid_match','nucleotid_mismatch','matrix','X_penalty',],
@@ -950,9 +1003,7 @@ sub new {
 	"affichage" => { "perl" => '1' },
 	"histogram" => { "perl" => '1' },
 	"scores" => { "perl" => '1' },
-	"alns" => {
-		"perl" => '',
-	},
+	"alns" => { "perl" => '1' },
 	"html_output" => { "perl" => '1' },
 	"markx" => {
 		"perl" => '! $html_output',

@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::fuzztran
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::fuzztran
 
 	FUZZTRAN	Protein pattern search after translation (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/fuzztran.html 
+         for available values):
 
 
 		fuzztran (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- dna [sequences] (-sequence)
 			pipe: seqsfile
-
-		required (Paragraph)
-			required Section
 
 		pattern (String)
 			Search pattern (-pattern)
@@ -40,35 +45,74 @@ Bio::Tools::Run::PiseApplication::fuzztran
 		mismatch (Integer)
 			Number of mismatches (-mismatch)
 
-		advanced (Paragraph)
-			advanced Section
-
 		frame (Excl)
 			Frame(s) to translate -- Translation frames (-frame)
 
 		table (Excl)
 			Code to use -- Genetic codes (-table)
 
-		output (Paragraph)
-			output Section
-
-		outf (OutFile)
-			outf (-outf)
-
-		mmshow (Switch)
-			Show mismatches (-mmshow)
-
-		accshow (Switch)
-			Show accession numbers (-accshow)
-
-		usashow (Switch)
-			Show USA (-usashow)
-
-		descshow (Switch)
-			Show descriptions (-descshow)
+		outfile (OutFile)
+			outfile (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/fuzztran.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -84,20 +128,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $fuzztran = Bio::Tools::Run::PiseApplication::fuzztran->new($remote, $email, @params);
+ Usage   : my $fuzztran = Bio::Tools::Run::PiseApplication::fuzztran->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::fuzztran object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $fuzztran = $factory->program('fuzztran');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::fuzztran.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/fuzztran.pm
 
@@ -106,6 +150,8 @@ sub new {
     $self->{TITLE}   = "FUZZTRAN";
 
     $self->{DESCRIPTION}   = "Protein pattern search after translation (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -142,11 +188,7 @@ sub new {
 	"frame", 	# Frame(s) to translate -- Translation frames (-frame)
 	"table", 	# Code to use -- Genetic codes (-table)
 	"output", 	# output Section
-	"outf", 	# outf (-outf)
-	"mmshow", 	# Show mismatches (-mmshow)
-	"accshow", 	# Show accession numbers (-accshow)
-	"usashow", 	# Show USA (-usashow)
-	"descshow", 	# Show descriptions (-descshow)
+	"outfile", 	# outfile (-outfile)
 	"auto",
 
     ];
@@ -163,11 +205,7 @@ sub new {
 	"frame" => 'Excl',
 	"table" => 'Excl',
 	"output" => 'Paragraph',
-	"outf" => 'OutFile',
-	"mmshow" => 'Switch',
-	"accshow" => 'Switch',
-	"usashow" => 'Switch',
-	"descshow" => 'Switch',
+	"outfile" => 'OutFile',
 	"auto" => 'String',
 
     };
@@ -199,20 +237,8 @@ sub new {
 	},
 	"output" => {
 	},
-	"outf" => {
-		"perl" => '" -outf=$value"',
-	},
-	"mmshow" => {
-		"perl" => '($value)? " -mmshow" : ""',
-	},
-	"accshow" => {
-		"perl" => '($value)? " -accshow" : ""',
-	},
-	"usashow" => {
-		"perl" => '($value)? " -usashow" : ""',
-	},
-	"descshow" => {
-		"perl" => '($value)? " -descshow" : ""',
+	"outfile" => {
+		"perl" => '" -outfile=$value"',
 	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
@@ -239,12 +265,8 @@ sub new {
 	"mismatch" => 3,
 	"frame" => 4,
 	"table" => 5,
-	"outf" => 6,
-	"mmshow" => 7,
-	"accshow" => 8,
-	"usashow" => 9,
-	"descshow" => 10,
-	"auto" => 11,
+	"outfile" => 6,
+	"auto" => 7,
 	"fuzztran" => 0
 
     };
@@ -261,11 +283,7 @@ sub new {
 	"mismatch",
 	"frame",
 	"table",
-	"outf",
-	"mmshow",
-	"accshow",
-	"usashow",
-	"descshow",
+	"outfile",
 	"auto",
 
     ];
@@ -285,11 +303,7 @@ sub new {
 	"frame" => 0,
 	"table" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"usashow" => 0,
-	"descshow" => 0,
+	"outfile" => 0,
 	"auto" => 1,
 	"fuzztran" => 1
 
@@ -306,11 +320,7 @@ sub new {
 	"frame" => 0,
 	"table" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"usashow" => 0,
-	"descshow" => 0,
+	"outfile" => 0,
 	"auto" => 0,
 
     };
@@ -326,11 +336,7 @@ sub new {
 	"frame" => 1,
 	"table" => 1,
 	"output" => 0,
-	"outf" => 1,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"usashow" => 0,
-	"descshow" => 0,
+	"outfile" => 1,
 	"auto" => 0,
 
     };
@@ -346,11 +352,7 @@ sub new {
 	"frame" => "Frame(s) to translate -- Translation frames (-frame)",
 	"table" => "Code to use -- Genetic codes (-table)",
 	"output" => "output Section",
-	"outf" => "outf (-outf)",
-	"mmshow" => "Show mismatches (-mmshow)",
-	"accshow" => "Show accession numbers (-accshow)",
-	"usashow" => "Show USA (-usashow)",
-	"descshow" => "Show descriptions (-descshow)",
+	"outfile" => "outfile (-outfile)",
 	"auto" => "",
 
     };
@@ -366,11 +368,7 @@ sub new {
 	"frame" => 0,
 	"table" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"usashow" => 0,
-	"descshow" => 0,
+	"outfile" => 0,
 	"auto" => 0,
 
     };
@@ -382,7 +380,7 @@ sub new {
 	"advanced" => ['frame','table',],
 	"frame" => ['1','1','2','2','3','3','F','Forward three frames','-1','-1','-2','-2','-3','-3','R','Reverse three frames','6','All six frames',],
 	"table" => ['0','Standard','1','Standard (with alternative initiation codons)','2','Vertebrate Mitochondrial','3','Yeast Mitochondrial','4','Mold, Protozoan, Coelenterate Mitochondrial and Mycoplasma/Spiroplasma','5','Invertebrate Mitochondrial','6','Ciliate Macronuclear and Dasycladacean','9','Echinoderm Mitochondrial','10','Euplotid Nuclear','11','Bacterial','12','Alternative Yeast Nuclear','13','Ascidian Mitochondrial','14','Flatworm Mitochondrial','15','Blepharisma Macronuclear','16','Chlorophycean Mitochondrial','21','Trematode Mitochondrial','22','Scenedesmus obliquus','23','Thraustochytrium Mitochondrial',],
-	"output" => ['outf','mmshow','accshow','usashow','descshow',],
+	"output" => ['outfile',],
     };
 
     $self->{FLIST}  = {
@@ -397,11 +395,7 @@ sub new {
 	"mismatch" => '0',
 	"frame" => '1',
 	"table" => '0',
-	"outf" => 'outf.out',
-	"mmshow" => '0',
-	"accshow" => '0',
-	"usashow" => '0',
-	"descshow" => '0',
+	"outfile" => 'outfile.out',
 
     };
 
@@ -416,11 +410,7 @@ sub new {
 	"frame" => { "perl" => '1' },
 	"table" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
-	"outf" => { "perl" => '1' },
-	"mmshow" => { "perl" => '1' },
-	"accshow" => { "perl" => '1' },
-	"usashow" => { "perl" => '1' },
-	"descshow" => { "perl" => '1' },
+	"outfile" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
 
     };
@@ -459,11 +449,7 @@ sub new {
 	"frame" => 0,
 	"table" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"usashow" => 0,
-	"descshow" => 0,
+	"outfile" => 0,
 	"auto" => 0,
 
     };
@@ -479,11 +465,7 @@ sub new {
 	"frame" => 1,
 	"table" => 1,
 	"output" => 0,
-	"outf" => 1,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"usashow" => 0,
-	"descshow" => 0,
+	"outfile" => 1,
 	"auto" => 0,
 
     };
@@ -493,8 +475,8 @@ sub new {
     };
 
     $self->{COMMENT}  = {
-	"usashow" => [
-		"Showing the USA (Uniform Sequence Address) of the matching sequences will turn your output file into a \'list\' file that can then be read in by many other EMBOSS programs by specifying it with a \'\@\' in front of the filename.",
+	"pattern" => [
+		"The standard IUPAC one-letter codes for the amino acids are used. <BR>  The symbol `x\' is used for a position where any amino acid is accepted. <BR>  Ambiguities are indicated by listing the acceptable amino acids for a given position, between square parentheses `[ ]\'. For example: [ALT] stands for Ala or Leu or Thr. <BR>  Ambiguities are also indicated by listing between a pair of curly brackets `{ }\' the amino acids that are not accepted at a gven position. For example: {AM} stands for any amino acid except Ala and Met. <BR>  Each element in a pattern is separated from its neighbor by a `-\'. (Optional in fuzztran) <BR>  Repetition of an element of the pattern can be indicated by following that element with a numerical value or a numerical range between parenthesis. Examples: x(3) corresponds to x-x-x, x(2,4) corresponds to x-x or x-x-x or x-x-x-x. <BR>  When a pattern is restricted to either the N- or C-terminal of a sequence, that pattern either starts with a `<\' symbol or respectively ends with a `>\' symbol. <BR>  A period ends the pattern. (Optional in fuzztran). <BR>  For example, [DE](2)HS{P}X(2)PX(2,4)C",
 	],
 
     };

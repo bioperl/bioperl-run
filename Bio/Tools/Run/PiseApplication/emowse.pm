@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::emowse
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,17 @@ Bio::Tools::Run::PiseApplication::emowse
 
 	EMOWSE	Protein identification by mass spectrometry (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/emowse.html 
+         for available values):
 
 
 		emowse (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequences (Sequence)
 			sequences -- protein [sequences] (-sequences)
@@ -34,14 +42,8 @@ Bio::Tools::Run::PiseApplication::emowse
 		infile (InFile)
 			Name of molecular weight data file (-infile)
 
-		required (Paragraph)
-			required Section
-
 		weight (Integer)
 			Whole sequence molwt (-weight)
-
-		advanced (Paragraph)
-			advanced Section
 
 		enzyme (Excl)
 			Enzyme or reagent -- Enzymes and reagents (-enzyme)
@@ -61,14 +63,68 @@ Bio::Tools::Run::PiseApplication::emowse
 		partials (Float)
 			Partials factor (-partials)
 
-		output (Paragraph)
-			output Section
-
 		outfile (OutFile)
 			outfile (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/emowse.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -84,20 +140,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $emowse = Bio::Tools::Run::PiseApplication::emowse->new($remote, $email, @params);
+ Usage   : my $emowse = Bio::Tools::Run::PiseApplication::emowse->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::emowse object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $emowse = $factory->program('emowse');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::emowse.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/emowse.pm
 
@@ -106,6 +162,8 @@ sub new {
     $self->{TITLE}   = "EMOWSE";
 
     $self->{DESCRIPTION}   = "Protein identification by mass spectrometry (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 

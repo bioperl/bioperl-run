@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::emma
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,27 +23,21 @@ Bio::Tools::Run::PiseApplication::emma
 
 	EMMA	Multiple alignment program - interface to ClustalW program (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/emma.html 
+         for available values):
 
 
 		emma (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		inseqs (Sequence)
 			inseqs -- gapany [sequences] (-inseqs)
 			pipe: seqsfile
-
-		advanced (Paragraph)
-			advanced Section
-
-		dendsection (Paragraph)
-			dendsection Section
 
 		onlydend (Switch)
 			Do you want to produce only the dendrogram file? (-onlydend)
@@ -49,9 +51,6 @@ Bio::Tools::Run::PiseApplication::emma
 		insist (Switch)
 			Insist that the sequence type is changed to protein (-insist)
 
-		slowsection (Paragraph)
-			slowsection Section
-
 		slowfast (Excl)
 			Please select one -- Do you want to carry out slow or fast pairwise alignment (-slowfast)
 
@@ -60,9 +59,6 @@ Bio::Tools::Run::PiseApplication::emma
 
 		pwgapv (Float)
 			Input value for gap extension penalty (-pwgapv)
-
-		protsection (Paragraph)
-			protsection Section
 
 		prot (Switch)
 			Do not change this value (-prot)
@@ -75,9 +71,6 @@ Bio::Tools::Run::PiseApplication::emma
 
 		pairwisedata (String)
 			Input the filename of your pairwise matrix (-pairwisedata)
-
-		fastsection (Paragraph)
-			fastsection Section
 
 		ktup (Integer)
 			Fast pairwise alignment: similarity scores: K-Tuple size (-ktup)
@@ -94,9 +87,6 @@ Bio::Tools::Run::PiseApplication::emma
 		nopercent (Switch)
 			Fast pairwise alignment: similarity scores: suppresses percentage score (-nopercent)
 
-		matrixsection (Paragraph)
-			matrixsection Section
-
 		matrix (Excl)
 			Select matrix -- Protein multiple alignment matrix options (-matrix)
 
@@ -106,17 +96,11 @@ Bio::Tools::Run::PiseApplication::emma
 		mamatrix (String)
 			Input the filename of your alignment matrix (-mamatrix)
 
-		gapsection (Paragraph)
-			gapsection Section
-
 		gapc (Float)
 			Enter gap penalty (-gapc)
 
 		gapv (Float)
 			Enter variable gap penalty (-gapv)
-
-		unweighted (Switch)
-			Transitions are unweighted (-unweighted)
 
 		endgaps (Switch)
 			Use end gap separation penalty (-endgaps)
@@ -136,9 +120,6 @@ Bio::Tools::Run::PiseApplication::emma
 		maxdiv (Integer)
 			Cut-off to delay the alignment of the most divergent sequences (-maxdiv)
 
-		output (Paragraph)
-			output Section
-
 		outseq (OutFile)
 			The sequence alignment output filename (-outseq)
 			pipe: seqsfile
@@ -151,6 +132,63 @@ Bio::Tools::Run::PiseApplication::emma
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/emma.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -166,20 +204,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $emma = Bio::Tools::Run::PiseApplication::emma->new($remote, $email, @params);
+ Usage   : my $emma = Bio::Tools::Run::PiseApplication::emma->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::emma object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $emma = $factory->program('emma');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::emma.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/emma.pm
 
@@ -188,6 +226,8 @@ sub new {
     $self->{TITLE}   = "EMMA";
 
     $self->{DESCRIPTION}   = "Multiple alignment program - interface to ClustalW program (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -244,7 +284,6 @@ sub new {
 	"gapsection", 	# gapsection Section
 	"gapc", 	# Enter gap penalty (-gapc)
 	"gapv", 	# Enter variable gap penalty (-gapv)
-	"unweighted", 	# Transitions are unweighted (-unweighted)
 	"endgaps", 	# Use end gap separation penalty (-endgaps)
 	"gapdist", 	# Gap separation distance (-gapdist)
 	"norgap", 	# No residue specific gaps (-norgap)
@@ -292,7 +331,6 @@ sub new {
 	"gapsection" => 'Paragraph',
 	"gapc" => 'Float',
 	"gapv" => 'Float',
-	"unweighted" => 'Switch',
 	"endgaps" => 'Switch',
 	"gapdist" => 'Integer',
 	"norgap" => 'Switch',
@@ -393,9 +431,6 @@ sub new {
 	"gapv" => {
 		"perl" => '(defined $value && $value != $vdef)? " -gapv=$value" : ""',
 	},
-	"unweighted" => {
-		"perl" => '($value)? " -unweighted" : ""',
-	},
 	"endgaps" => {
 		"perl" => '($value)? " -endgaps" : ""',
 	},
@@ -467,17 +502,16 @@ sub new {
 	"mamatrix" => 20,
 	"gapc" => 21,
 	"gapv" => 22,
-	"unweighted" => 23,
-	"endgaps" => 24,
-	"gapdist" => 25,
-	"norgap" => 26,
-	"hgapres" => 27,
-	"nohgap" => 28,
-	"maxdiv" => 29,
-	"outseq" => 30,
-	"outseq_sformat" => 31,
-	"dendoutfile" => 32,
-	"auto" => 33,
+	"endgaps" => 23,
+	"gapdist" => 24,
+	"norgap" => 25,
+	"hgapres" => 26,
+	"nohgap" => 27,
+	"maxdiv" => 28,
+	"outseq" => 29,
+	"outseq_sformat" => 30,
+	"dendoutfile" => 31,
+	"auto" => 32,
 	"emma" => 0
 
     };
@@ -516,7 +550,6 @@ sub new {
 	"mamatrix",
 	"gapc",
 	"gapv",
-	"unweighted",
 	"endgaps",
 	"gapdist",
 	"norgap",
@@ -566,7 +599,6 @@ sub new {
 	"gapsection" => 0,
 	"gapc" => 0,
 	"gapv" => 0,
-	"unweighted" => 0,
 	"endgaps" => 0,
 	"gapdist" => 0,
 	"norgap" => 0,
@@ -614,7 +646,6 @@ sub new {
 	"gapsection" => 0,
 	"gapc" => 0,
 	"gapv" => 0,
-	"unweighted" => 0,
 	"endgaps" => 0,
 	"gapdist" => 0,
 	"norgap" => 0,
@@ -661,7 +692,6 @@ sub new {
 	"gapsection" => 0,
 	"gapc" => 0,
 	"gapv" => 0,
-	"unweighted" => 0,
 	"endgaps" => 0,
 	"gapdist" => 0,
 	"norgap" => 0,
@@ -708,7 +738,6 @@ sub new {
 	"gapsection" => "gapsection Section",
 	"gapc" => "Enter gap penalty (-gapc)",
 	"gapv" => "Enter variable gap penalty (-gapv)",
-	"unweighted" => "Transitions are unweighted (-unweighted)",
 	"endgaps" => "Use end gap separation penalty (-endgaps)",
 	"gapdist" => "Gap separation distance (-gapdist)",
 	"norgap" => "No residue specific gaps (-norgap)",
@@ -755,7 +784,6 @@ sub new {
 	"gapsection" => 0,
 	"gapc" => 0,
 	"gapv" => 0,
-	"unweighted" => 0,
 	"endgaps" => 0,
 	"gapdist" => 0,
 	"norgap" => 0,
@@ -784,7 +812,7 @@ sub new {
 	"matrixsection" => ['matrix','dnamatrix','mamatrix',],
 	"matrix" => ['b','blosum','p','pam','g','gonnet','i','id','o','own',],
 	"dnamatrix" => ['i','iub','c','clustalw','o','own',],
-	"gapsection" => ['gapc','gapv','unweighted','endgaps','gapdist','norgap','hgapres','nohgap',],
+	"gapsection" => ['gapc','gapv','endgaps','gapdist','norgap','hgapres','nohgap',],
 	"output" => ['outseq','outseq_sformat','dendoutfile',],
 	"outseq_sformat" => ['fasta','fasta','gcg','gcg','phylip','phylip','embl','embl','swiss','swiss','ncbi','ncbi','nbrf','nbrf','genbank','genbank','ig','ig','codata','codata','strider','strider','acedb','acedb','staden','staden','text','text','fitch','fitch','msf','msf','clustal','clustal','phylip','phylip','phylip3','phylip3','asn1','asn1',],
     };
@@ -819,7 +847,6 @@ sub new {
 	"mamatrix" => 'NULL',
 	"gapc" => '10.0',
 	"gapv" => '5.0',
-	"unweighted" => '0',
 	"endgaps" => '0',
 	"gapdist" => '8',
 	"norgap" => '0',
@@ -864,7 +891,6 @@ sub new {
 	"gapsection" => { "perl" => '1' },
 	"gapc" => { "perl" => '1' },
 	"gapv" => { "perl" => '1' },
-	"unweighted" => { "perl" => '1' },
 	"endgaps" => { "perl" => '1' },
 	"gapdist" => { "perl" => '1' },
 	"norgap" => { "perl" => '1' },
@@ -937,7 +963,6 @@ sub new {
 	"gapsection" => 0,
 	"gapc" => 0,
 	"gapv" => 0,
-	"unweighted" => 0,
 	"endgaps" => 0,
 	"gapdist" => 0,
 	"norgap" => 0,
@@ -984,7 +1009,6 @@ sub new {
 	"gapsection" => 0,
 	"gapc" => 0,
 	"gapv" => 0,
-	"unweighted" => 0,
 	"endgaps" => 0,
 	"gapdist" => 0,
 	"norgap" => 0,
@@ -1042,9 +1066,6 @@ sub new {
 	],
 	"gapv" => [
 		"The penalty for extending a gap by 1 residue. Increasing the gap extension penalty will make gaps shorter. Terminal gaps are not penalised. Allowed values: Positive foating point number",
-	],
-	"unweighted" => [
-		"The \'Transition weight\' gives transitions (A <--> G or C <--> T i.e. purine-purine or pyrimidine-pyrimidine substitutions) a weight between 0 and 1; a weight of zero means that the transitions are scored as mismatches, while a weight of 1 gives the transitions the match score. For distantly related DNA sequences, the weight should be near to zero; for closely related sequences it can be useful to assign a higher score.",
 	],
 	"endgaps" => [
 		"\'End gap separation\' treats end gaps just like internal gaps for the purposes of avoiding gaps that are too close (set by \'gap separation distance\'). If you turn this off, end gaps will be ignored for this purpose. This is useful when you wish to align fragments where the end gaps are not biologically meaningful.",

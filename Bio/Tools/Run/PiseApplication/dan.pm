@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::dan
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::dan
 
 	DAN	Calculates DNA RNA/DNA melting temperature (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/dan.html 
+         for available values):
 
 
 		dan (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- DNA [sequences] (-sequence)
 			pipe: seqsfile
-
-		required (Paragraph)
-			required Section
 
 		windowsize (Integer)
 			Enter window size (-windowsize)
@@ -46,14 +51,8 @@ Bio::Tools::Run::PiseApplication::dan
 		saltconc (Float)
 			Enter salt concentration (mM) (-saltconc)
 
-		advanced (Paragraph)
-			advanced Section
-
 		rna (Switch)
 			Use RNA data values (-rna)
-
-		productsection (Paragraph)
-			productsection Section
 
 		product (Switch)
 			Prompt for product values (-product)
@@ -67,17 +66,11 @@ Bio::Tools::Run::PiseApplication::dan
 		prodlen (Integer)
 			Enter the product length (-prodlen)
 
-		thermosection (Paragraph)
-			thermosection Section
-
 		thermo (Switch)
 			Thermodynamic calculations (-thermo)
 
 		temperature (Float)
 			Enter temperature (-temperature)
-
-		output (Paragraph)
-			output Section
 
 		plot (Switch)
 			Produce a plot (-plot)
@@ -93,21 +86,65 @@ Bio::Tools::Run::PiseApplication::dan
 
 		auto (String)
 
-
 		psouput (String)
 
+=head1 FEEDBACK
 
-		psresults (Results)
+=head2 Mailing Lists
 
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
 
-		metaresults (Results)
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
+=head2 Reporting Bugs
 
-		dataresults (Results)
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
 
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
 
-		pngresults (Results)
+=head1 AUTHOR
 
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/dan.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -123,20 +160,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $dan = Bio::Tools::Run::PiseApplication::dan->new($remote, $email, @params);
+ Usage   : my $dan = Bio::Tools::Run::PiseApplication::dan->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::dan object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $dan = $factory->program('dan');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::dan.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/dan.pm
 
@@ -145,6 +182,8 @@ sub new {
     $self->{TITLE}   = "DAN";
 
     $self->{DESCRIPTION}   = "Calculates DNA RNA/DNA melting temperature (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -753,7 +792,7 @@ sub new {
 
     $self->{COMMENT}  = {
 	"windowsize" => [
-		"The values of melting point and other thermodynamic properties of the sequence are determined by taking a short length of sequence known as a window and determining the properties of the sequence in that window. The window is incrementally moved along the sequence with the properties being calcualted at each new position.",
+		"The values of melting point and other thermodynamic properties of the sequence are determined by taking a short length of sequence known as a window and determining the properties of the sequence in that window. The window is incrementally moved along the sequence with the properties being calculated at each new position.",
 	],
 	"shiftincrement" => [
 		"This is the amount by which the window is moved at each increment in order to find the melting point and other properties along the sequence.",

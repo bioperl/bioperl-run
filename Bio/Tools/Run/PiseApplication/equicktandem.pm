@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::equicktandem
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::equicktandem
 
 	EQUICKTANDEM	Finds tandem repeats (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/equicktandem.html 
+         for available values):
 
 
 		equicktandem (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- dna [single sequence] (-sequence)
 			pipe: seqfile
-
-		required (Paragraph)
-			required Section
 
 		maxrepeat (Integer)
 			Maximum repeat size (-maxrepeat)
@@ -40,14 +45,71 @@ Bio::Tools::Run::PiseApplication::equicktandem
 		threshold (Integer)
 			Threshold score (-threshold)
 
-		output (Paragraph)
-			output Section
-
 		outfile (OutFile)
 			outfile (-outfile)
 
+		origfile (OutFile)
+			origfile (-origfile)
+
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/equicktandem.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -63,20 +125,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $equicktandem = Bio::Tools::Run::PiseApplication::equicktandem->new($remote, $email, @params);
+ Usage   : my $equicktandem = Bio::Tools::Run::PiseApplication::equicktandem->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::equicktandem object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $equicktandem = $factory->program('equicktandem');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::equicktandem.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/equicktandem.pm
 
@@ -85,6 +147,8 @@ sub new {
     $self->{TITLE}   = "EQUICKTANDEM";
 
     $self->{DESCRIPTION}   = "Finds tandem repeats (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -116,6 +180,7 @@ sub new {
 	"threshold", 	# Threshold score (-threshold)
 	"output", 	# output Section
 	"outfile", 	# outfile (-outfile)
+	"origfile", 	# origfile (-origfile)
 	"auto",
 
     ];
@@ -130,6 +195,7 @@ sub new {
 	"threshold" => 'Integer',
 	"output" => 'Paragraph',
 	"outfile" => 'OutFile',
+	"origfile" => 'OutFile',
 	"auto" => 'String',
 
     };
@@ -156,6 +222,9 @@ sub new {
 	"outfile" => {
 		"perl" => '" -outfile=$value"',
 	},
+	"origfile" => {
+		"perl" => '($value)? " -origfile=$value" : ""',
+	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
 	},
@@ -180,7 +249,8 @@ sub new {
 	"maxrepeat" => 2,
 	"threshold" => 3,
 	"outfile" => 4,
-	"auto" => 5,
+	"origfile" => 5,
+	"auto" => 6,
 	"equicktandem" => 0
 
     };
@@ -195,6 +265,7 @@ sub new {
 	"maxrepeat",
 	"threshold",
 	"outfile",
+	"origfile",
 	"auto",
 
     ];
@@ -212,6 +283,7 @@ sub new {
 	"threshold" => 0,
 	"output" => 0,
 	"outfile" => 0,
+	"origfile" => 0,
 	"auto" => 1,
 	"equicktandem" => 1
 
@@ -226,6 +298,7 @@ sub new {
 	"threshold" => 0,
 	"output" => 0,
 	"outfile" => 0,
+	"origfile" => 0,
 	"auto" => 0,
 
     };
@@ -239,6 +312,7 @@ sub new {
 	"threshold" => 1,
 	"output" => 0,
 	"outfile" => 1,
+	"origfile" => 0,
 	"auto" => 0,
 
     };
@@ -252,6 +326,7 @@ sub new {
 	"threshold" => "Threshold score (-threshold)",
 	"output" => "output Section",
 	"outfile" => "outfile (-outfile)",
+	"origfile" => "origfile (-origfile)",
 	"auto" => "",
 
     };
@@ -265,6 +340,7 @@ sub new {
 	"threshold" => 0,
 	"output" => 0,
 	"outfile" => 0,
+	"origfile" => 0,
 	"auto" => 0,
 
     };
@@ -273,7 +349,7 @@ sub new {
 
 	"input" => ['sequence',],
 	"required" => ['maxrepeat','threshold',],
-	"output" => ['outfile',],
+	"output" => ['outfile','origfile',],
     };
 
     $self->{FLIST}  = {
@@ -300,6 +376,7 @@ sub new {
 	"threshold" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
 	"outfile" => { "perl" => '1' },
+	"origfile" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
 
     };
@@ -336,6 +413,7 @@ sub new {
 	"threshold" => 0,
 	"output" => 0,
 	"outfile" => 0,
+	"origfile" => 0,
 	"auto" => 0,
 
     };
@@ -349,6 +427,7 @@ sub new {
 	"threshold" => 1,
 	"output" => 0,
 	"outfile" => 1,
+	"origfile" => 0,
 	"auto" => 0,
 
     };

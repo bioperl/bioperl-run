@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::fuzznuc
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,24 +23,21 @@ Bio::Tools::Run::PiseApplication::fuzznuc
 
 	FUZZNUC	Nucleic acid pattern search (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/fuzznuc.html 
+         for available values):
 
 
 		fuzznuc (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		sequence (Sequence)
 			sequence -- dna [sequences] (-sequence)
 			pipe: seqsfile
-
-		required (Paragraph)
-			required Section
 
 		pattern (String)
 			Search pattern (-pattern)
@@ -40,32 +45,71 @@ Bio::Tools::Run::PiseApplication::fuzznuc
 		mismatch (Integer)
 			Number of mismatches (-mismatch)
 
-		advanced (Paragraph)
-			advanced Section
-
 		complement (Switch)
 			Search complementary strand (-complement)
 
-		output (Paragraph)
-			output Section
-
-		outf (OutFile)
-			outf (-outf)
-
-		mmshow (Switch)
-			Show mismatches (-mmshow)
-
-		accshow (Switch)
-			Show accession numbers (-accshow)
-
-		descshow (Switch)
-			Show descriptions (-descshow)
-
-		usashow (Switch)
-			Show USA (-usashow)
+		outfile (OutFile)
+			outfile (-outfile)
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/fuzznuc.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -81,20 +125,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $fuzznuc = Bio::Tools::Run::PiseApplication::fuzznuc->new($remote, $email, @params);
+ Usage   : my $fuzznuc = Bio::Tools::Run::PiseApplication::fuzznuc->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::fuzznuc object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $fuzznuc = $factory->program('fuzznuc');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::fuzznuc.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/fuzznuc.pm
 
@@ -103,6 +147,8 @@ sub new {
     $self->{TITLE}   = "FUZZNUC";
 
     $self->{DESCRIPTION}   = "Nucleic acid pattern search (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -136,11 +182,7 @@ sub new {
 	"advanced", 	# advanced Section
 	"complement", 	# Search complementary strand (-complement)
 	"output", 	# output Section
-	"outf", 	# outf (-outf)
-	"mmshow", 	# Show mismatches (-mmshow)
-	"accshow", 	# Show accession numbers (-accshow)
-	"descshow", 	# Show descriptions (-descshow)
-	"usashow", 	# Show USA (-usashow)
+	"outfile", 	# outfile (-outfile)
 	"auto",
 
     ];
@@ -156,11 +198,7 @@ sub new {
 	"advanced" => 'Paragraph',
 	"complement" => 'Switch',
 	"output" => 'Paragraph',
-	"outf" => 'OutFile',
-	"mmshow" => 'Switch',
-	"accshow" => 'Switch',
-	"descshow" => 'Switch',
-	"usashow" => 'Switch',
+	"outfile" => 'OutFile',
 	"auto" => 'String',
 
     };
@@ -189,20 +227,8 @@ sub new {
 	},
 	"output" => {
 	},
-	"outf" => {
-		"perl" => '" -outf=$value"',
-	},
-	"mmshow" => {
-		"perl" => '($value)? " -mmshow" : ""',
-	},
-	"accshow" => {
-		"perl" => '($value)? " -accshow" : ""',
-	},
-	"descshow" => {
-		"perl" => '($value)? " -descshow" : ""',
-	},
-	"usashow" => {
-		"perl" => '($value)? " -usashow" : ""',
+	"outfile" => {
+		"perl" => '" -outfile=$value"',
 	},
 	"auto" => {
 		"perl" => '" -auto -stdout"',
@@ -228,12 +254,8 @@ sub new {
 	"pattern" => 2,
 	"mismatch" => 3,
 	"complement" => 4,
-	"outf" => 5,
-	"mmshow" => 6,
-	"accshow" => 7,
-	"descshow" => 8,
-	"usashow" => 9,
-	"auto" => 10,
+	"outfile" => 5,
+	"auto" => 6,
 	"fuzznuc" => 0
 
     };
@@ -249,11 +271,7 @@ sub new {
 	"pattern",
 	"mismatch",
 	"complement",
-	"outf",
-	"mmshow",
-	"accshow",
-	"descshow",
-	"usashow",
+	"outfile",
 	"auto",
 
     ];
@@ -272,11 +290,7 @@ sub new {
 	"advanced" => 0,
 	"complement" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"descshow" => 0,
-	"usashow" => 0,
+	"outfile" => 0,
 	"auto" => 1,
 	"fuzznuc" => 1
 
@@ -292,11 +306,7 @@ sub new {
 	"advanced" => 0,
 	"complement" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"descshow" => 0,
-	"usashow" => 0,
+	"outfile" => 0,
 	"auto" => 0,
 
     };
@@ -311,11 +321,7 @@ sub new {
 	"advanced" => 0,
 	"complement" => 0,
 	"output" => 0,
-	"outf" => 1,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"descshow" => 0,
-	"usashow" => 0,
+	"outfile" => 1,
 	"auto" => 0,
 
     };
@@ -330,11 +336,7 @@ sub new {
 	"advanced" => "advanced Section",
 	"complement" => "Search complementary strand (-complement)",
 	"output" => "output Section",
-	"outf" => "outf (-outf)",
-	"mmshow" => "Show mismatches (-mmshow)",
-	"accshow" => "Show accession numbers (-accshow)",
-	"descshow" => "Show descriptions (-descshow)",
-	"usashow" => "Show USA (-usashow)",
+	"outfile" => "outfile (-outfile)",
 	"auto" => "",
 
     };
@@ -349,11 +351,7 @@ sub new {
 	"advanced" => 0,
 	"complement" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"descshow" => 0,
-	"usashow" => 0,
+	"outfile" => 0,
 	"auto" => 0,
 
     };
@@ -363,7 +361,7 @@ sub new {
 	"input" => ['sequence',],
 	"required" => ['pattern','mismatch',],
 	"advanced" => ['complement',],
-	"output" => ['outf','mmshow','accshow','descshow','usashow',],
+	"output" => ['outfile',],
     };
 
     $self->{FLIST}  = {
@@ -377,11 +375,7 @@ sub new {
     $self->{VDEF}  = {
 	"mismatch" => '0',
 	"complement" => '0',
-	"outf" => 'outf.out',
-	"mmshow" => '0',
-	"accshow" => '0',
-	"descshow" => '0',
-	"usashow" => '0',
+	"outfile" => 'outfile.out',
 
     };
 
@@ -395,11 +389,7 @@ sub new {
 	"advanced" => { "perl" => '1' },
 	"complement" => { "perl" => '1' },
 	"output" => { "perl" => '1' },
-	"outf" => { "perl" => '1' },
-	"mmshow" => { "perl" => '1' },
-	"accshow" => { "perl" => '1' },
-	"descshow" => { "perl" => '1' },
-	"usashow" => { "perl" => '1' },
+	"outfile" => { "perl" => '1' },
 	"auto" => { "perl" => '1' },
 
     };
@@ -437,11 +427,7 @@ sub new {
 	"advanced" => 0,
 	"complement" => 0,
 	"output" => 0,
-	"outf" => 0,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"descshow" => 0,
-	"usashow" => 0,
+	"outfile" => 0,
 	"auto" => 0,
 
     };
@@ -456,11 +442,7 @@ sub new {
 	"advanced" => 0,
 	"complement" => 0,
 	"output" => 0,
-	"outf" => 1,
-	"mmshow" => 0,
-	"accshow" => 0,
-	"descshow" => 0,
-	"usashow" => 0,
+	"outfile" => 1,
 	"auto" => 0,
 
     };
@@ -470,8 +452,8 @@ sub new {
     };
 
     $self->{COMMENT}  = {
-	"usashow" => [
-		"Showing the USA (Uniform Sequence Address) of the matching sequences will turn your output file into a \'list\' file that can then be read in by many other EMBOSS programs by specifying it with a \'\@\' in front of the filename.",
+	"pattern" => [
+		"The standard IUPAC one-letter codes for the nucleotides are used. <BR>  The symbol `n\' is used for a position where any nucleotide is accepted. <BR>  Ambiguities are indicated by listing the acceptable nucleotides for a given position, between square parentheses `[ ]\'.  For example: [ACG] stands for A or C or G. <BR>  Ambiguities are also indicated by listing between a pair of curly brackets `{ }\' the nucleotides that are not accepted at a given position. For example: {AG} stands for any nucleotides except A and G. <BR>  Each element in a pattern is separated from its neighbor by a `-\'. (Optional in fuzznuc). <BR>  Repetition of an element of the pattern can be indicated by following that element with a numerical value or a numerical range between parenthesis. Examples: N(3) corresponds to N-N-N, N(2,4) corresponds to N-N or N-N-N or N-N-N-N. <BR>  When a pattern is restricted to either the 5\' or 3\' end of a sequence, that pattern either starts with a `<\' symbol or respectively ends with a `>\' symbol. <BR>  A period ends the pattern.  (Optional in fuzznuc). <BR>  For example, [CG](5)TG{A}N(1,5)C",
 	],
 
     };

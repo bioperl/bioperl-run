@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::grailclnt
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -5,7 +13,7 @@ Bio::Tools::Run::PiseApplication::grailclnt
 
 =head1 SYNOPSIS
 
-   #
+  #
 
 =head1 DESCRIPTION
 
@@ -20,11 +28,15 @@ Bio::Tools::Run::PiseApplication::grailclnt
 		Xu, Y., Einstein, J. R., Mural, R.J., Shah, M. and Uberbacher, E.C., (1994) An Improved System for Exon Recognition and Gene Modeling in Human DNA Sequences, Published Presentation: The Second International Conference on Intelligent Systems for Molecular Biology, Stanford University, San Francisco, CA, August 14-17, 1994.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/grailclnt.html 
+         for available values):
 
 
 		grailclnt (String)
-
 
 		seq (Sequence)
 			Sequence
@@ -38,9 +50,6 @@ Bio::Tools::Run::PiseApplication::grailclnt
 		header (Switch)
 			Header
 
-		exons_options (Paragraph)
-			Exons options
-
 		translation (Switch)
 			Translation
 
@@ -52,9 +61,6 @@ Bio::Tools::Run::PiseApplication::grailclnt
 
 		clusters (Switch)
 			Clusters (grail 2)
-
-		gap_options (Paragraph)
-			Gene modelling options
 
 		cluster_file (InFile)
 			grail2exons results file
@@ -81,37 +87,82 @@ Bio::Tools::Run::PiseApplication::grailclnt
 		reverse_strand (Switch)
 			REVERSE_STRAND
 
-		polIIprom_options (Paragraph)
-			Pol II Promoters options
-
 		grail2_file (InFile)
 			grail2exons results file
 			pipe: grail_cluster
-
-		fserr_options (Paragraph)
-			fserr options
 
 		fserr_strand (Excl)
 			Strand
 
 		rpttv_organism (String)
 
-
 		start_seq (String)
-
 
 		end_seq (String)
 
-
 		end_request (String)
-
-
-		input_file (Results)
-
 
 		outfile (OutFile)
 			Result file
 			pipe: grail_cluster
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/grailclnt.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -127,20 +178,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $grailclnt = Bio::Tools::Run::PiseApplication::grailclnt->new($remote, $email, @params);
+ Usage   : my $grailclnt = Bio::Tools::Run::PiseApplication::grailclnt->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::grailclnt object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $grailclnt = $factory->program('grailclnt');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::grailclnt.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/grailclnt.pm
 
@@ -149,6 +200,8 @@ sub new {
     $self->{TITLE}   = "GRAILCLNT";
 
     $self->{DESCRIPTION}   = "Grail client";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Xu, Einstein, Mural, Shah, Uberbacher";
 

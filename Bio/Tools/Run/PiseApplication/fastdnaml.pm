@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::fastdnaml
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -22,21 +30,21 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 		Felsenstein, J.  1981.  Evolutionary trees from DNA sequences:   A maximum likelihood approach.  J. Mol. Evol. 17: 368-376.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/fastdnaml.html 
+         for available values):
 
 
 		fastdnaml (String)
 
-
 		clean_tmp (String)
-
 
 		alignment (Sequence)
 			Sequence Alignment File
 			pipe: readseq_ok_alig
-
-		inputopt (Paragraph)
-			Input Options
 
 		frequencies (Switch)
 			Instructs the program to use empirical base frequencies derived from the sequence data
@@ -65,9 +73,6 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 		non_interleaved (Switch)
 			Interleaved format
 
-		bootopt (Paragraph)
-			Bootstrap Options
-
 		bootstrap (Switch)
 			generates a re-sample of the input data (bootstrap)
 
@@ -85,15 +90,7 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 
 		concat (String)
 
-
 		in_file (String)
-
-
-		bootfiles (Results)
-
-
-		outputopt (Paragraph)
-			Output and Results Options
 
 		outfile (OutFile)
 			Output File
@@ -103,15 +100,6 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 
 		printdata (Switch)
 			Echo of the data in addition to the usual output (printdata)
-
-		tmpfiles (Results)
-
-
-		tmpaligfiles (Results)
-
-
-		arrgtopt (Paragraph)
-			Rearrangements Options
 
 		quickadd (Switch)
 			Decreases the time in initially placing a new sequence in the growing tree (quickadd)
@@ -125,9 +113,6 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 		partial_arrgt (Integer)
 			number of branches to cross in testing rearrangements during the sequential addition phase of tree inference
 
-		categopt (Paragraph)
-			Categories and Weights Options
-
 		categories (InFile)
 			categories file
 
@@ -137,18 +122,69 @@ Bio::Tools::Run::PiseApplication::fastdnaml
 		weights_categories (InFile)
 			Adds both the userweights and categories from a file
 
-		treeopt (Paragraph)
-			User input Tree Options
-
 		user_tree (InFile)
 			User tree - tree(s) file
 
 		user_lengths (Switch)
 			user trees to be read with branch lengths
 
-		tree (Results)
+=head1 FEEDBACK
 
-			pipe: phylip_tree
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/fastdnaml.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -164,20 +200,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $fastdnaml = Bio::Tools::Run::PiseApplication::fastdnaml->new($remote, $email, @params);
+ Usage   : my $fastdnaml = Bio::Tools::Run::PiseApplication::fastdnaml->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::fastdnaml object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $fastdnaml = $factory->program('fastdnaml');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::fastdnaml.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/fastdnaml.pm
 
@@ -186,6 +222,8 @@ sub new {
     $self->{TITLE}   = "fastDNAml";
 
     $self->{DESCRIPTION}   = "construction of phylogenetic trees of DNA sequences using maximum likelihood";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{AUTHORS}   = "Olsen, Matsuda, Hagstrom, Overbeek";
 

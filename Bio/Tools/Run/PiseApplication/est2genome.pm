@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::est2genome
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -15,17 +23,17 @@ Bio::Tools::Run::PiseApplication::est2genome
 
 	EST2GENOME	Align EST and genomic DNA sequences (EMBOSS)
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/est2genome.html 
+         for available values):
 
 
 		est2genome (String)
 
-
 		init (String)
-
-
-		input (Paragraph)
-			input Section
 
 		est (Sequence)
 			EST sequence(s) (-est)
@@ -34,9 +42,6 @@ Bio::Tools::Run::PiseApplication::est2genome
 		genome (Sequence)
 			Genomic sequence (-genome)
 			pipe: seqfile
-
-		advanced (Paragraph)
-			advanced Section
 
 		match (Integer)
 			Score for matching two bases (-match)
@@ -77,9 +82,6 @@ Bio::Tools::Run::PiseApplication::est2genome
 		seed (Integer)
 			Random number seed (-seed)
 
-		output (Paragraph)
-			output Section
-
 		outfile (OutFile)
 			outfile (-outfile)
 
@@ -91,6 +93,63 @@ Bio::Tools::Run::PiseApplication::est2genome
 
 		auto (String)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/est2genome.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
 
 =cut
 
@@ -106,20 +165,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $est2genome = Bio::Tools::Run::PiseApplication::est2genome->new($remote, $email, @params);
+ Usage   : my $est2genome = Bio::Tools::Run::PiseApplication::est2genome->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::est2genome object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $est2genome = $factory->program('est2genome');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::est2genome.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/est2genome.pm
 
@@ -128,6 +187,8 @@ sub new {
     $self->{TITLE}   = "EST2GENOME";
 
     $self->{DESCRIPTION}   = "Align EST and genomic DNA sequences (EMBOSS)";
+
+    $self->{OPT_EMAIL}   = 0;
 
     $self->{CATEGORIES}   =  [  
 
@@ -635,7 +696,7 @@ sub new {
 		"Cost for an intron, independent of length and starting/ending on donor-acceptor sites",
 	],
 	"minscore" => [
-		"You can exclude alignments with scores below a threshold by setting this to be false.",
+		"Exclude alignments with scores below this threshold score.",
 	],
 	"reverse" => [
 		"Reverse the orientation of the EST sequence",
