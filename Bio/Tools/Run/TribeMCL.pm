@@ -150,8 +150,9 @@ use Bio::SeqIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 # You will need to enable mcl and tribe-matrix to use this wrapper. This
 # can be done in (at least) two ways:
@@ -189,8 +190,7 @@ BEGIN {
         $MATRIXPROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,$MATRIXPROGRAM_NAME.($^O =~ /mswin/i ?'.exe':''));
     }
 
-    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE SEARCHIO 
-			  PAIRS MCL MATRIX WEIGHT);
+    @TRIBEMCL_PARAMS = qw(I INPUTTYPE HSP BLASTFILE SEARCHIO PAIRS MCL MATRIX WEIGHT);
     @OTHER_SWITCHES = qw(VERBOSE QUIET); 
 
     # Authorize attribute fields
@@ -204,8 +204,7 @@ sub new {
   my $self = $class->SUPER::new(@args);
   
   my ($attr, $value);
-  (undef,$TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
+  $TMPDIR = $self->io->tempdir(CLEANUP=>1);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -222,16 +221,6 @@ sub new {
   }
   defined($self->weight) || $self->weight(200);
   defined($self->I) || $self->I(3.0);
-  unless ($self->mcl_executable) {
-    if( $self->verbose >= 0 ) {
-      warn "mcl program not found as ".$self->mcl_executable." or not executable. \n"; 
-    }
-  }
-  unless ($self->matrix_executable) {
-    if( $self->verbose >= 0 ) {
-      warn "tribe-matrix program not found as ".$self->matrix_executable." or not executable. \n"; 
-    }
-  }
 
   return $self;
 }
@@ -598,25 +587,6 @@ sub _parse_mcl {
   return \@out;
 }
 
-
-=head2 io
-
- Title   : io
- Usage   : $obj->io($newval)
- Function: Gets a L<Bio::Root::IO> object
- Returns : L<Bio::Root::IO> object
- Args    : none
-
-
-=cut
-
-sub io{
-   my ($self) = @_;
-   unless( defined $self->{'io'} ) {
-       $self->{'io'} = new Bio::Root::IO(-verbose => $self->verbose());
-   }
-    return $self->{'io'};
-}
 
 1;
 
