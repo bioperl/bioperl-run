@@ -46,6 +46,8 @@ Wrapper for Vista
                                         'end'=>1500,
                                         'tickdist'=>100,
                                         'bases'=>1000,
+                                        'java_param'=>"-Xmx128m",
+                                        'num_pages'=>1
                                         'color'=> {'EXON'=>'100 0 0',
                                                    'CNS'=>'0 0 100'},
                                         'quiet'=>1);
@@ -153,10 +155,10 @@ BEGIN {
                       'title'   => 'VISTA PLOT',
                       'numwindows'=>4);
 
-    @VISTA_PARAMS=qw(JAVA OUTFILE MIN_PERC_ID QUIET VERBOSE ANNOTATION_FORMAT
+    @VISTA_PARAMS=qw(JAVA JAVA_PARAM OUTFILE MIN_PERC_ID QUIET VERBOSE ANNOTATION_FORMAT
                      REGION_FILE SCORE_FILE ALIGNMENT_FILE CONTIGS_FILE DIFFS PLOTFILE
-                     MIN_LENGTH PLOTMIN ANNOTATION BASES TICKDIST RESOLUTION TITLE
-                     WINDOW NUMWINDOWS START END NUM_PLOT_LINES LEGEND FILENAME 
+                     MIN_LENGTH PLOTMIN ANNOTATION BASES TICKDIST RESOLUTION TITLE PAPER
+                     WINDOW NUMWINDOWS START END NUM_PLOT_LINES LEGEND FILENAME NUM_PAGES
                      AXIS_LABEL TICKS_FILE COLOR USE_ORDER GAPS SNPS_FILE REPEATS_FILE 
                      FILTER_REPEATS);
 
@@ -386,7 +388,8 @@ sub _make_plotfile {
   print $tfh1 "TICKS_FILE ".$self->ticks_file ."\n\n" if $self->ticks_file;
   print $tfh1 "GAPS ".$self->gaps ."\n\n"if $self->gaps;
   print $tfh1 "REPEATS_FILE ".$self->repeats_file ."\n\n" if $self->repeats_file;
-  print $tfh1 "FILTER_REPEATS".$self->filter_repeats ."\n\n" if $self->filter_repeats;
+  print $tfh1 "FILTER_REPEATS ".$self->filter_repeats ."\n\n" if $self->filter_repeats;
+  print $tfh1 "NUM_PAGES ".$self->num_pages ."\n\n" if $self->num_pages;
   print $tfh1 "START ".$self->start ."\n\n" if $self->start;
   print $tfh1 "END ".$self->end ."\n\n" if $self->end;
   my $color = $self->color;
@@ -410,9 +413,8 @@ sub _make_plotfile {
 sub _dump2gff {
   my ($self,$feat) = @_;
   my ($tfh1,$file) = $self->io->tempfile(-dir=>$self->tempdir);
-  my @CDS = grep {$_->primary_tag eq 'CDS'}@$feat;
-  foreach my $cds(@CDS){
-    print $tfh1 $cds->gff_string."\n";
+  foreach my $f(@$feat){
+    print $tfh1 $f->gff_string."\n";
   }
   close ($tfh1);
   undef $tfh1;
@@ -426,10 +428,11 @@ sub _run_Vista {
     $self->debug( "Running Vista\n");
     my $java = $self->java;
     
-    my $cmd  =   $self->java.' Vista ';
+    my $cmd  =   $self->java." ".$self->java_param.' Vista ';
     $cmd .= " -q " if $self->quiet || $self->verbose < 0;
     $cmd .= " -d " if $self->debug;
     $cmd .= $infile;
+    $self->debug($cmd);
 	 my $status = system ($cmd);
 
    $self->throw("Problem running Vista: $? \n") if $status != 0;
