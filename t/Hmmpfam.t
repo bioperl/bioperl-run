@@ -10,7 +10,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 7;
+   $NTESTS = 8;
    plan tests => $NTESTS;
 }
 
@@ -26,10 +26,12 @@ use Bio::SeqIO;
 use Bio::Seq;
 
 my $db =  Bio::Root::IO->catfile("t","data","pfam_sample_R11");
-my @params = ('DB',$db);
+my @params = ('DB'=>$db,'E'=>5);
+
 
 my  $factory = Bio::Tools::Run::Hmmpfam->new(@params);
 ok $factory->isa('Bio::Tools::Run::Hmmpfam');
+ok $factory->E, 5;
 my $prot_file=  Bio::Root::IO->catfile("t","data","hmmpfam_protein_input");
 
 my $seq1 = Bio::Seq->new();
@@ -43,7 +45,16 @@ unless ($hmmpfam_present) {
        exit 0;
 }
 
-my @feat = $factory->predict_protein_features($seq1);
+my $searchio = $factory->predict_protein_features($seq1);
+
+my @feat;
+while (my $result = $searchio->next_result){
+  while(my $hit = $result->next_hit){
+    while (my $hsp = $hit->next_hsp){
+      push @feat, $hsp;
+    }
+  }
+}
 
 ok $feat[0]->isa('Bio::SeqFeatureI');
 ok ($feat[0]->feature1->start,25);
