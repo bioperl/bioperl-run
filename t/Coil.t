@@ -10,21 +10,23 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 5;
+   $NTESTS = 4;
    plan tests => $NTESTS;
 }
 
 END {
    foreach ( $Test::ntest..$NTESTS ) {
-       skip('Unable to run Seg tests, exe may not be installed',1);
+       skip('Unable to run Coil tests, exe may not be installed or configured properly',1);
    }
 }
-ok(1);
 use Bio::Tools::Run::Coil;
 use Bio::Root::IO;
 use Bio::SeqIO;
-use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use Bio::BioToEns::Beacon;
+
+if(! $ENV{'COILSDIR'}){
+        warn("Need to define env variable COILSDIR to run test");
+        exit(0);
+}
 
 my  $factory = Bio::Tools::Run::Coil->new();
 ok $factory->isa('Bio::Tools::Run::Coil');
