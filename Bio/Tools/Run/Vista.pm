@@ -179,15 +179,21 @@ sub AUTOLOAD {
 
     Title   :   new
     Usage   :   my $vis = Bio::Tools::Run::Vista->new('outfile'=>$out,
-                                      'title' => "My Vista Plot",
-                                        'annotation'=>$gff_file,
+                                        'title' => "My Vista Plot",
+                                        'annotation'=>\@features,
                                         'annotation_format'=>'GFF',
-                                        'regmin'=>75,
-                                        'regmax'=>100,
-                                        'min'   => 50,
+                                        'min_perc_id'=>75,
+                                        'min_length'=>100,
+                                        'plotmin'   => 50,
                                         'tickdist' => 2000,
                                         'window'=>40,
                                         'numwindows'=>4,
+                                        'start'=>50,
+                                        'end'=>1500,
+                                        'tickdist'=>100,
+                                        'bases'=>1000,
+                                        'color'=> {'EXON'=>'100 0 0',
+                                                   'CNS'=>'0 0 100'},
                                         'quiet'=>1);
     Function:   Construtor for Vista wrapper
     Args    :   outfile - location of the pdf generated
@@ -255,18 +261,20 @@ sub java {
 
  Title   : run
  Usage   : my @genes = $self->run($seq)
- Function: runs Vista and creates an array of features
- Returns : An Array of SeqFeatures
- Args    : A Bio::PrimarySeqI
+ Function: runs Vista 
+ Returns : A boolean 1 if no errors 
+ Args    : Argument 1: Bio::Align::Align required
+           Argument 2: a string or number, which is the sequence id of the
+                       reference sequence or the rank of the sequence
+                       in the alignment
 
 =cut
 
 sub run{
-    my ($self,$seq,$ref) = @_;
+    my ($self,$align,$ref) = @_;
     $ref ||=1;
-    my $infile = $self->_setinput($seq,$ref);
-    my @tss = $self->_run_Vista($infile);
-    return @tss;
+    my $infile = $self->_setinput($align,$ref);
+    return $self->_run_Vista($infile);
 
 }
 
@@ -283,8 +291,7 @@ sub run{
 
 sub _setinput {
     my ($self,$sim_aln,$ref) = @_;
-    #better be a file
-    $sim_aln->isa("Bio::Align::AlignI") || $self->throw("Expecting a Bio::Align::AlignI");
+    ($sim_aln && $sim_aln->isa("Bio::Align::AlignI")) || $self->throw("Expecting a Bio::Align::AlignI");
     my($pairs,$files) = $self->_mf2bin($sim_aln,$ref);
     my $plotfile = $self->_make_plotfile($sim_aln,$pairs,$files);
     return $plotfile;
@@ -394,7 +401,10 @@ sub _make_plotfile {
   if($self->plotfile) {#saving plotfile
     copy($plotfile,$self->plotfile);
   } 
-  return $plotfile;
+  else {
+    $self->plotfile($plotfile);
+  }
+  return $self->plotfile;
 }     
 
 sub _dump2gff {
@@ -508,6 +518,7 @@ sub _run_Vista {
   Args     : 
 
 =cut
+
 =head2 diffs
 
   Title    : diffs
@@ -598,6 +609,7 @@ sub _run_Vista {
   Args     : 
 
 =cut
+
 =head2 numwindows
 
   Title    : numwindows
@@ -723,6 +735,7 @@ sub _run_Vista {
   Args     : 
 
 =cut
+
 1;
 __END__
 
