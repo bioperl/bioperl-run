@@ -334,13 +334,15 @@ sub add_targets {
 
 		if (uc($key) eq "INCLUDED_REGION") {
 			# this must be a comma separated start, length.
-			unless ($args{$key} =~ /\,/) {
-				my $sequencelength;
-				# we don't have a length, hence we need to add the length of the 
-				# sequence less the start.
-				foreach my $input (@$inputarray) {
-					if ($input =~ /SEQUENCE=(.*)/) {$sequencelength=length($1)}
-				}
+			my $sequencelength;
+			# we don't have a length, hence we need to add the length of the 
+			# sequence less the start.
+			foreach my $input (@$inputarray) {
+				if ($input =~ /SEQUENCE=(.*)/) {$sequencelength=length($1)}
+			}
+		
+		        if (!$args{$key}) {$args{$key}="0," . $sequencelength}
+			elsif ($args{$key} !~ /\,/) {
 				my $length_of_included = $sequencelength-$args{$key};
 				$args{$key} .= ",".$length_of_included;
 			}
