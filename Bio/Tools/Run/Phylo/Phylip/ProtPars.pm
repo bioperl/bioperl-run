@@ -284,8 +284,7 @@ or
 sub create_tree{
 
     my ($self,$input) = @_;
-    my ($temp,$infilename, $seq);
-    my ($attr, $value, $switch);
+    my ($infilename);
 
 # Create input file pointer
   	$infilename = $self->_setinput($input);

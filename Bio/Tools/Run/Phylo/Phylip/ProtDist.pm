@@ -320,8 +320,7 @@ or
 sub create_distance_matrix{
 
     my ($self,$input) = @_;
-    my ($temp,$infilename, $seq);
-    my ($attr, $value, $switch);
+    my ($infilename);
 
 # Create input file pointer
   	$infilename = $self->_setinput($input);
@@ -414,8 +413,8 @@ sub _run {
 =cut
 
 sub _setinput {
-    my ($self, $input, $suffix) = @_;
-    my ($alnfilename,$infilename, $temp, $tfh,$input_tmp,$input_fh);
+    my ($self, $input) = @_;
+    my ($alnfilename,$tfh);
 
     # suffix is used to distinguish alignment files  from an align obkect
 	#If $input is not a  reference it better be the name of a file with the sequence/
