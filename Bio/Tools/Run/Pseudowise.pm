@@ -117,10 +117,6 @@ sub new {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
-    if ($attr =~/'PROGRAM'/i) {
-      $self->executable($value);
-      next;
-    }
     $self->$attr($value);
   }
   return $self;
@@ -145,7 +141,6 @@ sub AUTOLOAD {
  Returns : string representing the full path to the exe
  Args    : [optional] name of executable to set path to
            [optional] boolean flag whether or not warn when exe is not found
-
 
 =cut
 
@@ -173,6 +168,7 @@ sub executable{
    $self->{'_pathtoexe'};
 }
 
+*program = \&executable;
 
 =head2  version
 
@@ -277,7 +273,6 @@ sub _run {
 sub _parse_results {
     my ($self,$outfile) = @_;
     $outfile||$self->throw("No outfile specified");
-    my ($self) = @_;
 
     print "Parsing the file\n";
 

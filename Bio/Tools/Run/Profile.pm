@@ -121,10 +121,6 @@ sub new {
            $attr =   shift @args;
            $value =  shift @args;
            next if( $attr =~ /^-/ ); # don't want named parameters
-           if ($attr =~/PROGRAM/i) {
-              $self->executable($value);
-              next;
-           }
            $self->$attr($value);
        }
        return $self;
@@ -165,6 +161,8 @@ sub executable{
     }
       $self->{'_pathtoexe'};
 }
+
+*program = \&executable;
 
 =head2 predict_protein_features
 

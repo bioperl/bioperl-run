@@ -12,6 +12,9 @@
 
 Bio::Tools::Run::Phylo::Phylip::ProtPars - Object for creating a L<Bio::Tree> object from a multiple alignment file or a SimpleAlign object
 
+14 Nov 2002 Shawn
+Works with Phylip version 3.6
+
 =head1 SYNOPSIS
 
   #Create a SimpleAlign object
@@ -176,10 +179,6 @@ sub new {
 	$attr =   shift @args;
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
-	if ($attr =~/PROGRAM/i) {
-		$self->executable($value);
-		next;
-	}
 	if ($attr =~ /IDLENGTH/i){
 		$self->idlength($value);
 		next;
@@ -234,6 +233,8 @@ sub executable{
    }
    $self->{'_pathtoexe'};
 }
+
+*program = \&executable;
 
 =head2 idlength 
 
@@ -330,7 +331,7 @@ sub _run {
 	#get the results
 	my $path = `pwd`;
 	chomp($path);
-    	my $treefile = $path."/treefile";
+    	my $treefile = $path."/outtree";
 	my $outfile = $path."/outfile";
 
 	$self->throw("Protpars did not create treefile correctly") unless (-e $treefile);

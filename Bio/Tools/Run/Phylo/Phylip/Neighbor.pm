@@ -15,6 +15,9 @@ program neighbor by Joseph Felsenstein for creating a phylogenetic
 tree(either through Neighbor or UPGMA) based on protein distances
 based on amino substitution rate.
 
+14 Nov 2002 Shawn
+Works with Phylip version 3.6
+
 =head1 SYNOPSIS
 
   #Create a SimpleAlign object
@@ -224,10 +227,6 @@ sub new {
 	$attr =   shift @args;
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
-	if ($attr =~/PROGRAM/i) {
-		$self->executable($value);
-		next;
-	}
 	if ($attr =~ /IDLENGTH/i){
 		$self->idlength($value);
 		next;
@@ -346,7 +345,7 @@ sub _run {
     my $path = `pwd`;
     chomp($path);
     my $outfile = $path."/outfile";
-    my $treefile = $path."/treefile";
+    my $treefile = $path."/outtree";
     
     $self->throw("neighbor did not create tree correctly (expected $treefile) ") unless (-e $treefile);
     my $in  = Bio::TreeIO->new(-file => $treefile, '-format' => 'newick');
@@ -394,6 +393,7 @@ sub executable{
    $self->{'_pathtoexe'};
 }
 
+*program = \&executable;
 
 =head2  _setinput()
 

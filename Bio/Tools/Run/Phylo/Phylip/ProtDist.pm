@@ -15,6 +15,9 @@ program protdist by Joseph Felsentein for creating a distance matrix
 comparing protein sequences from a multiple alignment file or a
 L<Bio::SimpleAlign> object and returns a hash ref to the table
 
+14 Nov 2002 Shawn
+Works with Phylip version 3.6
+
 =head1 SYNOPSIS
 
   #Create a SimpleAlign object
@@ -51,9 +54,14 @@ Description	: (optional)
 
                   This sets the model of amino acid substitution used
  		  in the calculation of the distances.  3 different
- 		  models are supported: PAM Dayhoff PAM
- 		  Matrix(default) KIMURA Kimura's Distance CAT
- 		  Categories Distance Usage: @params =
+ 		  models are supported: JIT,PAM,Kimura,CAT 
+ 		  Matrix(default) 
+      KIMURA Kimura's Distance 
+      CAT Categories Distance 
+      JIT Jones-Tayplor-Thornton
+      PAM Dayhoff Pam Matrix
+
+      Usage: @params =
  		  ('model'=>'X');#where X is one of the values above
  		  Defaults to PAM For more information on the usage of
  		  the different models, please refer to the
@@ -179,6 +187,7 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @PROTPARS_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD);
 use strict;
+
 use Bio::Tools::Run::WrapperBase;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
@@ -229,10 +238,6 @@ sub new {
 	$attr =   shift @args;
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
-	if ($attr =~/PROGRAM/i) {
-		$self->executable($value);
-		next;
-	}
 	if ($attr =~ /IDLENGTH/i){
 		$self->idlength($value);
 		next;
@@ -288,6 +293,8 @@ sub executable{
    }
    $self->{'_pathtoexe'};
 }
+
+*program = \&executable;
 
 =head2 idlength 
 
@@ -476,18 +483,25 @@ sub _setparams {
     my $param_string = "";
 	my $cat = 0;
 	foreach  my $attr ( @PROTPARS_PARAMS) {
-        	$value = $self->$attr();
-	        next unless (defined $value);
-      		if ($attr =~/MODEL/i){
-			if ($value=~/CAT/i){
+    $value = $self->$attr();
+	  next unless (defined $value);
+    if ($attr =~/MODEL/i){
+		  if ($value=~/CAT/i){
 				$cat = 1;
-				$param_string .= "P\nP\n";
+				$param_string .= "P\nP\nP\nP\n";
 				next;
 			}
-			elsif($value=~/KIMURA/i){
-				$param_string .= "P\nY\n";
+      elsif($value=~/SIMILARITY/i){
+				$param_string .= "P\nP\nP\nY\n";
 				return $param_string;
 			}
+			elsif($value=~/KIMURA/i){
+				$param_string .= "P\nP\nY\n";
+				return $param_string;
+			}
+      elsif($value=~/PAM/i){
+        $param_string .= "P\n";
+      }
 			else {
 				$param_string.="Y\n";
 				return $param_string;
@@ -496,7 +510,7 @@ sub _setparams {
 		if ($cat == 1){
 			if($attr =~ /GENCODE/i){
 				$self->throw("Unallowed value for genetic code") unless ($value =~ /[U,M,V,F,Y]/);
-				$param_string .= "C\n$value\n";
+				$param_string .= "U\n$value\n";
 			}
 			if ($attr =~/CATEGORY/i){
 				$self->throw("Unallowed value for categorization of amino acids") unless ($value =~/[C,H,G]/);

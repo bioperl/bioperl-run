@@ -84,7 +84,7 @@ BEGIN {
        if (defined $ENV{TMHMMDIR}) {
           $PROGRAMDIR = $ENV{TMHMMDIR} || '';
           $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                           'tmhmm'.($^O =~ /mswin/i ?'.exe':''));
+                                           "tmhmm".($^O =~ /mswin/i ?'.exe':''));
        }
        else {
           $PROGRAM = 'tmhmm';
@@ -113,6 +113,7 @@ sub AUTOLOAD {
  Args    :
 
 =cut
+
 sub new {
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
@@ -123,10 +124,6 @@ sub new {
            $attr =   shift @args;
            $value =  shift @args;
            next if( $attr =~ /^-/ ); # don't want named parameters
-           if ($attr =~/PROGRAM/i) {
-              $self->executable($value);
-              next;
-           }
            $self->$attr($value);
        }
        return $self;
@@ -166,6 +163,8 @@ sub executable{
     }
       return $self->{'_pathtoexe'};
 }
+
+*program = \&executable;
 
 =head2 predict_protein_features
 
@@ -243,7 +242,7 @@ sub _run {
      my ($self)= @_;
      
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $str ="perl ".$self->executable." ".$self->_input." > ".$outfile;
+     my $str =$self->executable." ".$self->_input." > ".$outfile;
      my $status = system($str);
      $self->throw( "Tmhmm call ($str) crashed: $? \n") unless $status==0;
      

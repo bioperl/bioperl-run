@@ -166,7 +166,7 @@ BEGIN {
     if (defined $ENV{'FootPrinterDIR'}) {
         $PROGRAMDIR = $ENV{FOOTPRINTER_DIR} || '';
         $PROGRAM = Bio::Root::IO->
-	      catfile($PROGRAMDIR."/src/bin/",
+	      catfile($PROGRAMDIR,
 		    'FootPrinter'.($^O =~ /mswin/i ?'.exe':''));
     }
 
@@ -212,10 +212,6 @@ sub new {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
-    if ($attr =~/PROGRAM/i) {
-      $self->executable($value);
-      next;
-    }
     $self->$attr($value);
   }
 
@@ -273,6 +269,8 @@ sub executable {
    }
    $self->{'_pathtoexe'};    
 }
+
+*program = \&executable;
 
 =head2  run
 

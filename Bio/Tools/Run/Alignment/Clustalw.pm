@@ -310,7 +310,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::Clustalw;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $TMPDIR $TMPOUTFILE @CLUSTALW_SWITCHES @CLUSTALW_PARAMS
 	    @OTHER_SWITCHES %OK_FIELD);
 use strict;
@@ -319,10 +319,10 @@ use Bio::SeqIO;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::Root::Root;
-use Bio::Root::IO;
-use Bio::Factory::ApplicationFactoryI;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+
 
 # You will need to enable Clustalw to find the clustalw program. This
 # can be done in (at least) two ways:
@@ -335,14 +335,13 @@ use Bio::Factory::ApplicationFactoryI;
 # $ENV{CLUSTALDIR} = '/home/peter/clustalw1.8/';
 
 BEGIN {
-
+    $PROGRAMNAME='clustalw';
     if (defined $ENV{CLUSTALDIR}) {
-	$PROGRAMDIR = $ENV{CLUSTALDIR} || '';
-	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-					  'clustalw'.($^O =~ /mswin/i ?'.exe':''));
+        $PROGRAMDIR = $ENV{CLUSTALDIR} || '';
+        $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR."/".$PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
     }
     else {
-	$PROGRAM = 'clustalw';
+        $PROGRAM = $PROGRAMNAME;
     }
     @CLUSTALW_PARAMS = qw(KTUPLE TOPDIAGS WINDOW PAIRGAP FIXEDGAP
                    FLOATGAP MATRIX TYPE	TRANSIT DNAMATRIX OUTFILE
@@ -363,31 +362,16 @@ BEGIN {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    # to facilitiate tempfile cleanup
-    $self->_initialize_io();
 
     my ($attr, $value);
-    (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-    (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+    ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
+    (undef,$TMPOUTFILE) = $self->io->tempfile(-dir => $TMPDIR);
     while (@args)  {
-	$attr =   shift @args;
-	$value =  shift @args;
-	next if( $attr =~ /^-/ ); # don't want named parameters
-	if ($attr eq 'PROGRAM') {
-	    $self->program($value);
-	    next;
-	}
-	$self->$attr($value);	
+	    $attr =   shift @args;
+	    $value =  shift @args;
+	    next if( $attr =~ /^-/ ); # don't want named parameters
+	    $self->$attr($value);	
     }
-    if (! defined $self->program) {
-	 $self->program($PROGRAM);
-     }
-    unless ($self->exists_clustal()) {
-	if( $self->verbose >= 0 ) {
-	    warn "Clustalw program not found as ".$self->program." or not executable. \n  Clustalw can be obtained from eg- http://corba.ebi.ac.uk/Biocatalog/Alignment_Search_software.html/ \n";
-	}
-    }
-  
     return $self;
 }
 
@@ -401,48 +385,41 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
+=head2 executable
 
-=head2  exists_clustal()
-
- Title   : exists_clustal
- Usage   : $clustalfound = Bio::Tools::Run::Alignment::Clustalw->exists_clustal()
- Function: Determine whether clustalw program can be found on current host
- Example :
- Returns : 1 if clustalw program found at expected location, 0 otherwise.
- Args    :  none
-
-=cut
-
-
-sub exists_clustal {
-    my $self = shift;
-    if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-	$PROGRAM = $f if( -e $f );
-	return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function: 
- Returns : value of program
- Args    : newvalue (optional)
-
+ Title   : executable
+ Usage   : my $exe = $factory->executable();
+ Function: Finds the full path to the 'clustalw' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
 
 =cut
 
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
+sub executable{
+   my ($self, $exe,$warn) = @_;
 
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+           $self->{'_pathtoexe'} = $PROGRAM;
+       } else {
+           my $exe;
+           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+               -x $exe ) {
+               $self->{'_pathtoexe'} = $exe;
+           } else {
+               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+               $self->{'_pathtoexe'} = undef;
+           }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
-
+*program = \&executable;
 
 =head2  version
 
@@ -458,8 +435,9 @@ sub program{
 sub version {
     my ($self) = @_;
 
-    return undef unless $self->exists_clustal;
-    my $string = `clustalw -- ` ;
+    return undef unless $self->executable;
+    my $prog = $self->executable;
+    my $string = `$prog --` ;
     $string =~ /\(([\d.]+)\)/;
     return $1 || undef;
 
@@ -572,8 +550,8 @@ sub _run {
 	chmod 0777, $infile1,$infile2;
 	$command = '-profile';
     }
-    $self->debug( "Program ".$self->program."\n");
-    my $commandstring = $self->program." $command"." $instring".
+    $self->debug( "Program ".$self->executable."\n");
+    my $commandstring = $self->executable." $command"." $instring".
 	" -output=gcg". " $param_string";
     $self->debug( "clustal command = $commandstring");
     	
@@ -626,7 +604,7 @@ sub _setinput {
     #  $input may be an array of BioSeq objects...
     if (ref($input) eq "ARRAY") {
         #  Open temporary file for both reading & writing of BioSeq array
-	($tfh,$infilename) = $self->tempfile(-dir=>$TMPDIR);
+	($tfh,$infilename) = $self->io->tempfile(-dir=>$TMPDIR);
 	$temp =  Bio::SeqIO->new('-fh'=>$tfh,
 				 '-format' =>'Fasta');
 
@@ -646,7 +624,7 @@ sub _setinput {
    elsif (ref($input) eq "Bio::SimpleAlign") {
 	#  Open temporary file for both reading & writing of SimpleAlign object
 	if ($suffix ==1 || $suffix== 2 ) {
-	    ($tfh,$infilename) = $self->tempfile(-dir=>$TMPDIR);
+	    ($tfh,$infilename) = $self->io->tempfile(-dir=>$TMPDIR);
 	}
 	$temp =  Bio::AlignIO->new('-fh'=> $tfh,
 				   '-format' => 'Fasta');
@@ -657,7 +635,7 @@ sub _setinput {
 #  or $input may be a single BioSeq object (to be added to a previous alignment)
     elsif (ref($input) && $input->isa("Bio::PrimarySeqI") && $suffix==2) {
         #  Open temporary file for both reading & writing of BioSeq object
-	($tfh,$infilename) = $self->tempfile();
+	($tfh,$infilename) = $self->io->tempfile();
 	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
 	$temp->write_seq($input);
 	return $infilename;

@@ -122,10 +122,6 @@ sub new {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
-    if ($attr =~/PROGRAM/i )  {
-      $self->executable($value);
-      next;
-    }
     if($attr =~/^q$/i){
       $self->query($value);
     }
@@ -181,6 +177,8 @@ sub executable{
    }
    $self->{'_pathtoexe'};
 }
+
+*program = \&executable;
 
 =head2  version
 

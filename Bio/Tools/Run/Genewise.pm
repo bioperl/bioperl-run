@@ -120,10 +120,6 @@ sub new {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
-    if ($attr =~/'PROGRAM'/i) {
-      $self->executable($value);
-      next;
-    }
     $self->$attr($value);
   }
   return $self;
@@ -174,6 +170,7 @@ sub executable{
    }
    $self->{'_pathtoexe'};
 }
+*program = \&executable;
 
 =head2  version
 
@@ -190,8 +187,9 @@ sub version {
     my ($self) = @_;
 
     return undef unless $self->executable;
-    my $string = `genewise -- ` ;
-    $string =~ /\(([\d.]+)\)/;
+    my $prog = $self->executable;
+    my $string = `$prog -version`;
+    $string =~ /(Version *)/i;
     return $1 || undef;
 
 }
@@ -295,17 +293,17 @@ sub _setinput {
     # if you pass in a filename
     
     unless( ref($seq1) ) {
-	unless( -e $seq1 ) {
-	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
-	}
-	$outfile1 = $seq1;
+	    unless( -e $seq1 ) {
+	      $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+	    }
+	    $outfile1 = $seq1;
 	
     } else { 
-	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
-	my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , 
-				   '-format' => 'Fasta');
+	    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
+	    my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , 
+				                        '-format' => 'Fasta');
 
-	$out1->write_seq($seq1);
+	    $out1->write_seq($seq1);
 	$self->_query_pep_seq($seq1);
 	# Make sure you close things - this is what creates
 	# Out of filehandle errors 
