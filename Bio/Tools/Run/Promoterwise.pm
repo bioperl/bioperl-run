@@ -20,7 +20,7 @@ promoterwise
 
   my (@fp)= $factory->run($seq1,$seq2);
 
-  #each feature pair is a group of hsps
+  # each feature pair is a group of hsps
   foreach my $fp(@fp){
     print "Hit Length: ".$fp->feature1->length."\n";
     print "Hit Start: ".$fp->feature1->start."\n";
@@ -32,14 +32,14 @@ promoterwise
       print $first_hsp[$i]->seq." ".$second_hsp[$i]->seq."\n";
     }
   }
-    print "end: ". $fp->feature2->start."\t".$fp->feature2->end."\n";
+  print "end: ". $fp->feature2->start."\t".$fp->feature2->end."\n";
 
-  Available parameters include:
-  ( S T U V QUERY_START QUERY_END TARGET_START
-  TARGET_END LHWINDOW LHSEED LHALN LHSCORE LHREJECT
-  LHREJECT LHMAX DYMEM KBYTE DYCACHE)
-  For an explanation of these parameters, please see documentation
-  from the Wise package.
+  #Available parameters include:
+  #( S T U V QUERY_START QUERY_END TARGET_START
+  #TARGET_END LHWINDOW LHSEED LHALN LHSCORE LHREJECT
+  #LHREJECT LHMAX DYMEM KBYTE DYCACHE)
+  #For an explanation of these parameters, please see documentation
+  #from the Wise package.
 
 =head1 DESCRIPTION
 
@@ -200,10 +200,9 @@ sub version {
  Args    : Name of a file containing a set of 2 fasta sequences 
            or else 2  Bio::Seq objects.
 
- Throws an exception if argument is not either a string (eg a
- filename) or 2 Bio::Seq objects.  If
- arguments are strings, throws exception if file corresponding to string
- name can not be found.
+Throws an exception if argument is not either a string (eg a filename)
+or 2 Bio::Seq objects.  If arguments are strings, throws exception if
+file corresponding to string name can not be found.
 
 =cut
 
@@ -213,7 +212,8 @@ sub run{
     $self->io->_io_cleanup();
 # Create input file pointer
     my ($infile1,$infile2)= $self->_setinput($seq1, $seq2);
-    if (!($infile1 && $infile2)) {$self->throw("Bad input data (sequences need an id ) ");}
+    if (!($infile1 && $infile2))
+        {$self->throw("Bad input data (sequences need an id ) ");}
 
 
 # run promoterwise 
@@ -238,7 +238,9 @@ sub _run {
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
     unless ( $self->executable ) {
-	$self->throw("Cannot run Promoterwise unless the executable is found.  Check your environment variables or make sure promoterwise is in your path.");
+	$self->throw("Cannot run Promoterwise unless the executable is found.".
+                     " Check your environment variables or make sure ". 
+                     "promoterwise is in your path.");
     }
     my $paramstring = $self->_setparams;
     
@@ -250,13 +252,16 @@ sub _run {
 	# yeah, like promoterwise is really going to run on Windows...
 	$commandstring .= ' -quiet -silent -erroroffstd  2> /dev/null';
     }
-   $self->debug( "promoterwise command = $commandstring");
-    open(PW, "$commandstring |") || $self->throw( "Promoterwise call ($commandstring) crashed: $? \n");
-   my $pw_parser = Bio::Tools::Promoterwise->new(-fh=>\*PW,-query1_seq=>$self->_query1_seq,-query2_seq=>$self->_query2_seq); 
-   my @fp;
-   while (my $fp = $pw_parser->next_result){
-    push @fp,$fp;
-   }
+    $self->debug( "promoterwise command = $commandstring");
+    open(PW, "$commandstring |") || 
+        $self->throw( "Promoterwise call ($commandstring) crashed: $? \n");
+    my $pw_parser = Bio::Tools::Promoterwise->new(-fh=>\*PW,
+                                                  -query1_seq=>$self->_query1_seq,
+                                                  -query2_seq=>$self->_query2_seq);
+    my @fp;
+    while (my $fp = $pw_parser->next_result){
+        push @fp,$fp;
+    }
 
     return @fp;
 }
@@ -272,7 +277,7 @@ sub _setinput {
 
     unless( ref($seq1) ) {
 	unless( -e $seq1 ) {
-	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");    
+	    $self->throw("Sequence1 is not a Bio::PrimarySeqI object nor file\n");
 	}
     	$outfile1 = $seq1;
     } 

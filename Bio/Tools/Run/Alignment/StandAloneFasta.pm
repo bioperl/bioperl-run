@@ -13,7 +13,9 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Alignment::StandAloneFasta - Object for the local execution of the Fasta3 programs ((t)fasta3, (t)fastx3, (t)fasty3 ssearch3)
+Bio::Tools::Run::Alignment::StandAloneFasta - Object for the local
+execution of the Fasta3 programs ((t)fasta3, (t)fastx3, (t)fasty3
+ssearch3)
 
 =head1 SYNOPSIS
 
@@ -37,16 +39,16 @@ Bio::Tools::Run::Alignment::StandAloneFasta - Object for the local execution of 
   print $factory->O;
 
 
-  my @fastreport=$factory->run(ARGV[0]);
+  my @fastreport=$factory->run($ARGV[0]);
 
   foreach  (@fastreport) {
         print "Parsed fasta report:\n";
     my $result = $_->next_result;
-    while( my $hit = $result->next_hit()) {    
-       print "\thit name: ", $hit->name(), "\n";    
-         while( my $hsp = $hit->next_hsp()) {   
+    while( my $hit = $result->next_hit()) {
+       print "\thit name: ", $hit->name(), "\n";
+         while( my $hsp = $hit->next_hsp()) {
          print "E: ", $hsp->evalue(), "frac_identical: ",
-        $hsp->frac_identical(), "\n";    
+        $hsp->frac_identical(), "\n";
          }
       }
     }
@@ -54,21 +56,20 @@ Bio::Tools::Run::Alignment::StandAloneFasta - Object for the local execution of 
    #pass in seq objects
    my $sio = Bio::SeqIO->new(-file=>$ARGV[0],-format=>"fasta");
    my $seq = $sio->next_seq;
-   my @fastreport=$factory->run(ARGV[0]);
+   my @fastreport=$factory->run($ARGV[0]);
 
 =head1 DESCRIPTION
 
-This wrapper works with version 3 of the FASTA
-program package (see W. R. Pearson and D. J. Lipman (1988),
-"Improved Tools for Biological Sequence Analysis", PNAS
-85:2444-2448 (Pearson and Lipman, 1988); W. R.  Pearson (1996)
-"Effective protein sequence comparison" Meth. Enzymol.
-266:227-258 (Pearson, 1996); Pearson et. al. (1997) Genomics
-46:24-36 (Zhang et al., 1997);  Pearson, (1999) Meth. in
-Molecular Biology 132:185-219 (Pearson, 1999).  
-Version 3 of the FASTA packages contains many programs for searching DNA and
-protein databases and one program (prss3) for evaluating
-statistical significance from randomly shuffled sequences.
+This wrapper works with version 3 of the FASTA program package (see
+W. R. Pearson and D. J. Lipman (1988), "Improved Tools for Biological
+Sequence Analysis", PNAS 85:2444-2448 (Pearson and Lipman, 1988);
+W. R.  Pearson (1996) "Effective protein sequence comparison"
+Meth. Enzymol.  266:227-258 (Pearson, 1996); Pearson et. al. (1997)
+Genomics 46:24-36 (Zhang et al., 1997); Pearson, (1999) Meth. in
+Molecular Biology 132:185-219 (Pearson, 1999).  Version 3 of the FASTA
+packages contains many programs for searching DNA and protein
+databases and one program (prss3) for evaluating statistical
+significance from randomly shuffled sequences.
 
 Fasta is available at ftp://ftp.virginia.edu/pub/fasta
 
@@ -104,7 +105,7 @@ Email tqzhang1973@yahoo.com
 The rest of the documendation details each of the object
 methods. Internal methods are preceeded with a underscore
 
-=cut 
+=cut
 
 package Bio::Tools::Run::Alignment::StandAloneFasta;
 

@@ -10,13 +10,13 @@
 =head1 NAME
 
 Bio::Tools::Run::AnalysisFactory::Pise - A class to create Pise
-application objects.  
+application objects.
 
 =head1 SYNOPSIS
 
   use Bio::Tools::Run::AnalysisFactory::Pise;
 
-  # Build a Pise factory       
+  # Build a Pise factory
   my $factory = new Bio::Tools::Run::AnalysisFactory::Pise();
 
   # Then create an application object (Pise::Run::Tools::PiseApplication):
@@ -49,16 +49,16 @@ application objects, that let you submit jobs on a Pise server.
   my $factory = new Bio::Tools::Run::AnalysisFactory::Pise(
                                               -email => 'me@myhome');
 
-The email is optional (there is default one). It can be useful, though.
-Your program might enter infinite loops, or just run many jobs:
-the Pise server maintainer needs a contact (s/he could of course
+The email is optional (there is default one). It can be useful,
+though.  Your program might enter infinite loops, or just run many
+jobs: the Pise server maintainer needs a contact (s/he could of course
 cancel any requests from your address...). And if you plan to run a
-lot of heavy jobs, or to do a course with many students, please
-ask the maintainer before. 
+lot of heavy jobs, or to do a course with many students, please ask
+the maintainer before.
 
-The location parameter stands for the actual CGI location, except when 
-set at the factory creation step, where it is rather the root of all CGI.
-There are default values for most of Pise programs. 
+The location parameter stands for the actual CGI location, except when
+set at the factory creation step, where it is rather the root of all
+CGI.  There are default values for most of Pise programs.
 
 You can either set location at:
 
@@ -88,8 +88,11 @@ You can either set location at:
 =back
 
 You can also retrieve a previous job results by providing its url:
+
   $job = $factory->job($url);
+
 You get the url of a job by:
+
   $job->jobid;
 
 =head1 FEEDBACK
@@ -207,8 +210,8 @@ sub new {
  Title   : program()
  Usage   : my $program = Bio::Tools::Run::AnalysisFactory::Pise->program(
                              $program, 
-                             -location => 'http://somewhere/cgi-bin/Pise', 
-                             -email => $email, 
+                             -location => 'http://somewhere/cgi-bin/Pise',
+                             -email => $email,
                              @params);
  Function: Creates a representation of a single Pise program.
  Example :
@@ -225,7 +228,7 @@ sub program {
     my ($email) =
 	$self->_rearrange([qw(EMAIL )],
 			  @args);
-    
+
     my ($verbose) =
 	$self->_rearrange([qw(VERBOSE )],
 			  @args);

@@ -38,8 +38,8 @@ alignments using the Clustalw program
   # sequences to be added to the alignment. For example: 	
   $aln = $factory->profile_align($aln1,$seq); # $seq is a Bio::Seq object.
 
-There are various additional options and input formats available.  See
-the DESCRIPTION section that follows for additional details.
+  # There are various additional options and input formats available.
+  # See the DESCRIPTION section that follows for additional details.
 
 =head1 DESCRIPTION
 

@@ -10,8 +10,8 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Eponine-
-Object for execution  of the Eponine which is a mammalian TSS predictor
+Bio::Tools::Run::Eponine - Object for execution of the Eponine which
+is a mammalian TSS predictor
 
 =head1 SYNOPSIS
 
@@ -36,15 +36,12 @@ Object for execution  of the Eponine which is a mammalian TSS predictor
 	  }
   }
 
-
-
-
-Various additional options and input formats are available.  See the
-DESCRIPTION section for details.
+ # Various additional options and input formats are available.  See
+ # the DESCRIPTION section for details.
 
 =head1 DESCRIPTION
 
-wrapper for eponine.. a mammalian TSS predictor
+wrapper for eponine, a mammalian TSS predictor.
 
 The environment variable EPONINEDIR must be set to point at either the
 directory which contains eponine-scan.jar or directly at the jar which

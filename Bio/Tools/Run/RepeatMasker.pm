@@ -11,8 +11,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::RepeatMasker -
-Wrapper for RepeatMasker Program
+Bio::Tools::Run::RepeatMasker - Wrapper for RepeatMasker Program
 
 =head1 SYNOPSIS
 
@@ -27,7 +26,7 @@ Wrapper for RepeatMasker Program
   #return an array of Bio::SeqFeature::FeaturePair objects
   my @feats = $factory->run($seq); 
 
-or
+  # or
 
   $factory->run($seq);
   my @feats = $factory->repeat_features;

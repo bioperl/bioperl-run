@@ -10,17 +10,17 @@
 =head1 NAME
 
 Bio::Tools::Run::Pseudowise - Object for prediting pseudogenes in a
-given sequence given a protein and a cdna sequence 
+given sequence given a protein and a cdna sequence
 
 =head1 SYNOPSIS
 
-  #  Build a pseudowise alignment factory
-  my  $factory = Bio::Tools::Run::Pseudowise->new();
+  # Build a pseudowise alignment factory
+  my $factory = Bio::Tools::Run::Pseudowise->new();
 
-  #  Pass the factory 3 Bio:SeqI objects (in the order of query peptide and cdna and
-     target_genomic) 
-  #@genes is an array of GenericSeqFeature objects
-  my @genes = $factory->run($seq1, $seq2, $seq3); 
+  # Pass the factory 3 Bio:SeqI objects (in the order of query
+  # peptide and cdna and target_genomic)
+  # @genes is an array of GenericSeqFeature objects
+  my @genes = $factory->run($seq1, $seq2, $seq3);
 
 =head1 DESCRIPTION
 
@@ -35,14 +35,14 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
+  bioperl-l@bioperl.org                     - General discussion
+  http://bio.perl.org/MailList.html         - About the mailing lists
 
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+the bugs and their resolution.  Bug reports can be submitted via email
+or the web:
 
   bioperl-bugs@bio.perl.org
   http://bio.perl.org/bioperl-bugs/
@@ -185,10 +185,9 @@ sub version {
            peptide, cdna and genomic sequences
            or else 3  Bio::Seq objects.
 
- Throws an exception if argument is not either a string (eg a
- filename) or 3 Bio::Seq objects.  If
- arguments are strings, throws exception if file corresponding to string
- name can not be found. 
+Throws an exception if argument is not either a string (eg a filename)
+or 3 Bio::Seq objects.  If arguments are strings, throws exception if
+file corresponding to string name can not be found.
 
 =cut
 
@@ -206,10 +205,9 @@ sub predict_genes {
            peptide, cdna and genomic sequences
            or else 3  Bio::Seq objects.
 
- Throws an exception if argument is not either a string (eg a
- filename) or 3 Bio::Seq objects.  If
- arguments are strings, throws exception if file corresponding to string
- name can not be found. 
+Throws an exception if argument is not either a string (eg a filename)
+or 3 Bio::Seq objects.  If arguments are strings, throws exception if
+file corresponding to string name can not be found.
 
 =cut
 
@@ -220,7 +218,8 @@ sub run{
 
 # Create input file pointer
     my ($infile1,$infile2,$infile3)= $self->_setinput($seq1, $seq2, $seq3);
-    if (!($infile1 && $infile2 && $infile3)) {$self->throw("Bad input data (sequences need an id ) ");}
+    if (!($infile1 && $infile2 && $infile3)) 
+        {$self->throw("Bad input data (sequences need an id ) ");}
 
    my $prot_name = $seq1->display_id;
 # run pseudowise 
@@ -370,7 +369,8 @@ sub _setinput {
   my ($self, $seq1, $seq2, $seq3) = @_;
   my ($tfh1,$tfh2,$tfh3,$outfile1,$outfile2,$outfile3);
 
-    if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI")&& $seq2->isa("Bio::PrimarySeqI"))) 
+    if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI") &&
+         $seq2->isa("Bio::PrimarySeqI")))
       { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
     my $tempdir = $self->tempdir();
     ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
@@ -477,5 +477,5 @@ sub _subject_dna_seq {
   }
   return $self->{'_subject_dna_seq'};
 }
+
 1; # Needed to keep compiler happy
-  

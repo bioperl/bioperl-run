@@ -56,7 +56,9 @@ Bio::Tools::Run::AnalysisFactory - A directory of analysis tools
   use Bio::Tools::Run::AnalysisFactory;
   $service = new Bio::Tools::Run::AnalysisFactory
                  ->create_analysis ('edit::seqret');
-  $service->run (...)->results;
+  $service->run (
+                #...
+                )->results;
 
 =head1 DESCRIPTION
 

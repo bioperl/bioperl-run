@@ -33,8 +33,8 @@ sequences using the DNA Block Aligner program.
   my @hsps = $factory->align($seq_array_ref);
 
 
-There are various additional options and input formats available.  See
-the DESCRIPTION section that follows for additional details.
+  # There are various additional options and input formats available.
+  # See the DESCRIPTION section that follows for additional details.
 
 =head1 DESCRIPTION
 
@@ -50,8 +50,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
+  bioperl-l@bioperl.org                       - General discussion
+  http://bio.perl.org/MailList.html           - About the mailing lists
 
 =head2 Reporting Bugs
 

@@ -43,8 +43,8 @@ alignments using the TCoffee program
   # $seq is a Bio::Seq object.
   $aln = $factory->profile_align($aln1,$seq);
 
-There are various additional options and input formats available.  See
-the DESCRIPTION section that follows for additional details.
+  #There are various additional options and input formats available.
+  #See the DESCRIPTION section that follows for additional details.
 
 =head1 DESCRIPTION
 

@@ -5,7 +5,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Hmmpfam 
+Bio::Tools::Run::Hmmpfam
 
 =head1 SYNOPSIS
 
@@ -29,35 +29,36 @@ Bio::Tools::Run::Hmmpfam
    }
   }
 
-  Available params:
-   n        : nucleic acid models/sequence (default protein)
-   E <x>    : sets E value cutoff (globE) to <x>; default 10
-   T <x>    : sets T bit threshold (globT) to <x>; no threshold by default
-   Z <n>    : sets Z (# models) for E-value calculation
+  #Available params:
+  # n        : nucleic acid models/sequence (default protein)
+  # E <x>    : sets E value cutoff (globE) to <x>; default 10
+  # T <x>    : sets T bit threshold (globT) to <x>; no threshold by default
+  # Z <n>    : sets Z (# models) for E-value calculation
 
 
 
 =head1 DESCRIPTION
 
-  Wrapper module for Hmmpfam program that allows one to search a sequence against
-  an HMM database. Binary is available at http://hmmer.wustl.edu/
+Wrapper module for Hmmpfam program that allows one to search a
+sequence against an HMM database. Binary is available at
+http://hmmer.wustl.edu/
 
 =head1 FEEDBACK
 
 =head2 Mailing Lists
 
- User feedback is an integral part of the evolution of this and other
- Bioperl modules. Send your comments and suggestions preferably to one
- of the Bioperl mailing lists.  Your participation is much appreciated.
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to one
+of the Bioperl mailing lists.  Your participation is much appreciated.
 
  bioperl-l@bioperl.org          - General discussion
  http://bio.perl.org/MailList.html             - About the mailing lists
 
 =head2 Reporting Bugs
 
- Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via email
+or the web:
 
  bioperl-bugs@bioperl.org
  http://bugzilla.bioperl.org/
@@ -72,8 +73,8 @@ Bio::Tools::Run::Hmmpfam
 
 =head1 APPENDIX
 
- The rest of the documentation details each of the object
- methods. Internal methods are usually preceded with a _
+The rest of the documentation details each of the object
+methods. Internal methods are usually preceded with a _
 
 =cut
 

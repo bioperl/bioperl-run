@@ -17,62 +17,61 @@ Bio::Tools::Run::TribeMCL
   use Bio::Tools::Run::TribeMCL;
   use Bio::SearchIO;
 
-  #3 methods to input the blast results
+  # 3 methods to input the blast results
 
-  #straight forward raw blast output (NCBI or WU-BLAST)
+  # straight forward raw blast output (NCBI or WU-BLAST)
   my @params = ('inputtype'=>'blastfile');
 
-  OR
+  # OR
 
-  #markov program format 
-  #protein_id1 protein_id2 evalue_magnitude evalue_factor
-  #for example: 
-  #proteins ENSP00000257547  and ENSP00000261659
-  #with a blast score evalue of 1e-50
-  #and proteins O42187 and ENSP00000257547
-  #with a blast score evalue of 1e-119
-  #entry would be 
+  # markov program format 
+  # protein_id1 protein_id2 evalue_magnitude evalue_factor
+  # for example: 
+  # proteins ENSP00000257547  and ENSP00000261659
+  # with a blast score evalue of 1e-50
+  # and proteins O42187 and ENSP00000257547
+  # with a blast score evalue of 1e-119
+  # entry would be 
 
   my @array  = [[qw(ENSP00000257547 ENSP00000261659 1 50)],
 		[qw(O42187 ENSP00000257547 1 119)]];
   my @params = ('pairs'=>\@array,I=>'2.0');
 
-  OR
+  # OR
 
-  #pass in a searchio object 
-  #slowest of the 3 methods as it does more rigourous parsing
-  #than required for us here
+  # pass in a searchio object 
+  # slowest of the 3 methods as it does more rigourous parsing
+  # than required for us here
 
   my $sio = Bio::SearchIO->new(-format=>'blast',
                                -file=>'blast.out');
   my @params=('inputtype'=>'searchio',I=>'2.0');
 
 
-  #you can specify the path to the executable manually in the following way
+  # you can specify the path to the executable manually in the following way
   my @params=('inputtype'=>'blastfile',I=>'2.0',
 	      'mcl'=>'/home/shawn/software/mcl-02-150/src/shmcl/mcl',
 	      'matrix'=>'/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
   my $fact = Bio::Tools::Run::TribeMCL->new(@params);
 
-  OR
+  # OR
 
   $fact->matrix_executable('/home/shawn/software/mcl-02-150/src/contrib/tribe/tribe-matrix');
   $fact->mcl_executable('/home/shawn/software/mcl-02-150/src/shmcl/mcl');
 
-  #to run
+  # to run
 
   my $fact = Bio::Tools::Run::TribeMCL->new(@params);
 
-  #Run the program
-  #returns an array reference to clusters where members are
-  # the ids
-  #for example :2 clusters with 3 members per cluster:
-  # $fam = [ [mem1 mem2 mem3],[mem1 mem2 mem3]]
+  # Run the program
+  # returns an array reference to clusters where members are the ids
+  # for example :2 clusters with 3 members per cluster:
+  #  $fam = [ [mem1 mem2 mem3],[mem1 mem2 mem3]]
 
-  #pass in either the blastfile path/searchio obj/the array ref to scores
+  # pass in either the blastfile path/searchio obj/the array ref to scores
   my $fam = $fact->run($sio); 
 
-  #print out your clusters
+  # print out your clusters
 
   for (my $i = 0; $i <scalar(@{$fam}); $i++){
     print "Cluster $i \t ".scalar(@{$fam->[$i]})." members\n";
@@ -83,27 +82,31 @@ Bio::Tools::Run::TribeMCL
 
 =head1 DESCRIPTION
 
-  TribeMCL is a method for clustering proteins into related groups, which are
-  termed 'protein families'. This clustering is achieved by analysing similarity
-  patterns between proteins in a given dataset, and using these patterns to assign
-  proteins into related groups. In many cases, proteins in the same protein family
-  will have similar functional properties.
-  TribeMCL uses a novel clustering method (Markov Clustering or MCL)
-  which solves problems which normally hinder protein sequence clustering.
+TribeMCL is a method for clustering proteins into related groups,
+which are termed 'protein families'. This clustering is achieved by
+analysing similarity patterns between proteins in a given dataset, and
+using these patterns to assign proteins into related groups. In many
+cases, proteins in the same protein family will have similar
+functional properties.
 
-  References: 
-  Enright A.J., Van Dongen S., Ouzounis C.A; Nucleic Acids Res. 30(7):1575-1584 (2002)
+TribeMCL uses a novel clustering method (Markov Clustering or MCL)
+which solves problems which normally hinder protein sequence
+clustering.
 
-  You will need tribe-matrix (the program used to generate the matrix for input
-  into mcl) and mcl (the clustering software) available at:
+Reference:
 
-  http://www.ebi.ac.uk/research/cgg/tribe/ 
-  or 
-  http://micans.org/mcl/
+  Enright A.J., Van Dongen S., Ouzounis C.A; Nucleic Acids
+  Res. 30(7):1575-1584 (2002)
 
-  Future Work in this module:
-  Port the tribe-matrix program into perl so that we can enable have a SearchIO
-  kinda module for reading and writing mcl data format
+You will need tribe-matrix (the program used to generate the matrix
+for input into mcl) and mcl (the clustering software) available at:
+
+  http://www.ebi.ac.uk/research/cgg/tribe/ or
+  http://micans.org/mcl/.
+
+Future Work in this module: Port the tribe-matrix program into perl so
+that we can enable have a SearchIO kinda module for reading and
+writing mcl data format
 
 =head1 FEEDBACK
 
@@ -203,7 +206,8 @@ BEGIN {
     @OTHER_SWITCHES = qw(verbose quiet); 
 
     # Authorize attribute fields
-    foreach my $attr (@TRIBEMCL_PARAMS, @MATRIXPROGRAM_PARAMS, @MCLPROGRAM_PARAMS, @OTHER_SWITCHES) {
+    foreach my $attr (@TRIBEMCL_PARAMS, @MATRIXPROGRAM_PARAMS,
+                      @MCLPROGRAM_PARAMS, @OTHER_SWITCHES) {
       $OK_FIELD{$attr}++;
     }
 }
@@ -303,7 +307,7 @@ sub matrix_executable{
 	       -x $exe ) {
 	       $self->{'_matrix_exe'} = $exe;
 	   } else { 
-	       $self->warn("Cannot find executable for $MATRIXPROGRAM_NAME") 
+	       $self->warn("Cannot find executable for $MATRIXPROGRAM_NAME")
 		   if $warn;
 	       $self->{'_matrix_exe'} = undef;
 	   }
@@ -331,8 +335,10 @@ sub run {
   defined($file) || $self->throw("Error setting up input ");
   #run tribe-matrix to generate matrix for mcl
   my ($index_file, $mcl_infile) = $self->_run_matrix($file);
-  $self->throw("tribe-matrix not run properly as index file is missing") unless (-e $index_file);
-  $self->throw("tribe-matrix not run properly as matrix file is missing") unless (-e $mcl_infile);
+  $self->throw("tribe-matrix not run properly as index file is missing")
+      unless (-e $index_file);
+  $self->throw("tribe-matrix not run properly as matrix file is missing")
+      unless (-e $mcl_infile);
   #run mcl
   my $clusters = $self->_run_mcl($index_file,$mcl_infile);
   my $families;
@@ -343,7 +349,6 @@ sub run {
   else {
     $families = $self->_generate_families($clusters);
   }
-  
 
   return @{$families};
 }
@@ -372,10 +377,16 @@ sub _generate_families {
               my %taxon;
               $taxon_str=~s/=;/=undef;/g if $taxon_str;
               %taxon = map{split '=',$_}split';',$taxon_str if $taxon_str;
-              my $name = $taxon{'taxon_common_name'} eq 'undef' ? undef : $taxon{'taxon_common_name'} if $taxon{'taxon_common_name'};
-              my @classification = $taxon{'taxon_classification'} eq 'undef' ? undef : split(':',$taxon{'taxon_classification'}) if $taxon{'taxon_classification'};
-              my $tax_id = $taxon{'taxon_id'} eq 'undef' ? undef : $taxon{'taxon_id'} if $taxon{'taxon_id'};
-              my $sub_species = $taxon{'taxon_sub_species'} eq 'undef'? undef : $taxon{'taxon_sub_species'} if $taxon{'taxon_sub_species'} ;
+              my $name = $taxon{'taxon_common_name'} eq 'undef' ?
+                  undef : $taxon{'taxon_common_name'}
+                        if $taxon{'taxon_common_name'};
+              my @classification = $taxon{'taxon_classification'} eq 'undef' ?
+                  undef : split(':',$taxon{'taxon_classification'})
+                        if $taxon{'taxon_classification'};
+              my $tax_id = $taxon{'taxon_id'} eq 'undef' ? 
+                  undef : $taxon{'taxon_id'} if $taxon{'taxon_id'};
+              my $sub_species = $taxon{'taxon_sub_species'} eq 'undef'?
+                  undef : $taxon{'taxon_sub_species'} if $taxon{'taxon_sub_species'} ;
 
               my $species;
 
@@ -384,11 +395,11 @@ sub _generate_families {
               };
               if($@){
                 $self->warn("Problems creating Species $@");
-                next; 
+                next;
               }
               $species->common_name($name);
               $species->sub_species($sub_species);
-              $species->ncbi_taxid($tax_id);              
+              $species->ncbi_taxid($tax_id);
               $mem->species($species); 
 
               push @mem, $mem;
@@ -400,7 +411,7 @@ sub _generate_families {
                                               -members=>\@mem);
           push @fam, $fam;
       }
-     return \@fam;
+      return \@fam;
     }
     else {
         for(my $i = 0; $i < scalar(@{$clusters}); $i++){
@@ -412,7 +423,7 @@ sub _generate_families {
           }
           my $id = $family_tag."_".$i;
           my $fam = Bio::Cluster::SequenceFamily->new(-family_id=>$id,
-                                              -members=>\@mem);
+                                                      -members=>\@mem);
           push @fam, $fam;
       }
      return \@fam;
@@ -420,7 +431,7 @@ sub _generate_families {
 
 }
 
-     
+
 sub _consensifier {
     my ($self,$clusters) = @_;
     eval {
@@ -526,7 +537,8 @@ CLUSTER:
             my @lcs=Algorithm::Diff::LCS(\@list1,\@list2);
             my $lcs=join(" ",@lcs);
 
-            if ($lcs eq $candidate_consensus || index($orig_desc,$candidate_consensus) != -1 # addition;
+            if ($lcs eq $candidate_consensus ||
+                index($orig_desc,$candidate_consensus) != -1 # addition;
                 # many good (single word) annotations fall out otherwise
                ) {
                 $lcs_count++;
@@ -563,7 +575,6 @@ CLUSTER:
   }
   return %consensus;
 }
-    
 
 sub _setup_description {
     my ($self,$file) = @_;
@@ -614,7 +625,6 @@ sub _apply_edits {
   $desc=~s/EC (\d+) (\d+)/EC $1\.$2.-.-/;
   $desc=~s/(\d+) (\d+) KDA/$1.$2 KDA/;
   return $desc;
-    
 }
 
 =head2 _run_mcl
@@ -641,7 +651,7 @@ sub _run_mcl {
   unless (defined $self->I) {
     $self->I(3.0);
   }
-  
+
   foreach my $param (@MCLPROGRAM_PARAMS) {
     if (defined $self->$param) {
       $cmd .= " -$param ".$self->$param;
@@ -699,7 +709,7 @@ sub _run_matrix {
   my $status = system($cmd);
 
   $self->throw( "tribe-matrix call ($cmd) crashed: $? \n") unless $status==0;
-  
+
   return ($self->ind,$self->out);
 }
 
@@ -707,7 +717,8 @@ sub _run_matrix {
 
  Title   : _setup_input
  Usage   : $self->_setup_input()
- Function: internal function for running setting up the inputs needed for running mcl
+ Function: internal function for running setting up the inputs
+            needed for running mcl
  Returns : filepath of parsed ids and scores
  Args    : 
 
@@ -721,7 +732,8 @@ sub _setup_input {
 
     $type = $self->inputtype();
     if($type=~/scorefile/i){
-        -e $self->scorefile || $self->throw("Scorefile doesn't seem to exist or accessible");
+        -e $self->scorefile ||
+            $self->throw("Scorefile doesn't seem to exist or accessible");
         return $self->scorefile;
     }
     if($type =~/blastfile/i){
@@ -748,7 +760,8 @@ sub _setup_input {
       $rc = $self->_get_from_hit($self->hit,$tfh);
     }
     else {
-	    $self->throw("Must set inputtype to either blastfile,searchio or paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
+        $self->throw("Must set inputtype to either blastfile,searchio or ".
+                     "paris using \$fact->blastfile |\$fact->searchio| \$fact->pairs");
     }
     unless ( $rc ) {
 	    $self->throw("Need inputs for running tribe mcl, nothing provided"); 
@@ -764,7 +777,7 @@ sub _setup_input {
  Usage   : $self->_get_from_hsp()
  Function: internal function for getting blast scores from hsp 
  Returns : array ref to ids and score [protein1 protein2 magnitude factor]
- Args    :  L<Bio::Search::HSP::GenericHSP>
+ Args    : L<Bio::Search::HSP::GenericHSP>
 
 =cut
 
@@ -810,7 +823,6 @@ sub _get_from_hit {
     return $count;
 }
 
-    
 
 =head2 _get_from_searchio
 
@@ -843,7 +855,7 @@ sub _get_from_searchio {
 			$hsp->feature2->seq_id,
 			int($first),
 			int($second) ), "\n";
-        
+
 	$count++;
       }
     }
@@ -855,7 +867,8 @@ sub _get_from_searchio {
 
  Title   : _parse_blastfile
  Usage   : $self->_parse_blastfile()
- Function: internal function for quickly parsing blast evalue scores from raw blast output file
+ Function: internal function for quickly parsing blast evalue 
+           scores from raw blast output file
  Returns : array ref to ids and score [protein1 protein2 magnitude factor]
  Args    :  file path
 
@@ -931,13 +944,13 @@ sub _parse_mcl {
       /^(\S+)\s+(\S+)/;
       $hash{$1}=$2;
   }
-  
+
   for (my $j=0;$j<$i+1;$j++)	{
       my @array=split(" ",$cluster[$j]);
       for (my $p=1;$p<$#array;$p++){
 	  push @{$out[$array[0]]}, $hash{$array[$p]};
       }
-  }    
+  }
   return \@out;
 }
 

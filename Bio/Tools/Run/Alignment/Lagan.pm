@@ -17,8 +17,6 @@ of tools (including MLAGAN for multiple sequence alignments)
 
 =head1 SYNOPSIS
 
-MLAGAN / LAGAN execution and alignment object creation.
-
   use Bio::Tools::Run::Alignment::Lagan;
 
   @params =
@@ -45,6 +43,13 @@ MLAGAN / LAGAN execution and alignment object creation.
        'gapend' => -50,
        'gapcont' => -2,
   );
+
+
+=head1 DESCRIPTION
+
+To run mlagan/lagan, the executables "mlagan" and "lagan.pl" must be
+in your path or you must have an environment variable that points to
+the executable directory "LAGANDIR=/opt/lagan_executables/"
 
 All lagan and mlagan parameters listed in their Readmes can be set
 except for the mfa flag which has been turned on by default to prevent
@@ -74,13 +79,6 @@ TO USE MLAGAN:
 Only basic mlagan/lagan functionality has been implemented due to the
 iterative development of their project.  Future maintenance upgrades
 will include enhanced features and scoring.
-
-=head1 DESCRIPTION
-
-To run mlagan/lagan, the executables "mlagan" and "lagan.pl" must be
-in your path or you must have an environment variable that points to
-the executable directory "LAGANDIR=/opt/lagan_executables/"
-
 
 =head1 FEEDBACK
 

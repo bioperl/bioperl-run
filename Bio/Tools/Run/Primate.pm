@@ -17,8 +17,8 @@ tags.
   use Bio::Tools::Run::Primate;
   use Bio::SeqIO;
 
-  my $query = "primer.fa"
-  my $target = "contig.fa"
+  my $query = "primer.fa";
+  my $target = "contig.fa";
 
   my @params = ("query" => $query,"target" => $target,"m"=>0);
   my $fact = Bio::Tools::Run::Primate->new(@params);
@@ -247,7 +247,8 @@ sub _run {
     close($tfh); # this is to make sure we don't have 
                  # open filehandles
     undef $tfh;
-    my $commandstring = $self->executable." $param_string -q $query_file -t $target_file > $outfile";
+    my $commandstring = $self->executable.
+        " $param_string -q $query_file -t $target_file > $outfile";
     $self->debug( "primate command = $commandstring");
     my $status = system($commandstring);
     $self->throw( "primate call ($commandstring) crashed: $? \n") unless $status==0;

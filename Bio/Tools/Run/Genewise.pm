@@ -30,12 +30,18 @@ given sequence given a protein
   $factory->hmmer(1);
   my $genes = $factory->run($hmmfile, $genomic_seq);
 
-  Available Params:
 
-  NB: These should be passed without the '-' or they will be ignored,
-  except switches such as 'hmmer' (which have no corresponding value)
-  which should be set on the factory object using the AUTOLOADed
-  methods of the same name.
+=head1 DESCRIPTION
+
+Genewise is a gene prediction program developed by Ewan Birney
+http://www.sanger.ac.uk/software/wise2.
+
+=head2 Available Params:
+
+NB: These should be passed without the '-' or they will be ignored,
+except switches such as 'hmmer' (which have no corresponding value)
+which should be set on the factory object using the AUTOLOADed methods
+of the same name.
 
   Model    [-codon,-gene,-cfreq,-splice,-subs,-indel,-intron,-null]
   Alg      [-kbyte,-alg]
@@ -43,10 +49,6 @@ given sequence given a protein
   Output   [-gff,-gener,-alb,-pal,-block,-divide]
   Standard [-help,-version,-silent,-quiet,-errorlog]
 
-=head1 DESCRIPTION
-
-Genewise is a gene prediction program developed by Ewan Birney
-http://www.sanger.ac.uk/software/wise2.
 
 =head1 FEEDBACK
 
@@ -209,10 +211,9 @@ sub version {
            peptide and genomic sequences
            or else 2  Bio::Seq objects.
 
- Throws an exception if argument is not either a string (eg a
- filename) or 2 Bio::Seq objects.  If
- arguments are strings, throws exception if file corresponding to string
- name can not be found.
+Throws an exception if argument is not either a string (eg a filename)
+or 2 Bio::Seq objects.  If arguments are strings, throws exception if
+file corresponding to string name can not be found.
 
 =cut
 
@@ -232,11 +233,11 @@ sub predict_genes {
            genomic sequence). Alternatively any of the fasta sequence
            filenames may be substituted with a Bio::Seq object.
 
- Throws an exception if argument is not either a string (eg a
- filename) or Bio::Seq objects. If arguments are strings, throws exception
- if file corresponding to string name can not be found. Also throws an
- exception if a profile HMM is expected (the -hmmer genewise switch has
- been set).
+Throws an exception if argument is not either a string (eg a filename)
+or Bio::Seq objects. If arguments are strings, throws exception if
+file corresponding to string name can not be found. Also throws an
+exception if a profile HMM is expected (the -hmmer genewise switch has
+been set).
 
 =cut
 
