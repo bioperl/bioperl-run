@@ -1,10 +1,10 @@
 # BioPerl module for Bio::Tools::Run::Alignment::Lagan
 #
-# Cared for by Stephen Montgomery <smontgom@bcgsc.bc.ca>
+# Cared for by Bioperl
 #
-# Copyright Stephen Montgomery
+# Copyright Bioperl, Stephen Montgomery <smontgom@bcgsc.bc.ca>
 #
-# Special thanks to Peter Schattner.
+# Special thanks to Jason Stajich.
 #
 # You may distribute this module under the same terms as perl itself
 
@@ -421,7 +421,7 @@ sub _runlagan {
  Args    : [optional] name of executable to set path to
            [optional] boolean flag whether or not warn when exe is not found
 
- Thanks to Peter Schattner for providing the framework for this subroutine
+ Thanks to Jason Stajich for providing the framework for this subroutine
 
 =cut
 
@@ -456,7 +456,7 @@ sub executable {
  Function: Builds path for executable
  Returns : string representing the full path to the exe
 
- Thanks to Peter Schattner for providing the framework for this subroutine
+ Thanks to Jason Stajich for providing the framework for this subroutine
 
 =cut
 
@@ -478,7 +478,7 @@ sub program_path {
            by wrapper.
  Returns : string representing program directory
 
- Thanks to Peter Schattner for providing the framework for this subroutine
+ Thanks to Jason Stajich for providing the framework for this subroutine
 
 =cut
 
