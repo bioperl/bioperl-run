@@ -248,7 +248,7 @@ sub run {
     local * FASTARUN;
 
     $self->io->_io_cleanup;
-    my $program = $self->executable($program_i) ||  
+    my $program = $self->executable($self->program_name) ||  
 	$self->throw("FASTA program not found or not executable.\n");
     # You should specify a library file
     $self->throw("You didn't choose library.\n") unless ( $library);
