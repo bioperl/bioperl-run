@@ -109,7 +109,7 @@ use Bio::Tools::Sim4::Results;
 
 BEGIN {
 
-    @SIM4_PARAMS= qw(W X K C R D H P N B); 
+    @SIM4_PARAMS= qw(A W X K C R D H P N B); 
     @OTHER_PARAMS= qw(CDNA_SEQ GENOMIC_SEQ OUTFILE);
     @OTHER_SWITCHES = qw(SILENT QUIET VERBOSE); 
 
@@ -151,9 +151,9 @@ sub new {
   my $self = $class->SUPER::new(@args);
   # to facilitiate tempfile cleanup
   $self->io->_initialize_io();
-
+  $self->A(0); # default
   my ($attr, $value);
-
+  
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -275,7 +275,7 @@ sub _run {
         $self->outfile($outfile);
     }
     my $outfile = $self->outfile(); 
-    my $commandstring = $self->executable." $infile1 $infile2 $param_string A=0 > $outfile";
+    my $commandstring = $self->executable." $infile1 $infile2 $param_string > $outfile";
     if($self->quiet || $self->silent || ($self->verbose < 0)){
       $commandstring .= " 2>/dev/null";
     }
