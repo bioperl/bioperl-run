@@ -85,10 +85,9 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
             @PROMOTERWISE_SWITCHES @PROMOTERWISE_PARAMS
             @OTHER_SWITCHES %OK_FIELD);
 use Bio::SeqIO;
-use Bio::SeqFeature::Generic;
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
-use Bio::SeqFeature::FeaturePair; 
+use Bio::Tools::Promoterwise;
 use strict;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
@@ -253,56 +252,11 @@ sub _run {
     }
    $self->debug( "promoterwise command = $commandstring");
     open(PW, "$commandstring |") || $self->throw( "Promoterwise call ($commandstring) crashed: $? \n");
+   my $pw_parser = Bio::Tools::Promoterwise->new(-fh=>\*PW,-query1_seq=>$self->_query1_seq,-query2_seq=>$self->_query2_seq); 
    my @fp;
-    my %hash;
-    while(<PW>){
-      chomp;
-      my @array = split;
-      push @{$hash{$array[$#array]}}, \@array;
-    }
-    foreach my $key(keys %hash){
-      my ($sf1,$sf2);
-      my $sf1 = Bio::SeqFeature::Generic->new(-primary=>"conserved_element",
-                                              -source_tag=>"promoterwise");
-     $sf1->attach_seq($self->_query1_seq);
-      my $sf2 = Bio::SeqFeature::Generic->new(-primary=>"conserved_element",
-                                              -source_tag=>"promoterwise");
-        $sf2->attach_seq($self->_query2_seq);
-
-      foreach my $info(@{$hash{$key}}){
-        my ($score,$id1,$start_1,$end_1, $strand_1,$id2,$start_2,$end_2,$strand_2,$group)= @{$info};
-        if(!$sf1->strand && !$sf2->strand){ 
-          $sf1->strand($strand_1);
-          $sf2->strand($strand_2);
-          $sf1->seq_id($id1);
-          $sf2->seq_id($id2);
-          $sf1->score($score); 
-          $sf2->score($score); 
-        }
-        my $sub1 = Bio::SeqFeature::Generic->new(-start=>$start_1,
-                                              -seq_id=>$id1,
-                                              -end  =>$end_1,
-                                              -strand=>$strand_1,
-                                              -primary=>"conserved_element",
-                                              -source_tag=>"promoterwise",
-                                              -score=>$score); 
-        $sub1->attach_seq($self->_query1_seq);
-
-        my $sub2 = Bio::SeqFeature::Generic->new(-start=>$start_2,
-                                              -seq_id=>$id2,
-                                              -end  =>$end_2,
-                                              -strand=>$strand_2,
-                                              -primary=>"conserved_element",
-                                              -source_tag=>"promoterwise",
-                                              -score=>$score); 
-        $sub2->attach_seq($self->_query2_seq);
-        $sf1->add_SeqFeature($sub1,'EXPAND');
-        $sf2->add_SeqFeature($sub2,'EXPAND');
-    }
-    my $fp = Bio::SeqFeature::FeaturePair->new(-feature1=>$sf1,
-                                               -feature2=>$sf2);
-    push @fp, $fp;
-  }
+   while (my $fp = $pw_parser->next_result){
+    push @fp,$fp;
+   }
 
     return @fp;
 }
