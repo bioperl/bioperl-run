@@ -776,11 +776,14 @@ sub _init {
 			while (<$value>) {
 			    $self->{ARGS}{$param . "_data"} .= $_;
 			}
-		    } elsif ($application->param_type($param) eq "Sequence" && 
-			$value->isa("Bio::PrimarySeqI")) {
+		    } elsif ($value->isa("Bio::PrimarySeqI")) {
+			# not restricted to Sequence type (for
+			# Sequence type in Pise implies conversion)
 			$self->{ARGS}{$param . "_data"} = $value->seq;
-		    } elsif ($application->param_type($param) eq "Sequence" && 
-			     $value->isa("Bio::SimpleAlign")) {
+		    } elsif ($value->isa("Bio::SimpleAlign")) {
+			# not restricted to Sequence type (for
+			# Sequence type in Pise implies conversion)
+
 			#my $tmpfile = POSIX::tmpnam;
 			my $tmpfile = $param . ".fasta";
 			# bioperl 1.0
