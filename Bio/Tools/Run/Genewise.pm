@@ -115,8 +115,7 @@ sub new {
   $self->io->_initialize_io();
 
   my ($attr, $value);
-  #($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
-  ($TMPDIR) = "/usr/users/shawnh/tmp";
+  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
@@ -249,7 +248,7 @@ sub _run {
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
 
-    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+#    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 > $outfile";
     $self->debug( "genewise command = $commandstring");
@@ -287,15 +286,13 @@ sub get_strand {
 }
 
 sub _setinput {
-  my ($self, $seq1, $seq2) = @_;
-  my ($tfh1,$tfh2,$outfile1,$outfile2);
+    my ($self, $seq1, $seq2) = @_;
+    my ($tfh1,$tfh2,$outfile1,$outfile2);
 
     if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI")))
-      { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
-    #my $tempdir = $self->io->tempdir(CLEANUP=>1);
-    my $tempdir = "/usr/users/shawnh/tmp";
-    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
-    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
+    { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
+    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$TEMPDIR);
+    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$TEMPDIR);
 
     my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , '-format' => 'Fasta');
     my $out2 = Bio::SeqIO->new(-file=> ">$outfile2", '-format' => 'Fasta');
@@ -304,6 +301,12 @@ sub _setinput {
     $out2->write_seq($seq2);
     $self->_query_pep_seq($seq1);
     $self->_subject_dna_seq($seq2);
+    # Make sure you close things - this is what creates
+    # Out of filehandle errors 
+    close($tfh2);
+    close($tfh1);
+    undef $tfh2;
+    undef $tfh1;
     return $outfile1,$outfile2;
 
 }
