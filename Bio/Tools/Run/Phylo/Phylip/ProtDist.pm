@@ -514,7 +514,7 @@ sub _setparams {
     $self = shift;
     my $param_string = "";
     my $cat = 0;
-    my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'PROTDIST'}};
+    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'PROTDIST'}};
 
     foreach  my $attr ( @PROTDIST_PARAMS) {
     	$value = $self->$attr();
