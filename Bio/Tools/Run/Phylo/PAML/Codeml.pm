@@ -352,7 +352,7 @@ sub new {
   
   $self->set_default_parameters();
   if( defined $params ) {
-      if( ref($flags) !~ /HASH/i ) { 
+      if( ref($params) !~ /HASH/i ) { 
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
 	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
