@@ -110,7 +110,7 @@ BEGIN {
     $MINNAMELEN = 25;
     $PROGRAMNAME = 'yn00'  . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'PAMLDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catdir($ENV{'PAMLDIR'},$PROGRAMNAME. ($^O =~ /mswin/i ?'.exe': ''));
+	$PROGRAM = Bio::Root::IO->catdir($ENV{'PAMLDIR'},$PROGRAMNAME);
     }
     # valid values for parameters, the default one is always
     # the first one in the array
