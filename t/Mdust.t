@@ -34,7 +34,7 @@ my $mdust = Bio::Tools::Run::Mdust->new(-coords 	=> 1,
 					);
 ok $mdust->isa("Bio::Tools::Run::Mdust");
 unless($mdust->executable){
-  warn("Mdust not installed Skipping tests $Text::ntest to $NUMTESTS.\n") ;
+  warn("Mdust not installed Skipping tests $Test::ntest to $NUMTESTS.\n") ;
   exit(0);
 }
 
