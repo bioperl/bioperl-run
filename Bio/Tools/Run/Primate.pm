@@ -220,12 +220,13 @@ sub version {
 
 sub search {
 
-    my ($self) = @_;
+    my ($self,$target) = @_;
+    my $target = $target ||$self->target;
+    $target || $self->throw("Need a target sequence");
     $self->query || $self->throw("Need a query sequence");
-    $self->target || $self->throw("Need a target sequence");
     
 # Create input file pointer
-    my ($query_file,$target_file)= $self->_setinput($self->query,$self->target);
+    my ($query_file,$target_file)= $self->_setinput($self->query,$target);
     if (!($query_file,$target_file)) {$self->throw("Unable to create temp files for query and target !");}
 
 # Create parameter string to pass to primate program
@@ -289,14 +290,14 @@ sub _parse_results {
         #map primate coordinates to Seq coordinates
         my $seq_start = $seq_end- length($query{$tagname})+2;
         $seq_end++;
-        my $feature = Bio::SeqFeature::Generic->new( -seqname     => $seqname,
+        my $feature = Bio::SeqFeature::Generic->new( -seqname      => $seqname,
                                                       -strand      => $strand,
                                                       -score       => $mismatch,
                                                       -start       => $seq_start,
                                                       -end         => $seq_end,
                                                       -frame       => 1,
-                                                      -source_tag  => 'primate',
-                                                      -primary=> $tagname);
+                                                      -source      => 'primate',
+                                                      -primary     => $tagname);
       $feature->attach_seq($self->_target_seq); 
       push @feats,$feature;
       }
