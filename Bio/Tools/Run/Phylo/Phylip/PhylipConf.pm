@@ -105,11 +105,29 @@ use vars qw(%Menu %FileName);
                         'JUMBLE'  =>"J\n",
                         'SUBMIT'    =>"Y\n",
                       },
+
            'PROTPARS'=>{  'THRESHOLD'=>"T\n",
                           'JUMBLE'   =>"J\n",
                           'OUTGROUP' =>"O\n",
                           'SUBMIT'   =>"Y\n",
-                       }
+                       },
+                       
+           'SEQBOOT'=>{   'DATATYPE' =>{
+                                        'SEQUENCE'=>"",
+                                        'MORPH'   =>"D\n",
+                                        'REST'    =>"D\nD\n",
+                                        'GENEFREQ'=>"D\nD\nD\n",
+                                       },
+                          'ALLELES'  => "A\n",
+                          'PERMUTE'  => {
+                                        'BOOTSTRAP'=>"",
+                                        'JACKKNIFE'=>"J\n",
+                                        'PERMUTE'  =>"J\nJ\n",
+                                        },
+                          'REPLICATES'=>"R\n",
+                          'SUBMIT'   =>"Y\n",
+                       },
+
            
          },
   "3.6"=>{'PROTDIST'=>{'MODEL'  => {
@@ -147,7 +165,22 @@ use vars qw(%Menu %FileName);
                           'JUMBLE'   =>"J\n",
                           'OUTGROUP' =>"O\n",
                           'SUBMIT'   =>"Y\n",
-                       }
+                       },
+          'SEQBOOT'=>{   'DATATYPE' =>{
+                                        'SEQUENCE'=>"",
+                                        'MORPH'   =>"D\n",
+                                        'REST'    =>"D\nD\n",
+                                        'GENEFREQ'=>"D\nD\nD\n",
+                                       },
+                          'ALLELES'  => "A\n",
+                          'PERMUTE'  => {
+                                        'BOOTSTRAP'=>"",
+                                        'JACKKNIFE'=>"J\n",
+                                        'PERMUTE'  =>"J\nJ\n",
+                                        },
+                          'REPLICATES'=>"R\n",
+                          'SUBMIT'   =>"Y\n",
+                       },
          },
 );
 
