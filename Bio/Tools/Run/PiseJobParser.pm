@@ -7,8 +7,6 @@ Bio::Tools::Run::PiseJobParser
 
 =head1 SYNOPSIS
 
-  #
-
 =head1 DESCRIPTION
 
    Parsing of Pise XHTML output to extract results files and piping menus.
@@ -50,6 +48,9 @@ sub characters {
 	$self->{output_files} = 1;
 	$self->{terminated} = 1;
     }
+    if ($element->{Data} =~ /Warning:/) {
+	$self->{warning} = 1;
+    }
     if ($element->{Data} =~ /this files will remain accessible for/) {
 	$self->{output_files} = 0;
 	$self->{result_url} = 1;
@@ -89,6 +90,7 @@ sub start_element {
 	$self->{terminated} = 0;
 	$self->{error} = 0;
 	$self->{error_message} = "";
+	$self->{warning} = 0;
 	$self->{hrefs} = [];
     } elsif ($element->{Name} eq "A") {
 	$self->{href} = $attributes{HREF};
@@ -175,6 +177,8 @@ sub end_element {
 	if ($self->{error}) {
 	    $self->{check_message}=0;
 	}
+    } elsif ($element->{Name} eq "HR" && $self->{warning}) {
+	$self->{warning} = 0;
     }
 }
 
