@@ -280,8 +280,8 @@ BEGIN {
 		     
 		     'Mgene'    => [0,1], # 0:rates, 1:separate
 		     
-		     'fix_kappa'=> [0,1],#0:estimate kappa, 1:fix kappa
-		     'kappa'    => [2], # initial or fixed kappa
+		     'fix_kappa'=> [0,1], # 0:estimate kappa, 1:fix kappa
+		     'kappa'    => [2],   # initial or fixed kappa
 		     'fix_omega'=> [0,1], # 0: estimate omega, 1: fix omega
 		     'omega'    => [0.4], # initial or fixed omega for 
 		                          # codons or codon-base AAs
