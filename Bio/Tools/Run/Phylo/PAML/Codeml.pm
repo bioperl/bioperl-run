@@ -251,7 +251,7 @@ BEGIN {
 		     # with model=empirical(_F)
 		     # default is usually 'wag.dat', also
 		     # dayhoff.dat, jones.dat, mtmam.dat, or your own
-		     'aaRatefile' => ['wag.dat'], 
+		     'aaRatefile' => 'wag.dat', 
 
 		     # (model) models for codons 
 		     # 0: one, 1:b, 2:2 or more dN/dS ratios for branches
