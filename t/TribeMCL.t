@@ -23,11 +23,24 @@ END {
     }
 }
 
+eval{
+    require "Algorithm/Diff.pm";
+};
+if($@){
+    warn("Need Algorithm::Diff to run TribeMCL");
+    exit(0);
+}
+
 my $blast_out = Bio::Root::IO->catfile("t","data","TribeMCL.bls");
 
 #do from raw blast output
 my @params=('inputtype'=>'blastfile',I=>'3.0');
 my $fact = Bio::Tools::Run::TribeMCL->new(@params);
+
+unless ($fact){
+        warn("Couldn't create a TribeMCL wrapper");
+            exit(0);
+}
 my $desc = Bio::Root::IO->catfile("t","data","TribeMCL.desc");
 $fact->description_file($desc);
 
