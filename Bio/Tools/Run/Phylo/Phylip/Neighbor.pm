@@ -163,8 +163,8 @@ use Bio::Root::IO;
 # 1. define an environmental variable PHYLIPDIR:
 # export PHYLIPDIR=/home/shawnh/PHYLIP/bin
 #
-# 2. include a definition of an environmental variable CLUSTALDIR in
-# every script that will use Clustal.pm.
+# 2. include a definition of an environmental variable PHYLIPDIR in
+# every script that will use Neighbor.pm.
 # $ENV{PHYLIPDIR} = '/home/shawnh/PHYLIP/bin';
 #
 # 3. You can set the path to the program through doing:
@@ -220,9 +220,7 @@ sub new {
 	$self->idlength(10);
     }
     unless ($self->exists_neighbor()) {
-	if( $self->verbose >= 0 ) {
-		warn "neighbor program not found as ".$self->program." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n";
-	}
+	$self->warn( "neighbor program not found as ".$self->program." or not executable. \n  The phylip package can be obtained from http://evolution.genetics.washington.edu/phylip.html \n");
     }
     return $self;
 }
@@ -237,7 +235,6 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
-
 =head2  exists_neighbor()
 
  Title   : exists_neighbor
@@ -248,7 +245,6 @@ sub AUTOLOAD {
  Args    :  none
 
 =cut
-
 
 sub exists_neighbor{
     my $self = shift;
@@ -352,7 +348,6 @@ sub create_tree{
  Returns : Bio::Tree object
  Args    : Name of a file containing protein distances in Phylip format 
            and a parameter string to be passed to neighbor
-
 
 =cut
 
