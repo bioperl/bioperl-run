@@ -271,8 +271,7 @@ sub mcl_executable{
 	       -x $exe ) {
 	       $self->{'_mcl_exe'} = $exe;
 	   } else { 
-	       $self->warn("Cannot find executable for $MCLPROGRAM_NAME") 
-		   if $warn;
+	       $self->warn("Cannot find executable for $MCLPROGRAM_NAME") if $warn;
 	       $self->{'_mcl_exe'} = undef;
 	   }
        }
@@ -374,12 +373,12 @@ sub _generate_families {
               my $taxon_str = $description{$member}->[2];
               #parse taxon info into hash
               my %taxon;
-              $taxon_str=~s/=;/=undef;/g;
-              %taxon = map{split '=',$_}split';',$taxon_str;
-              my $name = $taxon{'taxon_common_name'} eq 'undef' ? undef : $taxon{'taxon_common_name'};
-              my @classification = $taxon{'taxon_classification'} eq 'undef' ? undef : split(':',$taxon{'taxon_classification'});
-              my $tax_id = $taxon{'taxon_id'} eq 'undef' ? undef : $taxon{'taxon_id'};
-              my $sub_species = $taxon{'taxon_sub_species'} eq 'undef'? undef : $taxon{'taxon_sub_species'};
+              $taxon_str=~s/=;/=undef;/g if $taxon_str;
+              %taxon = map{split '=',$_}split';',$taxon_str if $taxon_str;
+              my $name = $taxon{'taxon_common_name'} eq 'undef' ? undef : $taxon{'taxon_common_name'} if $taxon{'taxon_common_name'};
+              my @classification = $taxon{'taxon_classification'} eq 'undef' ? undef : split(':',$taxon{'taxon_classification'}) if $taxon{'taxon_classification'};
+              my $tax_id = $taxon{'taxon_id'} eq 'undef' ? undef : $taxon{'taxon_id'} if $taxon{'taxon_id'};
+              my $sub_species = $taxon{'taxon_sub_species'} eq 'undef'? undef : $taxon{'taxon_sub_species'} if $taxon{'taxon_sub_species'} ;
 
               my $species;
 
