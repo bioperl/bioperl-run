@@ -334,16 +334,16 @@ sub _parse_results {
   open(REPOUT,"<$outfile") || $self->throw("Error opening $outfile\n");
   my $filehandle = \*REPOUT;
   my @repeat_features;
-  #check if no repeats found
-    if (<$filehandle> =~ /no repetitive sequences detected/)
-    {
-        print STDERR "RepeatMasker didn't find any repetitive sequences\n";
-        close $filehandle;
-        return;
     }
     #extract values
      while (<$filehandle>) {  
-       if (/\d+/) { #ignore introductory lines
+        if (/$filehandle/ =~ /no repetitive sequences detected/)
+        {
+           print STDERR "RepeatMasker didn't find any repetitive sequences\n";
+           close $filehandle;
+           return;
+        }
+        if (/\d+/) { #ignore introductory lines
             my @element = split;
             # ignore features with negatives 
             next if ($element[11-13] =~ /-/); 
