@@ -521,7 +521,7 @@ sub _setparams {
     my $param_string = "";
     my $type ="";
     my $version = $self->version;
-    my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$version}->{'NEIGHBOR'}};
+    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$version}->{'NEIGHBOR'}};
 
     foreach  my $attr ( @NEIGHBOR_PARAMS) {
     	$value = $self->$attr();
