@@ -60,19 +60,16 @@ methods. Internal methods are usually preceded with a _
 
 
 package Bio::Tools::Run::Pseudowise;
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
             $TMPDIR $TMPOUTFILE @PSEUDOWISE_SWITCHES @PSEUDOWISE_PARAMS 
             @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::SeqIO;
-use Bio::SimpleAlign;
-use Bio::AlignIO;
+use Bio::SeqFeature::Generic;
 use Bio::Root::Root;
-use Bio::Root::IO;
-use Bio::Factory::ApplicationFactoryI;
-use Bio::Search::HSP::GenericHSP;
+use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Root::IO Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 # You will need to enable pseudowise to find the pseudowise program. This
 # can be done in (at least) two ways:
@@ -86,14 +83,14 @@ use Bio::Search::HSP::GenericHSP;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
-
+    $PROGRAMNAME='pseudowise';
     if (defined $ENV{WISEDIR}) {
         $PROGRAMDIR = $ENV{WISEDIR} || '';
         $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR."/src/bin/",
-                                          'pseudowise'.($^O =~ /mswin/i ?'.exe':''));
+                                          $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
     }
     else {
-        $PROGRAM = 'pseudowise';
+        $PROGRAM = $PROGRAMNAME;
     }
     @PSEUDOWISE_PARAMS = qw(SPLICE_MAX_COLLAR SPLICE_MIN_COLLAR SPLICE_SCORE_OFFSET
                      GENESTATS
@@ -112,30 +109,20 @@ sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
   # to facilitiate tempfile cleanup
-  $self->_initialize_io();
+  $self->io->_initialize_io();
 
   my ($attr, $value);
-  (undef,$TMPDIR) = $self->tempdir(CLEANUP=>1);
-  (undef,$TMPOUTFILE) = $self->tempfile(-dir => $TMPDIR);
+  ($TMPDIR) = $self->io->tempdir(CLEANUP=>1);
   while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
     if ($attr =~/'PROGRAM'/i) {
-      $self->program($value);
+      $self->executable($value);
       next;
     }
     $self->$attr($value);
   }
-  if (! defined $self->program) {
-    $self->program($PROGRAM);
-  }
-  unless ($self->exists_pseudowise()) {
-    if( $self->verbose >= 0 ) {
-      warn "Pseudowise program not found as ".$self->program." or not executable. \n Pseudowise can be obtained from http://www.sanger.ac.uk/software/wise2\n"; 
-    }
-  }
-
   return $self;
 }
 
@@ -150,49 +137,42 @@ sub AUTOLOAD {
     return $self->{$attr};
 }
 
-=head2  exists_pseudowise()
+=head2 executable
 
- Title   : exists_pseudowis_
- Usage   : $pseudowisefound= Bio::Tools::Run::Pseudowise->exists_pseudowise()
- Function: Determine whether pseudowise program can be found on current host
- Example :
- Returns : 1 if pseudowise program found at expected location, 0 otherwise.
- Args    :  none
-
-=cut
-
-
-sub exists_pseudowise{
-    #my $self = shift;
-    my ($self) = @_;
-    my $rt = Bio::Root::IO->new();
-    #if( my $f = Bio::Root::IO->exists_exe($PROGRAM) ) {
-    if( my $f = $rt->exists_exe($PROGRAM) ) {
-  $PROGRAM = $f if( -e $f );
-  return 1;
-    }
-}
-
-=head2 program
-
- Title   : program
- Usage   : $obj->program($newval)
- Function:
- Returns : value of program
- Args    : newvalue (optional)
+ Title   : executable
+ Usage   : my $exe = $genscan->executable();
+ Function: Finds the full path to the 'pseudowise' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
 
 
 =cut
 
-sub program{
-   my $self = shift;
-   if( @_ ) {
-      my $value = shift;
-      $self->{'program'} = $value;
-    }
-    return $self->{'program'};
+sub executable{
+   my ($self, $exe,$warn) = @_;
 
+   if( defined $exe ) {
+     $self->{'_pathtoexe'} = $exe;
+   }
+
+   unless( defined $self->{'_pathtoexe'} ) {
+       if( $PROGRAM && -e $PROGRAM && -x $PROGRAM ) {
+           $self->{'_pathtoexe'} = $PROGRAM;
+       } else {
+           my $exe;
+           if( ( $exe = $self->io->exists_exe($PROGRAMNAME) ) &&
+               -x $exe ) {
+               $self->{'_pathtoexe'} = $exe;
+           } else {
+               $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
+               $self->{'_pathtoexe'} = undef;
+           }
+       }
+   }
+   $self->{'_pathtoexe'};
 }
+
 
 =head2  version
 
@@ -208,7 +188,7 @@ sub program{
 sub version {
     my ($self) = @_;
 
-    return undef unless $self->exists_pseudowise;
+    return undef unless $self->executable;
     my $string = `pseudowise -- ` ;
     $string =~ /\(([\d.]+)\)/;
     return $1 || undef;
@@ -268,10 +248,11 @@ sub predict_genes {
 sub _run {
     my ($self,$infile1,$infile2,$infile3) = @_;
     my $instring;
-    $self->debug( "Program ".$self->program."\n");
+    $self->debug( "Program ".$self->executable."\n");
     #my $outfile = $self->outfile() || $TMPOUTFILE ;
-    my $outfile =  $TMPOUTFILE ;
-    my $commandstring = $self->program." $infile1 $infile2 $infile3> $outfile";
+    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my $paramstring = $self->_setparams;
+    my $commandstring = $self->executable." $paramstring $infile1 $infile2 $infile3 > $outfile";
     $self->debug( "pseudowise command = $commandstring");
     my $status = system($commandstring);
     $self->throw( "Pseudowise call ($commandstring) crashed: $? \n") unless $status==0;
@@ -380,14 +361,14 @@ sub _setinput {
 
     if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI")&& $seq2->isa("Bio::PrimarySeqI"))) 
       { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
+    my $tempdir = $self->io->tempdir(CLEANUP=>1);
+    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
+    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
+    ($tfh3,$outfile3) = $self->io->tempfile(-dir=>$tempdir);
 
-    ($tfh1,$outfile1) = $self->tempfile(-dir=>$TMPDIR);
-    ($tfh2,$outfile2) = $self->tempfile(-dir=>$TMPDIR);
-    ($tfh3,$outfile3) = $self->tempfile(-dir=>$TMPDIR);
-
-    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-    my $out2 = Bio::SeqIO->new(-fh=> $tfh2 , '-format' => 'Fasta');
-    my $out3 = Bio::SeqIO->new(-fh=> $tfh3 , '-format' => 'Fasta');
+    my $out1 = Bio::SeqIO->new(-file=> ">$outfile1" , '-format' => 'Fasta');
+    my $out2 = Bio::SeqIO->new(-file=> ">$outfile2", '-format' => 'Fasta');
+    my $out3 = Bio::SeqIO->new(-file=> ">$outfile3", '-format' => 'Fasta');
 
     $out1->write_seq($seq1);
     $out2->write_seq($seq2);
@@ -398,6 +379,27 @@ sub _setinput {
     return $outfile1,$outfile2,$outfile3;
   
 }
+
+sub _setparams {
+    my ($self) = @_;
+    my $param_string;
+    foreach my $attr(@PSEUDOWISE_PARAMS){
+        my $value = $self->$attr();
+        next unless (defined $value);
+        my $attr_key = ' -'.(lc $attr);
+        $param_string .=$attr_key.' '.$value;
+    }
+
+    foreach my $attr(@PSEUDOWISE_SWITCHES){
+        my $value = $self->$attr();
+        next unless (defined $value);
+        my $attr_key = ' -'.(lc $attr);
+        $param_string .=$attr_key;
+    }
+
+    return $param_string;
+}
+    
 
 
 =head2  _query_pep_seq()
