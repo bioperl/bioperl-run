@@ -236,7 +236,9 @@ sub _run {
      my ($self)= @_;
      
      my (undef,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $str=$self->executable .' '.$self->options .' '.$self->DB      .' '.$self->_input.' > '.$outfile;
+     my $str=$self->executable;
+     $str.=' '.$self->options if $self->options;
+     $str.=' '.$self->DB .' '.$self->_input.' > '.$outfile;
      
 
      my $status = system($str);
