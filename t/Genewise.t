@@ -25,7 +25,7 @@ END {
 
 ok(1);
 my $verbose = -1;
-my @params = ('dymem'=> 'linear','kbyte'=>'5000','erroroffstd'=>1,'program'=>'/usr/local/bin/genewise');
+my @params = ('-verbose' => $verbose);
 my  $factory = Bio::Tools::Run::Genewise->new(@params);
 ok $factory->isa('Bio::Tools::Run::Genewise');
 my $prog = $factory->program;
@@ -37,16 +37,16 @@ unless ($factory->executable) {
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress pseudowise messages to terminal
 
-
-
 #test with one file with 2 sequences
-my $inputfilename = Bio::Root::IO->catfile("t/data","new_pep.fa");
-my $seqstream1 = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
+my $inputfilename = Bio::Root::IO->catfile(qw(t data new_pep.fa));
+my $seqstream1 = Bio::SeqIO->new(-file => $inputfilename, 
+				 -format => 'fasta');
 my $seq1 = Bio::Seq->new();
 $seq1 = $seqstream1->next_seq();
 
-$inputfilename = Bio::Root::IO->catfile("t/data","new_dna.fa");
-my $seqstream2 = Bio::SeqIO->new(-file => $inputfilename, -fmt => 'Fasta');
+$inputfilename = Bio::Root::IO->catfile(qw(t data new_dna.fa));
+my $seqstream2 = Bio::SeqIO->new(-file => $inputfilename, 
+				 -format => 'fasta');
 my $seq2 = Bio::Seq->new();
 $seq2 = $seqstream2->next_seq();
 
@@ -61,7 +61,6 @@ my $end = $feat[0]->end;
 ok($end, 897);#ok4
 my $strand = $feat[0]->strand;
 ok($strand, 1);#ok5
-
 
 my ($featpair)= $feat[0]->each_tag_value('supporting_feature');
 ok($featpair->feature1->start,865);
