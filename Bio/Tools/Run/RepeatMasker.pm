@@ -88,6 +88,8 @@ use Bio::SeqFeature::Generic;
 use Bio::SeqFeature::FeaturePair;
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::RepeatMasker;
+
 
 # Let the code begin...
 
@@ -267,15 +269,22 @@ sub _run {
   my $status = system($cmd_str);
   $self->throw("Repeat Masker Call($cmd_str) crashed: $?\n") 
       unless $status == 0;
-  my $rpt_feat = $self->_parse_results($outfile);
-  $self->repeat_features($rpt_feat);
+  unless (open (RM, $outfile)) {
+      $self->throw("Cannot open RepeatMasker outfile for parsing");
+  }
+  my $rpt_parser = Bio::Tools::RepeatMasker->new(-fh=>\*RM);
+  my @rpt_feat;
+  while(my $rpt_feat = $rpt_parser->next_result){
+      push @rpt_feat, $rpt_feat;
+  }
+  $self->repeat_features(\@rpt_feat);
 
   #get masked sequence
   my $masked = $infile.".masked";
   my $seqio = Bio::SeqIO->new(-file=>$masked,-format=>'FASTA');
   $self->masked_seq($seqio->next_seq);
 
-  return @{$rpt_feat};
+  return @rpt_feat;
 }
 
 =head2  masked_seq
@@ -315,83 +324,6 @@ sub repeat_features {
   }
   return @{$self->{'_rf'}};
 }
-
-=head2  _parse_results()
-
- Title   : _parse_results
- Usage   : Internal function, not to be called directly
- Function: parses the results from RepeatMasker output 
-           (largely copied from Ensembl RepeatMasker Runnable)
- Example :
- Returns : array of repeat features 
- Args    : the name of the output file
-
-=cut
-
-sub _parse_results {
-  my ($self,$outfile) = @_;
-  $outfile || $self->throw("No outfile specified");
-  open(REPOUT,"<$outfile") || $self->throw("Error opening $outfile\n");
-  my $filehandle = \*REPOUT;
-  my @repeat_features;
-    #extract values
-     while (<$filehandle>) {  
-        if (/$filehandle/ =~ /no repetitive sequences detected/)
-        {
-           print STDERR "RepeatMasker didn't find any repetitive sequences\n";
-           close $filehandle;
-           return;
-        }
-        if (/\d+/) { #ignore introductory lines
-            my @element = split;
-            # ignore features with negatives 
-            next if ($element[11-13] =~ /-/); 
-            my (%feat1, %feat2);
-            my ($score, $query_name, $query_start, $query_end, $strand,
-		$repeat_name, $repeat_class ) = (split)[0, 4, 5, 6, 8, 9, 10];
-            my ($hit_start,$hit_end);
-	    if ($strand eq '+') {
-            ($hit_start, $hit_end) = (split)[11, 12];
-            $strand = 1;
-	    }
-       elsif ($strand eq 'C') {
-	        ($hit_start, $hit_end) = (split)[12, 13];
-          $strand = -1;
-	    }
-     #my $rc = $self->_get_consensus($repeat_name, $repeat_class);
-      
-	    my $rf = Bio::SeqFeature::Generic->new;
-	    $rf->seqname          ($query_name);
-	    $rf->score            ($score);
-	    $rf->start            ($query_start);
-	    $rf->end              ($query_end);
-	    $rf->strand           ($strand);
-      $rf->source_tag       ($PROGRAMNAME);
-      $rf->primary_tag      ($repeat_class);
-
-      my $rf2 = Bio::SeqFeature::Generic->new;
-      $rf2->seqname         ($repeat_name);
-      $rf2->score           ($score);
-      $rf2->start           ($hit_start);
-      $rf2->end             ($hit_end);
-      $rf2->strand          ($strand);
-      $rf2->source_tag      ($PROGRAMNAME);
-      $rf->primary_tag      ($repeat_class);
-
-      my $fp = Bio::SeqFeature::FeaturePair->new(-feature1=>$rf,
-                                            -feature2=>$rf2);
-
-
-	    #$rf->repeat_consensus ($rc);
-
-	    push @repeat_features, $fp;
-        }
-    }
-    close $filehandle;
-
-    return \@repeat_features;
-}
-
 
 =head2  _setparams()
 
