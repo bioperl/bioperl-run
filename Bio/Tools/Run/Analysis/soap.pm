@@ -257,6 +257,33 @@ sub _initialize {
     delete $self->{'_result_spec'};
 }
 
+#
+# Create a hash with named inputs, all extracted 
+# from the given data.
+#
+# The main job is done in the SUPER class - here we do
+# only the SOAP-specific stuff.
+#
+sub _prepare_inputs {
+    my $self = shift;
+    my $rh_inputs = $self->SUPER::_prepare_inputs (@_);
+
+    foreach my $name (keys %{$rh_inputs}) {
+	my $value = $$rh_inputs{$name};
+
+	# value of type ref ARRAY is send as byte[][]
+	if (ref $value eq 'ARRAY') {
+	    my @bytes =
+		map { SOAP::Data->new (type  => 'base64',
+				       value => $_) } @$value;
+	    $$rh_inputs{$name} = \@bytes;
+	    next;
+	}
+    }
+
+    return $rh_inputs;
+}
+
 # ---------------------------------------------------------------------
 #
 #   Here are the methods implementing Bio::AnalysisI interface

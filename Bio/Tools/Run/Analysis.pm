@@ -387,15 +387,12 @@ sub _prepare_inputs {
 	elsif (ref $input eq 'HASH') {
 	    foreach my $name (keys %$input) {
 		my $value = $$input{$name};
-		unless (ref $value) {   # taking only scalars
-		    $inputs{$name} = $value;
-		    next;
-		}
+		$inputs{$name} = $value;
 	    }
 	}
 
 	# ...or an element can be a scalar (which means that it
-	# represents a name of a boolean parametr (option)
+	# represents a name of a boolean parameter (an option)
 	elsif (ref \$input eq 'SCALAR') {
 	    $input =~ s/^@/\\@/;   # this cannot be a filename
 	    $inputs{$input} = 1;
@@ -417,7 +414,7 @@ sub _prepare_inputs {
 }
 
 # --- if a $value is a filename, read it and return its contents
-#     otherwise return thre $value itself; if $value start with
+#     otherwise return the $value itself; if $value start with
 #     an escaped '@', change it to a normal '@'
 sub _read_value {
     my ($self, $value) = @_;
