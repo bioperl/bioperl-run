@@ -221,8 +221,9 @@ BEGIN {
     $MINNAMELEN = 25;
     $PROGRAMNAME = 'codeml' . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'PAMLDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catfile($ENV{'PAMLDIR'},$PROGRAMNAME);
+	$PROGRAM = Bio::Root::IO->catfile($ENV{'PAMLDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
     }
+   
     # valid values for parameters, the default one is always
     # the first one in the array
     # much of the documentation here is lifted directly from the codeml.ctl
