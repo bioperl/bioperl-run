@@ -55,6 +55,10 @@ Wrapper for Vista
   my $referenceid= 'human';
   $vis->run($aln,$referenceid); 
 
+  #alternative one can choose pairwise alignments to plot
+  #where the second id in each pair is the reference sequence
+  $vis->run($aln,([mouse,human],[fugu,human],[mouse,fugu]]);
+
 =head1 DESCRIPTION
 
 Pls see Vista documentation for plotfile options
@@ -123,6 +127,7 @@ use vars qw($AUTOLOAD @ISA %DEFAULT_VALUES %EPONINE_PARAMS
 use strict;
 
 use Bio::Root::Root;
+use Bio::Seq;
 use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 use File::Copy;
@@ -294,21 +299,72 @@ sub run{
 
 sub _setinput {
     my ($self,$sim_aln,$ref) = @_;
-    ($sim_aln && $sim_aln->isa("Bio::Align::AlignI")) || $self->throw("Expecting a Bio::Align::AlignI");
     my($pairs,$files) = $self->_mf2bin($sim_aln,$ref);
     my $plotfile = $self->_make_plotfile($sim_aln,$pairs,$files);
     return $plotfile;
 }
 
+sub _parse_multi_fasta {
+  my ($self,$file) = @_;
+  my %seq;
+  open(FASTA, $file) || $self->throw("Couldn't open $file");
+  my $last;
+  my $count = 0;
+  while (my $line = <FASTA>) {
+    chomp $line;
+    next if $line=~/^$/;
+    if (substr($line, 0, 1) eq ">") {
+        $_ = substr($line, 1);
+        /\w+/g;
+        $seq{$&} = "";
+        $last = $&;
+    } else {
+        $seq{$last}.=$line;
+    }
+    print STDERR $count."\n";
+    $count++;
+  }
+  my @seq;
+
+  foreach my $key(keys %seq){
+    my $seq = Bio::Seq->new(-id=>$key,-seq=>$seq{$key});
+    push @seq,$seq;
+  }
+  return @seq;
+}
+
 #adapted from mlagan utils  mf2bin.pl 
 sub _mf2bin {
   my ($self,$sim,$ref)= @_;
-  my @seq = $sim->each_seq;
+  my @seq;
+  if(!ref $sim){
+    @seq = $self->_parse_multi_fasta($sim);
+  }
+  else {
+    ($sim && $sim->isa("Bio::Align::AlignI")) || $self->throw("Expecting a Bio::Align::AlignI");
+    @seq = $sim->each_seq;
+  }
   my $reference;
+  my @files;
+  my @pairs;
+  if(ref($ref) eq 'ARRAY'){
+    my @ref;
+    foreach my $set(@$ref){
+      my ($reference) = grep{$_->id eq $set->[1]}@seq;
+      my ($other) = grep{$_->id eq $set->[0]}@seq;
+      my ($pair,$file) = $self->_pack_bin($reference,$other);
+      push @pairs, @$pair;
+      push @files, @$file;
+      push @ref,$set->[1];
+    }
+    $self->_coordinate(\@ref);
+    return \@pairs,\@files;
 
+  }
   #figure out the reference sequence
-  if($ref =~/\d+/){ #its a rank index
+  elsif($ref =~/\d+/){ #its a rank index
     $reference = $seq[$ref-1];
+    $ref = $reference->id;
     splice @seq,($ref-1),1;
   }
   else { #its an id
@@ -320,16 +376,15 @@ sub _mf2bin {
       }
     }
   }
+  $self->_coordinate([$ref]);
 
   # pack bin
   # format from Alex Poliakov's glass2bin.pl script
   my %base_code = ('-' => 0, 'A' => 1, 'C' => 2, 'T' => 3, 'G' => 4, 'N' => 5,
                 'a' => 1, 'c' => 2, 't' => 3, 'g' => 4, 'n' => 5);
 
- my @files;
 
  my @ref= (split ('',$reference->seq));
- my @pairs;
 
   foreach my $seq2(@seq){
       my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
@@ -344,6 +399,29 @@ sub _mf2bin {
       push @files, $outfile;
       push @pairs,[$reference->id,$seq2->id];
   }
+  return \@pairs,\@files;
+}
+
+sub _pack_bin {
+  my ($self,$first,$sec) = @_;
+  my @first = (split('',$first->seq));
+  my @sec = (split('',$sec->seq));
+  # pack bin
+  # format from Alex Poliakov's glass2bin.pl script
+  my %base_code = ('-' => 0, 'A' => 1, 'C' => 2, 'T' => 3, 'G' => 4, 'N' => 5,
+                'a' => 1, 'c' => 2, 't' => 3, 'g' => 4, 'n' => 5);
+  my @files;
+  my @pairs;
+  my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+  foreach my $index(0..$#first){
+    unless($first[$index] eq '-' && $sec[$index] eq '-'){
+      print $tfh1 pack("H2",$base_code{$first[$index]}.$base_code{$sec[$index]});
+    }
+  }
+  close ($tfh1);
+  undef ($tfh1);
+  push @files, $outfile;
+  push @pairs,[$first->id,$sec->id];
   return \@pairs,\@files;
 }
 
@@ -397,7 +475,7 @@ sub _make_plotfile {
   $annotation_file .= " GFF" if $self->annotation_format=~/GFF/i;
   print $tfh1 "GENES ".$annotation_file." \n\n" if $annotation_file;
   print $tfh1 "LEGEND on\n\n";
-  print $tfh1 "COORDINATE ".$pairs->[0]->[0]."\n\n";
+  print $tfh1 "COORDINATE ".join(" ",@{$self->_coordinate})."\n\n";
   print $tfh1 "PAPER letter\n\n";
   print $tfh1 "BASES ".$self->bases."\n\n";
   print $tfh1 "TICK_DIST ".$self->tickdist."\n\n";
@@ -459,6 +537,13 @@ sub _run_Vista {
    
    return 1;
 
+}
+sub _coordinate {
+  my ($self,$val) = @_;
+  if($val){
+    $self->{'_coordinate'} = $val;
+  }
+  return $self->{'_coordinate'};
 }
 
 =head2 outfile
