@@ -10,13 +10,13 @@ use strict;
 use vars qw($NUMTESTS);
 
 my $error;
+my $serror;
 
 BEGIN { 
     # to handle systems with no installed Test module
     # we include the t dir (where a copy of Test.pm is located)
     # as a fallback
     eval { require Test; };
-    $error = 0;
     if( $@ ) {
 	use lib 't';
     }
@@ -24,23 +24,16 @@ BEGIN {
     
     $NUMTESTS = 7;
     plan tests => $NUMTESTS;
-    eval { require IO::String; 
-	   require Bio::Tools::Run::Phylo::Molphy::ProtML;
-	   require Bio::Tools::Phylo::Molphy;}; 
-    if( $@ ) { 
-	print STDERR "($@) no IO string installed\n"; 
-	$error = 1;
+
+    unless (eval "require IO::String; 1;") {
+            print STDERR ("IO::String not installed. Skipping tests $Test::ntest to $NUMTESTS.\n");
+            for ($Test::ntest..$NUMTESTS){
+                skip(1,1);
+            }
+            exit(0);
     }
 }
 
-if( $error ==  1 ) {
-    exit(0);
-}
-END { 
-    foreach ( $Test::ntest .. $NUMTESTS ) {
-	skip("unable to run all of the PAML tests",1);
-    }
-}
 my $verbose = $ENV{'BIOPERLDEBUG'};
 
 END { unlink('protml.eps'); }
@@ -53,6 +46,12 @@ END { unlink('protml.eps'); }
 use Bio::Tools::Phylo::Molphy; # PAML parser
 use Bio::Tools::Run::Phylo::Molphy::ProtML;
 use Bio::AlignIO;
+
+END {     
+    for ( $Test::ntest..$NTESTS ) {
+        skip("Molphy not found. Skipping.",1);
+    }
+}
 
  
 my %args = ( 'models' => 'jtt', 

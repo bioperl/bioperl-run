@@ -24,6 +24,14 @@ BEGIN {
 
     $NUMTESTS = 17;
     plan tests => $NUMTESTS;
+
+    unless (eval "require IO::String; 1;") {
+        print STDERR "IO::String not installed. Skipping tests $Test::ntest to $NUMTESTS.\n";
+        for ($Test::ntest..$NUMTESTS){
+            skip(1,1);    
+        }
+        exit(0);
+    }
 }
 
 if( $error ==  1 ) {
