@@ -78,7 +78,9 @@ Available Parameters:
   PARAM         VALUES        DESCRIPTION
   ----------------------------------------
   tree                      <file>        REQUIRED, Tree in Newick Format
-                                          to evaluate parsimony score
+                                          to evaluate parsimony score 
+                                          REQUIRED unless tree_of_life
+                                          exists in FOOTPRINTER_DIR
   sequence_type             upstream      Default upstream
                             downstream
                             other
@@ -88,7 +90,13 @@ Available Parameters:
                                           branch of the tree
   losses                    <file>        files give span constraints so that the motifs
                                           reported are statistically significant
-                                          Example files *.config come with the FootPrinter2.0
+                                          Example files
+                                          universal([6-9]|1[0-2])(loose|tight)?.config
+                                          come with FootPrinter2.0.
+                                          Install these in FOOTPRINTER_DIR and use by
+                                          setting "losses" to "somewhat significant",
+                                          "significant", or "very significant". Do not
+                                          set loss_cost.
   loss_cost                 0-20          a cost associated with losing a motif along some 
                                           branch of the tre
   subregion_size            1-infinity    penalize motifs whose position in the sequences 
@@ -109,7 +117,9 @@ Available Parameters:
   inversion_cost            1-5           This option allows for motifs to undergo inversions, 
                                           at the given cost. An inversion reverse-complements the motif.
   details                   1/0           Shows some of the details about the progress of the computation
-
+  html                      1/0           produce html output (never deleted)
+  ps                        1/0           produce postscript output (never deleted)
+ 
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -165,7 +175,7 @@ BEGIN {
                     LOSSES LOSS_COST TREE PROGRAM SUBREGION_SIZE POSITION_CHANGE_COST
                     INDEL_COST INVERSION_COST );
     @FP_SWITCHES = qw(TRIPLET_FILTERING PAIR_FILTERING POST_FILTERING DETAILS);
-    @OTHER_SWITCHES = qw(QUIET);
+    @OTHER_SWITCHES = qw(QUIET HTML PS);
 
     # Authorize attribute fields
     foreach my $attr ( @FP_PARAMS, @FP_SWITCHES,
@@ -316,7 +326,12 @@ sub _run {
       push @fp_feat, $fp_feat;
   }
 
-  unlink $outfile;
+  unless( $self->save_tempfiles ) {
+      unlink $outfile;
+      unlink $infile;             # is this dangerous??
+      unlink "$infile.order.txt"; # is this dangerous??
+      $self->cleanup();
+  }
 
   return @fp_feat;
 }
@@ -344,7 +359,18 @@ sub _setparams {
       next unless (defined $value);
 
       my $attr_key = lc $attr; #put params in format expected by dba
-
+      if ($attr_key eq 'losses' && $value =~ /^\s*(somewhat|very)?\s*significant\s*$/) {
+        $value = "$ENV{FOOTPRINTER_DIR}/universal".$self->size();
+	if (defined $1) {
+          if ($1 eq 'somewhat') {
+            $value .= 'loose';
+          } else { # $1 eq 'very'
+            $value .= 'tight';
+          }
+        }
+        $value .= '.config';
+        -f $value or $self->throw("universal losses file $value does not exist");
+      }
       $attr_key = ' -'.$attr_key;
       $param_string .= $attr_key.' '.$value;
     }
@@ -357,7 +383,8 @@ sub _setparams {
       $param_string .= $attr_key ;
     }
 
-    $param_string .= " -no_ps -no_html ";
+    $self->html() or $param_string .= " -no_html";
+    $self->ps()   or $param_string .= " -no_ps";
 
     return $param_string;
 }
@@ -375,16 +402,22 @@ sub _setparams {
 =cut
 
 sub _setinput {
-  my ($self,@seq) = @_;
-  my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
-  my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
-  foreach my $seq(@seq){
-      $seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
-      $out1->write_seq($seq);
-  }  
-  $tfh1->close;
-  undef($tfh1);
-  return ($outfile1);
+    my ($self,@seq) = @_;
+    my ($tfh1,$outfile1);
+    $outfile1 = $self->outfile_name();
+    if (defined $outfile1) {
+	$self->io()->_initialize_io(-file => $tfh1);
+    } else {
+	($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
+    }
+    my $out1 = Bio::SeqIO->new(-fh=> $tfh1 , '-format' => 'Fasta');
+    foreach my $seq(@seq){
+	$seq->isa("Bio::PrimarySeqI") || $self->throw("Need a Bio::PrimarySeq compliant object for FootPrinter");
+	$out1->write_seq($seq);
+    }  
+    $tfh1->close;
+    undef($tfh1);
+    return ($outfile1);
 }
 
 
