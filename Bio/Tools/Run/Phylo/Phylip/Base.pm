@@ -66,7 +66,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::Tools::Run::Phylo::Phylip::Base;
-use vars qw(@ISA %DEFAULT);
+use vars qw(@ISA %DEFAULT %FILENAME);
 use strict;
 
 BEGIN {
@@ -78,16 +78,14 @@ BEGIN {
 
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 @ISA = qw(Bio::Root::Root  Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-    %DEFAULT = ( 'OUTFILE'   => 'outfile',
-		 'TREEFILE'  => 'treefile',
-		 'PLOTFILE'  => 'plotfile',
-		 
-		 );
-
-
+    %DEFAULT = ( 
+     'VERSION'   => '3.5',
+		);
+    %FILENAME = %Bio::Tools::Run::Phylo::Phylip::PhylipConf::FileName;
 }
 
 =head2 new
@@ -119,7 +117,7 @@ BEGIN {
 sub outfile{
    my $self = shift;
    $self->{'_outfile'} = shift if @_;
-   return $self->{'_outfile'} || $DEFAULT{'OUTFILE'}; 
+   return $self->{'_outfile'} || $FILENAME{$self->version}{'OUTFILE'}
 }
 
 
@@ -137,7 +135,7 @@ sub outfile{
 sub treefile{
    my $self = shift;
    $self->{'_treefile'} = shift if @_;
-   return $self->{'_treefile'} || $DEFAULT{'TREEFILE'};
+   return $self->{'_treefile'} || $FILENAME{$self->version}{'TREEFILE'};
 }
 
 
@@ -156,7 +154,7 @@ sub fontfile{
     my $self = shift;
 
     return $self->{'fontfile'} = shift if @_;
-    return $self->{'fontfile'};
+    return $self->{'fontfile'} ;
 }
 
 =head2 plotfile
@@ -174,7 +172,24 @@ sub plotfile {
     my $self = shift;
 
     return $self->{'plotfile'} = shift if @_;
-    return $self->{'plotfile'} || $DEFAULT{'PLOTFILE'};
+    return $self->{'plotfile'} || $FILENAME{$self->version}{'PLOTFILE'};
 }
 
+=head2 version
+
+ Title   : version
+ Usage   : $obj->version($newval)
+ Function: Get/Set the version
+ Returns : value of version (a scalar)
+ Args    : on set, new value (a scalar or undef, optional)
+
+
+=cut
+
+sub version {
+    my $self = shift;
+
+    return $self->{'version'} = shift if @_;
+    return $self->{'version'} || $DEFAULT{'VERSION'};
+}
 1;
