@@ -1,11 +1,10 @@
+# $Id$
 # BioPerl module for Bio::Tools::Run::Phylo::Phylip::ProtPars
 #
-# Created by
-#
-# Shawn Hoon 
+# Created by Shawn Hoon 
 #
 # You may distribute this module under the same terms as perl itself
-
+#
 # POD documentation - main docs before the code
 
 =head1 NAME 
@@ -101,11 +100,16 @@ Report bugs to the Bioperl bug tracking system to help us keep track
  email or the web:
 
   bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Shawn Hoon 
 
 Email shawnh@fugu-sg.org 
+
+=head1 CONTRIBUTORS
+
+Email jason@bioperl.org
+
 
 =head1 APPENDIX
 
@@ -149,22 +153,21 @@ use Bio::Tools::Run::Phylo::Phylip::Base;
 # 
 
 
-
 BEGIN {
-  $PROGRAMNAME = "protpars";
-	if (defined $ENV{PHYLIPDIR}) {
-		$PROGRAMDIR = $ENV{PHYLIPDIR} || '';
-		$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-					$PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
-    	}
-	else {
-		$PROGRAM = $PROGRAMNAME;
-	}
-	@PROTPARS_PARAMS = qw(THRESHOLD JUMBLE OUTGROUP);
-	@OTHER_SWITCHES = qw(QUIET);
-	foreach my $attr(@PROTPARS_PARAMS,@OTHER_SWITCHES) {
-		$OK_FIELD{$attr}++;
-	}
+    $PROGRAMNAME = "protpars";
+    if (defined $ENV{PHYLIPDIR}) {
+	$PROGRAMDIR = $ENV{PHYLIPDIR} || '';
+	$PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
+					  $PROGRAMNAME.($^O =~ /mswin/i ?'.exe':''));
+    }
+    else {
+	$PROGRAM = $PROGRAMNAME;
+    }
+    @PROTPARS_PARAMS = qw(THRESHOLD JUMBLE OUTGROUP);
+    @OTHER_SWITCHES = qw(QUIET);
+    foreach my $attr(@PROTPARS_PARAMS,@OTHER_SWITCHES) {
+	$OK_FIELD{$attr}++;
+    }
 }
 
 sub new {
@@ -181,11 +184,11 @@ sub new {
 	$value =  shift @args;
 	next if( $attr =~ /^-/ ); # don't want named parameters
 	if ($attr =~ /IDLENGTH/i){
-		$self->idlength($value);
-		next;
+	    $self->idlength($value);
+	    next;
 	}
 	$self->$attr($value);	
-   }
+    }
     return $self;
 }
 
@@ -202,8 +205,8 @@ sub AUTOLOAD {
 =head2 executable
 
  Title   : executable
- Usage   : my $exe = $genscan->executable();
- Function: Finds the full path to the 'genscan' executable
+ Usage   : my $exe = $protpars->executable();
+ Function: Finds the full path to the 'protpars' executable
  Returns : string representing the full path to the exe
  Args    : [optional] name of executable to set path to
            [optional] boolean flag whether or not warn when exe is not found
