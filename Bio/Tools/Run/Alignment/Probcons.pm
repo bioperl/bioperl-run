@@ -409,8 +409,8 @@ sub _setparams {
 	$value = $self->$attr();
 	next unless (defined $value);	
 	my $attr_key = lc $attr;
-        $attr_key = ' -'.$attr_key;
-        $param_string .= $attr_key .'='.$value;
+        $attr_key = ' --'.$attr_key;
+        $param_string .= $attr_key .' '.$value;
 
     }
     for  $attr ( @PROBCONS_SWITCHES) {
