@@ -36,7 +36,7 @@ Works with Phylip version 3.6
 
   #Create the tree passing in the distance matrix
   @params = ('type'=>'NJ','outgroup'=>2,'lowtri'=>1,
-             'upptri'=>1,'subrep'=>1,'subrep'=>1);
+             'upptri'=>1,'subrep'=>1);
 
   my $neighbor_factory = 
      Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
@@ -539,7 +539,7 @@ sub _setparams {
 	       }
     	}
 	    elsif ($attr =~ /JUMBLE/i){
-	     $self->throw("Unallowed value for random seed") unless ($value =~ /\d+/);
+	     $self->throw("Unallowed value for random seed, need odd number") unless ($value =~ /\d+/ && ($value % 2 == 1));
 	     $param_string .=$menu{'JUMBLE'}."$value\n";
 	    }
       elsif($attr=~/MULTIPLE/i){
