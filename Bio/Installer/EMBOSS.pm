@@ -78,10 +78,10 @@ BEGIN {
           'DESTINATION_DOWNLOAD_DIR' => '/tmp',
           'DESTINATION_INSTALL_DIR' => "/usr/local",
           'PACKAGE_NAME' => 'EMBOSS-latest.tar.gz',
-          'DIRECTORY_NAME' => 'EMBOSS-latest'
+          'DIRECTORY_NAME' => 'EMBOSS-2.9.0'
         );
 }
-
+#FIXME: regexp directory_name so that is not hardcoded
 
 =head2 get_default 
 
