@@ -18,7 +18,8 @@ use ExtUtils::MakeMaker;
 %packages = (
 	     'IO::String'               => '0.0/IO handle to read or write to a string/GenBank+GenPept sequence retrieval, Variation code/Bio::DB::*,Bio::Variation::*,Bio::Tools::Blast::Run::Webblast, Bio::Index::Blast',
 	     'File::Temp'               => '0.0/Temporary File creation/Bio::Root::IO uses if present/Bio::DB::WebDBSeqI, Bio::Seq::LargePrimarySeq',
-	     'XML::Parser::PerlSAX'          => '0.0/XML SAX parser/Pise Applications/Pise::Job');
+	     'XML::Parser::PerlSAX'          => '0.0/XML SAX parser/Pise Applications/Pise::Job',
+             'HTML::Parser'	=> '0.0/HTML Parser/Pise Applications/Pise::Job');
 
 sub check_package {
     my ($name,$str) = @_;
