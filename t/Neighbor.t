@@ -12,7 +12,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 10;
+    $NTESTS = 14;
     plan tests => $NTESTS;
 }
 
@@ -24,7 +24,6 @@ END {
     }
 }
 
-ok(1);
 my $verbose = -1;
 my @params = ('type'    =>'UPGMA',
 #	      'outgroup'=>2,
@@ -78,10 +77,16 @@ my $inputfilename = Bio::Root::IO->catfile("t","data","neighbor.dist");
 my $tree;
 
 $tree = $tree_factory->create_tree($inputfilename);
-my @nodes = sort { defined $a->id && defined $b->id &&
-		       $a->id cmp $b->id } $tree->get_nodes();
+my @nodes = sort { $a->id cmp $b->id } 
+            grep { defined $_->id} $tree->get_nodes();
 
-ok($nodes[2]->id, 'SINFRUP001',"failed creating tree by protpars");
+ok($nodes[2]->id, 'SINFRUP002');
+ok($nodes[1]->id, 'SINFRUP001');
+ok($nodes[0]->id, 'ENSP000002');
+
+ok($nodes[2]->branch_length,'0.07854');
+ok($nodes[1]->branch_length,'0.08462');
+ok($nodes[0]->branch_length,'0.20141');
 
 $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
 my  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
@@ -94,4 +99,3 @@ $tree = $tree_factory->create_tree($matrix);
 		    defined $b->id &&
 		    $a->id cmp $b->id } $tree->get_nodes();
 ok ($nodes[1]->id, 'ENSP000003',"failed creating tree by neighbor");
-	
