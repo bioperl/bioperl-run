@@ -117,6 +117,10 @@ sub new {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
+    if ($attr =~/'PROGRAM'/i) {
+      $self->executable($value);
+      next;
+    }
     $self->$attr($value);
   }
   return $self;
@@ -142,6 +146,7 @@ sub AUTOLOAD {
  Args    : [optional] name of executable to set path to
            [optional] boolean flag whether or not warn when exe is not found
 
+
 =cut
 
 sub executable{
@@ -161,14 +166,15 @@ sub executable{
                $self->{'_pathtoexe'} = $exe;
            } else {
                $self->warn("Cannot find executable for $PROGRAMNAME") if $warn;
-               $self->{'_pathtoexe'} = undef;
+               #$self->{'_pathtoexe'} = undef;
+               $self->{'_pathtoexe'} = '/usr/users/kiran/wise2/wise2/src/bin/pseudowise';
+
            }
        }
    }
    $self->{'_pathtoexe'};
 }
 
-*program = \&executable;
 
 =head2  version
 
@@ -222,9 +228,9 @@ sub predict_genes {
     my ($infile1,$infile2,$infile3)= $self->_setinput($seq1, $seq2, $seq3);
     if (!($infile1 && $infile2 && $infile3)) {$self->throw("Bad input data (sequences need an id ) ");}
 
-
+   my $prot_name = $seq1->display_id;
 # run pseudowise 
-    my @feats = $self->_run($infile1,$infile2,$infile3);
+    my @feats = $self->_run($prot_name, $infile1,$infile2,$infile3);
     return @feats;
 }
 
@@ -242,11 +248,11 @@ sub predict_genes {
 =cut
 
 sub _run {
-    my ($self,$infile1,$infile2,$infile3) = @_;
+    my ($self,$prot_name, $infile1,$infile2,$infile3) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
     #my $outfile = $self->outfile() || $TMPOUTFILE ;
-    my (undef,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
+    my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$TMPDIR);
     my $paramstring = $self->_setparams;
     my $commandstring = $self->executable." $paramstring $infile1 $infile2 $infile3 > $outfile";
     $self->debug( "pseudowise command = $commandstring");
@@ -254,8 +260,8 @@ sub _run {
     $self->throw( "Pseudowise call ($commandstring) crashed: $? \n") unless $status==0;
 
     #parse the outpur and return a Bio::Seqfeature array
-    my $genes   = $self->_parse_results($outfile);
-    
+    my $genes   = $self->_parse_results($prot_name,$outfile);
+
     return @{$genes};
 }
 
@@ -271,8 +277,9 @@ sub _run {
 =cut
 
 sub _parse_results {
-    my ($self,$outfile) = @_;
+    my ($self,$prot_name,$outfile) = @_;
     $outfile||$self->throw("No outfile specified");
+    #my ($self) = @_;
 
     print "Parsing the file\n";
 
@@ -290,9 +297,17 @@ sub _parse_results {
 
     my @genes;
     #The big parsing loop - parses exons and predicted peptides
-
+            
+            my $count = 0;
+            my $score;
             while (<$filehandle>)
             {
+                if(/Ka/i) {
+                   my @line_elements = split;
+                    my $no = scalar(@line_elements);
+                    $score=$line_elements[$no-1];
+                 }
+                     
                 my $gene;
                 if (/Gene/i)
                 {
@@ -300,6 +315,7 @@ sub _parse_results {
                                 -primary => 'pseudogene',
                                 -source => 'pseudowise');
                   push @genes, $gene;
+                  $count = $count + 1;
 
                   while(<$filehandle>) {
                     my @gene_elements = split;
@@ -311,6 +327,7 @@ sub _parse_results {
                       my $gene_end = $element[2];
                       $gene->start($gene_start);
                       $gene->end($gene_end);
+                      $gene->score($score);
                     }
                     elsif (/Exon/i) {
                       my @element = split;
@@ -318,19 +335,25 @@ sub _parse_results {
                       my $exon_start = $element[1];
                       my $exon_end = $element[2];
                       my $exon_phase = $element[4];
+                      #my $seqname = $prot_name.'_'.$count;
+                      my $seqname = $prot_name;
                       my $exon = new Bio::SeqFeature::Generic (
+                                -seqname => $seqname,
                                 -start => $exon_start,
                                 -end => $exon_end,
                                 -primary => 'exon',
                                 -source => 'pseudowise',
                                 -frame  => $exon_phase);
+                      $exon->score($score);
                       $gene->add_sub_SeqFeature($exon);
                     }
                     elsif ((/Gene/i) && $no != 3) {
                        $gene = new Bio::SeqFeature::Generic (
                                 -primary => 'pseudogene',
                                 -source => 'pseudowise');
+                       $gene->score($score);
                        push @genes, $gene;
+                       $count = $count + 1;
 
                     }
                   }
@@ -371,14 +394,8 @@ sub _setinput {
     $self->_query_pep_seq($seq1);
     $self->_query_cdna_seq($seq2);
     $self->_subject_dna_seq($seq3);
-
-  close($tfh1);
-  close($tfh2);
-  close($tfh2);
-  undef $tfh1;
-  undef $tfh2;
-  undef $tfh3;
-  return $outfile1,$outfile2,$outfile3;
+    return $outfile1,$outfile2,$outfile3;
+  
 }
 
 sub _setparams {
