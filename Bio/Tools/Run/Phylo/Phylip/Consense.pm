@@ -45,6 +45,12 @@ program Consense
   #now use consense to get a final tree
   my $con_factory = Bio::Tools::Run::Phylo::Phylip::Consense->new();
 
+  #you may set outgroup either by the number representing the order in
+  #which species are entered or by the name of the species
+
+  $con_factory->outgroup(1);
+  $con_factory->outgroup('HUMAN');
+
   my $tree = $con_factory->run(\@tree);
 
   #now draw the tree
@@ -178,6 +184,7 @@ use Bio::SimpleAlign;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
 use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use IO::String;
 use Cwd;
 
 
@@ -400,6 +407,22 @@ sub _run {
     return $tree;
 }
 
+sub _set_names_from_tree {
+  my ($self,$tree) = @_;
+  my $newick;
+  my $ios = IO::String->new($newick);
+  my $tio = Bio::TreeIO->new(-fh=>$ios,-format=>'newick');
+  $tio->write_tree($tree);
+  my @names = $newick=~/(\w+):\d+/g;
+  my %names;
+  for(my $i=0; $i < $#names; $i++){
+      $names{$names[$i]} = $i+1;
+  }
+  $self->names(\%names);
+
+  return;
+}
+
 
 =head2  _setinput()
 
@@ -421,7 +444,10 @@ sub _setinput {
   	unless (ref $input) {
         # check that file exists or throw
         $alnfilename= $input;
-        unless (-e $input) {return 0;}
+       unless (-e $input) {return 0;}
+       my $tio = Bio::TreeIO->new(-file=>$alnfilename,-format=>'newick');
+       my $tree = $tio->next_tree;
+       $self->_set_names_from_tree($tree);
 		   return $alnfilename;
     }
 
@@ -430,15 +456,42 @@ sub _setinput {
     	  ($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
         my $treeIO = Bio::TreeIO->new(-fh => $tfh, 
 	                            			   -format=>'newick');
+
         foreach my $tree(@{$input}){
           $tree->isa('Bio::Tree::TreeI') || $self->throw('Expected a Bio::TreeI object');
         	$treeIO->write_tree($tree);
         }
+        #get the species names in order, using the first one
+        $self->_set_names_from_tree($input->[0]);
+
        $treeIO->close();
        close($tfh);
+
+
+       
        return $alnfilename;		
     }
     return 0;
+}
+
+=head2  names()
+
+ Title   :  names
+ Usage   :  $tree->names(\%names)
+ Function:  get/set for a hash ref for storing names in matrix
+            with rank as values.
+ Example :
+ Returns : hash reference
+ Args    : hash reference
+
+=cut
+
+sub names {
+    my ($self,$name) = @_;
+    if($name){
+        $self->{'_names'} = $name;
+    }
+    return $self->{'_names'};
 }
 
 =head2  _setparams()
@@ -473,9 +526,14 @@ sub _setparams {
         $param_string .= $menu{'ROOTED'};
       }
       elsif($attr =~/OUTGROUP/i){
-          if($rooted = 1){
+          if($rooted == 1){
               $self->warn("Outgroup option cannot be used with a rooted tree");
               next;
+          }
+          if($value !~/^\d+$/){ # is a name
+              my %names = %{$self->names};
+              $names{$value} || $self->throw("Outgroup $value not found");
+              $value = $names{$value};
           }
           $param_string .=$menu{'OUTGROUP'}."$value\n";
       }

@@ -40,6 +40,15 @@ Works with Phylip version 3.6
 
   my $neighbor_factory = 
      Bio::Tools::Run::Phylo::Phylip::Neighbor->new(@params);
+
+  #you can set your outgroup using either a number specifying
+  #the rank in the matrix or you can just use the name of the
+  #species
+
+  $neighbor_factory->outgroup('ENSP00001');
+  #or
+  $neighbor_factory->outgroup(1);
+
   my $tree = $neighbor_factory->create_tree($matrix);
 
   # Alternatively, one can create the tree by passing in a file name 
@@ -434,16 +443,44 @@ sub _setinput {
     	return $alnfilename;
     }
 
+
+    my %names;
     #  $input may be a hash ref to a distance matrix
     if ($input->isa("Bio::Matrix::PhylipDist")){
         #  Open temporary file for both reading & writing of distance matrix
       	($tfh,$alnfilename) = $self->io->tempfile(-dir=>$self->tempdir);
         print $tfh $input->print_matrix;
 	      close($tfh);
+        #set the species names
+        my @names = @{$input->names};
+        for(my $i=0; $i<= $#names; $i++){
+            $names{$names[$i]} = $i+1;
+        }
+        $self->names(\%names);
       	return $alnfilename;		
     }
 
     return 0;
+}
+
+=head2  names()
+
+ Title   :  names
+ Usage   :  $tree->names(\%names)
+ Function:  get/set for a hash ref for storing names in matrix
+            with rank as values.
+ Example :
+ Returns : hash reference 
+ Args    : hash reference 
+
+=cut
+
+sub names {
+    my ($self,$name) = @_;
+    if($name){
+        $self->{'_names'} = $name;
+    }
+    return $self->{'_names'};
 }
 
 =head2  _setparams()
@@ -478,7 +515,11 @@ sub _setparams {
 	    }
     	elsif($attr =~ /OUTGROUP/i){
 	      if ($type ne "UPGMA"){
-      		$self->throw("Unallowed value for outgroup") unless ($value =~ /\d+/);
+          if($value !~/^\d+$/){ # is a name so find the rank 
+              my %names = %{$self->names};
+              $names{$value} || $self->throw("Outgroup $value not found");
+              $value = $names{$value};
+          }
       		$param_string .= $menu{'OUTGROUP'}."$value\n";
 	      }
 	       else {
