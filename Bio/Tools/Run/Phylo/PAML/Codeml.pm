@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::PAML::Codeml
 #
-# Cared for by Jason Stajich <jason@bioperl.org>
+# Cared for by Jason Stajich <jason-at-bioperl-dot-org>
 #
 # Copyright Jason Stajich
 #
@@ -57,15 +57,14 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via
-email or the web:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bioperl.org
   http://bioperl.org/bioperl-bugs/
 
 =head1 AUTHOR - Jason Stajich
 
-Email jason@bioperl.org
+Email jason-at-bioperl-dot-org
 
 =head1 CONTRIBUTORS
 
@@ -407,12 +406,13 @@ sub new {
 =cut
 
 sub run{
-   my ($self) = @_;
+   my ($self,$aln,$tree) = @_;
    unless ( $self->save_tempfiles ) {
        # brush so we don't get plaque buildup ;)
        $self->cleanup();
    }
-   my ($aln,$tree) = ($self->alignment(),$self->tree);
+   $tree = $self->tree unless $tree;
+   $aln  = $self->alignment unless $aln;
    if( ! $aln ) { 
        $self->warn("must have supplied a valid aligment file in order to run codeml");
        return 0;
