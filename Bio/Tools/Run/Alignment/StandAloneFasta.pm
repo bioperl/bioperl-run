@@ -91,6 +91,7 @@ the bugs and their resolution.  Bug reports can be submitted via the web:
   http://bio.perl.org/bioperl-bugs/
 
 =head1 AUTHOR -  Tiequan Zhang
+
        Adapted for bioperl by Shawn Hoon
        Enhanced by Jason Stajich
 

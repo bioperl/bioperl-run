@@ -480,8 +480,8 @@ sub _input_nbr {
     if($val){
         $self->{'_input_nbr'} = $val;
     }    return $self->{'_input_nbr'};
-}   
-    
+}
+
 =head2  names()
 
  Title   :  names

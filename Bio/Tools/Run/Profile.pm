@@ -6,7 +6,7 @@
 # POD documentation - main docs before the code
 
 =head1 NAME
- 
+
 Bio::Tools::Run::Profile
 
 =head1 SYNOPSIS

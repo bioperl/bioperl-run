@@ -617,7 +617,6 @@ sub _apply_edits {
     
 }
 
-        
 =head2 _run_mcl
 
  Title   : _run_mcl
@@ -662,7 +661,7 @@ sub _run_mcl {
   my $families = $self->_parse_mcl($ind_file,$self->o);
   return $families;
 }
-  
+
 =head2 _run_matrix
 
  Title   : _run_matrix

@@ -402,7 +402,7 @@ sub _parse_results {
 
   return \@hsps;
 }
-   
+
 =head2  _setinput()
 
  Title   :  _setinput

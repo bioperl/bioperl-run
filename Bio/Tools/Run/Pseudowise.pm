@@ -354,7 +354,7 @@ sub _parse_results {
             }
     return \@genes;
 }
-   
+
 =head2  _setinput()
 
  Title   :  _setinput
