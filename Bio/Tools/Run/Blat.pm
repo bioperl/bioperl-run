@@ -139,7 +139,7 @@ sub new {
 =head2 align
 
  Title   :   align()
- Usage   :   $obj->align($query,$db)
+ Usage   :   $obj->align($query)
  Function:   Runs Blat  and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
@@ -147,7 +147,7 @@ sub new {
 =cut
 
 sub align {
-    my ($self,$query,$db) = @_;
+    my ($self,$query) = @_;
     my @feats;
 
     if  (ref($query) ) {	# it is an object
@@ -156,24 +156,14 @@ sub align {
 	}
 	my $infile1 = $self->_writeSeqFile($query);
 	$self->_input($infile1);
+        @feats = $self->_run();
 	unlink $infile1;
     }
     else {
         $self->_input($query);
-    }
-    if  (ref($db) ) {		# it is an object
-	if (ref($db) =~ /GLOB/) {
-	    $self->throw("cannot use filehandle");
-	}
-	my $infile1 = $self->_writeSeqFile($db);
-	$self->_database($infile1);
-	unlink $infile1; 
-    }
-    else {
-        $self->_database($db);
+        @feats = $self->_run();
     }
 
-    @feats = $self->_run();
     return @feats;
 }
 
@@ -228,8 +218,7 @@ sub _run {
      my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
      my $str= $self->executable;
 
-     #$str.=' '.$self->options if $self->options;
-     $str.=' '.$self->_database .' '.$self->_input.' '.$outfile;
+     $str.=' '.$self->DB .' '.$self->_input.' '.$outfile;
      
 
      my $status = system($str);
