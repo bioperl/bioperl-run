@@ -1,8 +1,8 @@
 # $Id$
 #
-# BioPerl module for Bio::Tools::StandAloneBlast
+# BioPerl module for Bio::Tools::Run::RemoteBlast
 #
-# Cared for by Jason Stajich
+# Cared for by Jason Stajich, Mat Wiepert
 #
 # Copyright Jason Stajich
 #
@@ -39,6 +39,8 @@ Remote-blast "factory object" creation and blast-parameter initialization:
   delete $Bio::Tools::Run::RemoteBlast::HEADER{'FILTER'};
   
   my $v = 1;
+  #$v is just to turn on and off the messages
+  
   my $str = Bio::SeqIO->new(-file=>'amino.fa' , '-format' => 'fasta' );
 
   while (my $input = $str->next_seq()){
@@ -386,8 +388,6 @@ sub submit_blast {
     my %header = $self->header;    
     foreach my $seq ( @seqs ) {
 	#If query has a fasta header, the output has the query line.
-#	$header{'QUERY'} = ">".(defined $seq->primary_id() ? $seq->primary_id() : "").
-#		" ".(defined $seq->desc() ? $seq->desc() : "")."\n".$seq->seq();
 	$header{'QUERY'} = ">".(defined $seq->display_id() ? $seq->display_id() : "").
 		" ".(defined $seq->desc() ? $seq->desc() : "")."\n".$seq->seq();
 	my $request = POST $URLBASE, [%header];
