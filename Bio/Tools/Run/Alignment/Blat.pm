@@ -55,7 +55,7 @@ Bio::Tools::Run::Blat
 package Bio::Tools::Run::Alignment::Blat;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
-            $PROGRAMNAME @BLAT_PARAMS %OK_FIELD);
+            $PROGRAMNAME @BLAT_PARAMS @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
@@ -69,7 +69,8 @@ BEGIN {
        @BLAT_PARAMS=qw(DB PROGRAM OOC DB_TYPE QUERY_TYPE TILESIZE ONEOFF MINMATCH
                        MINSCORE MINIDENTITY MAXGAP MAKEOOC REPMATCH MASK QMASK 
                        MINREPDIV TRIMT NOTRIMA VERBOSE);
-       foreach my $attr ( @BLAT_PARAMS)
+       @OTHER_SWITCHES = qw(QUIET);
+       foreach my $attr ( @BLAT_PARAMS, @OTHER_SWITCHES)
                         { $OK_FIELD{$attr}++; }
 }
 
@@ -217,28 +218,30 @@ sub _database() {
 
 sub _run {
      my ($self)= @_;
-     my $tfh;
      my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
+     # this is because we only want a unique filename
+     close($tfh);
+     undef $tfh;
      my $str= $self->executable;
 
      $str.=' -out=blast '.$self->DB .' '.$self->_input.' '.$outfile;
-     
+     if ($self->quiet() || $self->verbose() < 0) { 
+	 $str .= '  >/dev/null 2>/dev/null';
+     }
+     $self->debug($str ."\n") if( $self->verbose > 0 );
 
      my $status = system($str);
      $self->throw( "Blat call ($str) crashed: $? \n") unless $status==0;
      
-     my $filehandle;
+     my $blat_obj;
      if (ref ($outfile) !~ /GLOB/) {
-        open (BLAT, "<".$outfile) or $self->throw ("Couldn't open file ".$outfile.": $!\n");
-        $filehandle = \*BLAT;
+	 $blat_obj = Bio::SearchIO->new(-format  => 'blast',
+					-file    => $outfile);
+     } else {
+	 $blat_obj = Bio::SearchIO->new(-format  => 'blast',
+					-fh    => $outfile);
      }
-     else {
-        $filehandle = $outfile;
-     }
-     my $blat_obj= Bio::SearchIO->new(-format=>'blast',-fh=>$filehandle);
-
-     
-     $self->cleanup();
+     $self->cleanup();     
      return $blat_obj;
 }
 
