@@ -119,7 +119,7 @@ use Bio::Tools::Run::WrapperBase;
 BEGIN {
   @FASTA_PARAMS=qw(a A b c E d f g h H i j l L M m n O o p Q q r R s w x y z);
   @OTHER_PARAMS =qw(program);
-  foreach my $att (@FASTA_PARAMS) {$OK_FIELD{$att}++;}
+  foreach my $att (@FASTA_PARAMS ,@OTHER_PARAMS) {$OK_FIELD{$att}++;}
   $ktup=2; 
   %parameters=('q' =>'', 'm' =>'1', 'O' =>'');
     
