@@ -77,8 +77,8 @@ BEGIN {
         ( 'ORIGIN_DOWNLOAD_DIR' => 'ftp://ftp.uk.embnet.org/pub/EMBOSS/',
           'DESTINATION_DOWNLOAD_DIR' => '/tmp',
           'DESTINATION_INSTALL_DIR' => "/usr/local",
-          'PACKAGE_NAME' => 'EMBOSS-2.8.0.tar.gz',
-          'DIRECTORY_NAME' => 'EMBOSS-2.8.0'
+          'PACKAGE_NAME' => 'EMBOSS-latest.tar.gz',
+          'DIRECTORY_NAME' => 'EMBOSS-latest'
         );
 }
 
