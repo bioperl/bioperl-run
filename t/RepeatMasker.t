@@ -23,6 +23,7 @@ END {
 }
 my @params=("mam" => 1,"noint"=>1);
 my $fact = Bio::Tools::Run::RepeatMasker->new(@params);
+$fact->quiet(1);
 
 if( ! $fact->executable ) { 
     warn("RepeatMasker program not found. Skipping tests $Test::ntest to $NTESTS.\n");
