@@ -138,6 +138,7 @@ sub _execute_typical_nix_install{
    my ($self,@args) = @_;
    my $call;
 
+   #FIXME: regexp directory_name so that is not hardcoded, after EMBOSS-latest is downloaded
    my $destination = $self->destination_install_dir . "/" . $self->directory_name;
 
    print "\n\nTypical linux install -- configure -- make -- make install (this might take a while)\n\n";sleep 1;
