@@ -303,7 +303,7 @@ sub _mf2bin {
   }
   else { #its an id
     foreach my $i(0..$#seq){
-      if($seq[$i]->id eq $ref){
+      if($seq[$i]->id =~/$ref/){
         $reference  = $seq[$i];
         splice @seq,($i),1;
         last;
@@ -318,11 +318,11 @@ sub _mf2bin {
 
   my @files;
 
-  my @ref= reverse(split ('',$reference->seq));
+  my @ref= (split ('',$reference->seq));
   my @pairs;
   foreach my $seq2(@seq){
       my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
-      my @seq2= reverse (split('', $seq2->seq)); 
+      my @seq2= (split('', $seq2->seq)); 
       foreach my $index(0..$#ref){
         print $tfh1 pack("H2",$base_code{$ref[$index]}.$base_code{$seq2[$index]});
       }
