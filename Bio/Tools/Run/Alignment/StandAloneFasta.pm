@@ -135,7 +135,6 @@ sub new {
         my $attr = shift @args;
         my $value = shift @args;
         next if ($attr=~/^-/);
-        next if($attr !~ /^?([a-zA-Z])$/);
         $self->$attr($value); 
   }
   return $self;
@@ -162,7 +161,8 @@ sub AUTOLOAD {
 =cut
 
 sub program_name {
-  return shift->program;
+  my ($self) = @_;
+  return $self->program;
 }
 
 =head2 program_dir
@@ -252,8 +252,10 @@ sub run{
         push @fastobj, $object;
     }
   }else {
-    if ($outfile){open (handle, ">$outfile") or die("can't use $outfile:$!");
-    close(handle);}
+    if ($outfile){
+        open (FILE, ">$outfile") or die("can't use $outfile:$!");
+        close(FILE);
+    }
     
     foreach my $seq (@seqs){
       my ($fhinput,$teminputfile)=$self->io->tempfile(-dir=>$self->tempdir);
@@ -275,11 +277,11 @@ sub run{
     
 #The output in the temporary file will be saved at the end of $outfile
       if($outfile){
-        open (fhout, $tempoutfile) or die("can't  open the $tempoutfile file");
-        open (fh, ">>$outfile") or die("can't  use the $outfile file");
-        print  fh (<fhout>);
-        close (fhout);  
-        close (fh);
+        open (FHOUT, $tempoutfile) or die("can't  open the $tempoutfile file");
+        open (FH, ">>$outfile") or die("can't  use the $outfile file");
+        print  FH (<FHOUT>);
+        close (FHOUT);  
+        close (FH);
         }   
      }
     
@@ -437,7 +439,6 @@ sub _setparams{
   $self = shift;
   my $para = "";
   foreach my $attr(@FASTA_PARAMS) {
-    next if($attr !~ /^?([a-zA-Z])$/);
     $value = $self->$attr();
     next unless (defined $value);
     $para .=" -$attr $value";

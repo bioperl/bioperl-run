@@ -26,7 +26,6 @@ use Bio::SeqIO;
 
 ok(1);
 my $verbose = -1;
-my ($fasta_report, $hsp, @testresults);
 
 my @params = ( 'b' =>'15', 'O' =>'resultfile', 'm'=>'1',"program"=>'fasta33');
 my  $factory = Bio::Tools::Run::Alignment::StandAloneFasta->new('-verbose' => $verbose,
