@@ -108,7 +108,8 @@ BEGIN {
 
     @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD RODENT MAM MAMMAL COW AR 
                        ARABIDOPSIS DR DROSOPHILA EL ELEGANS IS_ONLY IS_CLIP NO_IS RODSPEC
-		       PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT NOISY QUIET); 
+		       PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT); 
+    @OTHER_SWITCHES = qw(NOISY QUIET SILENT);
 
     # Authorize attribute fields
     foreach my $attr ( @RM_PARAMS, @RM_SWITCHES,
@@ -264,7 +265,7 @@ sub _run {
   my $cmd_str = $self->executable." $param_string ". $infile;
   $self->debug("repeat masker command = $cmd_str");
   if ($self->quiet || $self->verbose <=0){
-      $cmd_str.=" >&/dev/null";
+      $cmd_str.=" 2> /dev/null 1>/dev/null";
   }
   my $status = system($cmd_str);
   $self->throw("Repeat Masker Call($cmd_str) crashed: $?\n") 
