@@ -63,7 +63,8 @@ my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
 exit(0) unless( $protml->executable );
 
 my $in = new Bio::AlignIO(-format => 'clustalw',
-			  -file   => 't/data/cel-cbr-fam.aln');
+			  -file   => Bio::Root::IO->catfile('t','data',
+							    'cel-cbr-fam.aln'));
 my $aln = $in->next_aln;
 $protml->alignment($aln);
 
