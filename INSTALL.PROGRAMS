@@ -1,0 +1,100 @@
+INSTALL.PROGRAMS:
+
+The Bioperl-run package has (Bio)perl wrappers written for the following applications:
+
+
+1.	Coils - Prediction of Coiled Coil Regions in Proteins 
+	Bio::Tools::Run::Coil
+	http://www.ch.embnet.org/software/COILS_form.html
+
+2.	EMBOSS Applications - European Molecular Biology Open Software Suite 
+	Bio::Tools::Run::EMBOSSApplication
+	http://www.hgmp.mrc.ac.uk/Software/EMBOSS/
+
+3.	Eponine - Transcription Start Site finder
+	Bio::Tools::Run::Eponine
+	http://www.sanger.ac.uk/Software/analysis/eponine/
+
+4.	FootPrinter - Program that performs phylogenetic footprinting. 
+	Bio::Tools::Run::FootPrinter
+	http://abstract.cs.washington.edu/~blanchem/FootPrinterWeb/FootPrinterInput.pl
+
+5.	Genewise - Gene prediction program
+	Bio::Tools::Run::Genewise
+	http://www.sanger.ac.uk/software/wise2
+
+6.	Genscan - Identification of complete gene structures in genomic DNA
+	Bio::Tools::Run::Genscan
+	http://genes.mit.edu/GENSCAN.html
+
+7.	Hmmpfam - search a single sequence against an HMM database  
+	Bio::Tools::Run::Hmmpfam
+	http://hmmer.wustl.edu/
+
+8.	PISE - Web interfaces for Biological Programs
+	Bio::Tools::Run::PiseApplication
+	http://www-alt.pasteur.fr/~letondal/Pise/
+
+9.	Primate - Near exact match finder for short sequence tags.
+	Bio::Tools::Run:::Primate
+	http://cvsweb.sanger.ac.uk/cgi-bin/cvsweb.cgi/ensembl-nci/?cvsroot=Ensembl
+
+10.	FingerPRINTScan - identify the closest matching PRINTS sequence motif fingerprints in a protein sequence
+	Bio::Tools::Run::Prints
+	http://www.bioinf.man.ac.uk/fingerPRINTScan/
+
+11.	pfscan - scan a protein or DNA sequence with a profile library 
+	Bio::Tools::Run::Profile
+	http://www.isrec.isb-sib.ch/software/software.html	
+
+12.	Pseudowise - a pseudogene precdiction program, part of the wise2 package
+	Bio::Tools::Run::Pseudowise
+	http://www.sanger.ac.uk/software/wise2 
+
+13.	RepeatMasker - screens DNA sequences in fasta format against a library of repetitive elements 
+	Bio::Tools::Run::RepeatMasker
+	http://repeatmasker.genome.washington.edu
+
+14.	Seg - Identify low-complexity regions in protein sequences
+	Bio::Tools::Run::Seg
+	ftp://ftp.ncbi.nih.gov/pub/seg/
+
+15.	Signalp - predicts the presence and location of signal peptide cleavage sites in amino acid sequences	
+	Bio::Tools::Run::Signalp
+	http://www.cbs.dtu.dk/services/SignalP/
+
+16.	Tmhmm - Prediction of transmembrane helices in proteins
+	Bio::Tools::Run::Tmhmm
+	http://www.cbs.dtu.dk/services/TMHMM/
+
+17.	TribeMBL - Method for clustering proteins into related groups.
+	Bio::Tools::Run::TribeMCL
+	http://www.ebi.ac.uk/research/cgg/tribe/
+
+18.	PAML - Phylogenetic Analysis by Maximum Likelihood package
+	Bio::Tools::Run::PAML
+	http://abacus.gene.ucl.ac.uk/software/paml.html
+
+19.	Molphy - MOLecular PHYlogenetics Package
+	Bio::Tools::Run::Molphy
+	http://www.ism.ac.jp/software/ismlib/softother.e.html
+
+20.	Phylip - Suite of Phylogenetics programs (Version 3.6)
+	Bio::Tools::Run::Phylip
+	http://evolution.genetics.washington.edu/phylip.html
+
+21.	Clustalw -  general purpose multiple sequence alignment program for DNA or proteins
+	Bio::Tools::Run::Alignment::Clustalw
+	http://www.ebi.ac.uk/clustalw/
+
+22.	DBA - DNA Block Aligner 
+	Bio::Tools::Run::Alignment::DBA
+	http://www.sanger.ac.uk/software/wise2
+
+23.	Sim4 - Align CDNA to genomic sequences
+	Bio::Tools::Run::Alignment::Sim4
+	http://globin.cse.psu.edu/
+
+24.	Tcoffee - Multiple Sequence Alignment Package
+	Bio::Tools::Run::Alignment::Tcoffee
+	http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.html
