@@ -174,7 +174,7 @@ sub new {
     $t->parse( $file); # results written into global %OPT
 
     my %acd = %OPT; # copy to a private hash
-    %acd->{'_name'} = $prog;
+    $acd{'_name'} = $prog;
     bless \%acd, $class;
 }
 
@@ -201,11 +201,11 @@ sub _row {
     my $values = $desc->next_sibling;
     my $default = $values->next_sibling;
 
-    %OPT->{$namet}{'unnamed'} = $unnamed;
-    %OPT->{$namet}{'category'} = $QUAL;
-    %OPT->{$namet}{'descr'} = $desc->text;
-    %OPT->{$namet}{'values'} = $values->text;
-    %OPT->{$namet}{'default'} = $default->text;
+    $OPT{$namet}{'unnamed'} = $unnamed;
+    $OPT{$namet}{'category'} = $QUAL;
+    $OPT{$namet}{'descr'} = $desc->text;
+    $OPT{$namet}{'values'} = $values->text;
+    $OPT{$namet}{'default'} = $default->text;
 
     $t->purge;			# to reduce memory requirements
 }
@@ -270,7 +270,7 @@ sub mandatory {
     my %mand;
     foreach my $key (keys %{$self}) {
 	next unless $key =~ /^-/; #ignore other attributes
-	%mand->{$key} = $self->{$key}
+	$mand{$key} = $self->{$key}
 	    if $self->{$key}{category} eq 'mandatory';
     }
     bless \%mand;

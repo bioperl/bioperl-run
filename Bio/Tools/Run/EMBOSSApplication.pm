@@ -203,11 +203,11 @@ sub run {
 	}
 
 	# print out debugging info
-	$self->debug("Input attr: ". $attr_name. " => ". 
-		     %{$input}->{$attr}. "\n"); 
+	$self->debug("Input attr: ". $attr_name. " => ".
+		     $input->{$attr}. "\n");
 	$option_string .= " " . $attr;
-	$option_string .= " ". %{$input}->{$attr} 
-	   if %{$input}->{$attr};
+	$option_string .= " ". $input->{$attr}
+	   if $input->{$attr};
     }
 
     #check mandatory attributes against given ones
@@ -347,43 +347,6 @@ sub subgroup {
 }
 
 
-
-=head2 Internal methods
-
-Do not call these methods directly
-
-=head2 _acd2input
-
- Title   : _acd2input
- Usage   : $embossfactory->_acd2input()
- Function: compares ACD file requirements to input hash
- Returns : 
- Throws  : if requirements are not met 
- Args    : None
-
-=cut
-
-sub _acd2input($input) {
-    my ($self, $input) = @_;
-    # match acd attributes against the input
-    foreach my $attr (keys %{$self->{'_attributes'}}) {
-	$self->debug( "ACD Attr: |". $attr. "|\n");
-	my $input_value = '';
-	my $input_key = '';
-	$input_key = 1, $input_value = %{$input}->{"-$attr"} if defined %{$input}->{"-$attr"};
-#	my $input_name = substr($input_value, 1) if substr($input_value, 0, 1) =~ /\W/;
-	$self->debug("--------------$input_value, $attr\n") if $input_key;
-
-#	 $self->throw('Attribute [$attr] not set') if 
-#	     defined %{$self}->{'_attributes'}->{$attr_name}->{optional} and $input_value ;
-#	 
-#	 $self->throw('Attribute [$attr] not set')
-#	     if ( %{$self}->{'_attributes'}->{$attr}->{optional} eq 'N' and defined %{$input}->{$attr_name} and %{$input}->{$attr_name} eq '' ) or 
-#		 
-##
-#		 ( %{$self}->{'_attributes'}->{$attr}->{required} eq 'Y' and not exists %{$input}->{$attr_name})  ;
-    }
-}
 
 
 1;
