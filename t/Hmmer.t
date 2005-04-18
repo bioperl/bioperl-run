@@ -10,7 +10,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 17;
+   $NTESTS = 20;
    plan tests => $NTESTS;
 }
 
@@ -115,6 +115,24 @@ ok -e $hmmout;
 
 
 
+#test HMMALIGN
+$hmmout=  Bio::Root::IO->catfile("t","data","hmmer.hmm");
+@params = ('HMM'=>$hmmout,'program'=>'hmmalign');
+$factory = Bio::Tools::Run::Hmmer->new(@params);
+ok $factory->isa('Bio::Tools::Run::Hmmer');
+my $seqfile=  Bio::Root::IO->catfile("t","data","cysprot1a.fa");
+my $seqio = Bio::SeqIO->new(-file  => $seqfile,
+			    -format=> 'fasta');
+my @seqs;
+while( my $seq = $seqio->next_seq ) {
+    push @seqs, $seq;
+}
+$aio = $factory->run(@seqs);
+$aln = $aio->next_aln;
+ok($aln);
+#$aio = Bio::AlignIO->new(-format => 'clustalw');
+#$aio->write_aln($aln);
+ok($aln->each_seq, 3);
 
 1; 
 
