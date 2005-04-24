@@ -21,7 +21,8 @@ END {
         skip("RepeatMasker program not found. Skipping. (Be sure you have the phrap package )",1);
     }
 }
-my @params=("mam" => 1,"noint"=>1);
+my $verbose = $ENV{'BIOPERLDEBUG'} ? 1 : 0;
+my @params=("species" => "mammal","noint"=>1, 'qq' => 1, '-verbose' => $verbose);
 my $fact = Bio::Tools::Run::RepeatMasker->new(@params);
 $fact->quiet(1);
 
@@ -31,20 +32,30 @@ if( ! $fact->executable ) {
     exit(0);
 }
 
-ok ($fact->mam, 1);
+ok ($fact->species, 'mammal');
 ok ($fact->noint,1);
-my $inputfilename= Bio::Root::IO->catfile("t","data","repeatmasker.fa");
+my $inputfilename= Bio::Root::IO->catfile(qw(t data repeatmasker.fa));
 
-my $in  = Bio::SeqIO->new(-file => "$inputfilename" , '-format' => 'fasta');
+my $in  = Bio::SeqIO->new(-file => $inputfilename , '-format' => 'fasta');
 my $seq = $in->next_seq();
 my @feats = $fact->mask($seq);
-ok ($feats[0]->feature1->start, 1337);
-ok ($feats[0]->feature1->end, 1407);
-ok ($feats[0]->feature1->strand, 1);
-ok ($feats[0]->feature1->primary_tag, "Simple_repeat");
-ok ($feats[0]->feature1->source_tag, "RepeatMasker");
-ok ($feats[0]->feature2->seq_id, "(TTAGGG)n");
 
+my $version = $fact->version;
+if( $version =~ /open/ ) {
+    ok ($feats[0]->feature1->start, 1725);
+    ok ($feats[0]->feature1->end, 2225);
+    ok ($feats[0]->feature1->strand, 1);
+    ok ($feats[0]->feature1->primary_tag, "Simple_repeat");
+    ok ($feats[0]->feature1->source_tag, "RepeatMasker");
+    ok ($feats[0]->feature2->seq_id, "(TTAGGG)n");
+} else {
+    ok ($feats[0]->feature1->start, 1337);
+    ok ($feats[0]->feature1->end, 1407);
+    ok ($feats[0]->feature1->strand, 1);
+    ok ($feats[0]->feature1->primary_tag, "Simple_repeat");
+    ok ($feats[0]->feature1->source_tag, "RepeatMasker");
+    ok ($feats[0]->feature2->seq_id, "(TTAGGG)n");
+}
 
 
 

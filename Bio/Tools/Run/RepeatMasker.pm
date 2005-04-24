@@ -94,12 +94,14 @@ use Bio::Tools::RepeatMasker;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
 
 BEGIN {
-    @RM_PARAMS = qw(DIV LIB CUTOFF PARALLEL GC FRAG );
+    @RM_PARAMS = qw(DIR DIV LIB CUTOFF PARALLEL GC FRAG SPECIES MAXSIZE );
 
     @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD 
 		      RODENT MAM MAMMAL COW AR 
 		      ARABIDOPSIS DR DROSOPHILA EL ELEGANS 
-		      IS_ONLY IS_CLIP NO_IS RODSPEC
+		      IS_ONLY IS_CLIP NO_IS RODSPEC E EXCLN 
+                      NO_ID FIXED XM U GFF ACE POLY X XSMALL SMALL
+                      INV A ALIGNMENTS 
 		      PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT); 
     @OTHER_SWITCHES = qw(NOISY QUIET SILENT);
 
@@ -133,7 +135,7 @@ sub program_name {
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{REPEATMASKERDIR}) if $ENV{REPEATMASKER};
+  return Bio::Root::IO->catfile($ENV{REPEATMASKERDIR}) if $ENV{REPEATMASKERDIR};
 }
 
 
@@ -195,8 +197,13 @@ sub version {
     my $exe = $self->executable;
     return undef unless $exe;
     my $string = `$exe -- ` ;    
-    $string =~ /\(([\d.]+)\)/;
-    return $self->{'_version'} = $1 || undef;
+    if( $string =~ /\(([\d.]+)\)/ ||
+	$string =~ /RepeatMasker\s+version\s+(\S+)/ ) { 
+	return $self->{'_version'} = $1;
+    } else {
+	return $self->{'_version'} = undef;
+    }
+    
 }
 
 =head2 run
