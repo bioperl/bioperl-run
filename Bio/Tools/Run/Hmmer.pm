@@ -112,12 +112,12 @@ use Bio::Tools::Run::WrapperBase;
 BEGIN {
     $DefaultOutFormat = 'msf';
     @HMMER_PARAMS=qw(HMM hmm PROGRAM program DB db A E T Z 
-		     n outformat null pam prior pbswitch 
+		     outformat null pam prior pbswitch 
 		     archpri cfile gapmax idlevel informat pamwgt 
 		     swentry swexit withali mapali
 		     cpu domE domT
                     );
-    @HMMER_SWITCHES=qw(n q oneline f g s fast hand 
+    @HMMER_SWITCHES=qw(n q oneline f g s fast hand F
 		       wblosum wgsc wme wpb wvoronoi wnone noeff 
 		       amino nucleic binary pvm xnu null2 acc compat
 		       cut_ga cut_nc cut_tc forward
