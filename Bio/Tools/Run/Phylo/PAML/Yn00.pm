@@ -1,4 +1,4 @@
-# Yn00.pm,v 1.3 2002/06/21 12:57:49 heikki Exp
+# $Id$
 #
 # BioPerl module for Bio::Tools::Run::Phylo::PAML::Yn00
 #
@@ -63,12 +63,11 @@ Report bugs to the Bioperl bug tracking system to help us keep track
 of the bugs and their resolution. Bug reports can be submitted via
 email or the web:
 
-  bioperl-bugs@bioperl.org
   http://bioperl.org/bioperl-bugs/
 
 =head1 AUTHOR - Jason Stajich
 
-Email jason@bioperl.org
+Email jason-at-bioperl.org
 
 =head1 CONTRIBUTORS
 
@@ -146,7 +145,7 @@ BEGIN {
 =head2 program_name
 
  Title   : program_name
- Usage   : >program_name()
+ Usage   : $yn00->program_name()
  Function: holds the program name
  Returns:  string
  Args    : None
@@ -154,13 +153,13 @@ BEGIN {
 =cut
 
 sub program_name {
-            return 'yn00';
+    return $PROGRAMNAME;
 }
 
 =head2 program_dir
 
  Title   : program_dir
- Usage   : ->program_dir()
+ Usage   : $yn00->program_dir()
  Function: returns the program directory, obtiained from ENV variable.
  Returns:  string
  Args    :
