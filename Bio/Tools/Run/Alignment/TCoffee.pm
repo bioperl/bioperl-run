@@ -541,6 +541,7 @@ use  Bio::Tools::Run::WrapperBase;
 #	BEGIN {$ENV{TCOFFEEDIR} = '/home/progs/tcoffee'; }
 
 BEGIN {
+    $PROGRAMNAME = 't_coffee';
     %DEFAULTS = ( 'MATRIX' => 'blosum',
                   'OUTPUT' => 'clustalw',
                   'AFORMAT'=> 'msf',
@@ -576,7 +577,7 @@ BEGIN {
 =cut
 
 sub program_name {
-        return 't_coffee';
+        return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -816,9 +817,14 @@ sub _run {
 	my ($type1,$type2);
 	($infile1,$type1) = @$in1;
 	($infile2,$type2) = @$in2;
-	$instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
-				     'X'.$self->matrix,
-				     $self->methods));	
+	unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
+	    $instring = '-in='.join(',',($type2.$infile2),'X'.$self->matrix,
+				    $self->methods);
+	    $instring .= ' -profile='.$infile1;
+	} else {
+	  $instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
+				       $self->methods));	
+	}
     }
     my $param_string = shift;
 #    my ($paramfh,$parameterFile) = $self->io->tempfile;
