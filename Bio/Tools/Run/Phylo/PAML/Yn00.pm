@@ -217,7 +217,7 @@ sub run{
    my ($self,$aln) = @_;
    ($aln) ||= $self->alignment();
    if( ! $aln ) { 
-       $self->warn("must have supplied a valid aligment file in order to run yn00");
+       $self->warn("must have supplied a valid alignment file in order to run yn00");
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
