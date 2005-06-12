@@ -111,7 +111,7 @@ use  Bio::Tools::Run::WrapperBase;
 
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
-    @MUSCLE_PARAMS = qw(IN OUT REFINE);
+    @MUSCLE_PARAMS = qw(IN OUT REFINE MAXITERS TREE1);
     @OTHER_SWITCHES = qw(QUIET);
 
 # Authorize attribute fields
