@@ -94,7 +94,7 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Alignment::Muscle;
 
 use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
-            @MUSCLE_PARAMS @OTHER_SWITCHES %OK_FIELD
+            @MUSCLE_PARAMS @MUSCLE_SWITCHES %OK_FIELD
             );
 use strict;
 use Bio::Seq;
@@ -111,11 +111,13 @@ use  Bio::Tools::Run::WrapperBase;
 
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
-    @MUSCLE_PARAMS = qw(IN OUT REFINE MAXITERS TREE1);
-    @OTHER_SWITCHES = qw(QUIET);
+    @MUSCLE_PARAMS = qw(IN OUT MAXITERS TREE1 LOG LOGA 
+			MAXMB MAXHOURS MAXITERS);
+    @MUSCLE_SWITCHES = qw(QUIET DIAGS REFINE STABLE GROUP 
+			  CLW CLWSTRICT MSF);
 
 # Authorize attribute fields
-    foreach my $attr ( @MUSCLE_PARAMS, @OTHER_SWITCHES ) {
+    foreach my $attr ( @MUSCLE_PARAMS, @MUSCLE_SWITCHES ) {
 	$OK_FIELD{$attr}++; }
 }
 
@@ -158,19 +160,35 @@ sub program_dir {
 
 =cut
 
-sub new{
+sub new {
     my ($class,@args) = @_;
-    my $self = $class->SUPER::new(@args);
-    my ($on) = $self->SUPER::_rearrange([qw(OUTFILE_NAME)], @args);
+    my( @muscle_args, @obj_args);
+    while( my $arg = shift @args ) {
+	if( $arg =~ /^-/ ) {
+	    push @obj_args, $arg, shift @args;
+	} else {
+	    push @muscle_args,$arg, shift @args;
+	}
+    }
+    my $self = $class->SUPER::new(@obj_args);
+    
+    my ($on) = $self->_rearrange([qw(OUTFILE_NAME)],@obj_args);
+    
     $self->outfile_name($on || '');
     my ($attr, $value);    
     $self->aformat($DEFAULTS{'AFORMAT'});
-    
-    while ( @args)  {
-	$attr =   shift @args;
-	$value =  shift @args;
+
+    while ( @muscle_args)  {
+	$attr =   shift @muscle_args;
+	$value =  shift @muscle_args;
 	next if( $attr =~ /^-/); # don't want named parameters
 	$self->$attr($value);
+    }
+    $self->aformat('msf') if $self->msf;
+    $self->aformat('clustalw') if $self->clw || $self->clwstrict;
+    
+    if( defined $self->out ) {
+	$self->outfile_name($self->out);
     }
     return $self;
 }
@@ -271,7 +289,14 @@ sub align {
     my ($self,$input) = @_;
     # Create input file pointer
     $self->io->_io_cleanup();
-    my ($infilename) = $self->_setinput($input);
+    my $infilename;
+    if( defined $input ) {
+	$infilename = $self->_setinput($input);
+    } elsif( defined $self->in ) {
+	$infilename = $self->_setinput($self->in);
+    } else {
+	$self->throw("No inputdata provided\n");
+    }
     if (! $infilename) {
 	$self->throw("Bad input data or less than 2 sequences in $input !");
     }
@@ -304,7 +329,6 @@ sub _run {
 
     my $status = system($commandstring);
     my $outfile = $self->outfile_name(); 
-
     if( !-e $outfile || -z $outfile ) {
 	$self->warn( "Muscle call crashed: $? [command $commandstring]\n");
 	return undef;
@@ -409,13 +433,14 @@ sub _setparams {
         $param_string .= $attr_key .' '.$value;
 
     }
-#     for  $attr ( @MUSCLE_SWITCHES) {
-# 	$value = $self->$attr();
-# 	next unless ($value);
-# 	my $attr_key = lc $attr; #put switches in format expected by tcoffee
-# 	$attr_key = ' -'.$attr_key;
-# 	$param_string .= $attr_key ;
-#     }
+    for  $attr ( @MUSCLE_SWITCHES) {
+ 	$value = $self->$attr();
+ 	next unless ($value);
+ 	my $attr_key = lc $attr; #put switches in format expected by tcoffee
+ 	$attr_key = ' -'.$attr_key;
+ 	$param_string .= $attr_key ;
+    }
+
     # Set default output file if no explicit output file selected
     unless ($self->outfile_name ) {	
 	my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
