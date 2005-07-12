@@ -327,7 +327,7 @@ BEGIN {
 		     # -1 use random starting points
 		     # 1 use the branch lengths in initial ML iteration
 		     # 2 branch lengths are fixed
-		     'fix_blength'   => [0,-1,2],
+		     'fix_blength'   => [0,-1,1,2],
 		     );
 }
 
