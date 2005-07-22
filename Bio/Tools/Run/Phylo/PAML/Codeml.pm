@@ -631,16 +631,18 @@ sub get_parameters{
 
 sub set_parameter{
    my ($self,$param,$value) = @_;
-   if( ! defined $VALIDVALUES{$param} ) { 
-       $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
-       return 0;
-   } 
-   if( ref( $VALIDVALUES{$param}) =~ /ARRAY/i &&
-       scalar @{$VALIDVALUES{$param}} > 0 ) {
+   unless ($self->{'no_param_checks'} == 1) {
+       if ( ! defined $VALIDVALUES{$param} ) { 
+           $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
+           return 0;
+       } 
+       if ( ref( $VALIDVALUES{$param}) =~ /ARRAY/i &&
+            scalar @{$VALIDVALUES{$param}} > 0 ) {
        
-       unless ( grep { $value eq $_ } @{ $VALIDVALUES{$param} } ) {
-	   $self->warn("parameter $param specified value $value is not recognized, please see the documentation and the code for this module or set the no_param_checks to a true value");
-	   return 0;
+           unless ( grep { $value eq $_ } @{ $VALIDVALUES{$param} } ) {
+               $self->warn("parameter $param specified value $value is not recognized, please see the documentation and the code for this module or set the no_param_checks to a true value");
+               return 0;
+           }
        }
    }
    $self->{'_codemlparams'}->{$param} = $value;
@@ -691,6 +693,15 @@ sub set_default_parameters{
 
 
 =cut
+
+sub no_param_checks{
+   my ($self,$value) = @_;
+   if( defined $value) {
+      $self->{'no_param_checks'} = $value;
+    }
+    return $self->{'no_param_checks'};
+}
+
 
 =head2 save_tempfiles
 
