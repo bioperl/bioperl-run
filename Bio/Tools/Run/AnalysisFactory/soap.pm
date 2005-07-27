@@ -2,7 +2,7 @@
 #
 # BioPerl module Bio::Tools::Run::AnalysisFactory::soap.pm
 #
-# Cared for by Martin Senger <senger@ebi.ac.uk>
+# Cared for by Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 
 # POD documentation - main docs before the code
@@ -19,6 +19,7 @@ it through the I<Bio::Tools::Run::AnalysisFactory> module:
   use Bio::Tools::Run::AnalysisFactory;
   my $list = new Bio::Tools::Run::AnalysisFactory (-access => 'soap')
      ->available_analyses;
+  print join ("\n", @$list) . "\n";
 
 =head1 DESCRIPTION
 
@@ -46,7 +47,7 @@ web:
 
 =head1 AUTHOR
 
-Martin Senger (senger@ebi.ac.uk)
+Martin Senger (martin.senger@gmail.com)
 
 =head1 COPYRIGHT
 
@@ -66,7 +67,7 @@ This software is provided "as is" without warranty of any kind.
 
 =item *
 
-http://industry.ebi.ac.uk/soaplab/Perl_Client.html
+http://www.ebi.ac.uk/soaplab/Perl_Client.html
 
 =back
 
@@ -84,7 +85,7 @@ C<Bio::Factory::AnalysisI>.
 # Let the code begin...
 
 package Bio::Tools::Run::AnalysisFactory::soap;
-use vars qw(@ISA $Revision $DEFAULT_LOCATION $DEFAULT_DIR_SERVICE);
+use vars qw(@ISA $Revision $DEFAULT_LOCATION @DEFAULT_DIR_SERVICE);
 use strict;
 
 use Bio::Tools::Run::AnalysisFactory;
@@ -98,7 +99,7 @@ use SOAP::Lite
 		"--- SOAP FAULT ---\n" .
 		'faultcode:   ' . $res->faultcode . "\n" .
 		'faultstring: ' . Bio::Tools::Run::AnalysisFactory::soap::_clean_msg ($res->faultstring)
-	      : "--- TRANSPORT ERROR ---\n" . $soap->transport->status;
+	      : "--- TRANSPORT ERROR ---\n" . $soap->transport->status . "\n$res\n";
         Bio::Tools::Run::AnalysisFactory::soap->throw ($msg);
     }
 ;
@@ -109,10 +110,13 @@ BEGIN {
     $Revision = q[$Id$];
 
     # where to go...
-    $DEFAULT_LOCATION = 'http://industry.ebi.ac.uk/soap/soaplab';
+    $DEFAULT_LOCATION = 'http://www.ebi.ac.uk/soaplab/services';
 
     # ...and what to find there
-    $DEFAULT_DIR_SERVICE = 'AnalysisFactory';
+    # (this is a list of service names available from the given location;
+    #  those that do not exist are ignored; if none exists then only
+    #  location - without any service name appended - is used)
+    @DEFAULT_DIR_SERVICE = ('AnalysisFactory', 'GowlabFactory');
 }
 
 # -----------------------------------------------------------------------------
@@ -124,7 +128,6 @@ BEGIN {
  Returns : nothing interesting
  Args    : This module recognises and uses following arguments:
              -location
-             -dir
              -httpproxy
              -soap
 	   Additionally, the main module Bio::Tools::Run::AnalysisFactory
@@ -152,20 +155,13 @@ change Bio::Tools::Run::AnalysisFactory I<new> method, not this one.
 A URL (also called an I<endpoint>) defining where is located a Web Service
 functioning for this object.
 
-Default is C<http://industry.ebi.ac.uk/soap/soaplab> (an experimental
-service running at European Bioinformatics Institute on top of most of
-EMBOSS analyses).
+Default is C<http://www.ebi.ac.uk/soaplab/services> (a service running
+at European Bioinformatics Institute on top of most of the EMBOSS
+analyses, and on top of few others).
 
 For example, if you run your own Web Service using Java(TM) Apache Axis
 toolkit, the location might be something like
 C<http://localhost:8080/axis/services>.
-
-=item -dir
-
-A name of a Web Service (also called a I<urn> or a I<namespace>).
-
-Default is I<AnalysisFactory> which corresponds well with the default
-location.
 
 =item -httpproxy
 
@@ -204,9 +200,9 @@ sub _initialize {
     # finally add default values for those keys who have default value
     # and who are not yet in the object
     $self->{'_location'} = $DEFAULT_LOCATION unless $self->{'_location'};
-    $self->{'_dir'} = $DEFAULT_DIR_SERVICE unless $self->{'_dir'};
 
     # create a SOAP object which will do the main job
+    # ('uri' (representing a service name) will be added before each call) 
     unless ($self->{'_soap'}) {
 	if (defined $self->{'_httpproxy'}) {
 	    $self->{'_soap'} = SOAP::Lite
@@ -214,7 +210,7 @@ sub _initialize {
 			  proxy => ['http' => $self->{'_httpproxy'}]);
 	} else {
 	    $self->{'_soap'} = SOAP::Lite
-		-> proxy ($self->{'_location'} . '/' . $self->{'_dir'});
+		-> proxy ($self->{'_location'});
 	}
     }
 }
@@ -229,7 +225,18 @@ sub _clean_msg {
 sub available_categories {
     my ($self) = @_;
     my $soap = $self->{'_soap'};
-    $soap->getAvailableCategories->result;
+
+    my @result = ();
+    my $okay = 0;
+    foreach my $service_name (@DEFAULT_DIR_SERVICE) {
+	$soap-> uri ($service_name);
+	eval {
+	    push (@result, @{ $soap->getAvailableCategories->result });
+	};
+	$okay = 1 unless $@;
+    }
+    return $soap->getAvailableCategories->result unless $okay;
+    \@result;
 }
 
 # String[] getAvailableAnalyses()
@@ -237,14 +244,34 @@ sub available_categories {
 sub available_analyses {
     my ($self, $category) = @_;
     my $soap = $self->{'_soap'};
+
+    my @result = ();
+    my $okay = 0;
+
     if (defined $category) {
+	foreach my $service_name (@DEFAULT_DIR_SERVICE) {
+	    $soap-> uri ($service_name);
+	    eval {
+		push (@result, @{ $soap->getAvailableAnalysesInCategory (SOAP::Data->type (string => $category))->result });
+	    };
+	    $okay = 1 unless $@;
+	}
 	return
 	    $soap->getAvailableAnalysesInCategory (SOAP::Data->type (string => $category))
-	       ->result;
+	    ->result unless $okay;
+	\@result;
+
     } else {
+	foreach my $service_name (@DEFAULT_DIR_SERVICE) {
+	    $soap-> uri ($service_name);
+	    eval {
+		push (@result, @{ $soap->getAvailableAnalyses->result });
+	    };
+	    $okay = 1 unless $@;
+	}
 	return
-	    $soap->getAvailableAnalyses
-	       ->result;
+	    $soap->getAvailableAnalyses->result unless $okay;
+	\@result;
     }
 }
 
@@ -257,9 +284,17 @@ sub create_analysis {
 
     # ask for an endpoint
     my $soap = $self->{'_soap'};
-    my $location =
-	$soap->getServiceLocation (SOAP::Data->type (string => $name))
-	   ->result;
+    my $location;
+    foreach my $service_name (@DEFAULT_DIR_SERVICE) {
+	$soap-> uri ($service_name);
+	eval {
+	    $location = $soap->getServiceLocation (SOAP::Data->type (string => $name))->result;
+	};
+	last if defined $location;
+    }
+    unless (defined $location) {
+	$location = $soap->getServiceLocation (SOAP::Data->type (string => $name)) ->result;
+    }
     my @location  = ('-location', $location) if $location;
 
     # share some of my properties with the new Bio::Analysis object
@@ -275,13 +310,6 @@ sub create_analysis {
 
  Usage   : print $Bio::Tools::Run::AnalysisFactory::soap::VERSION;
            print $Bio::Tools::Run::AnalysisFactory::soap::Revision;
-
-=cut
-
-=head2 Defaults
-
- Usage   : print $Bio::Tools::Run::AnalysisFactory::soap::DEFAULT_LOCATION;
-           print $Bio::Tools::Run::AnalysisFactory::soap::DEFAULT_DIR_SERVICE;
 
 =cut
 

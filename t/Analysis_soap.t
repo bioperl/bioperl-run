@@ -62,7 +62,8 @@ if ($serror) {
 
 # check 'new with a default access...'
 my $seqret;
-eval { $seqret = new Bio::Tools::Run::Analysis (-name => 'edit::seqret'); };
+#eval { $seqret = new Bio::Tools::Run::Analysis (-name => 'edit.seqret'); };
+$seqret = new Bio::Tools::Run::Analysis (-name => 'edit.seqret');
 print sprintf ($format, 'new ...Analysis (-name=>seqret) '); skip ($serror, defined $seqret);
 &print_error;
 

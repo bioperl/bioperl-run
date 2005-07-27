@@ -6,7 +6,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: papplmaker.PLS,v 1.4 2004-11-16 18:33:26 jason Exp $
+#   $Id: papplmaker.PLS,v 1.5 2005-07-27 13:47:55 senger Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -19,7 +19,7 @@ Usage:
 where 'options' are:
    -a <access>    access method (default 'soap')
    -l <location>  where are the analyses
-                  (default: http://industry.ebi.ac.uk/soap/soaplab)
+                  (default: http://www.ebi.ac.uk/soaplab/services)
    -n <name>      name of an analysis,
                   (default: generate for all available, unless -r given)
    -r <regexp>    regular expression for matching analysis names
@@ -38,7 +38,7 @@ Environment variables:
    HTTPPROXY      HTTP proxy server (use by some access method,
                   e.g. by the SOAP access)
 
-For more details type:  perldoc papplmaker
+For more details type:  perldoc papplmaker.PLS
 
 END_OF_USAGE
 }
@@ -61,8 +61,8 @@ BEGIN {
 
 
     # set the version for version checking
-    $VERSION = do { my @r = (q[$Revision: 1.4 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q[$Id: papplmaker.PLS,v 1.4 2004-11-16 18:33:26 jason Exp $];
+    $VERSION = do { my @r = (q[$Revision: 1.5 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q[$Id: papplmaker.PLS,v 1.5 2005-07-27 13:47:55 senger Exp $];
 
     # help wanted?
     if ($opt_h) {
@@ -100,7 +100,7 @@ $opt_f = 'no' unless $opt_f;
 for my $name (@names) {
 
     # service name can consist of category and analysis name
-    my ($category, $analysis) = split (/::/, $name, 2);
+    my ($category, $analysis) = split (/\./, $name, 2);
     unless ($analysis) {  # swap them if category does not exist
 	$analysis = $category;
 	$category = undef;
@@ -330,36 +330,36 @@ __END__
 
 =head1 NAME
 
-papplmaker -  Analysis tools module generator
+papplmaker.PLS -  Analysis tools module generator
 
 =head1 SYNOPSIS
 
   # get some help
-  papplmaker -h
+  papplmaker.PLS -h
 
   # generate module for program 'seqret'
-  papplmaker -n edit::seqret
+  papplmaker.PLS -n edit.seqret
 
   # ditto, but specify where to find 'seqret'
-  papplmaker -n edit::seqret
+  papplmaker.PLS -n edit::seqret
              -l http://localhost:8080/axis/services
 
   # ditto, but specify a non-default access method to 'seqret'
-  papplmaker -n edit::seqret
+  papplmaker.PLS -n edit::seqret
              -l http://corba.ebi.ac.uk/IOR/Analyses.ref
              -a corba
 
   # generate modules for all available analyses
   # (using default location and default access method)
-  papplmaker
+  papplmaker.PLS
 
   # do not generate but see what would be generated
-  papplmaker -s
-  papplmaker -S
+  papplmaker.PLS -s
+  papplmaker.PLS -S
 
   # generate module for analysis 'edit::seqret'
   # but name it 'MySeqret'
-  papplmaker -n edit::seqret -m MySeqret
+  papplmaker.PLS -n edit::seqret -m MySeqret
 
       # ...and use it
       use MySeqret;
@@ -370,15 +370,15 @@ papplmaker -  Analysis tools module generator
 
   # ditto but put the result into directory '/tmp/my'
   # (directories do not need to exist)
-  papplmaker -n edit::seqret -m MySeqret -d /tmp/my/
+  papplmaker.PLS -n edit::seqret -m MySeqret -d /tmp/my/
 
   # generate modules for all analysis whose names
   # matches given regular expression (case insensitive)
-  papplmaker -r 'edit'
+  papplmaker.PLS -r 'edit'
 
   # ditto, but name generated module with your own names
-  # (letting papplmaker substitute parts of your names)
-  papplmaker -r 'edit' -m 'My_$ANALYSIS'
+  # (letting papplmaker.PLS substitute parts of your names)
+  papplmaker.PLS -r 'edit' -m 'My_$ANALYSIS'
 
 =head1 DESCRIPTION
 
@@ -389,15 +389,15 @@ to retrieve results by naming them. However, sometimes is more
 convenient to use a specific module, representing one analysis tool,
 that already knows about available input and result names.
 
-The generator C<papplmaker> creates such dedicated modules.
+The generator C<papplmaker.PLS> creates such dedicated modules.
 
-C<papplmaker> uses the same access method as the general module -
+C<papplmaker.PLS> uses the same access method as the general module -
 which means that depending on the parameter C<access> it can use SOAP,
 CORBA or any other (supported) protocol, or it can access local
-analysis (available on the same machine where C<papplmaker> is
+analysis (available on the same machine where C<papplmaker.PLS> is
 invoked).
 
-C<papplmaker> does its job either for one named analysis (specified
+C<papplmaker.PLS> does its job either for one named analysis (specified
 by the C<-n> option, or it uses C<Bio::Tools::Run::AnalysisFactory> module in
 order to find what analyses are available, and can limit their number
 by matching against a regular expression given by the C<-r> option.

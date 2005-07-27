@@ -9,13 +9,13 @@
 #   functional command-line client for accessing various analysis
 #   tools.
 #
-#   Usage: ./analysis -h
-#   or: perldoc analysis.pl
+#   Usage: ./panalysis.PLS -h
+#   or: perldoc panalysis.PLS
 #
-#   senger@ebi.ac.uk
+#   martin.senger@gmail.com
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.6 2004-11-16 18:33:26 jason Exp $
+#   $Id: panalysis.PLS,v 1.7 2005-07-27 13:47:55 senger Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -23,7 +23,7 @@ use strict;
 sub get_usage {
     return <<"END_OF_USAGE";
 Usage:
-   analysis.pl [options] [input-data]
+   panalysis.PLS [options] [input-data]
 
 where 'options' are:
    -A <access>    access method (default 'soap')
@@ -83,7 +83,7 @@ Environment variables:
    HTTPTIMEOUT               HTTP timeout (0 means no timeout at all)
    RESULT_FILENAME_TEMPLATE  template for inventing filenames for results
 
-For more details type:  perldoc analysis.pl
+For more details type:  perldoc panalysis.PLS
 
 END_OF_USAGE
 }
@@ -112,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q[$Revision: 1.6 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q[$Id: panalysis.PLS,v 1.6 2004-11-16 18:33:26 jason Exp $];
+    $VERSION = do { my @r = (q[$Revision: 1.7 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q[$Id: panalysis.PLS,v 1.7 2005-07-27 13:47:55 senger Exp $];
 
 
     # help wanted?
@@ -344,13 +344,13 @@ __END__
 
 =head1 NAME
 
-analysis.pl - An example/tutorial script how to access analysis tools
+panalysis.PLS - An example/tutorial script how to access analysis tools
 
 =head1 SYNOPSIS
 
  # run an analysis with your sequence in a local file
-   ./analysis.pl -n 'edit::seqret'-w -r \
-                 sequence_direct_data=@/home/testdata/my.seq
+   ./panalysis.PLS -n 'edit.seqret'-w -r \
+                   sequence_direct_data=@/home/testdata/my.seq
 
  See more examples in the text below.
 
@@ -369,7 +369,7 @@ analysis tools.
 
 =head2 Defining location and access method
 
-C<analysis.pl> is independent on the access method to the remote
+C<panalysis.PLS> is independent on the access method to the remote
 analyses (the analyses running on a different machines). The method
 used to communicate with the analyses is defined by the C<-A> option,
 with the default value I<soap>. The other possible values (not yet
@@ -382,13 +382,13 @@ in the C<-l> option, while the I<corba> access may find here a
 stringified Interoperable Object Reference (IOR).
 
 A default location for the I<soap> access is
-C<http://industry.ebi.ac.uk/soap/soaplab> which represents an
-experimental service running at European Bioinformatics Institute on
-top of over hundred EMBOSS analyses.
+C<http://www.ebi.ac.uk/soaplab/services> which represents services
+running at European Bioinformatics Institute on top of over hundred
+EMBOSS analyses (and on top of few others).
 
 =head2 Available analyses
 
-C<analysis.pl> can show a list of available analyses (from the given
+C<panalysis.PLS> can show a list of available analyses (from the given
 location using given access method). The C<-L> option shows all
 analyses, the C<-c> option lists all available categories (a category
 is a group of analyses with similar functionality or processing
@@ -427,7 +427,7 @@ just creates (builds) a job, the C<-x> which creates a job and
 executes it, and finally C<-w> which creates a job, runs it and blocks
 the client until the job is finished. Always only one of these options
 is used (so it does not make sense to use more of them, the
-C<analysis.pl> priorities them in the order C<-x>, C<-w>, and
+C<panalysis.PLS> priorities them in the order C<-x>, C<-w>, and
 C<-b>).
 
 All of these options take input data from the command-line (see next
@@ -446,12 +446,12 @@ C<Classic::HelloWorld> service).
 Input data are given as name/value pairs, put on the command-line with
 equal sign between name and value. If the I<value> part starts with
 an un-escaped character C<@>, it is used as a local file name and the
-C<analysis.pl> reads the file and uses its contents instead. Examples:
+C<panalysis.PLS> reads the file and uses its contents instead. Examples:
 
-   analysis.pl -n edit::seqret -w -r
-               sequence_direct_data='tatatctcccc' osformat=embl
+   panalysis.PLS -n edit.seqret -w -r
+                 sequence_direct_data='tatatctcccc' osformat=embl
 
-   analysis.pl ...
+   panalysis.PLS ...
                sequence_direct_data=@/my/data/my.seq
 
 The names of input data come from the C<input specification> that can
@@ -474,39 +474,39 @@ is created even before execution (remember that option C<-b> builds a
 job but does not execute it yet).
 
 Any job, executed or not, is persistent and can be used again later
-from another invocation of the C<analysis.pl> script. Unless you
+from another invocation of the C<panalysis.PLS> script. Unless you
 explicitly destroy the job using option C<-z>.
 
 A job created by options C<-b>, C<-x> and C<-w> (and by input data)
-can be accessed in the same C<analysis.pl> invocation using various
+can be accessed in the same C<panalysis.PLS> invocation using various
 job-related options, the most important are C<-r> and C<-R> for
 retrieving results from the finished job.
 
 However, you can also re-create a job created by a previous
-invocation. Assuming that you know the job ID (the C<analysis.pl>
+invocation. Assuming that you know the job ID (the C<panalysis.PLS>
 prints it always on the standard error when a new job is created), use
 option C<-j> to re-create the job.
 
 Example:
 
-   ./analysis.pl -n 'edit::seqret'
+   ./panalysis.PLS -n 'edit.seqret'
                  sequence_direct_data=@/home/testdata/my.seq
 
 It prints:
 
-   JOB ID: edit::seqret/bb494b:ef55e47c99:-8000
+   JOB ID: edit.seqret/bb494b:ef55e47c99:-8000
 
 Next invocation (asking to run the job, to wait for its completion and
 to show job status) can be:
 
-   ./analysis.pl -n 'edit::seqret'
-                 -j edit::seqret/bb494b:ef55e47c99:-800
+   ./panalysis.PLS -n 'edit.seqret'
+                 -j edit.seqret/bb494b:ef55e47c99:-800
                  -w -s
 
 And again later another invocation can ask for results:
 
-   ./analysis.pl -n 'edit::seqret'
-                 -j edit::seqret/bb494b:ef55e47c99:-800
+   ./panalysis.PLS -n 'edit.seqret'
+                 -j edit.seqret/bb494b:ef55e47c99:-800
                  -r
 
 Here is a list of all job options (except for results, they are in the
@@ -547,7 +547,7 @@ undef value is returned (no error message produced).
 
 Some results are better to save directly into files instead to show
 them in the terminal window (this applies to the I<binary> results,
-mostly containing images). The C<analysis.pl> helps to deal with
+mostly containing images). The C<panalysis.PLS> helps to deal with
 binary results by saving them automatically to local files (actually
 it is the module C<Bio::Tools::Run::Analysis> and its submodules
 who do help with the binary data).
@@ -659,7 +659,7 @@ email or the web:
 
 =head1 AUTHOR
 
-Martin Senger (senger@ebi.ac.uk)
+Martin Senger (martin.senger@gmail.com)
 
 =head1 COPYRIGHT
 

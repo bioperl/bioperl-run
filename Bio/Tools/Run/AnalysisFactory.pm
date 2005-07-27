@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::AnalysisFactory
 #
-# Cared for by Martin Senger <senger@ebi.ac.uk>
+# Cared for by Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
 
@@ -55,7 +55,7 @@ Bio::Tools::Run::AnalysisFactory - A directory of analysis tools
   # create an analysis object
   use Bio::Tools::Run::AnalysisFactory;
   $service = new Bio::Tools::Run::AnalysisFactory
-                 ->create_analysis ('edit::seqret');
+                 ->create_analysis ('edit.seqret');
   $service->run (
                 #...
                 )->results;
@@ -71,14 +71,8 @@ The module is a higher-level abstraction whose main job is to load a
 C<-access> parameter. The same design is used here as for
 C<Bio::Tools::Run::Analysis> module.
 
-At the moment of writing, there is available a I<SOAP> access to
-almost all EMBOSS applications (running as an experimental service at
-European Bioinformatics Institute. The I<CORBA> access will follow
-shortly (it is already implemented in the C<novella> project -
-http://industry.ebi.ac.uk/novella , and it requires now to write only a
-small bridge to the C<Bio::Tools::Run::Analysis> module). A challenging but
-important task will be to make available also local analysis (some of
-them already being a part of bioperl).
+There is available a I<SOAP> access to almost all EMBOSS applications,
+running at European Bioinformatics Institute.
 
 The documentation of all C<public> methods are to be found
 in C<Bio::Factory::AnalysisI>.
@@ -105,7 +99,7 @@ email or the web:
 
 =head1 AUTHOR
 
-Martin Senger (senger@ebi.ac.uk)
+Martin Senger (martin.senger@gmail.com)
 
 =head1 COPYRIGHT
 
@@ -125,7 +119,7 @@ This software is provided "as is" without warranty of any kind.
 
 =item *
 
-http://industry.ebi.ac.uk/soaplab/Perl_Client.html
+http://www.ebi.ac.uk/soaplab/Perl_Client.html
 
 =back
 
@@ -199,9 +193,9 @@ Other (but future) possibilities are:
 A location of the service. The contents is access-specific (see
 details in the lower-level implementation modules).
 
-Default is C<http://industry.ebi.ac.uk/soap/soaplab> (an experimental
-service running at European Bioinformatics Institute on top of most of
-EMBOSS analyses; it is a Web Service using SOAP access).
+Default is C<http://www.ebi.ac.uk/soaplab/services> (there are
+services running at European Bioinformatics Institute on top of most
+of EMBOSS analyses, and on some others).
 
 =item -httpproxy
 
