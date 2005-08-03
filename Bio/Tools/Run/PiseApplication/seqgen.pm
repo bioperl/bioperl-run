@@ -105,10 +105,10 @@ Bio::Tools::Run::PiseApplication::seqgen
 		quiet (Switch)
 			non verbose output (-q)
 
-		write-ancest (Switch)
+		write_ancest (Switch)
 			write the ancestral sequences (-wa)
 
-		write-sites (Switch)
+		write_sites (Switch)
 			write the sites rates (-wr)
 
 		input_seq (Integer)
@@ -263,8 +263,8 @@ sub new {
 	"output", 	# Output parameters
 	"phylip", 	# output file format [default : standard PHYLIP output]
 	"quiet", 	# non verbose output (-q)
-	"write-ancest", 	# write the ancestral sequences (-wa)
-	"write-sites", 	# write the sites rates (-wr)
+	"write_ancest", 	# write the ancestral sequences (-wa)
+	"write_sites", 	# write the sites rates (-wr)
 	"input", 	# Input parameters
 	"input_seq", 	# Ancestral Sequence number (-k)
 
@@ -297,8 +297,8 @@ sub new {
 	"output" => 'Paragraph',
 	"phylip" => 'Excl',
 	"quiet" => 'Switch',
-	"write-ancest" => 'Switch',
-	"write-sites" => 'Switch',
+	"write_ancest" => 'Switch',
+	"write_sites" => 'Switch',
 	"input" => 'Paragraph',
 	"input_seq" => 'Integer',
 
@@ -380,10 +380,10 @@ sub new {
 	"quiet" => {
 		"perl" => '($value)? " -q":""',
 	},
-	"write-ancest" => {
+	"write_ancest" => {
 		"perl" => '($value)? " -wa":""',
 	},
-	"write-sites" => {
+	"write_sites" => {
 		"perl" => '($value)? " -wr":""',
 	},
 	"input" => {
@@ -437,8 +437,8 @@ sub new {
 	"control",
 	"outfile",
 	"output",
-	"write-ancest",
-	"write-sites",
+	"write_ancest",
+	"write_sites",
 	"scale_branch",
 	"scale_tree",
 	"rate1",
@@ -496,8 +496,8 @@ sub new {
 	"output" => 0,
 	"phylip" => 0,
 	"quiet" => 0,
-	"write-ancest" => 0,
-	"write-sites" => 0,
+	"write_ancest" => 0,
+	"write_sites" => 0,
 	"input" => 0,
 	"input_seq" => 0,
 
@@ -530,8 +530,8 @@ sub new {
 	"output" => 0,
 	"phylip" => 0,
 	"quiet" => 0,
-	"write-ancest" => 0,
-	"write-sites" => 0,
+	"write_ancest" => 0,
+	"write_sites" => 0,
 	"input" => 0,
 	"input_seq" => 0,
 
@@ -564,8 +564,8 @@ sub new {
 	"output" => 0,
 	"phylip" => 0,
 	"quiet" => 0,
-	"write-ancest" => 0,
-	"write-sites" => 0,
+	"write_ancest" => 0,
+	"write_sites" => 0,
 	"input" => 0,
 	"input_seq" => 0,
 
@@ -598,8 +598,8 @@ sub new {
 	"output" => "Output parameters",
 	"phylip" => "output file format [default : standard PHYLIP output]",
 	"quiet" => "non verbose output (-q)",
-	"write-ancest" => "write the ancestral sequences (-wa)",
-	"write-sites" => "write the sites rates (-wr)",
+	"write_ancest" => "write the ancestral sequences (-wa)",
+	"write_sites" => "write the sites rates (-wr)",
 	"input" => "Input parameters",
 	"input_seq" => "Ancestral Sequence number (-k)",
 
@@ -632,8 +632,8 @@ sub new {
 	"output" => 0,
 	"phylip" => 0,
 	"quiet" => 0,
-	"write-ancest" => 0,
-	"write-sites" => 0,
+	"write_ancest" => 0,
+	"write_sites" => 0,
 	"input" => 0,
 	"input_seq" => 0,
 
@@ -643,7 +643,7 @@ sub new {
 
 	"control" => ['model','length','datasets','partition_numb','scale_branch','scale_tree','rate1','rate2','rate3','shape','categories','invar_site','freqA','freqC','freqG','freqT','transratio','matrix','random_seed',],
 	"model" => ['F84','F84','HKY','HKY','REV','REV',],
-	"output" => ['phylip','quiet','write-ancest','write-sites',],
+	"output" => ['phylip','quiet','write_ancest','write_sites',],
 	"phylip" => ['p','PHYLIP','r','relaxed PHYLIP','n','NEXUS',],
 	"input" => ['input_seq',],
     };
@@ -692,8 +692,8 @@ sub new {
 	"output" => { "perl" => '1' },
 	"phylip" => { "perl" => '1' },
 	"quiet" => { "perl" => '1' },
-	"write-ancest" => { "perl" => '1' },
-	"write-sites" => { "perl" => '1' },
+	"write_ancest" => { "perl" => '1' },
+	"write_sites" => { "perl" => '1' },
 	"input" => { "perl" => '1' },
 	"input_seq" => { "perl" => '1' },
 
@@ -802,8 +802,8 @@ sub new {
 	"output" => 0,
 	"phylip" => 0,
 	"quiet" => 0,
-	"write-ancest" => 0,
-	"write-sites" => 0,
+	"write_ancest" => 0,
+	"write_sites" => 0,
 	"input" => 0,
 	"input_seq" => 0,
 
@@ -836,8 +836,8 @@ sub new {
 	"output" => 0,
 	"phylip" => 0,
 	"quiet" => 0,
-	"write-ancest" => 0,
-	"write-sites" => 0,
+	"write_ancest" => 0,
+	"write_sites" => 0,
 	"input" => 0,
 	"input_seq" => 0,
 
@@ -900,10 +900,10 @@ sub new {
 	"random_seed" => [
 		"This option allows to specify a seed for the random number	  generator. Using the same seed (with the same input) will result	  in identical simulated datasets. This is useful because you can	  recreate a set of simulations, you must use exactly the same	  model options",
 	],
-	"write-ancest" => [
+	"write_ancest" => [
 		"This option allows to obtain the sequences for each	      of the internal nodes in the tree.                The sequences are written out along with the sequencees for	      the tips of the tree in relaxed PHYLIP format.                 ",
 	],
-	"write-sites" => [
+	"write_sites" => [
 		"This option allows to obtain the relative rate of	      substitution for each sites as used in each simulation. This	      will go to sderr and will be produced for each replicate simulation.                 ",
 	],
 	"input_seq" => [
