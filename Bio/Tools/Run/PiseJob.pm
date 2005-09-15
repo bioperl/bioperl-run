@@ -698,7 +698,7 @@ sub fh {
 	if ($self->{DEBUG}) {
 	    print STDERR "DEBUG> Bio::Tools::Run::PiseJob fh: $url (",$self->{PROGRAM},")\n";
 	}
-	if ($url =~ /$file/) {
+	if ($url =~ /$file/ or $file =~ /$url/ or $file==$url) {
 	    if ($self->{DEBUG}) {
 		print STDERR "Bio::Tools::Run::PiseJob::fh: this one ($file)!\n";
 	    }
