@@ -15,7 +15,7 @@ Bio::Tools::Run::Phylo::Phylip::PhylipConf
 =head1 SYNOPSIS
 
   use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
-  my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$version}->{'PROTDIST'}};
+  my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$version}->{'PROTDIST'}};
 
 =head1 DESCRIPTION
 

@@ -438,7 +438,7 @@ sub _setparams {
     my $param_string = "";
     my $cat = 0;
     my $gene_freq = 0;
-    my %menu = %{%Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'SEQBOOT'}};
+    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'SEQBOOT'}};
 
     foreach  my $attr ( @SEQBOOT_PARAMS) {
     	$value = $self->$attr();
