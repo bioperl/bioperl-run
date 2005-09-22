@@ -2,7 +2,7 @@
 
 # BioPerl module for Bio::Installer::Generic
 #
-# Cared for by Albert Vilella <avilella@ebi.ac.uk, avilella@ub.edu>
+# Cared for by Albert Vilella
 #
 # Copyright Albert Vilella
 #
@@ -43,7 +43,7 @@ the web:
 
 =head1 AUTHOR - Albert Vilella
 
-Email avilella@ebi.ac.uk, avilella@ub.edu
+Email avilella-AT-gmail-DOT-com
 
 Describe contact details here
 
