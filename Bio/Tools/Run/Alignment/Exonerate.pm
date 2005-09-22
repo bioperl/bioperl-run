@@ -1,6 +1,6 @@
 # Wrapper  module for Exonerate Bio::Tools::Run::Alignment::Exonerate
-#
-#
+# $Id$
+# 
 # Cared for by Shawn Hoon
 #
 # Copyright Shawn Hoon
@@ -86,9 +86,10 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Run::WrapperBase;
-use Bio::SearchIO::Exonerate;
+use Bio::SearchIO;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
+	  Bio::Factory::ApplicationFactoryI);
 
 =head2 program_name
 
@@ -169,10 +170,8 @@ sub run {
     my ($self,$query,$target) = @_;
     my @feats;
     my ($file1) = $self->_writeInput($query);
-    my ($file2) = $self->_writeInput($target);
-
-	  my $assembly = $self->_run($file1,$file2);
-
+    my ($file2) = $self->_writeInput($target);    
+    my $assembly = $self->_run($file1,$file2);
     return $assembly;
 }
 
@@ -206,9 +205,8 @@ sub _run {
      my ($self,$query,$target)= @_;
 
      my ($tfh,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
-
      my $param_str = $self->_setparams." ".$self->arguments;
-     my $str =$self->executable." $param_str $query $target "." > $outfile";
+     my $str = $self->executable." $param_str $query $target "." > $outfile";
      $self->debug( "$str\n");
      my $status = system($str);
      $self->throw( "Exonerate call ($str) crashed: $? \n") unless $status==0;
@@ -274,7 +272,7 @@ sub _writeInput{
 
 sub _setparams {
     my ($self) = @_;
-    my $param_string;
+    my $param_string = '';
     foreach my $attr(@EXONERATE_PARAMS){
         next if($attr=~/PROGRAM/);
         my $value = $self->$attr();
