@@ -29,9 +29,8 @@ END {
 
 ok(1);
 
-my @params = ('quiet' => 1);
+my @params = ();
 my $factory = Bio::Tools::Run::Alignment::Probcons->new(@params);
-ok($factory->quiet, 1);
 my $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 my $aln;
 
