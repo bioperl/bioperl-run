@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 45;
+    $NTESTS = 88;
     plan tests => $NTESTS;
 }
 use Bio::Tools::Run::Alignment::Exonerate;
@@ -27,9 +27,11 @@ my $verbose = $ENV{BIOPERLDEBUG} || -1;
 
 my $query= Bio::Root::IO->catfile("t","data","exonerate_cdna.fa");
 my $target= Bio::Root::IO->catfile("t","data","exonerate_genomic.fa");
+my $targetrev= Bio::Root::IO->catfile("t","data","exonerate_genomic_rev.fa");
+
 my $run = Bio::Tools::Run::Alignment::Exonerate->new(-verbose  => $verbose,
 						     arguments=>'--model est2genome --bestn 1');
-exit unless( $run->executable );
+exit(0) unless( $run->executable );
 
 ok $run->isa('Bio::Tools::Run::Alignment::Exonerate');
 
@@ -64,9 +66,35 @@ RESULT: while(my $result = $searchio->next_result){
   }
   last;
 }
-unless (defined $run->executable) {
-    warn("Exonerate program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
 
+
+$searchio= $run->run($query,$targetrev);
+ok $searchio->isa("Bio::SearchIO");
+my @expectrev = ( [qw(28   333   964 1279)],# target-start t-end query-start q-end
+		  [qw(415  537   841 963)],
+		  [qw(623 852    611 840)],
+		  [qw(1179 1332  457 610)],
+		  [qw(2046 2138  364  456)],
+		  [qw(2456 2576  243 363)],
+		  [qw(2834 3073  4 242)] );
+RESULT: while(my $result = $searchio->next_result){
+    while( my $hit = $result->next_hit ) {
+      my $i = 0;
+    while( my $hsp = $hit->next_hsp ) {	
+	ok ($hsp->hit->strand, 1);
+	ok ($hsp->query->strand, -1);
+	ok ($hsp->hit->start,$expectrev[$i]->[0]);
+	ok ($hsp->hit->end,$expectrev[$i]->[1]);
+	ok ($hsp->query->start,$expectrev[$i]->[2]);
+	ok ($hsp->query->end,$expectrev[$i]->[3]);	
+	$i++;
+	if( $verbose > 0 ) {
+	    warn("TARGET:", $hsp->hit->location->to_FTstring, "\n");
+	    warn("QUERY: ",$hsp->query->location->to_FTstring, "\n");
+	}
+    }
+      last; # only show a single HIT
+  }
+  last;
+}
 
