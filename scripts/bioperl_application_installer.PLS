@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 # BioPerl script for Bio::Installer
 #
-# Cared for by Albert Vilella <avilella@ebi.ac.uk, avilella@ub.edu>
+# Cared for by Albert Vilella
 #
 #	based on the CPAN::FirstTime module
 #
@@ -27,7 +27,7 @@ and compile/install them in the specified directory.
 
 =head1 AUTHOR
 
-Albert Vilella, avilella-AT-ebi-DOT-ac-DOT-uk,avilella-AT-ub-DOT-edu
+Albert Vilella, avilella-AT-gmail-DOT-com
 
 =head1 TODO
 
@@ -53,6 +53,7 @@ BEGIN {
                       'EMBOSS',
                       'TCoffee',
                       'PAML',
+                      'Probcons',
                      ];
 }
 
