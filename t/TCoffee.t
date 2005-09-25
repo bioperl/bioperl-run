@@ -109,8 +109,10 @@ if( $version <= 1.22 ) {
     ok( $aln->overall_percentage_identity > 18);    
     ok( int($aln->average_percentage_identity), 44);
 } else {
-    ok( int($aln->overall_percentage_identity), 21);
-    ok( int($aln->average_percentage_identity), 47);    
+    my $overall = int($aln->overall_percentage_identity);
+    ok( $overall >=21 && $overall <= 23, 1, 'expect 21 >= val >= 23');
+    my $avg = int($aln->average_percentage_identity);
+    ok( $avg == 47 || $avg ==48, 1, 'expect 47 or 48');    
 }
 
 # test new 'run' generic running of factory
@@ -124,8 +126,10 @@ if( $version <= 1.22 ) {
     ok( $aln->overall_percentage_identity > 18);    
     ok( int($aln->average_percentage_identity), 44);
 } else {
-    ok( int($aln->overall_percentage_identity), 14);
-    ok( int($aln->average_percentage_identity),41);    
+    my $overall = int $aln->overall_percentage_identity;
+    ok($overall == 14 || $overall == 13,1,'expect 13 or 14');
+    my $avg = int($aln->average_percentage_identity);
+    ok($avg,41);    
 }
 
 $aln = $factory->run('-type' => 'align',
