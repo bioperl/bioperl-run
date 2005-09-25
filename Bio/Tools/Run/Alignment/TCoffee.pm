@@ -516,7 +516,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::TCoffee;
 
-use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
+use vars qw($AUTOLOAD @ISA $PROGRAM_NAME $PROGRAM_DIR %DEFAULTS
             @TCOFFEE_PARAMS @TCOFFEE_SWITCHES @OTHER_SWITCHES %OK_FIELD
             );
 use strict;
@@ -541,7 +541,8 @@ use  Bio::Tools::Run::WrapperBase;
 #	BEGIN {$ENV{TCOFFEEDIR} = '/home/progs/tcoffee'; }
 
 BEGIN {
-    $PROGRAMNAME = 't_coffee';
+    $PROGRAM_NAME = 't_coffee';
+    $PROGRAM_DIR = $ENV{'TCOFFEEDIR'};
     %DEFAULTS = ( 'MATRIX' => 'blosum',
                   'OUTPUT' => 'clustalw',
                   'AFORMAT'=> 'msf',
@@ -577,7 +578,7 @@ BEGIN {
 =cut
 
 sub program_name {
-        return $PROGRAMNAME;
+        return $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -591,7 +592,7 @@ sub program_name {
 =cut
 
 sub program_dir {
-        return Bio::Root::IO->catfile($ENV{TCOFFEEDIR}) if $ENV{TCOFFEEDIR};
+    return $PROGRAM_DIR;
 }
 
 sub new {

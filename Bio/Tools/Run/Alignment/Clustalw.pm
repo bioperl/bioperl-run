@@ -341,7 +341,7 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::Clustalw;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
+use vars qw($AUTOLOAD @ISA $PROGRAM_DIR $PROGRAM_NAME
 	    @CLUSTALW_SWITCHES @CLUSTALW_PARAMS
 	    @OTHER_SWITCHES %OK_FIELD);
 use strict;
@@ -368,7 +368,8 @@ BEGIN {
     @CLUSTALW_SWITCHES = qw(HELP CHECK OPTIONS NEGATIVE NOWEIGHTS ENDGAPS
                         NOPGAP NOHGAP NOVGAP KIMURA TOSSGAPS
                         KIMURA TOSSGAPS NJTREE);
-
+    $PROGRAM_NAME = 'clustalw';
+    $PROGRAM_DIR = $ENV{'CLUSTALDIR'} || $ENV{'CLUSTALWDIR'};
     @OTHER_SWITCHES = qw(QUIET);
     # Authorize attribute fields
     foreach my $attr ( @CLUSTALW_PARAMS, @CLUSTALW_SWITCHES,
@@ -386,7 +387,7 @@ BEGIN {
 =cut
 
 sub program_name {
-  return 'clustalw';
+  return $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -400,7 +401,7 @@ sub program_name {
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{CLUSTALDIR}) if $ENV{CLUSTALDIR};
+  return $PROGRAM_DIR;
 }
 
 sub new {
