@@ -631,7 +631,7 @@ sub get_parameters{
 
 sub set_parameter{
    my ($self,$param,$value) = @_;
-   unless ($self->{'no_param_checks'} == 1) {
+   unless ($self->no_param_checks ) {
        if ( ! defined $VALIDVALUES{$param} ) { 
            $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
            return 0;
@@ -699,7 +699,7 @@ sub no_param_checks{
    if( defined $value) {
       $self->{'no_param_checks'} = $value;
     }
-    return $self->{'no_param_checks'};
+    return $self->{'no_param_checks'} || 0;
 }
 
 
