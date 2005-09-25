@@ -60,14 +60,13 @@ methods. Internal methods are usually preceded with a _
 
 
 package Bio::Tools::Run::Pseudowise;
-use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
+use vars qw($AUTOLOAD @ISA $PROGRAM_NAME $PROGRAM_DIR
             @PSEUDOWISE_SWITCHES @PSEUDOWISE_PARAMS 
             @OTHER_SWITCHES %OK_FIELD);
 use strict;
 use Bio::SeqIO;
-use Bio::SeqFeature::Generic;
-use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Pseudowise;
 
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -83,6 +82,8 @@ use Bio::Tools::Run::WrapperBase;
 # $ENV{WISEDIR} = '/usr/local/share/wise2.2.20';
 
 BEGIN {
+    $PROGRAM_NAME = 'pseudowise';
+    $PROGRAM_DIR = Bio::Root::IO->catfile($ENV{WISEDIR},"src","bin") if $ENV{WISEDIR};
     @PSEUDOWISE_PARAMS = qw(SPLICE_MAX_COLLAR SPLICE_MIN_COLLAR 
 			    SPLICE_SCORE_OFFSET
 			    GENESTATS NOMATCHN PARAMS KBYTE 
@@ -90,7 +91,7 @@ BEGIN {
 			    ERRORLOG);
 
     @PSEUDOWISE_SWITCHES = qw(HELP SILENT QUIET ERROROFFSTD);
-
+    
     # Authorize attribute fields
     foreach my $attr ( @PSEUDOWISE_PARAMS, @PSEUDOWISE_SWITCHES,
                        @OTHER_SWITCHES) { $OK_FIELD{$attr}++; }
@@ -108,7 +109,7 @@ BEGIN {
 =cut
 
 sub program_name {
-  return 'pseudowise';
+  return $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -122,13 +123,13 @@ sub program_name {
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{WISEDIR},"/src/bin") if $ENV{WISEDIR};
+    return $PROGRAM_DIR;
 }
 
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-
+  
   my ($attr, $value);
   while (@args) {
     $attr =   shift @args;
@@ -192,7 +193,7 @@ file corresponding to string name can not be found.
 =cut
 
 sub predict_genes {
-	return shift->run(@_);
+    return shift->run(@_);
 }
 
 =head2 run
@@ -211,20 +212,18 @@ file corresponding to string name can not be found.
 
 =cut
 
-sub run{
-
-    my ($self,$seq1, $seq2, $seq3)=@_; 
+sub run {
+    my ($self,@args)=@_; 
     my ($attr, $value, $switch);
-
-# Create input file pointer
-    my ($infile1,$infile2,$infile3)= $self->_setinput($seq1, $seq2, $seq3);
-    if (!($infile1 && $infile2 && $infile3)) 
-        {$self->throw("Bad input data (sequences need an id ) ");}
-
-   my $prot_name = $seq1->display_id;
-# run pseudowise 
-    my @feats = $self->_run($prot_name, $infile1,$infile2,$infile3);
-    return @feats;
+ 
+    # Create input file pointer
+    my @files = $self->_setinput(@args);
+    if( @files !=3 || grep { !defined } @files ) { 
+	$self->throw("Bad input data (sequences need an id ) ");
+    }
+    
+    my $prot_name = $args[0]->display_id;
+    return $self->_run($prot_name, @files);
 }
 
 
@@ -241,23 +240,35 @@ sub run{
 =cut
 
 sub _run {
-    my ($self,$prot_name, $infile1,$infile2,$infile3) = @_;
+    my ($self,$prot_name, @files) = @_;
     my $instring;
     $self->debug( "Program ".$self->executable."\n");
     my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir);
     my $paramstring = $self->_setparams;
-    my $commandstring = $self->executable." $paramstring $infile1 $infile2 $infile3 > $outfile";
-    if($self->silent || $self->quiet || !($self->vebose)){
-        $commandstring .= ' 2> /dev/null';
+    my $commandstring = sprintf("%s %s %s > %s",
+				$self->executable, 
+				$paramstring,
+				join(" ", @files),
+				$outfile);
+  
+    if($self->silent || $self->quiet || ($self->verbose < 1)){
+	$commandstring .= ' 2> /dev/null';
     }
-    $self->debug( "pseudowise command = $commandstring");
-    my $status = system($commandstring);
-    $self->throw( "Pseudowise call ($commandstring) crashed: $? \n") unless $status==0;
-
+    $self->debug( "pseudowise command = $commandstring\n");
+#    my $status = system($commandstring);
+    `$commandstring`;
+#    $self->throw( "Pseudowise call ($commandstring) crashed: $? \n") 
+#	unless $status == 0;
     #parse the outpur and return a Bio::Seqfeature array
     my $genes   = $self->_parse_results($prot_name,$outfile);
     close($tfh1);
     undef $tfh1;
+    if( $self->verbose > 0 ) {
+	open($tfh1,$outfile) || die $!;
+	while(<$tfh1>) {
+	    $self->debug ($_);
+	}
+    }
     return @{$genes};
 }
 
@@ -276,81 +287,20 @@ sub _parse_results {
     my ($self,$prot_name,$outfile) = @_;
     $outfile||$self->throw("No outfile specified");
     my $filehandle;
-    if (ref ($outfile) !~ /GLOB/)
-    {
-        open (PSEUDOWISE, "<".$outfile)
+    if (ref ($outfile) !~ /GLOB/i ) {
+        open ($filehandle, "<".$outfile)
             or $self->throw ("Couldn't open file ".$outfile.": $!\n");
-        $filehandle = \*PSEUDOWISE;
-    }
-    else
-    {
+    } else {
         $filehandle = $outfile;
     }
-
+    
     my @genes;
     #The big parsing loop - parses exons and predicted peptides
-            
-            my $count = 0;
-            my $score;
-            while (<$filehandle>)
-            {
-                if(/Ka/i) {
-                   my @line_elements = split;
-                    my $no = scalar(@line_elements);
-                    $score=$line_elements[$no-1];
-                 }
-                     
-                my $gene;
-                if (/Gene/i)
-                {
-                  $gene = new Bio::SeqFeature::Generic (
-                                -primary => 'pseudogene',
-                                -source => 'pseudowise');
-                  push @genes, $gene;
-                  $count = $count + 1;
-
-                  while(<$filehandle>) {
-                    my @gene_elements = split;
-                    my $no = scalar(@gene_elements);
-                    if ((/Gene/i) && $no == 3) {
-                      my @element = split;
-                      my $no = scalar(@element);
-                      my $gene_start = $element[1];
-                      my $gene_end = $element[2];
-                      $gene->start($gene_start);
-                      $gene->end($gene_end);
-                      $gene->score($score);
-                    }
-                    elsif (/Exon/i) {
-                      my @element = split;
-                      my $no = scalar(@element);
-                      my $exon_start = $element[1];
-                      my $exon_end = $element[2];
-                      my $exon_phase = $element[4];
-                      #my $seqname = $prot_name.'_'.$count;
-                      my $seqname = $prot_name;
-                      my $exon = new Bio::SeqFeature::Generic (
-                                -seq_id=> $seqname,
-                                -start => $exon_start,
-                                -end => $exon_end,
-                                -primary => 'exon',
-                                -source => 'pseudowise',
-                                -frame  => $exon_phase);
-                      $exon->score($score);
-                      $gene->add_sub_SeqFeature($exon);
-                    }
-                    elsif ((/Gene/i) && $no != 3) {
-                       $gene = new Bio::SeqFeature::Generic (
-                                -primary => 'pseudogene',
-                                -source => 'pseudowise');
-                       $gene->score($score);
-                       push @genes, $gene;
-                       $count = $count + 1;
-
-                    }
-                  }
-                }
-            }
+    my $parser = Bio::Tools::Pseudowise->new(-verbose => $self->verbose,
+					     -fh      => $filehandle);
+    while( my $f = $parser->next_feature ) {
+	push @genes, $f;
+    }
     return \@genes;
 }
 
@@ -371,15 +321,15 @@ sub _setinput {
 
     if(!($seq1->isa("Bio::PrimarySeqI") && $seq2->isa("Bio::PrimarySeqI") &&
          $seq2->isa("Bio::PrimarySeqI")))
-      { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
-    my $tempdir = $self->tempdir();
-    ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
-    ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
-    ($tfh3,$outfile3) = $self->io->tempfile(-dir=>$tempdir);
+    { $self->throw("One or more of the sequences are nor Bio::PrimarySeqI objects\n"); }
+  my $tempdir = $self->tempdir();
+  ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$tempdir);
+  ($tfh2,$outfile2) = $self->io->tempfile(-dir=>$tempdir);
+  ($tfh3,$outfile3) = $self->io->tempfile(-dir=>$tempdir);
 
-    my $out1 = Bio::SeqIO->new(-fh => $tfh1 , '-format' => 'Fasta');
-    my $out2 = Bio::SeqIO->new(-fh => $tfh2, '-format' => 'Fasta');
-    my $out3 = Bio::SeqIO->new(-fh => $tfh3, '-format' => 'Fasta');
+  my $out1 = Bio::SeqIO->new(-fh => $tfh1 ,'-format' => 'Fasta');
+  my $out2 = Bio::SeqIO->new(-fh => $tfh2, '-format' => 'Fasta');
+  my $out3 = Bio::SeqIO->new(-fh => $tfh3, '-format' => 'Fasta');
   
   $out1->write_seq($seq1);
   $out2->write_seq($seq2);
@@ -394,8 +344,7 @@ sub _setinput {
   undef ($tfh1);
   undef ($tfh2);
   undef ($tfh3);
-
-  return $outfile1,$outfile2,$outfile3;  
+  return ($outfile1,$outfile2,$outfile3);  
 }
 
 sub _setparams {
