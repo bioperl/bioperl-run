@@ -696,7 +696,7 @@ sub run{
    if( $type =~ /align/i ) {
        return $self->align($seq);
    } elsif( $type =~ /profile/i ) {
-       return $self->profile_align($seq,$profile);
+       return $self->profile_align($profile,$seq);
    } else { 
        $self->warn("unrecognized alignment type $type\n");
    }
