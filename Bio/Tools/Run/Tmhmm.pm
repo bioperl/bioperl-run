@@ -63,8 +63,7 @@ Bio::Tools::Run::Tmhmm - Object for identifying transmembrane helixes
 
 package Bio::Tools::Run::Tmhmm;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
-            $PROGRAMNAME @TMHMM_PARAMS %OK_FIELD);
+use vars qw($AUTOLOAD @ISA $PROGRAMNAME @TMHMM_PARAMS %OK_FIELD);
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
@@ -75,19 +74,10 @@ use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-       $PROGRAMNAME = 'tmhmm'  . ($^O =~ /mswin/i ?'.exe':'');
-
-       if (defined $ENV{TMHMMDIR}) {
-          $PROGRAMDIR = $ENV{TMHMMDIR} || '';
-          $PROGRAM = Bio::Root::IO->catfile($PROGRAMDIR,
-                                           "tmhmm".($^O =~ /mswin/i ?'.exe':''));
-       }
-       else {
-          $PROGRAM = 'tmhmm';
-       }
-       @TMHMM_PARAMS=qw(PROGRAM VERBOSE);
-       foreach my $attr ( @TMHMM_PARAMS)
-                        { $OK_FIELD{$attr}++; }
+    $PROGRAMNAME = 'tmhmm'  . ($^O =~ /mswin/i ?'.exe':'');       
+    @TMHMM_PARAMS=qw(PROGRAM VERBOSE NOPLOT);
+    foreach my $attr ( @TMHMM_PARAMS)
+    { $OK_FIELD{$attr}++; }
 }
 
 =head2 program_name
@@ -101,7 +91,7 @@ BEGIN {
 =cut
 
 sub program_name {
-    return 'tmhmm';
+    return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -115,7 +105,7 @@ sub program_name {
 =cut
 
 sub program_dir {
-    return Bio::Root::IO->catfile($ENV{TMHMMDIR});
+    return $ENV{TMHMMDIR} || '';
 }
 
 sub AUTOLOAD {
@@ -176,12 +166,11 @@ sub predict_protein_features{
 
 =cut
 
-sub run{
+sub run {
     my ($self,$seq) = @_;
     my @feats;
 
-    if (ref($seq) ) {# it is an object
-
+    if (ref($seq) ) {		# it is an object
         if (ref($seq) =~ /GLOB/) {
             $self->throw("cannot use filehandle");
         }
@@ -190,25 +179,21 @@ sub run{
 
         $self->_input($infile1);
 
-         @feats = $self->_run();
-          unlink $infile1;
+	@feats = $self->_run();
+	unlink $infile1;
 
     }
     else {
-        #The clone object is not a seq object but a file.  Perhaps
-        #should check here or before if this file is fasta format...if
-        #not die Here the file does not need to be created or
-        #deleted. Its already written and may be used by other
-        #runnables.
+        # The clone object is not a seq object but a file.  Perhaps
+        # should check here or before if this file is fasta format...if
+        # not die Here the file does not need to be created or
+        # deleted. Its already written and may be used by other
+        # runnables.
 
         $self->_input($seq);
-
-         @feats = $self->_run();
-
+	@feats = $self->_run();
     }
-
     return @feats;
-
 }
 
 
@@ -245,7 +230,11 @@ sub _run {
      my ($self)= @_;
 
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $str =$self->executable." ".$self->_input." > ".$outfile;
+     my $str = $self->executable;
+     if( $self->NOPLOT ) {
+	 $str .= " --noplot";
+     }
+     $str .= " ".$self->_input." > ".$outfile;
      my $status = system($str);
      $self->throw( "Tmhmm call ($str) crashed: $? \n") unless $status==0;
 

@@ -236,10 +236,16 @@ sub version {
     my $exe;
     return undef unless $exe = $self->executable;
     # this is a bit of a hack, but MAFFT is just a gawk script
-    if( open(NAME, "grep 'MAFFT version' $exe |") ) {
-	if( <NAME> =~ /MAFFT\s+version\s+([\d.]+)/ ) {
-	    return $1;
+    # so we are actually grepping the scriptfile
+    if( open(NAME, "grep 'export version' $exe | ") ) {
+	while(<NAME>) {
+	    if( /version\s+([\d.]+)\s+/ ) {
+		return $1;
+	    }
 	}
+	close(NAME);
+    } else {
+	warn("$!");
     }
     return undef;
 }
@@ -432,7 +438,8 @@ sub _setparams {
     my $outputstr = " 1>$outfile" ;
 
     if ($self->quiet() || $self->verbose < 0) { 
-	$outputstr .= ' 2>/dev/null';
+	$param_string .= " --quiet";
+	$outputstr .= ' 2> /dev/null';
     }
     return ($param_string, $outputstr);
 }
