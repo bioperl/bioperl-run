@@ -197,8 +197,13 @@ sub version {
     return undef unless $self->executable;
     my $prog = $self->executable;
     my $string = `$prog -version`;
-    $string =~ /(Version *)/i;
-    return $1 || undef;
+    if( $string =~ /Version:\s+\$Name$/ ) {
+	return $1;
+    } elsif( $string =~ /(Version *)/i ) {
+	return $1;
+    } else { 
+	return undef;
+    }
 }
 
 =head2 predict_genes
@@ -286,7 +291,6 @@ sub _run {
     $self->debug("genewise command = $commandstring");
     my $status = system("$commandstring > $outfile1");
     $self->throw("Genewies call $commandstring crashed: $? \n") unless $status==0;
-
     
     my $genewiseParser = Bio::Tools::Genewise->new(-file=> $outfile1);
     my @genes;
