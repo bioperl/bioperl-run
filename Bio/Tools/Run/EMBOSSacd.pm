@@ -117,11 +117,14 @@ BEGIN {
 
     %QUALIFIER_CATEGORIES = 
 	(
-	 'Mandatory qualifiers' => 'mandatory',
-	 'Optional qualifiers' => 'optional',
-	 'Advanced qualifiers' => 'advanced',
-	 'Associated qualifiers' => 'associated',
-	 'General qualifiers' => 'general'
+	 'Mandatory qualifiers'            => 'mandatory',
+	 'Standard (Mandatory) qualifiers' => 'mandatory',
+	 'Optional qualifiers'             => 'optional',
+	 'Additional (Optional) qualifiers'=> 'optional',
+	 'Advanced qualifiers'             => 'advanced',
+	 'Advanced (Unprompted) qualifiers'=> 'advanced',
+	 'Associated qualifiers'           => 'associated',
+	 'General qualifiers'              => 'general',
 	);
     $QUAL;			# qualifier category
 
@@ -156,17 +159,16 @@ sub new {
     # reset global hash
     %OPT = ();
 
-    my $version = `embossversion`;
+    my $version = `embossversion -auto`;
     my $file;
     if ($version lt "2.8.0") {
-		 # reading from EMBOSS program acdc stdout (prior to version 2.8.0)
-       $file = `acdc $prog -help -verbose -acdtable 2>&1`;
+	# reading from EMBOSS program acdc stdout (prior to version 2.8.0)
+	$file = `acdc $prog -help -verbose -acdtable 2>&1`;
+    } else {
+	# reading from EMBOSS program acdtable stdout (version 2.8.0 or greater)
+	$file = `acdtable $prog -help -verbose 2>&1`;
     }
-    else {
-		 # reading from EMBOSS program acdtable stdout (version 2.8.0 or greater)
-		 $file = `acdtable $prog -help -verbose 2>&1`;
-    }
-
+    
     # converting HTML -> XHTML for XML parsing
     $file =~ s/(border)/$1="1"/;
     $file =~ s/=(\d+)/="$1"/g;
@@ -174,12 +176,12 @@ sub new {
     $file =~ s/&nbsp;//g;
 
     my $t = new XML::Twig( TwigHandlers =>
-									{
-									 '/table/tr' => \&_row  }
-								 );
-
+			   {
+			       '/table/tr' => \&_row  }
+			   );
+    
     $t->parse( $file); # results written into global %OPT
-
+    
     my %acd = %OPT; # copy to a private hash
     $acd{'_name'} = $prog;
     bless \%acd, $class;
@@ -195,6 +197,9 @@ sub _row {
     my $namet = $name->text;
     if ($namet =~ /qualifiers$/) { # set category
 	$QUAL = $QUALIFIER_CATEGORIES{$namet};
+	if( ! defined $QUAL ) { 
+	    warn("-- namet is $namet\n");
+	}
 	return;
     }
     my $unnamed = 0;
@@ -277,8 +282,9 @@ sub mandatory {
     my %mand;
     foreach my $key (keys %{$self}) {
 	next unless $key =~ /^-/; #ignore other attributes
+
 	$mand{$key} = $self->{$key}
-	    if $self->{$key}{category} eq 'mandatory';
+	if $self->{$key}{category} eq 'mandatory';
     }
     bless \%mand;
 }

@@ -47,7 +47,7 @@ ok(1);
 ## total number of tests that will be run.
 
 my $factory = new Bio::Factory::EMBOSS(-verbose => $verbose);
-
+my $version = $factory->version;
 ok($factory);
 
 my $compseqapp = $factory->program('compseq');
@@ -87,12 +87,29 @@ $in = new Bio::SeqIO(-format => 'fasta',
 while( my $s = $in->next_seq) {
     push @amino, $s;
 }
-$water->run({ '-sequencea' => $seq,
-	      '-seqall'    => \@amino,
-	      '-gapopen'   => '10.0',
-	      '-gapextend' => '0.5',
-	      '-outfile'   => $wateroutfile});
 
+my %expected;
+if( $version ge '3.0.0' ) {
+    $water->run({ '-asequence' => $seq,
+		  '-bsequence'    => \@amino,
+		  '-gapopen'   => '10.0',
+		  '-gapextend' => '0.5',
+		  '-outfile'   => $wateroutfile});
+    %expected = ( 'alnlen' => 394,
+		  'opid'    => '30.71',
+		  'apid'    => '40.20');
+		  
+} else {
+    $water->run({ '-sequencea' => $seq,
+		  '-seqall'    => \@amino,
+		  '-gapopen'   => '10.0',
+		  '-gapextend' => '0.5',
+		  '-outfile'   => $wateroutfile});
+    %expected = ( 'alnlen' => 339,
+		  'opid'    => '33.04',
+		  'apid'    => '40.58');
+
+}
 ok(-e $wateroutfile);
 
 my $alnin = new Bio::AlignIO(-format => 'emboss',
@@ -109,9 +126,11 @@ my ($first) = $aln->each_seq();
 ok($first->seq(), 'SCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGE');
 $aln = $alnin->next_aln;
 ok($aln);
-ok($aln->length, 339);
-ok(sprintf("%.2f",$aln->overall_percentage_identity), 33.04);
-ok(sprintf("%.2f",$aln->average_percentage_identity), 40.58);
+
+ok($aln->length, $expected{'alnlen'});
+ok(sprintf("%.2f",$aln->overall_percentage_identity), $expected{'opid'});
+ok(sprintf("%.2f",$aln->average_percentage_identity), $expected{'apid'});
+
 
 my $cons = $factory->program('cons');
 $cons->verbose(0);
@@ -120,17 +139,21 @@ $in = new Bio::AlignIO(-format => 'msf',
 							 'data',
 							 'cysprot.msf'));
 my $aln2 = $in->next_aln;
-$cons->run({ '-msf'   => $aln2,
-	     '-outseq'=> $consoutfile});
-
+if( $version ge '3.0.0' ) {
+    $cons->run({ '-sequence' => $aln2,
+		 '-outseq'   => $consoutfile});
+} else {
+    $cons->run({ '-msf'   => $aln2,
+		 '-outseq'=> $consoutfile});
+}
 ok(-e $consoutfile);
 
 
 # testing acd parsing and EMBOSSacd methods
 
 $compseqapp = $factory->program('compseq');
-exit unless $compseqapp->acd;
 
+exit unless $compseqapp->acd;
 ok my $acd = $compseqapp->acd;
 ok $compseqapp->acd->name, 'compseq';
 ok my $compseq_mand_acd = $compseqapp->acd->mandatory;
