@@ -89,7 +89,7 @@ while( my $s = $in->next_seq) {
 }
 
 my %expected;
-if( $version ge '3.0.0' ) {
+if( $version ge '2.8.0' ) {
     $water->run({ '-asequence' => $seq,
 		  '-bsequence'    => \@amino,
 		  '-gapopen'   => '10.0',
@@ -139,7 +139,7 @@ $in = new Bio::AlignIO(-format => 'msf',
 							 'data',
 							 'cysprot.msf'));
 my $aln2 = $in->next_aln;
-if( $version ge '3.0.0' ) {
+if( $version ge '2.8.0' ) {
     $cons->run({ '-sequence' => $aln2,
 		 '-outseq'   => $consoutfile});
 } else {
