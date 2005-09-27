@@ -197,7 +197,7 @@ sub version {
     return undef unless $self->executable;
     my $prog = $self->executable;
     my $string = `$prog -version`;
-    if( $string =~ /Version:\s+\$Name$/ ) {
+    if( $string =~ /Version:\s+\$\s*Name:\s+(\S+)\s+\$/ ) {
 	return $1;
     } elsif( $string =~ /(Version *)/i ) {
 	return $1;

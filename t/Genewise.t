@@ -30,8 +30,8 @@ my @params = ('-verbose' => $verbose,
 	      'quiet' => 1);
 
 my  $factory = Bio::Tools::Run::Genewise->new(@params);
-#$factory->executable("/usr/local/bin/genewise");
 my $version = $factory->version;
+
 ok $factory->isa('Bio::Tools::Run::Genewise');
 unless ($factory->executable) {
    warn("Genewise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
@@ -63,10 +63,9 @@ ok($seqid, 'HSHNRNPA');
 my ($featpair)= $feat[0]->each_tag_value('supporting_feature');
 ok($featpair->feature2->seq_id,'roa1_drome');
 ok($featpair->feature1->seq_id,'HSHNRNPA');
-
 if( defined $version && $version eq 'wise2-2-0' ) {
     ok($transcripts[0]->start, 1386);
-    ok($transcripts[0]->end, 4304);
+    ok($transcripts[0]->end, 3963);
     ok($feat[0]->start, 1386);
     ok($feat[0]->end, 1493);
     ok($feat[0]->strand,1);
