@@ -25,7 +25,6 @@ my $verbose = $ENV{'BIOPERLDEBUG'} ? 1 : 0;
 my @params=("species" => "mammal","noint"=>1, 'qq' => 1, '-verbose' => $verbose);
 my $fact = Bio::Tools::Run::RepeatMasker->new(@params);
 $fact->quiet(1);
-$fact->executable("$HOME/src/R3.0.8/RepeatMasker-3_0_8");
 if( ! $fact->executable ) { 
     warn("RepeatMasker program not found. Skipping tests $Test::ntest to $NTESTS.\n");
 
