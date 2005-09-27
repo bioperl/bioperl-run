@@ -6,7 +6,7 @@
 
 use strict;
 
-use constant NUMTESTS => 7;
+use constant NUMTESTS => 8;
 
 BEGIN {
     eval { require Test; };
@@ -48,4 +48,5 @@ $args = $primer3->arguments;
 ok($$args{'PRIMER_SEQUENCE_ID'}, "(string, optional) an id. Optional. Note must be present if PRIMER_FILE_FLAG is set");
 ok $primer3->add_targets('PRIMER_SEQUENCE_ID'=>'test seq');
 ok $results = $primer3->run;
-ok( $num_results = $results->number_of_results,4);
+ok( $num_results = $results->number_of_results,5);
+ok( $results->{input_options}->{PRIMER_SEQUENCE_ID} eq 'test seq');
