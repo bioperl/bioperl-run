@@ -924,19 +924,20 @@ sub _parse_mcl {
   my $i =-1;
   my $start;
   my (@cluster,@out);
-  while(<MCL>){
-    if ($start) {
-      chomp($_);
-      $cluster[$i] = join(" ",$cluster[$i],"$_");
-    }
-    if(/^\d+/){
-      $start = 1;
-      $i++;
-      $cluster[$i] = join(" ",$cluster[$i] || '',"$_");
-    }
-    if (/\$$/){
-      $start = 0;
-    }
+  while(<MCL>) {
+      if ($start) {
+	  chomp($_);
+	  $cluster[$i] = join(" ",$cluster[$i],"$_");
+      }
+      if(/^\d+/){
+	  $start = 1;
+	  $i++;
+	  $cluster[$i] = join(" ",$cluster[$i] || '',"$_");
+      }
+      if (/\$$/){
+	  $start = 0;
+      }
+      last if /^\(mclruninfo/;
   }
   open (IND,$ind) || $self->throw("Cannot open $ind for parsing");
   my %hash;
