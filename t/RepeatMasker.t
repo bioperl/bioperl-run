@@ -1,6 +1,6 @@
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
-
+# $Id$
 
 use strict;
 BEGIN {
@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 8;
+    $NTESTS = 10;
     plan tests => $NTESTS;
 }
 use Bio::Tools::Run::RepeatMasker;
