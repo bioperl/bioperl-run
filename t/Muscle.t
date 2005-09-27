@@ -26,7 +26,7 @@ use POSIX;
 
 END {     
     for ( $Test::ntest..$NUMTESTS ) {
-	skip("Muscle program not found. Skipping.\n",1);
+	skip("Muscle program not found. Skipping.",1);
     }
 }
 
@@ -63,7 +63,8 @@ my $seq_array_ref = \@seq_array;
 $aln = $factory->align($seq_array_ref);
 ok $aln->no_sequences, 7;
 my $s1_perid = POSIX::ceil($aln->average_percentage_identity);
-ok($s1_perid, 43);
+ok($s1_perid == 43 || $s1_perid == 44, 1,
+   'diff versions of MUSCLE have different vals');
 
 my $cwd = cwd;
 my $logfile = Bio::Root::IO->catfile($cwd,'muscle.log');
@@ -84,11 +85,14 @@ ok($factory->log, $logfile,'log file');
 $aln = $factory->align($seq_array_ref);
 ok $aln->no_sequences, 7;
 $s1_perid = POSIX::ceil($aln->average_percentage_identity);
-ok($s1_perid, 43);
+ok($s1_perid == 43 || $s1_perid == 44, 1,
+   'diff versions of MUSCLE have different vals');
 
 
 $inputfilename = Bio::Root::IO->catfile("t","data","cysprot1a.fa");
 $aln = $factory->align($inputfilename);
 ok $aln->no_sequences, 3;
 $s1_perid = POSIX::ceil($aln->average_percentage_identity);
-ok($s1_perid, 41);
+
+ok($s1_perid == 41 || $s1_perid == 42, 1,
+   'diff versions of MUSCLE have different vals');
