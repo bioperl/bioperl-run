@@ -5,6 +5,19 @@ use Bio::Root::AccessorMaker ('$'=>[qw(jar class min_version)]);
 
 our @ISA=qw(Bio::Tools::Run::AbstractRunner);
 
+=head1 new
+
+ Title   : new
+ Usage   : $runner = Bio::Tools::Run::JavaRunner->new(-jar => $jar)
+ Function: Builds a new Bio::Tools::Run::JavaRunner object
+ Returns : Bio::Tools::Run::JavaRunner
+ Args    : -jar => $path to jarfile
+             OR
+           -class => $classfile name        
+           -min_version => $versionstring 
+
+=cut
+
 
 sub _initialize {
     my ($self, @args)=@_;
@@ -25,7 +38,7 @@ sub _run_java {
     my $program;
     if(defined $self->jar){
         $program = "-jar ". $self->jar;
-    }elsif(defined $self->class){
+    } elsif(defined $self->class){
         $program = $self->class;
     }else{
         $self->throw('Neither jar nor class is assigned');
@@ -42,14 +55,17 @@ __END__
 
 =head1 NAME
 
-Bio::Tools::Run::JavaRunner
+Bio::Tools::Run::JavaRunner - run java programs
 
 =head1 SYNOPSIS
 
-
+   my $runner = Bio::Tools::Run::JavaRunner->new(-jar => $jar);
+   $runner->run();
 
 =head1 DESCRIPTION
 
+This module is probably incomplete.  It is intended to be a wrapper
+for running java programs.
 
 =head1 AUTHOR
 
