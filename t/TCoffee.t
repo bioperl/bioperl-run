@@ -27,6 +27,7 @@ END {
     for ( $Test::ntest..$NUMTESTS ) {
 	skip("TCoffee program not found. Skipping.\n",1);
     }
+    unlink("t_coffee.log");
 }
 
 ok(1);

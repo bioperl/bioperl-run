@@ -28,6 +28,7 @@ END {
     for ( $Test::ntest..$NUMTESTS ) {
 	skip("Muscle program not found. Skipping.",1);
     }
+	unlink('muscle.log', 'muscle.out');
 }
 
 ok(1);
