@@ -129,7 +129,7 @@ if( $version <= 1.22 ) {
     my $overall = int $aln->overall_percentage_identity;
     ok($overall == 14 || $overall == 13,1,'expect 13 or 14');
     my $avg = int($aln->average_percentage_identity);
-    ok($avg,41);    
+    ok($avg == 41 || $avg == 42, 1, 'expect 41 or 42');    
 }
 
 $aln = $factory->run('-type' => 'align',
