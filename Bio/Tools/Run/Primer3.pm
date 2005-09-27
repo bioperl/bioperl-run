@@ -431,14 +431,15 @@ sub run {
 
 	my @results;
 	while (<RESULTS>) {
-		if ($self->{'_outfilename'}) {
-			# this should work, but isn't
-			#$self->{output}->_print($_);
-			print OUT $_;
-		}
-		chomp;
-		my ($return, $value) = split('=',$_);
-		$self->{'results'}->{$return} = $value;
+	    if ($self->{'_outfilename'}) {
+		# this should work, but isn't
+		#$self->{output}->_print($_);
+		print OUT $_;
+	    }
+	    chomp;
+	    next if( $_ eq '='); # skip over bolderio record terminator
+	    my ($return, $value) = split('=',$_);
+	    $self->{'results'}->{$return} = $value;
 	}
 	close RESULTS;
 
@@ -452,6 +453,11 @@ sub run {
 	$self->{results_obj} = new Bio::Tools::Primer3;
 	$self->{results_obj}->_set_variable('results', $self->{results});
 	$self->{results_obj}->_set_variable('seqobject', $self->{seqobject});
+
+        # Bio::Tools::Primer3::_separate needs a hash of the primer3 arguments,
+ 	# with the arg as the key and the value as the value (surprise!).
+ 	my %input_hash = map {split '='} @{$self->{'primer3_input'}};
+ 	$self->{results_obj}->_set_variable('input_options', \%input_hash);
 	$self->{results_separated}= $self->{results_obj}->_separate();
 	return $self->{results_obj};
 }
