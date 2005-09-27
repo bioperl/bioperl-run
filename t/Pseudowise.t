@@ -30,8 +30,8 @@ my $verbose = -1;
 my @params = ('erroroffstd'=>1,'-verbose' => $DEBUG, 
 	      quiet => $DEBUG);
 my  $factory = Bio::Tools::Run::Pseudowise->new(@params);
+ok($factory);
 my $executable = $factory->executable;
-ok($executable);
 if( ! $executable ) {
     warn("Pseudowise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
     exit 0;
