@@ -95,7 +95,7 @@ unless ($protdist_present) {
 $dist_factory->verbose($verbose);
 ($matrix) = $dist_factory->create_distance_matrix($inputfilename);
 
-ok($matrix->get_entry('ENSP000003','SINFRUP001'),0.27708);
+ok(sprintf("%.3f", $matrix->get_entry('ENSP000003','SINFRUP001')),0.277);
 
 $inputfilename = Bio::Root::IO->catfile("t","data","cysprot.fa");
 @params = ('ktuple' => 2, 'matrix' => 'BLOSUM', 
