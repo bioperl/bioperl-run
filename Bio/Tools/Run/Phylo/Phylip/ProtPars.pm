@@ -418,9 +418,10 @@ sub _setparams {
 
     $self = shift;
     my $param_string = "";
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'PROTPARS'}};
+    
+    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'PROTPARS'}};
 
-	  for $attr ( @PROTPARS_PARAMS) {
+    for $attr ( @PROTPARS_PARAMS) {
         $value = $self->$attr();
         next unless (defined $value);
 	      if ($attr =~/JUMBLE/i){
