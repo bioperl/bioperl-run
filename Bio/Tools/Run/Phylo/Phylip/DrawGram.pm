@@ -492,7 +492,7 @@ sub _setparams {
 
  Title   : cleanup
  Usage   : $codeml->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory after a DrawGram run
  Returns : none
  Args    : none
 

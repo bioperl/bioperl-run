@@ -507,7 +507,7 @@ sub _setparams {
 
  Title   : cleanup
  Usage   : $codeml->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory after a DrawTree run
  Returns : none
  Args    : none
 

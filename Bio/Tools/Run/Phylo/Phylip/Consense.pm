@@ -601,7 +601,7 @@ sub _setparams {
 
  Title   : cleanup
  Usage   : $codeml->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory after a Consense run
  Returns : none
  Args    : none
 
