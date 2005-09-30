@@ -74,7 +74,7 @@ if( defined $version && $version eq 'wise2-2-0' ) {
     ok($featpair->feature2->strand,1);
     ok($featpair->feature2->score,'253.10');
     ok($featpair->feature1->start,1386);
-    ok($featpair->feature1->end,1497);
+    ok($featpair->feature1->end,1493);
     ok($featpair->feature1->strand,1);
     ok($featpair->feature1->score,'253.10');
 } else {
