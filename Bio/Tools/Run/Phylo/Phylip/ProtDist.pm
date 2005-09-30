@@ -54,8 +54,7 @@ L<Bio::SimpleAlign> object and returns a L<Bio::Matrix::PhylipDist> object;
 VERSION Support
 
 This wrapper currently supports v3.5 of phylip. There is also support
-for v3.6 although this is still experimental as v3.6 is still under
-alpha release and not all functionalities maybe supported.
+for v3.6.
 
 =head1 PARAMETERS FOR PROTDIST COMPUTATION
 
@@ -78,6 +77,10 @@ Description	: (optional)
  		  documentation 
                   defaults to Equal
  		  (0.25,0.25,0.25,0.25) found in the phylip package.
+
+                  Additional models in PHYLIP 3.6
+                  PMB - Henikoff/Tillier PMB matrix
+	          JTT - Jones/Taylor/Thornton
 
 =head2 MULTIPLE
 

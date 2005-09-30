@@ -89,7 +89,7 @@ use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 BEGIN {
     %DEFAULT = ( 
-     'VERSION'   => $ENV{'PHYLIPVERSION'} || '3.5',
+     'VERSION'   => $ENV{'PHYLIPVERSION'} || '3.6',
 		 );
     %FILENAME = %Bio::Tools::Run::Phylo::Phylip::PhylipConf::FileName;
 }
