@@ -31,7 +31,7 @@ my @params = ('-verbose' => $verbose,
 
 my  $factory = Bio::Tools::Run::Genewise->new(@params);
 my $version = $factory->version;
-
+warn("version is $version\n");
 ok $factory->isa('Bio::Tools::Run::Genewise');
 unless ($factory->executable) {
    warn("Genewise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
@@ -74,7 +74,7 @@ if( defined $version && $version eq 'wise2-2-0' ) {
     ok($featpair->feature2->strand,1);
     ok($featpair->feature2->score,'253.10');
     ok($featpair->feature1->start,1386);
-    ok($featpair->feature1->end,1493);
+    ok($featpair->feature1->end,1497);
     ok($featpair->feature1->strand,1);
     ok($featpair->feature1->score,'253.10');
 } else {
@@ -83,16 +83,16 @@ if( defined $version && $version eq 'wise2-2-0' ) {
     ok($transcripts[0]->end, 4304);
 
     ok($feat[0]->start, 1386);
-    ok($feat[0]->end, 1497);
+    ok($feat[0]->end, 1493);
     ok($feat[0]->strand,1);
     ok($featpair->feature2->start,26);
-    ok($featpair->feature2->end,62);
+    ok($featpair->feature2->end,61);
     ok($featpair->feature2->strand,1);
-    ok($featpair->feature2->score,'271.50');
+    ok($featpair->feature2->score,'319.10');
     ok($featpair->feature1->start,1386);
-    ok($featpair->feature1->end,1496);
+    ok($featpair->feature1->end,1493);
     ok($featpair->feature1->strand,1);
-    ok($featpair->feature1->score,'271.50');
+    ok($featpair->feature1->score,'319.10');
 
 }
 
