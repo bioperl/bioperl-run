@@ -63,7 +63,10 @@ package Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 use strict;
 
-use vars qw(%Menu %FileName);
+use vars qw(%Menu %FileName $RESOLUTIONX $RESOLUTIONY);
+
+$RESOLUTIONX = 300;
+$RESOLUTIONY = 300;
 
 %FileName = (
               "3.5"=>{'OUTFILE'=>'outfile',
@@ -180,6 +183,42 @@ use vars qw(%Menu %FileName);
 	     'JUMBLE'   =>"J\n",
 	     'OUTGROUP' =>"O\n",
 	     'SUBMIT'   =>"Y\n",
+	 },
+	 'DRAWGRAM' => {
+	     'SCALE'             => "R\n",
+	     'HORIZONTALMARGINS' => "M\n",
+	     'VERTICALMARGINS'   => "M\n",
+	     
+	     'SCREEN' => { 
+		 'Y|YES|1' => "V\nX\n",
+		 'N|NO|0'  => "V\nN\n",
+	     },
+	     
+	     'PLOTTER' => {
+		 'P|POSTSCRIPT'     => "P\nL\n",
+		 'PICT'             => "P\nM\n",
+		 "HP|PCL|LaserJect" => "P\nJ\n", 
+		 "BMP"              => "P\nW\n$RESOLUTIONX\n$RESOLUTIONY",
+		 "FIG"              => "P\nF\n",
+		 "IDRAW"            => "P\nA\n",
+		 "VRML"             => "P\nZ\n",
+		 "PCX"              => "P\nP\n3\n",		 
+	     },
+	     'ANCESTRAL'  => {
+		 'I|INTER|INTERMEDIETE' => "A\nI\n",
+		 'W|WEIGHTED'           => "A\nW\n",
+		 'C|CENT|CENTERED'      => "A\nC\n",
+		 'N|INNER|INNERMOST'    => "A\nN\n",
+		 'V'                    => "A\nV\n",
+	     },
+	     'STYLE' => {
+		 'CLAD|CLADOGRAM'      => "S\nC\n",
+		 'PHEN|PHENOGRAM'      => "S\nP\n",
+		 'V|CURV|CURVOGRAM'    => "S\nV\n",
+		 'E|EURO|EUROGRAM'     => "S\nE\n",
+		 'S|SWOOP|SWOOPOGRAM'  => "S\nS\n",
+		 'C|CIRC|O|CIRCULAR'   => "S\nO\n",		 
+	     }
 	 },
 	 'SEQBOOT'=>{   
 	     'DATATYPE' => {

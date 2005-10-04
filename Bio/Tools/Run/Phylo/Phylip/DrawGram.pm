@@ -40,21 +40,14 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via
-email or the web:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bioperl.org
   http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Jason Stajich
 
-Email jason@bioperl.org
-
-Describe contact details here
-
-=head1 CONTRIBUTORS
-
-Additional contributors names and emails here
+Email jason-at-bioperl.org
 
 =head1 APPENDIX
 
@@ -335,106 +328,36 @@ sub _setparams {
     my $param_string = "";
     my $cat = 0;
     my ($hmargin,$vmargin);
+    
+    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'DRAWGRAM'}};
+
     foreach  my $attr ( @DRAW_PARAMS) {	
 	$value = $self->$attr();
-
 	$attr = uc($attr);
+	if( ! exists $menu{$attr} ) {
+	    $self->warn("unknown parameter $attr, known params are ", 
+			join(",",keys %menu), "\n");
+	}
+	if( ! ref ($menu{$attr}) =~ /HASH/i ) {
+	    $param_string .= $menu{$attr} . $value . "\n";
+	}
 	next unless (defined $value);
-	if ($attr eq 'PLOTTER' ||
-	    $attr eq 'SCREEN' ) {
-	    # take first char of the input
-	    $param_string .= uc(substr($value,0,1))."\n";
-	    next;
-	} elsif( $attr eq 'TREEDIR' ) { # tree direction
-	    if( $value =~ /^H/i ) {
-		$param_string .= "1\n";
-	    }
-	} elsif( $attr eq 'TREESTYLE' ) {
-	    my $add = "2\n";
-	    if( $value =~ /clad/i || uc(substr($value,0,1)) eq 'C'  ) {
-		$add .= "C\n";
-	    } elsif( $value =~ /phen/i || uc(substr($value,0,1)) eq 'P' ) {
-		$add .= "P\n";
-	    } elsif( $value =~ /curv/i || uc(substr($value,0,1)) eq 'V' ) {
-		$add .= "V\n";
-	    } elsif( $value =~ /euro/i || uc(substr($value,0,1)) eq 'E' ) {
-		$add .= "E\n";
-	    } elsif( $value =~ /swoop/i || uc(substr($value,0,1)) eq 'S' ) {
-		$add .= "S\n";
-	    } else { 
-		$self->warn("Unknown requested tree output format $value\n");
-		next;
-	    }
-	    $param_string .= $add;
-	} elsif( $attr eq 'USEBRANCHLENS' ) {
-	    if( uc(substr($value,0,1)) eq 'N' || $value == 0 ) {
-		$param_string = "3\n";
-	    }
-	} elsif( $attr eq 'LABEL_ANGLE' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ||
-		$1 < 0 || $1 > 90 ) {
-		$self->warn("Expected a number from 0-90 in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "4\n$1\n";
-	} elsif( $attr eq 'HORIZMARGINS' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number in $attr\n"); 
-		next;
-	    }
-	    $hmargin = $1;
-	} elsif( $attr eq 'VERTICALMARGINS' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number in $attr\n"); 
-		next;
-	    }
-	    $vmargin = $1;
-	} elsif( $attr eq 'SCALE' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "6\n$1";
-	} elsif( $attr eq 'TREEDEPTH' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number from in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "7\n$1\n";
-	} elsif( $attr eq 'STEMLEN' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ||
-		 $1 < 0 || $1 >= 1 ) {
-		$self->warn("Expected a number from 0 to < 1 in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "8\n$1\n";
-	 } elsif( $attr eq 'TIPSPACE' ) {
-	     if( $value !~ /(\d+(\.\d+)?)/ ) {
-		 $self->warn("Expected a number from 0 to < 1 in $attr\n"); 
-		 next;
-	    }
-	    $param_string .= "9\n$1\n";
-	 } elsif( $attr eq 'ANCESTRALNODES' ) {
-	     if( $value !~ /^([IWCNV])/i ) {
-		 $self->warn("Unrecognized value $value for $attr, expected one of [IWCNV]\n");
-		 next;
-	     }
-	     $param_string .= "10\n$1\n";
-	 } elsif( $attr eq 'FONT' ) {	 
-	     $value =~ s/([\w\d]+)\s+/$1/g;
-	     $param_string .= "11\n$value\n";
-	 }
+	my $seen = 0;
+	for my $stype ( keys %{$menu{$attr}} ) {
+	    
+	    if( $value =~ /$stype/i ) {
+		$param_string .= $menu{$attr}->{$stype};
+		$seen = 1;
+		last;
+	    }		
+	}
+	unless( $seen ) {
+	    $self->warn("Unknown requested attribute $attr, $value is not known\n");
+	}
     }
-    if( $hmargin || $vmargin ) {
-	$hmargin ||= '.';
-	$vmargin ||= '.';
-	$param_string .= "5\n$hmargin\n$vmargin\n";
-    }
-
     $param_string .="Y\n";	
     return $param_string;
 }
-
 
 
 =head1 Bio::Tools::Run::Wrapper methods
