@@ -44,21 +44,14 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via
-email or the web:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bioperl.org
-  http://bugzilla.bioperl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Jason Stajich
 
-Email jason@bioperl.org
-
-Describe contact details here
-
-=head1 CONTRIBUTORS
-
-Additional contributors names and emails here
+Email jason-at-bioperl.org
 
 =head1 APPENDIX
 
@@ -89,7 +82,7 @@ use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 BEGIN {
     %DEFAULT = ( 
-     'VERSION'   => $ENV{'PHYLIPVERSION'} || '3.6',
+		 'VERSION'   => $ENV{'PHYLIPVERSION'} || '3.6',
 		 );
     %FILENAME = %Bio::Tools::Run::Phylo::Phylip::PhylipConf::FileName;
 }

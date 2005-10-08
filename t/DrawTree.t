@@ -40,7 +40,7 @@ ok($file);
 ok(-e $file);
 
 if( $DEBUG ) {
-    `gv $file`;
+    `gs $file`;
 } else { 
     unlink($file);
 }
@@ -53,7 +53,7 @@ ok($file);
 ok(-e $file);
 
 if( $DEBUG ) {
-    `gv $file`;
+    `gs $file`;
 } else { 
     unlink($file);
 }

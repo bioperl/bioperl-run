@@ -37,9 +37,8 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 
  Report bugs to the Bioperl bug tracking system to help us keep track
  the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+ the web:
 
-  bioperl-bugs@bio.perl.org
   http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Shawn Hoon
@@ -62,11 +61,14 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::Phylip::PhylipConf;
 
 use strict;
-
-use vars qw(%Menu %FileName $RESOLUTIONX $RESOLUTIONY);
+use Exporter;
+use vars qw(@ISA %Menu %FileName $RESOLUTIONX $RESOLUTIONY @EXPORT_OK);
+use base 'Exporter';
 
 $RESOLUTIONX = 300;
 $RESOLUTIONY = 300;
+
+@EXPORT_OK = qw(%FileName %Menu);
 
 %FileName = (
               "3.5"=>{'OUTFILE'=>'outfile',
@@ -186,14 +188,18 @@ $RESOLUTIONY = 300;
 	 },
 	 'DRAWGRAM' => {
 	     'SCALE'             => "R\n",
-	     'HORIZONTALMARGINS' => "M\n",
-	     'VERTICALMARGINS'   => "M\n",
-	     
+	     'HORIZMARGINS'      => "M\n%.2f\n%.2f\n",
+	     'VERTICALMARGINS'   => "M\n%.2f\n%.2f",	     
 	     'SCREEN' => { 
 		 'Y|YES|1' => "V\nX\n",
 		 'N|NO|0'  => "V\nN\n",
 	     },
-	     
+	     'FONT'         => "F\n%s\n",
+	     'PAGES'        => {
+		 'L|PAGES|SIZE'       => "#\nL\n%d\n%d\nM\n",
+		 'P|PHYSICAL'         => "#\nP\n%.4f\n%.4f\nM\n",
+		 'O|OVERLAP'          => "#\nO\n%.4f\n%.4f\nM\n",
+	     },
 	     'PLOTTER' => {
 		 'P|POSTSCRIPT'     => "P\nL\n",
 		 'PICT'             => "P\nM\n",
@@ -204,21 +210,66 @@ $RESOLUTIONY = 300;
 		 "VRML"             => "P\nZ\n",
 		 "PCX"              => "P\nP\n3\n",		 
 	     },
-	     'ANCESTRAL'  => {
+	     'ANCESTRALNODES'  => {
 		 'I|INTER|INTERMEDIETE' => "A\nI\n",
 		 'W|WEIGHTED'           => "A\nW\n",
 		 'C|CENT|CENTERED'      => "A\nC\n",
 		 'N|INNER|INNERMOST'    => "A\nN\n",
 		 'V'                    => "A\nV\n",
 	     },
-	     'STYLE' => {
-		 'CLAD|CLADOGRAM'      => "S\nC\n",
-		 'PHEN|PHENOGRAM'      => "S\nP\n",
+	     'TREESTYLE' => {
+		 'C|CLAD|CLADOGRAM'      => "S\nC\n",
+		 'P|PHEN|PHENOGRAM'      => "S\nP\n",
 		 'V|CURV|CURVOGRAM'    => "S\nV\n",
 		 'E|EURO|EUROGRAM'     => "S\nE\n",
 		 'S|SWOOP|SWOOPOGRAM'  => "S\nS\n",
-		 'C|CIRC|O|CIRCULAR'   => "S\nO\n",		 
-	     }
+		 'O|CIRC|CIRCULAR'   => "S\nO\n",		 
+	     },
+	     'TIPSPACE'      => "C\n%.4f\n",
+	     'STEMLEN'       => "T\n%.4f\n",
+	     'TREEDEPTH'     => "D\n%.4f\n",
+	     'LABEL_ANGLE'   => "L\n%.4f\n",
+	     'USEBRANCHLENS' => {
+		 '1|Y|YES'   => "",
+		 '0|N|NO'    => "B\n",
+	     },	 
+	 },
+	 'DRAWTREE' => {
+	     'SCREEN' => { 
+		 'Y|YES|1' => "V\nX\n",
+		 'N|NO|0'  => "V\nN\n",
+	     },	     
+	     'PLOTTER'           => {
+		 'L|P|POSTSCRIPT'     => "P\nL\n",
+		 'PICT'             => "P\nM\n",
+		 "HP|PCL|LaserJect" => "P\nJ\n", 
+		 "BMP"              => "P\nW\n$RESOLUTIONX\n$RESOLUTIONY",
+		 "FIG"              => "P\nF\n",
+		 "IDRAW"            => "P\nA\n",
+		 "VRML"             => "P\nZ\n",
+		 "PCX"              => "P\nP\n3\n",		 
+	     },
+	     'LABEL_ANGLE'       => {
+		 'F|FIXED'         => "L\nF\n%d\n",
+		 'R|RADIAL'        => "L\nR\n",
+		 'A|ALONG'         => "L\nA\n",
+		 'M|MIDDLE'        => "L\nM\n",
+	     },
+	     'ROTATION'            => "R\n%d\n",
+	     'ITERATE'             => {
+		 'E|EQUAL|DAYLIGHT' => "",
+		 'N|NBODY|N-BODY'   => "I\n",
+		 'NO|FALSE'         => "I\nI\n",		 
+	     },
+	     'TREEARC'             => "I\nI\nA\n%d\n",
+	     'SCALE'               => "S\n%.2f\n",	     
+	     'PAGES'        => {
+		 'L|PAGES|SIZE'       => "#\nL\n%d\n%d\nM\n",
+		 'P|PHYSICAL'         => "#\nP\n%.4f\n%.4f\nM\n",
+		 'O|OVERLAP'          => "#\nO\n%.4f\n%.4f\nM\n",
+	     },	     
+	     'HORIZMARGINS'      => "M\n%.2f\n%.2f\n",
+	     'VERTICALMARGINS'   => "M\n%.2f\n%.2f",
 	 },
 	 'SEQBOOT'=>{   
 	     'DATATYPE' => {

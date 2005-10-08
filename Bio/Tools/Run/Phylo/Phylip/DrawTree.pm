@@ -26,13 +26,20 @@ Bio::Tools::Run::Phylo::Phylip::DrawTree - use Phylip DrawTree program to draw t
 This is a module for automating drawing of trees through Joe
 Felsenstein's Phylip suite.
 
+To set parameters with option you need to pass in an array reference.
+For example to change the margines
+ $drawfact->HORIZMARGINS('
+
+This can be a brittle module as the menus change in PHYLIP.  It should
+support phylip 3.6 but no guarantees.
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
 
 User feedback is an integral part of the evolution of this and other
-Bioperl modules. Send your comments and suggestions preferably to
-the Bioperl mailing list.  Your participation is much appreciated.
+Bioperl modules. Send your comments and suggestions preferably to the
+Bioperl mailing list.  Your participation is much appreciated.
 
   bioperl-l@bioperl.org              - General discussion
   http://bioperl.org/MailList.shtml  - About the mailing lists
@@ -40,21 +47,14 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via
-email or the web:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bioperl.org
   http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Jason Stajich
 
-Email jason@bioperl.org
-
-Describe contact details here
-
-=head1 CONTRIBUTORS
-
-Additional contributors names and emails here
+Email jason-at-bioperl.org
 
 =head1 APPENDIX
 
@@ -75,11 +75,12 @@ use strict;
 
 use Bio::Tools::Run::Phylo::Phylip::Base;
 use Cwd;
-@ISA = qw( Bio::Tools::Run::Phylo::Phylip::Base );
-
 # inherit from Phylip::Base which has some methods for dealing with
 # Phylip specifics
-@ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
+
+@ISA = qw( Bio::Tools::Run::Phylo::Phylip::Base );
+
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 
 # You will need to enable the neighbor program. This
 # can be done in (at least) 3 ways:
@@ -96,9 +97,10 @@ use Cwd;
 # my $neighbor_factory = Bio::Tools::Run::Phylo::Phylip::DrawTree->new(@params)
 
 BEGIN {
-    %DEFAULT = ('PLOTTER' => 'L',
+    %DEFAULT = ('PLOTTER' => 'P',
 		'SCREEN'  => 'N');
-		
+    $DEFAULT{'FONTFILE'} = Bio::Root::IO->catfile($ENV{'PHYLIPDIR'},"font1") if $ENV{'PHYLIPDIR'};
+
     $PROGRAMNAME="drawtree";
     if (defined $ENV{'PHYLIPDIR'}) {
 	$PROGRAMDIR = $ENV{'PHYLIPDIR'} || '';
@@ -113,8 +115,6 @@ BEGIN {
     @DRAW_PARAMS = qw(PLOTTER SCREEN LABEL_ANGLE ROTATION TREEARC
 		      ITERATE SCALE 
 		      HORIZMARGINS VERTICALMARGINS
-		      CHARHEIGHT
-		      ENTHUSIASM
 		      FONT
 		      );
     @OTHER_SWITCHES = qw(QUIET);
@@ -126,7 +126,7 @@ BEGIN {
 =head2 program_name
 
  Title   : program_name
- Usage   : >program_name()
+ Usage   : $obj->program_name()
  Function: holds the program name
  Returns:  string
  Args    : None
@@ -134,7 +134,7 @@ BEGIN {
 =cut
 
 sub program_name {
-  return 'drawtree';
+  return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -341,6 +341,8 @@ sub _setinput {
 
 =cut
 
+
+
 sub _setparams {
     my ($attr, $value, $self);
 
@@ -349,107 +351,42 @@ sub _setparams {
     my $param_string = "";
     my $cat = 0;
     my ($hmargin,$vmargin);
+    my %menu = %{$Menu{$self->version}->{'DRAWGRAM'}};
     foreach  my $attr ( @DRAW_PARAMS) {	
 	$value = $self->$attr();
-
+	next unless defined $value;
+	my @vals;
+	if( ref($value) ) {
+	    ($value,@vals) = @$value;
+	}
 	$attr = uc($attr);
-	next unless (defined $value);
-	if ($attr eq 'PLOTTER' ||
-	    $attr eq 'SCREEN' ) {
-	    # take first char of the input
-	    $param_string .= uc(substr($value,0,1))."\n";
+	if( ! exists $menu{$attr} ) {
+	    $self->warn("unknown parameter $attr, known params are ". 
+			join(",",keys %menu). "\n");
+	}	
+	if( ref ($menu{$attr}) !~ /HASH/i ) {
+	    unless( @vals ) {
+		$param_string .= $menu{$attr};
+	    } else { 
+		$param_string .= sprintf($menu{$attr},$value,@vals);
+	    }
 	    next;
-	} elsif( $attr eq 'USEBRANCHLENS' ) {
-	    if( uc(substr($value,0,1)) eq 'Y' ||
-		uc(substr($value,0,1)) eq '1'
-		) {
-		$self->warn("Expected a number in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "1\n$1";	
-	} elsif( $attr eq 'LABEL_ANGLE' ) {
-	    if( $value !~ /([FRA])/i ) {
-		$self->warn("($attr)Expected value of one of F,R,A");
-		next;
-	    }
-	    my $a = $1;
-	    $param_string .= "2\n$a\n";
-	    if( $a eq 'F' ) {
-		my $angle = 0;
-		if( $value =~ /(\-?\d+(\.\d+)?)/ ) {		    
-		    $angle = $1;
-		    if( $angle >= 90 || $angle < -90 ) {
-			$self->warn("provided an angle which is too large ($angle) expected -90 <= $angle <= 90, setting it to 0");
-			$angle = 0;
-		    }
-		}
-		$param_string .= "$angle\n";
-	    }
-	} elsif( $attr eq 'ROTATION' ) {
-	    if( $value !~ /(\-?\d+(\.\d+)?)/ ||
-		$1 < -360 || $1 > 360 ) {
-		$self->warn("($attr)Expected a number between -360 and 360 $attr\n"); 
-		next;
-	    }
-	    $param_string = "3\n$1\n";
-	} elsif( $attr eq 'TREEARC' ) {
-	    if( $value !~ /(\-?\d+(\.\d+)?)/ ||
-		$1 <= 0 || $1 > 360 ) {
-		$self->warn("($attr)Expected a number between -360 and 360 $attr\n"); 
-		next;
-	    }
-	    $param_string = "4\n$1\n";
-	} elsif( $attr eq 'ITERATE' ) {
-	    if( uc(substr($value,0,1)) eq 'N' ||
-		substr($value,0,1) eq '0' ) {
-		$param_string .= "5\n";
-	    }
-	} elsif( $attr eq 'SCALE' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("($attr)Expected a number in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "6\n$1\n";
-	} elsif( $attr eq 'HORIZMARGINS' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("($attr)Expected a number in $attr\n"); 
-		next;
-	    }
-	    $hmargin = $1;
-	} elsif( $attr eq 'VERTICALMARGINS' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number in $attr\n"); 
-		next;
-	    }
-	    $vmargin = $1;
-	} elsif( $attr eq 'CHARHEIGHT' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "8\n$1";
-	} elsif( $attr eq 'ENTHUSIASM' ) {
-	    if( $value !~ /(\d+(\.\d+)?)/ ) {
-		$self->warn("Expected a number from in $attr\n"); 
-		next;
-	    }
-	    $param_string .= "9\n$1\n";
-
-	} elsif( $attr eq 'FONT' ) {	 
-	    $value =~ s/([\w\d]+)\s+/$1/g;
-	    $param_string .= "10\n$value\n";
+	}
+	my $seen = 0;
+	for my $stype ( keys %{$menu{$attr}} ) {	    
+	    if( $value =~ /$stype/i ) {		
+		$param_string .= sprintf($menu{$attr}->{$stype},@vals);	    
+		$seen = 1;
+		last;
+	    }		
+	}
+	unless( $seen ) {
+	    $self->warn("Unknown requested attribute $attr, $value is not known\n");
 	}
     }
-    if( $hmargin || $vmargin ) {
-	$hmargin ||= '.';
-	$vmargin ||= '.';
-	$param_string .= "5\n$hmargin\n$vmargin\n";
-    }
-
     $param_string .="Y\n";	
     return $param_string;
 }
-
 
 
 =head1 Bio::Tools::Run::Wrapper methods

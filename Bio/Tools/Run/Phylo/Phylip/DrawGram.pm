@@ -65,11 +65,9 @@ use vars qw($AUTOLOAD @ISA $PROGRAM $PROGRAMDIR $PROGRAMNAME
 	    $FONTFILE @DRAW_PARAMS @OTHER_SWITCHES
 	    %OK_FIELD %DEFAULT);
 use strict;
-
 use Bio::Tools::Run::Phylo::Phylip::Base;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 use Cwd;
-@ISA = qw( Bio::Tools::Run::Phylo::Phylip::Base );
-
 # inherit from Phylip::Base which has some methods for dealing with
 # Phylip specifics
 @ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
@@ -89,11 +87,12 @@ use Cwd;
 # my $neighbor_factory = Bio::Tools::Run::Phylo::Phylip::DrawGram->new(@params)
 
 BEGIN {
-    %DEFAULT = ('PLOTTER' => 'L',
+    %DEFAULT = ('PLOTTER' => 'P',
 		'SCREEN'  => 'N');
-  	$DEFAULT{'FONTFILE'} = Bio::Root::IO->catfile($ENV{'PHYLIPDIR'},"font1") if $ENV{'PHYLIPDIR'};
+    $DEFAULT{'FONTFILE'} = Bio::Root::IO->catfile($ENV{'PHYLIPDIR'},"font1") if $ENV{'PHYLIPDIR'};
+    $PROGRAMNAME = 'drawgram';
 
-    @DRAW_PARAMS = qw(PLOTTER SCREEN TREEDIR TREESTYLE USEBRANCHLENS
+    @DRAW_PARAMS = qw(PLOTTER SCREEN TREESTYLE USEBRANCHLENS
 		      LABEL_ANGLE HORIZMARGINS VERTICALMARGINS
 		      SCALE TREEDEPTH STEMLEN TIPSPACE ANCESTRALNODES
 		      FONT);
@@ -114,7 +113,7 @@ BEGIN {
 =cut
 
 sub program_name {
-  return 'drawgram';
+  return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -299,7 +298,7 @@ sub _setinput {
         #  Open temporary file for both reading & writing of BioSeq array
 	my $tfh;
 	($tfh,$treefile) = $self->io->tempfile(-dir=>$self->tempdir);
-	my $treeIO = Bio::TreeIO->new(-fh => $tfh, 
+	my $treeIO = Bio::TreeIO->new(-fh    => $tfh, 
 				      -format=>'newick');
 	$treeIO->write_tree($input);
 	$treeIO->close();
@@ -328,25 +327,31 @@ sub _setparams {
     my $param_string = "";
     my $cat = 0;
     my ($hmargin,$vmargin);
-    
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'DRAWGRAM'}};
-
+    my %menu = %{$Menu{$self->version}->{'DRAWGRAM'}};
     foreach  my $attr ( @DRAW_PARAMS) {	
 	$value = $self->$attr();
+	next unless defined $value;
+	my @vals;
+	if( ref($value) ) {
+	    ($value,@vals) = @$value;
+	}
 	$attr = uc($attr);
 	if( ! exists $menu{$attr} ) {
-	    $self->warn("unknown parameter $attr, known params are ", 
-			join(",",keys %menu), "\n");
+	    $self->warn("unknown parameter $attr, known params are ". 
+			join(",",keys %menu). "\n");
+	}	
+	if( ref ($menu{$attr}) !~ /HASH/i ) {
+	    unless( @vals ) {
+		$param_string .= $menu{$attr};
+	    } else { 
+		$param_string .= sprintf($menu{$attr},$value,@vals);
+	    }
+	    next;
 	}
-	if( ! ref ($menu{$attr}) =~ /HASH/i ) {
-	    $param_string .= $menu{$attr} . $value . "\n";
-	}
-	next unless (defined $value);
 	my $seen = 0;
-	for my $stype ( keys %{$menu{$attr}} ) {
-	    
-	    if( $value =~ /$stype/i ) {
-		$param_string .= $menu{$attr}->{$stype};
+	for my $stype ( keys %{$menu{$attr}} ) {	    
+	    if( $value =~ /$stype/i ) {		
+		$param_string .= sprintf($menu{$attr}->{$stype},@vals);	    
 		$seen = 1;
 		last;
 	    }		
