@@ -3,6 +3,7 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
+my $DBEUG = $ENV{'BIOPERLDEBUG'} || 0;
 BEGIN {
    eval { require Test; };
    if( $@ ) {
@@ -27,7 +28,8 @@ use Bio::AlignIO;
 use Bio::Seq;
 
 my $input =  Bio::Root::IO->catfile("t","data","Phrap.fa");
-my @params = (arguments=>'-penalty -3 -minmatch 15');
+my @params = (-verbose => $DBEUG,
+	      arguments=>'-penalty -3 -minmatch 15');
 
 my  $factory = Bio::Tools::Run::Phrap->new(@params);
 ok $factory->isa('Bio::Tools::Run::Phrap');
@@ -45,8 +47,9 @@ my $assembly = $factory->run($input);
 foreach my $contig($assembly->all_contigs){
   my $collection = $contig->get_features_collection;
   my @sf = $collection->get_all_features;
-  ok $sf[0]->start,601;
-  ok $sf[0]->end,963;
+  
+  ok $sf[1]->start, 601;
+  ok $sf[1]->end,   963;
 }
 
 
