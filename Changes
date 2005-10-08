@@ -1,6 +1,25 @@
 $Id$
 Revision history for Bioperl run modules
 
+1.5.1 Release in sync with bioperl core
+
+   o First major release in a while, so lots of things in this release
+
+   o PHYLIP wrappers are updated for PHYLIP 3.6, some programs will no
+     longer work (DrawTree and DrawGram specifically) for 3.5 at ths
+     point. It will depend on whether or not anyone really wants this
+     if we'll add in the necessary stuf to support 3.5.  It isn't
+     hard, just requires some stuff in th PhylipConf.pm modules.
+
+   o Bio::Tools::Run::Alignment::Muscle added
+
+   o PAML wrapper for Yn00 and Codeml are more forgiving about the
+     argument validation.
+
+   o Several wrappers updated for newer versions of the programs.
+     TribeMCL, Genewise, RepeatMasker
+  
+
 1.2.2 Release update in sync with bioperl core
 
     o Soaplab
