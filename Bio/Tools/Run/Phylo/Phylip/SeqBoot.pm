@@ -72,21 +72,24 @@ Description: (optional)
 
              3 different resampling methods are available:
 
-             BOOTSTRAP : creating a new  data  set  by  sampling  
-                         N  characters  randomly  with replacement
-                         The resulting data set has the same size as the original,
-                         but some characters have been left out and others are duplicated
+             BOOTSTRAP : creating a new data set by sampling N
+                         characters randomly with replacement The
+                         resulting data set has the same size as the
+                         original, but some characters have been left
+                         out and others are duplicated
 
-             JACKKNIFE : Delete-half-jackknifing. It involves sampling  
-                         a  random  half of the characters, and 
-                         including them in the data but dropping the others
-                         The resulting  data  sets  are  half  the  size  of  the
-                         original,  and  no  characters are duplicated.
+             JACKKNIFE : Delete-half-jackknifing. It involves sampling
+                         a random half of the characters, and
+                         including them in the data but dropping the
+                         others The resulting data sets are half the
+                         size of the original, and no characters are
+                         duplicated.
 
-             PERMUTE   : Permuting species within characters. It  involves  permuting  the
-                         columns  of  the data matrix separately.  This produces
-                         data matrices that have the same number and kinds of 
-                         characters but no taxonomic structure.
+             PERMUTE : Permuting species within characters. It
+                       involves permuting the columns of the data
+                       matrix separately.  This produces data matrices
+                       that have the same number and kinds of
+                       characters but no taxonomic structure.
 
              Defaults to BOOTSTRAP
 
@@ -95,10 +98,10 @@ Description: (optional)
   Title		: REPLICATES
   Description	: (optional)
 
-                This options allows the user to set the number  of  
-                replicate  data  sets. Most statisticians would be happiest 
-                with 1000 to 10,000 replicates in a bootstrap, 
-                but 100 gives a good rough picture
+                This options allows the user to set the number of
+                replicate data sets. Most statisticians would be
+                happiest with 1000 to 10,000 replicates in a
+                bootstrap, but 100 gives a good rough picture
 
                 Defaults to 100
 
@@ -107,9 +110,9 @@ Description: (optional)
 Title		:  ALLELES
 Description : (optional)
 
-            This option is to be used with gene frequencies datatype option
-            to specify  that all alleles at each locus are in the input
-            file.
+            This option is to be used with gene frequencies datatype
+            option to specify that all alleles at each locus are in
+            the input file.
 
 		  Defaults to NULL 
 
@@ -127,11 +130,10 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Shawn Hoon 
 
@@ -157,7 +159,7 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
-use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 use Bio::Matrix::PhylipDist;
 use Cwd;
 
@@ -438,7 +440,7 @@ sub _setparams {
     my $param_string = "";
     my $cat = 0;
     my $gene_freq = 0;
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu->{$self->version}->{'SEQBOOT'}};
+    my %menu = %{$Menu{$self->version}->{'SEQBOOT'}};
 
     foreach  my $attr ( @SEQBOOT_PARAMS) {
     	$value = $self->$attr();
