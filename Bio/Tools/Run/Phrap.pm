@@ -1,5 +1,6 @@
-# Wrapper  module for Phrap Bio::Tools::Run::Phrap
+# $Id$
 #
+# Phrap wraper module
 #
 # Cared for by Shawn Hoon
 #
@@ -11,10 +12,9 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phrap
+Bio::Tools::Run::Phrap - a wrapper for running Phrap
 
 =head1 SYNOPSIS
-
 
   use Bio::Tools::Run::Phrap;
   use Bio::SeqIO;
@@ -24,7 +24,7 @@ Bio::Tools::Run::Phrap
   while(my $seq = $sio->next_seq()){
     push @seq,$seq;
   }
-  my $prun = Bio::Tools::Run::Phrap->new(arguments=>'-penalty -3 -minmatch 10');
+  my $prun =Bio::Tools::Run::Phrap->new(arguments=>'-penalty -3 -minmatch 10');
   my $assembly = $prun->run(\@seq);
   foreach my $contig($assembly->all_contigs){
     my $collection = $contig->get_features_collection;
@@ -46,16 +46,15 @@ Bio::Tools::Run::Phrap
  Bioperl modules. Send your comments and suggestions preferably to one
  of the Bioperl mailing lists.  Your participation is much appreciated.
 
- bioperl-l@bioperl.org          - General discussion
- http://bio.perl.org/MailList.html             - About the mailing lists
+ bioperl-l@bioperl.org               - General discussion
+ http://bio.perl.org/MailList.html   - About the mailing lists
 
 =head2 Reporting Bugs
 
- Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
- bioperl-bugs@bioperl.org
  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Shawn Hoon
@@ -71,7 +70,7 @@ Bio::Tools::Run::Phrap
 
 package Bio::Tools::Run::Phrap;
 
-use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
+use vars qw($AUTOLOAD @ISA $PROGRAMDIR
             $PROGRAMNAME @PHRAP_PARAMS %OK_FIELD);
 use strict;
 use Bio::Assembly::IO;
@@ -80,18 +79,25 @@ use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
 use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase Bio::Factory::ApplicationFactoryI);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
+	  Bio::Factory::ApplicationFactoryI);
 
-BEGIN {
-       @PHRAP_PARAMS=qw(PENALTY GAP_INIT GAP_EXT INS_GAP_EXT DEL_GAP_EXT MATRIX RAW
-                        MINMATCH MAX_GROUP_SIZE WORD_RAW BANDWIDTH MINSCORE VECTOR_BOUND
-                        MASKLEVEL DEFAULT_QUAL SUBCLONE_DELIM N_DELIM GROUP_DELIM TRIM_START
-                        FORCELEVEL BYPASSLEVEL MAXGAP REPEAT_STRINGENCY REVISE_GREEDY SHATTER_GREEDY
-                        PREASSEMBLE FORCE_HIGH NODE_SEG NODE_SPACE RETAIN_DUPLICATES MAX_SUBCLONE_SIZE
-                        TRIM_PENALTY TRIM_SCORE TRIM_QUAL CONFIRM_LENGTH CONFIRM_TRIM CONFIRM_SCORE 
-                        INDEXWORDSIZE);
-       foreach my $attr ( @PHRAP_PARAMS)
-                       { $OK_FIELD{$attr}++; }
+BEGIN { 
+    $PROGRAMNAME= 'phrap';
+    @PHRAP_PARAMS=qw(PENALTY GAP_INIT GAP_EXT INS_GAP_EXT
+		     DEL_GAP_EXT MATRIX RAW MINMATCH MAX_GROUP_SIZE 
+		     WORD_RAW BANDWIDTH MINSCORE VECTOR_BOUND MASKLEVEL 
+		     DEFAULT_QUAL SUBCLONE_DELIM N_DELIM GROUP_DELIM TRIM_START
+		     FORCELEVEL BYPASSLEVEL MAXGAP REPEAT_STRINGENCY
+		     REVISE_GREEDYSHATTER_GREEDY PREASSEMBLE 
+		     FORCE_HIGH NODE_SEG NODE_SPACE RETAIN_DUPLICATES 
+		     MAX_SUBCLONE_SIZE TRIM_PENALTY TRIM_SCORE
+		     TRIM_QUAL CONFIRM_LENGTH CONFIRM_TRIM CONFIRM_SCORE
+		     INDEXWORDSIZE); 
+    
+    foreach my $attr ( @PHRAP_PARAMS) {
+	$OK_FIELD{$attr}++; 
+    } 
 }
 
 =head2 program_name
@@ -105,7 +111,7 @@ BEGIN {
 =cut
 
 sub program_name {
-    return 'phrap';
+    return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -119,8 +125,10 @@ sub program_name {
 =cut
 
 sub program_dir {
-    return Bio::Root::IO->catfile($ENV{PhrapDIR}) if $ENV{PhrapDIR};
+    return Bio::Root::IO->catfile($ENV{'PhrapDIR'}) if $ENV{'PhrapDIR'};
+    return $PROGRAMDIR; # you can then define this if you don't use env var
 }
+
 sub AUTOLOAD {
        my $self = shift;
        my $attr = $AUTOLOAD;
@@ -226,8 +234,9 @@ sub _run {
      my ($self)= @_;
 
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $param_str = $self->_setparams." ".$self->arguments;
+     my $param_str = ($self->_setparams || '')." ".($self->arguments || '');
      my $str =$self->executable." $param_str ".$self->_input()." 1> ".$outfile. " 2> /dev/null";
+     $self->debug($str. "\n");
      my $status = system($str);
      $self->throw( "Phrap call ($str) crashed: $? \n") unless $status==0;
      my $filehandle;
