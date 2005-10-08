@@ -12,7 +12,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 14;
+    $NTESTS = 15;
     plan tests => $NTESTS;
 }
 
@@ -76,16 +76,19 @@ my $inputfilename = Bio::Root::IO->catfile("t","data","neighbor.dist");
 my $tree;
 
 ($tree) = $tree_factory->create_tree($inputfilename);
-my @nodes = sort { $a->id cmp $b->id } 
-            grep { defined $_->id} $tree->get_nodes();
 
-ok($nodes[2]->id, 'SINFRUP002');
-ok($nodes[1]->id, 'SINFRUP001');
-ok($nodes[0]->id, 'ENSP000002');
+my ($tip1) = $tree->find_node('SINFRUP002');
+ok($tip1);
+ok($tip1->id, 'SINFRUP002');
+# get the OTHER node
+my ($other) = grep { $_->id ne $tip1->id } $tip1->ancestor->each_Descendent;
+ok($other);
+ok($other->id, 'ENSP000002');
+ok($tip1->branch_length, '0.07854');
+ok($other->branch_length,'0.20141');
 
-ok($nodes[2]->branch_length,'0.07854');
-ok($nodes[1]->branch_length,'0.08462');
-ok($nodes[0]->branch_length,'0.20141');
+my ($hum) = $tree->find_node('SINFRUP001');
+ok($hum->branch_length,'0.08462');
 
 $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
 my  $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
@@ -96,7 +99,7 @@ my ($matrix) = $protdist_factory->create_distance_matrix($inputfilename);
 $tree_factory->outgroup('ENSP000003');
 ($tree) = $tree_factory->create_tree($matrix);
 
-@nodes = sort { defined $a->id && 
+my @nodes = sort { defined $a->id && 
 		    defined $b->id &&
 		    $a->id cmp $b->id } $tree->get_nodes();
 ok ($nodes[1]->id, 'ENSP000003',"failed creating tree by neighbor");
