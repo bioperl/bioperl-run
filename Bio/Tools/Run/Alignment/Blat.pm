@@ -19,26 +19,25 @@ Bio::Tools::Run::Alignment::Blat
 
 =head1 DESCRIPTION
 
- wrapper module for Blat  program
+wrapper module for Blat program
 
 =head1 FEEDBACK
 
 =head2 Mailing Lists
 
- User feedback is an integral part of the evolution of this and other
- Bioperl modules. Send your comments and suggestions preferably to one
- of the Bioperl mailing lists.  Your participation is much appreciated.
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to one
+of the Bioperl mailing lists.  Your participation is much appreciated.
 
  bioperl-l@bioperl.org          - General discussion
  http://bio.perl.org/MailList.html             - About the mailing lists
 
 =head2 Reporting Bugs
 
- Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
- bioperl-bugs@bioperl.org
  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Bala
@@ -47,8 +46,8 @@ Bio::Tools::Run::Alignment::Blat
 
 =head1 APPENDIX
 
- The rest of the documentation details each of the object
- methods. Internal methods are usually preceded with a _
+The rest of the documentation details each of the object
+methods. Internal methods are usually preceded with a _
 
 =cut
 

@@ -24,7 +24,7 @@ given sequence given a matrix(for appropriate organisms).
 
 =head1 DESCRIPTION
 
- Genscan is a gene identifying program developed by Christopher Burge
+Genscan is a gene identifying program developed by Christopher Burge
 http://genes.mit.edu/burgelab/
 
 =head1 FEEDBACK
@@ -41,11 +41,10 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via
- email or the web:
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR - Bala
 
