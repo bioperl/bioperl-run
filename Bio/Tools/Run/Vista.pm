@@ -47,7 +47,7 @@ Wrapper for Vista
                                         'tickdist'=>100,
                                         'bases'=>1000,
                                         'java_param'=>"-Xmx128m",
-                                        'num_pages'=>1
+                                        'num_pages'=>1,
                                         'color'=> {'EXON'=>'100 0 0',
                                                    'CNS'=>'0 0 100'},
                                         'quiet'=>1);
@@ -57,7 +57,7 @@ Wrapper for Vista
 
   #alternative one can choose pairwise alignments to plot
   #where the second id in each pair is the reference sequence
-  $vis->run($aln,([mouse,human],[fugu,human],[mouse,fugu]]);
+  $vis->run($aln,([mouse,human],[fugu,human],[mouse,fugu]));
 
 =head1 DESCRIPTION
 
@@ -101,11 +101,10 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via email
-or the web:
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bio.perl.org
-  http://bio.perl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR
 

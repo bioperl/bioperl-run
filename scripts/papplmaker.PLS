@@ -6,7 +6,7 @@
 #   senger@ebi.ac.uk
 #   July 2002
 #
-#   $Id: papplmaker.PLS,v 1.5 2005-07-27 13:47:55 senger Exp $
+#   $Id: papplmaker.PLS,v 1.5.2.1 2005-10-09 15:19:49 jason Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -61,8 +61,8 @@ BEGIN {
 
 
     # set the version for version checking
-    $VERSION = do { my @r = (q[$Revision: 1.5 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q[$Id: papplmaker.PLS,v 1.5 2005-07-27 13:47:55 senger Exp $];
+    $VERSION = do { my @r = (q[$Revision: 1.5.2.1 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q[$Id: papplmaker.PLS,v 1.5.2.1 2005-10-09 15:19:49 jason Exp $];
 
     # help wanted?
     if ($opt_h) {
@@ -453,11 +453,10 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via
-email or the web:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bioperl.org
-  http://bioperl.org/bioperl-bugs/
+  http://bugzilla.bioperl.org/
 
 =head1 AUTHOR
 

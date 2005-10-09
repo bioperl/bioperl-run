@@ -15,7 +15,7 @@
 #   martin.senger@gmail.com
 #   July 2002
 #
-#   $Id: panalysis.PLS,v 1.7 2005-07-27 13:47:55 senger Exp $
+#   $Id: panalysis.PLS,v 1.7.2.1 2005-10-09 15:19:49 jason Exp $
 #-----------------------------------------------------------------------------
 
 use strict;
@@ -112,8 +112,8 @@ BEGIN {
     use vars qw($VERSION $Revision);
 
     # set the version for version checking
-    $VERSION = do { my @r = (q[$Revision: 1.7 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
-    $Revision = q[$Id: panalysis.PLS,v 1.7 2005-07-27 13:47:55 senger Exp $];
+    $VERSION = do { my @r = (q[$Revision: 1.7.2.1 $] =~ /\d+/g); sprintf "%d.%-02d", @r };
+    $Revision = q[$Id: panalysis.PLS,v 1.7.2.1 2005-10-09 15:19:49 jason Exp $];
 
 
     # help wanted?
@@ -651,11 +651,10 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via
-email or the web:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  bioperl-bugs@bioperl.org
-  http://bioperl.org/bioperl-bugs/
+http://bugzilla.bioperl.org/
 
 =head1 AUTHOR
 
