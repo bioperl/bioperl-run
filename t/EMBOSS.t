@@ -7,8 +7,9 @@
 # `make test'. After `make install' it should work as `perl test.t'
 
 use strict;
+use vars qw($error $NTESTS);
 BEGIN {
-    use vars qw($NTESTS);
+    $error = 0;
     # to handle systems with no installed Test module
     # we include the t dir (where a copy of Test.pm is located)
     # as a fallback
@@ -18,9 +19,16 @@ BEGIN {
     }
     use Test;
     $NTESTS = 30;
-    plan tests => $NTESTS }
+    plan tests => $NTESTS;
+    eval { 
+     require XML::Twig;
+     require Bio::EMBOSS::Factory;
+    };
+    if( $@ ) {
+     $error = 1;
+    }
+ }
 
-use Bio::Factory::EMBOSS;
 use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::AlignIO;
@@ -28,7 +36,6 @@ my $compseqoutfile = 'dna1.4.compseq';
 my $wateroutfile   = 'cysprot.water';
 my $consoutfile    = 'cysprot.cons';
 END {
-
     foreach ( $Test::ntest..$NTESTS ) {
 	skip("EMBOSS not installed locally or XML::Twig not installed",1);
     }
@@ -36,7 +43,7 @@ END {
     unlink($wateroutfile);
     unlink($consoutfile);
 }
-
+exit(0) if $error;
 my $verbose = $ENV{'BIOPERLDEBUG'} || -1;
 ok(1);
 
@@ -47,13 +54,15 @@ ok(1);
 ## total number of tests that will be run.
 
 my $factory = new Bio::Factory::EMBOSS(-verbose => $verbose);
-my $version = $factory->version;
 ok($factory);
-
 my $compseqapp = $factory->program('compseq');
+exit if( $compseqapp->executable ) ;
+
+my $version = $factory->version;
+
 if( ! $compseqapp ) { 
     # no EMBOSS installed
-    exit();
+    exit(0);
 }
 
 ok($compseqapp);
