@@ -57,9 +57,10 @@ the Bioperl mailing list.  Your participation is much appreciated.
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
-of the bugs and their resolution. Bug reports can be submitted via:
+of the bugs and their resolution. Bug reports can be submitted via the
+web:
 
-  http://bugzilla.bioperl.org/
+  http://bioperl.org/bioperl-bugs/
 
 =head1 AUTHOR - Jason Stajich
 
@@ -403,6 +404,91 @@ sub new {
   return $self;
 }
 
+
+=head2 prepare
+
+ Title   : prepare
+ Usage   : my $rundir = $codeml->prepare($aln);
+ Function: prepare the codeml analysis using the default or updated parameters
+           the alignment parameter must have been set
+ Returns : value of rundir
+ Args    : L<Bio::Align::AlignI> object,
+	   L<Bio::Tree::TreeI> object [optional]
+
+=cut
+
+sub prepare{
+   my ($self,$aln,$tree) = @_;
+   unless ( $self->save_tempfiles ) {
+       # brush so we don't get plaque buildup ;)
+       $self->cleanup();
+   }
+   $tree = $self->tree unless $tree;
+   $aln  = $self->alignment unless $aln;
+   if( ! $aln ) { 
+       $self->warn("must have supplied a valid aligment file in order to run codeml");
+       return 0;
+   }
+   my ($tempdir) = $self->tempdir();
+   my ($tempseqFH,$tempseqfile);
+   if( ! ref($aln) && -e $aln ) { 
+       $tempseqfile = $aln;
+   } else { 
+       ($tempseqFH,$tempseqfile) = $self->io->tempfile
+	   ('-dir' => $tempdir, 
+	    UNLINK => ($self->save_tempfiles ? 0 : 1));
+       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+				     '-fh'          => $tempseqFH,
+                                     '-interleaved' => 0,
+                                     '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
+       
+       $alnout->write_aln($aln);
+       $alnout->close();
+       undef $alnout;   
+       close($tempseqFH);
+   }
+   # now let's print the codeml.ctl file.
+   # many of the these programs are finicky about what the filename is 
+   # and won't even run without the properly named file.  Ack
+   
+   my $codeml_ctl = "$tempdir/codeml.ctl";
+   open(CODEML, ">$codeml_ctl") or $self->throw("cannot open $codeml_ctl for writing");
+   print CODEML "seqfile = $tempseqfile\n";
+
+   my $outfile = $self->outfile_name;
+
+   my ($temptreeFH,$temptreefile);
+   if( ! ref($tree) && -e $tree ) { 
+       $temptreefile = $tree;
+   } else { 
+       ($temptreeFH,$temptreefile) = $self->io->tempfile
+	   ('-dir' => $tempdir, 
+	    UNLINK => ($self->save_tempfiles ? 0 : 1));
+
+       my $treeout = new Bio::TreeIO('-format' => 'newick',
+				     '-fh'     => $temptreeFH);
+       $treeout->write_tree($tree);
+       $treeout->close();
+       close($temptreeFH);
+   }
+   print CODEML "treefile = $temptreefile\n";
+
+   print CODEML "outfile = $outfile\n";
+   my %params = $self->get_parameters;
+   while( my ($param,$val) = each %params ) {
+       print CODEML "$param = $val\n";
+   }
+   close(CODEML);
+#    my ($rc,$parser) = (1);
+#    {
+#        my $cwd = cwd();
+#        my $exit_status;
+#        chdir($tempdir);
+#    }
+   return $tempdir;
+}
+
+
 =head2 run
 
  Title   : run
@@ -630,7 +716,7 @@ sub get_parameters{
 
 sub set_parameter{
    my ($self,$param,$value) = @_;
-   unless ($self->no_param_checks ) {
+   unless ($self->{'no_param_checks'} == 1) {
        if ( ! defined $VALIDVALUES{$param} ) { 
            $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
            return 0;
@@ -698,7 +784,7 @@ sub no_param_checks{
    if( defined $value) {
       $self->{'no_param_checks'} = $value;
     }
-    return $self->{'no_param_checks'} || 0;
+    return $self->{'no_param_checks'};
 }
 
 
