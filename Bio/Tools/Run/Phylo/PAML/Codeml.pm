@@ -233,6 +233,7 @@ BEGIN {
     # much of the documentation here is lifted directly from the codeml.ctl
     # example file provided with the package
     %VALIDVALUES = ( 
+		     'outfile' => 'mlc',
 		     'noisy'   => [ 0..3,9],
 		     'verbose' => [ 0,1,2], # 0:concise, 1:detailed, 2:too much
 
@@ -580,7 +581,7 @@ sub run {
 	   $rc = 0;
        }
        eval {
-	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
+	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/$outfile", 
 						 -dir => "$tmpdir");
 
        };
@@ -811,6 +812,13 @@ sub no_param_checks{
 
 =cut
 
+sub outfile_name {
+    my $self = shift;
+    if( @_ ) {
+	return $self->{'_codemlparams'}->{'outfile'} = shift @_;
+    }
+    return $self->{'_codemlparams'}->{'outfile'};    
+}
 
 =head2 tempdir
 
