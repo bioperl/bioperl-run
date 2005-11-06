@@ -107,7 +107,7 @@ Email shawnh@fugu-sg.org
 
 =head1 CONTRIBUTORS
 
-Email jason@bioperl.org
+Email jason-AT-bioperl_DOT_org
 
 
 =head1 APPENDIX
@@ -133,7 +133,7 @@ use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
-use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 
 @ISA = qw(Bio::Tools::Run::Phylo::Phylip::Base);
 
@@ -418,7 +418,7 @@ sub _setparams {
     $self = shift;
     my $param_string = "";
     
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'PROTPARS'}};
+    my %menu = %{$Menu{$self->version}->{'PROTPARS'}};
 
     for $attr ( @PROTPARS_PARAMS) {
         $value = $self->$attr();

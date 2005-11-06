@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Phylip::DrawTree
 #
-# Cared for by Jason Stajich <jason@bioperl.org>
+# Cared for by Jason Stajich <jason-AT-bioperl_DOT_org>
 #
 # Copyright Jason Stajich
 #

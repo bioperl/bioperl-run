@@ -190,7 +190,7 @@ use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
-use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 
 use Cwd;
 			    
@@ -520,7 +520,7 @@ sub _setparams {
     my $param_string = "";
     my $type ="";
     my $version = $self->version;
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$version}->{'NEIGHBOR'}};
+    my %menu = %{$Menu{$version}->{'NEIGHBOR'}};
 
     foreach  my $attr ( @NEIGHBOR_PARAMS) {
     	$value = $self->$attr();

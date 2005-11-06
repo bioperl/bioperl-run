@@ -214,7 +214,7 @@ use Bio::SimpleAlign;
 use Bio::AlignIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
-use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 use Bio::Tools::Phylo::Phylip::ProtDist;
 use Cwd;
 
@@ -516,7 +516,7 @@ sub _setparams {
     $self = shift;
     my $param_string = "";
     my $cat = 0;
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'PROTDIST'}};
+    my %menu = %{$Menu{$self->version}->{'PROTDIST'}};
 
     foreach  my $attr ( @PROTDIST_PARAMS) {
     	$value = $self->$attr();

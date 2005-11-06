@@ -182,7 +182,7 @@ use strict;
 use Bio::SimpleAlign;
 use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Phylip::Base;
-use Bio::Tools::Run::Phylo::Phylip::PhylipConf;
+use Bio::Tools::Run::Phylo::Phylip::PhylipConf qw(%Menu);
 use IO::String;
 use Cwd;
 
@@ -497,7 +497,7 @@ sub _setparams {
     #for case where type is Ml
     my $Ml = 0;
     my $frac = 0.5;
-    my %menu = %{$Bio::Tools::Run::Phylo::Phylip::PhylipConf::Menu{$self->version}->{'CONSENSE'}};
+    my %menu = %{$Menu{$self->version}->{'CONSENSE'}};
 
     foreach  my $attr ( @CONSENSE_PARAMS) {
     	$value = $self->$attr();
