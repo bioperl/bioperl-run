@@ -477,6 +477,7 @@ sub prepare{
    print CODEML "outfile = $outfile\n";
    my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
+       next if $param eq 'outfile';
        print CODEML "$param = $val\n";
    }
    close(CODEML);
@@ -717,7 +718,7 @@ sub get_parameters{
 
 sub set_parameter{
    my ($self,$param,$value) = @_;
-   unless ($self->{'no_param_checks'} == 1) {
+   unless (defined $self->{'no_param_checks'} && $self->{'no_param_checks'} == 1) {
        if ( ! defined $VALIDVALUES{$param} ) { 
            $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
            return 0;
