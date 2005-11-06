@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::PAML::Yn00
 #
-# Cared for by Jason Stajich <jason@bioperl.org>
+# Cared for by Jason Stajich <jason-AT-bioperl_DOT_org>
 #
 # Copyright Jason Stajich
 #
@@ -183,7 +183,7 @@ BEGIN {
     }
     # valid values for parameters, the default one is always
     # the first one in the array
-    # much of the documentation here is lifted directly from the codeml.ctl
+    # much of the documentation here is lifted directly from the baseml.ctl
     # example file provided with the package
     %VALIDVALUES = ( 
 		     'noisy'   => [ 0..3,9],
@@ -349,11 +349,13 @@ sub run{
        ($tempseqFH,$tempseqfile) = $self->io->tempfile
 	   ('-dir' => $tmpdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
-				     '-fh'          => $tempseqFH,
-				     '-interleaved' => 0,
-				     '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
-       
+       my $alnout = new Bio::AlignIO(-format      => 'phylip',
+				     -fh          => $tempseqFH,
+				     -interleaved => 0,
+				     #-idlinebreak => 1,
+				     -line_length => 60,
+				     -wrap_sequential => 1,
+				     -idlength    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
        $alnout->write_aln($aln);
        $alnout->close();
        undef $alnout;   
@@ -365,24 +367,25 @@ sub run{
    # and won't even run without the properly named file.  Ack
    
    my $baseml_ctl = "$tmpdir/baseml.ctl";
-   open(YN, ">$baseml_ctl") or $self->throw("cannot open $baseml_ctl for writing");
-   print YN "seqfile = $tempseqfile\n";
+   open(BASEML, ">$baseml_ctl") or $self->throw("cannot open $baseml_ctl for writing");
+   print BASEML "seqfile = $tempseqfile\n";
 
    my $outfile = $self->outfile_name;
 
-   print YN "outfile = $outfile\n";
+   print BASEML "outfile = $outfile\n";
    my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
-       print YN "$param = $val\n";
+       next if $param eq 'outfile';
+       print BASEML "$param = $val\n";
    }
-   close(YN);
+   close(BASEML);
    my ($rc,$parser) = (1);
    {
        my $cwd = cwd();
        my $exit_status;
        chdir($tmpdir);
        my $ynexe = $self->executable();
-       $self->throw("unable to find executable for 'yn'") unless $ynexe;
+       $self->throw("unable to find executable for 'baseml'") unless $ynexe;
        open(RUN, "$ynexe |");
        my @output = <RUN>;
        $exit_status = close(RUN);
@@ -438,7 +441,7 @@ sub error_string{
 =head2 alignment
 
  Title   : alignment
- Usage   : $codeml->align($aln);
+ Usage   : $baseml->alignment($aln);
  Function: Get/Set the L<Bio::Align::AlignI> object
  Returns : L<Bio::Align::AlignI> object
  Args    : [optional] L<Bio::Align::AlignI>
@@ -474,18 +477,18 @@ sub alignment{
 sub get_parameters{
    my ($self) = @_;
    # we're returning a copy of this
-   return %{ $self->{'_codemlparams'} };
+   return %{ $self->{'_basemlparams'} };
 }
 
 
 =head2 set_parameter
 
  Title   : set_parameter
- Usage   : $codeml->set_parameter($param,$val);
- Function: Sets a codeml parameter, will be validated against
+ Usage   : $baseml->set_parameter($param,$val);
+ Function: Sets a baseml parameter, will be validated against
            the valid values as set in the %VALIDVALUES class variable.  
            The checks can be ignored if on turns of param checks like this:
-             $codeml->no_param_checks(1)
+             $baseml->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
            then no warning will be reported
  Args    : $paramname => name of the parameter
@@ -508,14 +511,14 @@ sub set_parameter{
 	   return 0;
        }
    }
-   $self->{'_codemlparams'}->{$param} = $value;
+   $self->{'_basemlparams'}->{$param} = $value;
    return 1;
 }
 
 =head2 set_default_parameters
 
  Title   : set_default_parameters
- Usage   : $codeml->set_default_parameters(0);
+ Usage   : $baseml->set_default_parameters(0);
  Function: (Re)set the default parameters from the defaults
            (the first value in each array in the 
 	    %VALIDVALUES class variable)
@@ -531,11 +534,11 @@ sub set_default_parameters{
    
    while( my ($param,$val) = each %VALIDVALUES ) {
        # skip if we want to keep old values and it is already set
-       next if( defined $self->{'_codemlparams'}->{$param} && $keepold);
+       next if( defined $self->{'_basemlparams'}->{$param} && $keepold);
        if(ref($val)=~/ARRAY/i ) {
-	   $self->{'_codemlparams'}->{$param} = $val->[0];
+	   $self->{'_basemlparams'}->{$param} = $val->[0];
        }  else { 
-	   $self->{'_codemlparams'}->{$param} = $val;
+	   $self->{'_basemlparams'}->{$param} = $val;
        }
    }
 }
@@ -571,7 +574,7 @@ sub set_default_parameters{
 =head2 outfile_name
 
  Title   : outfile_name
- Usage   : my $outfile = $codeml->outfile_name();
+ Usage   : my $outfile = $baseml->outfile_name();
  Function: Get/Set the name of the output file for this run
            (if you wanted to do something special)
  Returns : string
@@ -579,6 +582,16 @@ sub set_default_parameters{
 
 
 =cut
+
+sub outfile_name {
+    my $self = shift;
+    if( @_ ) {
+	return $self->{'_basemlparams'}->{'outfile'} = shift @_;
+    }
+    return $self->{'_basemlparams'}->{'outfile'};    
+}
+
+
 
 
 =head2 tempdir
@@ -595,7 +608,7 @@ sub set_default_parameters{
 =head2 cleanup
 
  Title   : cleanup
- Usage   : $codeml->cleanup();
+ Usage   : $baseml->cleanup();
  Function: Will cleanup the tempdir directory after a PAML run
  Returns : none
  Args    : none
