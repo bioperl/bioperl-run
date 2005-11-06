@@ -204,13 +204,8 @@ sub version {
     chop $version;
 
     # compare versions
-    my ($thisv, $embossv);
-    $version =~ /(\d+)\.(\d+)\.(\d+)/;
-    $thisv = "$1.$2$3";
-    $EMBOSSVERSION =~ /(\d+)\.(\d+)\.(\d+)/;
-    $embossv = "$1.$2$3";
-    $self->throw("EMBOSS has to be at least version $EMBOSSVERSION\n")
-	if $thisv < $embossv;
+    $self->throw("EMBOSS has to be at least version $EMBOSSVERSION got $version\n")
+	if $version lt  $EMBOSSVERSION;
 
     return $version;
 }
