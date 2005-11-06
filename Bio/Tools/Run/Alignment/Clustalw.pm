@@ -327,7 +327,7 @@ Email schattner@alum.mit.edu
 
 =head1 CONTRIBUTORS
 
-Jason Stajich jason@bioperl.org
+Jason Stajich jason-AT-bioperl_DOT_org
 
 =head1 APPENDIX
 

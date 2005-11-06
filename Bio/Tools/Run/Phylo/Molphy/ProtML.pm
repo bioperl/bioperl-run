@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Molphy::ProtML
 #
-# Cared for by Jason Stajich <jason@bioperl.org>
+# Cared for by Jason Stajich <jason-AT-bioperl_DOT_org>
 #
 # Copyright Jason Stajich
 #
@@ -143,7 +143,7 @@ web:
 
 =head1 AUTHOR - Jason Stajich
 
-Email jason@bioperl.org
+Email jason-AT-bioperl_DOT_org
 
 =head1 CONTRIBUTORS
 

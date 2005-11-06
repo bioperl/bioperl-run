@@ -90,7 +90,7 @@ Address:
 
 =head2 CONTRIBUTORS
 
-Email: jason@bioperl.org
+Email: jason-AT-bioperl_DOT_org
 
 =head1 APPENDIX
 

@@ -75,7 +75,7 @@ Email: fugui@worf.fugu-sg.org
 
 =head1 CONTRIBUTORS
 
-Jason Stajich jason@bioperl.org
+Jason Stajich jason-AT-bioperl_DOT_org
 Keith James kdj@sanger.ac.uk
 
 =head1 APPENDIX
