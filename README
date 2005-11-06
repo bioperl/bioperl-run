@@ -3,7 +3,7 @@ $Id$
 
 o Version
 
- This is Bioperl-run version 1.2.2., a stable bug fix release
+ This is Bioperl-run version 1.5.1, a developer release, please insure that you have bioperl core 1.5.1 or later
 
 o Description 
  
@@ -52,4 +52,6 @@ o Environmental variables
 
  EPONINEDIR          	DIR PATH   Point to the directory where 
                                     eponine_scan.jar is installed
-
+ PAMLDIR                DIR PATH   Point to directory where PAML is 
+                                    installed.
+ 
