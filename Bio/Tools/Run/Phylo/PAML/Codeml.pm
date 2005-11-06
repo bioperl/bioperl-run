@@ -426,7 +426,7 @@ sub prepare{
    $tree = $self->tree unless $tree;
    $aln  = $self->alignment unless $aln;
    if( ! $aln ) { 
-       $self->warn("must have supplied a valid aligment file in order to run codeml");
+       $self->warn("must have supplied a valid alignment file in order to run codeml");
        return 0;
    }
    my ($tempdir) = $self->tempdir();
@@ -511,7 +511,7 @@ sub run {
    $tree = $self->tree unless $tree;
    $aln  = $self->alignment unless $aln;
    if( ! $aln ) { 
-       $self->warn("must have supplied a valid aligment file in order to run codeml");
+       $self->warn("must have supplied a valid alignment file in order to run codeml");
        return 0;
    }
    my ($tmpdir) = $self->tempdir();
