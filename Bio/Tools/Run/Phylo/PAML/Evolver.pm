@@ -269,7 +269,6 @@ sub prepare {
    }
    $tree = $self->tree unless $tree;
    my ($tempdir) = $self->tempdir();
-   my ($tempseqFH,$tempseqfile);
    # If multiple replicates, evolver gives:
 
    # A file with a concatenation of sequential phylips separated by a
@@ -302,35 +301,30 @@ sub prepare {
    
    # FIXME: we should do the appropriate here if we are simulating codons, nts o aa.
    my $evolver_ctl = "$tempdir/MCcodon.dat";
-   open(EVOLVER, ">$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
+   my $evolverfh;
+   open($evolverfh, ">>$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
 ##    FIXME: params follow an order, they are not a hash. Do we have
 ##    an example of this in bioperl-run?
    my %params = $self->get_parameters;
-   print EVOLVER "$params{outfmt}\n";
-   print EVOLVER "$params{seed}\n";
-   print EVOLVER "$params{outfmt}\n";
+   print $evolverfh "$params{outfmt}\n";
+   print $evolverfh "$params{seed}\n";
+   print $evolverfh "$params{outfmt}\n";
    # FIXME: call get_leaf_nodes to count numseq
-   # print EVOLVER "$numseq ";
-   print EVOLVER "$params{nuclsites} ";
-   print EVOLVER "$params{replicates}\n\n";
-   print EVOLVER "$params{tree_length}\n";
+   my $numseq = scalar($tree->get_leaf_nodes);
+   print $evolverfh "$numseq ";
+   print $evolverfh "$params{nuclsites} ";
+   print $evolverfh "$params{replicates}\n\n";
+   print $evolverfh "$params{tree_length}\n";
+   close($evolverfh);
    # FIXME: print tree - do #1:#n branch tagging magic here
-#    my ($temptreeFH,$temptreefile);
-#    if( ! ref($tree) && -e $tree ) { 
-#        $temptreefile = $tree;
-#    } else { 
-#        ($temptreeFH,$temptreefile) = $self->io->tempfile
-# 	   ('-dir' => $tempdir, 
-# 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-
-#        my $treeout = new Bio::TreeIO('-format' => 'newick',
-# 				     '-fh'     => $temptreeFH);
-#        $treeout->write_tree($tree);
-#        $treeout->close();
-#        close($temptreeFH);
-#    }
-   print EVOLVER "$params{omega}\n";
-   print EVOLVER "$params{kappa}\n";
+   # FIXME: the tree should be _appended_ to the file -- God, where is
+   # my "Perl Cookbook" when I need it
+   my $treeout = new Bio::TreeIO('-format' => 'newick',
+                                 '-fh'     => $evolverfh);
+   $treeout->write_tree($tree);
+   open($evolverfh, ">>$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
+   print $evolverfh "$params{omega}\n";
+   print $evolverfh "$params{kappa}\n";
    # FIXME: print codon freqs here
    # my @codon_freqs = $result->get_CodonFreqs();
    #  foreach my $firstbase (@codon_freqs) {
@@ -339,8 +333,9 @@ sub prepare {
    #      }
    #      print "\n";
    #  }
-   print EVOLVER "\n// end of file.\n";
-   close(EVOLVER);
+   print $evolverfh "\n// end of file.\n";
+   close($evolverfh);
+   1;;
    # FIXME: what do we return in prepare?
    # return
 }
@@ -358,47 +353,48 @@ sub prepare {
 
 =cut
 
-sub run {
+# sub run {
 
-    # FIXME: We should look for the stuff we prepared in the prepare method here
-   my ($rc,$parser) = (1);
-   {
-       my $cwd = cwd();
-       my $exit_status;
-       chdir($tmpdir);
-       my $evolverexe = $self->executable();
-       $self->throw("unable to find or run executable for 'evolver'") unless $evolverexe && -e $evolverexe && -x _;
-       if( $self->{'_branchLengths'} ) { 
-	   open(RUN, "echo $self->{'_branchLengths'} | $evolverexe |") or $self->throw("Cannot open exe $evolverexe");
-       } else {
-	   open(RUN, "$evolverexe |") or $self->throw("Cannot open exe $evolverexe");
-       }
-       my @output = <RUN>;
-       $exit_status = close(RUN);
-       $self->error_string(join('',@output));
-       if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
-	   $self->warn("There was an error - see error_string for the program output");
-	   $rc = 0;
-       }
-       #### FIXME: Will we parse/test the resulting alns? Shouldn't
-       #### we, this can go away
-       eval {
-	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
-						 -dir => "$tmpdir");
+#     # FIXME: We should look for the stuff we prepared in the prepare method here
+#    my ($rc,$parser) = (1);
+#    {
+#        my $cwd = cwd();
+#        my $exit_status;
+#        my ($tmpdir) = $self->tempdir();
+#        chdir($tmpdir);
+#        my $evolverexe = $self->executable();
+#        $self->throw("unable to find or run executable for 'evolver'") unless $evolverexe && -e $evolverexe && -x _;
+#        if( $self->{'_branchLengths'} ) { 
+# 	   open(RUN, "echo $self->{'_branchLengths'} | $evolverexe |") or $self->throw("Cannot open exe $evolverexe");
+#        } else {
+# 	   open(RUN, "$evolverexe |") or $self->throw("Cannot open exe $evolverexe");
+#        }
+#        my @output = <RUN>;
+#        $exit_status = close(RUN);
+#        $self->error_string(join('',@output));
+#        if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
+# 	   $self->warn("There was an error - see error_string for the program output");
+# 	   $rc = 0;
+#        }
+#        #### FIXME: Will we parse/test the resulting alns? Shouldn't
+#        #### we, this can go away
+#        eval {
+# 	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
+# 						 -dir => "$tmpdir");
 
-       };
-       if( $@ ) {
-	   $self->warn($self->error_string);
-       }
-       chdir($cwd);
-       ####
-   }
-   unless ( $self->save_tempfiles ) {
-      unlink("$evolver_ctl");
-      $self->cleanup();
-   }
-   return ($rc,$parser);
-}
+#        };
+#        if( $@ ) {
+# 	   $self->warn($self->error_string);
+#        }
+#        chdir($cwd);
+#        ####
+#    }
+#    unless ( $self->save_tempfiles ) {
+#       unlink("$evolver_ctl");
+#       $self->cleanup();
+#    }
+#    return ($rc,$parser);
+# }
 
 =head2 error_string
 
