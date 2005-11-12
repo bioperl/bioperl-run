@@ -153,7 +153,7 @@ BEGIN {
          #     0           * 0:paml format (mc.paml); 1:paup format (mc.paup)
          # random number seed (odd number)
          # FIXME: can I set seed to null here and ask for it later?
-         'seed' => NULL,
+         'seed' => '13147',
          # numseq can actually be calculated from the tree external nodes
          # nucleotide sites
          'nuclsites' => '1000',
@@ -270,7 +270,17 @@ sub prepare {
    $tree = $self->tree unless $tree;
    my ($tempdir) = $self->tempdir();
    my ($tempseqFH,$tempseqfile);
-   #FIXME: split the files if replicates > 1 or maybe force paup outfmt?
+   # If multiple replicates, evolver gives:
+
+   # A file with a concatenation of sequential phylips separated by a
+   # double return which gets correctly parsed by AlignIO next_aln
+
+   # A concatenation of paup entries with tags separating them which
+   # wont get correctly parsed with current AlignIO (failed with
+   # nexus)
+
+   #FIXME: maybe force phylip outfmt and split the files if replicates > 1
+
    #    if( ! ref($aln) && -e $aln ) { 
    #        $tempseqfile = $aln;
    #    } else { 
@@ -293,11 +303,18 @@ sub prepare {
    # FIXME: we should do the appropriate here if we are simulating codons, nts o aa.
    my $evolver_ctl = "$tempdir/MCcodon.dat";
    open(EVOLVER, ">$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
-   print EVOLVER "seqfile = $tempseqfile\n";
-
-   my $outfile = $self->outfile_name;
-
-   # FIXME: What if we write the tree inside $evolver_ctl
+##    FIXME: params follow an order, they are not a hash. Do we have
+##    an example of this in bioperl-run?
+   my %params = $self->get_parameters;
+   print EVOLVER "$params{outfmt}\n";
+   print EVOLVER "$params{seed}\n";
+   print EVOLVER "$params{outfmt}\n";
+   # FIXME: call get_leaf_nodes to count numseq
+   # print EVOLVER "$numseq ";
+   print EVOLVER "$params{nuclsites} ";
+   print EVOLVER "$params{replicates}\n\n";
+   print EVOLVER "$params{tree_length}\n";
+   # FIXME: print tree - do #1:#n branch tagging magic here
 #    my ($temptreeFH,$temptreefile);
 #    if( ! ref($tree) && -e $tree ) { 
 #        $temptreefile = $tree;
@@ -312,25 +329,20 @@ sub prepare {
 #        $treeout->close();
 #        close($temptreeFH);
 #    }
-#    print EVOLVER "treefile = $temptreefile\n";
-
-#    print EVOLVER "outfile = $outfile\n";
-#    my %params = $self->get_parameters;
-
-##    FIXME: params follow an order, they are not a hash. Do we have
-##    an example of this in bioperl-run?
-
-#    while( my ($param,$val) = each %params ) {
-#        print EVOLVER "$param = $val\n";
-#    }
-#    close(EVOLVER);
-#    my ($rc,$parser) = (1);
-#    {
-#        my $cwd = cwd();
-#        my $exit_status;
-#        chdir($tempdir);
-#    }
-   return $tempdir;
+   print EVOLVER "$params{omega}\n";
+   print EVOLVER "$params{kappa}\n";
+   # FIXME: print codon freqs here
+   # my @codon_freqs = $result->get_CodonFreqs();
+   #  foreach my $firstbase (@codon_freqs) {
+   #      foreach my $element (@$firstbase) {
+   #          print "  $element";
+   #      }
+   #      print "\n";
+   #  }
+   print EVOLVER "\n// end of file.\n";
+   close(EVOLVER);
+   # FIXME: what do we return in prepare?
+   # return
 }
 
 
