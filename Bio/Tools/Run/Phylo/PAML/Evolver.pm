@@ -145,6 +145,9 @@ BEGIN {
     # much of the documentation here is lifted directly from the MCcodon.dat
     # example file provided with the package
 
+    # Evolver calls time for seed: SetSeed(i==-1?(int)time(NULL):i);
+    my $rand = int(time);
+    #     my $rand = int(rand(999999));
     %VALIDVALUES = 
         ( 
 
@@ -152,14 +155,13 @@ BEGIN {
          'outfmt'    => [0,1], 
          #     0           * 0:paml format (mc.paml); 1:paup format (mc.paup)
          # random number seed (odd number)
-         # FIXME: can I set seed to null here and ask for it later?
-         'seed' => '13147',
+         # FIXME: set seed to null here and ask for it later?
+         'seed' => "$rand",
          # numseq can actually be calculated from the tree external nodes
          # nucleotide sites
          'nuclsites' => '1000',
          # replicates
          'replicates' => '1',
-         # FIXME: check min and max in evolver
          # tree length; use -1 if tree has absolute branch lengths
          # Note that tree length and branch lengths under the codon model are
          # measured by the expected number of nucleotide substitutions per codon
@@ -170,7 +172,6 @@ BEGIN {
          'omega' => '0.3',
          # kappa
          'kappa' => '5',
-         # FIXME: codon freqs or nt freqs should always come from an object?
          # FIXME: this only for MCbase.dat ?
          # model: 0:JC69, 1:K80, 2:F81, 3:F84, 4:HKY85, 5:T92, 6:TN93, 7:REV
          # FIXME: this applies to only some models?
@@ -271,6 +272,7 @@ sub prepare {
    my ($tempdir) = $self->tempdir();
    # If multiple replicates, evolver gives:
 
+   # FIXME:
    # A file with a concatenation of sequential phylips separated by a
    # double return which gets correctly parsed by AlignIO next_aln
 
@@ -278,7 +280,7 @@ sub prepare {
    # wont get correctly parsed with current AlignIO (failed with
    # nexus)
 
-   #FIXME: maybe force phylip outfmt and split the files if replicates > 1
+   # FIXME: maybe force phylip outfmt and split the files if replicates > 1
 
    #    if( ! ref($aln) && -e $aln ) { 
    #        $tempseqfile = $aln;
@@ -302,40 +304,61 @@ sub prepare {
    # FIXME: we should do the appropriate here if we are simulating codons, nts o aa.
    my $evolver_ctl = "$tempdir/MCcodon.dat";
    my $evolverfh;
-   open($evolverfh, ">>$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
-##    FIXME: params follow an order, they are not a hash. Do we have
-##    an example of this in bioperl-run?
+   open($evolverfh, ">$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
+   # FIXME: params follow an order, they are not a hash. Do we have an
+   # clean example of this in bioperl-run?
    my %params = $self->get_parameters;
    print $evolverfh "$params{outfmt}\n";
    print $evolverfh "$params{seed}\n";
-   print $evolverfh "$params{outfmt}\n";
    # FIXME: call get_leaf_nodes to count numseq
-   my $numseq = scalar($tree->get_leaf_nodes);
+   # FIXME: call get_leaf_nodes to count only leafs - relates to newick onlyleafids email
+   my $numseq = scalar($tree->get_nodes);
    print $evolverfh "$numseq ";
    print $evolverfh "$params{nuclsites} ";
    print $evolverfh "$params{replicates}\n\n";
    print $evolverfh "$params{tree_length}\n";
-   close($evolverfh);
-   # FIXME: print tree - do #1:#n branch tagging magic here
-   # FIXME: the tree should be _appended_ to the file -- God, where is
-   # my "Perl Cookbook" when I need it
+   # FIXME: do #1:#n branch tagging magic here - is this branchlength stuff?
+   # FIXME: is it ok to use this pre flush stuff?
    my $treeout = new Bio::TreeIO('-format' => 'newick',
-                                 '-fh'     => $evolverfh);
+                                 '-fh'     => $evolverfh,
+                                 -PRE =>'>>',
+                                 '-flush',
+                                );
    $treeout->write_tree($tree);
    open($evolverfh, ">>$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
    print $evolverfh "$params{omega}\n";
    print $evolverfh "$params{kappa}\n";
    # FIXME: print codon freqs here
-   # my @codon_freqs = $result->get_CodonFreqs();
+   # my @codon_freqs = $self->get_CodonFreqs();
    #  foreach my $firstbase (@codon_freqs) {
    #      foreach my $element (@$firstbase) {
-   #          print "  $element";
+   #          print $evolverfh "  $element";
    #      }
-   #      print "\n";
+   #      print $evolverfh "\n";
    #  }
+
+   # FIXME: codon freqs or nt freqs should always come from an object?
+   # Silly printing the default codonfreqs in the default
+   # MCcodon.dat provided by PAML
+   print $evolverfh 
+       "0.00983798  0.01745548  0.00222048  0.01443315\n",
+       "0.00844604  0.01498576  0.00190632  0.01239105\n",
+       "0.01064012  0.01887870  0           0\n",
+       "0.00469486  0.00833007  0           0.00688776\n",
+       "0.01592816  0.02826125  0.00359507  0.02336796\n",
+       "0.01367453  0.02426265  0.00308642  0.02006170\n",
+       "0.01722686  0.03056552  0.00388819  0.02527326\n",
+       "0.00760121  0.01348678  0.00171563  0.01115161\n",
+       "0.01574077  0.02792876  0.00355278  0.02309304\n",
+       "0.01351366  0.02397721  0.00305010  0.01982568\n",
+       "0.01702419  0.03020593  0.00384245  0.02497593\n",
+       "0.00751178  0.01332811  0.00169545  0.01102042\n",
+       "0.02525082  0.04480239  0.00569924  0.03704508\n",
+       "0.02167816  0.03846344  0.00489288  0.03180369\n",
+       "0.02730964  0.04845534  0.00616393  0.04006555\n",
+       "0.01205015  0.02138052  0.00271978  0.01767859\n";
    print $evolverfh "\n// end of file.\n";
    close($evolverfh);
-   1;;
    # FIXME: what do we return in prepare?
    # return
 }
