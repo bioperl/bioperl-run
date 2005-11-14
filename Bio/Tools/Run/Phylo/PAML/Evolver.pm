@@ -145,7 +145,7 @@ BEGIN {
     # much of the documentation here is lifted directly from the MCcodon.dat
     # example file provided with the package
 
-    # Evolver calls time for seed: SetSeed(i==-1?(int)time(NULL):i);
+    # FIXME: Evolver calls time for seed: SetSeed(i==-1?(int)time(NULL):i);
     my $rand = int(time);
     #     my $rand = int(rand(999999));
     %VALIDVALUES = 
@@ -264,23 +264,26 @@ sub new {
 
 sub prepare {
    my ($self,$aln,$tree) = @_;
+   # FIXME: To consider: to have save_tempfiles always TRUE by default
+   # or simply never delete
    unless ( $self->save_tempfiles ) {
        # brush so we don't get plaque buildup ;)
        $self->cleanup();
    }
    $tree = $self->tree unless $tree;
    my ($tempdir) = $self->tempdir();
-   # If multiple replicates, evolver gives:
 
    # FIXME:
+   # If multiple replicates, evolver gives:
    # A file with a concatenation of sequential phylips separated by a
    # double return which gets correctly parsed by AlignIO next_aln
 
-   # A concatenation of paup entries with tags separating them which
+   # Or a concatenation of paup entries with tags separating them which
    # wont get correctly parsed with current AlignIO (failed with
    # nexus)
 
-   # FIXME: maybe force phylip outfmt and split the files if replicates > 1
+   # FIXME: To consider: force phylip outfmt and split the files if
+   # replicates > 1
 
    #    if( ! ref($aln) && -e $aln ) { 
    #        $tempseqfile = $aln;
