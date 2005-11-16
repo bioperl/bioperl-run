@@ -36,17 +36,15 @@ Bio::Tools::Run::Phylo::PAML::Evolver - Wrapper aroud the PAML program evolver
   # Or with all the data coming from a previous PAML run
   my $parser = new Bio::Tools::Phylo::PAML
     (
-     -file => "$mlcfile",
-     -dir => "$dir",
+     -file => "$inputfile",
     );
   my $result = $parser->next_result();
   my $tree = $result->next_tree;
   $evolver->tree($tree);
-
-  # Option (6) Simulate codon data sets      (use MCcodon.dat)?
-  # For codon frequencies, maybe something similar to:
   my @codon_freqs = $result->get_CodonFreqs();
-  $evolver->set_CodonFreqs(@codon_freqs);
+  $evolver->set_CodonFreqs(\@codon_freqs);
+
+  my $val = $evolver->prepare();
 
   # FIXME: something similar for nucleotide frequencies:
   # Option (5) Simulate nucleotide data sets (use MCbase.dat)?
@@ -332,18 +330,19 @@ sub prepare {
    print $evolverfh "$params{omega}\n";
    print $evolverfh "$params{kappa}\n";
    # FIXME: print codon freqs here
-   # my @codon_freqs = $self->get_CodonFreqs();
-   #  foreach my $firstbase (@codon_freqs) {
-   #      foreach my $element (@$firstbase) {
-   #          print $evolverfh "  $element";
-   #      }
-   #      print $evolverfh "\n";
-   #  }
+   my @codon_freqs = $self->get_CodonFreqs();
+   foreach my $firstbase (@codon_freqs) {
+       foreach my $element (@$firstbase) {
+           print $evolverfh "  $element";
+       }
+       print $evolverfh "\n";
+   }
 
    # FIXME: codon freqs or nt freqs should always come from an object?
    # Silly printing the default codonfreqs in the default
    # MCcodon.dat provided by PAML
-   print $evolverfh 
+   unless (@codon_freqs) {
+       print $evolverfh 
        "0.00983798  0.01745548  0.00222048  0.01443315\n",
        "0.00844604  0.01498576  0.00190632  0.01239105\n",
        "0.01064012  0.01887870  0           0\n",
@@ -360,6 +359,7 @@ sub prepare {
        "0.02167816  0.03846344  0.00489288  0.03180369\n",
        "0.02730964  0.04845534  0.00616393  0.04006555\n",
        "0.01205015  0.02138052  0.00271978  0.01767859\n";
+   }
    print $evolverfh "\n// end of file.\n";
    close($evolverfh);
    # FIXME: what do we return in prepare?
@@ -583,6 +583,40 @@ sub no_param_checks{
       $self->{'no_param_checks'} = $value;
     }
     return $self->{'no_param_checks'};
+}
+
+=head2 set_CodonFreqs
+
+ Title   : set_CodonFreqs
+ Usage   : $obj->set_CodonFreqs($newval)
+ Function: Get/Set the Codon Frequence table
+ Returns : value of set_CodonFreqs (a scalar)
+ Args    : on set, new value (a scalar or undef, optional)
+
+
+=cut
+
+sub set_CodonFreqs{
+    my $self = shift;
+
+    return $self->{'_codonfreqs'} = shift if @_;
+    return $self->{'_codonfreqs'};
+}
+
+=head2 get_CodonFreqs
+
+ Title   : get_CodonFreqs
+ Usage   : my @codon_freqs = $evolver->get_CodonFreqs() 
+ Function: Get the Codon freqs
+ Returns : Array
+ Args    : none
+
+
+=cut
+
+sub get_CodonFreqs{
+   my ($self) = @_;
+   return @{$self->{'_codonfreqs'} || []};
 }
 
 
