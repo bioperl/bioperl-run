@@ -52,6 +52,8 @@ Bio::Tools::Run::Phylo::PAML::Evolver - Wrapper aroud the PAML program evolver
   # FIXME: something similar for aa parameters:
   # Option (7) Simulate amino acid data sets (use MCaa.dat)?
 
+  # FIXME: With an initial RootSeq.txt
+
 =head1 DESCRIPTION
 
 This is a wrapper around the evolver program of PAML (Phylogenetic
