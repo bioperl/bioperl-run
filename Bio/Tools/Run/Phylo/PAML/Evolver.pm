@@ -313,7 +313,8 @@ sub prepare {
    print $evolverfh "$params{seed}\n";
    # FIXME: call get_leaf_nodes to count numseq
    # FIXME: call get_leaf_nodes to count only leafs - relates to newick onlyleafids email
-   my $numseq = scalar($tree->get_nodes);
+#   my $numseq = scalar($tree->get_nodes);
+   my $numseq = scalar($tree->get_leaf_nodes);
    print $evolverfh "$numseq ";
    print $evolverfh "$params{nuclsites} ";
    print $evolverfh "$params{replicates}\n\n";
@@ -325,6 +326,7 @@ sub prepare {
                                  -PRE =>'>>',
                                  '-flush',
                                 );
+   $treeout->bootstrap_style('nointernalids');
    $treeout->write_tree($tree);
    open($evolverfh, ">>$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
    print $evolverfh "$params{omega}\n";
