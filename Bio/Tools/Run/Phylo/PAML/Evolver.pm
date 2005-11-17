@@ -169,6 +169,12 @@ BEGIN {
          # the expected number of amino acid changes per amino acid site.
          'tree_length' => '1.5',
          # omega
+         # FIXME: if one wants to call for different omegas (NSsites),
+         # right now it has to be done like:
+         # $evolver->set_parameter(omega,"3\n0.2\t0.3\t0.5\n0.5\t0.9\t3.2\n");
+         # 3            * number of site classes, followed by frequencies and omega's.
+         #   0.6    0.3   0.1 # Freqs
+         #   0.1    0.8   3.2 # Omegas
          'omega' => '0.3',
          # kappa
          'kappa' => '5',
