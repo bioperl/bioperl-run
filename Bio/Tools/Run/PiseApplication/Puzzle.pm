@@ -1,3 +1,11 @@
+# $Id$
+# BioPerl module for Bio::Tools::Run::PiseApplication::Puzzle
+#
+# Cared for by Catherine Letondal <letondal@pasteur.fr>
+#
+# For copyright and disclaimer see below.
+#
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -20,7 +28,12 @@ Bio::Tools::Run::PiseApplication::Puzzle
 		Strimmer, K., and A. von Haeseler. 1996. Quartet puzzling:A quartet maximum likelihood method for reconstructing tree topologies. Mol. Biol. Evol. 13: 964-969.
 
 
-      Parameters:
+
+      Parameters: 
+
+        (see also:
+          http://bioweb.pasteur.fr/seqanal/interfaces/Puzzle.html 
+         for available values):
 
 
 		Puzzle (String)
@@ -29,16 +42,6 @@ Bio::Tools::Run::PiseApplication::Puzzle
 
 		confirm (String)
 
-		outfile (Results)
-
-		outtree (Results)
-			pipe: phylip_tree
-
-		outdist (Results)
-			pipe: phylip_dist
-
-		params (Results)
-
 		infile (Sequence)
 			Alignement File
 			pipe: readseq_ok_alig
@@ -46,29 +49,35 @@ Bio::Tools::Run::PiseApplication::Puzzle
 		seqtype (Excl)
 			Is it a DNA or protein sequence
 
-		control_options (Paragraph)
-			Control options
-
 		approximate (Switch)
 			Approximate quartet likelihood (v)
 
 		puzzling_step (Integer)
 			Number of puzzling steps (n)
 
-		protein_options (Paragraph)
-			Protein options
-
 		protein_model (Excl)
 			Model of substitution for protein (if no automatic guess) (m)
-
-		dna_options (Paragraph)
-			DNA options
 
 		ratio (Float)
 			Transition/transversion ratio (t)
 
-		nuc_freq (Paragraph)
-			Nucleotids frequencies (in %) (f)
+		GTR_acrate (Float)
+			A-C rate (1)
+
+		GTR_agrate (Float)
+			A-G rate (2)
+
+		GTR_atrate (Float)
+			A-T rate (3)
+
+		GTR_cgrate (Float)
+			C-G rate (4)
+
+		GTR_ctrate (Float)
+			C-T rate (5)
+
+		GTR_gtrate (Float)
+			G-T rate (6)
 
 		use_specified (Switch)
 			Use specified values
@@ -97,9 +106,6 @@ Bio::Tools::Run::PiseApplication::Puzzle
 		symmetrize_frequencies (Switch)
 			Symmetrize doublet frequencies (s)
 
-		rate_options (Paragraph)
-			Rate heterogeneity options
-
 		rate_heterogeneity (Excl)
 			Model of rate heterogeneity (w)
 
@@ -112,9 +118,6 @@ Bio::Tools::Run::PiseApplication::Puzzle
 		invariable (Float)
 			Fraction of invariable sites (i)
 
-		user_tree_options (Paragraph)
-			User Tree options
-
 		user_tree (Switch)
 			Tree search procedure: User tree (k)
 
@@ -123,9 +126,6 @@ Bio::Tools::Run::PiseApplication::Puzzle
 
 		no_tree (Switch)
 			Pairwise distances only (no tree) (k)
-
-		output_options (Paragraph)
-			Output options
 
 		outgroup (Integer)
 			Display as outgroup (o)
@@ -145,6 +145,64 @@ Bio::Tools::Run::PiseApplication::Puzzle
 		list_trees (Switch)
 			List puzzling step trees (j)
 
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+email or the web:
+
+  bioperl-bugs@bioperl.org
+  http://bioperl.org/bioperl-bugs/
+
+=head1 AUTHOR
+
+Catherine Letondal (letondal@pasteur.fr)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003 Institut Pasteur & Catherine Letondal.
+All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+http://bioweb.pasteur.fr/seqanal/interfaces/Puzzle.html
+
+=item *
+
+Bio::Tools::Run::PiseApplication
+
+=item *
+
+Bio::Tools::Run::AnalysisFactory::Pise
+
+=item *
+
+Bio::Tools::Run::PiseJob
+
+=back
+
 =cut
 
 #'
@@ -159,20 +217,20 @@ use Bio::Tools::Run::PiseApplication;
 =head2 new
 
  Title   : new()
- Usage   : my $Puzzle = Bio::Tools::Run::PiseApplication::Puzzle->new($remote, $email, @params);
+ Usage   : my $Puzzle = Bio::Tools::Run::PiseApplication::Puzzle->new($location, $email, @params);
  Function: Creates a Bio::Tools::Run::PiseApplication::Puzzle object.
            This method should not be used directly, but rather by 
-           a Bio::Factory::Pise instance:
-           my $factory = Bio::Factory::Pise->new(-email => 'me@myhome');
+           a Bio::Tools::Run::AnalysisFactory::Pise instance.
+           my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
            my $Puzzle = $factory->program('Puzzle');
- Example :
+ Example : -
  Returns : An instance of Bio::Tools::Run::PiseApplication::Puzzle.
 
 =cut
 
 sub new {
-    my ($class, $remote, $email, @params) = @_;
-    my $self = $class->SUPER::new($remote, $email);
+    my ($class, $location, $email, @params) = @_;
+    my $self = $class->SUPER::new($location, $email);
 
 # -- begin of definitions extracted from /local/gensoft/lib/Pise/5.a/PerlDef/Puzzle.pm
 
@@ -183,6 +241,11 @@ sub new {
     $self->{DESCRIPTION}   = "Tree reconstruction for sequences by quartet puzzling and maximum likelihood";
 
     $self->{OPT_EMAIL}   = 0;
+
+    $self->{CATEGORIES}   =  [  
+
+         "phylogeny",
+  ];
 
     $self->{AUTHORS}   = "Strimmer, von Haeseler";
 
@@ -231,6 +294,13 @@ sub new {
 	"protein_model", 	# Model of substitution for protein (if no automatic guess) (m)
 	"dna_options", 	# DNA options
 	"ratio", 	# Transition/transversion ratio (t)
+	"GTR_options", 	# GTR model rates
+	"GTR_acrate", 	# A-C rate (1)
+	"GTR_agrate", 	# A-G rate (2)
+	"GTR_atrate", 	# A-T rate (3)
+	"GTR_cgrate", 	# C-G rate (4)
+	"GTR_ctrate", 	# C-T rate (5)
+	"GTR_gtrate", 	# G-T rate (6)
 	"nuc_freq", 	# Nucleotids frequencies (in %) (f)
 	"use_specified", 	# Use specified values
 	"a_freq", 	# pi(A)
@@ -277,6 +347,13 @@ sub new {
 	"protein_model" => 'Excl',
 	"dna_options" => 'Paragraph',
 	"ratio" => 'Float',
+	"GTR_options" => 'Paragraph',
+	"GTR_acrate" => 'Float',
+	"GTR_agrate" => 'Float',
+	"GTR_atrate" => 'Float',
+	"GTR_cgrate" => 'Float',
+	"GTR_ctrate" => 'Float',
+	"GTR_gtrate" => 'Float',
 	"nuc_freq" => 'Paragraph',
 	"use_specified" => 'Switch',
 	"a_freq" => 'Float',
@@ -336,7 +413,7 @@ sub new {
 		"perl" => '($value)? "" : "v\\n"',
 	},
 	"puzzling_step" => {
-		"perl" => '(defined $value && $value != $vdef)? "n\\n$value\\n" : ""',
+		"perl" => '(defined $value and $value != $vdef)? "n\\n$value\\n" : ""',
 	},
 	"protein_options" => {
 	},
@@ -345,7 +422,27 @@ sub new {
 	"dna_options" => {
 	},
 	"ratio" => {
-		"perl" => '(defined $value)? "t\\n$value\\n" : ""',
+		"perl" => '(defined $value) ? "t\\n$value\\n" : ""',
+	},
+	"GTR_options" => {
+	},
+	"GTR_acrate" => {
+		"perl" => '(defined $value and $value != $vdef) ? "1\\n$value\\n" : ""',
+	},
+	"GTR_agrate" => {
+		"perl" => '(defined $value and $value != $vdef) ? "2\\n$value\\n" : ""',
+	},
+	"GTR_atrate" => {
+		"perl" => '(defined $value and $value != $vdef) ? "3\\n$value\\n" : ""',
+	},
+	"GTR_cgrate" => {
+		"perl" => '(defined $value and $value != $vdef) ? "4\\n$value\\n" : ""',
+	},
+	"GTR_ctrate" => {
+		"perl" => '(defined $value and $value != $vdef) ? "5\\n$value\\n" : ""',
+	},
+	"GTR_gtrate" => {
+		"perl" => '(defined $value and $value != $vdef) ? "6\\n$value\\n" : ""',
 	},
 	"nuc_freq" => {
 	},
@@ -383,7 +480,7 @@ sub new {
 		"perl" => '(defined $value)? "a\\n$value\\n" : ""',
 	},
 	"gamma_number" => {
-		"perl" => '(defined $value && $value != $vdef)? "c\\n$value\\n" : ""',
+		"perl" => '(defined $value and $value != $vdef)? "c\\n$value\\n" : ""',
 	},
 	"invariable" => {
 		"perl" => '(defined $value)? "i\\n$value\\n" : ""',
@@ -443,6 +540,12 @@ sub new {
 	"puzzling_step" => 1,
 	"protein_model" => 1,
 	"ratio" => 1,
+	"GTR_acrate" => 11,
+	"GTR_agrate" => 11,
+	"GTR_atrate" => 11,
+	"GTR_cgrate" => 11,
+	"GTR_ctrate" => 11,
+	"GTR_gtrate" => 11,
 	"use_specified" => 50,
 	"a_freq" => 51,
 	"c_freq" => 52,
@@ -470,41 +573,48 @@ sub new {
 
     $self->{BY_GROUP_PARAMETERS}  = [
 	"seqtype",
-	"Puzzle",
-	"dna_options",
-	"rate_options",
+	"nuc_freq",
+	"GTR_options",
 	"outfile",
 	"outtree",
 	"outdist",
 	"params",
-	"nuc_freq",
+	"dna_options",
+	"Puzzle",
 	"control_options",
+	"protein_options",
+	"rate_options",
 	"user_tree_options",
 	"output_options",
-	"protein_options",
-	"list_trees",
+	"protein_model",
+	"ratio",
 	"infile",
 	"approximate",
-	"puzzling_step",
-	"ratio",
 	"user_tree",
 	"no_tree",
-	"protein_model",
+	"puzzling_step",
 	"outgroup",
 	"branch_length",
 	"estimates",
 	"estimation_by",
 	"list_unresolved",
+	"list_trees",
 	"stdinput",
 	"dna_model",
-	"symmetrize_frequencies",
+	"GTR_ctrate",
+	"GTR_gtrate",
+	"GTR_acrate",
 	"constrain_TN",
+	"symmetrize_frequencies",
+	"GTR_agrate",
+	"GTR_atrate",
+	"GTR_cgrate",
 	"f84_ratio",
 	"y_r",
 	"rate_heterogeneity",
+	"gamma_number",
 	"invariable",
 	"alpha",
-	"gamma_number",
 	"use_specified",
 	"a_freq",
 	"c_freq",
@@ -535,6 +645,13 @@ sub new {
 	"protein_model" => 0,
 	"dna_options" => 0,
 	"ratio" => 0,
+	"GTR_options" => 0,
+	"GTR_acrate" => 0,
+	"GTR_agrate" => 0,
+	"GTR_atrate" => 0,
+	"GTR_cgrate" => 0,
+	"GTR_ctrate" => 0,
+	"GTR_gtrate" => 0,
 	"nuc_freq" => 0,
 	"use_specified" => 0,
 	"a_freq" => 0,
@@ -581,6 +698,13 @@ sub new {
 	"protein_model" => 0,
 	"dna_options" => 0,
 	"ratio" => 0,
+	"GTR_options" => 0,
+	"GTR_acrate" => 0,
+	"GTR_agrate" => 0,
+	"GTR_atrate" => 0,
+	"GTR_cgrate" => 0,
+	"GTR_ctrate" => 0,
+	"GTR_gtrate" => 0,
 	"nuc_freq" => 0,
 	"use_specified" => 0,
 	"a_freq" => 0,
@@ -627,6 +751,13 @@ sub new {
 	"protein_model" => 0,
 	"dna_options" => 0,
 	"ratio" => 0,
+	"GTR_options" => 0,
+	"GTR_acrate" => 0,
+	"GTR_agrate" => 0,
+	"GTR_atrate" => 0,
+	"GTR_cgrate" => 0,
+	"GTR_ctrate" => 0,
+	"GTR_gtrate" => 0,
 	"nuc_freq" => 0,
 	"use_specified" => 0,
 	"a_freq" => 1,
@@ -673,6 +804,13 @@ sub new {
 	"protein_model" => "Model of substitution for protein (if no automatic guess) (m)",
 	"dna_options" => "DNA options",
 	"ratio" => "Transition/transversion ratio (t)",
+	"GTR_options" => "GTR model rates",
+	"GTR_acrate" => "A-C rate (1)",
+	"GTR_agrate" => "A-G rate (2)",
+	"GTR_atrate" => "A-T rate (3)",
+	"GTR_cgrate" => "C-G rate (4)",
+	"GTR_ctrate" => "C-T rate (5)",
+	"GTR_gtrate" => "G-T rate (6)",
 	"nuc_freq" => "Nucleotids frequencies (in %) (f)",
 	"use_specified" => "Use specified values",
 	"a_freq" => "pi(A)",
@@ -719,6 +857,13 @@ sub new {
 	"protein_model" => 0,
 	"dna_options" => 0,
 	"ratio" => 0,
+	"GTR_options" => 0,
+	"GTR_acrate" => 0,
+	"GTR_agrate" => 0,
+	"GTR_atrate" => 0,
+	"GTR_cgrate" => 0,
+	"GTR_ctrate" => 0,
+	"GTR_gtrate" => 0,
 	"nuc_freq" => 0,
 	"use_specified" => 0,
 	"a_freq" => 0,
@@ -754,9 +899,10 @@ sub new {
 	"control_options" => ['approximate','puzzling_step','protein_options','dna_options','rate_options','user_tree_options',],
 	"protein_options" => ['protein_model',],
 	"protein_model" => ['0','','1','Dayhoff (Dayhoff et al. 1978)','2','JTT (Jones et al. 1992)','3','mtREV24 (Adachi-Hasegawa 1996)','4','BLOSUM 62 (Henikoff-Henikoff 1992)','5','VT (Mueller-Vingron 2000)','6','WAG (Whelan-Goldman 2000)',],
-	"dna_options" => ['ratio','nuc_freq',],
+	"dna_options" => ['ratio','GTR_options','nuc_freq',],
+	"GTR_options" => ['GTR_acrate','GTR_agrate','GTR_atrate','GTR_cgrate','GTR_ctrate','GTR_gtrate',],
 	"nuc_freq" => ['use_specified','a_freq','c_freq','g_freq',],
-	"dna_model" => ['1','HKY (Hasegawa et al. 1985)','2','TN (Tamura-Nei 1993)','3','SH (Schoeniger-von Haeseler 1994)',],
+	"dna_model" => ['1','HKY (Hasegawa et al. 1985)','2','TN (Tamura-Nei 1993)','3','GTR (e.g. Lanave et al. 1980)',],
 	"rate_options" => ['rate_heterogeneity','alpha','gamma_number','invariable',],
 	"rate_heterogeneity" => ['1','Uniform rate','2','Gamma distributed rates','3','Two rates (1 invariable + 1 variable)','4','Mixed (1 invariable + n Gamma rates)',],
 	"user_tree_options" => ['user_tree','tree_file','no_tree',],
@@ -781,6 +927,7 @@ sub new {
 		'' => '""',
 		'1' => '""',
 		'2' => '"m\\n"',
+		'3' => '"m\\nm\\n"',
 
 	},
 	"rate_heterogeneity" => {
@@ -812,6 +959,12 @@ sub new {
 	"approximate" => '1',
 	"puzzling_step" => '1000',
 	"protein_model" => '1',
+	"GTR_acrate" => '1.00',
+	"GTR_agrate" => '1.00',
+	"GTR_atrate" => '1.00',
+	"GTR_cgrate" => '1.00',
+	"GTR_ctrate" => '1.00',
+	"GTR_gtrate" => '1.00',
 	"use_specified" => '0',
 	"dna_model" => '1',
 	"constrain_TN" => '0',
@@ -845,13 +998,32 @@ sub new {
 		"perl" => '$seqtype ne "DNA" ',
 	},
 	"protein_model" => {
-		"perl" => '$seqtype ne "DNA"  && ! $guessmodel',
+		"perl" => '$seqtype ne "DNA" and ! $guessmodel',
 	},
 	"dna_options" => {
-		"perl" => '$seqtype eq "DNA" ',
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
 	},
 	"ratio" => {
 		"perl" => '$seqtype eq "DNA" ',
+	},
+	"GTR_options" => { "perl" => '1' },
+	"GTR_acrate" => {
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
+	},
+	"GTR_agrate" => {
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
+	},
+	"GTR_atrate" => {
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
+	},
+	"GTR_cgrate" => {
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
+	},
+	"GTR_ctrate" => {
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
+	},
+	"GTR_gtrate" => {
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
 	},
 	"nuc_freq" => {
 		"perl" => '$seqtype eq "DNA" ',
@@ -872,27 +1044,27 @@ sub new {
 		"perl" => '$seqtype eq "DNA" ',
 	},
 	"constrain_TN" => {
-		"perl" => '$seqtype eq "DNA"  && $dna_model eq "2"',
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "2"',
 	},
 	"f84_ratio" => {
-		"perl" => '$seqtype eq "DNA"  && $dna_model eq "2"',
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "2"',
 	},
 	"y_r" => {
-		"perl" => '$seqtype eq "DNA"  && $dna_model eq "2"',
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "2"',
 	},
 	"symmetrize_frequencies" => {
-		"perl" => '$seqtype eq "DNA"  && $dna_model eq "3"',
+		"perl" => '$seqtype eq "DNA" and $dna_model eq "3"',
 	},
 	"rate_options" => { "perl" => '1' },
 	"rate_heterogeneity" => { "perl" => '1' },
 	"alpha" => {
-		"perl" => '$rate_heterogeneity eq "2" || $rate_heterogeneity eq "4" ',
+		"perl" => '$rate_heterogeneity eq "2" or $rate_heterogeneity eq "4" ',
 	},
 	"gamma_number" => {
-		"perl" => '$rate_heterogeneity eq "2" || $rate_heterogeneity eq "4" ',
+		"perl" => '$rate_heterogeneity eq "2" or $rate_heterogeneity eq "4" ',
 	},
 	"invariable" => {
-		"perl" => '$rate_heterogeneity eq "3" || $rate_heterogeneity eq "4" ',
+		"perl" => '$rate_heterogeneity eq "3" or $rate_heterogeneity eq "4" ',
 	},
 	"user_tree_options" => { "perl" => '1' },
 	"user_tree" => { "perl" => '1' },
@@ -956,6 +1128,13 @@ sub new {
 	"protein_model" => 0,
 	"dna_options" => 0,
 	"ratio" => 0,
+	"GTR_options" => 0,
+	"GTR_acrate" => 0,
+	"GTR_agrate" => 0,
+	"GTR_atrate" => 0,
+	"GTR_cgrate" => 0,
+	"GTR_ctrate" => 0,
+	"GTR_gtrate" => 0,
 	"nuc_freq" => 0,
 	"use_specified" => 0,
 	"a_freq" => 0,
@@ -1002,6 +1181,13 @@ sub new {
 	"protein_model" => 0,
 	"dna_options" => 0,
 	"ratio" => 0,
+	"GTR_options" => 0,
+	"GTR_acrate" => 0,
+	"GTR_agrate" => 0,
+	"GTR_atrate" => 0,
+	"GTR_cgrate" => 0,
+	"GTR_ctrate" => 0,
+	"GTR_gtrate" => 0,
 	"nuc_freq" => 0,
 	"use_specified" => 0,
 	"a_freq" => 0,
@@ -1037,6 +1223,12 @@ sub new {
 	"puzzling_step" => "params",
 	"protein_model" => "params",
 	"ratio" => "params",
+	"GTR_acrate" => "params",
+	"GTR_agrate" => "params",
+	"GTR_atrate" => "params",
+	"GTR_cgrate" => "params",
+	"GTR_ctrate" => "params",
+	"GTR_gtrate" => "params",
 	"use_specified" => "params",
 	"a_freq" => "params",
 	"c_freq" => "params",
@@ -1067,7 +1259,7 @@ sub new {
 		"The Dayhoff and JTT matrices are for use with proteins encoded on nuclear DNA, and the mtREV24 matrix is for use with proteins encoded on mtDNA. The BLOSUM 62 model is for more distantly related amino acid sequences (Henikoff and Henikoff 1992).",
 	],
 	"dna_model" => [
-		"The following models are implemented for nucleotides: the Tamura-Nei (TN) model, the Hasegawa et al. (HKY) model, and the Schöniger & von Haeseler (SH) model. The SH model describes the evolution of pairs of dependent nucleotides (pairs are the first and the second nucleotide, the third and the fourth nucleotide and so on). It allows for specification of the transition-transversion ratio. The originally proposed model (Schöniger & von Haeseler 1994) is obtained by setting the transition-transversion parameter to 0.5. The Jukes-Cantor (1969), the Felsenstein (1981), and the Kimura (1980) model are all special cases of the HKY model.",
+		"The following models are implemented for nucleotides: the Tamura-Nei (TN) model, the Hasegawa et al. (HKY) model, and the Schöniger and von Haeseler (SH) model. The SH model describes the evolution of pairs of dependent nucleotides (pairs are the first and the second nucleotide, the third and the fourth nucleotide and so on). It allows for specification of the transition-transversion ratio. The originally proposed model (Schöniger and von Haeseler 1994) is obtained by setting the transition-transversion parameter to 0.5. The Jukes-Cantor (1969), the Felsenstein (1981), and the Kimura (1980) model are all special cases of the HKY model.",
 	],
 
     };
