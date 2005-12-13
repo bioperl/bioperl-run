@@ -30,6 +30,15 @@ from the program primer3
 
 =head1 SYNOPSIS
 
+Bio::Tools::Primer3 creates the input files needed to design primers
+using primer3 and provides mechanisms to access data in the primer3
+output files.
+
+This module provides a bioperl interface to the program primer3. See
+http://frodo.wi.mit.edu/primer3/primer3_code.html for
+details and to download the software. This module should work for 
+primer3 release 1 but is not guaranteed to work with earlier versions.
+
   # design some primers.
   # the output will be put into temp.out
 
@@ -68,19 +77,9 @@ from the program primer3
 
   print "There were ", $results->number_of_results, " primers\n";
 
-Bio::Tools::Primer3 creates the input files needed to design primers
-using primer3 and provides mechanisms to access data in the primer3
-output files.
-
-This module provides a bioperl interface to the program primer3. See
-http://www-genome.wi.mit.edu/genome_software/other/primer3.html for
-details and to download the software.
-
 This module is based on one written by Chad Matsalla
-(bioinformatics1@dieselwurks.com)
-
-I have ripped some of his code, and added a lot of my own. I hope he is
-not mad at me!
+(bioinformatics1@dieselwurks.com). I have ripped some of his code, and 
+added a lot of my own. I hope he is not mad at me!
 
 The original version was designed to work with PrimedSeq and
 Bio::SeqFeature::Primer.  I will try and include those compatibilities
@@ -120,7 +119,13 @@ bioinformatics1@dieselwurks.com
 
 Shawn Hoon shawnh-at-stanford.edu
 Jason Stajich jason-at-bioperl.org
-Brian Osborne osborne1 - optonline.net
+Brian Osborne osborne1-at-optonline.net
+
+
+=head1 SEE ALSO
+
+L<Bio::Tools::Primer3>
+
 
 =head1 APPENDIX
 
@@ -294,7 +299,8 @@ sub program_dir {
       $self->{'program_dir'}=$dir;
    } 
    
-   # we need to stop here if we know what the answer is, otherwise we can never set it and then call it later
+   # we need to stop here if we know what the answer is, otherwise we can 
+   # never set it and then call it later
    return $self->{'program_dir'} if $self->{'program_dir'};
    
    if ($ENV{PRIMER3}) {
