@@ -79,7 +79,7 @@ details and to download the software.
 This module is based on one written by Chad Matsalla
 (bioinformatics1@dieselwurks.com)
 
-I have ripped some of his code, and added a lot of my own. I hope he's
+I have ripped some of his code, and added a lot of my own. I hope he is
 not mad at me!
 
 The original version was designed to work with PrimedSeq and
@@ -112,9 +112,7 @@ Rob Edwards
 
 redwards@utmem.edu
 
-Based heavily on work of 
-
-Chad Matsalla
+Based heavily on work of Chad Matsalla
 
 bioinformatics1@dieselwurks.com
 
@@ -122,6 +120,7 @@ bioinformatics1@dieselwurks.com
 
 Shawn Hoon shawnh-at-stanford.edu
 Jason Stajich jason-at-bioperl.org
+Brian Osborne osborne1 - optonline.net
 
 =head1 APPENDIX
 
@@ -188,7 +187,18 @@ BEGIN {
  PRIMER_WT_END_STABILITY PRIMER_WT_GC_PERCENT_GT
  PRIMER_WT_GC_PERCENT_LT PRIMER_WT_NUM_NS PRIMER_WT_POS_PENALTY
  PRIMER_WT_REP_SIM PRIMER_WT_SEQ_QUAL PRIMER_WT_SIZE_GT
- PRIMER_WT_SIZE_LT PRIMER_WT_TM_GT PRIMER_WT_TM_LT SEQUENCE TARGET );
+ PRIMER_WT_SIZE_LT PRIMER_WT_TM_GT PRIMER_WT_TM_LT SEQUENCE TARGET 
+ PRIMER_DEFAULT_PRODUCT
+ PRIMER_DEFAULT_SIZE
+ PRIMER_INSIDE_PENALTY
+ PRIMER_INTERNAL_OLIGO_MAX_TEMPLATE_MISHYB
+ PRIMER_OUTSIDE_PENALTY
+ PRIMER_LIB_AMBIGUITY_CODES_CONSENSUS
+ PRIMER_MAX_TEMPLATE_MISPRIMING
+ PRIMER_PAIR_MAX_TEMPLATE_MISPRIMING
+ PRIMER_PAIR_WT_TEMPLATE_MISPRIMING
+ PRIMER_WT_TEMPLATE_MISPRIMING
+);
 
 	foreach my $attr (@PRIMER3_PARAMS) {$OK_FIELD{$attr}++}
 }
@@ -213,16 +223,16 @@ sub AUTOLOAD {
            design primers against sequence
  Function: Start primer3 working and adds a sequence. At the moment it 
            will not clear out the old sequence, but I suppose it should.
- Returns : Doesn't return anything. If called with a filename will allow 
+ Returns : Does not return anything. If called with a filename will allow 
            you to retrieve the results
  Args    : -seq (optional) Bio::Seq object of sequence. This is required 
            to run primer3 but can be added later with add_targets()
-	   -outfile file name to output results to (can also be added 
+	        -outfile file name to output results to (can also be added 
            with $primer3->outfile_name
-	   -path path to primer3 executable, including program name, e.g. 
+	        -path path to primer3 executable, including program name, e.g. 
            "/usr/bin/primer3_core". This can also be set with program_name 
            and program_dir
-	   -verbose (optional) set verbose output
+	        -verbose (optional) set verbose output
  Notes   :
 
 =cut
@@ -521,9 +531,12 @@ sub _input_args {
   'PRIMER_PRODUCT_MIN_TM'=>'(float, default -1000000.0) The minimum allowed Tm of the product',
   'PRIMER_EXPLAIN_FLAG'=>'(boolean, default 0) If set it will print a bunch of information out.',
   'PRIMER_PRODUCT_SIZE_RANGE'=>'(size range list, default 100-300) space separated list of product sizes eg <a>-<b> <x>-<y>',
+  
+  'PRIMER_DEFAULT_PRODUCT' => '(size range list, default 100-300)',
   'PRIMER_PICK_INTERNAL_OLIGO'=>'(boolean, default 0) if set, a hybridization probe will be selected',
   'PRIMER_GC_CLAMP'=>'(int, default 0) Number of Gs and Cs at the 3 prime end.',
   'PRIMER_OPT_SIZE'=>'(int, default 20) Optimal primer size. Primers will be close to this value in length',
+  'PRIMER_DEFAULT_SIZE' => '(int, default 20)',
   'PRIMER_MIN_SIZE'=>'(int, default 18) Minimum size. Must be 0 < PRIMER_MIN_SIZE < PRIMER_MAX_SIZE ',
   'PRIMER_MAX_SIZE'=>'(int, default 27) Maximum size. Must be < 35.',
   'PRIMER_OPT_TM'=>'(float, default 60.0C) Optimum Tm of a primer.',
@@ -605,80 +618,19 @@ sub _input_args {
   'PRIMER_IO_WT_NUM_NS'=>'(float, default 0.0)',
   'PRIMER_IO_WT_REP_SIM'=>'(float, default 0.0)',
   'PRIMER_IO_WT_SEQ_QUAL'=>'(float, default 0.0)',
-  'PRIMER_IO_WT_END_QUAL'=>'(float, default 0.0)');
+  'PRIMER_IO_WT_END_QUAL'=>'(float, default 0.0)',
+  'PRIMER_INSIDE_PENALTY' =>  '(float, default -1.0)',
+  'PRIMER_INTERNAL_OLIGO_MAX_TEMPLATE_MISHYB' => '(decimal 9999.99, default 12.00)',
+  'PRIMER_OUTSIDE_PENALTY' => '(float, default 0.0)',
+  'PRIMER_LIB_AMBIGUITY_CODES_CONSENSUS' => '(boolean, default 1)',
+  'PRIMER_MAX_TEMPLATE_MISPRIMING' => '(decimal,9999.99, default -1.00)',
+  'PRIMER_PAIR_MAX_TEMPLATE_MISPRIMING' => '(decimal,9999.99, default -1.00)',
+  'PRIMER_PAIR_WT_TEMPLATE_MISPRIMING' => '(float, default 0.0)',
+  'PRIMER_WT_TEMPLATE_MISPRIMING' => '(float, default 0.0)'
+);
  $self->{'input_options'}=\%hash;
  return \%hash;
 }
 
-##############################################################################
-#                      COMMENTS                                              #
-#                                                                            #
-#  These comments are taken from the primer3 README file. They have an       #
-#  abbreviated explanation of what's                                         #
-#  what. You should read the readme file for more information                #
-#                                                                            #
-#  I have used this list to generate defaults, and handle output from primer.#
-#                                                                            #
-#  Note that I have ignored some experimental and/or deprecated things.      #
-#                                                                            #
-#  Rob Edwards 3/15/03                                                       #
-#                                                                            #
-##############################################################################
-
-# OUTPUT TAGS
-# each tage has PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO,PAIR}_<j>_<tag_name>
-# PRIMER_ERROR (string)	 describes user-correctible errors detected in the input.
-# Absent if no errors.
-# PRIMER_LEFT (start, length)	The selected left primer. Start is the 0-based 
-# index of the FIRST base, length its length.
-# PRIMER_RIGHT (start, length)	The selected right primer. Start is the 0-based 
-# index of the LAST base, length its length.
-# PRIMER_INTERNAL_OLIGO (start, length)		The selected internal oligo.
-# Start is the 0-based index of start base of the primer.
-# PRIMER_PRODUCT_SIZE (integer)	The product size of the PCR product.
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_EXPLAIN (string)	String containing 
-# statistics on the possiblities that primer3 considered in selecting a single oligo.
-# PRIMER_PAIR_EXPLAIN (string)	String containing statistics on picking a 
-# primer pair (plus internal oligo if requested).
-# PRIMER_PAIR_PENALTY (float)	The score for this pair (lower is better).
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_PENALTY (float)	The score for the primer 
-# selected (lower is better).
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SEQUENCE (string)	The sequence of the 
-# oligo. All seqs are 5'->3'
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_TM (float)	The Tm for the selected oligo.
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_GC_PERCENT (float)	The percent GC for 
-# the selected oligo
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SELF_ANY (float)	Score of complimentarity 
-# for the oligo
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_SELF_END (float)	Score of complimentarity 
-# for the oligo
-# PRIMER_PAIR_COMPL_ANY (float)	Score of complimentarity for the pair
-# PRIMER_PAIR_COMPL_END (float)	Score of complimentarity for the pair
-# PRIMER_WARNING (string)	Warnings generated by primer (separated by semicolons);
-# PRIMER_{LEFT,RIGHT,PAIR}_MISPRIMING_SCORE (float, string)	Maximum mispriming 
-# score for the primer, string is the id of corresponding library sequence.
-# PRIMER_PRODUCT_TM (float)	Tm of the product
-# PRIMER_PRODUCT_TM_OLIGO_TM_DIFF (float)	Tm difference
-# PRIMER_PAIR_T_OPT_A (float)
-# PRIMER_INTERNAL_OLIGO_MISHYB_SCORE (float, string)	Maximum mishybridization 
-# score and id of the sequence in MISHYB_LIBRARY
-# PRIMER_{LEFT,RIGHT,INTERNAL_OLIGO}_MIN_SEQ_QUALITY (int)	Minimum SEQUENCE 
-# quality from (e.g. phred scores)
-# PRIMER_{LEFT,RIGHT}_END_STABILITY (float)	Delta G of disruption of the five 
-# 3' bases of the oligo.
-# PRIMER_STOP_CODON_POSITION (int)	Position of the first base of the stop 
-# codon, if Primer3 found one, or -1 if Primer3 did not.
-
-
-# PRIMER3 EXIT STATUS CODES
-# 0 on normal operation
-# -1 under the following conditions:
-#    illegal command-line arguments.
-#    unable to fflush stdout.
-#    unable to open (for writing and creating) a .for, .rev
-#      or .int file (probably due to a protection problem).
-# -2 on out-of-memory
-# -3 empty input
-# -4 error in a "Global" input tag (message in PRIMER_ERROR).
 
 1;
