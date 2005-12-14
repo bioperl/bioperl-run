@@ -41,7 +41,6 @@ primer3 release 1 but is not guaranteed to work with earlier versions.
 
   # design some primers.
   # the output will be put into temp.out
-
   use Bio::Tools::Run::Primer3;
   use Bio::SeqIO;
 
@@ -80,11 +79,6 @@ primer3 release 1 but is not guaranteed to work with earlier versions.
 This module is based on one written by Chad Matsalla
 (bioinformatics1@dieselwurks.com). I have ripped some of his code, and 
 added a lot of my own. I hope he is not mad at me!
-
-The original version was designed to work with PrimedSeq and
-Bio::SeqFeature::Primer.  I will try and include those compatibilities
-too, but as of this writing neither are fully developed, so we'll see
-how far we get.
 
 =head1 FEEDBACK
 
@@ -638,5 +632,21 @@ sub _input_args {
  return \%hash;
 }
 
+=head2 _set_variable
+
+  Title   : _set_variable()
+  Usage   : $self->_set_variable('variable name', 'value');
+  Function: An internal function that sets a variable
+  Returns : Nothing.
+  Args    : None
+  Notes   : Used to set $self->{results} and $self->seqobject
+
+=cut
+
+sub _set_variable {
+	my ($self, $name, $value)=@_;
+	next unless ($name);
+	$self->{$name} = $value;
+}
 
 1;
