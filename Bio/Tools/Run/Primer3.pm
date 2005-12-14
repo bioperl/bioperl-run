@@ -632,21 +632,4 @@ sub _input_args {
  return \%hash;
 }
 
-=head2 _set_variable
-
-  Title   : _set_variable()
-  Usage   : $self->_set_variable('variable name', 'value');
-  Function: An internal function that sets a variable
-  Returns : Nothing.
-  Args    : None
-  Notes   : Used to set $self->{results} and $self->seqobject
-
-=cut
-
-sub _set_variable {
-	my ($self, $name, $value)=@_;
-	next unless ($name);
-	$self->{$name} = $value;
-}
-
 1;
