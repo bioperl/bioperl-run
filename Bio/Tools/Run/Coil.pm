@@ -11,12 +11,11 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Coil
+Bio::Tools::Run::Coil - wrapper for ncoils program
 
 =head1 SYNOPSIS
 
-  Build a Coil factory
-
+  # Build a Coil factory
   my $factory = Bio::Tools::Run::Coil->new($params);
 
   # Pass the factory a Bio::Seq object
@@ -25,7 +24,22 @@ Bio::Tools::Run::Coil
 
 =head1 DESCRIPTION
 
-Wrapper module for Coil
+This module is a wrapper for the B<ncoils> program available via
+<http://www.russell.embl-heidelberg.de/coils/coils.tar.gz> for predicting 
+coiled coils in protein sequences.
+
+By default it looks for an executable called I<ncoils> in the directory 
+specified by the I<COILSDIR> environmental variable.
+
+=head1 REFERENCES
+
+Lupas, van Dyke & Stock, 
+I<Predicting coiled coils from protein sequences>, 
+Science B<252>:1162-1164, 1991.
+
+Lupas, A.,
+I<Prediction and Analysis of Coiled-Coil Structures>,
+Meth. Enzymology B<266>:513-525, 1996.
 
 =head1 FEEDBACK
 
@@ -35,8 +49,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
- bioperl-l@bioperl.org          - General discussion
- http://bio.perl.org/MailList.html             - About the mailing lists
+ bioperl-l@bioperl.org              - General discussion
+ http://bio.perl.org/MailList.html  - About the mailing lists
 
 =head2 Reporting Bugs
 
@@ -46,11 +60,13 @@ web:
 
  http://bugzilla.bioperl.org/
 
-=head1 AUTHOR
+=head1 AUTHORS
 
  Based on the EnsEMBL module Bio::EnsEMBL::Pipeline::Runnable::Protein::Coil
  originally written by Marc Sohrmann (ms2@sanger.ac.uk)
+
  Written in BioPipe by Balamurugan Kumarasamy <savikalpa@fugu-sg.org>
+
  Cared for by the Fugu Informatics team (fuguteam@fugu-sg.org)
 
 =head1 APPENDIX
