@@ -23,26 +23,24 @@ Mdust - Perl extension for Mdust nucleotide filtering
 
 =head1 DESCRIPTION
 
-Perl wrapper for the nucleic acid complexity filtering program mdust as 
-available from TIGR (http://www.tigr.org/tdb/tgi/software/).  Takes a 
-bioperl primary seq object of type DNA as input. Returns a Bio::Seq 
-object with the low-complexity regions changed to Ns OR a 
+Perl wrapper for the nucleic acid complexity filtering program B<mdust> as 
+available from TIGR via L<http://www.tigr.org/tdb/tgi/software/>.  Takes a 
+Bio::PrimarySeq object of type DNA as input. Returns a Bio::Seq 
+object with the low-complexity regions changed to Ns, or a 
 Bio::Seq::RichSeq object with the low-complexity regions identified as 
-a SeqFeature::Generic with primary tag = 'Excluded'.
+a Bio::SeqFeature::Generic with primary tag = 'Excluded'.
 
 This module uses the environment variable MDUSTDIR to find the mdust 
-program. Set MDUSTDIR to the directory containing the mdust binary 
-(example: if mdust is installed as /usr/local/bin/mdust, set MDUSTDIR 
-to '/usr/local/bin').
-
-
-=head2 EXPORT
-
-None
+program. Set MDUSTDIR to the directory containing the mdust binary.
+For example, if mdust is installed as I</usr/local/bin/mdust>, set MDUSTDIR 
+to I</usr/local/bin>.
 
 =head1 SEE ALSO
 
-L<mdust>, L<perl>.
+L<mdust>, 
+L<Bio::PrimarySeq>, 
+L<Bio::Seq::RichSeq>, 
+L<Bio::SeqFeature::Generic>
 
 =head1 FEEDBACK
 
@@ -66,10 +64,6 @@ the web:
 =head1 AUTHOR
 
 Donald Jackson (donald.jackson@bms.com)
-
-=head1 CONTRIBUTORS
-
-Additional contributors names and emails here
 
 =head1 APPENDIX
 
