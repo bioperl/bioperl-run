@@ -21,9 +21,8 @@ Bio::Tools::Run::Seg - Object for identifying low complexity
 
 =head1 DESCRIPTION
 
-Seg is a low complexity region (in protein) identifying program
-developed by Wootton and Federhen at the National Center for
-Biotechnology Information (NCBI)
+Seg is a program which identifies low complexity regions in proteins.
+It was developed by Wootton and Federhen at NCBI.
 
 =head1 FEEDBACK
 
@@ -33,8 +32,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
- bioperl-l@bioperl.org          - General discussion
- http://bio.perl.org/MailList.html             - About the mailing lists
+ bioperl-l@bioperl.org             - General discussion
+ http://bio.perl.org/MailList.html - About the mailing lists
 
 
 =head2 Reporting Bugs
@@ -78,7 +77,7 @@ BEGIN {
 =head2 program_name
 
  Title   : program_name
- Usage   : $factory>program_name()
+ Usage   : $factory->program_name()
  Function: holds the program name
  Returns:  string
  Args    : None
@@ -93,9 +92,9 @@ sub program_name {
 
  Title   : program_dir
  Usage   : $factory->program_dir(@params)
- Function: returns the program directory, obtiained from ENV variable.
- Returns:  string
- Args    :
+ Function: returns the program directory, obtained from ENV variable.
+ Returns : string, or undef if $SEGDIR not in ENV
+ Args    : None
 
 =cut
 
@@ -183,7 +182,7 @@ sub run{
 
         $self->_input($seq);
 
-         @feats = $self->_run();
+        @feats = $self->_run();
 
     }
 
@@ -195,7 +194,7 @@ sub run{
 
  Title   :   _input
  Usage   :   obj->_input($seqFile)
- Function:   Internal(not to be used directly)
+ Function:   Internal (not to be used directly)
  Returns :
  Args    :
 
@@ -214,9 +213,9 @@ sub _input {
 
  Title   :   _run
  Usage   :   $obj->_run()
- Function:   Internal(not to be used directly)
+ Function:   Internal (not to be used directly)
  Returns :   An array of Bio::SeqFeature::Generic objects
- Args    :
+ Args    :   None
 
 =cut
 
@@ -257,9 +256,9 @@ sub _run {
 
  Title   :   _writeSeqFile
  Usage   :   obj->_writeSeqFile($seq)
- Function:   Internal(not to be used directly)
- Returns :
- Args    :
+ Function:   Internal (not to be used directly)
+ Returns :   string - Fasta filename to which $seq was written
+ Args    :   Bio::Seq object
 
 =cut
 
