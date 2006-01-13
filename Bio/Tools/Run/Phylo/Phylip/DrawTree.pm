@@ -28,7 +28,8 @@ Felsenstein's Phylip suite.
 
 To set parameters with option you need to pass in an array reference.
 For example to change the margines
- $drawfact->HORIZMARGINS('
+
+  $drawfact->HORIZMARGINS('
 
 This can be a brittle module as the menus change in PHYLIP.  It should
 support phylip 3.6 but no guarantees.
