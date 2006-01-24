@@ -76,6 +76,14 @@ primer3 release 1 but is not guaranteed to work with earlier versions.
 
   print "There were ", $results->number_of_results, " primers\n";
 
+Bio::Tools::Run::Primer3 creates the input files needed to design primers
+using primer3 and provides mechanisms to access data in the primer3
+output files.
+
+This module provides a bioperl interface to the program primer3. See
+http://www-genome.wi.mit.edu/genome_software/other/primer3.html for
+details and to download the software.
+
 This module is based on one written by Chad Matsalla
 (bioinformatics1@dieselwurks.com). I have ripped some of his code, and 
 added a lot of my own. I hope he is not mad at me!
@@ -216,9 +224,9 @@ sub AUTOLOAD {
 =head2 new()
 
  Title   : new()
- Usage   : my $primer3 = Bio::Tools::Primer3->new(-file=>$file) to read 
+ Usage   : my $primer3 = Bio::Tools::Run::Primer3->new(-file=>$file) to read 
            a primer3 output file.
-           my $primer3 = Bio::Tools::Primer3->new(-seq=>sequence object) 
+           my $primer3 = Bio::Tools::Run::Primer3->new(-seq=>sequence object) 
            design primers against sequence
  Function: Start primer3 working and adds a sequence. At the moment it 
            will not clear out the old sequence, but I suppose it should.
@@ -400,14 +408,14 @@ sub add_targets {
  Title   : run()
  Usage   : $primer3->run();
  Function: Run the primer3 program with the arguments that you have supplied.
- Returns : A Bio::Tools::Run::Primer3 object containing the results.
+ Returns : A Bio::Tools::Primer3 object containing the results.
  Args    : None.
  Note    : See the Bio::Tools::Primer3 documentation for those functions.
 
 =cut
 
 sub run {
-	my($self,%args) = @_;
+	my($self) = @_;
 	my $executable = $self->executable;
 	my $input = $self->{'primer3_input'};
 	unless (-e $executable) {
@@ -460,7 +468,7 @@ sub run {
 
 	$self->cleanup;
 	# convert the results to individual results
-	$self->{results_obj} = new Bio::Tools::Primer3;
+	$self->{results_obj} = Bio::Tools::Primer3->new;
 	$self->{results_obj}->_set_variable('results', $self->{results});
 	$self->{results_obj}->_set_variable('seqobject', $self->{seqobject});
 
@@ -476,7 +484,7 @@ sub run {
 
  Title   : arguments()
  Usage   : $hashref = $primer3->arguments();
- Function: Describes the options that you can set through Bio::Tools::Primer3, 
+ Function: Describes the options that you can set through Bio::Tools::Run::Primer3, 
            with a brief (one line) description of what they are and their 
            default values
  Returns : A string (if an argument is supplied) or a reference to a hash.
