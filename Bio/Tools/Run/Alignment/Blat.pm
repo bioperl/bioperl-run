@@ -13,6 +13,8 @@ Bio::Tools::Run::Alignment::Blat
 
 Build a Blat factory.
 
+  use Bio::Tools::Run::Alignment::Blat;
+
   my $factory = Bio::Tools::Run::Alignment::Blat->new();
 
   # Pass the factory a Bio::Seq object
@@ -95,7 +97,7 @@ sub program_name {
 
  Title   : program_dir
  Usage   : $factory->program_dir(@params)
- Function: returns the program directory, obtiained from ENV variable.
+ Function: returns the program directory, obtained from ENV variable.
  Returns : string
  Args    :
 
@@ -106,69 +108,76 @@ sub program_dir {
 }
 
 sub AUTOLOAD {
-       my $self = shift;
-       my $attr = $AUTOLOAD;
-       $attr =~ s/.*:://;
-       $attr = uc $attr;
-       $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
-       $self->{$attr} = shift if @_;
-       return $self->{$attr};
+	my $self = shift;
+	my $attr = $AUTOLOAD;
+	$attr =~ s/.*:://;
+	$attr = uc $attr;
+	$self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
+	$self->{$attr} = shift if @_;
+	return $self->{$attr};
 }
 
 =head2 new
 
  Title   : new
  Usage   : $blat->new(@params)
- Function: creates a new Blat  factory
- Returns :  Bio::Tools::Run::Alignment::Blat
+ Function: creates a new Blat factory
+ Returns : Bio::Tools::Run::Alignment::Blat
  Args    :
 
 =cut
 
 sub new {
-    my ($class,@args) = @_;
-    my $self = $class->SUPER::new(@args);
-    my ($attr, $value);
-    while (@args)  {
-	$attr =   shift @args;
-	$value =  shift @args;
-	next if( $attr =~ /^-/ ); # don't want named parameters
-	if ($attr =~/PROGRAM/i) {
-	    $self->executable(Bio::Root::IO->catfile($value,$self->program_name));
-	    next;
+	my ($class,@args) = @_;
+	my $self = $class->SUPER::new(@args);
+	my ($attr, $value);
+	while (@args)  {
+		$attr =   shift @args;
+		$value =  shift @args;
+		next if ( $attr =~ /^-/ ); # don't want named parameters
+		if ($attr =~/PROGRAM/i) {
+			$self->executable(Bio::Root::IO->catfile($value,$self->program_name));
+			next;
+		}
+		$self->$attr($value);
 	}
-	$self->$attr($value);
-    }
-    return $self;
+	return $self;
 }
 
 =head2 run
 
  Title   :   run()
  Usage   :   $obj->run($query)
- Function:   Runs Blat  and creates an array of featrues
+ Function:   Runs Blat and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :   A Bio::PrimarySeqI
 
 =cut
 
 sub run {
-    my ($self,$query) = @_;
-    my @feats;
+	my ($self,$query) = @_;
+	my @feats;
 
-    if  (ref($query) ) {	# it is an object
+	if  (ref($query) ) {	# it is an object
     	if (ref($query) =~ /GLOB/) {
-	      $self->throw("cannot use filehandle");
+	      $self->throw("Cannot use filehandle as argument to run()");
     	}
     	my $infile1 = $self->_writeSeqFile($query);
     	$self->_input($infile1);
       return  $self->_run();
-    }
-    else {
-        $self->_input($query);
-        return $self->_run();
-    }
+	} else {
+		$self->_input($query);
+		return $self->_run();
+	}
 }
+
+=head2 align
+
+ Title   :   align
+ Usage   :   $obj->align($query)
+ Function:   Alias to run()
+
+=cut
 
 sub align {
   return shift->run(@_);
@@ -178,7 +187,7 @@ sub align {
 
  Title   :   _input
  Usage   :   obj->_input($seqFile)
- Function:   Internal(not to be used directly)
+ Function:   Internal (not to be used directly)
  Returns :
  Args    :
 
@@ -196,7 +205,7 @@ sub _input() {
 
  Title   :   _database
  Usage   :   obj->_database($seqFile)
- Function:   Internal(not to be used directly)
+ Function:   Internal (not to be used directly)
  Returns :
  Args    :
 
@@ -213,7 +222,7 @@ sub _database() {
 
  Title   :   _run
  Usage   :   $obj->_run()
- Function:   Internal(not to be used directly)
+ Function:   Internal (not to be used directly)
  Returns :   An array of Bio::SeqFeature::Generic objects
  Args    :
 
@@ -228,7 +237,7 @@ sub _run {
 
 	my $str= $self->executable;
 
-	$str .=' -out=psl '.$self->DB .' '.$self->_input.' '.$outfile;
+	$str .= ' -out=psl '.$self->DB .' '.$self->_input.' '.$outfile;
 
 #this is shell specific, please fix
 #     if ($self->quiet() || $self->verbose() < 0) { 
