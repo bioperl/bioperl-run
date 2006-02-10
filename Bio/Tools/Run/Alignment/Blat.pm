@@ -1,3 +1,5 @@
+# $Id$
+#
 # Copyright Balamurugan Kumarasamy
 #
 # You may distribute this module under the same terms as perl itself
@@ -9,7 +11,7 @@ Bio::Tools::Run::Alignment::Blat
 
 =head1 SYNOPSIS
 
-  Build a Blat  factory
+Build a Blat factory.
 
   my $factory = Bio::Tools::Run::Alignment::Blat->new();
 
@@ -19,7 +21,7 @@ Bio::Tools::Run::Alignment::Blat
 
 =head1 DESCRIPTION
 
-wrapper module for Blat program
+Wrapper module for Blat program
 
 =head1 FEEDBACK
 
@@ -29,8 +31,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
- bioperl-l@bioperl.org          - General discussion
- http://bio.perl.org/MailList.html             - About the mailing lists
+ bioperl-l@bioperl.org              - General discussion
+ http://bio.perl.org/MailList.html   - About the mailing lists
 
 =head2 Reporting Bugs
 
@@ -54,7 +56,8 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Alignment::Blat;
 
 use vars qw($AUTOLOAD @ISA $PROGRAM  $PROGRAMDIR
-            $PROGRAMNAME @BLAT_PARAMS @OTHER_SWITCHES %OK_FIELD);
+            $PROGRAMNAME @BLAT_PARAMS @OTHER_SWITCHES 
+				%OK_FIELD);
 use strict;
 use Bio::SeqIO;
 use Bio::Root::Root;
@@ -65,20 +68,21 @@ use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-       @BLAT_PARAMS=qw(DB PROGRAM OOC DB_TYPE QUERY_TYPE TILESIZE ONEOFF MINMATCH
-                       MINSCORE MINIDENTITY MAXGAP MAKEOOC REPMATCH MASK QMASK 
+       @BLAT_PARAMS=qw(DB PROGRAM OOC DB_TYPE QUERY_TYPE TILESIZE 
+							  ONEOFF MINMATCH MINSCORE MINIDENTITY MAXGAP 
+							  MAKEOOC REPMATCH MASK QMASK 
                        MINREPDIV TRIMT NOTRIMA VERBOSE);
        @OTHER_SWITCHES = qw(QUIET);
        foreach my $attr ( @BLAT_PARAMS, @OTHER_SWITCHES)
-                        { $OK_FIELD{$attr}++; }
+			{ $OK_FIELD{$attr}++; }
 }
 
 =head2 program_name
 
  Title   : program_name
- Usage   : $factory>program_name()
+ Usage   : $factory->program_name()
  Function: holds the program name
- Returns:  string
+ Returns : string
  Args    : None
 
 =cut
@@ -92,7 +96,7 @@ sub program_name {
  Title   : program_dir
  Usage   : $factory->program_dir(@params)
  Function: returns the program directory, obtiained from ENV variable.
- Returns:  string
+ Returns : string
  Args    :
 
 =cut
@@ -116,7 +120,7 @@ sub AUTOLOAD {
  Title   : new
  Usage   : $blat->new(@params)
  Function: creates a new Blat  factory
- Returns:  Bio::Tools::Run::Alignment::Blat
+ Returns :  Bio::Tools::Run::Alignment::Blat
  Args    :
 
 =cut
@@ -224,7 +228,7 @@ sub _run {
 
 	my $str= $self->executable;
 
-	$str.=' -out=psl '.$self->DB .' '.$self->_input.' '.$outfile;
+	$str .=' -out=psl '.$self->DB .' '.$self->_input.' '.$outfile;
 
 #this is shell specific, please fix
 #     if ($self->quiet() || $self->verbose() < 0) { 
@@ -254,7 +258,7 @@ sub _run {
 
  Title   :   _writeSeqFile
  Usage   :   obj->_writeSeqFile($seq)
- Function:   Internal(not to be used directly)
+ Function:   Internal (not to be used directly)
  Returns :
  Args    :
 
