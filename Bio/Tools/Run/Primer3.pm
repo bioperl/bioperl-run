@@ -44,11 +44,11 @@ primer3 release 1 but is not guaranteed to work with earlier versions.
   use Bio::Tools::Run::Primer3;
   use Bio::SeqIO;
 
-  my $seqio=Bio::SeqIO->new(-file=>'data/dna1.fa');
-  my $seq=$seqio->next_seq;
-  my $primer3 = Bio::Tools::Run::Primer3->new(-seq=>$seq,
-                                              -outfile=>"temp.out",
-                                              -path=>"/usr/bin/primer3_core");
+  my $seqio = Bio::SeqIO->new(-file=>'data/dna1.fa');
+  my $seq = $seqio->next_seq;
+  my $primer3 = Bio::Tools::Run::Primer3->new(-seq => $seq,
+                                              -outfile => "temp.out",
+                                              -path => "/usr/bin/primer3_core");
 
   # or after the fact you can change the program_name
   $primer3->program_name('my_suprefast_primer3');
@@ -123,11 +123,9 @@ Shawn Hoon shawnh-at-stanford.edu
 Jason Stajich jason-at-bioperl.org
 Brian Osborne osborne1-at-optonline.net
 
-
 =head1 SEE ALSO
 
 L<Bio::Tools::Primer3>
-
 
 =head1 APPENDIX
 
