@@ -18,7 +18,7 @@ Wrapper for Vista
   use Bio::Tools::Run::Alignment::Lagan;
   use Bio::AlignIO;
 
-  my $sio = Bio::SeqIO->new(-file=>$ARGV[0],-format=>'fasta');
+  my $sio = Bio::SeqIO->new(-file=>$ARGV[0],-format=>'genbank');
   my @seq;
   my $reference = $sio->next_seq;
   push @seq, $reference;
@@ -32,7 +32,7 @@ Wrapper for Vista
   my $aln = $lagan->mlagan(\@seq,'(fugu (mouse human))');
 
 
-  my $vis = Bio::Tools::Run::Vista->new('outfile'=>$out,
+  my $vis = Bio::Tools::Run::Vista->new('outfile'=>"outfile.pdf",
                                         'title' => "My Vista Plot",
                                         'annotation'=>\@features,
                                         'annotation_format'=>'GFF',
