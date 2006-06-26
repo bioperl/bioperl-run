@@ -21,8 +21,8 @@ Bio::Tools::Run::Alignment::MAFFT - run the MAFFT alignment tools
 =head1 DESCRIPTION
 
 You can get MAFFT from 
-http://www.biophys.kyoto-u.ac.jp/~katoh/programs/align/mafft4/
-Basically fftnsi is the default in this implementation.
+L<http://www.biophys.kyoto-u.ac.jp/~katoh/programs/align/mafft4/>.
+"fftnsi" is the default in this implementation.
 
 =head1 FEEDBACK
 
@@ -32,14 +32,15 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to one
 of the Bioperl mailing lists.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org          - General discussion
-  http://bio.perl.org/MailList.html             - About the mailing lists
+  bioperl-l@bioperl.org             - General discussion
+  http://bioperl.org/MailList.html - About the mailing lists
 
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
 the bugs and their resolution.  Bug reports can be submitted via the web:
- http://bugzilla.open-bio.org/
+
+  http://bugzilla.open-bio.org/
 
 =head1 AUTHOR -  Jason Stajich
 
@@ -204,7 +205,7 @@ sub AUTOLOAD {
 
  Title   : error_string
  Usage   : $obj->error_string($newval)
- Function: Where the output from the last analysus run is stored.
+ Function: Where the output from the last analysis run is stored.
  Returns : value of error_string
  Args    : newvalue (optional)
 
