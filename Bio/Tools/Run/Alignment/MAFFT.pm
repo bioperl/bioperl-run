@@ -238,9 +238,14 @@ sub version {
     return undef unless $exe = $self->executable;
     # this is a bit of a hack, but MAFFT is just a gawk script
     # so we are actually grepping the scriptfile
+    # UPDATE (Torsten Seemann)
+    # it now seems to be a 'sh' script and the format has changed
+    # slightly. i've tried to make the change compatible with both...
+    # version="v5.860 (2006/06/12)"; export version
+    
     if( open(NAME, "grep 'export version' $exe | ") ) {
 	while(<NAME>) {
-	    if( /version\s+([\d.]+)\s+/ ) {
+	    if( /version.*?([\d.]+)\s+/ ) {
 		return $1;
 	    }
 	}
