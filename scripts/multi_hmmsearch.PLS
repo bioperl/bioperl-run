@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: multi_hmmsearch.PLS,v 1.1 2006-03-16 21:08:39 bosborne Exp $
+# $Id: multi_hmmsearch.PLS,v 1.2 2006-07-01 15:34:54 mauricio Exp $
 
 use strict;
 
@@ -38,8 +38,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to the
 Bioperl mailing list. Your participation is much appreciated.
 
-  bioperl-l@bioperl.org              - General discussion
-  http://bioperl.org/MailList.shtml  - About the mailing lists
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
 =head2 Reporting Bugs
 
