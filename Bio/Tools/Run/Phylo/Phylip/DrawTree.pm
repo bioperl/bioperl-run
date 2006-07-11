@@ -1,4 +1,4 @@
-# $Id $
+# $Id$
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Phylip::DrawTree
 #
@@ -352,7 +352,7 @@ sub _setparams {
 	my $param_string = "";
 	my $cat = 0;
 	my ($hmargin,$vmargin);
-	my %menu = %{$Menu{$self->version}->{'DRAWGRAM'}};
+	my %menu = %{$Menu{$self->version}->{'DRAWTREE'}};
 	foreach  my $attr ( @DRAW_PARAMS) {	
 		$value = $self->$attr();
 		next unless defined $value;
