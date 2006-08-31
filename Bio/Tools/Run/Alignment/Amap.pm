@@ -264,7 +264,7 @@ sub version {
     return undef unless $exe = $self->executable;
     my $string = `$exe 2>&1` ;
     #AMAP version 1.09 - align multiple protein sequences and print to standard output
-    $string =~ /AMAP\s+version\s+(\d+\.\d+)/m;
+    $string =~ /AMAP\s+version.+(\d+\.\d+)/m;
     return $1 || undef;
 }
 
