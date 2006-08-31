@@ -151,8 +151,8 @@ BEGIN {
                            CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS EDGE-WEIGHT-THRESHOLD GAP-FACTOR); 
                            #FIXME: Last line are switches, dunno how to set them, 
                            #gave as params
-    @AMAP_SWITCHES = qw(PROGRESSIVE NOREORDER ALIGNMENT-ORDER MAXSTEP PRINT-POSTERIORS);
-    @OTHER_SWITCHES = qw();
+    @AMAP_SWITCHES = qw();
+    @OTHER_SWITCHES = qw(PROGRESSIVE NOREORDER ALIGNMENT-ORDER MAXSTEP PRINT-POSTERIORS);
 
 # Authorize attribute fields
     foreach my $attr ( @AMAP_PARAMS, @OTHER_SWITCHES ) {
