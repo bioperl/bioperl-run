@@ -76,7 +76,7 @@ information about it at this URL http://bio.math.berkeley.edu/amap/
 =head2 Helping the module find your executable 
 
 FIXME: Amap uses the same parameters as Probcons, plus a few others. I
-haven't had time to check the changes from the Probcons.pm
+haven't had time to check all the changes from the Probcons.pm
 runnable. Feel free to do it.
 
 You will need to enable Amap to find the amap program. This can be
@@ -148,10 +148,10 @@ BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
     @AMAP_PARAMS = qw (CONSISTENCY ITERATIVE-REFINEMENT 
                            PRE-TRAINING ANNOT TRAIN PARAMFILE MATRIXFILE
-                           CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS); 
+                           CLUSTALW PAIRS VITERBI VERBOSE EMISSIONS EDGE-WEIGHT-THRESHOLD GAP-FACTOR); 
                            #FIXME: Last line are switches, dunno how to set them, 
                            #gave as params
-    @AMAP_SWITCHES = qw();
+    @AMAP_SWITCHES = qw(PROGRESSIVE NOREORDER ALIGNMENT-ORDER MAXSTEP PRINT-POSTERIORS);
     @OTHER_SWITCHES = qw();
 
 # Authorize attribute fields
