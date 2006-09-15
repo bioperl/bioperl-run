@@ -23,22 +23,22 @@ Bio::Factory::EMBOSS - EMBOSS appliaction factory class
   # get an EMBOSS application  object from the factory
   $water = $f->program('water');
 
-  # here is an example of running the application
-  # water can compare 1 seq against 1->many sequences
+  # here is an example of running the application -
+  # water can compare 1 sequence against 1 or more sequences
   # in a database using Smith-Waterman
   my $seq_to_test; # this would have a seq here
   my @seqs_to_check; # this would be a list of seqs to compare 
-                     # (could be just 1)
+                       # (could be just 1)
   my $wateroutfile = 'out.water';
   $water->run({ '-sequencea' => $seq_to_test,
-              '-seqall'    => \@seqs_to_check,
-              '-gapopen'   => '10.0',
-              '-gapextend' => '0.5',
-              '-outfile'   => $wateroutfile});
+                '-seqall'    => \@seqs_to_check,
+                '-gapopen'   => '10.0',
+                '-gapextend' => '0.5',
+                '-outfile'   => $wateroutfile});
   # now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = new Bio::AlignIO(-format => 'emboss',
-			       -file   => $wateroutfile);
+		               	       -file   => $wateroutfile);
 
   while( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
@@ -50,7 +50,7 @@ The EMBOSS factory class encapsulates access to EMBOSS programs.  A
 factory object allows creation of only known applications.
 
 If you want to check command line options before sending them to the
-program set $factory-E<gt>verbose to positive integer. The value is
+program set $prog-E<gt>verbose to positive integer. The value is
 passed on to programs objects and the ADC description of the available
 command line options is parsed and compared to input.
 
