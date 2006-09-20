@@ -25,7 +25,7 @@ Bio::Tools::Run::Coil - wrapper for ncoils program
 =head1 DESCRIPTION
 
 This module is a wrapper for the B<ncoils> program available via
-<http://www.russell.embl-heidelberg.de/coils/coils.tar.gz> for predicting 
+L<http://www.russell.embl-heidelberg.de/coils/coils.tar.gz> for predicting 
 coiled coils in protein sequences.
 
 By default it looks for an executable called I<ncoils> in the directory 

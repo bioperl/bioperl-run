@@ -60,6 +60,7 @@ Bio::Tools::Run::AbstractRunner
 
 =head1 SYNOPSIS
 
+*** Give standard usage here
 
 =head1 DESCRIPTION
 

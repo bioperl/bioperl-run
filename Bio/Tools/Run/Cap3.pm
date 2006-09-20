@@ -19,6 +19,8 @@ Bio::Tools::Run::Cap3 - wrapper for Cap3
 
 =head1 DESCRIPTION
 
+*** Describe the object here
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
