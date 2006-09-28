@@ -43,22 +43,16 @@ alignments using the Clustalw program
 
 =head1 DESCRIPTION
 
-Note: this DESCRIPTION only documents the (Bio)perl interface to
+Note: this DESCRIPTION only documents the Bioperl interface to
 Clustalw.  Clustalw, itself, is a large & complex program - for more
 information regarding clustalw, please see the clustalw documentation
 which accompanies the clustalw distribution. Clustalw is available
-from (among others) ftp://ftp.ebi.ac.uk/pub/software/. Clustalw.pm has
-been tested so far only under Linux. I expect that it should also work
-under other Unix systems.  However, since the module is currently
-implemented using (unix) system calls, extensive modification may be
-necessary before Clustalw.pm would work under non-Unix operating
-systems (eg Windows, MacOS).  Clustalw.pm has only been tested using
-version 1.8 of clustalw.  Compatibility with earlier versions of the
-clustalw program is currently unknown. Before running Clustalw
-successfully it will be necessary: to install clustalw on your system,
-to edit the variable $clustdir in Clustalw.pm to point to the clustalw
-program, and to ensure that users have execute privilieges for the
-clustalw program.
+from (among others) ftp://ftp.ebi.ac.uk/pub/software/. Clustalw.pm has 
+only been tested using version 1.8 of clustalw.  Compatibility with 
+earlier versions of the clustalw program is currently unknown. Before 
+running Clustalw successfully it will be necessary: to install clustalw 
+on your system, and to ensure that users have execute privileges for 
+the clustalw program.
 
 =head2 Helping the module find your executable 
 
@@ -70,20 +64,23 @@ can be done in (at least) three ways:
     returns a clustalw executable on your system.
  2. Define an environmental variable CLUSTALDIR which is a 
     directory which contains the 'clustalw' application:
-    In bash 
+    In bash:
+
     export CLUSTALDIR=/home/username/clustalw1.8
-    In csh/tcsh
+
+    In csh/tcsh:
+
     setenv CLUSTALDIR /home/username/clustalw1.8
 
  3. Include a definition of an environmental variable CLUSTALDIR in
-    every script that will use this Clustalw wrapper module.
+    every script that will use this Clustalw wrapper module, e.g.:
+
     BEGIN { $ENV{CLUSTALDIR} = '/home/username/clustalw1.8/' }
     use Bio::Tools::Run::Alignment::Clustalw;
 
 If you are running an application on a webserver make sure the
 webserver environment has the proper PATH set or use the options 2 or
 3 to set the variables.
-
 
 =head2 How it works
 
@@ -128,7 +125,6 @@ write:
 	$factory->ktuple($ktuple);
  	$get_ktuple = $factory->ktuple();
 
-
 Once the factory has been created and the appropriate parameters set,
 one can call the method align() to align a set of unaligned sequences,
 or call profile_align() to add one or more sequences or a second
@@ -136,12 +132,13 @@ alignment to an initial alignment.
 
 Input to align() may consist of a set of unaligned sequences in the
 form of the name of file containing the sequences. For example,
-$inputfilename = 't/data/cysprot.fa'; $aln =
-$factory-E<gt>align($inputfilename);
+
+  $inputfilename = 't/data/cysprot.fa'; 
+  $aln = $factory-E<gt>align($inputfilename);
 
 Alternately one can create an array of Bio::Seq objects somehow
 
-	$str = Bio::SeqIO->new(-file=> 't/data/cysprot.fa', '-format' => 'Fasta');
+	$str = Bio::SeqIO->new(-file=> 't/data/cysprot.fa', -format => 'Fasta');
 	@seq_array =();
 	while ( my $seq = $str->next_seq() ) {push (@seq_array, $seq) ;}
 
@@ -151,8 +148,7 @@ and pass the factory a reference to that array
 	$aln = $factory->align($seq_array_ref);
 
 In either case, align() returns a reference to a SimpleAlign object
-which can then be displayed, stored, or converted to a UnivAlign
-object for further manipulation.
+which can then used (see L<Bio::SimpleAlign>).
 
 Once an initial alignment exists, one can pass the factory additional
 sequence(s) to be added (ie aligned) to the original alignment.  The
@@ -180,7 +176,9 @@ objects. For example,
 	$profile1 = 't/data/cysprot1a.msf';
 	$profile2 = 't/data/cysprot1b.msf';
 	$aln = $factory->profile_align($profile1,$profile2);
+
 or
+
 	$str1 = Bio::AlignIO->new(-file=> 't/data/cysprot1a.msf');
 	$aln1 = $str1->next_aln();
 	$str2 = Bio::AlignIO->new(-file=> 't/data/cysprot1b.msf');
@@ -191,12 +189,12 @@ In either case, profile_align() returns a reference to a SimpleAlign
 object containing an (super)alignment of the two input alignments.
 
 For more examples of syntax and use of Clustalw, the user is
-encouraged to run the script Clustalw.t is the bioperl/t directory.
+encouraged to look at the script Clustalw.t in the t/ directory.
 
 Note: Clustalw is still under development. Various features of the
 clustalw program have not yet been implemented.  If you would like
-that a specific clustalw feature be added to this perl interface, let
-me know.
+that a specific clustalw feature be added to this perl contact
+bioperl-l@bioperl.org.
 
 These can be specified as paramters when instantiating a new Clustalw
 object, or through get/set methods of the same name (lowercase).
