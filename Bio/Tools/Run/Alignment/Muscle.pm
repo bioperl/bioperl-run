@@ -112,7 +112,7 @@ use  Bio::Tools::Run::WrapperBase;
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
     @MUSCLE_PARAMS = qw(IN OUT TREE1 LOG LOGA SCOREFILE GAPOPEN 
-			MAXMB MAXHOURS MAXITERS);
+			MAXMB MAXHOURS MAXITERS KBAND);
     @MUSCLE_SWITCHES = qw(QUIET DIAGS REFINE STABLE GROUP 
 			  CLW CLWSTRICT MSF);
 
@@ -241,6 +241,7 @@ sub version {
     my $exe;
     return undef unless $exe = $self->executable;
     my $string = `$exe 2>&1` ;
+
     $string =~ /MUSCLE\s+v(\d+\.\d+)/m;
     return $1 || undef;
 }
