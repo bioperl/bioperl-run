@@ -183,21 +183,17 @@ skip ($serror, ref ($job) =~ /^Bio::Tools::Run::Analysis::Job/);
 
 $next_dependent_tests = 3;
 if ($job) {
-
-	# repeated calls to results() retrieves empty hashes;
-	# cache hash ref in a variable
-	my $results = $job->results;
 	
     print sprintf ($format, 'checking "detailed_status" ');
-    skip ($serror, eval { $results->{'detailed_status'} == 0 });
+    skip ($serror, eval { ${ $job->results ('detailed_status') }{'detailed_status'} == 0 });
     &print_error;
 
     print sprintf ($format, 'checking "report" ');
-    skip ($serror, eval { $results->{'report'} =~ /successfully/i });
+    skip ($serror, eval { ${ $job->results ('report') }{'report'} =~ /successfully/i });
     &print_error;
-	
+
     print sprintf ($format, 'checking "outseq" ');
-    skip ($serror, eval { $results->{'outseq'} =~ /^$seq$/ });
+    skip ($serror, eval { ${ $job->results ('outseq') }{'outseq'} =~ /^$seq$/ });
     &print_error;
 
 } else {
