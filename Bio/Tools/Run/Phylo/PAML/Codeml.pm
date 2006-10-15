@@ -378,6 +378,7 @@ sub program_dir {
            -executable => where the codeml executable resides
 
 See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
+
 =cut
 
 sub new {
