@@ -74,12 +74,12 @@ use Bio::Installer::Generic;
 @ISA = qw(Bio::Installer::Generic );
 
 BEGIN {
-    %DEFAULTS = ( 'ORIGIN_DOWNLOAD_DIR' => 'ftp://abacus.gene.ucl.ac.uk/pub/paml/',
+    %DEFAULTS = ( 'ORIGIN_DOWNLOAD_DIR' => 'http://abacus.gene.ucl.ac.uk/software/',
                   'BIN_FOLDER' => 'src',
                   'DESTINATION_DOWNLOAD_DIR' => '/tmp',
                   'DESTINATION_INSTALL_DIR' => "$ENV{'HOME'}",
-                  'PACKAGE_NAME' => 'paml3.14a.tar.gz',
-                  'DIRECTORY_NAME' => 'paml3.14',
+                  'PACKAGE_NAME' => 'paml3.15.tar.gz',
+                  'DIRECTORY_NAME' => 'paml3.15',
                   'ENV_NAME' => 'PAMLDIR',
                 );
 }
