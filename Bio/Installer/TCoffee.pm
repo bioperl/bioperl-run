@@ -77,8 +77,8 @@ BEGIN {
                   'BIN_FOLDER' => 'bin',
                   'DESTINATION_DOWNLOAD_DIR' => '/tmp',
                   'DESTINATION_INSTALL_DIR' => "$ENV{'HOME'}",
-                  'PACKAGE_NAME' => 'T-COFFEE_distribution.tar.gz',
-                  'DIRECTORY_NAME' => 'T-COFFEE_distribution_Version_1.37',
+                  'PACKAGE_NAME' => 'T-COFFEE_distribution_Version_4.45.tar.gz',
+                  'DIRECTORY_NAME' => 'T-COFFEE_distribution_Version_4.45',
                   'ENV_NAME' => 'TCOFFEEDIR',
                 );
 }
