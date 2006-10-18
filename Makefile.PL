@@ -113,21 +113,30 @@ the rest of bioperl-run will work fine.
 QQ_ERROR_QQ
 }
 
+# generate hash for prerequisites
+# for use in WriteMakefile
+my %prereq;
+while (my ($key, $value) = each %packages) {
+  my ($version,$desc,$expl,$module) = split( /\// , $value);
+  $prereq{$key} = $version;
+}
+
 WriteMakefile(
-    NAME	=> $NAME,
-    DISTNAME    => $DISTNAME,
-    VERSION     => $VERSION,
-    'dist'      => {  COMPRESS     => 'gzip -9f',
-                      SUFFIX       => '.gz', 
-                      DIST_DEFAULT => 'all tardist',
-                   },
-    ($] ge '5.005')  ? (
-	'AUTHOR' => 'Bioperl Team (bioperl-l@bioperl.org)',
-	'ABSTRACT' => 'Bioperl wrapper toolkit',
-	) : (),
-     'realclean'  => {  FILES        => join(' ',@BACKUP_FILES) }
+  NAME         => $NAME,
+  DISTNAME     => $DISTNAME,
+  VERSION      => $VERSION,
+  dist         => { COMPRESS     => 'gzip -9f',
+                    SUFFIX       => '.gz',
+		    DIST_DEFAULT => 'all tardist',
+  },
+  ($] ge '5.005') ? (
+    'AUTHOR'   => 'Bioperl Team (bioperl-l@bioperl.org)',
+    'ABSTRACT' => 'Bioperl Wrapper Toolkit',
+  ) : (),
+  realclean   => { FILES => join(' ', @BACKUP_FILES) },
+  DIR         => [  ], # directories with other Makefile.PL's in them
+  PREREQ_PM   => \%prereq,
+  # Once 'nmake ppd' has been issued, the PPD needs to be modified for use with PPM4
+  # For example, see http://www.bioperl.org/wiki/Create_a_Bioperl_PPM_Package
 );
-
-
-
 
