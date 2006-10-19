@@ -28,7 +28,7 @@ sub check_package {
     my ($name,$str) = @_;
     my ($ver,$desc,$expl,$module) = split( /\// , $str);
     if( !eval "require($name)") {
-    	if ($name eq 'Bio::Root::Root') {
+    	if ($name eq 'Bio::Root::Version') {
 	  print "Bioperl-run absolutely needs Bioperl to work - It makes no sense without it\n";
 	  exit(0);
 	}
