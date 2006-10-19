@@ -116,3 +116,6 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 
 29.     Vista - Visualizing global DNA  sequence alignments of arbitrary length
         http://www-gsd.lbl.gov/vista/VISTAdownload2.html
+
+30.     Exonerate - A package of alignment tools for protein and EST to genome/DNA alignments
+        http://www.ebi.ac.uk/~guy/exonerate/
