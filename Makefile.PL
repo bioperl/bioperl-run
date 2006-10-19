@@ -21,7 +21,7 @@ use ExtUtils::MakeMaker;
   'File::Temp'            => '0.0/Temporary File creation/Bio::Root::IO uses if present/Bio::DB::WebDBSeqI, Bio::Seq::LargePrimarySeq',
   'XML::Parser::PerlSAX'  => '0.0/XML SAX parser/Pise Applications/Pise::Job',
   'HTML::Parser'	  => '0.0/HTML Parser/Pise Applications/Pise::Job',
-  'Bio::Root::Root'       => '0.0/Bioperl//',
+  'Bio::Root::Version'       => '0.0/Bioperl//',
 );
 
 sub check_package {
