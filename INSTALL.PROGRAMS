@@ -119,3 +119,11 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 
 30.     Exonerate - A package of alignment tools for protein and EST to genome/DNA alignments
         http://www.ebi.ac.uk/~guy/exonerate/
+
+31.     AMAP- Protein multiple alignment based sequence annealing
+        http://bio.math.berkeley.edu/amap/
+
+32.     Blat - An alignment tool like BLAST, but structured differently
+        http://genome.ucsc.edu/cgi-bin/hgBlat
+
+
