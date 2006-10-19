@@ -1,4 +1,3 @@
-
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
 ## $Id$
@@ -9,24 +8,24 @@
 use strict;
 use vars qw($error $NTESTS);
 BEGIN {
-    $error = 0;
-    # to handle systems with no installed Test module
-    # we include the t dir (where a copy of Test.pm is located)
-    # as a fallback
-    eval { require Test; };
-    if( $@ ) {
-	use lib 't';
-    }
-    use Test;
-    $NTESTS = 30;
-    plan tests => $NTESTS;
-    eval { 
-     require XML::Twig;
-     require Bio::EMBOSS::Factory;
-    };
-    if( $@ ) {
-     $error = 1;
-    }
+	$error = 0;
+	# to handle systems with no installed Test module
+	# we include the t dir (where a copy of Test.pm is located)
+	# as a fallback
+	eval { require Test; };
+	if( $@ ) {
+		use lib 't';
+	}
+	use Test;
+	$NTESTS = 30;
+	plan tests => $NTESTS;
+	eval { 
+		require XML::Twig;
+		require Bio::Factory::EMBOSS;
+	};
+	if ( $@ ) {
+		$error = 1;
+	}
  }
 
 use Bio::Root::IO;
