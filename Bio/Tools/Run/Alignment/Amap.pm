@@ -202,7 +202,7 @@ sub new{
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
     my ($on) = $self->SUPER::_rearrange([qw(OUTFILE_NAME)], @args);
-    $self->outfile_name($on || '');
+    $self->outfile_name($on) if $on;
     my ($attr, $value);    
     $self->aformat($DEFAULTS{'AFORMAT'});
     
@@ -225,26 +225,6 @@ sub AUTOLOAD {
 
     $self->{$attr} = shift if @_;
     return $self->{$attr};
-}
-
-=head2 error_string
-
- Title   : error_string
- Usage   : $obj->error_string($newval)
- Function: Where the output from the last analysus run is stored.
- Returns : value of error_string
- Args    : newvalue (optional)
-
-
-=cut
-
-sub error_string{
-   my ($self,$value) = @_;
-   if( defined $value) {
-      $self->{'error_string'} = $value;
-    }
-    return $self->{'error_string'};
-
 }
 
 =head2  version
