@@ -339,11 +339,11 @@ sub subgroup {
 
 =head2 program_dir
 
- Title   :
+ Title   : program_dir
  Usage   :
  Function: Required by WrapperBase
  Throws  :
- Returns :
+ Returns : Name of directory with EMBOSS programs
  Args    :
 
 =cut
@@ -354,11 +354,11 @@ sub program_dir {
 
 =head2 program_path
 
- Title   :
+ Title   : program_path
  Usage   :
  Function: Required by WrapperBase
  Throws  :
- Returns :
+ Returns : Full path of program
  Args    :
 
 =cut
@@ -372,17 +372,18 @@ sub program_path {
 
 =head2 executable
 
- Title   :
+ Title   : executable
  Usage   :
  Function: Required by WrapperBase
  Throws  :
- Returns :
+ Returns : Name of program
  Args    :
 
 =cut
 
 sub executable {
-	#
+	my $self = shift;
+	$self->{_name};
 }
 
 1;
