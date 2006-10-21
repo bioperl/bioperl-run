@@ -55,7 +55,7 @@ ok(1);
 my $factory = new Bio::Factory::EMBOSS(-verbose => $verbose);
 ok($factory);
 my $compseqapp = $factory->program('compseq');
-exit if( $compseqapp->executable ) ;
+#exit if( $compseqapp->executable ) ;
 
 my $version = $factory->version;
 
@@ -72,9 +72,6 @@ my %input = ( '-word' => 4,
 	      '-outfile' => $compseqoutfile);
 $compseqapp->run(\%input);
 ok(-e $compseqoutfile);
-#if( open(IN, $compseqoutfile) ) {
-#    while(<IN>) { print }
-#}
 
 my $water = $factory->program('water');
 
@@ -175,25 +172,27 @@ ok $acd->descr('-reverse'), 'Set this to be true if you also wish to also count 
 ok $acd->unnamed('-reverse'), 0;
 ok $acd->default('-reverse'), 'No';
 
+__END__
+
 ## comparing input and ACD qualifiers
 ## commented out because verbose > 1 prints error messages
 ## that would confuse users running tests
-#
-#$compseqapp->verbose(1);
-#%input = ( '-word' => 4,
-#	   '-outfile' => $compseqoutfile);
-#eval {
-#    my $a = $compseqapp->run(\%input);
-#};
-#ok 1 if $@; # '-sequence' missing
-#
-#%input = ( '-word' => 4,
-#	   '-incorrect_option' => 'no value',
-#	   '-sequence' => Bio::Root::IO->catfile('t',
-#						 'data',
-#						 'dna1.fa'),
-#	   '-outfile' => $compseqoutfile);
-#eval {
-#    $compseqapp->run(\%input);
-#};
-#ok 1 if $@; # -incorrect_option is incorrect
+
+$compseqapp->verbose(1);
+%input = ( '-word' => 4,
+	   '-outfile' => $compseqoutfile);
+eval {
+    my $a = $compseqapp->run(\%input);
+};
+ok 1 if $@; # '-sequence' missing
+
+ %input = ( '-word' => 4,
+	   '-incorrect_option' => 'no value',
+	   '-sequence' => Bio::Root::IO->catfile('t',
+						 'data',
+						 'dna1.fa'),
+	   '-outfile' => $compseqoutfile);
+eval {
+    $compseqapp->run(\%input);
+};
+ok 1 if $@; # -incorrect_option is incorrect
