@@ -2,7 +2,6 @@
 #
 # BioPerl module for Bio::Factory::EMBOSS
 #
-#
 # Cared for by Heikki Lehvaslaiho <heikki-at-bioperl-dot-org>
 #
 # Copyright Heikki Lehvaslaiho
@@ -13,7 +12,7 @@
 
 =head1 NAME
 
-Bio::Factory::EMBOSS - EMBOSS appliaction factory class
+Bio::Factory::EMBOSS - EMBOSS application factory class
 
 =head1 SYNOPSIS
 
@@ -30,17 +29,17 @@ Bio::Factory::EMBOSS - EMBOSS appliaction factory class
   my @seqs_to_check; # this would be a list of seqs to compare 
                        # (could be just 1)
   my $wateroutfile = 'out.water';
-  $water->run({ '-sequencea' => $seq_to_test,
-                '-seqall'    => \@seqs_to_check,
-                '-gapopen'   => '10.0',
-                '-gapextend' => '0.5',
-                '-outfile'   => $wateroutfile});
+  $water->run({-sequencea => $seq_to_test,
+               -seqall    => \@seqs_to_check,
+               -gapopen   => '10.0',
+               -gapextend => '0.5',
+               -outfile   => $wateroutfile});
   # now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = new Bio::AlignIO(-format => 'emboss',
 		               	       -file   => $wateroutfile);
 
-  while( my $aln = $alnin->next_aln ) {
+  while ( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
   }
 
@@ -78,12 +77,7 @@ web:
 
 =head1 AUTHOR - Heikki Lehvaslaiho
 
-Email:  heikki-at-bioperl-dot-org
-Address:
-
-     EMBL Outstation, European Bioinformatics Institute
-     Wellcome Trust Genome Campus, Hinxton
-     Cambs. CB10 1SD, United Kingdom
+Email heikki-at-bioperl-dot-org
 
 =head1 APPENDIX
 
@@ -123,7 +117,6 @@ sub new {
   $self->_program_list; # retrieve info about available programs
 
   return $self;
-
 }
 
 =head2 location

@@ -1,7 +1,6 @@
- # $Id$
+# $Id$
 #
 # BioPerl module for Bio::Tools::Run::EMBOSSApplication
-#
 #
 # Cared for by Heikki Lehvaslaiho <heikki-at-bioperl-dot-org>
 #
@@ -13,7 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::EMBOSSApplication -  class for EMBOSS Applications
+Bio::Tools::Run::EMBOSSApplication - class for EMBOSS Applications
 
 =head1 SYNOPSIS
 
@@ -30,28 +29,28 @@ Bio::Tools::Run::EMBOSSApplication -  class for EMBOSS Applications
   # here is an example of running the application
   # water can compare 1 seq against 1->many sequences
   # in a database using Smith-Waterman
-  my $seq_to_test; # this would have a seq here
+  my $seq_to_test;     # this would have a seq here
   my @seqs_to_check; # this would be a list of seqs to compare 
-                     # (could be just 1)
+
   my $wateroutfile = 'out.water';
-  $water->run({ '-sequencea' => $seq_to_test,
-              '-seqall'    => \@seqs_to_check,
-              '-gapopen'   => '10.0',
-              '-gapextend' => '0.5',
-              '-outfile'   => $wateroutfile});
+  $water->run({-sequencea => $seq_to_test,
+               -seqall    => \@seqs_to_check,
+               -gapopen   => '10.0',
+               -gapextend => '0.5',
+               -outfile   => $wateroutfile});
   # now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = new Bio::AlignIO(-format => 'emboss',
-			       -file   => $wateroutfile);
+			                      -file   => $wateroutfile);
 
-  while( my $aln = $alnin->next_aln ) {
+  while ( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
   }
 
 =head1 DESCRIPTION
 
 The EMBOSSApplication class can represent EMBOSS any program. It is
-created by a Bio::Factory::EMBOSS object.
+created by a L<Bio::Factory::EMBOSS> object.
 
 If you want to check command line options before sending them to the
 program set $prog-E<gt>verbose to positive integer. The ADC
@@ -73,7 +72,7 @@ Bioperl mailing lists  Your participation is much appreciated.
 
 =head2 Reporting Bugs
 
-report bugs to the Bioperl bug tracking system to help us keep track
+Report bugs to the Bioperl bug tracking system to help us keep track
 the bugs and their resolution.  Bug reports can be submitted via the
 web:
 
@@ -81,12 +80,7 @@ web:
 
 =head1 AUTHOR - Heikki Lehvaslaiho
 
-Email:  heikki-at-bioperl-dot-org
-Address:
-
-     EMBL Outstation, European Bioinformatics Institute
-     Wellcome Trust Genome Campus, Hinxton
-     Cambs. CB10 1SD, United Kingdom
+Email  heikki-at-bioperl-dot-org
 
 =head2 CONTRIBUTORS
 
@@ -133,107 +127,107 @@ sub new {
 =cut
 
 sub run {
-    my ($self, $input) = @_;
-    $self->io->_io_cleanup();
-    # test input
-    $self->debug( Dumper($input) );
+	my ($self, $input) = @_;
+	$self->io->_io_cleanup();
+	# test input
+	$self->debug( Dumper($input) );
 
-    #parse ACD information
-    $self->acd if $self->verbose > 0;
+	# parse ACD information
+	$self->acd if $self->verbose > 0;
 
-    # collect the options into a string
-    my $option_string = '';
-    foreach my $attr (keys %{$input}) {
-	my $attr_name = substr($attr, 1) if substr($attr, 0, 1) =~ /\W/;
+	# collect the options into a string
+	my $option_string = '';
+	foreach my $attr (keys %{$input}) {
+		my $attr_name = substr($attr, 1) if substr($attr, 0, 1) =~ /\W/;
 
-	my $array = 0;
+		my $array = 0;
 
-	if( defined $input->{$attr} && ref($input->{$attr}) ) {
+		if( defined $input->{$attr} && ref($input->{$attr}) ) {
 
-	    my (@pieces);
+			my (@pieces);
 
-	    if( $array = (ref($input->{$attr}) =~ /array/i) ) {
-		foreach my $s ( @{$input->{$attr}} ) {
-		    @pieces = @{$input->{$attr}};
+			if( $array = (ref($input->{$attr}) =~ /array/i) ) {
+				foreach my $s ( @{$input->{$attr}} ) {
+					@pieces = @{$input->{$attr}};
+				}
+			} else {
+				@pieces = ($input->{$attr});
+			}
+			if( ! defined $pieces[0] ) {
+				# we ignore for now
+				$self->warn("specified a parameter $attr with no value");
+				$input->{$attr} = undef;
+				return;
+			} elsif( $pieces[0]->isa('Bio::PrimarySeqI') ) {
+				unless(  $SEQIOLOADED ) { 
+					require Bio::SeqIO;
+					$SEQIOLOADED = 1;
+				}
+				my ($tfh,$tempfile) = $self->io->tempfile(-dir => $self->tempdir);
+				my $out = new Bio::SeqIO(-format => 'fasta',
+												 -fh     => $tfh);
+				foreach my $seq ( @pieces ) {
+					$out->write_seq($seq);
+				}
+				$out->close();
+				$input->{$attr} = $tempfile;
+				close($tfh);
+				undef $tfh;
+			} elsif( $pieces[0]->isa('Bio::Align::AlignI') ) {
+				unless(  $ALIGNIOLOADED ) { 
+					require Bio::AlignIO;
+					$ALIGNIOLOADED = 1;
+				}
+				my ($tfh,$tempfile) = $self->io->tempfile();
+				my $out = new Bio::AlignIO(-format => 'msf',
+													-fh     => $tfh);
+				foreach my $p ( @pieces ) {
+					$out->write_aln($p);
+				}
+				$input->{$attr} = $tempfile;
+				close($tfh);
+				undef $tfh;
+			}
 		}
-	    } else {
-		@pieces = ($input->{$attr});
-	    }
-	    if( ! defined $pieces[0] ) {
-		# we ignore for now
-		$self->warn("specified a parameter $attr with no value");
-		$input->{$attr} = undef;
-		return;
-	    } elsif( $pieces[0]->isa('Bio::PrimarySeqI') ) {
-		unless(  $SEQIOLOADED ) { 
-		    require Bio::SeqIO;
-		    $SEQIOLOADED = 1;
+
+		# check each argument against ACD
+		if ($self->verbose > 0) {
+
+			last unless defined $self->acd; # might not have the parser
+
+			$self->throw("Attribute [$attr] not recognized!\n")
+			  unless $self->acd->qualifier($attr);
 		}
-		my ($tfh,$tempfile) = $self->io->tempfile(-dir => $self->tempdir);
-		my $out = new Bio::SeqIO(-format => 'fasta',
-					 -fh     => $tfh);
-		foreach my $seq ( @pieces ) {
-		    $out->write_seq($seq);
-		}
-		$out->close();
-		$input->{$attr} = $tempfile;
-		close($tfh);
-		undef $tfh;
-	    } elsif( $pieces[0]->isa('Bio::Align::AlignI') ) {
-		unless(  $ALIGNIOLOADED ) { 
-		    require Bio::AlignIO;
-		    $ALIGNIOLOADED = 1;
-		}
-		my ($tfh,$tempfile) = $self->io->tempfile();
-		my $out = new Bio::AlignIO(-format => 'msf',
-					   -fh     => $tfh);
-		foreach my $p ( @pieces ) {
-		    $out->write_aln($p);
-		}
-		$input->{$attr} = $tempfile;
-		close($tfh);
-		undef $tfh;
-	    }
+
+		# print out debugging info
+		$self->debug("Input attr: ". $attr_name. " => ".
+						 $input->{$attr}. "\n");
+		$option_string .= " " . $attr;
+		$option_string .= " ". $input->{$attr}
+		  if defined $input->{$attr};
 	}
 
-	# check each argument against ACD
+	#check mandatory attributes against given ones
 	if ($self->verbose > 0) {
-
-	    last unless defined $self->acd; # might not have the parser
-
-	    $self->throw("Attribute [$attr] not recognized!\n")
-		unless $self->acd->qualifier($attr);
+		last unless defined $self->acd; # might not have the parser
+		#	$self->acd->mandatory->print;
+		#	if ($self->name eq 'water') {
+		#	    print Dumper($self->acd->mandatory);
+		#	}
+		foreach my $attr (keys %{$self->acd->mandatory} ) {
+			last unless defined $self->acd; # might not have the parser
+			unless (defined $input->{$attr}) {
+				print "-" x 38, "\n", "MISSING MANDATORY ATTRIBUTE: $attr\n", 
+				  "-" x 38, "\n";
+				$self->acd->print($attr) and
+				  $self->throw("Program ". $self->name.
+									" needs attribute [$attr]!\n")
+			  }
+		}
 	}
-
-	# print out debugging info
-	$self->debug("Input attr: ". $attr_name. " => ".
-		     $input->{$attr}. "\n");
-	$option_string .= " " . $attr;
-	$option_string .= " ". $input->{$attr}
-	   if defined $input->{$attr};
-    }
-
-    #check mandatory attributes against given ones
-    if ($self->verbose > 0) {
-	last unless defined $self->acd; # might not have the parser
-#	$self->acd->mandatory->print;
-#	if ($self->name eq 'water') {
-#	    print Dumper($self->acd->mandatory);
-#	}
-	foreach my $attr (keys %{$self->acd->mandatory} ) {
-	    last unless defined $self->acd; # might not have the parser
-	    unless (defined $input->{$attr}) {
-		print "-" x 38, "\n", "MISSING MANDATORY ATTRIBUTE: $attr\n", 
-		    "-" x 38, "\n";
-		$self->acd->print($attr) and
-		$self->throw("Program ". $self->name.
-			 " needs attribute [$attr]!\n")
-	    }
-	}
-    }
-    my $runstring = join (' ', $self->name, $option_string, '-auto');
-    $self->debug( "Command line: ", $runstring, "\n"); 
-    return `$runstring`;
+	my $runstring = join (' ', $self->name, $option_string, '-auto');
+	$self->debug( "Command line: ", $runstring, "\n"); 
+	return `$runstring`;
 }
 
 =head2 acd
@@ -347,8 +341,5 @@ sub subgroup {
     my ($self) = @_;
     return $self->{'_subgroup'};
 }
-
-
-
 
 1;
