@@ -2,8 +2,6 @@
 #
 # BioPerl module for Bio::Tools::Run::EMBOSSApplication
 #
-# Cared for by Heikki Lehvaslaiho <heikki-at-bioperl-dot-org>
-#
 # Copyright Heikki Lehvaslaiho
 #
 # You may distribute this module under the same terms as perl itself
@@ -96,13 +94,11 @@ methods. Internal methods are usually preceded with a _
 # Let the code begin...
 
 package Bio::Tools::Run::EMBOSSApplication;
-use vars qw(@ISA $SEQIOLOADED $ALIGNIOLOADED);
+use vars qw( $SEQIOLOADED $ALIGNIOLOADED );
 use strict;
 use Data::Dumper;
-use Bio::Root::Root;
 use Bio::Tools::Run::EMBOSSacd;
-use Bio::Tools::Run::WrapperBase;
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 sub new {
   my($class, $args) = @_;
@@ -207,7 +203,7 @@ sub run {
 		  if defined $input->{$attr};
 	}
 
-	#check mandatory attributes against given ones
+	# check mandatory attributes against given ones
 	if ($self->verbose > 0) {
 		last unless defined $self->acd; # might not have the parser
 		#	$self->acd->mandatory->print;
@@ -306,7 +302,6 @@ sub descr {
 
            If the application is assigned into a subgroup
            use l<subgroup> to get it.
-
  Throws  : 
  Returns : string, group name
  Args    : group string
@@ -340,6 +335,54 @@ sub group {
 sub subgroup {
     my ($self) = @_;
     return $self->{'_subgroup'};
+}
+
+=head2 program_dir
+
+ Title   :
+ Usage   :
+ Function: Required by WrapperBase
+ Throws  :
+ Returns :
+ Args    :
+
+=cut
+
+sub program_dir {
+	return Bio::Root::IO->catfile($ENV{EMBOSS_ACDROOT});
+}
+
+=head2 program_path
+
+ Title   :
+ Usage   :
+ Function: Required by WrapperBase
+ Throws  :
+ Returns :
+ Args    :
+
+=cut
+
+sub program_path {
+	my $self = shift;
+	my $name = $self->{_name};
+	my $dir = Bio::Root::IO->catfile($ENV{EMBOSS_ACDROOT});
+	return "$dir/$name";
+}
+
+=head2 executable
+
+ Title   :
+ Usage   :
+ Function: Required by WrapperBase
+ Throws  :
+ Returns :
+ Args    :
+
+=cut
+
+sub executable {
+	#
 }
 
 1;
