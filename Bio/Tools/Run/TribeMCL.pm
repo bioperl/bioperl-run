@@ -376,29 +376,16 @@ sub _generate_families {
               my %taxon;
               $taxon_str=~s/=;/=undef;/g if $taxon_str;
               %taxon = map{split '=',$_}split';',$taxon_str if $taxon_str;
-              my $name = $taxon{'taxon_common_name'} eq 'undef' ?
-                  undef : $taxon{'taxon_common_name'}
-                        if $taxon{'taxon_common_name'};
-              my @classification = $taxon{'taxon_classification'} eq 'undef' ?
-                  undef : split(':',$taxon{'taxon_classification'})
-                        if $taxon{'taxon_classification'};
-              my $tax_id = $taxon{'taxon_id'} eq 'undef' ? 
-                  undef : $taxon{'taxon_id'} if $taxon{'taxon_id'};
-              my $sub_species = $taxon{'taxon_sub_species'} eq 'undef'?
-                  undef : $taxon{'taxon_sub_species'} if $taxon{'taxon_sub_species'} ;
+              my $name = $taxon{'taxon_common_name'};
+              my @classification = $taxon{'taxon_classification'} ? split(':',$taxon{'taxon_classification'}) : ();
+              my $tax_id = $taxon{'taxon_id'};
+              my $sub_species = $taxon{'taxon_sub_species'};
 
-              my $species;
-
-              eval {
-                  $species = Bio::Species->new( -classification=>\@classification);
-              };
-              if($@){
-                $self->warn("Problems creating Species $@");
-                next;
-              }
-              $species->common_name($name);
-              $species->sub_species($sub_species);
-              $species->ncbi_taxid($tax_id);
+              my $species = Bio::Species->new();
+              $species->common_name($name) if $name; #*** should this actually be scientific_name() ?
+              $species->sub_species($sub_species) if $sub_species;
+              $species->ncbi_taxid($tax_id) if $tax_id;
+              $species->classification(@classification) if @classification;
               $mem->species($species); 
 
               push @mem, $mem;
