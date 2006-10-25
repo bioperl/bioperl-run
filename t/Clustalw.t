@@ -21,7 +21,7 @@ BEGIN {
   #$error = 0;
 
   # Setup Test::More and plan the number of tests
-  use Test::More tests=>40;
+  use Test::More tests=>39;
   
   # Use modules that are needed in this test that are from
   # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
@@ -136,25 +136,31 @@ SKIP: {
   is( $aln->no_sequences, 7,                            'Correct number of seqs returned' );
   
   SKIP: {
-    # TODO: Is this needed, or should min version be bumped to > 1.82. Discuss with module author
+	# TODO: Is this needed, or should min version be bumped to > 1.82. Discuss with module author
     # keeping this to be compatible with older t/Clustalw.t
-    skip("clustalw 1.81 & 1.82 contain a profile align bug", 2)
-      unless $factory->version > 1.82;
-    
-    $aln = $factory->profile_align($profile1,$profile2);
+    skip("clustalw 1.81 & 1.82 contain a profile align bug", 2) unless $factory->version > 1.82;
+	
+	my $str1 = Bio::AlignIO->new(-file=> $profile1);
+    my $aln1 = $str1->next_aln();
+    my $str2 = Bio::AlignIO->new(-file=> $profile2);
+    my $aln2 = $str2->next_aln();
+      
+    $aln = $factory->profile_align($aln1,$aln2);
     is($aln->get_seq_by_pos(2)->get_nse, 'CATH_HUMAN/1-335', 'Got correct sequence by position');
-    
-    $aln = $factory->profile_align($profile1,$profile1);
+	
+    $str2 = Bio::SeqIO->new(-file=> Bio::Root::IO->catfile("t","data","cysprot1b.fa"));
+    my $seq = $str2->next_seq();
+    $aln = $factory->profile_align($aln1,$seq);
     is($aln->get_seq_by_pos(2)->get_nse,  'CATH_HUMAN/1-335', 'Got correct sequence by position');
   }
 }
 
 # TODO: Test factory methods that change parameters
-TODO: {
-  local $TODO = "program_name setting not finished";
-  $factory->program_name('something_silly');
-  is( $factory->program_name, 'something_silly',         'Set and got program_name correctly' );
-}
+#TODO: {
+#  local $TODO = "program_name setting not finished";
+#  $factory->program_name('something_silly');
+#  is( $factory->program_name, 'something_silly',         'Set and got program_name correctly' );
+#}
 $factory->ktuple(4);
 is( $factory->ktuple, 4,                                 'Set and got ktuple correctly' );
 $factory->topdiags(10);
