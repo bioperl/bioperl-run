@@ -28,8 +28,8 @@ This module is a wrapper for the B<ncoils> program available via
 L<http://www.russell.embl-heidelberg.de/coils/coils.tar.gz> for predicting 
 coiled coils in protein sequences.
 
-By default it looks for an executable called I<ncoils> in the directory 
-specified by the I<COILSDIR> environmental variable.
+By default it looks for an executable called I<ncoils> and data/parameter files
+in the directory specified by the I<COILSDIR> environmental variable.
 
 =head1 REFERENCES
 
