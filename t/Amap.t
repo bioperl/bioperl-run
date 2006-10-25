@@ -21,7 +21,7 @@ BEGIN {
   #$error = 0;
 
   # Setup Test::More and the number of planned tests
-  use Test::More tests=>21;
+  use Test::More tests=>19;
   
   # Use modules that are needed in this test that are from
   # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
@@ -38,8 +38,6 @@ END {
   
   foreach my $file ( qw(cysprot.dnd cysprot1a.dnd) ) {
     unlink $file;
-    # check it was deleted
-    ok( ! -e $file, 'Temp file deleted successfully' );
   }
 }
 
@@ -78,7 +76,7 @@ is( $factory->program_name(), 'amap',                    'Correct exe default na
 SKIP: {
   # condition used to skip this block of tests
   #skip($why, $how_many_in_block);
-  skip("Couldn't find the executable", 11)
+  skip("Couldn't find the executable", 9)
     unless defined $factory->executable();
   
   # test all factory methods that depend on the executable
@@ -116,9 +114,9 @@ SKIP: {
 }
 
 # TODO: test factory methods that change parameters
-TODO: {
-  local $TODO = 'program_name setting is unfinished';
-  $factory->program_name('something_silly');
-  is( $factory->program_name, 'something_silly',        'Set and got program_name correctly') ;
-}
+#TODO: {
+#  local $TODO = 'program_name setting is unfinished';
+#  $factory->program_name('something_silly');
+#  is( $factory->program_name, 'something_silly',        'Set and got program_name correctly') ;
+#}
 
