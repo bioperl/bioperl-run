@@ -55,14 +55,13 @@ ok(1);
 my $factory = new Bio::Factory::EMBOSS(-verbose => $verbose);
 ok($factory);
 my $compseqapp = $factory->program('compseq');
-#exit if( $compseqapp->executable ) ;
-
-my $version = $factory->version;
 
 if( ! $compseqapp ) { 
     # no EMBOSS installed
     exit(0);
 }
+
+my $version = $factory->version;
 
 ok($compseqapp);
 my %input = ( '-word' => 4,
