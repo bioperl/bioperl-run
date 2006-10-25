@@ -50,6 +50,10 @@ To run mlagan/lagan, the executables "mlagan" and "lagan.pl" must be
 in your path or you must have an environment variable that points to
 the executable directory "LAGAN_DIR=/opt/lagan_executables/"
 
+It is strongly recommended to set LAGAN_DIR instead of simply including lagan.pl
+in your path. If LAGAN_DIR is not set, you must define $lagandir in lagan.pl and
+potentially other scripts.
+
 All lagan and mlagan parameters listed in their Readmes can be set
 except for the mfa flag which has been turned on by default to prevent
 parsing of the alignment format.
@@ -152,7 +156,7 @@ BEGIN {
     }
 
     #The LAGAN_DIR environment variable should be set if the lagan
-    #executables aren't in your path.
+    #executables aren't in your path. Or in fact, even if they are!
     $PROGRAM_DIR = $ENV{'LAGAN_DIR'} || '';
 }
 
