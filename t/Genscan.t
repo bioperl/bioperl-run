@@ -24,12 +24,12 @@ use Bio::Tools::Run::Genscan;
 use Bio::Root::IO;
 
 
-if(! $ENV{'GENSCAN_DIR'}){
-    warn("Need to define env variable GENSCAN_DIR to run test");
+if(! $ENV{'GENSCANDIR'}){
+    warn("Need to define env variable GENSCANDIR to run test");
     exit(0);
 }
 
-my $paramfile = Bio::Root::IO->catfile($ENV{'GENSCAN_DIR'},"HumanIso.smat");
+my $paramfile = Bio::Root::IO->catfile($ENV{'GENSCANDIR'},"HumanIso.smat");
 my @params = ('MATRIX',$paramfile);
 my  $factory = Bio::Tools::Run::Genscan->new(@params);
 ok $factory->isa('Bio::Tools::Run::Genscan');
