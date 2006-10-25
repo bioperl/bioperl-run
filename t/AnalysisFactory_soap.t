@@ -1,105 +1,100 @@
-# This is -*-Perl-*- code
+# -*-Perl-*-
+# $id$
 ## Bioperl Test Harness Script for Modules
-##
-# $Id$
-
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl AnalysisFactory_soap.t'
 
 use strict;
-use vars qw($NUMTESTS);
-use lib '..','./blib/lib';
 
-my $error;
+BEGIN {
+  # Things to do ASAP once the script is run
+  # even before anything else in the file is parsed
+  #use vars qw($NUMTESTS $DEBUG $error);
+  #$DEBUG = $ENV{'BIOIPERLDEBUG'} || 0;
+  
+  # Use installed Test module, otherwise fall back
+  # to copy of Test.pm located in the t dir
+  eval { require Test::More; };
+  if ( $@ ) {
+    use lib 't/lib';
+  }
 
-BEGIN { 
-    # to handle systems with no installed Test module
-    # we include the t dir (where a copy of Test.pm is located)
-    # as a fallback
-    eval { require Test; };
-    $error = 0;
-    if( $@ ) {
-	use lib 't';
-    }
-    use Test;
-    $NUMTESTS = 8;
-    plan tests => $NUMTESTS;
+  # Currently no errors
+  #$error = 0;
+
+  # Setup Test::More and plan the number of tests
+  use Test::More tests=>12;
+  
+  # Use modules that are needed in this test that are from
+  # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
+  # use_ok('<module::to::use>');
+  use_ok('Bio::Tools::Run::AnalysisFactory');
+  #use_ok('File::Spec');
 }
 
-my $testnum;
-my $verbose = 0;
-
-## End of black magic.
-##
-## Insert additional test code below but remember to change
-## the 'plan tests =>...' in the BEGIN block to reflect the
-## total number of tests that will be run. 
-
-my $serror = 0;
-
-my $format = ($ENV{'TEST_DETAILS'} ? '%-40s' : '');
-
-unless (eval "require SOAP::Lite; 1;") {
-    print STDERR "SOAP::Lite not installed. Skipping some tests.\n";
-    $serror = 1;
+END {
+  # Things to do right at the very end, just
+  # when the  interpreter finishes/exits
+  # E.g. deleting intermediate files produced during the test
+  
+  #foreach my $file ( qw(cysprot.dnd cysprot1a.dnd) ) {
+  #  unlink $file;
+  #  # check it was deleted
+  #  ok( ! -e $file, 'Expected temp file deleted' );
+  #}
 }
 
-# check 'use ...'
-eval { require Bio::Tools::Run::AnalysisFactory };
-print sprintf ($format, 'use Bio::Tools::Run::AnalysisFactory '); ok (%Bio::Tools::Run::AnalysisFactory::);
-&print_error;
+# setup input files etc
+# none in this test
 
-# check 'new with a default access...'
-my $factory;
-eval { $factory = new Bio::Tools::Run::AnalysisFactory (-verbose => '0'); };
-print sprintf ($format, 'new Bio::Tools::Run::AnalysisFactory '); skip ($serror, defined $factory);
-&print_error;
+# setup output files etc
+# none in this test
 
-# check 'new with an explicit access...'
-my $factory_tmp;
-eval { $factory_tmp = new Bio::Tools::Run::AnalysisFactory (-access => 'soap'); };
-print sprintf ($format, 'new with an explicit access '); skip ($serror, defined $factory_tmp);
-&print_error;
+# setup global objects that are to be used in more than one test
+# Also test they were initialised correctly
+# test new with default access
+my $factory = Bio::Tools::Run::AnalysisFactory->new();
+isa_ok( $factory, 'Bio::Tools::Run::AnalysisFactory');
 
-# check 'new with a non-existing access...'
-my $factory_tmp2;
-eval { $factory_tmp2 = new Bio::Tools::Run::AnalysisFactory (-access => 'not_exist'); };
-print sprintf ($format, 'new with a non-existing access '); skip ($serror, !defined $factory_tmp2);
+# test new with explicit access
+$factory = Bio::Tools::Run::AnalysisFactory->new(-access=>'soap');
+isa_ok( $factory, 'Bio::Tools::Run::AnalysisFactory');
 
-# the rest makes sense only with SOAP::Lite installed
-if ($serror) {
-    foreach ( $Test::ntest..$NUMTESTS) { 
-	skip (1,1);
-    }
-    exit (0);
-}
-
-# check using a real service
+# test new with non-existing access
 eval {
-    print sprintf ($format, 'calling "available_categories" ');
-    skip ($serror, grep (/protein/i, @{ $factory->available_categories }));
-
-    print sprintf ($format, 'calling "available_analyses" ');
-    skip ($serror, grep (/seqret/i, @{ $factory->available_analyses }));
-
-    print sprintf ($format, 'calling "available_analyses(category)" ');
-    skip ($serror, grep (/seqret/i, @{ $factory->available_analyses ('edit') }));
-
-    print sprintf ($format, 'calling "create_analysis" ');
-    skip ($serror, defined $factory->create_analysis ('edit::seqret'));
+  $factory = Bio::Tools::Run::AnalysisFactory->new(-access=>'non_existing');
 };
+ok( $@, 'Non existant access method threw an error' );
 
-if ($@) {
-    print STDERR "Warning: (Probably) couldn't connect to $$factory{'_location'}.\n" . $@;
-    foreach ( $Test::ntest..$NUMTESTS) { 
-	skip ('(Probably) because of no network access',1);
-    }
-    exit(0);
+# test default factory values
+
+# Now onto the nitty gritty tests of the modules methods
+
+# block of tests to skip if you know the tests will fail
+# under some condition. E.g.:
+#   Need network access,
+#   Wont work on particular OS,
+#   Cant find the exectuable
+# DO NOT just skip tests that seem to fail for an unknown reason
+SKIP: {
+  # condition used to skip this block of tests
+  #skip($why, $how_many_in_block);
+  skip("SOAP::Lite not installed, wanted to check real service(s)", 7)
+    unless use_ok('SOAP::Lite');
+  
+  my $array_ref = $factory->available_categories;
+  isa_ok( $array_ref, 'ARRAY' );
+  ok( grep(/protein/i, @$array_ref), 'available_categories returned category with protein' );
+  
+  $array_ref = $factory->available_analyses;
+  isa_ok( $array_ref, 'ARRAY' );
+  ok( grep(/seqret/i, @$array_ref), 'available_analyses returned category with seqret' );
+  
+  $array_ref = $factory->available_analyses('edit');
+  isa_ok( $array_ref, 'ARRAY' );
+  ok( grep(/seqret/i, @$array_ref), 'available_analyses("edit") returned something' );
+  
+  my $service = $factory->create_analysis('edit.seqret');
+  isa_ok( $service, 'Bio::Tools::Run::Analysis::soap' );
+  
 }
 
 
-sub print_error {
-    print STDERR $@ if $@ && $ENV{'TEST_DETAILS'};
-}
-
-__END__
