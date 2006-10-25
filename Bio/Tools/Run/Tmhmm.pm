@@ -27,7 +27,11 @@ Bio::Tools::Run::Tmhmm - Object for identifying transmembrane helixes
 
 =head1 DESCRIPTION
 
-Tmhmm is a program for identifying transmembrane helices in proteins
+Tmhmm is a program for identifying transmembrane helices in proteins.
+
+You must have the executable I<tmhmm> in the PATH or have the
+environmental variable TMHMMDIR set to the directory where I<tmhmm>
+resides.
 
 =head1 FEEDBACK
 
