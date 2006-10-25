@@ -27,6 +27,9 @@ given sequence given a matrix(for appropriate organisms).
 Genscan is a gene identifying program developed by Christopher Burge
 http://genes.mit.edu/burgelab/
 
+By default it looks for an executable called I<genscan> and data/parameter files
+in the directory specified by the I<GENSCANDIR> environmental variable.
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists
