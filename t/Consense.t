@@ -55,7 +55,7 @@ $sb_factory->quiet($bequiet);  # Suppress protpars messages to terminal
 my $inputfilename = Bio::Root::IO->catfile("t","data","consense.treefile");
 my $tree = $sb_factory->run($inputfilename);
 
-ok $tree->number_nodes, 12;
+ok $tree->number_nodes, 13;
 
 my $node = $tree->find_node('CATH_RAT');
 ok $node->branch_length, "10.0";
