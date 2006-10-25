@@ -48,7 +48,7 @@ Bio::Tools::Run::Alignment::Lagan - Object for the local execution of the LAGAN 
 
 To run mlagan/lagan, the executables "mlagan" and "lagan.pl" must be
 in your path or you must have an environment variable that points to
-the executable directory "LAGANDIR=/opt/lagan_executables/"
+the executable directory "LAGAN_DIR=/opt/lagan_executables/"
 
 All lagan and mlagan parameters listed in their Readmes can be set
 except for the mfa flag which has been turned on by default to prevent
@@ -151,9 +151,9 @@ BEGIN {
         $OK_FIELD{$attr}++;
     }
 
-    #The LAGANDIR environment variable should be set if the lagan
+    #The LAGAN_DIR environment variable should be set if the lagan
     #executables aren't in your path.
-    $PROGRAM_DIR = $ENV{'LAGANDIR'} || '';
+    $PROGRAM_DIR = $ENV{'LAGAN_DIR'} || '';
 }
 
 sub new {
@@ -400,7 +400,7 @@ sub _runlagan {
     }
     
     $self->debug("$command_string\n");
-    my $status = system($command_string);
+    my $status = system('_POSIX2_VERSION=1 '.$command_string); # temporary hack whilst lagan script 'rechaos.pl' uses obsolete sort syntax
     my $outfile = $self->out();
     my $align = Bio::AlignIO->new(	'-file' => $outfile,
 					'-format' => 'fasta' );
