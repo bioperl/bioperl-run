@@ -29,14 +29,16 @@ my @params = ('-verbose' => $verbose,
 	      'silent' => 1, 
 	      'quiet' => 1);
 
-my  $factory = Bio::Tools::Run::Genewise->new(@params);
-my $version = $factory->version;
-warn("version is $version\n") if $verbose > 0;
-ok $factory->isa('Bio::Tools::Run::Genewise');
+my $factory = Bio::Tools::Run::Genewise->new(@params);
+
 unless ($factory->executable) {
    warn("Genewise program not found. Skipping tests $Test::ntest to $NTESTS.\n");
    exit 0;
 }
+
+my $version = $factory->version;
+warn("version is $version\n") if $verbose > 0;
+ok $factory->isa('Bio::Tools::Run::Genewise');
 
 my $bequiet = 1;
 $factory->quiet($bequiet);  # Suppress pseudowise messages to terminal
