@@ -29,9 +29,8 @@ Bio::Tools::Run::Tmhmm - Object for identifying transmembrane helixes
 
 Tmhmm is a program for identifying transmembrane helices in proteins.
 
-You must have the executable I<tmhmm> in the PATH or have the
-environmental variable TMHMMDIR set to the directory where I<tmhmm>
-resides.
+You must have the environmental variable TMHMMDIR set to the base
+directory where I<tmhmm> and it's associated data/option files reside
 
 =head1 FEEDBACK
 
@@ -237,7 +236,7 @@ sub _run {
      if( $self->NOPLOT ) {
 	 $str .= " --noplot";
      }
-     $str .= " ".$self->_input." > ".$outfile;
+     $str .= " -basedir=".$self->program_dir." ".$self->_input." > ".$outfile;
      my $status = system($str);
      $self->throw( "Tmhmm call ($str) crashed: $? \n") unless $status==0;
 
