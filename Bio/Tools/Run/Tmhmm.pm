@@ -158,6 +158,31 @@ sub predict_protein_features{
 	return shift->run(@_);
 }
 
+=head2 executable
+
+ Title   : executable
+ Usage   : my $exe = $lagan->executable('tmhmm');
+ Function: Finds the full path to the 'tmhmm' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
+
+=cut
+
+sub executable {
+    my $self = shift;
+    my $exe = $self->SUPER::executable(@_) || return;
+    
+    # even if its executable, we still need the environment variable to have
+    # been set
+    if (! $ENV{TMHMMDIR}) {
+        $self->warn("Environment variable TMHMMDIR must be set, even if the tmhmm executable is in your path");
+        return undef;
+    }
+    
+    return $exe;
+}
+
 =head2 run
 
  Title   :   run()
@@ -232,7 +257,8 @@ sub _run {
      my ($self)= @_;
 
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-     my $str = $self->executable;
+     my $str = $self->executable || return;
+     
      if( $self->NOPLOT ) {
 	 $str .= " --noplot";
      }
