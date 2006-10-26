@@ -45,7 +45,8 @@ wrapper for eponine, a mammalian TSS predictor.
 
 The environment variable EPONINEDIR must be set to point at either the
 directory which contains eponine-scan.jar or directly at the jar which
-eponine-scan classfiles.
+eponine-scan classfiles. NOTE: EPONINEDIR must point at the real file
+not a symlink.
 
 =head1 FEEDBACK
 
@@ -111,8 +112,12 @@ BEGIN {
 	}
     }
 
-    if( defined $ENV{'EPONINEDIR'} ) {
-	$EPOJAR = Bio::Root::IO->catfile($ENV{'EPONINEDIR'}, $EPOJAR);
+    if( $ENV{'EPONINEDIR'} ) {
+    	if ( -d $ENV{'EPONINEDIR'} ) {
+	   $EPOJAR = Bio::Root::IO->catfile($ENV{'EPONINEDIR'}, $EPOJAR)
+	} elsif(-e $ENV{'EPONINEDIR'}) {
+	   $EPOJAR = $ENV{'EPONINEDIR'};
+	}
         if ( ! -e $EPOJAR) {
 	   $EPOJAR =undef;
 	}
@@ -204,15 +209,15 @@ sub new {
       # full path assumed
       $self->java($java);
     }
-
-   $self->epojar($epojar) if (defined $epojar && -e $epojar);
-
-   if (defined $threshold && $threshold >=0 ){
+    
+    $self->epojar($epojar) if (defined $epojar);
+    
+    if (defined $threshold && $threshold >=0 ){
         $self->threshold($threshold);
-   } else {
+    } else {
         $self->threshold($DEFAULT_THRESHOLD);
     }
-				
+    
     return $self;
 }
 
@@ -365,9 +370,10 @@ sub _run_eponine {
 	$self->warn("Cannot find java");
 	return undef;
     }
-    unless(defined $epojar && -e $epojar ) {
-	$self->warn("Cannot find Eponine jar");
-	return undef;
+    if (! defined $epojar) { $self->warn("Don't know the name of the Eponine jar file"); return; }
+    if (! -e $epojar) {
+	$self->warn("Cannot find Eponine jar: $epojar - either you specified an incorrect path in\nEPONINEDIR or it was not in the current working directory");
+	return;
     }
     my $cmd  =   $self->java.' -jar '.$self->epojar.' -seq '.$infile.' -threshold '.$self->threshold." > ".$result;
     $self->throw("Error running eponine-scan on ".$self->filename.
