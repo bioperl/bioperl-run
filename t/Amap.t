@@ -21,7 +21,7 @@ BEGIN {
   #$error = 0;
 
   # Setup Test::More and the number of planned tests
-  use Test::More tests=>19;
+  use Test::More tests=>18;
   
   # Use modules that are needed in this test that are from
   # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
@@ -76,7 +76,7 @@ is( $factory->program_name(), 'amap',                    'Correct exe default na
 SKIP: {
   # condition used to skip this block of tests
   #skip($why, $how_many_in_block);
-  skip("Couldn't find the executable", 9)
+  skip("Couldn't find the executable", 8)
     unless defined $factory->executable();
   
   # test all factory methods that depend on the executable
