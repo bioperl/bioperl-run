@@ -434,7 +434,7 @@ sub _setparams {
     for  $attr ( @AMAP_SWITCHES) {
 	$value = $self->$attr();
 	next unless ($value);
-	my $attr_key = lc $attr; #put switches in format expected by tcoffee
+	my $attr_key = lc $attr; #put switches in format expected by Amap
 	$attr_key = ' -'.$attr_key;
 	$param_string .= $attr_key ;
     }
