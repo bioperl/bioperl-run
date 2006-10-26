@@ -529,9 +529,9 @@ sub save {
 	    my $res = $ua->request(GET $url);
 	    
 	    if ($res->is_success) {
-		open(FILE,"> $file") || die "cannot open $file: $!";
-		print FILE $res->content;
-		close FILE;
+		open(my $FILE,"> $file") || die "cannot open $file: $!";
+		print $FILE $res->content;
+		close $FILE;
 		return $file;
 	    } else {
 		$self->{ERROR} = 1;
@@ -1139,6 +1139,13 @@ sub TIEHANDLE {
   return bless {pisejob => shift}, $class;
 }
 
+sub CLOSE {
+    my $self = shift;
+    my $fh = $self->fh;
+    return if (!$fh  || \*STDOUT == $fh || \*STDERR == $fh || \$STDIN == $fh);
+    close $fh;
+}    
+    
 =head2 _clean_content
 
  Title   : _clean_content()
@@ -1192,6 +1199,5 @@ sub _clean_content {
     return $content;
 
 }
-
 
 1;
