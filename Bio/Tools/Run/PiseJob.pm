@@ -137,7 +137,6 @@ Bio::Tools::Run::PiseApplication
 
 package Bio::Tools::Run::PiseJob;
 
-use vars qw(@ISA $VERSION);
 use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
@@ -147,9 +146,9 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use POSIX;
 
-@ISA = qw(Bio::Root::Root);
+use base qw(Bio::Root::Root);
 
-$VERSION = '1.0';
+our $VERSION = '1.0';
 
 =head2 new
 
@@ -608,7 +607,6 @@ sub content {
 
 sub stdout {
     my $self = shift;
-
     if (! $self->{JOBID}) {
 	$self->throw("Bio::Tools::Run::PiseJob::stdout: your job has no jobid");
     }
@@ -1139,12 +1137,23 @@ sub TIEHANDLE {
   return bless {pisejob => shift}, $class;
 }
 
+=head2 CLOSE()
+
+ Title   : CLOSE()
+ Usage   : 
+ Function: Internal - see perltie.
+ Example :
+ Returns : 
+
+=cut
+
+# Note: this partly fixes Bug 2126
 sub CLOSE {
     my $self = shift;
     my $fh = $self->fh;
     return if (!$fh  || \*STDOUT == $fh || \*STDERR == $fh || \$STDIN == $fh);
     close $fh;
-}    
+}
     
 =head2 _clean_content
 
