@@ -45,7 +45,11 @@ unless ($present && -e $present	) {
     exit(0);
 }
 my $version = $factory->version;
-ok ($version >= 3.3, 1, "Code tested only on muscle versions > 3.3" );
+unless ($version >= 3.6) {
+    warn "Only muscle version 3.6 or higher is supported by these tests. Skipping tests $Test::ntest to $NUMTESTS.\n";
+    exit(0);
+}
+ok ($version >= 3.6, 1, "Code tested only on muscle versions > 3.6" );
 $aln = $factory->align($inputfilename);
 ok($aln);
 ok( $aln->no_sequences, 7);

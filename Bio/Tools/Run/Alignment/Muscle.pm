@@ -42,6 +42,8 @@ Muscle is Robert Edgar's progressive alignment program.  You can get
 it and see information about it at this URL
 http://www.drive5.com/muscle
 
+It is recommended you use at least version 3.6. Behaviour with earlier versions
+is questionable.
 
 =head2 Helping the module find your executable 
 
