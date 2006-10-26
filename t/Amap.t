@@ -36,7 +36,7 @@ END {
   # when the  interpreter finishes/exits
   # E.g. deleting intermediate files produced during the test
   
-  foreach my $file ( qw(cysprot.dnd cysprot1a.dnd) ) {
+  foreach my $file ( qw(cysprot.dnd cysprot1a.dnd mlc) ) {
     unlink $file;
   }
 }
