@@ -72,8 +72,8 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to
 the Bioperl mailing list.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org                  - General discussion
-  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
 
 =head2 Reporting Bugs
 
@@ -81,7 +81,7 @@ Report bugs to the Bioperl bug tracking system to help us keep track
 of the bugs and their resolution. Bug reports can be submitted via the
 web:
 
-  http://bugzilla.open-bio.org/
+  http://bioperl.org/bioperl-bugs/
 
 =head1 AUTHOR - Albert Vilella
 
@@ -145,7 +145,7 @@ BEGIN {
     # much of the documentation here is lifted directly from the MCcodon.dat
     # example file provided with the package
 
-    # FIXME: Evolver calls time for seed: SetSeed(i==-1?(int)time(NULL):i);
+    # Evolver calls time for seed: SetSeed(i==-1?(int)time(NULL):i);
     my $rand = int(time);
     #     my $rand = int(rand(999999));
     %VALIDVALUES = 
@@ -314,32 +314,33 @@ sub prepare {
    my $evolver_ctl = "$tempdir/MCcodon.dat";
    my $evolverfh;
    open($evolverfh, ">$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
-   # FIXME: params follow an order, they are not a hash. Do we have an
+   # FIXME: params follow an order in the control file, they are not a hash. Do we have an
    # clean example of this in bioperl-run?
    my %params = $self->get_parameters;
    print $evolverfh "$params{outfmt}\n";
    print $evolverfh "$params{seed}\n";
-   # FIXME: call get_leaf_nodes to count numseq
-   # FIXME: call get_leaf_nodes to count only leafs - relates to newick onlyleafids email
-#   my $numseq = scalar($tree->get_nodes);
+   # FIXME: call get_leaf_nodes to count only leafs - relates to newick onlyleafids bug
+   # my $numseq = scalar($tree->get_nodes);
    my $numseq = scalar($tree->get_leaf_nodes);
    print $evolverfh "$numseq ";
    print $evolverfh "$params{nuclsites} ";
    print $evolverfh "$params{replicates}\n\n";
    print $evolverfh "$params{tree_length}\n";
-   # FIXME: do #1:#n branch tagging magic here - is this branchlength stuff?
-   # FIXME: is it ok to use this pre flush stuff?
-   my $treeout = new Bio::TreeIO('-format' => 'newick',
-                                 '-fh'     => $evolverfh,
-                                 -PRE =>'>>',
-                                 '-flush',
-                                );
-   $treeout->bootstrap_style('nointernalids');
+   # FIXME: do #1:#n branch tagging magic here
+   # FIXME: this pre flush stuff is for appending mode
+   my $treeout = new Bio::TreeIO
+       ('-format' => 'newick',
+        '-fh'     => $evolverfh,
+        -PRE =>'>>',
+        '-flush',
+       );
+#    $treeout->bootstrap_style('nointernalids');
    $treeout->write_tree($tree);
+   # Appending mode to add more control file contents here
    open($evolverfh, ">>$evolver_ctl") or $self->throw("cannot open $evolver_ctl for writing");
-   print $evolverfh "$params{omega}\n";
+   print $evolverfh "\n$params{omega}\n";
    print $evolverfh "$params{kappa}\n";
-   # FIXME: print codon freqs here
+   # Print codon freqs here or defaults (below)
    my @codon_freqs = $self->get_CodonFreqs();
    foreach my $firstbase (@codon_freqs) {
        foreach my $element (@$firstbase) {
@@ -380,7 +381,7 @@ sub prepare {
 =head2 run
 
  Title   : run
- Usage   : my ($rc,$parser) = $evolver->run($aln);
+ Usage   : my ($rc,$parser) = $evolver->run();
  Function: run the evolver analysis using the default or updated parameters
            the alignment parameter must have been set
  Returns : Return code, L<Bio::Tools::Phylo::PAML>
@@ -389,48 +390,41 @@ sub prepare {
 
 =cut
 
-# sub run {
+sub run {
 
-#     # FIXME: We should look for the stuff we prepared in the prepare method here
-#    my ($rc,$parser) = (1);
-#    {
-#        my $cwd = cwd();
-#        my $exit_status;
-#        my ($tmpdir) = $self->tempdir();
-#        chdir($tmpdir);
-#        my $evolverexe = $self->executable();
-#        $self->throw("unable to find or run executable for 'evolver'") unless $evolverexe && -e $evolverexe && -x _;
-#        if( $self->{'_branchLengths'} ) { 
-# 	   open(RUN, "echo $self->{'_branchLengths'} | $evolverexe |") or $self->throw("Cannot open exe $evolverexe");
-#        } else {
-# 	   open(RUN, "$evolverexe |") or $self->throw("Cannot open exe $evolverexe");
-#        }
-#        my @output = <RUN>;
-#        $exit_status = close(RUN);
-#        $self->error_string(join('',@output));
-#        if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
-# 	   $self->warn("There was an error - see error_string for the program output");
-# 	   $rc = 0;
-#        }
-#        #### FIXME: Will we parse/test the resulting alns? Shouldn't
-#        #### we, this can go away
-#        eval {
-# 	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
-# 						 -dir => "$tmpdir");
+    my $self = shift;
+    # FIXME: We should look for the stuff we prepared in the prepare method here
+    my $rc = (1);
+    {
+        my $cwd = cwd();
+        my $exit_status;
+        my ($tmpdir) = $self->tempdir();
+        chdir($tmpdir);
+        my $evolverexe = $self->executable();
+        $self->throw("unable to find or run executable for 'evolver'") unless $evolverexe && -e $evolverexe && -x _;
+        open(RUN, "$evolverexe 6 MCcodon.dat |") or $self->throw("Cannot open exe $evolverexe");
+        my @output = <RUN>;
+        $exit_status = close(RUN);
+        $self->error_string(join('',@output));
+        if ( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
+            $self->warn("There was an error - see error_string for the program output");
+            $rc = 0;
+        }
+#         #### FIXME: Will we parse/test the resulting alns? Shouldn't
+#         #### we, this can go away
+#         eval {
+#             $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
+#                                                   -dir => "$tmpdir");
 
-#        };
-#        if( $@ ) {
-# 	   $self->warn($self->error_string);
-#        }
-#        chdir($cwd);
-#        ####
-#    }
-#    unless ( $self->save_tempfiles ) {
-#       unlink("$evolver_ctl");
-#       $self->cleanup();
-#    }
-#    return ($rc,$parser);
-# }
+#         };
+#         if ( $@ ) {
+#             $self->warn($self->error_string);
+#         }
+        chdir($cwd);
+        ####
+    }
+    return $rc;
+}
 
 =head2 error_string
 
