@@ -107,6 +107,7 @@ use vars qw(@ISA %VALIDVALUES $MINNAMELEN $PROGRAMNAME $PROGRAM);
 use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
+use Bio::SeqIO;
 use Bio::TreeIO;
 use Bio::Tools::Run::WrapperBase;
 use Bio::Tools::Phylo::PAML;
@@ -390,6 +391,7 @@ sub prepare {
 
 =cut
 
+
 sub run {
 
     my $self = shift;
@@ -410,17 +412,14 @@ sub run {
             $self->warn("There was an error - see error_string for the program output");
             $rc = 0;
         }
-#         #### FIXME: Will we parse/test the resulting alns? Shouldn't
-#         #### we, this can go away
-#         eval {
-#             $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
-#                                                   -dir => "$tmpdir");
-
-#         };
-#         if ( $@ ) {
-#             $self->warn($self->error_string);
-#         }
-        chdir($cwd);
+        # FIXME - hardcoded mc.paml
+        unless ($self->indel) {
+            my $in  = Bio::AlignIO->new('-file'   => "$tmpdir/mc.paml", 
+                                        '-format' => 'phylip');
+            my $aln = $in->next_aln();
+            $self->alignment($aln);
+        }
+        #chdir($cwd);
         ####
     }
     return $rc;
@@ -430,7 +429,7 @@ sub run {
 
  Title   : error_string
  Usage   : $obj->error_string($newval)
- Function: Where the output from the last analysus run is stored.
+ Function: Where the output from the last analysis run is stored.
  Returns : value of error_string
  Args    : newvalue (optional)
 
@@ -445,6 +444,36 @@ sub error_string{
     return $self->{'error_string'};
 
 }
+
+=head2 alignment
+
+ Title   : alignment
+ Usage   : $evolver->align($aln);
+ Function: Get/Set the L<Bio::Align::AlignI> object
+ Returns : L<Bio::Align::AlignI> object
+ Args    : [optional] L<Bio::Align::AlignI>
+ Comment : We could potentially add support for running directly on a file
+           but we shall keep it simple
+ See also: L<Bio::SimpleAlign>
+
+=cut
+
+sub alignment{
+   my ($self,$aln) = @_;
+
+   if( defined $aln ) { 
+       if( -e $aln ) { 
+	   $self->{'_alignment'} = $aln;
+       } elsif( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
+	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function not $aln");
+	   return undef;
+       } else {
+	   $self->{'_alignment'} = $aln;
+       }
+   }
+   return  $self->{'_alignment'};
+}
+
 
 =head2 tree
 
@@ -688,5 +717,30 @@ sub DESTROY {
     }
     $self->SUPER::DESTROY();
 }
+
+
+=head2 indel
+
+ Title   : indel
+ Usage   : $obj->indel($newval)
+ Function: this is only useful if using evolver_indel instead of main
+           evolver package:
+           Exploring the Relationship between Sequence Similarity and
+           Accurate Phylogenetic Trees Brandi L. Cantarel, Hilary
+           G. Morrison and William Pearson
+ Example : 
+ Returns : value of indel (a scalar)
+ Args    : on set, new value (a scalar or undef, optional)
+
+
+=cut
+
+sub indel{
+    my $self = shift;
+
+    return $self->{'indel'} = shift if @_;
+    return $self->{'indel'};
+}
+
 
 1;
