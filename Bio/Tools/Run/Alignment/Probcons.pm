@@ -207,6 +207,9 @@ sub new{
 	$value =  shift @args;
 	next if( $attr =~ /^-/); # don't want named parameters
 	$self->$attr($value);
+    if ($attr =~ /verbose/i) {
+        $self->{verbose_set} = 1;
+    }
     }
     return $self;
 }
@@ -313,10 +316,10 @@ sub align {
 	$self->throw("Bad input data or less than 2 sequences in $input !");
     }
 
-    my $param_string = $self->_setparams();
+    my $param_string = $self->_setparams($infilename);
 
     # run probcons
-    return &_run($self, $infilename, $param_string);
+    return &_run($self, $param_string);
 }
 
 =head2  _run
@@ -334,23 +337,25 @@ sub align {
 =cut
 
 sub _run {
-    my ($self,$infilename,$params) = @_;
-    my $commandstring = $self->executable." $infilename $params";
+    my ($self, $params) = @_;
+    my $commandstring = $self->executable." $params";
     
     $self->debug( "probcons command = $commandstring \n");
 
     my $status = system($commandstring);
-    my $outfile = $self->outfile_name(); 
-
-    if( !-e $outfile || -z $outfile ) {
-	$self->warn( "Probcons call crashed: $? [command $commandstring]\n");
-	return undef;
+    if ($status) {
+        $self->warn( "Probcons call crashed: $? [command $commandstring]\n");
+        return;
     }
-
-    my $in  = Bio::AlignIO->new('-file'   => $outfile, 
-				'-format' => $self->aformat);
-    my $aln = $in->next_aln();
-    return $aln;
+    
+    my $outfile = $self->outfile_name();
+    if (-e $outfile || -z $outfile) {
+        my $in  = Bio::AlignIO->new('-file'   => $outfile, 
+                    '-format' => $self->aformat);
+        my $aln = $in->next_aln();
+        return $aln;
+    }
+    return; # some modes of operation do not generate an output alignment
 }
 
 
@@ -434,7 +439,7 @@ sub _setinput {
 =cut
 
 sub _setparams {
-    my ($self) = @_;
+    my ($self, $infilename) = @_;
     my ($attr, $value,$param_string);
     $param_string = '';
     my $laststr;
@@ -446,6 +451,9 @@ sub _setparams {
         $attr_key = ' -'.$attr_key if ($attr eq 'ANNOT');
         $param_string .= $attr_key .' '.$value;
 
+    }
+    if ($self->{verbose_set}) {
+        $param_string .= ' --verbose';
     }
     for  $attr ( @PROBCONS_SWITCHES) {
 	$value = $self->$attr();
@@ -462,7 +470,7 @@ sub _setparams {
 	$self->outfile_name($outfile);
     }
     #FIXME: This may be only for *nixes. Double check in other OSes
-    $param_string .= " > ".$self->outfile_name;
+    $param_string .= " $infilename > ".$self->outfile_name;
     
     if ($self->verbose < 0) { 
 	$param_string .= ' 2> /dev/null';

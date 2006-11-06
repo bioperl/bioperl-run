@@ -74,7 +74,7 @@ my $factory2 = new Bio::Tools::Run::Alignment::Probcons
      'verbose' => '',
      'train'   => $paramsfilename,
     );
-$factory2->outfile_name($paramsfilename);
+$factory2->outfile_name($dummyfilename);
 
 my $probcons_present = $factory->executable();
 unless ($probcons_present) {
@@ -90,7 +90,6 @@ $factory2 = new Bio::Tools::Run::Alignment::Probcons
     (
      'iterative-refinement'  => '1000',
      'consistency'   => '5',
-     'verbose' => '',
      'annot'   => $annotfilename,
      'paramfile'   => $paramsfilename,
     );
