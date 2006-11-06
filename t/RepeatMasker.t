@@ -15,14 +15,19 @@ BEGIN {
 }
 use Bio::Tools::Run::RepeatMasker;
 use Bio::SeqIO;
-use Env;
+
+my $inputfilename= Bio::Root::IO->catfile(qw(t data repeatmasker.fa));
+my $createdfile = Bio::Root::IO->catfile(qw(t data repeatmasker.fa.out));
+
 END {
     for ( $Test::ntest..$NTESTS ) {
-        skip("RepeatMasker program not found. Skipping. (Be sure you have the phrap package )",1);
+        skip("RepeatMasker program not found or incorrectly configured. Skipping.",1);
     }
+	unlink($createdfile);
 }
+
 my $verbose = $ENV{'BIOPERLDEBUG'} ? 1 : 0;
-my @params=("species" => "mammal","noint"=>1, 'qq' => 1, '-verbose' => $verbose);
+my @params=("species" => "mammal", 'noint' => 1, 'qq' => 1, '-verbose' => $verbose);
 my $fact = Bio::Tools::Run::RepeatMasker->new(@params);
 $fact->quiet(1);
 if( ! $fact->executable ) { 
@@ -33,7 +38,6 @@ if( ! $fact->executable ) {
 
 ok ($fact->species, 'mammal');
 ok ($fact->noint,1);
-my $inputfilename= Bio::Root::IO->catfile(qw(t data repeatmasker.fa));
 
 my $in  = Bio::SeqIO->new(-file => $inputfilename , '-format' => 'fasta');
 my $seq = $in->next_seq();
