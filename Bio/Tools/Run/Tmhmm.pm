@@ -162,7 +162,7 @@ sub predict_protein_features{
 =head2 executable
 
  Title   : executable
- Usage   : my $exe = $lagan->executable('tmhmm');
+ Usage   : my $exe = $tmhmm->executable('tmhmm');
  Function: Finds the full path to the 'tmhmm' executable
  Returns : string representing the full path to the exe
  Args    : [optional] name of executable to set path to
