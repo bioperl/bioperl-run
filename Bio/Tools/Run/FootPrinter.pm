@@ -68,8 +68,9 @@ Copyright (c) 1999-2002, by Mathieu Blanchette and Martin Tompa.
 http://abstract.cs.washington.edu/~blanchem/FootPrinterWeb/FootPrinterInput.pl
 
 **NOTE**
-To run FootPrinter, you will need to set the enviroment variable
-FOOTPRINTER_DIR to where the binary is located. For example:
+To run FootPrinter, you will NEED to set the enviroment variable
+FOOTPRINTER_DIR to where the binary is located (even if the executable is in
+your path). For example:
 setenv FOOTPRINTER_DIR=/usr/local/bin/FootPrinter2.0/
 
 Available Parameters:
@@ -141,18 +142,14 @@ web:
 
 =head1 AUTHOR - Shawn Hoon
 
-
 Email shawnh@fugu-sg.org
 
-
 =head1 APPENDIX
-
 
 The rest of the documentation details each of the object
 methods. Internal methods are usually preceded with a "_".
 
 =cut
-
 
 package Bio::Tools::Run::FootPrinter;
 
@@ -167,7 +164,7 @@ use Bio::Tools::FootPrinter;
 
 # Let the code begin...
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase );
+@ISA = qw(Bio::Tools::Run::WrapperBase);
 
 BEGIN {
     @FP_PARAMS = qw(SEQUENCE_TYPE SIZE MAX_MUTATIONS MAX_MUTATIONS_PER_BRANCH
@@ -209,6 +206,30 @@ sub program_dir {
   return Bio::Root::IO->catfile($ENV{FOOTPRINTER_DIR}) if $ENV{FOOTPRINTER_DIR};
 }
 
+=head2 executable
+
+ Title   : executable
+ Usage   : my $exe = $lagan->executable('tmhmm');
+ Function: Finds the full path to the 'tmhmm' executable
+ Returns : string representing the full path to the exe
+ Args    : [optional] name of executable to set path to
+           [optional] boolean flag whether or not warn when exe is not found
+
+=cut
+
+sub executable {
+    my $self = shift;
+    my $exe = $self->SUPER::executable(@_) || return;
+    
+    # even if its executable, we still need the environment variable to have
+    # been set
+    if (! $ENV{FOOTPRINTER_DIR}) {
+        $self->warn("Environment variable FOOTPRINTER_DIR must be set, even if the tmhmm executable is in your path");
+        return;
+    }
+    
+    return $exe;
+}
 
 sub AUTOLOAD {
     my $self = shift;
@@ -241,21 +262,15 @@ sub new {
     $self->$attr($value);
   }
 
-  unless ($self->executable()) {
-    if( $self->verbose > 0 ) {
-      warn "FootPrinter program not found as ".$self->executable.
-	  " or not executable. \n"; 
-    }
+  unless ($self->executable) {
+    $self->debug("FootPrinter program not found or not executable.");
   }
   if(!$self->tree && -e $ENV{FOOTPRINTER_DIR}."/tree_of_life"){
     $self->tree($ENV{FOOTPRINTER_DIR}."/tree_of_life");
   }
 
   unless($self->tree){
-     if($self->verbose > 0){
-         $self->warn("Phylogenetic tree not provided. FootPrinter won't be able to
-                      run without it. use \$fp->tree to set the tree file");
-     }
+     $self->debug("Phylogenetic tree not provided. FootPrinter won't be able to run without it. use \$fp->tree to set the tree file");
   }
 
   return $self;
