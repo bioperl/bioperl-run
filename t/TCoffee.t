@@ -25,7 +25,7 @@ use Bio::Root::IO;
 
 END {     
     for ( $Test::ntest..$NUMTESTS ) {
-	skip("TCoffee program not found. Skipping.\n",1);
+	skip("TCoffee program not found. Skipping.",1);
     }
     unlink("t_coffee.log");
 }
