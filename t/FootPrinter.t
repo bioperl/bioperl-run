@@ -1,7 +1,6 @@
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
 
-
 use strict;
 BEGIN {
     eval { require Test; };
@@ -10,7 +9,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 18;
+    $NTESTS = 22;
     plan tests => $NTESTS;
 }
 use Bio::Tools::Run::FootPrinter;
@@ -59,23 +58,44 @@ my $input= Bio::Root::IO->catfile("t","data","FootPrinter.seq.fa");
 my $in  = Bio::SeqIO->new(-file => "$input" , '-format' => 'fasta');
 my @seq;
 while (my $seq = $in->next_seq){
-  push @seq, $seq;
+  push @seq, $seq; # 6 sequences
 }
 my @fp= $fact->run(@seq);
-ok $#fp, 5;
+ok @fp, 6;
 
 my $first = shift @fp;
 
 my @motifs = $first->sub_SeqFeature;
-ok $#motifs, 1;
-ok $motifs[0]->seq_id,'TETRAODON';
-ok $motifs[0]->seq->seq, 'tacaggatgca';
-ok $motifs[0]->start, 352;
-ok $motifs[0]->end, 362;
-ok $motifs[1]->seq->seq, 'ccatatttgga';
-ok $motifs[1]->start, 363;
-ok $motifs[1]->end, 373;
-
+if (@motifs == 2) {
+    # older version of FootPrinter? or version 2.1 is buggy with its silly first
+    # motif of 1 bp below
+    ok $motifs[0]->seq_id,'TETRAODON-motif1';
+    ok $motifs[0]->seq->seq, 'tacaggatgca';
+    ok $motifs[0]->start, 352;
+    ok $motifs[0]->end, 362;
+    ok $motifs[1]->seq_id,'TETRAODON-motif2';
+    ok $motifs[1]->seq->seq, 'ccatatttgga';
+    ok $motifs[1]->start, 363;
+    ok $motifs[1]->end, 373;
+    ok 1;
+    ok 1;
+    ok 1;
+    ok 1;
+}
+elsif (@motifs == 3) {
+    ok $motifs[0]->seq_id,'TETRAODON-motif1';
+    ok $motifs[0]->seq->seq, 't';
+    ok $motifs[0]->start, 352;
+    ok $motifs[0]->end, 352;
+    ok $motifs[1]->seq_id,'TETRAODON-motif2';
+    ok $motifs[1]->seq->seq, 'acaggatgca';
+    ok $motifs[1]->start, 353;
+    ok $motifs[1]->end, 362;
+    ok $motifs[2]->seq_id,'TETRAODON-motif3';
+    ok $motifs[2]->seq->seq, 'ccatatttgga';
+    ok $motifs[2]->start, 363;
+    ok $motifs[2]->end, 373;
+}
 
 
 
