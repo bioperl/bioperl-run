@@ -520,15 +520,15 @@ use vars qw($AUTOLOAD @ISA $PROGRAM_NAME $PROGRAM_DIR %DEFAULTS
             @TCOFFEE_PARAMS @TCOFFEE_SWITCHES @OTHER_SWITCHES %OK_FIELD
             );
 use strict;
+use Cwd;
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
-use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
-use  Bio::Tools::Run::WrapperBase;
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
+use Bio::Tools::Run::WrapperBase;
+@ISA = qw(Bio::Tools::Run::WrapperBase 
           Bio::Factory::ApplicationFactoryI);
 
 # You will need to enable TCoffee to find the tcoffee program. This can be done
@@ -578,7 +578,7 @@ BEGIN {
 =cut
 
 sub program_name {
-        return $PROGRAM_NAME;
+    return $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -903,12 +903,36 @@ sub _setinput {
 	    $header =~ /clustal/i ) { # phylip
 	    $type = 'A';
 	}
+    
+    # On some systems, having filenames with / in them (ie. a file in a
+    # directory) causes t-coffee to completely fail. It warns on all systems.
+    # The -no_warning option solves this, but there is still some strange
+    # bug when doing certain profile-related things. This is magically solved
+    # by copying the profile file to a temp file in the current directory, so
+    # it its filename supplied to t-coffee contains no /
+    # (It's messy here - I just do this to /all/ input files to most easily
+    #  catch all variants of providing a profile - it may only be the last
+    #  form (isa("Bio::PrimarySeqI")) that causes a problem?)
+    
+    my (undef, undef, $adjustedfilename) = File::Spec->splitpath($infilename);
+    if ($adjustedfilename ne $infilename) {
+        my ($fh, $tempfile) = $self->io->tempfile(-dir => cwd());
+        seek(IN, 0, 0);
+        while (<IN>) {
+            print $fh $_;
+        }
+        close($fh);
+        (undef, undef, $tempfile) = File::Spec->splitpath($tempfile);
+        $infilename = $tempfile;
+    }
+    
 	close(IN);
 	return ($infilename,$type);
     } elsif (ref($input) =~ /ARRAY/i ) { #  $input may be an
 	                                 #  array of BioSeq objects...
         #  Open temporary file for both reading & writing of array
-	($tfh,$infilename) = $self->io->tempfile();
+	($tfh,$infilename) = $self->io->tempfile(-dir => cwd());
+    (undef, undef, $infilename) = File::Spec->splitpath($infilename);
 	if( ! ref($input->[0]) ) {
 	    $self->warn("passed an array ref which did not contain objects to _setinput");
 	    return undef;
@@ -953,7 +977,8 @@ sub _setinput {
     #  $input may be a SimpleAlign object.
     } elsif ( $input->isa("Bio::Align::AlignI") ) {
 	#  Open temporary file for both reading & writing of SimpleAlign object
-	($tfh, $infilename) = $self->io->tempfile();
+	($tfh, $infilename) = $self->io->tempfile(-dir => cwd());
+    (undef, undef, $infilename) = File::Spec->splitpath($infilename);
 	$temp =  Bio::AlignIO->new(-fh=>$tfh,
 				   '-format' => 'clustalw');
 	$temp->write_aln($input);
@@ -966,7 +991,8 @@ sub _setinput {
     # a previous alignment)
     elsif ( $input->isa("Bio::PrimarySeqI")) {
         #  Open temporary file for both reading & writing of BioSeq object
-	($tfh,$infilename) = $self->io->tempfile();
+	($tfh,$infilename) = $self->io->tempfile(-dir => cwd());
+    (undef, undef, $infilename) = File::Spec->splitpath($infilename);
 	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
 	$temp->write_seq($input);
 	$temp->close();
@@ -1026,6 +1052,10 @@ sub _setparams {
     }
 
     if ($self->quiet() || $self->verbose < 0) { $param_string .= ' -quiet';}
+    
+    # -no_warning is required on some systems or failure is guaranteed
+    $param_string .= ' -no_warning';
+    
     return $param_string;
 }
 
