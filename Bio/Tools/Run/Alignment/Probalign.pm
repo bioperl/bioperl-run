@@ -10,9 +10,9 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Alignment::Probalign - Object for the calculation of an
-iterative multiple sequence alignment from a set of unaligned
-sequences or alignments using the Probalign program
+Bio::Tools::Run::Alignment::Probalign - Object for the calculation of
+a multiple sequence alignment from a set of unaligned sequences or
+alignments using the Probalign program
 
 =head1 SYNOPSIS
 
