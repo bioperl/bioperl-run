@@ -74,10 +74,10 @@ my $error = 0;
 print "\n*** Optional dependencies section ***\n";
 while (my ($name, $value) = each %packages) {
   my ($ver, $desc, $expl, $module) = split( /\// , $value);
-  if (! eval "require $name;") {
+  if (! eval "require $name;" || ${$name.'::VERSION'} < $ver) {
     my @modules = split(',', $module);
     my $modules = join("\n * ", @modules);
-    print "External Module '$name' ($desc) is not installed on this computer.\n The following Bioperl-run modules need it for $expl:\n * $modules\n";
+    print "External Module '$name' >= $ver ($desc) is not installed on this computer.\n The following Bioperl-run modules need it for $expl:\n * $modules\n";
     $error = 1;
     
     if (exists $exclude_from_prereqs{$name}) {
