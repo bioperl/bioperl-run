@@ -15,7 +15,8 @@ use File::Spec::Functions;
 use ExtUtils::MakeMaker;
 use Cwd;
 
-my $VERSION  = "1.5.2-RC3";
+my $VERSION = 1.005002_003;
+$VERSION = eval $VERSION;
 
 # All Bioperl dependencies on external modules are defined here
 # (these are mostly considered optional)
@@ -23,7 +24,7 @@ my %packages = (
   'Algorithm::Diff'       => '0.0/Compute intelligent differences between two files/generating consensus protein family descriptions/TribeMCL',
   'XML::Parser::PerlSAX'  => '0.0/XML SAX parser/Pise Applications/Pise::Job',
   'HTML::Parser'					=> '0.0/HTML Parser/Pise Applications/Pise::Job',
-  'Bio::Root::Version'    => '0.0/Bioperl/basic functionality/Everything',
+  'Bio::Root::Version'    => '1.005002/Bioperl/basic functionality/Everything',
 );
 
 # We don't want CPAN, Bundle::BioPerl et al. to know about these for various
@@ -74,6 +75,7 @@ my $error = 0;
 print "\n*** Optional dependencies section ***\n";
 while (my ($name, $value) = each %packages) {
   my ($ver, $desc, $expl, $module) = split( /\// , $value);
+	no strict 'refs';
   if (! eval "require $name;" || ${$name.'::VERSION'} < $ver) {
     my @modules = split(',', $module);
     my $modules = join("\n * ", @modules);
