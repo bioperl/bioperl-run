@@ -34,9 +34,9 @@ my %exclude_from_prereqs = (
   
 );
 
-# These are really required
+# These are really required and deserve a clearer warning
 my %required = (
-	'Bio::Root::Version' => 'Bioperl-core is fundamental to operation'
+	'Bio::Root::Version' => 1
 );
 
 
@@ -86,8 +86,7 @@ while (my ($name, $value) = each %packages) {
       print "Additionally, it will not be considered a pre-requisite\n(and therefore will not be automatically installed by CPAN) because:\n $exclude_from_prereqs{$name}.\n\n";
     }
 		elsif (exists $required{$name}) {
-			print "Additionally, it is absolutely required\n(and therefore we will now die) because:\n $required{$name}.\n\n";
-			$error = 2;
+			print "Additionally, it is absolutely required and therefore most if not all tests will fail!\n\n";
 		}
     else {
       print "\n";
@@ -116,9 +115,6 @@ Information:
 
 QQ_ERROR_QQ
 }
-elsif ($error == 2) {
-	die "\n";
-}
 else {
 	print "All dependencies are installed\n\n";
 }
@@ -133,7 +129,7 @@ WriteMakefile(
                     DIST_DEFAULT => 'all tardist'
                   },
   'AUTHOR'     => 'Bioperl Team (bioperl-l@bioperl.org)',
-  'ABSTRACT'   => 'Bioinformatics Toolkit',
+  'ABSTRACT'   => 'Bioperl Wrapper Toolkit',
   # clean() is overridden and also gets rid of @should_be_cleaned
   realclean    => { FILES => join(' ', @should_be_cleaned) },
   PREREQ_PM    => \%prereq,
