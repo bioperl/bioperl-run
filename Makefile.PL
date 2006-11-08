@@ -1,4 +1,4 @@
-## --Makefile.PL for Bioperl-pipeline distribution--##
+## --Makefile.PL for bioperl-run distribution--##
 ## ----------------------------------------------------##
 ## $Id$
 ##----------------------------------------------------
@@ -11,11 +11,8 @@
 require 5.006_001;
 use strict;
 use warnings;
-use Config;
-use IO::File;
 use File::Spec::Functions;
 use ExtUtils::MakeMaker;
-use File::Path 'rmtree';
 use Cwd;
 
 my $VERSION  = "1.5.2-RC3";
@@ -120,6 +117,9 @@ QQ_ERROR_QQ
 elsif ($error == 2) {
 	die "\n";
 }
+else {
+	print "All dependencies are installed\n\n";
+}
 
 # write the makefile
 WriteMakefile(
@@ -149,17 +149,17 @@ exit;
 #
 
 sub prompt_for_pise_email {
-  print "\n*** Pise Email Tests section *** \n";
-	my $proceed = prompt("Do you want to run the Pise Email tests (requires a valid email address) y/n",'n');
+  print "\n*** Pise Tests section *** \n";
+	my $proceed = prompt("Do you want to run the Pise tests with a valid email address? y/n",'n');
 	my $path = catfile('t', 'pise-email.test');
 	if ($proceed =~ /^[yY]/) {
-		my $address = prompt("Enter your email address (no default)",'');
+		my $address = prompt("Enter your email address",'');
 		if ($address && open(T,">t/pise-email.test")) {
 			print T "$address\n";
 			close T;
 		}
 		else {
-			warn("Cannot open file t/pise-email.test for writing - no Pise tests will be run");
+			warn("Cannot open file t/pise-email.test for writing, or no email supplied - Pise tests will be run without an email address");
 		}
 		push(@should_be_cleaned, $path);
 	}
