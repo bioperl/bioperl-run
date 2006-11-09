@@ -323,8 +323,10 @@ sub align {
            sequence alignment.
  Args : Name of a file containing the fasta MSA and name of a file
         containing a set of unaligned fasta sequences
- Comments : This only works for muscle version 3.52 -- wont work for
-            version 3.6
+ Comments : This only works for muscle version 3.52.
+            Some early versions of the 3.6 sources had a bug that
+            caused a segfault with -profile. The attached should fix
+            it, if not let Bob Edgar know.
 
 =cut
 
