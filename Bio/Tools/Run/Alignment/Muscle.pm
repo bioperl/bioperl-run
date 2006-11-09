@@ -114,7 +114,7 @@ use  Bio::Tools::Run::WrapperBase;
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
     @MUSCLE_PARAMS = qw(IN OUT TREE1 LOG LOGA SCOREFILE GAPOPEN 
-			MAXMB MAXHOURS MAXITERS KBAND);
+			MAXMB MAXHOURS MAXITERS KBAND IN1 IN2);
     @MUSCLE_SWITCHES = qw(QUIET DIAGS REFINE STABLE GROUP 
 			  CLW CLWSTRICT MSF);
 
@@ -310,6 +310,84 @@ sub align {
     return &_run($self, $infilename, $param_string);
 }
 
+=head2  profile
+
+ Title   : profile
+ Usage   :
+        $alnfilename = /t/data/cysprot.msa';
+	$seqsfilename = 't/data/cysprot.fa';
+	$aln = $factory->profile($alnfilename,$seqsfilename);
+
+ Function: Perform a profile alignment on a MSA to include more seqs
+ Returns : Reference to a SimpleAlign object containing the
+           sequence alignment.
+ Args : Name of a file containing the fasta MSA and name of a file
+        containing a set of unaligned fasta sequences
+ Comments : This only works for muscle version 3.52 -- wont work for
+            version 3.6
+
+=cut
+
+sub profile {
+    my ($self,$alnfilename,$seqsfilename) = @_;
+    # Create input file pointer
+    $self->io->_io_cleanup();
+    if ($self->version ne '3.52') {
+	$self->throw("profile does not work for this version of muscle\n");
+    }
+    my $infilename;
+    if( defined $alnfilename ) {
+        if (! ref $alnfilename) {
+            # check that file exists or throw
+            $infilename = $alnfilename;
+            unless (-e $infilename) {return 0;}
+            # let's peek and guess
+            open(IN,$infilename) || $self->throw("Cannot open $infilename");
+            my $header;
+            while( defined ($header = <IN>) ) {
+                last if $header !~ /^\s+$/;
+            }
+            close(IN);
+            if ( $header !~ /^>\s*\S+/ ){
+                $self->throw("Need to provide a FASTA format file to muscle profile!");
+            } 
+        }
+    } else {
+	$self->throw("No inputdata provided\n");
+    }
+    if (! $infilename) {
+	$self->throw("Bad input data or less than 2 sequences in $infilename !");
+    }
+    if( defined $seqsfilename ) {
+        if (! ref $seqsfilename) {
+            # check that file exists or throw
+            $infilename = $seqsfilename;
+            unless (-e $infilename) {return 0;}
+            # let's peek and guess
+            open(IN,$infilename) || $self->throw("Cannot open $infilename");
+            my $header;
+            while( defined ($header = <IN>) ) {
+                last if $header !~ /^\s+$/;
+            }
+            close(IN);
+            if ( $header !~ /^>\s*\S+/ ){
+                $self->throw("Need to provide a FASTA format file to muscle profile!");
+            } 
+        }
+    } else {
+	$self->throw("No inputdata provided\n");
+    }
+    if (! $infilename) {
+	$self->throw("Bad input data or less than 2 sequences in $infilename !");
+    }
+
+    my $param_string = $self->_setparams();
+
+    # run muscle
+    $self->{_profile} = 1;
+    return &_run($self, "$alnfilename -in2 $seqsfilename", $param_string);
+}
+
 =head2  _run
 
  Title   :  _run
@@ -326,8 +404,14 @@ sub align {
 
 sub _run {
     my ($self,$infilename,$params) = @_;
-    my $commandstring = $self->executable." -in $infilename $params";
-    
+    my $commandstring;
+    if ($self->{_profile}) {
+        $commandstring = $self->executable." -profile -in1 $infilename $params";
+        $self->{_profile} = 0;
+    } else {
+        $commandstring = $self->executable." -in $infilename $params";
+    }
+
     $self->debug( "muscle command = $commandstring \n");
 
     my $status = system($commandstring);
