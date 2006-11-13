@@ -168,7 +168,7 @@ sub program_path {
 =cut
 
 sub program_dir {
-        return Bio::Root::IO->rel2abs($ENV{MAFFTDIR}) if $ENV{MAFFTDIR};
+        return File::Spec->rel2abs($ENV{MAFFTDIR}) if $ENV{MAFFTDIR};
 }
 
 sub new {
@@ -235,7 +235,7 @@ sub error_string{
 sub version {
     my ($self) = @_;
     my $exe;
-    return undef unless $exe = $self->executable;
+    return unless $exe = $self->executable;
     # this is a bit of a hack, but MAFFT is just a gawk script
     # so we are actually grepping the scriptfile
     # UPDATE (Torsten Seemann)
@@ -251,9 +251,9 @@ sub version {
 	}
 	close(NAME);
     } else {
-	warn("$!");
+	$self->warn("$!");
     }
-    return undef;
+    return;
 }
 
 =head2 run
@@ -335,7 +335,7 @@ sub _run {
     my $outfile = $self->outfile(); 
     if( !-e $outfile || -z $outfile ) {
 	$self->warn( "MAFFT call crashed: $? [command $commandstring]\n");
-	return undef;
+	return;
     }
     
     my $in  = Bio::AlignIO->new('-file' => $outfile, 
@@ -371,7 +371,7 @@ sub _setinput {
 	($tfh,$infilename) = $self->io->tempfile();
 	if( ! ref($input->[0]) ) {
 	    $self->warn("passed an array ref which did not contain objects to _setinput");
-	    return undef;
+	    return;
 	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
 	    $temp =  Bio::SeqIO->new('-fh' => $tfh,
 				     '-format' => 'fasta');
