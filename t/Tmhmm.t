@@ -35,7 +35,7 @@ unless ($tmhmm_present) {
   exit 0;
 }	      
 
-my $prot_file=  Bio::Root::IO->catfile("t","data","TMHMM_prot.fas");
+my $prot_file=  Bio::Root::IO->catfile("t","data","test_prot.FastA");
 ok(-e $prot_file);
 
 my $seq1 = Bio::Seq->new();
