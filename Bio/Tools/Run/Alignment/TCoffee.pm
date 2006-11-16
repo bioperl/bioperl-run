@@ -1053,8 +1053,11 @@ sub _setparams {
 
     if ($self->quiet() || $self->verbose < 0) { $param_string .= ' -quiet';}
     
-    # -no_warning is required on some systems or failure is guaranteed
-    $param_string .= ' -no_warning';
+    # -no_warning is required on some systems with certain versions or failure
+    # is guaranteed
+    if ($self->version >= 4 && $self->version < 4.7) {
+        $param_string .= ' -no_warning';
+    }
     
     return $param_string;
 }
