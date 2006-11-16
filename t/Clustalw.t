@@ -67,10 +67,10 @@ my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 isa_ok( $factory, 'Bio::Tools::Run::Alignment::Clustalw');
 
 # test default factory values
-is( $factory->program_dir, undef,                        'program_dir returned correct default' );
-is( $factory->error_string, '',                          'error_string returned correct default' );
-is( $factory->outfile_name, 'mlc',                       'outfile_name returned correct default' );
-is( $factory->bootstrap, undef,                          'bootstrap returned correct default' );
+is( $factory->program_dir, $ENV{'CLUSTALDIR'}, 'program_dir returned correct default' );
+is( $factory->error_string, '', 'error_string returned correct default' );
+is( $factory->outfile_name, 'mlc', 'outfile_name returned correct default' );
+is( $factory->bootstrap, undef, 'bootstrap returned correct default' );
 
 # Now onto the nitty gritty tests of the modules methods
 is( $factory->program_name(), 'clustalw',                'Correct exe default name' );
