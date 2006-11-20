@@ -43,11 +43,11 @@ my $seqstream = Bio::SeqIO->new(-file => $prot_file, -fmt => 'Fasta');
 $seq1 = $seqstream->next_seq();
 ok( $seq1->isa('Bio::Seq') );
 my @feat = $factory->run($seq1);
-ok(scalar@feat == 7);
+ok @feat, 5;
 
 ok $feat[0]->isa('Bio::SeqFeatureI');
-ok ($feat[0]->start,77);
-ok ($feat[0]->end,99);
+ok ($feat[0]->start,121);
+ok ($feat[0]->end,143);
 
    
 
