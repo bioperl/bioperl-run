@@ -3,7 +3,8 @@ $Id$
 
 o Version
 
- This is Bioperl-run version 1.5.1, a developer release, please insure that you have bioperl core 1.5.1 or later
+ This is Bioperl-run version 1.5.2, a developer release, please ensure
+ that you have bioperl core 1.5.2 or later
 
 o Description 
  
@@ -22,17 +23,14 @@ o Installation
  version.
 
  The installation of this package is identical to the core bioperl
- install.
+ install. You can install with CPAN in the usual way, or:
 
- Essentially
+   % perl Build.PL
 
-   % perl Makefile.PL
-   % make
-
-   % make test (some tests may not succeed if you do not have the
-                necessary programs or env variables defined)
+   % ./Build test (some tests may not succeed if you do not have the
+                   necessary programs or env variables defined)
    % su
-   # make install
+   # ./Build install
 
 
 o Environmental variables

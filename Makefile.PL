@@ -3,6 +3,40 @@
 ## $Id$
 ##----------------------------------------------------
 
+# This still works, but has been superceded by Build.PL
+# Please use Build.PL in preference
+
+warn <<'WARN';
+!--
+  Bioperl is transitioning from Makefile.PL-based installations to Build.PL
+
+  This Makefile.PL should still work fine, but please try Build.PL instead,
+  especially if you run into any non-test-related problems:
+
+  perl Build.PL
+  ./Build test
+  ./Build install
+  
+  If you're seeing this message whilst installing with CPAN, consider
+  killing this installation and changing your CPAN configuration before
+  trying to install again:
+  
+  cpan> o conf init prefer_installer
+  Choose 'MB'.
+  cpan> o conf commit
+  cpan> q
+
+--!
+
+WARN
+
+for (1..5) {
+  local $| = 1;
+  print ". ";
+  sleep(1);
+}
+print "\n";
+
 #
 # Start with object preamble and setup of variables that might need changing
 # in the future
