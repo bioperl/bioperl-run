@@ -145,10 +145,11 @@ use XML::Parser::PerlSAX;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use POSIX;
+use Bio::Root::Version;
 
 use base qw(Bio::Root::Root);
 
-our $VERSION = '1.0';
+our $VERSION = ${Bio::Root::Version::VERSION};
 
 =head2 new
 

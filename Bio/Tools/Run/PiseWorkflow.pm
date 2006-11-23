@@ -95,7 +95,7 @@ the working directory. 	The html output file can also be specified:
 
 package Bio::Tools::Run::PiseWorkflow;
 
-use vars qw(@ISA $VERSION);
+use vars qw(@ISA);
 use strict;
 use Bio::Root::Root;
 use Bio::Tools::Run::PiseApplication;
@@ -104,10 +104,12 @@ use Data::Dumper;
 use CGI;
 use File::Temp qw/ tempfile /;
 use Fcntl qw(:DEFAULT :flock);
+use Bio::Root::Version;
 
 @ISA = qw(Bio::Root::Root);
-$VERSION = '1.0';
 my %pids;
+
+our $VERSION = ${Bio::Root::Version::VERSION};
 
 =head2 new
 
