@@ -10,7 +10,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 5;
+   $NTESTS = 8;
    plan tests => $NTESTS;
 }
 
@@ -19,15 +19,16 @@ END {
        skip('Unable to run Tmhmm tests, exe may not be installed',1);
    }
 }
-ok(1);
+
 use Bio::Tools::Run::Tmhmm;
 use Bio::Root::IO;
 use Bio::SeqIO;
-use Bio::Seq;
+
+ok(1);
 
 # AHEM - Fugu guys, can you make sure this is genericized?
 
-my  $factory = Bio::Tools::Run::Tmhmm->new();
+my $factory = Bio::Tools::Run::Tmhmm->new();
 ok $factory->isa('Bio::Tools::Run::Tmhmm');
 my $tmhmm_present = $factory->executable();
 unless ($tmhmm_present) {
@@ -38,9 +39,8 @@ unless ($tmhmm_present) {
 my $prot_file=  Bio::Root::IO->catfile("t","data","test_prot.FastA");
 ok(-e $prot_file);
 
-my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file => $prot_file, -fmt => 'Fasta');
-$seq1 = $seqstream->next_seq();
+my $seq1 = $seqstream->next_seq();
 ok( $seq1->isa('Bio::Seq') );
 my @feat = $factory->run($seq1);
 ok @feat, 5;
