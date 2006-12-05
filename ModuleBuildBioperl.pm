@@ -8,12 +8,15 @@
 # minor things, since for the most part Module::Build::Base code is hard to
 # cleanly override.
 
+# This was written by Sendu Bala and is released under the same license as
+# Bioperl itself
+
 package ModuleBuildBioperl;
 
 BEGIN {
     # we really need Module::Build to be installed
-    unless (eval "use Module::Build; 1") {
-        print "This package requires Module::Build to install itself.\n";
+    unless (eval "use Module::Build 0.2805; 1") {
+        print "This package requires Module::Build v0.2805 or greater to install itself.\n";
         
         require ExtUtils::MakeMaker;
         my $yn = ExtUtils::MakeMaker::prompt('  Install Module::Build now from CPAN?', 'y');
@@ -37,10 +40,10 @@ BEGIN {
         File::Copy::move($build_pl."hidden", $build_pl);
         CPAN::Shell->expand("Module", "Module::Build")->uptodate or die "Couldn't install Module::Build, giving up.\n";
         
-        chdir $cwd or die "Cannot chdir() back to $cwd: $!";
+        chdir $cwd or die "Cannot chdir() back to $cwd: $!\n\n***\nInstallation will probably work fine if you now quit CPAN and try again.\n***\n\n";
     }
     
-    eval "use base Module::Build; 1" or die $@;
+    eval "use base qw(Module::Build Tie::Hash); 1" or die $@;
     
     # ensure we'll be able to reload this module later by adding its path to inc
     use Cwd;
@@ -50,8 +53,8 @@ BEGIN {
 use strict;
 use warnings;
 
-our $VERSION = 1.005002005;
-our @extra_types = qw(options test excludes_os);
+our $VERSION = 1.005002100;
+our @extra_types = qw(options excludes_os feature_requires test); # test must always be last in the list!
 our $checking_types = "requires|conflicts|".join("|", @extra_types);
 
 
@@ -59,7 +62,7 @@ our $checking_types = "requires|conflicts|".join("|", @extra_types);
 sub find_pm_files {
     my $self = shift;
     foreach my $pm (@{$self->rscan_dir('Bio', qr/\.pm$/)}) {
-        $self->{properties}{pm_files}->{$pm} = File::Spec->catfile('lib', $pm);;
+        $self->{properties}{pm_files}->{$pm} = File::Spec->catfile('lib', $pm);
     }
     
     $self->_find_file_by_type('pm', 'lib');
@@ -250,6 +253,16 @@ sub check_autofeatures {
     $self->log_info("\n");
 }
 
+# overriden just to hide pointless ugly warnings
+sub check_installed_status {
+    my $self = shift;
+    open (my $olderr, ">&", \*STDERR);
+    open(STDERR, "/dev/null");
+    my $return = $self->SUPER::check_installed_status(@_);
+    open(STDERR, ">&", $olderr);
+    return $return;
+}
+
 # extend to handle option checking (which takes an array ref) and code test
 # checking (which takes a code ref and must return a message only on failure)
 # and excludes_os (which takes an array ref of regexps).
@@ -319,8 +332,15 @@ sub prereq_failures {
                     next if $installed eq 'ok';
                     $status->{message} = $installed unless $installed eq 'skip';
                 }
+                elsif ($type =~ /^feature_requires/) {
+                    next if $status->{ok};
+                }
                 else {
                     next if $status->{ok};
+                    
+                    my $installed = $self->install_required($modname, $spec, $status->{message});
+                    next if $installed eq 'ok';
+                    $status->{message} = $installed;
                 }
                 
                 $out->{$type}{$modname} = $status;
@@ -329,6 +349,54 @@ sub prereq_failures {
     }
     
     return keys %{$out} ? $out : return;
+}
+
+# install an external module using CPAN prior to testing and installation
+# should only be called by install_required or install_optional
+sub install_prereq {
+    my ($self, $desired, $version) = @_;
+    
+    if ($self->under_cpan) {
+        # Just add to the required hash, which CPAN >= 1.81 will check prior
+        # to install
+        $self->{properties}{requires}->{$desired} = $version;
+        $self->log_info("   I'll get CPAN to prepend the installation of this\n");
+        return 'ok';
+    }
+    else {
+        # Here we use CPAN to actually install the desired module, the benefit
+        # being we continue even if installation fails, and that this works
+        # even when not using CPAN to install.
+        require Cwd;
+        require CPAN;
+        
+        # Save this because CPAN will chdir all over the place.
+        my $cwd = Cwd::cwd();
+        
+        CPAN::Shell->install($desired);
+        my $msg;
+        if (CPAN::Shell->expand("Module", $desired)->uptodate) {
+            $self->log_info("\n\n*** (back in Bioperl Build.PL) ***\n * You chose to install $desired and it installed fine\n");
+            $msg = 'ok';
+        }
+        else {
+            $self->log_info("\n\n*** (back in Bioperl Build.PL) ***\n");
+            $msg = "You chose to install $desired but it failed to install";
+        }
+        
+        chdir $cwd or die "Cannot chdir() back to $cwd: $!";
+        return $msg;
+    }
+}
+
+# install required modules listed in 'requires' or 'build_requires' arg to
+# new that weren't already installed. Should only be called by prereq_failures
+sub install_required {
+    my ($self, $desired, $version, $msg) = @_;
+    
+    $self->log_info(" - ERROR: $msg\n");
+    
+    return $self->install_prereq($desired, $version);
 }
 
 # install optional modules listed in 'recommends' arg to new that weren't
@@ -351,38 +419,35 @@ sub install_optional {
     }
     
     if ($install) {
-        # Here we use CPAN to actually install the desired module, the benefit
-        # being we continue even if installation fails, and that this works
-        # even when not using CPAN to install.
-        #
-        # The alternative would be to simply append the module to 'requires'
-        # and let CPAN deal with required modules in the normal way, but
-        # older CPANs don't do that (look only at META.yml), and we get
-        # total failure for something that was only optional
-        require Cwd;
-        require CPAN;
-        
-        # Save this because CPAN will chdir all over the place.
-        my $cwd = Cwd::cwd();
-        
-        CPAN::Shell->install($desired);
-        my $msg;
-        if (CPAN::Shell->expand("Module", $desired)->uptodate) {
-            $self->log_info("\n\n*** (back in Bioperl Build.PL) ***\n * You chose to install $desired and it installed fine\n");
-            $msg = 'ok';
-        }
-        else {
-            $self->log_info("\n\n*** (back in Bioperl Build.PL) ***\n");
-            $msg = "You chose to install $desired but it failed to install";
-        }
-        
-        chdir $cwd or die "Cannot chdir() back to $cwd: $!";
-        return $msg;
+        return $self->install_prereq($desired, $version);
     }
     else {
         $self->log_info(" * You chose not to install $desired\n");
         return 'ok';
     }
+}
+
+# there's no official way to discover if being run by CPAN, and the method
+# here is hardly ideal since user could change their build_dir in CPAN config.
+# NB: Module::AutoInstall has more robust detection, and is promising in other
+# ways; could consider converting over to it in the future
+sub under_cpan {
+    my $self = shift;
+    
+    unless (defined $self->{under_cpan}) {
+        require Cwd;
+        my $cwd = Cwd::cwd();
+        if ($cwd =~ /cpan/i) {
+            $self->log_info("(I think I'm being run by CPAN, so will rely on CPAN to handle prerequisite installation)\n");
+            $self->{under_cpan} = 1;
+        }
+        else {
+            $self->log_info("(I think you ran Build.PL directly, so will use CPAN to install prerequisites on demand)\n");
+            $self->{under_cpan} = 0;
+        }
+    }
+    
+    return $self->{under_cpan};
 }
 
 # overridden simply to not print the default answer if chosen by hitting return
@@ -621,7 +686,8 @@ sub prepare_metadata {
     return $node;
 }
 
-# let us store extra things persistently in _build
+# let us store extra things persistently in _build, and keep recommends and
+# requires hashes in insertion order
 sub _construct {
     my $self = shift;
     $self = $self->SUPER::_construct(@_);
@@ -634,12 +700,78 @@ sub _construct {
         $ph->{$_}->restore if -e $file;
     }
     
+    my %tied;
+    tie %tied, "ModuleBuildBioperl";
+    if (ref($p->{recommends}) eq 'HASH') {
+        while (my ($key, $val) = each %{$p->{recommends}}) {
+            $tied{$key} = $val;
+        }
+    }
+    else {
+        foreach my $hash_ref (@{$p->{recommends}}) {
+            while (my ($key, $val) = each %{$hash_ref}) {
+                $tied{$key} = $val;
+            }
+        }
+    }
+    $self->{properties}->{recommends} = \%tied;
+    my %tied2;
+    tie %tied2, "ModuleBuildBioperl";
+    while (my ($key, $val) = each %{$p->{requires}}) {
+        $tied2{$key} = $val;
+    }
+    $self->{properties}->{requires} = \%tied2;
+    
     return $self;
 }
 sub write_config {
     my $self = shift;
+    
+    # turn $self->{properties}->{requires} into an array of hash refs to
+    # maintain its order when retrieved (don't care about recommends now,
+    # this is only relevant on a resume)
+    my @required;
+    my $orig_requires = $self->{properties}->{requires};
+    while (my ($key, $val) = each %{$self->{properties}->{requires}}) {
+        push(@required, { $key => $val });
+    }
+    $self->{properties}->{requires} = \@required;
+    
     $self->SUPER::write_config;
+    
+    # write extra things
     $self->{phash}{$_}->write() foreach qw(manifest_skip post_install_scripts);
+    
+    # re-write the prereqs file to keep future versions of CPAN happy
+    $self->{properties}->{requires} = $orig_requires;
+    my @items = @{ $self->prereq_action_types };
+    $self->_write_data('prereqs', { map { $_, $self->$_() } @items });
+    $self->{properties}->{requires} = \@required;
+    
+    # be even more certain we can reload ourselves during a resume by copying
+    # ourselves to _build\lib
+    my $filename = File::Spec->catfile($self->{properties}{config_dir}, 'lib', 'ModuleBuildBioperl.pm');
+    my $filedir  = File::Basename::dirname($filename);
+    
+    File::Path::mkpath($filedir);
+    warn "Can't create directory $filedir: $!" unless -d $filedir;
+    
+    File::Copy::copy('ModuleBuildBioperl.pm', $filename);
+    warn "Unable to copy 'ModuleBuildBioperl.pm' to '$filename'\n" unless -e $filename;
+}
+sub read_config {
+    my $self = shift;
+    $self->SUPER::read_config(@_);
+    
+    # restore the requires order into a tied hash from the stored array
+    my %tied;
+    tie %tied, "ModuleBuildBioperl";
+    foreach my $hash_ref (@{$self->{properties}->{requires}}) {
+        while (my ($key, $val) = each %{$hash_ref}) {
+            $tied{$key} = $val;
+        }
+    }
+    $self->{properties}->{requires} = \%tied;
 }
 
 # add a file to the default MANIFEST.SKIP
@@ -753,6 +885,131 @@ sub ppm_name {
     return $self->dist_dir.'-ppm';
 }
 
+# generate complete ppd4 version file
+sub ACTION_ppd {
+    my $self = shift;
+    
+    my $file = $self->make_ppd(%{$self->{args}});
+    $self->add_to_cleanup($file);
+    $self->add_to_manifest_skip($file);
+}
+
+# add pod2htm temp files to MANIFEST.SKIP, generated during ppmdist most likely
+sub htmlify_pods {
+    my $self = shift;
+    $self->SUPER::htmlify_pods(@_);
+    $self->add_to_manifest_skip('pod2htm*');
+}
+
+# don't copy across man3 docs since they're of little use under Windows and
+# have bad filenames
+sub ACTION_ppmdist {
+    my $self = shift;
+    my @types = $self->install_types(1);
+    $self->SUPER::ACTION_ppmdist(@_);
+    $self->install_types(0);
+}
+
+# when supplied a true value, pretends libdoc doesn't exist (preventing man3
+# installation for ppmdist). when supplied false, they exist again
+sub install_types {
+    my ($self, $no_libdoc) = @_;
+    $self->{no_libdoc} = $no_libdoc if defined $no_libdoc;
+    my @types = $self->SUPER::install_types;
+    if ($self->{no_libdoc}) {
+        my @altered_types;
+        foreach my $type (@types) {
+            push(@altered_types, $type) unless $type eq 'libdoc';
+        }
+        return @altered_types;
+    }
+    return @types;
+}
+
+# overridden from Module::Build::PPMMaker for ppd4 compatability
+sub make_ppd {
+    my ($self, %args) = @_;
+    
+    require Module::Build::PPMMaker;
+    my $mbp = Module::Build::PPMMaker->new();
+    
+    my %dist;
+    foreach my $info (qw(name author abstract version)) {
+        my $method = "dist_$info";
+        $dist{$info} = $self->$method() or die "Can't determine distribution's $info\n";
+    }
+    $dist{codebase} = $self->ppm_name.'.tar.gz';
+    $mbp->_simple_xml_escape($_) foreach $dist{abstract}, $dist{codebase}, @{$dist{author}};
+    
+    my (undef, undef, undef, $mday, $mon, $year) = localtime();
+    $year += 1900;
+    $mon++;
+    my $date = "$year-$mon-$mday";
+    
+    my $softpkg_version = $self->dist_dir;
+    $softpkg_version =~ s/^$self->{properties}{dist_name}-//;
+    
+    # header
+    my $ppd = <<"PPD";
+    <SOFTPKG NAME=\"$dist{name}\" VERSION=\"$softpkg_version\" DATE=\"$date\">
+        <TITLE>$dist{name}</TITLE>
+        <ABSTRACT>$dist{abstract}</ABSTRACT>
+@{[ join "\n", map "        <AUTHOR>$_</AUTHOR>", @{$dist{author}} ]}
+        <PROVIDE NAME=\"$dist{name}::\" VERSION=\"$dist{version}\"/>
+PPD
+    
+    # provide section
+    foreach my $pm (@{$self->rscan_dir('Bio', qr/\.pm$/)}) {
+        # convert these filepaths to Module names
+        $pm =~ s/\//::/g;
+        $pm =~ s/\.pm//;
+        
+        $ppd .= sprintf(<<'EOF', $pm, $dist{version});
+        <PROVIDE NAME="%s" VERSION="%s"/>
+EOF
+    }
+    
+    # rest of header
+    $ppd .= <<"PPD";
+        <IMPLEMENTATION>
+            <ARCHITECTURE NAME=\"MSWin32-x86-multi-thread-5.8\"/>
+            <CODEBASE HREF=\"$dist{codebase}\"/>
+PPD
+    
+    # required section
+    # we do both requires and recommends to make installation on Windows as
+    # easy (mindless) as possible
+    for my $type ('requires', 'recommends') {
+        my $prereq = $self->$type;
+        while (my ($modname, $version) = each %$prereq) {
+            next if $modname eq 'perl';
+            ($version) = split("/", $version) if $version =~ /\//;
+            
+            # Module names must have at least one ::
+            unless ($modname =~ /::/) {
+                $modname .= '::';
+            }
+            
+            $ppd .= sprintf(<<'EOF', $modname, $version || '');
+            <REQUIRE NAME="%s" VERSION="%s"/>
+EOF
+        }
+    }
+    
+    # footer
+    $ppd .= <<'EOF';
+        </IMPLEMENTATION>
+    </SOFTPKG>
+EOF
+    
+    my $ppd_file = "$dist{name}.ppd";
+    my $fh = IO::File->new(">$ppd_file") or die "Cannot write to $ppd_file: $!";
+    print $fh $ppd;
+    close $fh;
+  
+    return $ppd_file;
+}
+
 # we make all archive formats we want, not just .tar.gz
 # we also auto-run manifest action, since we always want to re-create
 # MANIFEST and MANIFEST.SKIP just-in-time
@@ -786,6 +1043,81 @@ sub make_zip {
     my $files = $self->rscan_dir($dir);
     Archive::Tar->create_archive("$file.tar", 0, @$files);
     $self->do_system($self->split_like_shell("bzip2"), "-k", "$file.tar");
+}
+
+# 
+# Below is ripped straight from Tie::IxHash. We need ordered hashes for our
+# recommends and required hashes, needed to generate our pre-reqs.
+# This means we can't have Tie::IxHash as a pre-req!
+# We could include Tie::IxHash in t/lib or something, but this is simpler
+# and suffers fewer potential problems
+#
+# Again, code below written by Gurusamy Sarathy
+#
+
+sub TIEHASH {
+  my($c) = shift;
+  my($s) = [];
+  $s->[0] = {};   # hashkey index
+  $s->[1] = [];   # array of keys
+  $s->[2] = [];   # array of data
+  $s->[3] = 0;    # iter count
+
+  bless $s, $c;
+
+  $s->Push(@_) if @_;
+
+  return $s;
+}
+
+sub FETCH {
+  my($s, $k) = (shift, shift);
+  return exists( $s->[0]{$k} ) ? $s->[2][ $s->[0]{$k} ] : undef;
+}
+
+sub STORE {
+  my($s, $k, $v) = (shift, shift, shift);
+  
+  if (exists $s->[0]{$k}) {
+    my($i) = $s->[0]{$k};
+    $s->[1][$i] = $k;
+    $s->[2][$i] = $v;
+    $s->[0]{$k} = $i;
+  }
+  else {
+    push(@{$s->[1]}, $k);
+    push(@{$s->[2]}, $v);
+    $s->[0]{$k} = $#{$s->[1]};
+  }
+}
+
+sub DELETE {
+  my($s, $k) = (shift, shift);
+
+  if (exists $s->[0]{$k}) {
+    my($i) = $s->[0]{$k};
+    for ($i+1..$#{$s->[1]}) {    # reset higher elt indexes
+      $s->[0]{$s->[1][$_]}--;    # timeconsuming, is there is better way?
+    }
+    delete $s->[0]{$k};
+    splice @{$s->[1]}, $i, 1;
+    return (splice(@{$s->[2]}, $i, 1))[0];
+  }
+  return undef;
+}
+
+sub EXISTS {
+  exists $_[0]->[0]{ $_[1] };
+}
+
+sub FIRSTKEY {
+  $_[0][3] = 0;
+  &NEXTKEY;
+}
+
+sub NEXTKEY {
+  return $_[0][1][$_[0][3]++] if ($_[0][3] <= $#{$_[0][1]});
+  return undef;
 }
 
 1;
