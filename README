@@ -1,10 +1,8 @@
 $Id$
 
-
 o Version
 
- This is Bioperl-run version 1.5.2, a developer release, please ensure
- that you have bioperl core 1.5.2 or later
+ This is bioperl-run version 1.5.2, a developer release.
 
 o Description 
  
@@ -15,41 +13,12 @@ o Description
  See the Changes file for more information about what is contained in
  here.
 
-
 o Installation
 
- You need to have the core bioperl installation before using
- bioperl-run. Select a bioperl distribution with the same release
- version.
-
- The installation of this package is identical to the core bioperl
- install. You can install with CPAN in the usual way, or:
-
-   % perl Build.PL
-
-   % ./Build test (some tests may not succeed if you do not have the
-                   necessary programs or env variables defined)
-   % su
-   # ./Build install
-
-
-o Environmental variables
-
- Some important environment variables you need to be aware of.
-
- Variable		Values     Comment
- --------------------------------------------------------------------
- PHYLIPVERSION		3.5, 3.6   If you want to run Phylip3.6 you 
- 				   Need to set this env variable to 3.6
-
- BLASTDIR		DIR PATH   Point to the directory where BLAST 
- 	                           is installed
-
- GENSCAN_DIR		DIR PATH   Point to the directory where 
-                                    HumanIso.smat file is installed
-
- EPONINEDIR          	DIR PATH   Point to the directory where 
-                                    eponine_scan.jar is installed
- PAMLDIR                DIR PATH   Point to directory where PAML is 
-                                    installed.
+ See the accompanying INSTALL file for details on installing
+ bioperl-run.
  
+o Feedback
+
+Write down any problems or praise and send them to 
+bioperl-l@bioperl.org  ;-)

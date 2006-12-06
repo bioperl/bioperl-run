@@ -1,0 +1,122 @@
+# $Id$
+
+bioperl-run INSTALLATION
+
+
+INSTALL THE RIGHT BIOPERL
+
+You need at least the corresponding version of Bioperl. Since this
+is bioperl-run 1.5.2, you will need bioperl 1.5.2.
+
+
+INSTALLATION
+
+Installation instructions at the following address apply here:
+http://www.bioperl.org/wiki/Installing_Bioperl_for_Unix
+The next 2 sections summarize the essential points from there.
+
+
+CPAN INSTALLATION
+
+To install using CPAN you will need a recent version (v1.8802 has
+been tested) of it and your prefer_installer conf set to 'MB':
+
+  >cpan
+  cpan>o conf prefer_installer MB
+  cpan>o conf commit
+  cpan>q
+
+Find the name of the bioperl-run version you want:
+
+  >cpan
+  cpan>d /bioperl-run/
+  Database was generated on Mon, 20 Nov 2006 05:24:36 GMT
+  Distribution S/SE/SENDU/bioperl-run-1.5.2_100.tar.gz
+  
+Now install:
+
+ cpan>install S/SE/SENDU/bioperl-run-1.5.2_100.tar.gz
+
+If you've installed everything perfectly then you may pass all the tests
+run in the './Build test' phase.
+It's also possible that you may fail some tests. Possible explanations:
+problems with local Perl installation, previously undetected bug in
+Bioperl, flawed test script and so on. A few failed tests may not affect
+your usage of bioperl-run.
+
+If you decide that the failed tests will not affect how you intend to use
+bioperl-run and you'd like to install anyway do:
+
+ cpan>force install S/SE/SENDU/bioperl-run-1.5.2_100.tar.gz
+
+This is what most experienced Bioperl users would do. However, if you're
+concerned about a failed test and need assistance or advice then contact
+bioperl-l@bioperl.org.
+  
+
+MANUAL INSTALLATION
+
+Download the bioperl-run archive, then extract its contents. Example:
+
+  >gunzip bioperl-run-<release-version>.tar.gz
+  >tar xvf bioperl-run-<release-version>.tar
+  >cd bioperl-run
+
+where <release-version> is the current release.
+
+Issue the following command from within bioperl-run/:
+
+  >perl Build.PL
+
+You can run regression tests and install bioperl-run using the
+following commands:
+
+  >./Build test  
+  >./Build install
+
+NOTE: many tests will be skipped without the necessary environment
+variables set to tell Bioperl where your programs are installed.
+
+
+INSTALLING bioperl-run ON WINDOWS
+
+The following page on the BioPerl website has up-to-date
+instructions on how to install bioperl-run on Windows:
+
+http://www.bioperl.org/wiki/Installing_Bioperl_on_Windows
+
+(the instructions are aimed at bioperl-core, but apply
+equally to bioperl-run)
+
+
+ENVIRONMENT VARIABLES
+
+ Some important environment variables you need to be aware of.
+
+ Variable		Values     Comment
+ --------------------------------------------------------------------
+ PHYLIPVERSION	3.5, 3.6   If you want to run Phylip3.6 you 
+                           need to set this env variable to 3.6
+
+ BLASTDIR		DIR PATH   Point to the directory where BLAST 
+ 	                       is installed
+
+ GENSCAN_DIR	DIR PATH   Point to the directory where 
+                           HumanIso.smat file is installed
+
+ EPONINEDIR     DIR PATH   Point to the directory where 
+                           eponine_scan.jar is installed
+                           
+ PAMLDIR        DIR PATH   Point to directory where PAML is 
+                           installed
+
+Generally the all-caps program name concatenated to 'DIR' patten for
+environment variable names is followed for most programs. However
+there are some exceptions (some require an underscore between the
+program name and 'DIR'), so check the documentation for the module
+you're interested in using.
+
+Note that for some programs, having the executables in your path is
+not enough - the correct environment variable still needs to be set,
+and sometimes it shouldn't point to the executable location, but
+somewhere else - again, check the documentation.
