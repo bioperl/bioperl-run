@@ -12,7 +12,7 @@
 
 Bio::Tools::Run::Alignment::Proda - Object for the calculation of setd
 of multiple sequence alignments from a set of unaligned sequences or
-alignments using the Proda program
+alignments using the Proda program. 
 
 =head1 SYNOPSIS
 
@@ -42,6 +42,13 @@ alignments using the Proda program
 You can get it and see information about it at this URL
 http://proda.stanford.edu
 
+This program will return one or more local alignments for the
+different repeated or rearranged regions in the sequences. If a
+sequences contains more than one of those patterns, it will be present
+more than once in the alignment. The difference will be in that the id
+contain the start and end, like myseqid(123-456) and myseqid(567-890),
+instead of simply myseqid as in the original input file. This is true
+for all the output ids, even if they are present only once.
 
 =head2 Helping the module find your executable 
 
@@ -166,9 +173,9 @@ sub new{
     my $self = $class->SUPER::new(@args);
     my ($on) = $self->SUPER::_rearrange([qw(OUTFILE_NAME)], @args);
     $self->outfile_name($on || '');
-    my ($attr, $value);    
+    my ($attr, $value);
     $self->aformat($DEFAULTS{'AFORMAT'});
-    
+
     while ( @args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -289,7 +296,7 @@ sub align {
 =head2  _run
 
  Title   :  _run
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly
  Function:  makes actual system call to proda program
  Example :
  Returns : nothing; proda output is written to a
@@ -303,7 +310,7 @@ sub align {
 sub _run {
     my ($self,$infilename,$params) = @_;
     my $commandstring = $self->executable." $infilename $params";
-    
+
     $self->debug( "proda command = $commandstring \n");
 
     my $status = system($commandstring);
@@ -328,7 +335,7 @@ sub _run {
 =head2  _setinput
 
  Title   :  _setinput
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly
  Function:  Create input file for proda program
  Example :
  Returns : name of file containing proda data input AND
@@ -434,7 +441,7 @@ sub _setparams {
     }
     #FIXME: This may be only for *nixes. Double check in other OSes
     $param_string .= " > ".$self->outfile_name;
-    
+
     if ($self->verbose < 0) { 
 	$param_string .= ' 2> /dev/null';
     }
@@ -467,7 +474,7 @@ sub aformat{
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
