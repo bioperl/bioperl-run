@@ -34,14 +34,7 @@ alignments using the Probalign program
   #There are various additional options and input formats available.
   #See the DESCRIPTION section that follows for additional details.
 
-  $factory = new Bio::Tools::Run::Alignment::Probalign
-      (
-       'iterative-refinement'  => '1000',
-       'consistency'   => '5',
-       'pre-training' => '20',
-       'verbose' => '',
-       'paramfile'   => "$dir/$subdir/$outdir/train.params",
-      );
+  $factory = new Bio::Tools::Run::Alignment::Probalign();
   $factory->outfile_name("$dir/$subdir/$outdir/outfile.afa");
   $aln = $factory->align($seq_array_ref);
 
@@ -180,9 +173,9 @@ sub new{
     my $self = $class->SUPER::new(@args);
     my ($on) = $self->SUPER::_rearrange([qw(OUTFILE_NAME)], @args);
     $self->outfile_name($on || '');
-    my ($attr, $value);    
+    my ($attr, $value);
     $self->aformat($DEFAULTS{'AFORMAT'});
-    
+
     while ( @args)  {
 	$attr =   shift @args;
 	$value =  shift @args;
@@ -303,7 +296,7 @@ sub align {
 =head2  _run
 
  Title   :  _run
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly
  Function:  makes actual system call to probalign program
  Example :
  Returns : nothing; probalign output is written to a
@@ -317,7 +310,7 @@ sub align {
 sub _run {
     my ($self,$infilename,$params) = @_;
     my $commandstring = $self->executable." $infilename $params";
-    
+
     $self->debug( "probalign command = $commandstring \n");
 
     my $status = system($commandstring);
@@ -444,7 +437,7 @@ sub _setparams {
     }
     #FIXME: This may be only for *nixes. Double check in other OSes
     $param_string .= " > ".$self->outfile_name;
-    
+
     if ($self->verbose < 0) { 
 	$param_string .= ' 2> /dev/null';
     }
@@ -477,7 +470,7 @@ sub aformat{
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
