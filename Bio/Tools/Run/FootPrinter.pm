@@ -161,6 +161,7 @@ use Cwd;
 use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
 use Bio::Tools::FootPrinter;
+use Bio::SeqIO;
 
 
 # Let the code begin...
