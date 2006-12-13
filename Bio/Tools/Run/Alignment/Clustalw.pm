@@ -447,6 +447,36 @@ sub version {
 
 }
 
+=head2  run
+
+ Title   : run
+ Usage   : ($aln, $tree) = $factory->run($inputfilename);
+           ($aln, $tree) = $factory->run($seq_array_ref);
+ Function: Perform a multiple sequence alignment, generating a tree at the same
+           time. (Like align() and tree() combined.)
+ Returns : A SimpleAlign object containing the sequence alignment and a
+           Bio::Tree::Tree object with the tree relating the sequences.
+ Args    : Name of a file containing a set of unaligned fasta sequences
+           or else an array of references to Bio::Seq objects.
+
+=cut
+
+sub run {
+    my ($self,$input) = @_;
+    my ($temp,$infilename, $seq);
+    my ($attr, $value, $switch);
+
+    $self->io->_io_cleanup();
+    # Create input file pointer
+    $infilename = $self->_setinput($input);
+    if (!$infilename) {$self->throw("Bad input data (sequences need an id ) or less than 2 sequences in $input !");}
+
+    # Create parameter string to pass to clustalw program
+    my $param_string = $self->_setparams();
+
+    # run clustalw
+    return $self->_run('both', $infilename, $param_string);
+}
 
 =head2  align
 
@@ -473,23 +503,21 @@ or
 =cut
 
 sub align {
-
     my ($self,$input) = @_;
-    my ($temp,$infilename, $seq);
-    my ($attr, $value, $switch);
 
     $self->io->_io_cleanup();
-# Create input file pointer
-    $infilename = $self->_setinput($input);
+    
+    # Create input file pointer
+    my $infilename = $self->_setinput($input);
     if (!$infilename) {$self->throw("Bad input data (sequences need an id ) or less than 2 sequences in $input !");}
 
-# Create parameter string to pass to clustalw program
+    # Create parameter string to pass to clustalw program
     my $param_string = $self->_setparams();
 
-# run clustalw
+    # run clustalw
     my $aln = $self->_run('align', $infilename,$param_string);
 }
-#################################################
+
 
 =head2  profile_align
 
@@ -508,26 +536,22 @@ or references to SimpleAlign objects.
 =cut
 
 sub profile_align {
-
     my ($self,$input1,$input2) = @_;
-    my ($temp,$infilename1,$infilename2,$input,$seq);
 
     $self->io->_io_cleanup();
-# Create input file pointer
-    $infilename1 = $self->_setinput($input1,1);
-    $infilename2 = $self->_setinput($input2,2);
+    # Create input file pointer
+    my $infilename1 = $self->_setinput($input1,1);
+    my $infilename2 = $self->_setinput($input2,2);
     if (!$infilename1 || !$infilename2) {$self->throw("Bad input data: $input1 or $input2 !");}
     unless ( -e $infilename1 and -e  $infilename2) {$self->throw("Bad input file: $input1 or $input2 !");}
 
-
-# Create parameter string to pass to clustalw program
+    # Create parameter string to pass to clustalw program
     my $param_string = $self->_setparams();
-# run clustalw
+    # run clustalw
     my $aln = $self->_run('profile-aln', $infilename1,
 			  $infilename2, $param_string);
-
 }
-#################################################
+
 
 =head2  tree
 
@@ -552,11 +576,11 @@ or
 
 sub tree {
     my ($self,$input) = @_;
-    my ($temp,$infilename, $seq);
-    my ($attr, $value, $switch);
+    
     $self->io->_io_cleanup();
+    
     # Create input file pointer
-    $infilename = $self->_setinput($input);
+    my $infilename = $self->_setinput($input);
     
     if (!$infilename) {$self->throw("Bad input data (sequences need an id ) or less than 2 sequences in $input !");}
     
@@ -564,9 +588,9 @@ sub tree {
     my $param_string = $self->_setparams();
 
     # run clustalw
-    my $tree = $self->_run('tree', $infilename,$param_string);
+    my $tree = $self->_run('tree', $infilename, $param_string);
 }
-#################################################
+
 
 =head2  _run
 
@@ -584,9 +608,9 @@ sub tree {
 
 sub _run {
     my ($self,$command,$infile1,$infile2,$param_string) = @_;
-    my $instring;
+    my ($instring, $tree);
     
-    if ($command =~ /align/) {
+    if ($command =~ /align|both/) {
 	
 	if( $^O eq 'dec_osf' ) {
 	    $instring =  "$infile1";
@@ -595,7 +619,6 @@ sub _run {
 	    $instring = " -infile=$infile1";
 	}
 	$param_string .= " $infile2";
-
     }
 
     if ($command =~ /profile/) {
@@ -622,23 +645,7 @@ sub _run {
 	    return undef;
 	}
 
-    	my $treefile = $instring;
-    	$treefile =~ s/ //g;
-	if( $param_string =~ /-bootstrap/ ) {
-	    $treefile = $instring.'.phb';
-	} elsif( $param_string =~ /-tree/ ) {
-	    $treefile = $instring.'.ph';
-	} else { $treefile = $instring.".dnd" }
-	my $in = new Bio::TreeIO('-file'  => $treefile,
-				 '-format'=> 'newick');
-    	my $tree = $in->next_tree;
-	unless ( $self->save_tempfiles ) {
-	    foreach my $f ( $treefile ) {
-		$f =~ s/\.[^\.]*$// ;
-		unlink $f if( $f ne '' );
-	    }
-	}
-	return $tree;
+    	return $self->_get_tree($infile1, $param_string);
     }
     
     my $output = $self->output || 'gcg';
@@ -665,7 +672,11 @@ sub _run {
 				-format=> $format);
     my $aln = $in->next_aln();
     $in->close;
-
+    
+    if ($command eq 'both') {
+        $tree = $self->_get_tree($infile1, $param_string);
+    }
+    
     # Clean up the temporary files created along the way...
     # Replace file suffix with dnd to find name of dendrogram file(s) to delete
     unless ( $self->save_tempfiles ) {
@@ -674,9 +685,39 @@ sub _run {
 	    unlink $f .'.dnd' if( $f ne '' );
 	}
     }
+    
+    if ($command eq 'both') {
+        return ($aln, $tree);
+    }
     return $aln;
 }
 
+sub _get_tree {
+    my ($self, $treefile, $param_string) = @_;
+    
+    if ($param_string =~ /-bootstrap/ ) {
+        $treefile .= '.phb';
+    }
+    elsif( $param_string =~ /-tree/ ) {
+        $treefile .= '.ph';
+    }
+    else {
+        $treefile .= '.dnd';
+    }
+    
+    my $in = new Bio::TreeIO('-file'  => $treefile,
+                             '-format'=> 'newick');
+    
+    my $tree = $in->next_tree;
+    unless ( $self->save_tempfiles ) {
+        foreach my $f ( $treefile ) {
+            $f =~ s/\.[^\.]*$// ;
+            unlink $f if( $f ne '' );
+        }
+    }
+    
+    return $tree;
+}
 
 =head2  _setinput()
 
