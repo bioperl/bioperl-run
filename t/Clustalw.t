@@ -21,7 +21,7 @@ BEGIN {
   #$error = 0;
 
   # Setup Test::More and plan the number of tests
-  use Test::More tests=>39;
+  use Test::More tests=>42;
   
   # Use modules that are needed in this test that are from
   # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
@@ -33,17 +33,6 @@ BEGIN {
   use_ok('File::Spec');
 }
 
-END {
-  # Things to do right at the very end, just
-  # when the  interpreter finishes/exits
-  # E.g. deleting intermediate files produced during the test
-  
-  #foreach my $file ( qw(cysprot.dnd cysprot1a.dnd) ) {
-  #  unlink $file;
-  #  # check it was deleted
-  #  ok( ! -e $file, 'Expected temp file deleted' );
-  #}
-}
 
 # setup input files etc
 my $inputfilename = File::Spec->catfile("t","data","cysprot.fa");
@@ -84,7 +73,7 @@ is( $factory->program_name(), 'clustalw',                'Correct exe default na
 SKIP: {
   # condition used to skip this block of tests
   #skip($why, $how_many_in_block);
-  skip("Couldn't find the executable", 13)
+  skip("Couldn't find the executable", 16)
     unless defined $factory->executable();
   
   # test all factory methods dependent on finding the executable
@@ -134,6 +123,26 @@ SKIP: {
   $aln = $factory->profile_align($profile1,$profile2);
   isa_ok( $aln, 'Bio::SimpleAlign' );
   is( $aln->no_sequences, 7,                            'Correct number of seqs returned' );
+  
+  # test the run method
+  ($aln, $tree) = $factory->run(\@seq_array);
+  isa_ok($aln, 'Bio::SimpleAlign');
+  isa_ok($tree, 'Bio::Tree::Tree');
+  
+  # test the footprint method
+  my @seqs = (Bio::Seq->new(-seq => 'AACCTGGCCAATTGGCCAATTGGGCGTACGTACGT', -id => 'rabbit'),
+	      Bio::Seq->new(-seq => 'ACCCTGGCCAATTGGCCAATTGTAAGTACGTACGT', -id => 'marmot'),
+	      Bio::Seq->new(-seq => 'AAGCTGGCCAATTGGCCAATTAGACTTACGTACGT', -id => 'chimp'),
+	      Bio::Seq->new(-seq => 'AACATGGCCAATTGGCCAATCGGACGTACGTCCGT', -id => 'human'),
+	      Bio::Seq->new(-seq => 'AACCGGGCCAATTGGCCAAGTGGACGTACGTATGT', -id => 'cebus'),
+	      Bio::Seq->new(-seq => 'AACCTAGCCAATTGGCCACTTGGACGTACGTACAT', -id => 'gorilla'),
+	      Bio::Seq->new(-seq => 'AACCTGCCCAATTGGCCGATTGGACGTACGTACGC', -id => 'orangutan'),
+	      Bio::Seq->new(-seq => 'AACCTGGGCAATTGGCAAATTGGACGTACGTACGT', -id => 'baboon'),
+	      Bio::Seq->new(-seq => 'AACCTGGCTAATTGGTCAATTGGACGTACGTACGT', -id => 'rhesus'),
+	      Bio::Seq->new(-seq => 'AACCTGGCCGATTGGCCAATTGGACGTACGTACGT', -id => 'squirrelmonkey'));
+  my @results = $factory->footprint(\@seqs);
+  @results = map { $_->consensus_string } @results;
+  is_deeply(\@results, [qw(ATTGG TACGT)], 'footprinting worked');
   
   SKIP: {
 	# TODO: Is this needed, or should min version be bumped to > 1.82. Discuss with module author
