@@ -29,10 +29,8 @@ Wrapper for FootPrinter Program
               'post_filtering'=>1,
               'inversion_cost'=>1,
               'max_mutations'=>4,
-              'program'=>"/usr/users/shawnh/software/FootPrinter2.0/FootPrinter",
-              'tree'   =>"/usr/users/shawnh/software/FootPrinter2.0/tree_of_life",
-              'verbose'=>1);
-  my $fp = Bio::Tools::Run::FootPrinter->new(@params);
+              'tree'   =>"/usr/users/shawnh/software/FootPrinter2.0/tree_of_life");
+  my $fp = Bio::Tools::Run::FootPrinter->new(@params, -verbose => 1);
 
   my $sio = Bio::SeqIO->new(-file=>"/usr/users/shawnh/seq.fa",-format=>"fasta");
 
