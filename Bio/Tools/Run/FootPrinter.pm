@@ -317,6 +317,7 @@ sub run {
 sub _run {
   my ($self,$infile,$tree,$param_string) = @_;
   my $instring;
+  my $exe = $self->executable || return;
   $self->debug( "Program ".$self->executable."\n");
 
   my $outfile = $infile.".seq.txt";
