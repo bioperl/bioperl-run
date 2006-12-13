@@ -38,6 +38,19 @@ alignments using the Clustalw program
   # sequences to be added to the alignment. For example: 	
   $aln = $factory->profile_align($aln1,$seq); # $seq is a Bio::Seq object.
 
+  # Get a tree of the sequences
+  $tree = $factory->tree(\@seq_array);
+  
+  # Get both an alignment and a tree
+  ($aln, $tree) = $factory->run(\@seq_array);
+  
+  # Do a footprinting analysis on the supplied sequences, getting back the
+  # most converved sub-alignments
+  my @results = $factory->footprint(\@seq_array);
+  foreach my $result (@results) {
+    print $result->consensus_string, "\n";
+  }
+
   # There are various additional options and input formats available.
   # See the DESCRIPTION section that follows for additional details.
 
@@ -109,8 +122,7 @@ clustalw output file can be saved if the calling script specifies an
 output file (with the clustalw parameter OUTFILE).  Currently only the
 GCG-MSF output file formats is supported.
 
-Other parameters and features (such as those corresponding to tree
-production) have not been implemented yet in Perl format.
+Not all parameters and features have been implemented yet in Perl format.
 
 Alignment parameters can be changed and/or examined at any time after
 the factory has been created.  The program checks that any
@@ -591,6 +603,65 @@ sub tree {
     my $tree = $self->_run('tree', $infilename, $param_string);
 }
 
+=head2  footprint
+
+ Title   : footprint
+ Usage   : @alns = $factory->footprint($treefilename, $window_size, $diff);
+           @alns = $factory->footprint($seqs_array_ref);
+ Function: Aligns all the supplied sequences and slices out of the alignment
+           those regions along a sliding window who's tree length differs
+           significantly from the total average tree length.
+ Returns : list of SimpleAlign objects
+ Args    : first argument as per run(), optional second argument to specify
+           the size of the sliding window (default 5bp) and optional third
+           argument to specify the % difference from the total tree length
+           needed for a window to be considered a footprint (default 33%).
+
+=cut
+
+sub footprint {
+    my ($self, $in, $slice_size, $deviate) = @_;
+    
+    my ($simplealn, $tree) = $self->run($in);
+    
+    # total tree length?
+    my $total_length = $tree->total_branch_length;
+    
+    # tree length along sliding window, picking regions that significantly
+    # deviate from the average tree length
+    $slice_size ||= 5;
+    $deviate ||= 33;
+    my $threshold = $total_length - (($total_length / 100) * $deviate);
+    my $length = $simplealn->length;
+    my $below = 0;
+    my $found_minima = 0;
+    my $minima = [$threshold, ''];
+    my @results;
+    for my $i (1..($length - $slice_size + 1)) {
+        my $slice = $simplealn->slice($i, ($i + $slice_size - 1), 1);
+        my $tree = $self->tree($slice);
+        my $slice_length = $tree->total_branch_length;
+        
+        $slice_length <= $threshold ? ($below = 1) : ($below = 0);
+        if ($below) {
+            unless ($found_minima) {
+                if ($slice_length < ${$minima}[0]) {
+                    $minima = [$slice_length, $slice];
+                }
+                else {
+                    push(@results, ${$minima}[1]);
+                    $minima = [$threshold, ''];
+                    $found_minima = 1;
+                }
+            }
+        }
+        else {
+            $found_minima = 0;
+        }
+    }
+    
+    return @results;
+}
 
 =head2  _run
 
