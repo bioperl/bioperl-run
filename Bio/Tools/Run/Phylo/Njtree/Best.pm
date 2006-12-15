@@ -284,8 +284,8 @@ sub run {
        $self->throw("unable to find or run executable for 'njtree'") 
            unless $njtree_executable && -e $njtree_executable && -x _;
 
-       open(RUN, "$njtree_executable |") 
-           or $self->throw("Cannot open exe $njtree_executable");
+       open(RUN, "$commandstring |") 
+           or $self->throw("Cannot run $commandstring");
 
        my @output = <RUN>;
        $exit_status = close(RUN);
