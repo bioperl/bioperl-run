@@ -455,7 +455,7 @@ sub check_names {
        $self->{_alnids}{$id} = 1;
    }
    foreach my $alnid (keys %{$self->{_alnids}}) {
-       $self->{_unmappedids}{$alnid} unless (defined($self->{_treeids}{$alnid}));
+       $self->{_unmappedids}{$alnid} = 1 unless (defined($self->{_treeids}{$alnid}));
    }
    if (defined($self->{_unmappedids})) {
        my $count = scalar(keys%{$self->{_unmappedids}});
