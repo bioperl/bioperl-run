@@ -259,10 +259,7 @@ sub prepare {
 
 sub run {
    my ($self,$aln,$tree) = @_;
-   unless ( $self->save_tempfiles ) {
-       # brush so we don't get plaque buildup ;)
-       $self->cleanup();
-   }
+
    $self->prepare($aln,$tree) unless (defined($self->{_prepared}));
    my ($rc,$nhx_tree) = (1);
    my ($tmpdir) = $self->tempdir();
