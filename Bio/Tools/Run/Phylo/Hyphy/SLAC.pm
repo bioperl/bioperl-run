@@ -111,10 +111,6 @@ BEGIN {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'HYPHYDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
     }
    
-    # valid values for parameters, the default one is always
-    # the first one in the array
-    # much of the documentation here is lifted directly from the codeml.ctl
-    # example file provided with the package
     @VALIDVALUES = 
         (
          {'geneticCode' => [ "Universal","VertebratemtDNA","YeastmtDNA","Mold/ProtozoanmtDNA",
@@ -186,7 +182,7 @@ sub program_dir {
                               NOT cleanup after onesself (default FALSE)
            -tree => the Bio::Tree::TreeI object
            -params => a hashref of PAML parameters (all passed to set_parameter)
-           -executable => where the codeml executable resides
+           -executable => where the hyphy executable resides
 
 See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
 
@@ -220,8 +216,8 @@ sub new {
 =head2 prepare
 
  Title   : prepare
- Usage   : my $rundir = $codeml->prepare($aln);
- Function: prepare the codeml analysis using the default or updated parameters
+ Usage   : my $rundir = $slac->prepare($aln);
+ Function: prepare the slac analysis using the default or updated parameters
            the alignment parameter must have been set
  Returns : value of rundir
  Args    : L<Bio::Align::AlignI> object,
@@ -238,7 +234,7 @@ sub prepare {
    $tree = $self->tree unless $tree;
    $aln  = $self->alignment unless $aln;
    if( ! $aln ) { 
-       $self->warn("must have supplied a valid alignment file in order to run codeml");
+       $self->warn("must have supplied a valid alignment file in order to run hyphy slac");
        return 0;
    }
    my ($tempdir) = $self->tempdir();
@@ -285,8 +281,8 @@ sub prepare {
 =head2 run
 
  Title   : run
- Usage   : my ($rc,$results) = $codeml->run($aln);
- Function: run the codeml analysis using the default or updated parameters
+ Usage   : my ($rc,$results) = $slac->run($aln);
+ Function: run the slac analysis using the default or updated parameters
            the alignment parameter must have been set
  Returns : Return code, L<Bio::Tools::Phylo::PAML>
  Args    : L<Bio::Align::AlignI> object,
@@ -305,7 +301,7 @@ sub run {
        my $exit_status;
        my $tempdir = $self->tempdir;
        my $slacexe = $self->executable();
-       $self->throw("unable to find or run executable for 'codeml'") unless $slacexe && -e $slacexe && -x _;
+       $self->throw("unable to find or run executable for 'HYPHY'") unless $slacexe && -e $slacexe && -x _;
        $commandstring = $slacexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_slacwrapper'};
        open(RUN, "$commandstring |") or $self->throw("Cannot open exe $slacexe");
        my @output = <RUN>;
@@ -405,7 +401,7 @@ sub error_string {
 =head2 alignment
 
  Title   : alignment
- Usage   : $codeml->align($aln);
+ Usage   : $slac->align($aln);
  Function: Get/Set the L<Bio::Align::AlignI> object
  Returns : L<Bio::Align::AlignI> object
  Args    : [optional] L<Bio::Align::AlignI>
@@ -434,7 +430,7 @@ sub alignment {
 =head2 tree
 
  Title   : tree
- Usage   : $codeml->tree($tree, %params);
+ Usage   : $slac->tree($tree, %params);
  Function: Get/Set the L<Bio::Tree::TreeI> object
  Returns : L<Bio::Tree::TreeI> 
  Args    : [optional] $tree => L<Bio::Tree::TreeI>,
@@ -478,11 +474,11 @@ sub get_parameters {
 =head2 set_parameter
 
  Title   : set_parameter
- Usage   : $codeml->set_parameter($param,$val);
- Function: Sets a codeml parameter, will be validated against
+ Usage   : $slac->set_parameter($param,$val);
+ Function: Sets a slac parameter, will be validated against
            the valid values as set in the %VALIDVALUES class variable.  
            The checks can be ignored if one turns off param checks like this:
-             $codeml->no_param_checks(1)
+             $slac->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
            then no warning will be reported
  Args    : $param => name of the parameter
@@ -504,7 +500,7 @@ sub set_parameter {
 =head2 set_default_parameters
 
  Title   : set_default_parameters
- Usage   : $codeml->set_default_parameters(0);
+ Usage   : $slac->set_default_parameters(0);
  Function: (Re)set the default parameters from the defaults
            (the first value in each array in the 
 	    %VALIDVALUES class variable)
@@ -547,7 +543,7 @@ sub set_default_parameters {
 =head2 update_ordered_parameters
 
  Title   : update_ordered_parameters
- Usage   : $codeml->update_ordered_parameters(0);
+ Usage   : $slac->update_ordered_parameters(0);
  Function: (Re)set the default parameters from the defaults
            (the first value in each array in the 
 	    %VALIDVALUES class variable)
@@ -619,7 +615,7 @@ sub no_param_checks {
 =head2 outfile_name
 
  Title   : outfile_name
- Usage   : my $outfile = $codeml->outfile_name();
+ Usage   : my $outfile = $slac->outfile_name();
  Function: Get/Set the name of the output file for this run
            (if you wanted to do something special)
  Returns : string
@@ -650,7 +646,7 @@ sub outfile_name {
 =head2 cleanup
 
  Title   : cleanup
- Usage   : $codeml->cleanup();
+ Usage   : $slac->cleanup();
  Function: Will cleanup the tempdir directory after a PAML run
  Returns : none
  Args    : none
