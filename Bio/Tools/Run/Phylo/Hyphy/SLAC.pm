@@ -317,7 +317,7 @@ sub run {
        }
        my $outfile = $self->outfile_name;
        eval {
-	   open(OUTFILE, "$tempdir/$outfile") or $self->throw("cannot open $outfile for reading");
+	   open(OUTFILE, "$outfile") or $self->throw("cannot open $outfile for reading");
            my $readed_header = 0;
            my @elems;
            while (<OUTFILE>) {
