@@ -10,7 +10,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Alignment::Proda - Object for the calculation of setd
+Bio::Tools::Run::Alignment::Proda - Object for the calculation of sets
 of multiple sequence alignments from a set of unaligned sequences or
 alignments using the Proda program. 
 
