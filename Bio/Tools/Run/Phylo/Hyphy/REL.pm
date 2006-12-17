@@ -19,23 +19,18 @@ Bio::Tools::Run::Phylo::Hyphy::REL - Wrapper around the Hyphy REL analysis
   use Bio::Tools::Run::Phylo::Hyphy::REL;
   use Bio::AlignIO;
 
-  my $alignio = new Bio::AlignIO(-format => 'phylip',
-  			         -file   => 't/data/gf-s85.phylip');
+  my $alignio = new Bio::AlignIO(-format => 'fasta',
+  			         -file   => 't/data/hyphy1.fasta');
 
   my $aln = $alignio->next_aln;
 
   my $treeio = Bio::TreeIO->new(
-      -format => 'nh', -file => 't/data/tree.nh');
+      -format => 'nh', -file => 't/data/hyphy1.tree');
 
   my $rel = new Bio::Tools::Run::Phylo::Hyphy::REL();
   $rel->alignment($aln);
   $rel->tree($tree);
-  my ($rc,$parser) = $rel->run();
-  my $result = $parser->next_result;
-  my $MLmatrix = $result->get_MLmatrix();
-  print "Ka = ", $MLmatrix->[0]->[1]->{'dN'},"\n";
-  print "Ks = ", $MLmatrix->[0]->[1]->{'dS'},"\n";
-  print "Ka/Ks = ", $MLmatrix->[0]->[1]->{'omega'},"\n";
+  my ($rc,$results) = $rel->run();
 
 =head1 DESCRIPTION
 
@@ -45,7 +40,7 @@ Spencer V. Muse, Simon D.W. Frost and Art Poon.  See
 http://www.hyphy.org for more information.
 
 This module will generate the correct list of options for interfacing
-with TemplateBatchFiles/Ghostrides/RELwrapper.bf.
+with TemplateBatchFiles/Ghostrides/Wrapper.bf.
 
 =head1 FEEDBACK
 
@@ -91,9 +86,10 @@ use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
 use Bio::TreeIO;
+use Bio::Tools::Run::Phylo::Hyphy::Base;
 use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+@ISA = qw(Bio::Root::Root Bio::Tools::Run::Phylo::Hyphy::Base);
 
 =head2 Default Values
 
@@ -106,70 +102,16 @@ INCOMPLETE DOCUMENTATION OF ALL METHODS
 =cut
 
 BEGIN { 
-    $PROGRAMNAME = 'HYPHYMP' . ($^O =~ /mswin/i ?'.exe':'');
-    if( defined $ENV{'HYPHYDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catfile($ENV{'HYPHYDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
-    }
-   
     @VALIDVALUES = 
         (
          {'geneticCode' => [ "Universal","VertebratemtDNA","YeastmtDNA","Mold/ProtozoanmtDNA",
                              "InvertebratemtDNA","CiliateNuclear","EchinodermmtDNA","EuplotidNuclear",
                              "Alt.YeastNuclear","AscidianmtDNA","FlatwormmtDNA","BlepharismaNuclear"]},
-         {'New/Restore' => [ "New Analysis", "Restore"]},
          {'tempalnfile' => undef }, # aln file goes here
-         {'Model Options' => [ { "Custom" => '010010' },
-                               { "Default" => undef } ] 
-         },
          {'temptreefile' => undef }, # tree file goes here
-         {'Model Fit Results' => [ '/dev/null'] }, # this will not work under Windows
-         {'dN/dS bias parameter' => [ { "Estimate dN/dS only" => undef },
-                                      { "Neutral" => undef },
-                                      { "Estimate" => undef },
-                                      { "Estimate + CI" => undef },
-                                      { "User" => '3' } ] },
-         {'Ancestor Counting' => [ 'Single Ancestor Counting','Weighted Ancestor Counting',
-                                  'Sample Ancestal States','Process Sampled Ancestal States',
-                                  'One rate FEL','Two rate FEL','Rate Distribution',
-                                  'Full site-by-site LRT','Multirate FEL'] },
-         {'REL Options' => ['Full tree','Tips vs Internals'] },
-         {'Treatment of Ambiguities' => ['Resolved','Averaged'] },
-         {'Test Statistic' => ['Approximate','Simulated Null'] },
-         {'Significance level' => '0.05' },
-         {'Output options' => 'Export to File' }, #we force a tsv file here
-         {'outfile' => undef }, # outfile goes here
-         {'Rate class estimator' => [ 'Skip','Count'] },
+         {'Model' => [ "Null for Test 1", "Null for Test 2", "Alternative"]},
         );
 }
-
-=head2 program_name
-
- Title   : program_name
- Usage   : $factory->program_name()
- Function: holds the program name
- Returns:  string
- Args    : None
-
-=cut
-
-sub program_name {
-        return 'HYPHYMP';
-}
-
-=head2 program_dir
-
- Title   : program_dir
- Usage   : ->program_dir()
- Function: returns the program directory, obtiained from ENV variable.
- Returns:  string
- Args    :
-
-=cut
-
-sub program_dir {
-        return Bio::Root::IO->catfile($ENV{HYPHYDIR}) if $ENV{HYPHYDIR};
-}
-
 
 =head2 new
 
@@ -213,71 +155,6 @@ sub new {
 }
 
 
-=head2 prepare
-
- Title   : prepare
- Usage   : my $rundir = $rel->prepare($aln);
- Function: prepare the rel analysis using the default or updated parameters
-           the alignment parameter must have been set
- Returns : value of rundir
- Args    : L<Bio::Align::AlignI> object,
-	   L<Bio::Tree::TreeI> object [optional]
-
-=cut
-
-sub prepare {
-   my ($self,$aln,$tree) = @_;
-   unless ( $self->save_tempfiles ) {
-       # brush so we don't get plaque buildup ;)
-       $self->cleanup();
-   }
-   $tree = $self->tree unless $tree;
-   $aln  = $self->alignment unless $aln;
-   if( ! $aln ) { 
-       $self->warn("must have supplied a valid alignment file in order to run hyphy rel");
-       return 0;
-   }
-   my ($tempdir) = $self->tempdir();
-   my ($tempseqFH,$tempalnfile);
-   if( ! ref($aln) && -e $aln ) { 
-       $tempalnfile = $aln;
-   } else { 
-       ($tempseqFH,$tempalnfile) = $self->io->tempfile
-	   ('-dir' => $tempdir, 
-	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
-				     '-fh'          => $tempseqFH,
-                                     '-interleaved' => 0);
-
-       $alnout->write_aln($aln);
-       $alnout->close();
-       undef $alnout;
-       close($tempseqFH);
-   }
-   $self->{'_relparams'}{'tempalnfile'} = $tempalnfile;
-   my $outfile = $self->outfile_name || "$tempdir/rel.tsv";
-   $self->{'_relparams'}{'outfile'} = $outfile;
-
-   my ($temptreeFH,$temptreefile);
-   if( ! ref($tree) && -e $tree ) { 
-       $temptreefile = $tree;
-   } else { 
-       ($temptreeFH,$temptreefile) = $self->io->tempfile
-	   ('-dir' => $tempdir, 
-	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-
-       my $treeout = new Bio::TreeIO('-format' => 'newick',
-				     '-fh'     => $temptreeFH);
-       $treeout->write_tree($tree);
-       $treeout->close();
-       close($temptreeFH);
-   }
-   $self->{'_relparams'}{'temptreefile'} = $temptreefile;
-   $self->create_wrapper;
-   $self->{_prepared} = 1;
-   return $tempdir;
-}
-
 =head2 run
 
  Title   : run
@@ -302,7 +179,7 @@ sub run {
        my $tempdir = $self->tempdir;
        my $relexe = $self->executable();
        $self->throw("unable to find or run executable for 'HYPHY'") unless $relexe && -e $relexe && -x _;
-       $commandstring = $relexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_relwrapper'};
+       $commandstring = $relexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_wrapper'};
        open(RUN, "$commandstring |") or $self->throw("Cannot open exe $relexe");
        my @output = <RUN>;
        $exit_status = close(RUN);
@@ -313,27 +190,20 @@ sub run {
        }
        my $outfile = $self->outfile_name;
        eval {
-	   open(OUTFILE, "$outfile") or $self->throw("cannot open $outfile for reading");
-           my $readed_header = 0;
-           my @elems;
-           while (<OUTFILE>) {
-               if ($readed_header) {
-                   my @values = split("\t",$_);
-                   for my $i (0 .. (scalar(@values)-1)) {
-                       push @{$results->{$elems[$i]}}, $values[$i];
-                   }
-               } else {
-                   @elems = split("\t",$_);
-                   $readed_header = 1;
-               }
+	   open(OUTFILE, ">$outfile") or $self->throw("cannot open $outfile for writing");
+           # FIXME -- needs output parsing -- ask hyphy to clean that up into a tsv?
+           foreach my $output (@output) {
+               print OUTFILE $output;
+               $results .= sprintf($output);
            }
+           close(OUTFILE);
        };
        if( $@ ) {
 	   $self->warn($self->error_string);
        }
    }
    unless ( $self->save_tempfiles ) {
-       unlink($self->{'_relwrapper'});
+       unlink($self->{'_wrapper'});
       $self->cleanup();
    }
    return ($rc,$results);
@@ -355,147 +225,10 @@ sub run {
 sub create_wrapper {
    my $self = shift;
 
-   my $tempdir = $self->tempdir;
-   $self->update_ordered_parameters;
-   my $relwrapper = "$tempdir/RELwrapper.bf";
-   open(REL, ">$relwrapper") or $self->throw("cannot open $relwrapper for writing");
-
-   print REL "stdinRedirect"," = ", "\{", "\};", "\n\n";
-   my $counter = sprintf("%02d", 0);
-   foreach my $elem (@{ $self->{'_updatedorderedrelparams'} }) {
-       my ($param,$val) = each %$elem;
-       print REL 'stdinRedirect ["';
-       print REL "$counter";
-       print REL '"] = "';
-       print REL "$val";
-       print REL '"',";\n";
-       $counter = sprintf("%02d",$counter+1);
-   }
-   print REL "\n",'ExecuteAFile (HYPHY_BASE_DIRECTORY + "TemplateBatchFiles" + DIRECTORY_SEPARATOR  + "QuickSelectionDetection.bf", stdinRedirect);', "\n";
-
-   close(REL);
-   $self->{'_relwrapper'} = $relwrapper;
+   my $batchfile = 'YangNielsenBranchSite2005.bf';
+   $self->SUPER::create_wrapper($batchfile);
 }
 
-
-=head2 error_string
-
- Title   : error_string
- Usage   : $obj->error_string($newval)
- Function: Where the output from the last analysus run is stored.
- Returns : value of error_string
- Args    : newvalue (optional)
-
-
-=cut
-
-sub error_string {
-   my ($self,$value) = @_;
-   if( defined $value) {
-      $self->{'error_string'} = $value;
-    }
-    return $self->{'error_string'};
-
-}
-
-=head2 alignment
-
- Title   : alignment
- Usage   : $rel->align($aln);
- Function: Get/Set the L<Bio::Align::AlignI> object
- Returns : L<Bio::Align::AlignI> object
- Args    : [optional] L<Bio::Align::AlignI>
- Comment : We could potentially add support for running directly on a file
-           but we shall keep it simple
- See also: L<Bio::SimpleAlign>
-
-=cut
-
-sub alignment {
-   my ($self,$aln) = @_;
-
-   if( defined $aln ) { 
-       if( -e $aln ) { 
-	   $self->{'_alignment'} = $aln;
-       } elsif( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
-	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function not $aln");
-	   return undef;
-       } else {
-	   $self->{'_alignment'} = $aln;
-       }
-   }
-   return  $self->{'_alignment'};
-}
-
-=head2 tree
-
- Title   : tree
- Usage   : $rel->tree($tree, %params);
- Function: Get/Set the L<Bio::Tree::TreeI> object
- Returns : L<Bio::Tree::TreeI> 
- Args    : [optional] $tree => L<Bio::Tree::TreeI>,
-           [optional] %parameters => hash of tree-specific parameters:
-
- Comment : We could potentially add support for running directly on a file
-           but we shall keep it simple
- See also: L<Bio::Tree::Tree>
-
-=cut
-
-sub tree {
-   my ($self, $tree, %params) = @_;
-   if( defined $tree ) { 
-       if( ! ref($tree) || ! $tree->isa('Bio::Tree::TreeI') ) { 
-	   $self->warn("Must specify a valid Bio::Tree::TreeI object to the alignment function");
-       }
-       $self->{'_tree'} = $tree;
-   }
-   return $self->{'_tree'};
-}
-
-=head2 get_parameters
-
- Title   : get_parameters
- Usage   : my %params = $self->get_parameters();
- Function: returns the list of parameters as a hash
- Returns : associative array keyed on parameter names
- Args    : none
-
-
-=cut
-
-sub get_parameters {
-   my ($self) = @_;
-   # we're returning a copy of this
-   return @{ $self->{'_relparams'} };
-}
-
-
-=head2 set_parameter
-
- Title   : set_parameter
- Usage   : $rel->set_parameter($param,$val);
- Function: Sets a rel parameter, will be validated against
-           the valid values as set in the %VALIDVALUES class variable.  
-           The checks can be ignored if one turns off param checks like this:
-             $rel->no_param_checks(1)
- Returns : boolean if set was success, if verbose is set to -1
-           then no warning will be reported
- Args    : $param => name of the parameter
-           $value => value to set the parameter to
- See also: L<no_param_checks()>
-
-=cut
-
-
-
-sub set_parameter {
-   my ($self,$param,$value) = @_;
-
-   # FIXME - add validparams checking
-   $self->{'_relparams'}{$param} = $value;
-   return 1;
-}
 
 =head2 set_default_parameters
 
@@ -518,7 +251,7 @@ sub set_default_parameters {
        # skip if we want to keep old values and it is already set
        if (ref($val)=~/ARRAY/i ) {
            unless (ref($val->[0])=~/HASH/i) {
-               push @{ $self->{'_orderedrelparams'} }, {$param, $val->[0]};
+               push @{ $self->{'_orderedparams'} }, {$param, $val->[0]};
            } else {
                $val = $val->[0];
            }
@@ -530,47 +263,11 @@ sub set_default_parameters {
                last unless (defined($param));
                $prevparam = $param;
                ($param,$val) = each %{$val};
-               push @{ $self->{'_orderedrelparams'} }, {$prevparam, $param};
-               push @{ $self->{'_orderedrelparams'} }, {$param, $val} if (defined($val));
+               push @{ $self->{'_orderedparams'} }, {$prevparam, $param};
+               push @{ $self->{'_orderedparams'} }, {$param, $val} if (defined($val));
            }
        } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) { 
-           push @{ $self->{'_orderedrelparams'} }, {$param, $val};
-       }
-   }
-}
-
-
-=head2 update_ordered_parameters
-
- Title   : update_ordered_parameters
- Usage   : $rel->update_ordered_parameters(0);
- Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
-	    %VALIDVALUES class variable)
- Returns : none
- Args    : boolean: keep existing parameter values
-
-
-=cut
-
-sub update_ordered_parameters {
-   my ($self,$keepold) = @_;
-   $keepold = 0 unless defined $keepold;
-   foreach my $elem (@{$self->{'_orderedrelparams'}}) {
-       my ($param,$val) = each %$elem;
-       my $composite_param = $param;
-       # skip if we want to keep old values and it is already set
-       if (ref($param) =~ /ARRAY/i ) {
-           push @{ $self->{'_updatedorderedrelparams'} }, {$param, $self->{_relparams}{$param} || $val};
-       } elsif ( ref($val) =~ /HASH/i ) { 
-           while (defined($val)) {
-               last unless (ref($val) =~ /HASH/i);
-               my ($param,$val) = each %{$val};
-               $composite_param .= $param;
-           }
-           push @{ $self->{'_updatedorderedrelparams'} }, {$param, $self->{_relparams}{$composite_param} || $val};
-       } else { 
-           push @{ $self->{'_updatedorderedrelparams'} }, {$param, $self->{_relparams}{$param} || $val};
+           push @{ $self->{'_orderedparams'} }, {$param, $val};
        }
    }
 }
@@ -592,15 +289,6 @@ sub update_ordered_parameters {
 
 =cut
 
-sub no_param_checks {
-   my ($self,$value) = @_;
-   if( defined $value) {
-      $self->{'no_param_checks'} = $value;
-    }
-    return $self->{'no_param_checks'};
-}
-
-
 =head2 save_tempfiles
 
  Title   : save_tempfiles
@@ -611,26 +299,6 @@ sub no_param_checks {
 
 
 =cut
-
-=head2 outfile_name
-
- Title   : outfile_name
- Usage   : my $outfile = $rel->outfile_name();
- Function: Get/Set the name of the output file for this run
-           (if you wanted to do something special)
- Returns : string
- Args    : [optional] string to set value to
-
-
-=cut
-
-sub outfile_name {
-    my $self = shift;
-    if( @_ ) {
-	return $self->{'_relparams'}->{'outfile'} = shift @_;
-    }
-    return $self->{'_relparams'}->{'outfile'};
-}
 
 =head2 tempdir
 
