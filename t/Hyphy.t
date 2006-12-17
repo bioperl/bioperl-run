@@ -22,7 +22,7 @@ BEGIN {
     }
     use Test;
 
-    $NUMTESTS = 2;
+    $NUMTESTS = 4;
     plan tests => $NUMTESTS;
 
     unless (eval "require IO::String; 1;") {
@@ -53,6 +53,9 @@ my $verbose = 0;
 
 use Bio::Root::IO;
 use Bio::Tools::Run::Phylo::Hyphy::SLAC;
+use Bio::Tools::Run::Phylo::Hyphy::FEL;
+use Bio::Tools::Run::Phylo::Hyphy::REL;
+use Bio::Tools::Run::Phylo::Hyphy::Modeltest;
 use Bio::AlignIO;
 use Bio::TreeIO;
 
@@ -69,6 +72,24 @@ my $slac = new Bio::Tools::Run::Phylo::Hyphy::SLAC;
 $slac->alignment($aln);
 $slac->tree($tree);
 my ($rc,$results) = $slac->run();
-print $slac->error_string, "\n";
-ok($results, 1);
+ok(defined($results), 1);
+
+my $rel = new Bio::Tools::Run::Phylo::Hyphy::REL;
+$rel->alignment($aln);
+$rel->tree($tree);
+my ($rc,$results) = $rel->run();
+ok(defined($results), 1);
+
+my $fel = new Bio::Tools::Run::Phylo::Hyphy::FEL;
+$fel->alignment($aln);
+$fel->tree($tree);
+my ($rc,$results) = $fel->run();
+ok(defined($results), 1);
+
+my $modeltest = new Bio::Tools::Run::Phylo::Hyphy::Modeltest;
+$modeltest->alignment($aln);
+$modeltest->tree($tree);
+my ($rc,$results) = $modeltest->run();
+ok(defined($results), 1);
+
 1;
