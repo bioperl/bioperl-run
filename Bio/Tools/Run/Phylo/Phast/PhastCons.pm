@@ -20,18 +20,17 @@ Bio::Tools::Run::Phylo::Phast::PhastCons - Wrapper for footprinting using
   use Bio::Tools::Run::Phylo::Phast::PhastCons;
 
   # Make a PhastCons factory
-  @params = ();
-  $factory = Bio::Tools::Run::Phylo::Phast::PhastCons->new(@params);
+  $factory = Bio::Tools::Run::Phylo::Phast::PhastCons->new();
 
   # Pass the factory an alignment and the corresponding species tree
   $align_filename = 't/data/apes.multi_fasta';
-  $species_tree_filename = 't/data/apes_tree.newick';
+  $species_tree_filename = 't/data/apes.newick';
   $result = $factory->run($align_filename, $species_tree_filename);
 
   # or get a Bio::Align::AlignI (SimpleAlign) object from somewhere, and
   # generate the species tree automatically using a Bio::DB::Taxonomy database
-  $db = Bio::DB::Taxonomy->new(-source => 'entrez');
-  $result = $factory->run($aln_obj, $db);
+  $tdb = Bio::DB::Taxonomy->new(-source => 'entrez');
+  $result = $factory->run($aln_obj, $tdb);
 
 =head1 DESCRIPTION
 
@@ -49,7 +48,7 @@ This can be done in (at least) three ways:
 
  1. Make sure the phastCons and phyloFit executables are in your path.
  2. Define an environmental variable PHASTDIR which is a 
-    directory which contains the 'phastCons and phyloFit' applications:
+    directory which contains the phastCons and phyloFit applications:
     In bash:
 
     export PHASTDIR=/home/username/phast/bin
@@ -97,9 +96,9 @@ Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::Phast::PhastCons;
 use strict;
 
+use Cwd;
 use Bio::AlignIO;
-use Bio::TreeIO;
-use Bio::Tree::Tree;
+use Bio::Tools::Run::Phylo::Phast::PhyloFit;
 
 use base qw(Bio::Tools::Run::WrapperBase);
 
@@ -218,7 +217,7 @@ sub expected_length {
  Args    : The first arguement represents an alignment, the second arguement
            a species tree.
            The alignment can be provided as a multi-fasta format alignment
-           file name, or a Bio::Align::AlignI complient object (eg. a
+           filename, or a Bio::Align::AlignI complient object (eg. a
            Bio::SimpleAlign).
            The species tree can be provided as a newick format tree filename
            or a Bio::Tree::TreeI complient object. Alternatively a
@@ -227,7 +226,8 @@ sub expected_length {
            species names and looking for those in the supplied database.
            
            In all cases, the alignment sequence names must correspond to node
-           ids in the species tree.
+           ids in the species tree. Multi-word species names should be joined
+           with underscores to form the sequence names, eg. Homo_sapiens
 
 =cut
 
@@ -235,20 +235,14 @@ sub run {
     my ($self, $aln, $tree) = @_;
 
     if (ref $aln && $aln->isa("Bio::Align::AlignI")) {
-        $aln = $self->_writeAlignFile($aln);
+        $self->_writeAlignFile($aln);
     }
-    elsif (! -e $aln) {
-        $self->throw("When not supplying a Bio::Align::AlignI object, you must supply a readable filename");
+    else {
+        $self->throw("When not supplying a Bio::Align::AlignI object, you must supply a readable filename") unless -e $aln;
+        $self->_alignment_file($aln);
     }
-    $self->{_align_file} = $aln;
     
-    if (ref $tree && ($tree->isa("Bio::Tree::TreeI") || $tree->isa('Bio::DB::Taxonomy'))) {
-        $tree = $self->_writeTreeFile($tree);
-    }
-    elsif (! -e $tree) {
-        $self->throw("When not supplying a Bio::Tree::TreeI or Bio::DB::Taxonomy object, you must supply a readable filename");
-    }
-    $self->{_tree_file} = $tree;
+    $self->_tree($tree);
     
     return $self->_run; 
 }
@@ -258,27 +252,36 @@ sub _run {
     
     my $exe = $self->executable || return;
     
-    # cd to a temp dir
-    #...
+    # use phyloFit to generate tree model initialization (?) using species tree
+    # and alignment
+    my $pf = Bio::Tools::Run::Phylo::Phast::PhyloFit->new(-verbose => $self->verbose);
+    my $init_mod = $pf->run($self->_alignment_file, $self->_tree) || $self->throw("phyloFit failed to work as expected, is it installed?");
     
-    # use phyloFit to generate tree model using species tree and alignment
-    #...
+    # cd to a temp dir
+    my $temp_dir = $self->tempdir;
+    my $cwd = Cwd->cwd();
+    chdir($temp_dir) || $self->throw("Couldn't change to temp dir '$temp_dir'");
     
     # do training for parameter estimation
-    my $command = $exe.$self->_setparams(1);
+    my $command = $exe.$self->_setparams($init_mod);
     $self->debug("phastCons training command = $command");
     system($command) && $self->throw("phastCons training call ($command) crashed: $?");
     
     # do the final analysis
-    $command = $exe.$self->_setparams(0);
+    $command = $exe.$self->_setparams();
     $self->debug("phastCons command = $command");
     system($command) && $self->throw("phastCons call ($command) crashed: $?");
     
     # read in most_cons.gff as the result, possibly convert to something nicer
     #...
+    open(GFF, 'most_cons.gff') or $self->throw("most_cons.gff result file not found!");
+    while (<GFF>) {
+        print;
+    }
+    close(GFF);
     
     # cd back to orig dir
-    #...
+    chdir($cwd) || $self->throw("Couldn't change back to working directory '$cwd'");
     
     $self->throw("Not yet implemented");
 }
@@ -289,20 +292,21 @@ sub _run {
  Usage   : Internal function, not to be called directly
  Function: Creates a string of params to be used in the command string
  Returns : string of params
- Args    : false for result production, true to estimate trees 
+ Args    : none for result production, OR filename of phyloFit generated
+           init.mod file to estimate trees
 
 =cut
 
 sub _setparams {
-    my ($self, $estimate) = @_;
+    my ($self, $init_mod) = @_;
     my $param_string = '';
     
     $param_string .= ' --target-coverage '.$self->target_coverage if $self->target_coverage;
     $param_string .= ' --expected-length '.$self->expected_length if $self->expected_length;
     
-    my $input = '--msa-format FASTA '.$self->{_align_file};
-    if ($estimate) {
-        $param_string .= ' --estimate-trees mytrees '.$input.' init.mod';
+    my $input = '--msa-format FASTA '.$self->_alignment_file;
+    if ($init_mod) {
+        $param_string .= ' --estimate-trees mytrees '.$input.' '.$init_mod;
     }
     else {
         $param_string .= $input.' --most_conserved most_cons.gff mytrees.cons.mod,mytrees.noncons.mod';
@@ -317,7 +321,7 @@ sub _setparams {
  Title   : _writeAlignFile
  Usage   : obj->_writeAlignFile($aln)
  Function: Internal(not to be used directly)
- Returns : filename
+ Returns : n/a (sets _alignment_file())
  Args    : Bio::Align::AlignI
 
 =cut
@@ -327,123 +331,28 @@ sub _writeAlignFile {
     
     my ($tfh, $tempfile) = $self->io->tempfile(-dir=>$self->tempdir);
     
-    my $out = Bio::AlignIO->new('-fh'     => $tfh, 
-				'-format' => 'fasta');
+    my $out = Bio::AlignIO->new('-fh' => $tfh, '-format' => 'fasta');
     $out->write_aln($align);
     
     $out->close();
     $out = undef;
     close($tfh);
     undef $tfh;
-    return $tempfile;
+    $self->_alignment_file($tempfile);
 }
 
-=head2 _writeTreeFile
-
- Title   : _writeTreeFile
- Usage   : obj->_writeTreeFile($tree)
- Function: Internal(not to be used directly)
- Returns : filename
- Args    : Bio::Tree::TreeI OR Bio::DB::Taxonomy
-           AND alignment filename
-
-=cut
-
-sub _writeTreeFile {
-    my ($self, $thing) = @_;
-    
-    my $tree;
-    if ($thing->isa('Bio::Tree::TreeI')) {
-        $tree = $thing;
-    }
-    else {
-        # get all the alignment sequence names
-        my @species_names = $self->_get_seq_names;
-        
-        # the full lineages of the species are merged into a single tree
-        foreach my $name (@species_names) {
-            my $ncbi_id = $thing->get_taxonid($name);
-            if ($ncbi_id) {
-                my $node = $thing->get_taxon(-taxonid => $ncbi_id);
-                
-                if ($tree) {
-                    $tree->merge_lineage($node);
-                }
-                else {
-                    $tree = new Bio::Tree::Tree(-node => $node);
-                }
-            }
-            else {
-                $self->throw("no taxonomy database node for species ".$name);
-            }
-        }
-        
-        # simple paths are contracted by removing degree one nodes
-        $tree->contract_linear_paths;
-        
-        # convert node ids to their names for correct output with TreeIO
-        foreach my $node ($tree->get_nodes) {
-            $node->id($node->node_name);
-        }
-    }
-    
-    my ($tfh, $tempfile) = $self->io->tempfile(-dir=>$self->tempdir);
-    
-    my $out = Bio::TreeIO->new('-fh'     => $tfh, 
-			       '-format' => 'newick');
-    $out->write_tree($tree);
-    
-    $out->close();
-    $out = undef;
-    close($tfh);
-    undef $tfh;
-    return $tempfile;
-}
-
-# subs for checking the tree and alignment ids match
-sub _get_seq_names {
+# store the input alignment file name
+sub _alignment_file {
     my $self = shift;
-    my $file = $self->{_align_file};
-    
-    my $align_in = Bio::AlignIO->new(-file => $file, -format => 'fasta');
-    my $aln = $align_in->next_aln || $self->throw("Alignment file '$file' had no alignment!");
-    
-    my @names;
-    foreach my $seq ($aln->each_seq) {
-        push(@names, $seq->id);
-    }
-    
-    return @names;
+    if (@_) { $self->{_align_file} = Cwd::abs_path(shift) }
+    return $self->{_align_file} || '';
 }
-sub _get_node_names {
+
+# store the input tree option
+sub _tree {
     my $self = shift;
-    my $file = $self->{_tree_file};
-    
-    my $tree_in = Bio::TreeIO->new(-file => $file, -format => 'newick');
-    my $tree = $tree_in->next_tree || $self-throw("Tree file '$file' had no tree!");
-    
-    my @names;
-    foreach my $node ($tree->get_leaf_nodes) {
-        
-    }
-    
-    return;
-}
-sub _check_names {
-    my $self = shift;
-    
-    my @seq_names = $self->_get_seq_names;
-    my %node_names = map { $_ => 1 } $self->_get_node_names;
-    
-    foreach my $name (@seq_names) {
-        $self->{_unmapped}{$name} = 1 unless defined $node_names{$name};
-    }
-    
-    if (defined($self->{_unmapped})) {
-        my $count = scalar(keys %{$self->{_unmapped}});
-        my $unmapped = join(",", keys %{$self->{_unmapped}});
-        $self->throw("$count unmapped ids between the aln and the tree: $unmapped");
-    }
+    if (@_) { $self->{_tree_thing} = shift }
+    return $self->{_tree_thing} || '';
 }
 
 1;
