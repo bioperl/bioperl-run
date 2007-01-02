@@ -36,10 +36,31 @@ Bio::Tools::Run::RepeatMasker - Wrapper for RepeatMasker Program
 
 =head1 DESCRIPTION
 
-RepeatMasker is a program that screens DNA sequences for interspersed
+To use this module, the RepeatMasker program (and probably database) must be
+installed. RepeatMasker is a program that screens DNA sequences for interspersed
 repeats known to exist in mammalian genomes as well as for low
 complexity DNA sequences. For more information, on the program and its
-usage, please refer to http://repeatmasker.genome.washington.edu/.
+usage, please refer to http://www.repeatmasker.org/.
+
+Having installed RepeatMasker, you must let Bioperl know where it is.
+This can be done in (at least) three ways:
+
+ 1. Make sure the RepeatMasker executable is in your path.
+ 2. Define an environmental variable REPEATMASKERDIR which is a 
+    directory which contains the RepeatMasker executable:
+    In bash:
+
+    export REPEATMASKERDIR=/home/username/RepeatMasker/
+
+    In csh/tcsh:
+
+    setenv REPEATMASKERDIR /home/username/RepeatMasker/
+
+ 3. Include a definition of an environmental variable REPEATMASKERDIR in
+    every script that will use this RepeatMasker wrapper module, e.g.:
+
+    BEGIN { $ENV{REPEATMASKERDIR} = '/home/username/RepeatMasker/' }
+    use Bio::Tools::Run::RepeatMasker;
 
 =head1 FEEDBACK
 
