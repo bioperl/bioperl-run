@@ -45,6 +45,21 @@ program protdist
   $protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
   my ($matrix)  = $protdist_factory->run('/home/shawnh/prot.phy');
 
+  # To prevent PHYLIP from truncating sequence names:
+  # Step 1. Shelf the original names:
+    my ($aln_safe, $ref_name)=                    #   $aln_safe has serial names
+               $aln->set_displayname_safe();      #   $ref_name holds original names
+  # Step 2. Run ProtDist and Neighbor:
+    ($matrix) = $protdist_factory->
+               create_distance_matrix($aln_safe); #  Use $aln_safe instead of $aln
+    ($tree) = $neighbor_factory->run($matrix);
+  # Step 3. Retrieve orgininal OTU names:
+    use Bio::Tree::Tree;
+    my @nodes=$tree->get_nodes();
+    foreach my $nd (@nodes){
+       $nd->id($ref_name->{$nd->id_output}) if $nd->is_Leaf;
+    }
+
 =head1 DESCRIPTION
 
 Wrapper for protdist Joseph Felsentein for creating a distance matrix

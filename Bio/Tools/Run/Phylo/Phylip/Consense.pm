@@ -27,11 +27,18 @@ program Consense
   my $aio= Bio::AlignIO->new(-file=>$ARGV[0],-format=>"clustalw");
   my $aln = $aio->next_aln;
 
+  # To prevent truncation of sequence names by PHYLIP runs, use set_displayname_safe
+  my ($aln_safe, $ref_name)=$aln->set_displayname_safe();
+
   #next use seqboot to generate multiple aligments
   my @params = ('datatype'=>'SEQUENCE','replicates'=>10);
   my $seqboot_factory = Bio::Tools::Run::Phylo::Phylip::SeqBoot->new(@params);
 
   my $aln_ref= $seqboot_factory->run($aln);
+
+  Or, for long sequence names:
+
+  my $aln_ref= $seqboot_factory->run($aln_safe);
 
   #next build distance matrices and construct trees
   my $pd_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
@@ -52,6 +59,12 @@ program Consense
   $con_factory->outgroup('HUMAN');
 
   my $tree = $con_factory->run(\@tree);
+
+  # Restore original sequence names, after ALL phylip runs:
+  my @nodes = $tree->get_nodes();
+  foreach my $nd (@nodes){
+     $nd->id($ref_name->{$nd->id_output}) if $nd->is_Leaf;
+  }
 
   #now draw the tree
   my $draw_factory = Bio::Tools::Run::Phylo::Phylip::DrawTree->new();

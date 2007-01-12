@@ -32,6 +32,21 @@ program SeqBoot
          $aio->write_aln($ai);
   }
 
+  # To prevent PHYLIP from truncating sequence names:
+  # Step 1. Shelf the original names:
+  my ($aln_safe, $ref_name)=                  #  $aln_safe has serial names
+             $aln->set_displayname_safe();    #  $ref_name holds orginal names 
+  # Step 2. Run PHYLIP programs:
+  $aln_ref = $seq->run($aln_safe);            #  Use $aln_safe instead of $aln
+  # Step 3. Retrieve orgininal names
+  $aio = Bio::AlignIO->new(
+             -file=>">alignment.bootstrap",
+             -format=>"fasta");               #  FASTA output to view full names
+  foreach my $ai(@{$aln_ref}){
+         my $new_aln=$ai->restore_displayname($ref_name); #  Restore names
+         $aio->write_aln($new_aln);
+  }
+
 =head1 DESCRIPTION
 
 Wrapper for seqboot from the phylip package by Joseph Felsentein.

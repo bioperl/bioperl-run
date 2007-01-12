@@ -37,6 +37,19 @@ Works with Phylip version 3.6
     Bio::Tools::Run::Phylo::Phylip::ProtPars->new(idlength=>30,threshold=>10);
   $tree = $tree_factory->run("/usr/users/shawnh/COMPARA/prot.phy");
 
+  # To prevent PHYLIP from truncating sequence names:
+  # Step 1. Shelf the original names:
+     my ($aln_safe, $ref_name)=                    #   $aln_safe has serial names
+                $aln->set_displayname_safe();      #   $ref_name holds original names
+  # Step 2. Run ProtPars:
+     $tree = $protpars_factory->run($aln_safe);    #  Use $aln_safe instead of $aln
+  # Step 3. Retrieve orgininal OTU names:
+     use Bio::Tree::Tree;
+     my @nodes=$tree->get_nodes();
+         foreach my $nd (@nodes){
+            $nd->id($ref_name->{$nd->id_output}) if $nd->is_Leaf;
+         }
+
 =head1 PARAMTERS FOR PROTPARS COMPUTATION
 
 =head2 THRESHOLD
@@ -117,7 +130,6 @@ methods. Internal methods are usually preceded with a _
 
 =cut
 
-#'
 
 	
 package Bio::Tools::Run::Phylo::Phylip::ProtPars;
