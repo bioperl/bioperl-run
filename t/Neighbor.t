@@ -103,3 +103,23 @@ my @nodes = sort { defined $a->id &&
 		    defined $b->id &&
 		    $a->id cmp $b->id } $tree->get_nodes();
 ok ($nodes[1]->id, 'ENSP000003',"failed creating tree by neighbor");
+
+# Test name preservation and restoration:
+$inputfilename = Bio::Root::IO->catfile("t","data","longnames.aln");
+my $aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
+my ($aln_safe, $ref_name) =$aln->set_displayname_safe(3);
+$protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
+($matrix) = $protdist_factory->create_distance_matrix($aln_safe);
+$tree_factory->outgroup(undef);
+($tree) = $tree_factory->create_tree($matrix);
+@nodes = sort { defined $a->id && 
+		    defined $b->id &&
+		    $a->id cmp $b->id } $tree->get_nodes();
+ok ($nodes[12]->id, 'S01',"failed to assign serial names");
+foreach my $nd (@nodes){
+  $nd->id($ref_name->{$nd->id_output}) if $nd->is_Leaf;
+}
+ok ($nodes[12]->id, 'Spar_21273',"failed to restore original names");
+
+
+

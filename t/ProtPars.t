@@ -13,7 +13,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 7;
+    $NTESTS = 10;
     plan tests => $NTESTS;
 }
 
@@ -81,3 +81,20 @@ $tree = $tree_factory->create_tree($aln);
 @nodes = sort { defined $a->id && defined $b->id && $a->id cmp $b->id } $tree->get_nodes();
 ok (scalar(@nodes),13,
     "failed creating tree by protpars");
+
+# test name preservation and restoration:
+@params = ('threshold'=>10,'jumble'=>'7,5',outgroup=>2,'idlength'=>10);
+$tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->new(@params);
+$tree_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
+$inputfilename = Bio::Root::IO->catfile("t","data","longnames.aln");
+my $aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
+my ($aln_safe, $ref_name) =$aln->set_displayname_safe(3);
+$tree = $tree_factory->create_tree($aln_safe);
+@nodes = sort { $a->id cmp $b->id } $tree->get_nodes();
+ok (scalar(@nodes),27,
+    "failed creating tree by protpars");
+ok ($nodes[12]->id, 'S01',"failed to assign serial names");
+foreach my $nd (@nodes){
+  $nd->id($ref_name->{$nd->id_output}) if $nd->is_Leaf;
+}
+ok ($nodes[12]->id, 'Spar_21273',"failed to restore original names");

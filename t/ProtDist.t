@@ -13,7 +13,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 11;
+    $NTESTS = 13;
     plan tests => $NTESTS;
 }
 
@@ -110,3 +110,11 @@ my $aln = $align_factory->align($inputfilename);
 ok (int($matrix->get_entry('ALEU_HORVU','ALEU_HORVU')),0,
     "failed creating distance matrix");
 ok(sprintf("%.2f",$matrix->get_entry('CATL_HUMAN','CYS1_DICDI'),'1.30', "failed creating distance matrix"));
+
+# Test name preservation and restoration:
+$inputfilename = Bio::Root::IO->catfile("t","data","longnames.aln");
+my $aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
+my ($aln_safe, $ref_name) =$aln->set_displayname_safe(3);
+($matrix) = $dist_factory->create_distance_matrix($aln_safe);
+ok (int($matrix->get_entry('S03','S03')),0, "failed creating matrix on safe names");
+ok(sprintf("%.4f",$matrix->get_entry('S01','S02'),'0.0205', "failed creating distance matrix"));

@@ -13,7 +13,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 6;
+    $NTESTS = 8;
     plan tests => $NTESTS;
 }
 
@@ -67,4 +67,14 @@ my $aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>"phylip")->next_aln;
 $aln_ref = $sb_factory->run($aln);
 
 ok scalar(@{$aln_ref}), 2;
+
+# Test name preservation and restoration:
+$inputfilename = Bio::Root::IO->catfile("t","data","longnames.aln");
+$aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
+my ($aln_safe, $ref_name) =$aln->set_displayname_safe();
+$aln_ref = $sb_factory->run($aln_safe);
+my $first=shift @{$aln_ref};
+ok $first->get_seq_by_pos(3)->id(), "S000000003", "ailed to  assign serial names";
+my $aln_restored=$first->restore_displayname($ref_name);
+ok $aln_restored->get_seq_by_pos(3)->id(), "Smik_Contig1103.1", "fail to restore original names";
 
