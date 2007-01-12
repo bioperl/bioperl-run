@@ -25,12 +25,12 @@ Bio::Tools::Run::Phylo::Phast::PhastCons - Wrapper for footprinting using
   # Pass the factory an alignment and the corresponding species tree
   $align_filename = 't/data/apes.multi_fasta';
   $species_tree_filename = 't/data/apes.newick';
-  $result = $factory->run($align_filename, $species_tree_filename);
+  @features = $factory->run($align_filename, $species_tree_filename);
 
   # or get a Bio::Align::AlignI (SimpleAlign) object from somewhere, and
   # generate the species tree automatically using a Bio::DB::Taxonomy database
   $tdb = Bio::DB::Taxonomy->new(-source => 'entrez');
-  $result = $factory->run($aln_obj, $tdb);
+  @features = $factory->run($aln_obj, $tdb);
 
 =head1 DESCRIPTION
 
@@ -38,9 +38,26 @@ This is a wrapper for running the phastCons application by Adam Siepel. You
 can get details here: http://compgen.bscb.cornell.edu/~acs/software.html
 
 Currently the interface is extremely simplified, allowing only one analysis
-method and only two options to be changed. The focus here is on ease of use,
-allowing phastCons to estimate as many parameters as possible and having it
-output just the 'most conserved' blocks it detects.
+method. The focus here is on ease of use, allowing phastCons to estimate as many
+parameters as possible and having it output just the 'most conserved' blocks it
+detects. You can, however, try supplying normal phastCons arguments to new(),
+or calling arg-named methods (excluding initial hyphens and converting others
+to underscores, eg. $factory->indels_only(1) to set the --indels-only arg).
+
+The particular analysis carried out here is to:
+ 1. Use phyloFit to generate a tree model for initialization of the nonconserved
+    model from the supplied alignment (all data) and species tree
+ 2. Run phastCons in 'training' mode for parameter estimation using all the
+    alignment data and the model from step 1
+ 3. Run phastCons with the trees from step 2 to discover the most conserved
+    regions
+
+See the 'HowTo' at http://compgen.bscb.cornell.edu/~acs/phastCons-HOWTO.html
+for details on how to improve results.
+
+WARNING: the API is likely to change in the future to allow for alternative
+analysis types.
+
 
 You will need to enable this phastCons wrapper to find the phast programs (at
 least phastCons and phyloFit).
@@ -99,11 +116,53 @@ use strict;
 use Cwd;
 use Bio::AlignIO;
 use Bio::Tools::Run::Phylo::Phast::PhyloFit;
+use Bio::FeatureIO;
 
-use base qw(Bio::Tools::Run::WrapperBase);
+use base qw(Bio::Tools::Run::Phylo::PhyloBase);
 
 our $PROGRAM_NAME = 'phastCons';
 our $PROGRAM_DIR = $ENV{'PHASTDIR'};
+
+# methods and their synonyms from the phastCons args we support
+our %PARAMS   = (rho => 'R',
+                 nrates => 'k',
+                 transitions => 't',
+                 target_coverage => 'C',
+                 expected_length => ['E', 'expected_lengths'],
+                 lnl => 'L',
+                 log => 'g',
+                 refidx => 'r',
+                 max_micro_indel => 'Y',
+                 indel_params => 'D',
+                 lambda => 'l',
+                 extrapolate => 'e',
+                 hmm => 'H',
+                 catmap => 'c',
+                 states => 'S',
+                 reflect_strand => 'U',
+                 require_informative => 'M',
+                 not_informative => 'F');
+
+our %SWITCHES = (quiet => 'q',
+                 indels => 'I',
+                 indels_only => 'J',
+                 FC => 'X',
+                 coding_potential => 'p',
+                 ignore_missing => 'z');
+
+# just to be explicit, args we don't support (yet) or we handle ourselves
+our %UNSUPPORTED = (estimate_trees => 'T',
+                    estimate_rho => 'O',
+                    gc => 'G',
+                    msa_format => 'i',
+                    score => 's',
+                    no_post_probs => 'n',
+                    seqname => 'N',
+                    idpref => 'P',
+                    help => 'h',
+                    alias => 'A',
+                    most_conserved => ['V', 'viterbi']);
+
 
 =head2 program_name
 
@@ -137,11 +196,37 @@ sub program_dir {
 
  Title   : new
  Usage   : $factory = Bio::Tools::Run::Phylo::Phast::PhastCons->new(@params)
- Function: creates a new PhastCons factory
+ Function: Creates a new PhastCons factory
  Returns : Bio::Tools::Run::Phylo::Phast::PhastCons
- Args    : Optionally, provide any of the following (defaults are not to use):
-           -target_coverage  => number # 
-           -expected_length  => int # 
+ Args    : Optionally, provide any of the following (defaults are not to use,
+           see the same-named methods for information on what each option does):
+           {
+            -target_coverage  => number between 0 and 1
+            AND
+            -expected_length  => int
+           }
+           -rho => number between 0 and 1
+           -quiet => boolean (turn on or off program output to console)
+
+           Most other options understood by phastCons can be supplied as key =>
+           value pairs in this way. Options that don't normally take a value
+           should be given a value of 1. You can type the keys as you would on
+           the command line (eg. '--indels-only' => 1) or with only a single
+           hyphen to start and internal hyphens converted to underscores (eg.
+           -indels_only => 1) to avoid having to quote the key.
+
+           These options can NOT be used with this wrapper currently:
+           estimate_trees / T
+           estimate_rho / O
+           gc / G
+           msa_format / i
+           score / s
+           no_post_probs / n
+           seqname / N
+           idpref / P
+           help / h
+           alias / A
+           most_conserved / V / viterbi
 
 =cut
 
@@ -149,20 +234,9 @@ sub new {
     my ($class, @args) = @_;
     my $self = $class->SUPER::new(@args);
     
-    # for consistency with other run modules, allow params to be dashless
-    my %args = @args;
-    while (my ($key, $val) = each %args) {
-        if ($key !~ /^-/) {
-            delete $args{$key};
-            $args{'-'.$key} = $val;
-        }
-    }
-    
-    my ($coverage, $length) = $self->_rearrange([qw(TARGET_COVERAGE
-                                                    EXPECTED_LENGTH)], %args);
-    
-    $self->target_coverage($coverage) if $coverage;
-    $self->expected_length($length) if $length;
+    $self->_set_from_args(\@args, -methods => {(map { $_ => $PARAMS{$_} } keys %PARAMS),
+                                               (map { $_ => $SWITCHES{$_} } keys %SWITCHES)},
+                                  -create => 1);
     
     return $self;
 }
@@ -171,15 +245,17 @@ sub new {
 
  Title   : target_coverage
  Usage   : $factory->target_coverage(0.25);
- Function: 
+ Function: Constrain transition parameters such that the expected fraction of
+           sites in conserved elements is the supplied value.
  Returns : number (default undef)
- Args    : None to get, number to set.
+ Args    : None to get, number (between 0 and 1) to set
 
 =cut
 
 sub target_coverage {
     my ($self, $num) = @_;
     if (defined ($num)) {
+        ($num > 0 && $num < 1) || $self->throw("target_coverage value must be between 0 and 1, exclusive");
         $self->{coverage} = $num;
     }
     return $self->{coverage} || return;
@@ -189,18 +265,33 @@ sub target_coverage {
 
  Title   : expected_length
  Usage   : $factory->expected_length(5);
- Function: 
+ Function: Set transition probabilities such that the expected length of a
+           conserved element is the supplied value. target_coverage() must also
+           be set.
  Returns : int (default undef)
- Args    : None to get, int to set.
+ Args    : None to get, int to set
 
 =cut
 
-sub expected_length {
-    my ($self, $int) = @_;
-    if (defined ($int)) {
-        $self->{exp_length} = $int;
+=head2 rho
+
+ Title   : rho
+ Usage   : $factory->rho(0.3);
+ Function: Set the *scale* (overall evolutionary rate) of the model for the
+           conserved state to be the supplied number times that of the model for
+           the non-conserved state (default 0.3).
+ Returns : number (default undef)
+ Args    : None to get, number (between 0 and 1) to set
+
+=cut
+
+sub rho {
+    my ($self, $num) = @_;
+    if (defined ($num)) {
+        ($num > 0 && $num < 1) || $self->throw("rho value must be between 0 and 1, exclusive");
+        $self->{rho} = $num;
     }
-    return $self->{exp_length} || 0;
+    return $self->{rho} || return;
 }
 
 =head2 run
@@ -213,7 +304,7 @@ sub expected_length {
            $result = $factory->run($align_object, $db_taxonomy_object);
  Function: Runs phastCons on an alignment to find the most conserved regions
            ('footprinting').
- Returns : ? object
+ Returns : array of Bio::SeqFeature::Annotated
  Args    : The first arguement represents an alignment, the second arguement
            a species tree.
            The alignment can be provided as a multi-fasta format alignment
@@ -254,7 +345,7 @@ sub _run {
     
     # use phyloFit to generate tree model initialization (?) using species tree
     # and alignment
-    my $pf = Bio::Tools::Run::Phylo::Phast::PhyloFit->new(-verbose => $self->verbose);
+    my $pf = Bio::Tools::Run::Phylo::Phast::PhyloFit->new(-verbose => $self->verbose, -quiet => $self->quiet);
     my $init_mod = $pf->run($self->_alignment_file, $self->_tree) || $self->throw("phyloFit failed to work as expected, is it installed?");
     
     # cd to a temp dir
@@ -264,26 +355,26 @@ sub _run {
     
     # do training for parameter estimation
     my $command = $exe.$self->_setparams($init_mod);
-    $self->debug("phastCons training command = $command");
+    $self->debug("phastCons training command = $command\n");
     system($command) && $self->throw("phastCons training call ($command) crashed: $?");
     
     # do the final analysis
     $command = $exe.$self->_setparams();
-    $self->debug("phastCons command = $command");
+    $self->debug("phastCons command = $command\n");
     system($command) && $self->throw("phastCons call ($command) crashed: $?");
     
-    # read in most_cons.gff as the result, possibly convert to something nicer
-    #...
-    open(GFF, 'most_cons.gff') or $self->throw("most_cons.gff result file not found!");
-    while (<GFF>) {
-        print;
-    }
-    close(GFF);
+    # read in most_cons.bed as the result
+    my $bedin = Bio::FeatureIO->new(-format => 'bed', -file => 'most_cons.bed');
     
     # cd back to orig dir
     chdir($cwd) || $self->throw("Couldn't change back to working directory '$cwd'");
     
-    $self->throw("Not yet implemented");
+    my @feats = ();
+    while (my $feat = $bedin->next_feature) {
+        $feat->source('phastCons');
+        push(@feats, $feat);
+    }
+    return @feats;
 }
 
 =head2 _setparams
@@ -299,53 +390,25 @@ sub _run {
 
 sub _setparams {
     my ($self, $init_mod) = @_;
-    my $param_string = '';
     
-    $param_string .= ' --target-coverage '.$self->target_coverage if $self->target_coverage;
-    $param_string .= ' --expected-length '.$self->expected_length if $self->expected_length;
+    my $param_string = $self->SUPER::_setparams(-params => [keys %PARAMS],
+                                                -switches => [keys %SWITCHES],
+                                                -double_dash => 1,
+                                                -underscore_to_dash => 1);
     
-    my $input = '--msa-format FASTA '.$self->_alignment_file;
+    $param_string .= ' --no-post-probs';
+    my $aln_id = $self->_alignment_id;
+    $param_string .= " --seqname $aln_id --idpref $aln_id" if $aln_id;
+    
+    my $input = ' --msa-format FASTA '.$self->_alignment_file;
     if ($init_mod) {
         $param_string .= ' --estimate-trees mytrees '.$input.' '.$init_mod;
     }
     else {
-        $param_string .= $input.' --most_conserved most_cons.gff mytrees.cons.mod,mytrees.noncons.mod';
+        $param_string .= $input.' --most-conserved most_cons.bed --score mytrees.cons.mod,mytrees.noncons.mod';
     }
-    $input .= ' --no-post-probs';
     
     return $param_string;
-}
-
-=head2 _writeAlignFile
-
- Title   : _writeAlignFile
- Usage   : obj->_writeAlignFile($aln)
- Function: Internal(not to be used directly)
- Returns : n/a (sets _alignment_file())
- Args    : Bio::Align::AlignI
-
-=cut
-
-sub _writeAlignFile {
-    my ($self, $align) = @_;
-    
-    my ($tfh, $tempfile) = $self->io->tempfile(-dir=>$self->tempdir);
-    
-    my $out = Bio::AlignIO->new('-fh' => $tfh, '-format' => 'fasta');
-    $out->write_aln($align);
-    
-    $out->close();
-    $out = undef;
-    close($tfh);
-    undef $tfh;
-    $self->_alignment_file($tempfile);
-}
-
-# store the input alignment file name
-sub _alignment_file {
-    my $self = shift;
-    if (@_) { $self->{_align_file} = Cwd::abs_path(shift) }
-    return $self->{_align_file} || '';
 }
 
 # store the input tree option
