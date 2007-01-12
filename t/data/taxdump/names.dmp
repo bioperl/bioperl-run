@@ -1,0 +1,104 @@
+2759	|	Eucarya	|		|	synonym	|
+2759	|	Eucaryotae	|		|	synonym	|
+2759	|	Eukarya	|		|	synonym	|
+2759	|	Eukaryota	|		|	scientific name	|
+2759	|	Eukaryotae	|		|	synonym	|
+2759	|	eucaryotes	|		|	genbank common name	|
+2759	|	eukaryotes	|		|	common name	|
+2759	|	eukaryotes	|	eukaryotes<blast2759>	|	blast name	|
+6072	|	Eumetazoa	|		|	scientific name	|
+7711	|	Chordata	|		|	scientific name	|
+7711	|	chordates	|		|	genbank common name	|
+7711	|	chordates	|	chordates<blast7711>	|	blast name	|
+7742	|	Vertebrata	|		|	scientific name	|
+7742	|	vertebrates	|		|	genbank common name	|
+7742	|	vertebrates	|	vertebrates<blast7742>	|	blast name	|
+7776	|	Gnathostomata	|	Gnathostomata <vertebrate>	|	scientific name	|
+7776	|	jawed vertebrates	|		|	genbank common name	|
+8287	|	Sarcopterygii	|		|	scientific name	|
+9347	|	Eutheria	|		|	scientific name	|
+9347	|	Placentalia	|		|	synonym	|
+9347	|	eutherian mammals	|		|	common name	|
+9347	|	placental mammals	|		|	common name	|
+9347	|	placentals	|		|	genbank common name	|
+9443	|	Primata	|		|	synonym	|
+9443	|	Primates	|		|	scientific name	|
+9443	|	primate	|		|	equivalent name	|
+9443	|	primates	|	primates <blast9443>	|	blast name	|
+9526	|	Catarrhini	|		|	scientific name	|
+9577	|	Hylobatidae	|		|	scientific name	|
+9577	|	gibbons	|		|	genbank common name	|
+9577	|	lesser apes	|		|	common name	|
+9578	|	Hylobates	|		|	scientific name	|
+9580	|	Hylobates lar	|		|	scientific name	|
+9580	|	common gibbon	|		|	genbank common name	|
+9580	|	white-handed gibbon	|		|	common name	|
+9590	|	Hylobates syndactylus	|		|	synonym	|
+9590	|	Symphalangus syndactylus	|		|	scientific name	|
+9590	|	siamang	|		|	genbank common name	|
+9592	|	Gorilla	|		|	scientific name	|
+9593	|	Gorilla gorilla	|		|	scientific name	|
+9593	|	gorilla	|	gorilla <common name>	|	genbank common name	|
+9594	|	Gorilla beringei beringei	|		|	synonym	|
+9594	|	Gorilla gorilla beringei	|		|	scientific name	|
+9594	|	highland gorilla	|		|	common name	|
+9594	|	mountain gorilla	|		|	genbank common name	|
+9596	|	Pan	|		|	scientific name	|
+9596	|	chimpanzees	|		|	genbank common name	|
+9598	|	Chimpansee troglodytes	|		|	misspelling	|
+9598	|	Pan troglodytes	|		|	scientific name	|
+9598	|	chimpanzee	|		|	genbank common name	|
+9599	|	Pongo	|		|	scientific name	|
+9600	|	Pongo pygmaeus	|		|	scientific name	|
+9600	|	orang-utan	|		|	common name	|
+9600	|	orangutan	|		|	genbank common name	|
+9604	|	Hominidae	|		|	scientific name	|
+9604	|	Pongidae	|		|	synonym	|
+9604	|	great apes	|		|	common name	|
+9605	|	Homo	|		|	scientific name	|
+9606	|	Homo sapiens	|		|	scientific name	|
+9606	|	human	|		|	genbank common name	|
+9606	|	man	|		|	common name	|
+29089	|	Hylobates concolor	|		|	synonym	|
+29089	|	Nomascus concolor	|		|	scientific name	|
+29089	|	crested gibbon	|		|	genbank common name	|
+32523	|	Tetrapoda	|		|	scientific name	|
+32523	|	tetrapods	|		|	genbank common name	|
+32524	|	Amniota	|		|	scientific name	|
+32524	|	amniotes	|		|	genbank common name	|
+32525	|	Theria	|		|	scientific name	|
+33154	|	Fungi/Metazoa group	|		|	scientific name	|
+33208	|	Animalia	|		|	synonym	|
+33208	|	Metazoa	|		|	scientific name	|
+33208	|	animals	|		|	blast name	|
+33208	|	metazoans	|		|	genbank common name	|
+33208	|	multicellular animals	|		|	common name	|
+33213	|	Bilateria	|		|	scientific name	|
+33316	|	Coelomata	|		|	scientific name	|
+33511	|	Deuterostomia	|		|	scientific name	|
+40674	|	Mammalia	|		|	scientific name	|
+40674	|	mammals	|		|	genbank common name	|
+40674	|	mammals	|	mammals<blast40674>	|	blast name	|
+61851	|	Bunopithecus hoolock	|		|	scientific name	|
+61851	|	Hoolock gibbon	|		|	genbank common name	|
+61851	|	Hylobates hoolock	|		|	synonym	|
+81572	|	Hylobates moloch	|		|	scientific name	|
+81572	|	silvery gibbon	|		|	genbank common name	|
+89593	|	Craniata	|	Craniata <chordata>	|	scientific name	|
+117570	|	Teleostomi	|		|	scientific name	|
+117571	|	Euteleostomi	|		|	scientific name	|
+117571	|	bony vertebrates	|		|	genbank common name	|
+131567	|	biota	|		|	synonym	|
+131567	|	cellular organisms	|		|	scientific name	|
+207598	|	Homo/Pan/Gorilla group	|		|	scientific name	|
+314146	|	Euarchontoglires	|		|	scientific name	|
+314293	|	Anthropoidea	|		|	synonym	|
+314293	|	Simiiformes	|		|	scientific name	|
+314295	|	Hominoidea	|		|	scientific name	|
+314295	|	apes	|		|	common name	|
+325165	|	Nomascus	|		|	scientific name	|
+325166	|	Symphalangus	|		|	scientific name	|
+325167	|	Bunopithecus	|		|	scientific name	|
+376913	|	Haplorrhini	|		|	scientific name	|
+406788	|	Cross river gorilla	|		|	genbank common name	|
+406788	|	Gorilla gorilla diehli	|		|	scientific name	|
