@@ -16,7 +16,7 @@ Bio::Tools::Run::Phylo::PhyloBase- base module for phylo wrappers
 
 =head1 SYNOPSIS
 
-  use base qw(Bio::Tools::Run::Phylo::Phast::PhyloFit);
+  use base qw(Bio::Tools::Run::Phylo::PhyloBase);
 
 =head1 DESCRIPTION
 
