@@ -108,7 +108,7 @@ use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 BEGIN {
-    @SIMPROT_PARAMS = qw(alignment branch eFactor tree indelFrequncy
+    @SIMPROT_PARAMS = qw(alignment branch eFactor indelFrequncy
     maxIndel subModel rootLength sequence phylip alpha interleaved
     Benner variablegamma bennerk);
 
@@ -175,7 +175,7 @@ sub new {
   defined $st  && $self->save_tempfiles($st);
   defined $exe && $self->executable($exe);
 
-  $self->set_default_parameters();
+  # $self->set_default_parameters();
   if( defined $params ) {
       if( ref($params) !~ /HASH/i ) { 
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
@@ -253,20 +253,18 @@ sub run {
    $self->prepare($tree) unless (defined($self->{_prepared}));
    my ($rc,$aln,$seq) = (1);
    my ($tmpdir) = $self->tempdir();
-   my $outfile = $self->outfile_name;
+   my $outfile;
    {
        my $commandstring;
        my $exit_status;
        my $simprot_executable = $self->executable;
-       $commandstring = $simprot_executable." best ";
+       $commandstring .= $simprot_executable;
        $commandstring .= $self->{_simprot_params};
-       $commandstring .= " --tree=". "$self->{_temptreefile} ";
-       unless ($self->outfile_name ) {
-           my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-           close($tfh);
-           undef $tfh;
-           $self->outfile_name($outfile);
-       }
+       $commandstring .= " --tree=". $self->{_temptreefile} . " ";
+       my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+       close($tfh);
+       undef $tfh;
+       $self->outfile_name($outfile);
        my ($tfh, $seqfile) = $self->io->tempfile(-dir=>$self->tempdir());
        close($tfh);
        undef $tfh;
