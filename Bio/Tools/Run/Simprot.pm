@@ -95,28 +95,34 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Simprot;
 
-use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM 
-            @SIMPROT_PARAMS @SIMPROT_SWITCHES %OK_FIELD);
+use vars qw(@ISA %VALIDVALUES $PROGRAMNAME $PROGRAM);
 
 use strict;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
+use Bio::SeqIO;
 use Bio::TreeIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
+# valid values for parameters, the default one is always
+# the first one in the array
 BEGIN {
-    @SIMPROT_PARAMS = qw(alignment branch eFactor indelFrequncy
-    maxIndel subModel rootLength sequence phylip alpha interleaved
-    Benner variablegamma bennerk);
-
-    @SIMPROT_SWITCHES = qw(debug);
-
-# Authorize attribute fields
-    foreach my $attr ( @SIMPROT_PARAMS, @SIMPROT_SWITCHES ) {
-	$OK_FIELD{$attr}++; }
+    %VALIDVALUES = ( 
+                    'branch'   => '1',
+                    'eFactor'  => '3',
+                    'indelFrequncy'   => '0.03',
+                    'maxIndel'   => '2048',
+                    'subModel' => [ 2,0,1], # 0:PAM, 1:JTT, 2:PMB
+                    'rootLength'   => '50',
+                    'alpha'   => '1',
+                    'Benner'   => '0',
+                    'interleaved'   => '1',
+                    'variablegamma'   => '0',
+                    'bennerk'   => '-2',
+                   );
 }
 
 =head2 program_name
@@ -175,7 +181,7 @@ sub new {
   defined $st  && $self->save_tempfiles($st);
   defined $exe && $self->executable($exe);
 
-  # $self->set_default_parameters();
+  $self->set_default_parameters();
   if( defined $params ) {
       if( ref($params) !~ /HASH/i ) { 
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
@@ -185,6 +191,76 @@ sub new {
   }
   return $self;
 }
+
+
+sub set_parameter{
+   my ($self,$param,$value) = @_;
+   unless (defined $self->{'no_param_checks'} && $self->{'no_param_checks'} == 1) {
+       if ( ! defined $VALIDVALUES{$param} ) { 
+           $self->warn("unknown parameter $param will not be set unless you force by setting no_param_checks to true");
+           return 0;
+       } 
+       if ( ref( $VALIDVALUES{$param}) =~ /ARRAY/i &&
+            scalar @{$VALIDVALUES{$param}} > 0 ) {
+       
+           unless ( grep { $value eq $_ } @{ $VALIDVALUES{$param} } ) {
+               $self->warn("parameter $param specified value $value is not recognized, please see the documentation and the code for this module or set the no_param_checks to a true value");
+               return 0;
+           }
+       }
+   }
+   $self->{'_simprotparams'}->{$param} = $value;
+   return 1;
+}
+
+
+
+=head2 set_default_parameters
+
+ Title   : set_default_parameters
+ Usage   : $codeml->set_default_parameters(0);
+ Function: (Re)set the default parameters from the defaults
+           (the first value in each array in the 
+	    %VALIDVALUES class variable)
+ Returns : none
+ Args    : boolean: keep existing parameter values
+
+
+=cut
+
+sub set_default_parameters{
+   my ($self,$keepold) = @_;
+   $keepold = 0 unless defined $keepold;
+   
+   while( my ($param,$val) = each %VALIDVALUES ) {
+       # skip if we want to keep old values and it is already set
+       next if( defined $self->{'_simprotparams'}->{$param} && $keepold);
+       if(ref($val)=~/ARRAY/i ) {
+	   $self->{'_simprotparams'}->{$param} = $val->[0];
+       }  else { 
+	   $self->{'_simprotparams'}->{$param} = $val;
+       }
+   }
+}
+
+
+=head2 get_parameters
+
+ Title   : get_parameters
+ Usage   : my %params = $self->get_parameters();
+ Function: returns the list of parameters as a hash
+ Returns : associative array keyed on parameter names
+ Args    : none
+
+
+=cut
+
+sub get_parameters{
+   my ($self) = @_;
+   # we're returning a copy of this
+   return %{ $self->{'_simprotparams'} };
+}
+
 
 
 =head2 prepare
@@ -228,7 +304,11 @@ sub prepare {
        close($temptreeFH);
    }
    $self->{_prepared} = 1;
-   $self->{_simprot_params} = $self->_setparams();
+
+   my %params = $self->get_parameters;
+   while( my ($param,$val) = each %params ) {
+       $self->{_simprot_params} .=" \-\-$param\=$val";
+   }
 
    return $tempdir;
 }
@@ -286,10 +366,8 @@ sub run {
 	   $rc = 0;
        }
        eval {
-	   $aln = new Bio::AlignIO(-file => "$tmpdir/$outfile", 
-                                   -format => 'fasta');
-	   $seq = new Bio::SeqIO(-file => "$tmpdir/$seqfile", 
-                                 -format => 'fasta');
+	   $aln = new Bio::AlignIO(-file => "$outfile",-format => 'fasta');
+	   $seq = new Bio::SeqIO(-file => "$seqfile", -format => 'fasta');
        };
        if( $@ ) {
 	   $self->warn($self->error_string);
@@ -301,18 +379,6 @@ sub run {
    return ($rc,$aln,$seq);
 }
 
-
-sub AUTOLOAD {
-    my $self = shift;
-    my $attr = $AUTOLOAD;
-    $attr =~ s/.*:://;
-    $attr = $attr;
-    # aliasing
-    $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
-
-    $self->{$attr} = shift if @_;
-    return $self->{$attr};
-}
 
 =head2 error_string
 
@@ -412,42 +478,6 @@ sub tree {
    return $self->{'_tree'};
 }
 
-
-=head2  _setparams
-
- Title   :  _setparams
- Usage   :  Internal function, not to be called directly
- Function:  Create parameter inputs for simprot program
- Example :
- Returns : parameter string to be passed to simprot
-           during align or profile_align
- Args    : name of calling object
-
-=cut
-
-sub _setparams {
-    my ($self) = @_;
-    my ($attr, $value,$param_string);
-    $param_string = '';
-    my $laststr;
-    for  $attr ( @SIMPROT_PARAMS ) {
-	$value = $self->$attr();
-	next unless (defined $value);
-	my $attr_key = $attr;
-        $attr_key = ' --'.$attr_key;
-        $param_string .= $attr_key .'='.$value;
-
-    }
-    for  $attr ( @SIMPROT_SWITCHES) {
- 	$value = $self->$attr();
- 	next unless ($value);
- 	my $attr_key = $attr;
- 	$attr_key = ' --'.$attr_key;
- 	$param_string .= $attr_key ;
-    }
-
-    return $param_string;
-}
 
 
 =head1 Bio::Tools::Run::BaseWrapper methods
