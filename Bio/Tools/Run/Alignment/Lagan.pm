@@ -121,68 +121,43 @@ Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::Lagan;
 
-use vars qw(@ISA $PROGRAM_DIR @LAGAN_PARAMS @MLAGAN_PARAMS @LAGAN_SWITCHES @OTHER_PARAMS
-	    %OK_FIELD $AUTOLOAD);
-
 use strict;
-use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::AlignIO;
-use Bio::AlignIO::fasta;
 use Bio::SimpleAlign;
-use Bio::Tools::Run::WrapperBase;
 use Cwd;
 
-@ISA = qw(	Bio::Root::Root
-		Bio::Tools::Run::WrapperBase);
+use base qw(Bio::Tools::Run::WrapperBase);
 
-BEGIN {
-
-    @LAGAN_PARAMS = qw(chaos order recurse mfa out lazy maskedonly
+our @LAGAN_PARAMS = qw(chaos order recurse mfa out lazy maskedonly
                        usebounds rc translate draft info fastreject);
-    @OTHER_PARAMS = qw(outfile);
-    @LAGAN_SWITCHES = qw(silent quiet);
-    @MLAGAN_PARAMS = qw(nested postir translate lazy verbose tree match mismatch
+our @OTHER_PARAMS = qw(outfile);
+our @LAGAN_SWITCHES = qw(silent quiet);
+our @MLAGAN_PARAMS = qw(nested postir translate lazy verbose tree match mismatch
                         gapstart gapend gapcont out version);
 
-    #Not all of these parameters are useful in this context, care
-    #should be used in setting only standard ones
+#Not all of these parameters are useful in this context, care
+#should be used in setting only standard ones
 
-    #Authorize Attribute fields
-    foreach my $attr (@LAGAN_PARAMS, @LAGAN_SWITCHES, @MLAGAN_PARAMS,@OTHER_PARAMS) {
-        $OK_FIELD{$attr}++;
-    }
-
-    #The LAGAN_DIR environment variable must be set
-    $PROGRAM_DIR = $ENV{'LAGAN_DIR'} || '';
-}
+#The LAGAN_DIR environment variable must be set
+our $PROGRAM_DIR = $ENV{'LAGAN_DIR'} || '';
 
 sub new {
     my($class, @args) = @_;
     my $self = $class->SUPER::new(@args);
-    while (@args) {
-        my $attr = shift @args;
-        my $value = shift @args;
-        $self->$attr($value);
-    }
+    
+    $self->_set_from_args(\@args, -methods => [@LAGAN_PARAMS, @OTHER_PARAMS,
+                                               @LAGAN_SWITCHES, @MLAGAN_PARAMS],
+                                  -create => 1);
+    
     my ($tfh, $tempfile) = $self->io->tempfile();
     my $outfile = $self->out || $self->outfile || $tempfile;
     $self->out($outfile);
     close($tfh);
     undef $tfh;
     return $self;
-}
-
-sub AUTOLOAD {
-    my $self = shift;
-    my $attr = $AUTOLOAD;
-    $attr =~ s/.*:://;
-
-    $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
-    $self->{$attr} = shift if @_;
-    return $self->{$attr};
 }
 
 =head2 lagan
@@ -352,13 +327,8 @@ sub _setparams {
     }
     ##EXPAND OTHER LAGAN SUITE PROGRAMS HERE
 
-    my $param_string = "";
-    for $attr (@execparams) {
-        $value = $self->$attr();
-        next unless (defined $value);
-        $attr = '-' . $attr;
-        $param_string .= " $attr $value ";
-    }
+    my $param_string = $self->SUPER::_setparams(-params => [@execparams],
+                                                -dash => 1);
     return $param_string . " -mfa ";
 }	
 
