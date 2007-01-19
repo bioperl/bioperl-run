@@ -26,7 +26,8 @@ my $build = ModuleBuildBioperl->new(
                             'XML::Parser::PerlSAX'      => '0/Pise Applications/Bio::Tools::Run::PiseJob',
                             'HTML::Parser'				=> '0/Pise Applications/Bio::Tools::Run::PiseJob',
                            },
-    dynamic_config      => 1
+    dynamic_config      => 1,
+    create_makefile_pl  => 'passthrough'
     
     #pm_files           => {} # modules in Bio are treated as if they were in lib and auto-installed
     #script_files       => [] # scripts in scripts directory are installed on-demand
