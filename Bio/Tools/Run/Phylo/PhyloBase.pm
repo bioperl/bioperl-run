@@ -72,13 +72,14 @@ use base qw(Bio::Tools::Run::WrapperBase);
  Usage   : $obj->_writeAlignFile($aln)
  Function: Writes the supplied alignment object out in the desired format to
            a temp file.
- Returns : n/a (sets _alignment_file())
+ Returns : n/a (sets _alignment_file() and _alignment_object())
  Args    : Bio::Align::AlignI AND format (default 'fasta');
 
 =cut
 
 sub _writeAlignFile {
     my ($self, $align, $format) = @_;
+    $self->_alignment_object($align);
     $format ||= 'fasta';
     
     my ($tfh, $tempfile) = $self->io->tempfile(-dir=>$self->tempdir);
@@ -247,7 +248,7 @@ sub _tree_file {
  Title   : _get_seq_names
  Usage   : @names = $obj->_get_seq_names()
  Function: Get all the sequence names (from id()) of the sequenes in the
-           alignment. _alignment_file() must be set prior to calling this.
+           alignment.  _alignment_object() must be set prior to calling this.
  Returns : list of strings (seq ids)
  Args    : input format of the alignment file (defaults to guess)
 
@@ -255,11 +256,7 @@ sub _tree_file {
 
 sub _get_seq_names {
     my $self = shift;
-    my $file = $self->_alignment_file || $self->throw("Alignment filename hasn't been set with _alignment_file");
-    my $format = shift;
-    
-    my $align_in = Bio::AlignIO->new(-verbose => $self->verbose, -file => $file, $format ? (-format => $format) : ());
-    my $aln = $align_in->next_aln || $self->throw("Alignment file '$file' had no alignment!");
+    my $aln = $self->_alignment_object(@_);
     
     my @names;
     foreach my $seq ($aln->each_seq) {
@@ -267,6 +264,40 @@ sub _get_seq_names {
     }
     
     return @names;
+}
+
+=head2 _alignment_object
+
+ Title   : _alignment_object
+ Usage   : $aln = $obj->_alignment_object()
+ Function: Read the alignment file and generate an alignment object from it.
+           _alignment_file() must be set prior to calling this.
+ Returns : Bio::SimpleAlign
+ Args    : none or input format of the alignment file (defaults to guess) to
+           get, or Bio::Align::AlignI to set.
+
+=cut
+
+sub _alignment_object {
+    my $self = shift;
+    
+    if (defined $self->{_align_obj}) {
+        return $self->{_align_obj};
+    }
+    
+    my $thing = shift;
+    if (ref($thing) && $thing->isa('Bio::Align::AlignI')) {
+        $self->{_align_obj} = $thing;
+        return $thing;
+    }
+    my $format = $thing;
+    
+    my $file = $self->_alignment_file || $self->throw("Alignment filename hasn't been set with _alignment_file");
+    
+    my $align_in = Bio::AlignIO->new(-verbose => $self->verbose, -file => $file, $format ? (-format => $format) : ());
+    my $aln = $align_in->next_aln || $self->throw("Alignment file '$file' had no alignment!");
+    $self->{_align_obj} = $aln;
+    return $aln;
 }
 
 =head2 _get_node_names
