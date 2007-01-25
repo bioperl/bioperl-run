@@ -31,6 +31,9 @@ Bio::Tools::Run::Phylo::Phast::PhastCons - Wrapper for footprinting using
   # generate the species tree automatically using a Bio::DB::Taxonomy database
   $tdb = Bio::DB::Taxonomy->new(-source => 'entrez');
   @features = $factory->run($aln_obj, $tdb);
+  
+  # @features is an array of Bio::SeqFeature::Annotated, one feature per
+  # alignment sequence and prediction
 
 =head1 DESCRIPTION
 
@@ -114,6 +117,7 @@ package Bio::Tools::Run::Phylo::Phast::PhastCons;
 use strict;
 
 use Cwd;
+use Clone qw(clone);
 use Bio::AlignIO;
 use Bio::Tools::Run::Phylo::Phast::PhyloFit;
 use Bio::FeatureIO;
@@ -131,7 +135,6 @@ our %PARAMS   = (rho => 'R',
                  expected_length => ['E', 'expected_lengths'],
                  lnl => 'L',
                  log => 'g',
-                 refidx => 'r',
                  max_micro_indel => 'Y',
                  indel_params => 'D',
                  lambda => 'l',
@@ -158,6 +161,7 @@ our %UNSUPPORTED = (estimate_trees => 'T',
                     score => 's',
                     no_post_probs => 'n',
                     seqname => 'N',
+                    refidx => 'r',
                     idpref => 'P',
                     help => 'h',
                     alias => 'A',
@@ -227,6 +231,7 @@ sub program_dir {
            help / h
            alias / A
            most_conserved / V / viterbi
+           refidx / r
 
 =cut
 
@@ -273,6 +278,8 @@ sub target_coverage {
 
 =cut
 
+# created automatically
+
 =head2 rho
 
  Title   : rho
@@ -304,7 +311,8 @@ sub rho {
            $result = $factory->run($align_object, $db_taxonomy_object);
  Function: Runs phastCons on an alignment to find the most conserved regions
            ('footprinting').
- Returns : array of Bio::SeqFeature::Annotated
+ Returns : array of Bio::SeqFeature::Annotated (one feature per alignment
+           sequence and prediction)
  Args    : The first arguement represents an alignment, the second arguement
            a species tree.
            The alignment can be provided as a multi-fasta format alignment
@@ -370,9 +378,24 @@ sub _run {
     chdir($cwd) || $self->throw("Couldn't change back to working directory '$cwd'");
     
     my @feats = ();
+    my $aln = $self->_alignment_object;
     while (my $feat = $bedin->next_feature) {
         $feat->source('phastCons');
-        push(@feats, $feat);
+        
+        # features are in alignment coords; make a feature for each alignment
+        # sequence
+        foreach my $seq ($aln->each_seq) {
+            my $clone = clone($feat);
+            
+            # give it the correct id
+            $clone->seq_id($seq->id);
+            
+            # correct the coords
+            $clone->start($seq->location_from_column($feat->start)->start);
+            $clone->end($seq->location_from_column($feat->end)->end);
+            
+            push(@feats, $clone);
+        }
     }
     return @feats;
 }
@@ -399,6 +422,7 @@ sub _setparams {
     $param_string .= ' --no-post-probs';
     my $aln_id = $self->_alignment_id;
     $param_string .= " --seqname $aln_id --idpref $aln_id" if $aln_id;
+    $param_string .= ' --refidx 0';
     
     my $input = ' --msa-format FASTA '.$self->_alignment_file;
     if ($init_mod) {
