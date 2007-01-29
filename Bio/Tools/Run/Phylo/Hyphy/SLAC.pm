@@ -25,7 +25,7 @@ Bio::Tools::Run::Phylo::Hyphy::SLAC - Wrapper around the Hyphy SLAC analysis
   my $aln = $alignio->next_aln;
 
   my $treeio = Bio::TreeIO->new(
-      -format => 'nh', -file => 't/data/hyphy1.tree');
+      -format => 'newick', -file => 't/data/hyphy1.tree');
 
   my $slac = new Bio::Tools::Run::Phylo::Hyphy::SLAC();
   $slac->alignment($aln);

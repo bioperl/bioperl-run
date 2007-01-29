@@ -25,7 +25,7 @@ Bio::Tools::Run::Phylo::Hyphy::REL - Wrapper around the Hyphy REL analysis
   my $aln = $alignio->next_aln;
 
   my $treeio = Bio::TreeIO->new(
-      -format => 'nh', -file => 't/data/hyphy1.tree');
+      -format => 'newick', -file => 't/data/hyphy1.tree');
 
   my $rel = new Bio::Tools::Run::Phylo::Hyphy::REL();
   $rel->alignment($aln);
