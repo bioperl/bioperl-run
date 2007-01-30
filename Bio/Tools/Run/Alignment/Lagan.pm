@@ -483,3 +483,4 @@ sub program_dir {
     $PROGRAM_DIR;
 }
 
+1;
