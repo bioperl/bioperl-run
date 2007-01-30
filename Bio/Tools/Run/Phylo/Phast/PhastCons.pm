@@ -121,6 +121,7 @@ use Clone qw(clone);
 use Bio::AlignIO;
 use Bio::Tools::Run::Phylo::Phast::PhyloFit;
 use Bio::FeatureIO;
+use Bio::Annotation::SimpleValue;
 
 use base qw(Bio::Tools::Run::Phylo::PhyloBase);
 
@@ -381,18 +382,22 @@ sub _run {
     my $aln = $self->_alignment_object;
     while (my $feat = $bedin->next_feature) {
         $feat->source('phastCons');
+        my $sv = Bio::Annotation::SimpleValue->new(-tagname => 'predicted', -value => 1);
+        $feat->annotation->add_Annotation($sv);
+        # $feat->type('TF_binding_site'); causes seg fault in subsequent clone()
         
-        # features are in alignment coords; make a feature for each alignment
-        # sequence
+        # features are in zero-based alignment coords; make a feature for each
+        # alignment sequence
         foreach my $seq ($aln->each_seq) {
             my $clone = clone($feat);
+            # $clone->type('TF_binding_site'); causes massive slowdown if you later store/retrieve these features from Bio::DB::SeqFeature database
             
             # give it the correct id
             $clone->seq_id($seq->id);
             
             # correct the coords
-            $clone->start($seq->location_from_column($feat->start)->start);
-            $clone->end($seq->location_from_column($feat->end)->end);
+            $clone->start($seq->location_from_column($feat->start + 1)->start);
+            $clone->end($seq->location_from_column($feat->end + 1)->end);
             
             push(@feats, $clone);
         }
