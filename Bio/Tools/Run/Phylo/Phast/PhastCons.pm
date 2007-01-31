@@ -395,9 +395,11 @@ sub _run {
             # give it the correct id
             $clone->seq_id($seq->id);
             
-            # correct the coords
-            $clone->start($seq->location_from_column($feat->start + 1)->start);
-            $clone->end($seq->location_from_column($feat->end + 1)->end);
+            # check and correct the coords (sequence may not have the feature)
+            my $sloc = $seq->location_from_column($feat->start + 1) || next;
+            my $eloc = $seq->location_from_column($feat->end + 1) || next;
+            $clone->start($sloc->start);
+            $clone->end($eloc->end);
             
             push(@feats, $clone);
         }
