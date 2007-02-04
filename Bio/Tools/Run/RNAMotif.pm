@@ -1,14 +1,23 @@
+# $Id$
+#
+# BioPerl module for Bio::Tools::Run::RNAMotif
+#
+# Cared for by Chris Fields
+#
+# Copyright Chris Fields
+#
 # You may distribute this module under the same terms as perl itself
+#
 # POD documentation - main docs before the code
 
 =head1 NAME
 
-Bio::Tools::Run::Hmmer - Wrapper for local execution of rnamotif, rm2ct,
+Bio::Tools::Run::RNAMotif - Wrapper for local execution of rnamotif, rm2ct,
 rmfmt, rmprune
 
 =head1 SYNOPSIS
 
-  #run rnamotif|hmmalign|hmmsearch
+  #run rnamotif|rmfmt|rm2ct
   
   my @params = (
               descr => 'pyrR.descr',
@@ -125,6 +134,8 @@ my @RNAMOTIF_PARAMS=qw(c sh N d h p s v context setvar On I xdfname pre post
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
+    my ($outfile) = $self->_rearrange([qw(OUTFILE_NAME)], @args);
+    $outfile    && $self->outfile_name($outfile);
     $self->io->_initialize_io();
     $self->_set_from_args(\@args,
                           -methods => [@RNAMOTIF_PARAMS],
@@ -163,6 +174,28 @@ sub program_dir {
   return Bio::Root::IO->catfile($ENV{RNAMOTIFDIR}) if $ENV{RNAMOTIFDIR};
 }
 
+=head2  version
+
+ Title   : version
+ Usage   : $v = $prog->version();
+ Function: Determine the version number of the program
+ Example :
+ Returns : float or undef
+ Args    : none
+
+=cut
+
+sub version {
+    my ($self) = @_;
+    return undef unless $self->executable;
+    my $string = `rnamotif -v`;
+    my $v;
+    if ($string =~ m{(\d+)}) {
+        $v = $1;
+    }
+    return $v || $string;
+}
+
 =head2 run
 
  Title   :   run
@@ -196,6 +229,7 @@ sub run{
 sub _run {
     my ($self,$file)= @_;
     my $str = $self->executable;
+    my $outfile = $self->outfile_name;
     #$self->debug("Params:",$self->_setparams,"\n");
     my $param_str = $self->arguments." ".$self->_setparams;
     $str .= "$param_str ".$file;
@@ -210,16 +244,12 @@ sub _run {
     if($progname eq 'rnamotif' || $progname eq 'rmprune' ){
         my $fh;
         open($fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $?\n");
-    
         return Bio::SearchIO->new(-fh      => $fh, 
                       -verbose => $self->verbose,
                       -format  => "rnamotif");
     } elsif ($progname eq 'rmfmt' && $self->can('a') && $self->a) {
         my $fh;
         open($fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $?\n");
-        
-            # should make this a parameter in the future as cmdline
-            # arguments could make this incompatible 
         return Bio::AlignIO->new(-fh      => $fh,
                         -verbose => $self->verbose,
                         -format  =>'fasta');
@@ -297,30 +327,5 @@ sub _writeSeqFile {
     undef $tfh;
     return $inputfile;
 }
-
-#=head2 _writeAlignFile
-#
-# Title   :   _writeAlignFile
-# Usage   :   obj->_writeAlignFile($seq)
-# Function:   Internal(not to be used directly)
-# Returns :
-# Args    :
-#
-#=cut
-#
-#sub _writeAlignFile{
-#    my ($self,@align) = @_;
-#    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
-#    my $in  = Bio::AlignIO->new('-fh'     => $tfh , 
-#                '-format' => 'stockholm');
-#    foreach my $s(@align){
-#      $in->write_aln($s);
-#    }
-#    $in->close();
-#    $in = undef;
-#    close($tfh);
-#    undef $tfh;
-#    return $inputfile;
-#}
 
 1;
