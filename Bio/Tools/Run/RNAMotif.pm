@@ -64,9 +64,16 @@ rmfmt, rmprune
 
 =head1 DESCRIPTION
 
-Wrapper module for Tom Macke and David Cases's RNAMotif suite of programs.  This
-allows running of rnamotif, rmprune, rm2ct, and rmfmt. Binaries are available
-at http://www.scripps.edu/mb/case/casegr-sh-3.5.html
+Wrapper module for Tom Macke and David Cases's RNAMotif suite of programs. This
+allows running of rnamotif, rmprune, rm2ct, and rmfmt. Binaries are available at
+http://www.scripps.edu/mb/case/casegr-sh-3.5.html
+
+This wrapper allows for one to save output to an optional named file or tempfile
+using the '-outfile_name' or '-tempfile' parameters; this is primarily for
+saving output from the rm2ct program, which currently does not have a parser
+available. If both a named output file and tempfile flag are set, the output
+file name is used. The default setting is piping output into a filehandle for
+parsing (or output to STDERR, for rm2ct which requires '-verbose' set to 1).
 
 =head1 FEEDBACK
 
@@ -119,7 +126,7 @@ my %RNAMOTIF_SWITCHES = map {$_ => 1} qw(c d h p s v l a la context sh);
 
 # order is important here
 my @RNAMOTIF_PARAMS=qw(c sh N d h p s v context setvar On I xdfname pre post
-                        descr xdescr fmt fmap l a la program db prune);
+                        descr xdescr fmt fmap l a la program db prune t);
 
 =head2 new
 
@@ -134,14 +141,22 @@ my @RNAMOTIF_PARAMS=qw(c sh N d h p s v context setvar On I xdfname pre post
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    my ($outfile) = $self->_rearrange([qw(OUTFILE_NAME)], @args);
-    $outfile    && $self->outfile_name($outfile);
+    my ($out, $tf) = $self->_rearrange([qw(OUTFILE_NAME TEMPFILE)], @args);
     $self->io->_initialize_io();
+    if ($tf && !$out) {
+        my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+        close($tfh);
+        undef $tfh;
+        $self->outfile_name($outfile);
+    } else {
+        $out ||= '';
+        $self->outfile_name($out);
+    }
+    $tf   && $self->tempfile($tf);
     $self->_set_from_args(\@args,
                           -methods => [@RNAMOTIF_PARAMS],
                           -create => 1
                          );
-    
     return $self;
 }
 
@@ -228,31 +243,41 @@ sub run{
 
 sub _run {
     my ($self,$file)= @_;
-    my $str = $self->executable;
-    my $outfile = $self->outfile_name;
-    #$self->debug("Params:",$self->_setparams,"\n");
-    my $param_str = $self->arguments." ".$self->_setparams;
-    $str .= "$param_str ".$file;
-    
-    my $progname = $self->program_name;
-    if ($self->prune && $progname eq 'rnamotif') {
-        $str .= ' | rmprune';
-    }
+    return unless $self->executable;
+    my ($str, $progname, $outfile) =
+       ($self->executable, $self->program_name, $self->outfile_name);
+    my $param_str = $self->_setparams($file);
+    $str .= " $param_str";
     $self->debug("RNAMotif command: $str\n");
-    # small sanity check
-    $self->throw("Unknown program: $progname") if (!exists $RNAMOTIF_PROGS{$progname} );
-    if($progname eq 'rnamotif' || $progname eq 'rmprune' ){
-        my $fh;
-        open($fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $?\n");
-        return Bio::SearchIO->new(-fh      => $fh, 
+    if($progname eq 'rnamotif' || $progname eq 'rmprune' ||
+       ($progname eq 'rmfmt' && $self->can('a') && $self->a)) {
+        if ($outfile) {
+            my $status = system($str);
+            if( !-e $outfile || -z $outfile ) {
+                $self->warn( "RNAMotif call crashed: $! \n[command $str]\n");
+                return undef;
+            }
+            if ( $progname eq 'rnamotif' || $progname eq 'rmprune') {
+                return Bio::SearchIO->new(-file      => $outfile, 
                       -verbose => $self->verbose,
-                      -format  => "rnamotif");
-    } elsif ($progname eq 'rmfmt' && $self->can('a') && $self->a) {
-        my $fh;
-        open($fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $?\n");
-        return Bio::AlignIO->new(-fh      => $fh,
+                      -format  => "rnamotif")
+            } else {
+                return Bio::AlignIO->new(-file      => $outfile,
                         -verbose => $self->verbose,
                         -format  =>'fasta');
+            }
+        } else {
+            open(my $fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $!\n");
+            if ( $progname eq 'rnamotif' || $progname eq 'rmprune') {
+                return Bio::SearchIO->new(-fh      => $fh, 
+                          -verbose => $self->verbose,
+                          -format  => "rnamotif");
+            } else {
+                return Bio::AlignIO->new(-fh      => $fh,
+                        -verbose => $self->verbose,
+                        -format  =>'fasta');
+            }
+        }
     } else {
         # for rm2ct, possibly SeqIO-based?
         my $status = open(my $OUT,"$str | ");
@@ -281,10 +306,17 @@ sub _run {
 =cut
 
 sub _setparams {
-    my ($self) = @_;
+    my ($self, $file) = @_;
+    my $progname = $self->program_name;
+    # small sanity check
+    $self->throw("Unknown program: $progname") if
+        (!exists $RNAMOTIF_PROGS{$progname} );
+
     my $param_string;
+    my $outfile = ($self->outfile_name) ? ' > '.$self->outfile_name : '';
+    
     my @params;
-    foreach my $attr (@RNAMOTIF_PARAMS){
+    foreach my $attr (@RNAMOTIF_PARAMS) {
         next if ($attr =~/PROGRAM|DB|PRUNE/i);
         my $value = $self->$attr();
         next unless (defined $value);
@@ -299,7 +331,16 @@ sub _setparams {
             }
         }
     }
+    
     $param_string = join ' ', @params;
+    $param_string .= ' '.$file;
+
+    if ($self->prune && $self->program_name eq 'rnamotif') {
+        $param_string .= ' | rmprune';
+    }
+
+    $param_string .= $outfile;
+    
     return $param_string;
 }
 
@@ -326,6 +367,12 @@ sub _writeSeqFile {
     close($tfh);
     undef $tfh;
     return $inputfile;
+}
+
+sub tempfile {
+    my $self = shift;
+    return $self->{'_tempfile'} = shift if @_;
+    return $self->{'_tempfile'};
 }
 
 1;
