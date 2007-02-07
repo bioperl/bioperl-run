@@ -27,15 +27,15 @@ rmfmt, rmprune
               sh    => 1,
              );
   
-  my $factory = Bio::Tools::Run::RNAMotif->new('program' =>'rnamotif',
-                                                'prune'  => 1,
+  my $factory = Bio::Tools::Run::RNAMotif->new(-program =>'rnamotif',
+                                               -prune  => 1,
                                                 @params);
 
   # Pass the factory a Bio::Seq object or a file name
   # Returns a Bio::SearchIO object
   
-  my $search = $factory->run($seq);
-  my @feat;
+  #my $searchio = $factory->run("B_sub.gb");
+  my $searchio = $factory->run($seq);
   while (my $result = $searchio->next_result){
    while(my $hit = $result->next_hit){
     while (my $hsp = $hit->next_hsp){
@@ -66,7 +66,7 @@ rmfmt, rmprune
 
 Wrapper module for Tom Macke and David Cases's RNAMotif suite of programs. This
 allows running of rnamotif, rmprune, rm2ct, and rmfmt. Binaries are available at
-http://www.scripps.edu/mb/case/casegr-sh-3.5.html
+http://www.scripps.edu/mb/case/casegr-sh-3.5.html.
 
 This wrapper allows for one to save output to an optional named file or tempfile
 using the '-outfile_name' or '-tempfile' parameters; this is primarily for
@@ -74,6 +74,16 @@ saving output from the rm2ct program, which currently does not have a parser
 available. If both a named output file and tempfile flag are set, the output
 file name is used. The default setting is piping output into a filehandle for
 parsing (or output to STDERR, for rm2ct which requires '-verbose' set to 1).
+
+WARNING: At this time, there is very little checking of parameter settings, so
+one could have an error if setting the worng parameter for a program. Future
+versions will likely add some error checking.
+
+=head1 NOTES ON PROGRAM PARAMETERS
+
+All program parameters are currently supported. Of note, the 'D' parameter, used
+for setting the value of a variable to a value, is changed to 'set_var' to avoid
+name collisions with 'd' (used for dumping internal data structures).
 
 =head1 FEEDBACK
 
@@ -120,13 +130,20 @@ use Bio::Tools::Run::WrapperBase;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-my %RNAMOTIF_PROGS = map {$_ => 1} qw(rnamotif rm2ct rmfmt rmprune);
+# will move parameters to each program, use this for _set_params
+my %RNAMOTIF_PROGS =(
+    rnamotif    => [qw(c d h N O p s v context sh setvar I xdfname pre post
+                    descr xdescr fmt fmap )],
+    rm2ct       => [qw(t)],
+    rmfmt       => [qw(a l la smax td)],
+    rmprune     => [] # no params
+    );
 
 my %RNAMOTIF_SWITCHES = map {$_ => 1} qw(c d h p s v l a la context sh);
 
 # order is important here
-my @RNAMOTIF_PARAMS=qw(c sh N d h p s v context setvar On I xdfname pre post
-                        descr xdescr fmt fmap l a la program db prune t);
+my @RNAMOTIF_PARAMS=qw(program prune c sh N d h p s v context setvar O I
+    xdfname pre post descr xdescr fmt fmap l a la t);
 
 =head2 new
 
@@ -135,6 +152,9 @@ my @RNAMOTIF_PARAMS=qw(c sh N d h p s v context setvar On I xdfname pre post
  Function: creates a new RNAMotif factory
  Returns:  Bio::Tools::Run::RNAMotif
  Args    : list of parameters
+           -tempfile        => set tempfile flag (default 0)
+           -outfile_name    => set file to send output to (default none)
+           -prune           => set rmprune postprocess flag (default 0)
 
 =cut
 
@@ -203,26 +223,37 @@ sub program_dir {
 sub version {
     my ($self) = @_;
     return undef unless $self->executable;
-    my $string = `rnamotif -v`;
+    return $self->{'_progversion'} if $self->{'_progversion'};
+    my $string = `rnamotif -v 2>&1`;
     my $v;
-    if ($string =~ m{(\d+)}) {
+    if ($string =~ m{([\d.]+)}) {
         $v = $1;
     }
-    return $v || $string;
+    return $self->{'_progversion'} = $v || $string;
 }
 
 =head2 run
 
- Title   :   run
- Usage   :   $obj->run($seqFile)
- Function:   Runs HMMER and returns Bio::SearchIO
- Returns :   A Bio::SearchIO
- Args    :   A Bio::PrimarySeqI or file name
+ Title   :  run
+ Usage   :  $obj->run($seqFile)
+ Function:  Runs RNAMotif programs, returns Bio::SearchIO/Bio::AlignIO
+ Returns :  Depends on program:
+            'rnamotif' - returns Bio::SearchIO
+            'rmfmt -a' - returns Bio::AlignIO
+            all others - sends output to outfile, tempfile, STDERR
+            
+            Use search() (for Bio::SearchIO stream) or get_AlignIO() (for
+            Bio::AlignIO stream) for a uniform Bioperl object interface.
+            
+ Args    :  A Bio::PrimarySeqI or file name
+ Note    :  This runs any RNAMotif program set via program()
 
 =cut
 
-sub run{
+sub run {
     my ($self,@seq) = @_;
+    $self->throw ("Must pass a file name or a list of Bio::PrimarySeqI objects")
+        if (!@seq);
     if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
         my $infile1 = $self->_writeSeqFile(@seq);
         return  $self->_run($infile1);
@@ -231,67 +262,152 @@ sub run{
     }
 }
 
+=head2 search
+
+ Title   :  search
+ Usage   :  $searchio = $obj->search($seqFile)
+ Function:  Runs 'rnamotif' on seqs, returns Bio::SearchIO
+ Returns :  A Bio::SearchIO
+ Args    :  A Bio::PrimarySeqI or file name
+ Note    :  Runs 'rnamotif' only, regardless of program setting; all other
+            parameters loaded
+
+=cut
+
+sub search {
+    my ($self,@seq) = @_;
+    $self->throw ("Must pass a file name or a list of Bio::PrimarySeqI objects")
+        if (!@seq);
+    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
+        my $infile1 = $self->_writeSeqFile(@seq);
+        return  $self->_run($infile1);
+    } else {
+        return  $self->_run(@seq); 
+    }
+}
+
+=head2 get_AlignIO
+
+ Title   :  get_AlignIO
+ Usage   :  $aln = $obj->get_AlignIO($seqFile)
+ Function:  Runs 'rmfmt -a' on file, returns Bio::AlignIO
+ Returns :  A Bio::AlignIO
+ Args    :  File name
+ Note    :  Runs 'rmfmt -a' only, regardless of program setting; only file
+            name and outfile (if any) are set
+
+=cut
+
+sub get_AlignIO {
+    my ($self,@seq) = @_;
+    $self->throw ("Must pass a file name")
+        if (!@seq && ref($seq[0]));
+    return  $self->_run(@seq);
+}
+
+=head2 tempfile
+
+ Title   : tempfile
+ Usage   : $obj->tempfile(1)
+ Function: Set tempfile flag.  When set, writes output to a tempfile; this
+           is overridden by outfile_name() if set
+ Returns : Boolean setting (or undef if not set)
+ Args    : [OPTIONAL] Boolean
+
+=cut
+
+sub tempfile {
+    my $self = shift;
+    return $self->{'_tempfile'} = shift if @_;
+    return $self->{'_tempfile'};
+}
+
+=head2 prune
+
+ Title   : prune
+ Usage   : $obj->prune(1)
+ Function: Set rmprune flag.  When set, follows any searches with a call to
+           rmprune (this deletes some redundant sequence hits)
+ Returns : Boolean setting (or undef if not set)
+ Args    : [OPTIONAL] Boolean
+
+=cut
+
+sub prune {
+    my $self = shift;
+    return $self->{'_prune'} = shift if @_;
+    return $self->{'_prune'};
+}
+
 =head2 _run
 
  Title   :   _run
  Usage   :   $obj->_run()
  Function:   Internal(not to be used directly)
- Returns :   An array of Bio::SeqFeature::Generic objects
+ Returns :   
  Args    :
 
 =cut
 
 sub _run {
-    my ($self,$file)= @_;
+    my ($self,$file,$prog)= @_;
     return unless $self->executable;
+    $self->io->_io_cleanup();
     my ($str, $progname, $outfile) =
-       ($self->executable, $self->program_name, $self->outfile_name);
+       ($prog || $self->executable, $self->program_name, $self->outfile_name);
     my $param_str = $self->_setparams($file);
+    my $descr = ($self->can('descr')) ? $self->descr :
+                ($self->can('xdescr')) ? $self->xdescr :
+                $self->throw("Must have a descriptor present!");
     $str .= " $param_str";
     $self->debug("RNAMotif command: $str\n");
-    if($progname eq 'rnamotif' || $progname eq 'rmprune' ||
-       ($progname eq 'rmfmt' && $self->can('a') && $self->a)) {
-        if ($outfile) {
-            my $status = system($str);
-            if( !-e $outfile || -z $outfile ) {
-                $self->warn( "RNAMotif call crashed: $! \n[command $str]\n");
-                return undef;
-            }
-            if ( $progname eq 'rnamotif' || $progname eq 'rmprune') {
-                return Bio::SearchIO->new(-file      => $outfile, 
-                      -verbose => $self->verbose,
-                      -format  => "rnamotif")
-            } else {
-                return Bio::AlignIO->new(-file      => $outfile,
-                        -verbose => $self->verbose,
-                        -format  =>'fasta');
-            }
-        } else {
-            open(my $fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $!\n");
-            if ( $progname eq 'rnamotif' || $progname eq 'rmprune') {
-                return Bio::SearchIO->new(-fh      => $fh, 
-                          -verbose => $self->verbose,
-                          -format  => "rnamotif");
-            } else {
-                return Bio::AlignIO->new(-fh      => $fh,
-                        -verbose => $self->verbose,
-                        -format  =>'fasta');
-            }
+    
+    # rnamotif => SearchIO object
+    # rmfmt -a => AlignIO object
+    # all others sent to outfile, tempfile, or STDERR (upon verbose = 1)
+    
+    my $obj = ($progname eq 'rnamotif' || $progname eq 'rmprune' ) ?
+       Bio::SearchIO->new(-verbose => $self->verbose,
+                          -format  => "rnamotif",
+                          -version => $self->version,
+                          -database => $file,
+                          -model => $descr) :
+       ($progname eq 'rmfmt' && $self->can('a') && $self->a) ?
+       Bio::AlignIO->new(-verbose => $self->verbose, -format  =>'fasta') :
+       undef;
+    
+    my @args;
+    # file-based
+    if ($outfile) {
+        my $status = system($str);
+        if($status || !-e $outfile || -z $outfile ) {
+            my $error = ($!) ? "$! Status: $status" : "Status: $status";
+            $self->throw( "RNAMotif call crashed: $error \n[command $str]\n");
+            return undef;
         }
+        if ($obj && ref($obj)) {
+            $obj->file($outfile);
+            @args = (-file => $outfile);
+        }
+    # fh-based
     } else {
-        # for rm2ct, possibly SeqIO-based?
-        my $status = open(my $OUT,"$str | ");
-        my $io;
-        while(<$OUT>) {
-            $io .= $_;
+        open(my $fh,"$str |") || $self->throw("RNAMotif call ($str) crashed: $?\n");
+        if ($obj && ref($obj)) {
+            $obj->fh($fh);
+            @args = (-fh => $fh);
+        } else {
+            # dump to debugging
+            my $io;
+            while(<$fh>) {$io .= $_;}
+            close($fh);
+            $self->debug($io);
+            return 1;
         }
-        close($OUT);
-        $self->debug($io) if $self->verbose > 0;
-        unless( $status ) {
-            $self->throw("RNAMotif call ($str) crashed: $?\n") unless $status==1;
-        }
-        return 1;
     }
+    # initialize SearchIO/AlignIO...um...IO
+    # (since file/fh set post obj construction)
+    $obj->_initialize_io(@args) if $obj && ref($obj);
+    return $obj || 1;
 }
 
 =head2 _setparams
@@ -367,12 +483,6 @@ sub _writeSeqFile {
     close($tfh);
     undef $tfh;
     return $inputfile;
-}
-
-sub tempfile {
-    my $self = shift;
-    return $self->{'_tempfile'} = shift if @_;
-    return $self->{'_tempfile'};
 }
 
 1;
