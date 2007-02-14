@@ -398,8 +398,8 @@ sub _run {
             # check and correct the coords (sequence may not have the feature)
             my $sloc = $seq->location_from_column($feat->start + 1) || next;
             my $eloc = $seq->location_from_column($feat->end + 1) || next;
-            $clone->start($sloc->start);
-            $clone->end($eloc->end);
+            $clone->start($sloc->start - 1);
+            $clone->end($eloc->end - 1);
             
             push(@feats, $clone);
         }
