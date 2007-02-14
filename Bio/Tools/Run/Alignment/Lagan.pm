@@ -186,9 +186,11 @@ sub lagan {
 
 =head2 mlagan
 
-  Runs the Mlagan multiple sequence alignment algorithm
-  Inputs should be an Array of Primary Seq objects and a Phylogenetic Tree in String format
-  Returns an SimpleAlign object / preloaded with the tmp file of the Mlagan multifasta output.
+  Runs the Mlagan multiple sequence alignment algorithm.
+  Inputs should be an Array of Primary Seq objects and a Phylogenetic Tree in
+  String format or as a Bio::Tree::TreeI compliant object.
+  Returns an SimpleAlign object / preloaded with the tmp file of the Mlagan
+  multifasta output.
 
 =cut
 
@@ -196,6 +198,32 @@ sub mlagan {
     my ($self, $input1, $tree) = @_;
     $self->io->_io_cleanup();
     my $executable = 'mlagan';
+    
+    if ($tree && ref($tree) && $tree->isa('Bio::Tree::TreeI')) {
+        # fiddle tree so mlagan will like it
+        my %orig_ids;
+        foreach my $node ($tree->get_nodes) {
+            my $seq_id = $node->name('supplied');
+            $seq_id = $seq_id ? shift @{$seq_id} : ($node->node_name ? $node->node_name : $node->id);
+            $orig_ids{$seq_id} = $node->id;
+            $node->id($seq_id);
+        }
+        
+        # convert to string
+        my $tree_obj = $tree;
+        $tree = $tree->simplify_to_leaves_string;
+        
+        # more fiddling
+        $tree =~ s/ /_/g;
+        $tree =~ s/"//g;
+        $tree =~ s/,/ /g;
+        
+        # unfiddle the tree object
+        foreach my $node ($tree_obj->get_nodes) {
+            $node->id($orig_ids{$node->id});
+        }
+    }
+    
     my $infiles;
     ($infiles, $tree) = $self->_setinput($executable, $input1, $tree);
     my $lagan_report = &_generic_lagan (	$self,
