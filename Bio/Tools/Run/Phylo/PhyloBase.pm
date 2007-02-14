@@ -138,28 +138,11 @@ sub _writeTreeFile {
         # get all the alignment sequence names
         my @species_names = $self->_get_seq_names;
         
-        # the full lineages of the species are merged into a single tree
-        foreach my $name (@species_names) {
-            my $ncbi_id = $thing->get_taxonid($name);
-            if ($ncbi_id) {
-                my $node = $thing->get_taxon(-taxonid => $ncbi_id);
-                $node->name('seq_id', $name);
-                
-                if ($tree) {
-                    $tree->merge_lineage($node);
-                }
-                else {
-                    $tree = new Bio::Tree::Tree(-verbose => $self->verbose, -node => $node);
-                }
-            }
-            else {
-                $self->throw("No taxonomy database node for species ".$name);
-            }
-        }
+        $tree = $thing->get_tree(@species_names);
         
         # convert node ids to their seq_ids for correct output with TreeIO
         foreach my $node ($tree->get_nodes) {
-            my $seq_id = $node->name('seq_id');
+            my $seq_id = $node->name('supplied');
             $seq_id = $seq_id ? shift @{$seq_id} : ($node->node_name ? $node->node_name : $node->id);
             
             $node->id($seq_id);
