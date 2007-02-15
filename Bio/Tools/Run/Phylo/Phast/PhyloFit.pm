@@ -245,22 +245,22 @@ sub new {
 sub run {
     my ($self, $aln, $tree) = @_;
     
-    if (ref $aln && $aln->isa("Bio::Align::AlignI")) {
-        $self->_writeAlignFile($aln);
-    }
-    else {
-        $self->throw("When not supplying a Bio::Align::AlignI object, you must supply a readable filename") unless -e $aln;
-        $self->_alignment_file($aln);
+    ($aln && $tree) || $self->throw("alignment and tree must be supplied");
+    $self->_alignment($aln);
+    $tree = $self->_tree($tree);
+    
+    $tree->force_binary;
+    
+    # adjust tree node ids to convert spaces to underscores (eg. if tree
+    # generated from taxonomy)
+    foreach my $node ($tree->get_leaf_nodes) {
+        my $id = $node->id;
+        $id =~ s/ /_/g;
+        $node->id($id);
     }
     
-    if (-e $tree || (ref $tree && ($tree->isa("Bio::Tree::TreeI") || $tree->isa('Bio::DB::Taxonomy')))) {
-        $self->_writeTreeFile($tree, -binary => 1, -unquoted => 1);
-    }
-    else {
-        $self->throw("When not supplying a Bio::Tree::TreeI or Bio::DB::Taxonomy object, you must supply a readable filename");
-    }
-    
-    $self->_check_names('fasta', 'newick');
+    # check node and seq names match
+    $self->_check_names;
     
     return $self->_run; 
 }
@@ -275,8 +275,11 @@ sub _run {
     my $cwd = Cwd->cwd();
     chdir($temp_dir) || $self->throw("Couldn't change to temp dir '$temp_dir'");
     
+    my $aln_file = $self->_write_alignment;
+    my $tree_file = $self->_write_tree;
+    
     #...phyloFit --tree "(human,(mouse,rat))" --msa-format FASTA --out-root init alignment.fa
-    my $command = $exe.$self->_setparams;
+    my $command = $exe.$self->_setparams($aln_file, $tree_file);
     $self->debug("phyloFit command = $command\n");
     system($command) && $self->throw("phyloFit call ($command) crashed: $?");
     
@@ -292,21 +295,20 @@ sub _run {
  Usage   : Internal function, not to be called directly
  Function: Creates a string of params to be used in the command string
  Returns : string of params
- Args    : none
+ Args    : alignment and tree file names
 
 =cut
 
 sub _setparams {
-    my $self = shift;
+    my ($self, $aln_file, $tree_file) = @_;
     
-    my $param_string = ' --tree '.$self->_tree_file;
+    my $param_string = ' --tree '.$tree_file;
     $param_string .= ' --msa-format FASTA';
     $param_string .= ' --out-root init';
     
     # --min-informative defaults to 50, but must not be greater than the number
     # of bases in the alignment
-    my $ain = Bio::AlignIO->new(-verbose => $self->verbose, -file => $self->_alignment_file, -format => 'fasta');
-    my $aln = $ain->next_aln;
+    my $aln = $self->_alignment;
     my $length = $aln->length;
     my $min_informative = $self->min_informative || 50;
     if ($length < $min_informative) {
@@ -317,7 +319,7 @@ sub _setparams {
                                               -switches => [keys %SWITCHES],
                                               -double_dash => 1,
                                               -underscore_to_dash => 1);
-    $param_string .= ' '.$self->_alignment_file;
+    $param_string .= ' '.$aln_file;
     
     return $param_string;
 }

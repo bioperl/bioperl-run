@@ -117,6 +117,7 @@ package Bio::Tools::Run::Phylo::Phast::PhastCons;
 use strict;
 
 use Cwd;
+use File::Basename;
 use Clone qw(clone);
 use Bio::AlignIO;
 use Bio::Tools::Run::Phylo::Phast::PhyloFit;
@@ -333,16 +334,17 @@ sub rho {
 
 sub run {
     my ($self, $aln, $tree) = @_;
-
-    if (ref $aln && $aln->isa("Bio::Align::AlignI")) {
-        $self->_writeAlignFile($aln);
-    }
-    else {
-        $self->throw("When not supplying a Bio::Align::AlignI object, you must supply a readable filename") unless -e $aln;
-        $self->_alignment_file($aln);
-    }
     
-    $self->_tree($tree);
+    ($aln && $tree) || $self->throw("alignment and tree must be supplied");
+    my $aln_obj = $self->_alignment($aln);
+    $tree = $self->_tree($tree);
+    
+    # if aln was a file, set the alignment id to match file name
+    if (-e $aln) {
+        my $aln_id = basename($aln);
+        ($aln_id) = $aln_id =~ /^([^\.]+)/;
+        $aln_obj->id($aln_id);
+    }
     
     return $self->_run; 
 }
@@ -355,20 +357,22 @@ sub _run {
     # use phyloFit to generate tree model initialization (?) using species tree
     # and alignment
     my $pf = Bio::Tools::Run::Phylo::Phast::PhyloFit->new(-verbose => $self->verbose, -quiet => $self->quiet);
-    my $init_mod = $pf->run($self->_alignment_file, $self->_tree) || $self->throw("phyloFit failed to work as expected, is it installed?");
+    my $init_mod = $pf->run($self->_alignment, $self->_tree) || $self->throw("phyloFit failed to work as expected, is it installed?");
     
     # cd to a temp dir
     my $temp_dir = $self->tempdir;
     my $cwd = Cwd->cwd();
     chdir($temp_dir) || $self->throw("Couldn't change to temp dir '$temp_dir'");
     
+    my $aln_file = $self->_write_alignment;
+    
     # do training for parameter estimation
-    my $command = $exe.$self->_setparams($init_mod);
+    my $command = $exe.$self->_setparams($aln_file, $init_mod);
     $self->debug("phastCons training command = $command\n");
     system($command) && $self->throw("phastCons training call ($command) crashed: $?");
     
     # do the final analysis
-    $command = $exe.$self->_setparams();
+    $command = $exe.$self->_setparams($aln_file);
     $self->debug("phastCons command = $command\n");
     system($command) && $self->throw("phastCons call ($command) crashed: $?");
     
@@ -379,7 +383,7 @@ sub _run {
     chdir($cwd) || $self->throw("Couldn't change back to working directory '$cwd'");
     
     my @feats = ();
-    my $aln = $self->_alignment_object;
+    my $aln = $self->_alignment;
     while (my $feat = $bedin->next_feature) {
         $feat->source('phastCons');
         my $sv = Bio::Annotation::SimpleValue->new(-tagname => 'predicted', -value => 1);
@@ -413,13 +417,13 @@ sub _run {
  Usage   : Internal function, not to be called directly
  Function: Creates a string of params to be used in the command string
  Returns : string of params
- Args    : none for result production, OR filename of phyloFit generated
-           init.mod file to estimate trees
+ Args    : alignment file name for result production, AND filename of phyloFit
+           generated init.mod file to estimate trees
 
 =cut
 
 sub _setparams {
-    my ($self, $init_mod) = @_;
+    my ($self, $aln_file, $init_mod) = @_;
     
     my $param_string = $self->SUPER::_setparams(-params => [keys %PARAMS],
                                                 -switches => [keys %SWITCHES],
@@ -427,11 +431,11 @@ sub _setparams {
                                                 -underscore_to_dash => 1);
     
     $param_string .= ' --no-post-probs';
-    my $aln_id = $self->_alignment_id;
+    my $aln_id = $self->_alignment->id;
     $param_string .= " --seqname $aln_id --idpref $aln_id" if $aln_id;
     $param_string .= ' --refidx 0';
     
-    my $input = ' --msa-format FASTA '.$self->_alignment_file;
+    my $input = ' --msa-format FASTA '.$aln_file;
     if ($init_mod) {
         $param_string .= ' --estimate-trees mytrees '.$input.' '.$init_mod;
     }
@@ -440,13 +444,6 @@ sub _setparams {
     }
     
     return $param_string;
-}
-
-# store the input tree option
-sub _tree {
-    my $self = shift;
-    if (@_) { $self->{_tree_thing} = shift }
-    return $self->{_tree_thing} || '';
 }
 
 1;
