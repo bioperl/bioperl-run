@@ -2,10 +2,6 @@
 #
 # BioPerl module for Bio::Tools::Run::Alignment::Clustalw
 #
-# Cared for by
-#
-# Copyright Peter Schattner
-#
 # You may distribute this module under the same terms as perl itself
 # POD documentation - main docs before the code
 
@@ -45,7 +41,7 @@ alignments using the Clustalw program
   ($aln, $tree) = $factory->run(\@seq_array);
   
   # Do a footprinting analysis on the supplied sequences, getting back the
-  # most converved sub-alignments
+  # most conserved sub-alignments
   my @results = $factory->footprint(\@seq_array);
   foreach my $result (@results) {
     print $result->consensus_string, "\n";
@@ -75,6 +71,7 @@ can be done in (at least) three ways:
  1. Make sure the clustalw executable is in your path so that
     which clustalw
     returns a clustalw executable on your system.
+
  2. Define an environmental variable CLUSTALDIR which is a 
     directory which contains the 'clustalw' application:
     In bash:
@@ -116,7 +113,7 @@ terminal output. Not all clustalw parameters are supported at this
 stage.
 
 By default, Clustalw output is returned solely in a the form of a
-BioPerl Bio::SimpleAlign object which can then be printed and/or saved
+Bio::SimpleAlign object which can then be printed and/or saved
 in multiple formats using the AlignIO.pm module. Optionally the raw
 clustalw output file can be saved if the calling script specifies an
 output file (with the clustalw parameter OUTFILE).  Currently only the
@@ -285,10 +282,10 @@ object, or through get/set methods of the same name (lowercase).
 
  Title       : TYPE
  Description : (optional) sequence type: protein or DNA. This allows
-	       you to explicitly overide the programs attempt at
-	       guessing the type of the sequence.  It is only useful
-	       if you are using sequences with a VERY strange
-	       composition.
+	            you to explicitly overide the programs attempt at
+	            guessing the type of the sequence.  It is only useful
+	            if you are using sequences with a VERY strange
+	            composition.
 
 =head2 OUTPUT
 
@@ -301,16 +298,16 @@ object, or through get/set methods of the same name (lowercase).
 
  Title       : OUTFILE
  Description : (optional) Name of clustalw output file. If not set
-	       module will erase output file.  In any case alignment will
-	       be returned in the form of SimpleAlign objects
+	            module will erase output file.  In any case alignment will
+	            be returned in the form of SimpleAlign objects
 
 =head2 TRANSMIT
 
  Title       : TRANSMIT
  Description : (optional) transitions not weighted.  The default is to
-	       weight transitions as more favourable than other
-	       mismatches in DNA alignments.  This switch makes all
-	       nucleotide mismatches equally weighted.
+	            weight transitions as more favourable than other
+	            mismatches in DNA alignments.  This switch makes all
+	            nucleotide mismatches equally weighted.
 
 =head1 FEEDBACK
 
@@ -544,7 +541,6 @@ sub align {
 Throws an exception if arguments are not either strings (eg filenames)
 or references to SimpleAlign objects.
 
-
 =cut
 
 sub profile_align {
@@ -568,13 +564,12 @@ sub profile_align {
 =head2  tree
 
  Title   : tree
- Usage   :
-    @params = ('bootstrap' => 1000, 
-	       'tossgaps'  => 1, 
-	       'kimura'    => 1, 
-	       'seed'      => 121, 
-	       'bootlabels'=> 'nodes', 
-	       'quiet'     => 1);
+ Usage   : @params = ('bootstrap' => 1000, 
+	                    'tossgaps'  => 1, 
+	                    'kimura'    => 1, 
+	                    'seed'      => 121, 
+	                    'bootlabels'=> 'nodes', 
+	                    'quiet'     => 1);
     $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
     $tree_obj = $factory->tree($aln_obj);
 or
@@ -582,7 +577,6 @@ or
  Function: 
  Returns : Bio::TreeIO object
  Args    : 
-
 
 =cut
 
@@ -613,7 +607,7 @@ sub tree {
            significantly from the total average tree length.
  Returns : list of SimpleAlign objects
  Args    : first argument as per run(), optional second argument to specify
-           the size of the sliding window (default 5bp) and optional third
+           the size of the sliding window (default 5 bp) and optional third
            argument to specify the % difference from the total tree length
            needed for a window to be considered a footprint (default 33%).
 
