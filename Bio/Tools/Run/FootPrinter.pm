@@ -1,8 +1,6 @@
 # $Id$
 # BioPerl module for FootPrinter
 #
-# Cared for by Shawn Hoon <shawnh@fugu-sg.org>
-#
 # Copyright Shawn Hoon
 #
 # You may distribute this module under the same terms as perl itself
@@ -11,28 +9,27 @@
 
 =head1 NAME
 
-Bio::Tools::Run::FootPrinter -
-Wrapper for FootPrinter Program
+Bio::Tools::Run::FootPrinter - wrapper for the FootPrinter program
 
 =head1 SYNOPSIS
 
   use Bio::Tools::Run::FootPrinter;
 
-  my @params = (
-               'size'=>10,
-              'max_mutations_per_branch'=>4,
-              'sequence_type'=>'upstream',
-              'subregion_size'=>30,
-              'position_change_cost'=>5,
-              'triplet_filtering'=>1,
-              'pair_filtering'=>1,
-              'post_filtering'=>1,
-              'inversion_cost'=>1,
-              'max_mutations'=>4,
-              'tree'   =>"/usr/users/shawnh/software/FootPrinter2.0/tree_of_life");
+  my @params = (size => 10,
+                 max_mutations_per_branch => 4,
+                 sequence_type => 'upstream',
+                 subregion_size => 30,
+                 position_change_cost => 5,
+                 triplet_filtering => 1,
+                 pair_filtering => 1,
+                 post_filtering => 1,
+                 inversion_cost => 1,
+                 max_mutations => 4,
+                 tree => "~/software/FootPrinter2.0/tree_of_life" );
+
   my $fp = Bio::Tools::Run::FootPrinter->new(@params, -verbose => 1);
 
-  my $sio = Bio::SeqIO->new(-file=>"/usr/users/shawnh/seq.fa",-format=>"fasta");
+  my $sio = Bio::SeqIO->new(-file=>"seq.fa", -format => "fasta");
 
   while (my $seq = $sio->next_seq){
     push @seq, $seq;
@@ -41,15 +38,14 @@ Wrapper for FootPrinter Program
 
   foreach my $result(@fp){
     print "***************\n".$result->seq_id."\n";
-     foreach my $feat($result->sub_SeqFeature){
+    foreach my $feat($result->sub_SeqFeature){
       print $feat->start."\t".$feat->end."\t".$feat->seq->seq."\n";
     }
   }
 
 =head1 DESCRIPTION
 
-
-Taken from FootPrinter manual:
+From the FootPrinter manual:
 
 FootPrinter is a program that performs phylogenetic footprinting. 
 It takes as input a set of unaligned orthologous sequences from various species, 
@@ -61,18 +57,21 @@ By default, the program searches for regions that are well conserved across
 all of the input sequences, but this can be relaxed to 
 find regions conserved in only a subset of the species
 
-Copyright (c) 1999-2002, by Mathieu Blanchette and Martin Tompa.
+=head2 About Footprinter
 
-http://abstract.cs.washington.edu/~blanchem/FootPrinterWeb/FootPrinterInput.pl
+Written by Mathieu Blanchette and Martin Tompa. Available at:
 
-**NOTE**
+L<http://abstract.cs.washington.edu/~blanchem/FootPrinterWeb/FootPrinterInput.pl>
+
+=head2 Running Footprinter
+
 To run FootPrinter, you will NEED to set the enviroment variable
 FOOTPRINTER_DIR to where the binary is located (even if the executable is in
 your path). For example:
-setenv FOOTPRINTER_DIR=/usr/local/bin/FootPrinter2.0/
 
-Available Parameters:
+ setenv FOOTPRINTER_DIR=/usr/local/bin/FootPrinter2.0/
 
+=head2 Available Parameters
 
   PARAM         VALUES        DESCRIPTION
   ----------------------------------------
@@ -103,7 +102,7 @@ Available Parameters:
   position_change_cost      0-20          Cost for changing subregion
 
   triplet_filtering         1/0           pre-filtering step that removes from consideration 
-                                          any substring that doesn't have a sufficiently good 
+                                          any substring that does not have a sufficiently good 
                                           pair of matching substrings in some pair of the other 
                                           input sequences
   pair_filtering            1/0           Same as triplet filtering, but looks only for one match 
@@ -160,7 +159,6 @@ use Bio::Root::Root;
 use Bio::Tools::Run::WrapperBase;
 use Bio::Tools::FootPrinter;
 use Bio::SeqIO;
-
 
 # Let the code begin...
 
