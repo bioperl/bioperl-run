@@ -102,3 +102,60 @@
 376913	|	Haplorrhini	|		|	scientific name	|
 406788	|	Cross river gorilla	|		|	genbank common name	|
 406788	|	Gorilla gorilla diehli	|		|	scientific name	|
+9608	|	Canidae	|		|	scientific name	|
+9608	|	dog, coyote, wolf, fox	|		|	genbank common name	|
+9611	|	Canis	|		|	scientific name	|
+9615	|	Canis canis	|		|	synonym	|
+9615	|	Canis domesticus	|		|	synonym	|
+9615	|	Canis familiaris	|		|	scientific name	|
+9615	|	Canis lupus familiaris	|		|	synonym	|
+9615	|	beagle dog	|		|	includes	|
+9615	|	beagle dogs	|		|	includes	|
+9615	|	dog	|		|	genbank common name	|
+9615	|	dogs	|		|	common name	|
+9989	|	Rodentia	|		|	scientific name	|
+9989	|	rodents	|		|	genbank common name	|
+9989	|	rodents	|	rodents <blast9989>	|	blast name	|
+10066	|	Muridae	|		|	scientific name	|
+10088	|	Mus	|		|	scientific name	|
+10088	|	Nannomys	|		|	synonym	|
+10088	|	mice	|	mice <genus Mus>	|	common name	|
+10090	|	LK3 transgenic mice	|		|	includes	|
+10090	|	Mus muscaris	|		|	misnomer	|
+10090	|	Mus musculus	|		|	scientific name	|
+10090	|	Mus sp. 129SV	|		|	includes	|
+10090	|	house mouse	|		|	genbank common name	|
+10090	|	mice C57BL/6xCBA/CaJ hybrid	|		|	misspelling	|
+10090	|	mouse	|		|	common name	|
+10090	|	nude mice	|		|	includes	|
+10090	|	transgenic mice	|		|	includes	|
+10114	|	Rattus	|		|	scientific name	|
+10114	|	rat	|	rat <genus rat>	|	common name	|
+10114	|	rats	|	rats <genus rat>	|	common name	|
+10116	|	Buffalo rat	|		|	includes	|
+10116	|	Gunn rats	|		|	misnomer	|
+10116	|	Norway rat	|		|	genbank common name	|
+10116	|	Rattus PC12 clone IS	|		|	includes	|
+10116	|	Rattus norvegicus	|		|	scientific name	|
+10116	|	Rattus norvegicus8	|		|	misspelling	|
+10116	|	Rattus norwegicus	|		|	misspelling	|
+10116	|	Rattus rattiscus	|		|	misnomer	|
+10116	|	Rattus sp. strain Wistar	|		|	equivalent name	|
+10116	|	Sprague-Dawley rat	|		|	includes	|
+10116	|	Wistar rats	|		|	includes	|
+10116	|	brown rat	|		|	common name	|
+10116	|	laboratory rat	|		|	includes	|
+10116	|	rat	|	rat <Rattus norvegicus>	|	common name	|
+10116	|	rats	|	rats <Rattus norvegicus>	|	common name	|
+10116	|	zitter rats	|		|	includes	|
+33553	|	Myomorpha	|		|	includes	|
+33553	|	Sciurognathi	|		|	scientific name	|
+33553	|	Sciuromorpha	|		|	includes	|
+33554	|	Carnivora	|		|	scientific name	|
+39107	|	Murinae	|		|	scientific name	|
+39107	|	Otomyinae	|		|	includes	|
+314145	|	Laurasiatheria	|		|	scientific name	|
+314147	|	Glires	|		|	scientific name	|
+314147	|	Rodents and rabbits	|		|	genbank common name	|
+337687	|	Muroidea	|		|	scientific name	|
+379584	|	Caniformia	|		|	scientific name	|
