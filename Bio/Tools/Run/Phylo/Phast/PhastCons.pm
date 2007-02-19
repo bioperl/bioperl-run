@@ -39,6 +39,7 @@ Bio::Tools::Run::Phylo::Phast::PhastCons - Wrapper for footprinting using
 
 This is a wrapper for running the phastCons application by Adam Siepel. You
 can get details here: http://compgen.bscb.cornell.edu/~acs/software.html
+phastCons is used for phylogenetic footprinting/ shadowing.
 
 Currently the interface is extremely simplified, allowing only one analysis
 method. The focus here is on ease of use, allowing phastCons to estimate as many
