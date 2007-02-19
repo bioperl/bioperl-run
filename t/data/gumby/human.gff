@@ -1,0 +1,22 @@
+human	supported_mRNA	exon	17826	17994	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	18272	18313	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	19120	19251	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	20390	20507	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	20810	20965	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	24272	24718	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	26056	26150	.	+	.	Sequence	"SCL"
+human	supported_mRNA	exon	29980	33863	.	+	.	Sequence	"SCL"
+human	supported_mRNA	CDS	24272	24718	.	+	.	Sequence	"SCL"
+human	supported_mRNA	CDS	26056	26150	.	+	.	Sequence	"SCL"
+human	supported_mRNA	CDS	29980	30440	.	+	.	Sequence	"SCL"
+human	alignment_with_mmscl	HSS	8146	8637	.	+	.	Equivalent of murine -9	HSS
+human	alignment_with_mmscl	HSS	8806	9545	.	+	.	Equivalent of murine -8	HSS
+human	alignment_with_mmscl	HSS	14215	14804	.	+	.	Equivalent of murine -4	HSS
+human	alignment_with_mmscl	HSS	17492	17878	.	+	.	Equivalent of murine Pr1a HSS
+human	alignment_with_mmscl	HSS	18107	18300	.	+	.	Equivalent of murine Pr1b HSS
+human	alignment_with_mmscl	HSS	18603	18903	.	+	.	Equivalent of murine +1	HSS
+human	alignment_with_mmscl	HSS	20634	20844	.	+	.	Equivalent of murine +3	HSS
+human	alignment_with_mmscl	HSS	24257	24697	.	+	.	Equivalent of murine +7	HSS
+human	alignment_with_mmscl	HSS	37126	37454	.	+	.	Equivalent of murine +18 HSS
+human	alignment_with_mmscl	HSS	37873	38182	.	+	.	Equivalent of murine +19 HSS
+human	alignment_with_mmscl	enhancer	40125	41807	.	+	.	Equivalent of murine +23 region
