@@ -58,9 +58,9 @@ This is a wrapper for running the gumby application by Shyam Prabhakar. You
 can get details here: http://pga.lbl.gov/gumby/. Gumby is used for phylogenetic
 footprinting/ shadowing.
 
-You can try supplying normal gumby command-line arguments to new(),
-or calling arg-named methods (excluding initial hyphens and converting others
-to underscores, eg. $factory->gaps_as_bases(1) to set the --gaps-as-bases arg).
+You can try supplying normal gumby command-line arguments to new(), eg.
+new(-ratio => 2) or calling arg-named methods (excluding the initial hyphen, eg.
+$factory->econs(1) to set the -econs arg).
 
 
 You will need to enable this Gumby wrapper to find the gumby program.
@@ -203,7 +203,8 @@ sub new {
            will correspond to the sequence ids from the alignment that will
            be supplied to run() (the objects will be grouped by seq_id and
            output to gff files for use by gumby; filepaths to those tempfiles
-           will be returned)
+           will be returned). Note that all features must have source, seq_id
+           and primary_tag set or none will be used.
 
 =cut
 
