@@ -252,6 +252,15 @@ sub mlagan {
            Bio::Matrix::MLagan object
            OR
            filename of an mlagan substitution matrix file
+           
+           NB: due to a bug in mlagan 2.0, the -nucmatrixfile option does not
+           work, so this Bioperl wrapper is unable to simply point mlagan to
+           your desired matrix file (or to a temp file generated from your
+           matrix object). Instead the $LAGAN_DIR/nucmatrix.txt file must
+           actually be replaced. This wrapper will make a back-up copy of that
+           file, write the new file in its place, then revert things back to the
+           way they were after the alignment has been produced. For this reason,
+           $LAGAN_DIR must be writable, as must $LAGAN_DIR/nucmatrix.txt.
 
 =cut
 
@@ -412,6 +421,7 @@ sub _setparams {
             my $mout = Bio::Matrix::IO->new(-format => 'mlagan',
                                             -fh => $handle);
             $mout->write_matrix($self->nuc_matrix);
+            $self->{_nucmatrixfile} = $nucmatrixfile;
         }
     }
     ##EXPAND OTHER LAGAN SUITE PROGRAMS HERE
@@ -446,13 +456,25 @@ sub _runlagan {
     }
     if ($executable eq 'mlagan') {
         $command_string = $exe;
+        my $i = 0;
         foreach my $tempfile (@$input1) {
             $command_string .= " " . $tempfile;
+            $i++;
+            system("cp $tempfile in_file$i.lag");
         }
         if (defined $input2) {
             $command_string .= " -tree " . "\"" . $input2 . "\"";
         }	
         $command_string .= " " . $param_string;
+        
+        my $matrix_file = $self->{_nucmatrixfile};
+        if ($matrix_file) {
+            # mlagan 2.0 bug-workaround
+            my $orig = File::Spec->catfile($PROGRAM_DIR, 'nucmatrix.txt');
+            -e $orig || $self->throw("Strange, $orig doesn't seem to exist");
+            system("cp $orig $orig.bk") && $self->throw("Backup of $orig failed: $!");
+            system("cp $matrix_file $orig") && $self->throw("Copy of $matrix_file -> $orig failed: $!");
+        }
     }
 
     if (($self->silent ||  $self->quiet) &&
@@ -474,6 +496,11 @@ sub _runlagan {
     
     $self->debug("$command_string\n");
     my $status = system('_POSIX2_VERSION=1 '.$command_string); # temporary hack whilst lagan script 'rechaos.pl' uses obsolete sort syntax
+    
+    if ($self->{_nucmatrixfile}) {
+        my $orig = File::Spec->catfile($PROGRAM_DIR, 'nucmatrix.txt');
+        system("mv $orig.bk $orig") && $self->warn("Restore of $orig from $orig.bk failed: $!");
+    }
     
     opendir($cwd_dir, $cwd) || $self->throw("Could not open the current directory '$cwd'!");
     foreach my $thing (readdir($cwd_dir)) {
