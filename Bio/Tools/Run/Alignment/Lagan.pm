@@ -112,6 +112,8 @@ Genome Sciences Centre in beautiful Vancouver, British Columbia CANADA
 
 MLagan/Lagan is the hard work of Michael Brudno et al.
 
+Sendu Bala bix@sendu.me.uk
+
 =head1 APPENDIX
 
 The rest of the documentation details each of the object methods.
@@ -127,6 +129,8 @@ use Bio::Seq;
 use Bio::SeqIO;
 use Bio::AlignIO;
 use Bio::SimpleAlign;
+use File::Spec;
+use Bio::Matrix::IO;
 use Cwd;
 
 use base qw(Bio::Tools::Run::WrapperBase);
@@ -232,6 +236,55 @@ sub mlagan {
 						$tree );
 }
 
+=head2  nuc_matrix
+
+ Title   : nuc_matrix
+ Usage   : my $matrix_obj = $obj->nuc_matrix();
+           -or-
+           $obj->nuc_matrix($matrix_obj);
+           -or-
+           $obj->nuc_matrix($matrix_file);
+ Function: Get/set the substitution matrix for use by mlagan. By default the
+           file $LAGAN_DIR/nucmatrix.txt is used by mlagan. By default this
+           method returns a corresponding Matrix.
+ Returns : Bio::Matrix::Mlagan object
+ Args    : none to get, OR to set:
+           Bio::Matrix::MLagan object
+           OR
+           filename of an mlagan substitution matrix file
+
+=cut
+
+sub nuc_matrix {
+    my ($self, $thing, $gap_open, $gap_continue) = @_;
+    
+    if ($thing) {
+        if (-e $thing) {
+            my $min = Bio::Matrix::IO->new(-format => 'mlagan',
+                                           -file   => $thing);
+            $self->{_nuc_matrix} = $min->next_matrix;
+        }
+        elsif (ref($thing) && $thing->isa('Bio::Matrix::Mlagan')) {
+            $self->{_nuc_matrix} = $thing;
+        }
+        else {
+            $self->throw("Unknown kind of thing supplied, '$thing'");
+        }
+        
+        $self->{_nuc_matrix_set} = 1;
+    }
+    
+    unless (defined $self->{_nuc_matrix}) {
+        # read the program default file
+        my $min = Bio::Matrix::IO->new(-format => 'mlagan',
+                                       -file   => File::Spec->catfile($PROGRAM_DIR, 'nucmatrix.txt'));
+        $self->{_nuc_matrix} = $min->next_matrix;
+    }
+    
+    $self->{_nuc_matrix_set} = 1 if defined wantarray;
+    return $self->{_nuc_matrix};
+}
+
 =head2  _setinput
 
  Title   : _setinput
@@ -241,7 +294,6 @@ sub mlagan {
            or array of files and phylo tree for Mlagan data input
 
 =cut
-
 
 sub _setinput {
     my ($self, $executable, $input1, $input2) = @_;
@@ -345,18 +397,28 @@ sub _generic_lagan {
 
 sub _setparams {
     my ($self, $executable) = @_;
-    my ($attr, $value, @execparams);
-
+    
+    my (@execparams, $nucmatrixfile);
     if ($executable eq 'lagan.pl') {
         @execparams = @LAGAN_PARAMS;
     }
-    if ($executable eq 'mlagan') {
+    elsif ($executable eq 'mlagan') {
         @execparams = @MLAGAN_PARAMS;
+        
+        if ($self->{_nuc_matrix_set}) {
+            # we create this file on every call because we have no way of
+            # knowing if user altered the matrix object
+            (my $handle, $nucmatrixfile) = $self->io->tempfile();
+            my $mout = Bio::Matrix::IO->new(-format => 'mlagan',
+                                            -fh => $handle);
+            $mout->write_matrix($self->nuc_matrix);
+        }
     }
     ##EXPAND OTHER LAGAN SUITE PROGRAMS HERE
-
+    
     my $param_string = $self->SUPER::_setparams(-params => [@execparams],
                                                 -dash => 1);
+    $param_string .= " -nucmatrixfile $nucmatrixfile" if $nucmatrixfile;
     return $param_string . " -mfa ";
 }	
 

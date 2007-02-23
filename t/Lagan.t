@@ -11,7 +11,7 @@ BEGIN {
    }
    use Test;
    use vars qw($NTESTS);
-   $NTESTS = 5;
+   $NTESTS = 7;
    plan tests => $NTESTS;
 }
 
@@ -25,6 +25,7 @@ use Bio::Tools::Run::Alignment::Lagan;
 use Bio::Root::IO;
 use Bio::SeqIO;
 use Bio::Seq;
+use Bio::Matrix::Mlagan;
 
 my $seq1 =  Bio::Root::IO->catfile("t","data","lagan_dna.fa");
 my $sio = Bio::SeqIO->new(-file=>$seq1,-format=>'fasta');
@@ -65,6 +66,20 @@ ok $simple_align->isa('Bio::SimpleAlign');
 ok $simple_align->percentage_identity, 100;
 
 my $multi = $factory->mlagan([$seq,$seq2,$seq3]);
+ok $multi->percentage_identity, 100;
+
+my $matrix = Bio::Matrix::Mlagan->new(-values => [[qw(115 -161 -81 -161 0 -72)],
+                                                  [qw(-161 115 -161 -81 0 -72)],
+                                                  [qw(-81 -161 115 -161 0 -72)],
+                                                  [qw(-161 -81 -161 115 0 -72)],
+                                                  [qw(0 0 0 0 0 0)],
+                                                  [qw(-72 -72 -72 -72 0 -72)]],
+                                      -gap_open => -470,
+                                      -gap_continue => -25);
+
+ok $factory->nuc_matrix($matrix), $matrix;
+#*** weak test; doesn't show the supplied matrix had any effect on results...
+$multi = $factory->mlagan([$seq,$seq2,$seq3]);
 ok $multi->percentage_identity, 100;
 
 1;
