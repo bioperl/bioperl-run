@@ -456,11 +456,8 @@ sub _runlagan {
     }
     if ($executable eq 'mlagan') {
         $command_string = $exe;
-        my $i = 0;
         foreach my $tempfile (@$input1) {
             $command_string .= " " . $tempfile;
-            $i++;
-            system("cp $tempfile in_file$i.lag");
         }
         if (defined $input2) {
             $command_string .= " -tree " . "\"" . $input2 . "\"";
