@@ -15,7 +15,7 @@
 Bio::Tools::Run::Phylo::Njtree::Best - Wrapper aroud the Njtree
 (Njtree/phyml) best program. Wrapper for the calculation of a
 reconciled phylogenetic tree with inferred duplication tags from a
-multiple sequence alignment and a species tree using NJTREE
+multiple sequence alignment and a species tree using NJTREE.
 
 
 =head1 SYNOPSIS
@@ -30,7 +30,7 @@ multiple sequence alignment and a species tree using NJTREE
   my $aln = $alignio->next_aln;
 
   my $treeio = Bio::TreeIO->new(
-      -format => 'nh', -file => 't/data/species_tree.nh');
+      -format => 'nhx', -file => 't/data/species_tree.nh');
 
   my $tree = $treeio->next_tree;
 
@@ -199,11 +199,11 @@ sub prepare {
    $tree = $self->tree unless $tree;
    $aln  = $self->alignment unless $aln;
    if( ! $aln ) { 
-       $self->warn("must have supplied a valid alignment file in order to run njtree_best");
+       $self->warn("Must have supplied a valid alignment file in order to run njtree_best");
        return 0;
    }
    if( ! $tree ) { 
-       $self->warn("must have supplied a valid species tree file in order to run njtree_best");
+       $self->warn("Must have supplied a valid species tree file in order to run njtree_best");
        return 0;
    }
    my ($tempdir) = $self->tempdir();
