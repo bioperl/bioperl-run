@@ -24,7 +24,9 @@ my $build = ModuleBuildBioperl->new(
     recommends          => {
                             'Algorithm::Diff'           => '0/generating consensus protein family descriptions/Bio::Tools::Run::TribeMCL',
                             'XML::Parser::PerlSAX'      => '0/Pise Applications/Bio::Tools::Run::PiseJob',
-                            'HTML::Parser'				=> '0/Pise Applications/Bio::Tools::Run::PiseJob',
+                            'HTML::Parser'              => '0/Pise Applications/Bio::Tools::Run::PiseJob',
+                            'IPC::Run'                  => '0/Glimmer and Genemark application wrappers'.
+                                                           '/Bio::Tools::Run::Glimmer,Bio::Tools::Run::Genemark',
                            },
     dynamic_config      => 1,
     create_makefile_pl  => 'passthrough'
@@ -44,25 +46,25 @@ exit;
 
 
 sub pise_email {
-	my $proceed = $build->y_n("Do you want to run the Pise tests with a valid email address? y/n",'n');
+    my $proceed = $build->y_n("Do you want to run the Pise tests with a valid email address? y/n",'n');
     
-	my $path = File::Spec->catfile('t', 'pise-email.test');
+    my $path = File::Spec->catfile('t', 'pise-email.test');
     $build->add_to_cleanup($path);
     $build->add_to_manifest_skip($path);
     
-	if ($proceed) {
-		my $address = $build->prompt("Enter your email address", '');
-		if ($address && open(T,">t/pise-email.test")) {
-			print T "$address\n";
-			close T;
-		}
-		else {
-			$build->log_warn("Cannot open file t/pise-email.test for writing, or no email supplied - Pise tests will be run without an email address");
-		}
-	}
-	else {
-		if (-e $path) {
-			unlink $path;
-		}
-	}
+    if ($proceed) {
+        my $address = $build->prompt("Enter your email address", '');
+        if ($address && open(T,">t/pise-email.test")) {
+            print T "$address\n";
+            close T;
+        }
+        else {
+            $build->log_warn("Cannot open file t/pise-email.test for writing, or no email supplied - Pise tests will be run without an email address");
+        }
+    }
+    else {
+        if (-e $path) {
+            unlink $path;
+        }
+    }
 }
