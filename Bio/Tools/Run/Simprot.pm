@@ -165,6 +165,8 @@ sub program_dir {
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
            -executable => where the simprot executable resides
+					 -params => A reference to a hash where keys are parameter names
+					            and hash values are the associated parameter values
 
 See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
 
@@ -192,6 +194,16 @@ sub new {
   return $self;
 }
 
+=head2 set_parameters
+
+ Title   : set_parameters
+ Usage   : $codeml->set_parameters($parameter, $value);
+ Function: (Re)set the SimProt parameters
+ Returns : none
+ Args    : First argument is the parameter name
+           Second argument is the parameter value
+
+=cut
 
 sub set_parameter{
    my ($self,$param,$value) = @_;
