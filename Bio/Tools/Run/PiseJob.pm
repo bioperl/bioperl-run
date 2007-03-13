@@ -343,7 +343,7 @@ sub get_pipes {
 	my @pipes = @{ $pipes{$result_file} };
 	return @pipes;
     } else {
-	return undef;
+	return;
     }
 }
 
@@ -523,7 +523,7 @@ sub save {
 
     foreach $url (@{ $self->{RESULT_FILES}}) {
 	if ($self->{DEBUG}) {
-	    print STDERR ref($self), "::save: $url (",$self->{PROGRAM},")\n";
+	    $self->debug(ref($self), "::save: $url (",$self->{PROGRAM},")\n");
 	}
 	if ($url =~ /$result/) {
 	    my $res = $ua->request(GET $url);
@@ -577,11 +577,11 @@ sub content {
 
     foreach $url (@{ $self->{RESULT_FILES}}) {
 	if ($self->{DEBUG}) {
-	    print STDERR ref($self) . " content: $url (",$self->{PROGRAM},")\n";
+	    $self->debug(ref($self) . " content: $url (",$self->{PROGRAM},")\n");
 	}
 	if ($url =~ /$file/) {
 	    if ($self->{DEBUG}) {
-		print STDERR ref($self) . " content: this one!\n";
+		$self->debug(ref($self) . " content: this one!\n");
 	    }
 	    my $res = $ua->request(GET $url);
 	    
@@ -618,6 +618,13 @@ sub stdout {
     return $self->content($self->{PROGRAM} . ".out");
 
 }
+
+=head2 output
+
+ Title   : output()
+ Usage   : Alias for stdout()
+ 
+=cut
 
 sub output {
     my $self = shift;
@@ -694,11 +701,11 @@ sub fh {
 
     foreach $url (@{ $self->{RESULT_FILES}}) {
 	if ($self->{DEBUG}) {
-	    print STDERR "DEBUG> Bio::Tools::Run::PiseJob fh: $url (",$self->{PROGRAM},")\n";
+	    $self->debug("DEBUG> Bio::Tools::Run::PiseJob fh: $url (",$self->{PROGRAM},")\n");
 	}
 	if ($url =~ /$file/ or $file =~ /$url/ or $file==$url) {
 	    if ($self->{DEBUG}) {
-		print STDERR "Bio::Tools::Run::PiseJob::fh: this one ($file)!\n";
+		$self->debug("Bio::Tools::Run::PiseJob::fh: this one ($file)!\n");
 	    }
 	    my $res = $ua->request(GET $url);
 	    
@@ -738,7 +745,7 @@ sub results_type {
 	$self->throw("Bio::Tools::Run::PiseJob::results_type: your job has no jobid");
     }
     if ($self->{TERMINATED}) {
-	print STDERR "Bio::Tools::Run::PiseJob::results_type: job already terminated\n" if $self->{VERBOSE};
+	$self->debug("Bio::Tools::Run::PiseJob::results_type: job already terminated\n");
 	return 0;
     }
     if (@_) {
@@ -764,7 +771,7 @@ sub results_type {
     my $location = $self->{LOCATION};
     $location =~ s/$command\.pl//;
     $location .= "lib/results.pl";
-    print STDERR "Bio::Tools::Run::PiseJob::results_type: running $location to change results type ($results_type scratch_dir: $scratch_dir)\n" if $self->{VERBOSE};
+    $self->debug("Bio::Tools::Run::PiseJob::results_type: running $location to change results type ($results_type scratch_dir: $scratch_dir)\n");
 
     my $res = $ua->request(POST $location, [command => $command, email => $email, results_type => $results_type, scratch_dir => $scratch_dir]);
 
@@ -837,16 +844,16 @@ sub _init {
 
     foreach my $param ($application->parameters) { 
 	my $value;
-	print STDERR "Bio::Tools::Run::PiseJob::_init param type: ", $application->param_type($param), "\n" if $self->{DEBUG};
+	$self->debug("Bio::Tools::Run::PiseJob::_init param type: ", $application->param_type($param), "\n");
 	$value = $application->$param();
 	if (defined $value) {
-	    print STDERR "Bio::Tools::Run::PiseJob::_init param value: $value, ref: ",ref($value),"\n" if $self->{DEBUG};
+	    $self->debug("Bio::Tools::Run::PiseJob::_init param value: $value, ref: ",ref($value),"\n");
 
 	    if ($application->param_type($param) eq "Sequence" || $application->param_type($param) eq "InFile") {
 		if (ref($value)) {
-		    print STDERR ref($self), "::_init: ",ref($value), "\n" if $self->{DEBUG};
+		    $self->debug(ref($self), "::_init: ",ref($value), "\n");
 		    if (ref($value) eq "GLOB" || $value->isa('IO::Handle')) {
-			print STDERR "Bio::Tools::Run::PiseJob::_init got filehandle ",ref($value),"\n" if $self->{DEBUG};
+			$self->debug("Bio::Tools::Run::PiseJob::_init got filehandle ",ref($value),"\n");
 			while (<$value>) {
 			    $self->{ARGS}{$param . "_data"} .= $_;
 			}
@@ -866,13 +873,13 @@ sub _init {
 			$out->write_aln($value);
 			#close(TMP);
 			push (@{$self->{TMPFILES}}, $tmpfile);
-			print STDERR "Bio::Tools::Run::PiseJob::_init written alignment to $tmpfile\n" if $self->{VERBOSE};
+			$self->debug("Bio::Tools::Run::PiseJob::_init written alignment to $tmpfile\n");
 			$self->{ARGS}{$param} = $tmpfile;
 		    }
 		} else {
 		    if (ref(\$value) eq "SCALAR" && -f $value) {
 			$self->{ARGS}{$param} = $value;
-			print STDERR "Bio::Tools::Run::PiseJob::_init got file ($value)\n" if $self->{DEBUG};
+			$self->debug("Bio::Tools::Run::PiseJob::_init got file ($value)\n");
 		    } else {
 			$self->{ARGS}{$param . "_data"} = $value;
 		    }
@@ -903,7 +910,7 @@ sub _submit {
     my $self = shift;
 
     if (defined $self->{JOBID}) {
-	print STDERR ref($self) . " submit: this job has been already setup and launched\n";
+	$self->debug(ref($self) . " submit: this job has been already setup and launched\n");
 	$self->{ERROR} = 1;
 	$self->{ERROR_MESSAGE} = ref($self) . " _submit: this job has been already setup and launched";
 	$self->throw(ref($self) . " _submit: this job has been already setup and launched");
@@ -927,14 +934,14 @@ sub _submit {
 		stat($value);
 		if (-e _) {
 		    push (@content, $param => [$value]);
-		    print STDERR "_submit(1): $param: file $value\n" if ($self->{DEBUG});
+		    $self->debug("_submit(1): $param: file $value\n");
 		} else {
 		    push (@content, $param => $value);
-		    print STDERR "_submit(1): $param: not file (1)\n" if ($self->{DEBUG});
+		    $self->debug("_submit(1): $param: not file (1)\n");
 		}
 	    } else {
 		push (@content, $param => $value);
-		print STDERR "_submit(1): $param: not file ($value)(2)\n" if ($self->{DEBUG});
+		$self->debug("_submit(1): $param: not file ($value)(2)\n");
 	    }
 	} elsif ($type eq "Switch") {
 	    if ($value) {
@@ -948,7 +955,7 @@ sub _submit {
 	    push (@content, $param => $value);
 	}
 	
-#	print STDERR "$param ($type): $content{$param}\n" if ($self->{DEBUG});;
+#	$self->debug("$param ($type): $content{$param}\n");
     }
     
     # dealing with default values
@@ -966,7 +973,7 @@ sub _submit {
 			push (@content, $param => $v);
 		    }
 		} else {
-		    print STDERR "_submit(2): setting $param to vdef $vdef\n" if $self->{DEBUG};
+		    $self->debug("_submit(2): setting $param to vdef $vdef\n");
 		    push (@content, $param => $vdef);
 		}
 	    }
@@ -976,11 +983,11 @@ sub _submit {
     if ($self->{DEBUG}) {
 	my $i;
 	for ($i=0; $i <= scalar(@content); $i++) {
-	    print STDERR "PiseJob _submit(3): $content[$i]\n";
+	    $self->debug("PiseJob _submit(3): $content[$i]\n");
 	}
     }
 
-    print STDERR ref($self), "::_submit: submitting request ($location)...\n"  if $self->{VERBOSE};
+    $self->debug(ref($self), "::_submit: submitting request ($location)...\n");
 
     my $ua = $self->_get_ua;
 
@@ -989,19 +996,19 @@ sub _submit {
 			   Content      => \@content);
 
     foreach my $tmpfile (@{ $self->{TMPFILES}} ) {
-	print STDERR "removing $tmpfile\n" if $self->{VERBOSE};
+	$self->debug("removing $tmpfile\n");
 	unlink $tmpfile;
     }
 
     if ($res->is_success) {
 #	if ($self->{DEBUG}) {
-#	    print STDERR "submit:\n", $res->content;
+#	    $self->debug("submit:\n", $res->content);
 #	}
 	$self->{RESULTS} = $res->content;
 	if ($self->_parse($res->content) >= 0) {
 	    return $self->jobid;
 	} else {
-	    print STDERR ref($self) . " _submit: parse error, result content: " . $res->content if $self->{VERBOSE};
+	    $self->debug(ref($self) . " _submit: parse error, result content: " . $res->content,"\n");
  	    return $self->jobid;
 	}
     } else {
@@ -1031,7 +1038,7 @@ sub _parse {
     } elsif (defined $self->{RESULTS}) {
 	$content = $self->{RESULTS};
     } else {
-	print STDERR "parse: you must provide the REMOTE results page\n";
+	$self->debug("parse: you must provide the REMOTE results page\n");
 	return -1;
     }
     my $handler;
@@ -1047,8 +1054,8 @@ sub _parse {
     eval {$parser->parse($content)};
 
     if ($@) {
-	print STDERR "parse: cannot parse this job:\n$@\n";
-	print STDERR $content;
+	$self->debug("parse: cannot parse this job:\n$@\n");
+	$self->debug("$content\n");
 	return -1;
     } else {
 	if (! $self->{JOBID}) {
@@ -1076,14 +1083,14 @@ sub _parse {
 	;
 	foreach my $param (keys %{ $handler->{value}}) {
 	    $self->{VALUE}{$param} = $handler->{value}{$param};
-	    #print STDERR "DEBUG> Bio::Tools::Run::PiseJob _parse: $param => ", $self->{VALUE}{$param}, "\n" if $self->{VERBOSE};
+	    #$self->debug("DEBUG> Bio::Tools::Run::PiseJob _parse: $param => ", $self->{VALUE}{$param}, "\n");
 	}
 
 	$self->{TERMINATED} = $handler->terminated;
 	if ($handler->error) {
 	    $self->{ERROR} = $handler->error;
 	    $self->{ERROR_MESSAGE} = $handler->error_message;
-	    print STDERR ref($self) . " _parse: an error has occured (", $self->{PROGRAM}, ") : ",$handler->error_message, "\n" if $self->{VERBOSE};
+	    $self->debug(ref($self) . " _parse: an error has occured (", $self->{PROGRAM}, ") : ",$handler->error_message, "\n");
 	    return -1;
 	}
     }
@@ -1119,7 +1126,7 @@ sub READLINE {
       my $line = shift @{ $self->{pisejob}->{FH_DATA} };
       return "$line\n";
   } else {
-      return undef;
+      return;
   }
 }
 
@@ -1204,7 +1211,7 @@ sub _clean_content {
 ";
 	$content = $content . $foot;
     }
-#    print STDERR "clean_content:\n",$content;
+#    $self->debug("clean_content:\n",$content\n");
 
     return $content;
 
