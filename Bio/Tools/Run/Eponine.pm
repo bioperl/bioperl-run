@@ -272,7 +272,7 @@ sub epojar {
     {
 	unless( $location ) {
 	    $self->warn("eponine-scan.jar not found at $location: $!\n");
-	    return undef;
+	    return;
 	}
       $self->{'_epojar'} = $location ;
     }
@@ -318,6 +318,13 @@ sub run{
     return @tss;
 
 }
+
+=head2 predict_TSS
+
+ Title   : predict_TSS
+ Usage   : Alias for run()
+
+=cut
 
 sub predict_TSS {
   return shift->run(@_);
@@ -368,7 +375,7 @@ sub _run_eponine {
 			   $self->epojar);
     unless( defined $java && -e $java && -x $java ) {
 	$self->warn("Cannot find java");
-	return undef;
+	return;
     }
     if (! defined $epojar) { $self->warn("Don't know the name of the Eponine jar file"); return; }
     if (! -e $epojar) {
