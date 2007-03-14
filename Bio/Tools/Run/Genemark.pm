@@ -253,7 +253,7 @@ sub _run {
                       \@cmd,
                       \undef,
                       \$program_stdout,
-                      \$program_stderr, debug => 1
+                      \$program_stderr, 
                   ) || die $OS_ERROR;
         
     };

@@ -9,7 +9,7 @@ BEGIN {
     }
     use Test::More;
     use vars qw($NTESTS);
-    $NTESTS = 110;
+    $NTESTS = 111;
     plan tests => $NTESTS;
     use_ok('Bio::Tools::Run::Glimmer');
     use_ok('Bio::Root::IO');
