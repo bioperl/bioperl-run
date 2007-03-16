@@ -25,12 +25,12 @@ multiple sequence alignment and a species tree using NJTREE.
   use Bio::TreeIO;
 
   my $alignio = new Bio::AlignIO(-format => 'fasta',
-  			         -file   => 't/data/msa_njtree.fasta');
+  			         -file   => 't/data/njtree_aln2.nucl.mfa');
 
   my $aln = $alignio->next_aln;
 
   my $treeio = Bio::TreeIO->new(
-      -format => 'nhx', -file => 't/data/species_tree.nh');
+      -format => 'nhx', -file => 't/data/species_tree_njtree.nh');
 
   my $tree = $treeio->next_tree;
 
