@@ -9,7 +9,7 @@ BEGIN {
     }
     use Test::More;
     use vars qw($NTESTS);
-    $NTESTS = 98;
+    $NTESTS = 99;
     plan tests => $NTESTS;
     use_ok('Bio::Tools::Run::Genemark');
     use_ok('Bio::Root::IO');
@@ -30,7 +30,6 @@ SKIP: {
     my $factory    = Bio::Tools::Run::Genemark->new(
                                                     -program => 'gmhmmp',
                                                     -m       => $model_file,
-                                                    -file    => $fasta_file,
                                                 );
     isa_ok $factory, 'Bio::Tools::Run::Genemark';
     
@@ -45,7 +44,11 @@ SKIP: {
     
     my $gmhmmp = $factory->run($seq);
     isa_ok $gmhmmp,'Bio::Tools::Genemark';
-    
+
+    my $first_gene = $gmhmmp->next_prediction();
+    isa_ok $first_gene, 'Bio::Tools::Prediction::Gene';
+    is $first_gene->seq_id(), 'gi|15611071|ref|NC_000921.1|';
+        
     while (my $gene = $gmhmmp->next_prediction()) {
         isa_ok $gene, 'Bio::Tools::Prediction::Gene';
     }

@@ -20,7 +20,7 @@ family of programs.
   # GeneMark.hmm (prokaryotic)
   my $factory =
       Bio::Tools::Run::Genemark->new('-program' => 'gmhmmp',
-                                     '-model'   => 'model.icm');
+                                     '-m'       => 'model.icm');
   
 
   # Pass the factory Bio::Seq objects
@@ -207,7 +207,7 @@ sub run {
         }
     }
     
-    return $self->_run($file_name);
+    return $self->_run($file_name, $seq[0]->display_id());
     
 }
 
@@ -223,7 +223,7 @@ sub run {
 
 sub _run {
     
-    my ($self, $seq_file_name) = @_;
+    my ($self, $seq_file_name, $seq_id) = @_;
 
     my ($temp_fh, $temp_file_name) =
         $self->io->tempfile(-dir=>$self->tempdir());
@@ -265,7 +265,8 @@ sub _run {
     $self->debug(join("\n", 'GeneMark STDOUT:', $program_stdout)) if $program_stdout;
     $self->debug(join("\n", 'GeneMark STDERR:', $program_stderr)) if $program_stderr;
                  
-    return Bio::Tools::Genemark->new(-file => $temp_file_name);
+    return Bio::Tools::Genemark->new(-file    => $temp_file_name,
+                                     -seqname => $seq_id);
     
 }
 
