@@ -7,19 +7,41 @@ Bio::Tools::Run::Infernal - Wrapper for local execution of cmalign, cmbuild,
 cmsearch, cmscore
 
 =head1 SYNOPSIS
+  
+  # parameters which are switches are set with any value that evals TRUE,
+  # others are set to a specific value
+  
+  my @params = (hmmfb => 1,
+                thresh => 20);
+  
+  my $factory = Bio::Tools::Run::Infernal->new(@params);
+                                                
+  # run cmalign|cmbuild|cmsearch|cmscore|cmemit directly as a wrapper method
+  # this resets the program flag if previously set
+  
+  $factory->cmsearch(@seqs); # searches Bio::PrimarySeqI's based on set cov. model
+                             # saves output to outfile()/tempfile
 
-  #run cmalign|cmbuild|cmsearch|cmscore|cmemit
+  # only values which are allowed for a program are set, so one can use the same
+  # wrapper for the following...
   
-  my @params = ();
+  $factory->cmalign(@seqs); # aligns Bio::PrimarySeqI's to a set cov. model
+                            # saves output to outfile()/tempfile
+  $factory->cmscore(@seqs); # scores set cov. model against Bio::PrimarySeqI's,
+                            # saves output to outfile()/tempfile/STDERR.
+  $factory->cmbuild($aln); # builds covariance model based on alignment
+                           # saves CM to model(), output to outfile()/tempfile/STDERR.
+  $factory->cmemit($file); # emits sequence from specified cov. model;
+                           # set one if no file specified
+
+  # run based on the setting of the program parameter
   
-  my $factory = Bio::Tools::Run::Infernal->new('program' =>'cmsearch',
+  my $factory = Bio::Tools::Run::Infernal->new(-program => 'cmsearch',
                                                 @params);
-
-  # Pass the factory a Bio::Seq object or a file name
-  # Returns a Bio::SearchIO object
-  
   my $search = $factory->run($seq);
-  my @feat;
+  
+  # using cmsearch returns a Bio::SearchIO object
+  
   while (my $result = $searchio->next_result){
    while(my $hit = $result->next_hit){
     while (my $hsp = $hit->next_hsp){
@@ -33,7 +55,7 @@ cmsearch, cmscore
     }
    }
   }
-
+  
 =head1 DESCRIPTION
 
 Wrapper module for Sean Eddy's Infernal suite of programs. The current
@@ -90,30 +112,38 @@ use Bio::Tools::Run::WrapperBase;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-# will move parameters to each program, use this for _set_params
-my %INFERNAL_PROGRAM = (
-    cmalign  => [qw(h l q informat nosmall regress full tfile banddump dlev
-                time inside outside post checkpost sub fsub elsilent hbanded hbandp sums
-                checkcp9 qdb beta noexpand W)], 
-    cmbuild  => [qw(h n A F binary rf gapthresh informat bandp elself nodetach
-                wgiven wnone wgsc effent etarget effnone cfile cmtbl emap gtree gtbl tfile
-                bfile local bdfile nobalance regress treeforce ignorant dlev null
-                priorfile)],
+our @PARAMS = qw(A F W X a banddump bandp bdfile begin beta bfile binary c cfile
+checkcp9 checkpost cmtbl cp9 dlev dumptrees effent effnone elself elsilent emap
+end etarget fsub full gapthresh gtbl gtree h hbanded hbandp hmmfb hmmonly hmmpad
+hmmweinberg hthresh ignorant informat inside l learninserts local n noalign
+nobalance nodetach noexpand noqdb nosmall null null2 outside post priorfile q
+qdb qdbfile regress rf scan2bands scoreonly seed smallonly stringent sub sums
+tfile thresh time toponly treeforce wgiven wgsc wnone);
+
+our %INFERNAL_PROGRAM = (
+    cmalign =>  [qw(h l q informat nosmall regress full tfile banddump dlev
+                time inside outside post checkpost sub fsub elsilent hbanded
+                hbandp sums checkcp9 qdb beta noexpand W)], 
+    cmbuild =>  [qw(h n A F binary rf gapthresh informat bandp elself nodetach
+                wgiven wnone wgsc effent etarget effnone cfile cmtbl emap gtree
+                gtbl tfile bfile local bdfile nobalance regress treeforce
+                ignorant dlev null priorfile)],
     cmscore  => [qw(h informat local regress scoreonly smallonly stringent qdb
                 beta)],
     cmsearch => [qw(h W informat toponly local noalign dumptrees thresh X inside
-                null2 learninserts hmmfb hmmweinberg hmmpad hmmonly hthresh beta noqdb
-                qdbfile hbanded hbandp banddump sums scan2bands)],
+                null2 learninserts hmmfb hmmweinberg hmmpad hmmonly hthresh beta
+                noqdb qdbfile hbanded hbandp banddump sums scan2bands)],
     cmemit   => [qw(a c h n q seed full begin end cp9)],
     );
 
-my %INFERNAL_SWITCHES = map {$_ => 1} qw(h l a A F c q X banddump binary checkcp9
-    checkpost cp9 dumptrees effent effnone elsilent fsub full hbanded hmmfb hmmonly
-    hmmweinberg ignorant inside learninserts local noalign nobalance nodetach
-    noexpand noqdb nosmall null2 outside post qdb rf scan2bands scoreonly
-    smallonly stringent sub sums time toponly treeforce wgiven wgsc wnone);
+our %INFERNAL_SWITCHES = map {$_ => 1} qw(h l a A F c q X banddump binary
+    checkcp9 checkpost cp9 dumptrees effent effnone elsilent fsub full hbanded
+    hmmfb hmmonly hmmweinberg ignorant inside learninserts local noalign
+    nobalance nodetach noexpand noqdb nosmall null2 outside post qdb rf
+    scan2bands scoreonly smallonly stringent sub sums time toponly treeforce
+    wgiven wgsc wnone);
 
-my %INFERNAL_DOUBLE = map {$_ => 1} qw(X banddump bandp bdfile begin beta bfile
+our %INFERNAL_DOUBLE = map {$_ => 1} qw(X banddump bandp bdfile begin beta bfile
     binary cfile checkcp9 checkpost cmtbl cp9 dlev dumptrees effent effnone
     elself elsilent emap end etarget fsub full gapthresh gtbl gtree hbanded
     hbandp hmmfb hmmonly hmmpad hmmweinberg hthresh ignorant informat inside
@@ -135,16 +165,19 @@ my %INFERNAL_DOUBLE = map {$_ => 1} qw(X banddump bandp bdfile begin beta bfile
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    my ($program, $out, $tf) = $self->_rearrange([qw(PROGRAM
-                                                  OUTFILE_NAME
-                                                  TEMPFILE)], @args);
-    $self->throw("No program defined in constructor") if !$program;
-    $self->throw("Program '$program' not supported") if !exists $INFERNAL_PROGRAM{$program};
+    my ($program, $model, $out, $tf) =
+        $self->_rearrange([qw(PROGRAM
+                            MODEL
+                            OUTFILE_NAME 
+                            TEMPFILE)], @args);
+    $self->throw("Program '$program' not supported") if $program &&
+        !exists $INFERNAL_PROGRAM{$program};
+    $program ||='';
     $self->io->_initialize_io();
     # defining outfile specifically overrides the tempfile flag
     # all programs but cmbuild  : outfile is optional (default to STDOUT)
     if (($tf && !$out) || ($program eq 'cmbuild' && !$out)) {
-        my ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+        my ($tfh, $outfile) = $self->io->tempfile(-dir=> $self->io->tempdir());
         close($tfh);
         undef $tfh;
         $self->outfile_name($outfile);
@@ -152,12 +185,34 @@ sub new {
         $out ||= '';
         $self->outfile_name($out);
     }
-    $tf   && $self->tempfile($tf);
+    $tf        && $self->tempfile($tf);
+    $program   && $self->program($program);
+    $model     && $self->model($model);
     $self->_set_from_args(\@args,
-                          -methods => [@{ $INFERNAL_PROGRAM{$program} }, 'program', 'model'],
-                          -create => 1
-                         );
+            -methods => [@PARAMS],
+            -create => 1
+           );
     return $self;
+}
+
+=head2 program
+
+ Title   :  program
+ Usage   :  $obj->program()
+ Function:  Set the program called when run() is used.  Synonym of
+            program_name()
+ Returns :  String (program name)
+ Args    :  String (program name)
+
+=cut
+
+sub program {
+    my $self = shift;
+    if (@_) {
+        $self->{'_program'} = shift @_;
+        $self->executable( $self->{'_program'} );
+    }
+    return $self->{'_program'};
 }
 
 =head2 program_name
@@ -175,11 +230,27 @@ sub program_name {
   return $self->program(@_);
 }
 
+=head2 model
+
+ Title   :  model
+ Usage   :  $obj->model()
+ Function:  Set the model used when run() is called.
+ Returns :  String (file location of covariance model)
+ Args    :  String (file location of covariance model)
+
+=cut
+
+sub model {
+    my $self = shift;
+    return $self->{'_model'} = shift if @_;
+    return $self->{'_model'};
+}
+
 =head2 program_dir
 
  Title   : program_dir
  Usage   : $factory->program_dir(@params)
- Function: returns the program directory, obtiained from ENV variable.
+ Function: returns the program directory, obtained from ENV variable.
  Returns:  string
  Args    :
 
@@ -193,7 +264,7 @@ sub program_dir {
 
  Title   : version
  Usage   : $v = $prog->version();
- Function: Determine the version number of the program (use cmsearch)
+ Function: Determine the version number of the program (uses cmsearch)
  Example :
  Returns : float or undef
  Args    : none
@@ -215,7 +286,7 @@ sub version {
 
  Title   :   run
  Usage   :   $obj->run($seqFile)
- Function:   Runs HMMER and returns Bio::SearchIO
+ Function:   Runs Infernal and returns Bio::SearchIO
  Returns :   A Bio::SearchIO
  Args    :   A Bio::PrimarySeqI or file name
 
@@ -224,6 +295,117 @@ sub version {
 sub run {
     my ($self,@seq) = @_;
     # will need to add _writeAlignFile for alignment data
+    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
+        my $infile1 = $self->_writeSeqFile(@seq);
+        return  $self->_run($infile1);
+    } elsif  (ref $seq[0] && $seq[0]->isa("Bio::Align::AlignI") ){# it is an object
+        my $infile1 = $self->_writeSeqFile(@seq);
+        return  $self->_run($infile1);
+    } else {
+        return  $self->_run(@seq);
+    }
+}
+
+=head1 Specific program interface methods
+
+=head2 cmsearch
+
+ Title   :   cmsearch
+ Usage   :   $obj->cmsearch($seqFile)
+ Function:   Runs Infernal cmsearch and returns Bio::SearchIO
+ Returns :   A Bio::SearchIO
+ Args    :   Bio::PrimarySeqI or file name
+
+=cut
+
+sub cmsearch {
+    my ($self,@seq) = @_;
+    $self->program('cmsearch');
+    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
+        my $infile1 = $self->_writeSeqFile(@seq);
+        return  $self->_run($infile1);
+    } else {
+        return  $self->_run(@seq);
+    }
+}
+
+=head2 cmalign
+
+ Title   :   cmalign
+ Usage   :   $obj->cmalign($seqFile)
+ Function:   Runs Infernal cmalign and returns Bio::AlignIO
+ Returns :   A Bio::AlignIO
+ Args    :   Bio::PrimarySeqI or file name
+
+=cut
+
+sub cmalign {
+    my ($self,@seq) = @_;
+    $self->program('cmalign');
+    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
+        my $infile1 = $self->_writeSeqFile(@seq);
+        return  $self->_run($infile1);
+    } else {
+        return  $self->_run(@seq);
+    }
+}
+
+=head2 cmemit
+
+ Title   :   cmemit
+ Usage   :   $obj->cmemit($modelfile)
+ Function:   Runs Infernal cmemit and returns Bio::AlignIO
+ Returns :   A Bio::AlignIO
+ Args    :   [optional] File name containing covariance model
+             (will use model() if not passed)
+
+=cut
+
+sub cmemit {
+    my ($self,@seq) = @_;
+    $self->program('cmemit');
+    if  (ref $seq[0]){# it is an object
+        $self->throw("Arg must be covariance model file name");
+    } else {
+        return  $self->_run(@seq);
+    }
+}
+
+=head2 cmbuild
+
+ Title   :   cmbuild
+ Usage   :   $obj->cmbuild($alignment)
+ Function:   Runs Infernal cmbuild and saves covariance model
+ Returns :   1 on success (no object for covariance models)
+ Args    :   Bio::AlignIO with structural information (such as from Stockholm
+             format source) or alignment file
+
+=cut
+
+sub cmbuild {
+    my ($self,@seq) = @_;
+    $self->program('cmbuild');
+    if  (ref $seq[0] && $seq[0]->isa("Bio::Align::AlignI") ){# it is an object
+        my $infile1 = $self->_writeAlignFile(@seq);
+        return  $self->_run($infile1);
+    } else {
+        return  $self->_run(@seq);
+    }
+}
+
+=head2 cmscore
+
+ Title   :   cmscore
+ Usage   :   $obj->cmscore($seq)
+ Function:   Runs Infernal cmscore and saves output
+ Returns :   None
+ Args    :   Bio::PrimarySeqI or file
+
+=cut
+
+sub cmscore {
+    my ($self,@seq) = @_;
+    $self->program('cmscore');
     if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
         my $infile1 = $self->_writeSeqFile(@seq);
         return  $self->_run($infile1);
@@ -252,10 +434,10 @@ sub _run {
     # file or model defined (using $file if both are defined)
     if ($prog eq 'cmemit' && (!$file && !$model) ) {
         $self->throw("Must supply file/Bio::PrimarySeqI/Bio::AlignI or a model");
-    } elsif (!$file || !$model) {
+    } elsif (!$file && !$model) {
         $self->throw("Must supply file/Bio::PrimarySeqI/Bio::AlignI and a model");
     }
-    $file ||= $model;
+    $file ||= '';
     # for cmsearch, cmscore, cmalign, cmbuild, $file should point to a sequence or alignment file
     # for cmemit, the file is technically optional (falls back to using the model() if set)
     # format : cmsearch [-options] <cmfile> <sequence file>
@@ -266,27 +448,32 @@ sub _run {
     # the output file (if set) : cmalign, cmemit : added in _setparams (-o option)
     #                            cmscore, cmsearch, cmbuild: redirect STDOUT to file
     my $str = $self->executable;
-    my $param_str = ' '.$self->_setparams;
-    $str .= "$param_str $model $file";
+    my $param_str = $self->_setparams;
+    $str .= $param_str ? " $param_str $model $file" : " $model $file";
     if ($out && ($prog ne 'cmalign' || $prog ne 'cmemit')) {
         $str .= " > $out";
     }
     $self->debug("Infernal command: $str\n");
     # cmsearch returns SearchIO
-    # cmbuild does not return anything (outfile = STDOUT, cmfile is written)
+    # cmbuild does not return anything (outfile = STDOUT, cmfile is written to model() )
+    # cmscore does not return anything (outfile = STDOUT or outfile/tempfile)
     # cmemit - AlignIO or SeqIO (based on parameter settings)
     # cmalign - AlignIO
-    # cmscore does not return anything (outfile = STDOUT)
-    my $obj = ($prog eq 'cmsearch') ? Bio::SearchIO->new(-format => 'infernal',
-                                                         -database => $file,
-                                                         -version => $version,
-                                                         -model => $model,) :
-             undef;
+    my $obj =
+        ($prog eq 'cmsearch') ? Bio::SearchIO->new(-format => 'infernal',
+                                                -database => $file,
+                                                -version => $version,
+                                                -model => $model) :
+        ($prog eq 'cmalign' ) ? Bio::AlignIO->new(-format => 'stockholm') :
+        ($prog eq 'cmemit' && $self->a) ? Bio::AlignIO->new(-format => 'stockholm') :
+        ($prog eq 'cmemit') ? Bio::SeqIO->new(-format => 'fasta') :
+              undef;
     # outfile or tempfile-based
     
     # only supports cmsearch for now, adding support for the others very soon...
-    return 1 unless $prog eq 'cmsearch';
+    #return 1 unless $prog eq 'cmsearch' || $prog eq 'cmalign';
     my @args;
+    # file output
     if ($out) {
         my $status = system($str);
         if($status || !-e $out || -z $out ) {
@@ -298,9 +485,9 @@ sub _run {
             $obj->file($out);
             @args = (-file => $out);
         }
-    # fh-based
+    # fh-based (no outfile)
     } else {
-        open(my $fh,"$str |") || $self->throw("ERPIN call ($str) crashed: $?\n");
+        open(my $fh,"$str |") || $self->throw("Infernal call ($str) crashed: $?\n");
         if ($obj && ref($obj)) {
             $obj->fh($fh);
             @args = (-fh => $fh);
@@ -315,7 +502,6 @@ sub _run {
     }
     $obj->_initialize_io(@args) if $obj && ref($obj);
     return $obj || 1;
-
 }
 
 =head2 _setparams
@@ -329,15 +515,24 @@ sub _run {
 
 =cut
 
+# this only sets parameters which legitimately can be used for a program (listed
+# in $INFERNAL_PROGRAM)
+
 sub _setparams {
     my ($self) = @_;
     my $param_string;
-    my ($program, $model, $outfile) = ($self->program, $self->model, $self->outfile_name);
-    $self->throw("No valid program defined!") if !$program || !exists $INFERNAL_PROGRAM{$program};
+    my ($program, $model, $outfile) = ($self->program,
+                                       $self->model,
+                                       $self->outfile_name);
+    $self->throw("No valid program defined!")
+        if !$program || !exists $INFERNAL_PROGRAM{$program};
+        
+    # verbosity of cmemit must be turned off to get data into Bio* objects
+    $self->q(1) if $program eq 'cmemit' || $program eq 'cmalign';
+    
     my @valid_params = @{ $INFERNAL_PROGRAM{$program} };
     my @params;
     foreach my $attr (@valid_params) {
-        my $val = ($self->can($attr)) ? 1 : 0;
         my $value = ($self->can($attr)) ? $self->$attr() : undef;
         next unless (defined $value);
         my $attr_key = (exists $INFERNAL_DOUBLE{$attr}) ? '--'.$attr : '-'.$attr;
@@ -393,7 +588,7 @@ sub _writeAlignFile{
     my ($self,@align) = @_;
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
     my $in  = Bio::AlignIO->new('-fh'     => $tfh , 
-                '-format' => 'msf');
+                '-format' => 'stockholm');
     foreach my $s(@align){
       $in->write_aln($s);
     }
