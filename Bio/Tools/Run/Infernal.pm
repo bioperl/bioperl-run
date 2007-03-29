@@ -1,5 +1,13 @@
+# $Id$
+#
 # You may distribute this module under the same terms as perl itself
+#
 # POD documentation - main docs before the code
+#
+# _history
+#
+# March 2007 - first full implementation; needs some file IO tweaking between
+#              runs but works for now
 
 =head1 NAME
 
@@ -475,6 +483,7 @@ sub _run {
     my @args;
     # file output
     if ($out) {
+        local $SIG{CHLD} = 'DEFAULT';
         my $status = system($str);
         if($status || !-e $out || -z $out ) {
             my $error = ($!) ? "$! Status: $status" : "Status: $status";

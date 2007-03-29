@@ -124,9 +124,9 @@ my %ERPIN_SWITCHES = map {$_ => 1} qw(dmp smp fwd rev fwd+rev long short mute
     warnings globstat locstat unifstat Eon Eoff hist chrono);
 
 # order is important here
-my @ERPIN_PARAMS=qw(program tset file strategy dmp smp fwd rev fwd+rev long
+my @ERPIN_PARAMS=qw(program model file strategy dmp smp fwd rev fwd+rev long
     short mute warnings globstat locstat unifstat Eon Eoff hist seq1 nseq bgn
-    len logzero tablen chrono pcw hpcw spcw sumf);
+    len logzero tablen chrono pcw hpcw spcw sumf tset);
 
 =head2 new
 
@@ -235,30 +235,6 @@ sub run {
     }
 }
 
-=head2 search
-
- Title   :  search
- Usage   :  $searchio = $obj->search($seqFile)
- Function:  Runs 'rnamotif' on seqs, returns Bio::SearchIO
- Returns :  A Bio::SearchIO
- Args    :  A Bio::PrimarySeqI or file name
- Note    :  Runs 'rnamotif' only, regardless of program setting; all other
-            parameters loaded
-
-=cut
-
-sub search {
-    my ($self,@seq) = @_;
-    $self->throw ("Must pass a file name or a list of Bio::PrimarySeqI objects")
-        if (!@seq);
-    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
-        my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
-    } else {
-        return  $self->_run(@seq); 
-    }
-}
-
 =head2 tempfile
 
  Title   : tempfile
@@ -311,6 +287,7 @@ sub _run {
     my @args;
     # file-based
     if ($outfile) {
+        local $SIG{CHLD} = 'DEFAULT';
         my $status = system($str);
         if($status || !-e $outfile || -z $outfile ) {
             my $error = ($!) ? "$! Status: $status" : "Status: $status";
@@ -365,23 +342,21 @@ sub _setparams {
     my ($tset, $st) = ($self->tset, $self->strategy);
     
     $param_string = join " ", ($tset, $file, $st);
+    $self->debug("String : $param_string\n");
     
     $self->throw("Must have both a training set and search strategy defined!")
         if (!defined($tset) || !defined ($st));
     
     my @params;
     foreach my $attr (@ERPIN_PARAMS) {
-        next if $attr eq 'program';
+        next if $attr eq 'program' || $attr eq 'tset' || $attr eq 'strategy';
         my $value = $self->$attr();
         next unless ($attr eq 'file' || defined $value);
         my $attr_key = '-'.$attr;
         if (exists $ERPIN_SWITCHES{$attr}) {
             push @params, $attr_key;
         } else {
-            if ($attr eq 'strategy' ||
-                $attr eq 'tset') {
-                push @params, $value;
-            } elsif ($attr eq 'file') {
+            if ($attr eq 'file') {
                 push @params, $file;
             } else {
                 push @params, $attr_key.' '.$value;
@@ -389,7 +364,7 @@ sub _setparams {
         }
     }
     
-    $param_string = join ' ', @params;
+    $param_string .= ' '.join ' ', @params;
     $param_string .= $outfile if $outfile;
     
     return $param_string;
