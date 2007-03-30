@@ -379,8 +379,9 @@ sub _run {
     my @args;
     # file-based
     if ($outfile) {
+        local $SIG{CHLD} = 'DEFAULT';
         my $status = system($str);
-        if($status || !-e $outfile || -z $outfile ) {
+        if($status || !-e $outfile ) {
             my $error = ($!) ? "$! Status: $status" : "Status: $status";
             $self->throw( "RNAMotif call crashed: $error \n[command $str]\n");
             return undef;
