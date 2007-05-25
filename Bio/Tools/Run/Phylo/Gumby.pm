@@ -330,9 +330,17 @@ sub _run {
     my $command = $exe.$self->_setparams($aln_file, $tree_file);
     $self->debug("gumby command = $command\n");
     
-    system($command) && $self->throw("gumby call ($command) crashed: $?");
+    open(PIPE, "$command |") || $self->throw("gumby call ($command) failed to start: $? | $!");
+    my $error = '';
+    while (<PIPE>) {
+        print unless $self->quiet;
+        if (/^ERROR: (.+)/ || /^mbgumbel\(\): (.+)/) {
+            $error .= $1;
+        }
+    }
+    close(PIPE) || ($error ? $self->warn("gumby call ($command) failed: $error") : $self->throw("gumby call ($command) crashed: $?"));
     
-    my @feats;
+    my @feats = ();
     foreach my $file ('out_all.align', 'out_exon.align', 'out_nonexon.align') {
         -e $file || next;
         my $parser = Bio::Tools::Phylo::Gumby->new(-file => $file);
@@ -369,7 +377,8 @@ sub _setparams {
                                               -switches => \@SWITCHES,
                                               -dash => 1,);
     $param_string .= ' -o out';
-    $param_string .= ' > /dev/null 2> /dev/null' if $self->quiet;
+    $param_string .= ' 2>&1';
+    $param_string .= ' 1>/dev/null' if $self->quiet;
     
     return $param_string;
 }
