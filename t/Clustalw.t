@@ -5,11 +5,6 @@
 use strict;
 
 BEGIN {
-  # Things to do ASAP once the script is run
-  # even before anything else in the file is parsed
-  #use vars qw($NUMTESTS $DEBUG $error);
-  #$DEBUG = $ENV{'BIOIPERLDEBUG'} || 0;
-  
   # Use installed Test module, otherwise fall back
   # to copy of Test.pm located in the t dir
   eval { require Test::More; };
@@ -17,15 +12,9 @@ BEGIN {
     use lib 't/lib';
   }
 
-  # Currently no errors
-  #$error = 0;
-
   # Setup Test::More and plan the number of tests
-  use Test::More tests=>42;
+  use Test::More tests => 43;
   
-  # Use modules that are needed in this test that are from
-  # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
-  # use_ok('<module::to::use>');
   use_ok('Bio::Tools::Run::Alignment::Clustalw');
   use_ok('Bio::SimpleAlign');
   use_ok('Bio::AlignIO');
@@ -42,16 +31,9 @@ ok( -e $profile1, 'Found profile1 file' );
 my $profile2 = File::Spec->catfile('t','data','cysprot1b.msf');
 ok( -e $profile2, 'Found profile2 file' );
 
-# setup output files etc
-# none in this test
-
 # setup global objects that are to be used in more than one test
 # Also test they were initialised correctly
-my @params = (
-         'ktuple' => 3,
-	 'quiet'  => 1,
-	 #-verbose => $verbose,
-);
+my @params = ('ktuple' => 3, 'quiet'  => 1);
 my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 isa_ok( $factory, 'Bio::Tools::Run::Alignment::Clustalw');
 
@@ -64,17 +46,8 @@ is( $factory->bootstrap, undef, 'bootstrap returned correct default' );
 # Now onto the nitty gritty tests of the modules methods
 is( $factory->program_name(), 'clustalw',                'Correct exe default name' );
 
-# block of tests to skip if you know the tests will fail
-# under some condition. E.g.:
-#   Need network access,
-#   Wont work on particular OS,
-#   Cant find the exectuable
-# DO NOT just skip tests that seem to fail for an unknown reason
 SKIP: {
-  # condition used to skip this block of tests
-  #skip($why, $how_many_in_block);
-  skip("Couldn't find the executable", 16)
-    unless defined $factory->executable();
+  skip("Couldn't find the executable", 16) unless defined $factory->executable();
   
   # test all factory methods dependent on finding the executable
   # TODO: isnt( $factory->program_dir, undef,               'Found program in an ENV variable' );
@@ -90,12 +63,10 @@ SKIP: {
   # now test its output
   isa_ok( $aln, 'Bio::SimpleAlign');
   is( $aln->no_sequences, 7,                               'Correct number of seqs returned' );
+  is $aln->score, 16047, 'Score';
   
   # test execution using an array of Seq objects
-  my $str = Bio::SeqIO->new(
-                        '-file' => $inputfilename,
-			'-format' => 'Fasta',
-  );
+  my $str = Bio::SeqIO->new('-file' => $inputfilename, '-format' => 'Fasta');
   my @seq_array =();
   while ( my $seq = $str->next_seq() ) {
     push (@seq_array, $seq) ;
