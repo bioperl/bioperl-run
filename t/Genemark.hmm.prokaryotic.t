@@ -2,15 +2,19 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
+use vars qw($NTESTS);
+
 BEGIN {
+    $NTESTS = 99;
+    
     eval { require Test::More; };
     if( $@ ) {
         use lib 't/lib';
     }
     use Test::More;
-    use vars qw($NTESTS);
-    $NTESTS = 99;
+    
     plan tests => $NTESTS;
+    
     use_ok('Bio::Tools::Run::Genemark');
     use_ok('Bio::Root::IO');
     use_ok('Bio::Seq');
@@ -21,7 +25,7 @@ my $model_dir = $ENV{'GENEMARK_MODELS'} if $ENV{'GENEMARK_MODELS'};
 
 SKIP: {
     unless ($model_dir) {
-        skip("genemark models not found. Skipping tests 4 to $NTESTS.", 95);
+        skip("genemark models not found. Skipping tests 4 to $NTESTS.", 96);
     }
     
     my $fasta_file = Bio::Root::IO->catfile('t','data','H_pylori_J99.fasta');
@@ -39,7 +43,7 @@ SKIP: {
     my $genemark_present = $factory->executable();
     
     unless ($genemark_present) {
-        skip("genemark program not found. Skipping tests 5 to $NTESTS.", 94);
+        skip("genemark program not found. Skipping tests 5 to $NTESTS.", 95);
     }
     
     my $gmhmmp = $factory->run($seq);

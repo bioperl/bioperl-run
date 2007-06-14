@@ -2,14 +2,17 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
+use vars qw($NTESTS);
+
 BEGIN {
+    $NTESTS = 217;
+    
     eval { require Test::More; };
     if( $@ ) {
         use lib 't/lib';
     }
     use Test::More;
-    use vars qw($NTESTS);
-    $NTESTS = 217;
+    
     plan tests => $NTESTS;
     use_ok('Bio::Tools::Run::Glimmer');
     use_ok('Bio::Root::IO');
@@ -31,9 +34,8 @@ my $seq = $seqstream->next_seq();
 SKIP: {
     my $glimmer_present = $factory->executable();
     
-    # I'm guessing here
     unless ($glimmer_present) {
-        skip("glimmer2 program not found. Skipping tests 5 to $NTESTS.",199);
+        skip("glimmer2 program not found. Skipping tests 5 to $NTESTS.", ($NTESTS - 4));
     }
     
     my $glimmer2 = $factory->run($seq);

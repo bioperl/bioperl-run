@@ -59,7 +59,7 @@ use Bio::Tools::Run::Phylo::Njtree::Best;
 use Bio::AlignIO;
 use Bio::TreeIO;
 
-my $alignio = new Bio::AlignIO(-format => 'fasta',
+my $alignio = Bio::AlignIO->new(-format => 'fasta',
                                -file   => 't/data/njtree_aln2.nucl.mfa');
 
 my $aln = $alignio->next_aln;
@@ -69,7 +69,7 @@ my $treeio = Bio::TreeIO->new(
 
 my $tree = $treeio->next_tree;
 
-my $njtree_best = new Bio::Tools::Run::Phylo::Njtree::Best();
+my $njtree_best = Bio::Tools::Run::Phylo::Njtree::Best->new();
 $njtree_best->alignment($aln);
 $njtree_best->tree($tree);
 $njtree_best->check_names();

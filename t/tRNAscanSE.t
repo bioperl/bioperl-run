@@ -2,15 +2,19 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
+use vars qw($NTESTS);
+
 BEGIN {
+    $NTESTS = 12;
+    
     eval { require Test::More; };
     if( $@ ) {
         use lib 't/lib';
     }
     use Test::More;
-    use vars qw($NTESTS);
-    $NTESTS = 12;
+    
     plan tests => $NTESTS;
+    
     use_ok('Bio::Tools::Run::tRNAscanSE');
     use_ok('Bio::Root::IO');
     use_ok('Bio::Seq');
@@ -30,7 +34,7 @@ SKIP: {
     my $tRNAscanSE_present = $factory->executable();
     
     unless ($tRNAscanSE_present) {
-        skip("tRNAscanSE program not found. Skipping tests 5 to $NTESTS",12);
+        skip("tRNAscanSE program not found. Skipping tests 5 to $NTESTS", ($NTESTS - 4));
     }
     
     my $tRNAscanSE = $factory->run($seq);
