@@ -9,87 +9,72 @@
 use strict;
 use vars qw($NUMTESTS);
 
-my $error;
-
-BEGIN { 
-    # to handle systems with no installed Test module
-    # we include the t dir (where a copy of Test.pm is located)
-    # as a fallback
-    eval { require Test; };
-    $error = 0;
-    if( $@ ) {
-	use lib 't';
-    }
-    use Test;
-
-    $NUMTESTS = 4;
-    plan tests => $NUMTESTS;
-
-    unless (eval "require IO::String; 1;") {
-        print STDERR "IO::String not installed. Skipping tests $Test::ntest to $NUMTESTS.\n";
-        for ($Test::ntest..$NUMTESTS){
-            skip(1,1);
-        }
-        exit(0);
-    }
+BEGIN {
+    $NUMTESTS = 15;
+	
+    eval {require Test::More;};
+	if ($@) {
+		use lib 't/lib';
+	}
+	use Test::More;
+	
+    eval {require IO::String };
+	if ($@) {
+		plan skip_all => 'IO::String not installed. This means that the module is not usable. Skipping tests';
+	}
+	else {
+		plan tests => $NUMTESTS;
+	}
+	
+	use_ok('Bio::Root::IO');
+	use_ok('Bio::Tools::Run::Phylo::Hyphy::SLAC');
+	use_ok('Bio::Tools::Run::Phylo::Hyphy::FEL');
+	use_ok('Bio::Tools::Run::Phylo::Hyphy::REL');
+	use_ok('Bio::Tools::Run::Phylo::Hyphy::Modeltest');
+	use_ok('Bio::AlignIO');
+	use_ok('Bio::TreeIO');
 }
 
-if( $error ==  1 ) {
-    exit(0);
-}
-END { 
-    foreach ( $Test::ntest .. $NUMTESTS ) {
-	skip("unable to run all of the Njtree tests",1);
+ok my $slac = Bio::Tools::Run::Phylo::Hyphy::SLAC->new();
+ok my $rel = Bio::Tools::Run::Phylo::Hyphy::REL->new();
+ok my $fel = Bio::Tools::Run::Phylo::Hyphy::FEL->new();
+ok my $modeltest = Bio::Tools::Run::Phylo::Hyphy::Modeltest->new();
+
+SKIP: {
+	my $present = $slac->executable();
+    
+    unless ($present) {
+        skip("Hyphy program not found. Skipping tests", ($NUMTESTS - 11));
     }
+	
+	my $alignio = Bio::AlignIO->new(-format => 'fasta',
+						 -file   => 't/data/hyphy1.fasta');
+	
+	my $treeio = Bio::TreeIO->new(-format => 'newick',
+						 -file   => 't/data/hyphy1.tree');
+	
+	my $aln = $alignio->next_aln;
+	my $tree = $treeio->next_tree;
+	
+	$slac->alignment($aln);
+	$slac->tree($tree);
+	my ($rc,$results) = $slac->run();
+	ok defined($results);
+	
+	$rel->alignment($aln);
+	$rel->tree($tree);
+	($rc,$results) = $rel->run();
+	ok defined($results);
+	
+	$fel->alignment($aln);
+	$fel->tree($tree);
+	($rc,$results) = $fel->run();
+	ok defined($results);
+	
+	$modeltest->alignment($aln);
+	$modeltest->tree($tree);
+	($rc,$results) = $modeltest->run();
+	ok defined($results);
+	
+	#*** where are the tests?!
 }
-my $testnum;
-my $verbose = 0;
-
-## End of black magic.
-##
-## Insert additional test code below but remember to change
-## the print "1..x\n" in the BEGIN block to reflect the
-## total number of tests that will be run. 
-
-use Bio::Root::IO;
-use Bio::Tools::Run::Phylo::Hyphy::SLAC;
-use Bio::Tools::Run::Phylo::Hyphy::FEL;
-use Bio::Tools::Run::Phylo::Hyphy::REL;
-use Bio::Tools::Run::Phylo::Hyphy::Modeltest;
-use Bio::AlignIO;
-use Bio::TreeIO;
-
-my $alignio = new Bio::AlignIO(-format => 'fasta',
-			         -file   => 't/data/hyphy1.fasta');
-
-my $treeio = new Bio::TreeIO(-format => 'newick',
-			         -file   => 't/data/hyphy1.tree');
-
-my $aln = $alignio->next_aln;
-my $tree = $treeio->next_tree;
-
-my $slac = new Bio::Tools::Run::Phylo::Hyphy::SLAC;
-$slac->alignment($aln);
-$slac->tree($tree);
-my ($rc,$results) = $slac->run();
-ok(defined($results), 1);
-
-my $rel = new Bio::Tools::Run::Phylo::Hyphy::REL;
-$rel->alignment($aln);
-$rel->tree($tree);
-my ($rc,$results) = $rel->run();
-ok(defined($results), 1);
-
-my $fel = new Bio::Tools::Run::Phylo::Hyphy::FEL;
-$fel->alignment($aln);
-$fel->tree($tree);
-my ($rc,$results) = $fel->run();
-ok(defined($results), 1);
-
-my $modeltest = new Bio::Tools::Run::Phylo::Hyphy::Modeltest;
-$modeltest->alignment($aln);
-$modeltest->tree($tree);
-my ($rc,$results) = $modeltest->run();
-ok(defined($results), 1);
-
-1;
