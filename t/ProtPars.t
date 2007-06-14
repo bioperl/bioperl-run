@@ -87,7 +87,7 @@ ok (scalar(@nodes),13,
 $tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->new(@params);
 $tree_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
 $inputfilename = Bio::Root::IO->catfile("t","data","longnames.aln");
-my $aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
+$aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
 my ($aln_safe, $ref_name) =$aln->set_displayname_safe(3);
 $tree = $tree_factory->create_tree($aln_safe);
 @nodes = sort { $a->id cmp $b->id } $tree->get_nodes();
