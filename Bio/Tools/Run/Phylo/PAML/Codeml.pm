@@ -19,12 +19,12 @@ Bio::Tools::Run::Phylo::PAML::Codeml - Wrapper aroud the PAML program codeml
   use Bio::Tools::Run::Phylo::PAML::Codeml;
   use Bio::AlignIO;
 
-  my $alignio = new Bio::AlignIO(-format => 'phylip',
+  my $alignio = Bio::AlignIO->new(-format => 'phylip',
   			         -file   => 't/data/gf-s85.phylip');
 
   my $aln = $alignio->next_aln;
 
-  my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml();
+  my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new();
   $codeml->alignment($aln);
   my ($rc,$parser) = $codeml->run();
   my $result = $parser->next_result;
@@ -364,7 +364,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::PAML::Codeml();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::PAML::Codeml->new();
  Function: Builds a new Bio::Tools::Run::Phylo::PAML::Codeml object 
  Returns : Bio::Tools::Run::Phylo::PAML::Codeml
  Args    : -alignment => the Bio::Align::AlignI object
@@ -439,7 +439,7 @@ sub prepare{
        ($tempseqFH,$tempseqfile) = $self->io->tempfile
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+       my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
                                      '-interleaved' => 0,
                                      '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
@@ -467,7 +467,7 @@ sub prepare{
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
-       my $treeout = new Bio::TreeIO('-format' => 'newick',
+       my $treeout = Bio::TreeIO->new('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();
@@ -525,7 +525,7 @@ sub run {
        ($tempseqFH,$tempseqfile) = $self->io->tempfile
 	   ('-dir' => $tmpdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+       my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
 				 '-interleaved' => 0,
 				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
@@ -550,7 +550,7 @@ sub run {
 	   ('-dir' => $tmpdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
-       my $treeout = new Bio::TreeIO('-format' => 'newick',
+       my $treeout = Bio::TreeIO->new('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();
@@ -583,7 +583,7 @@ sub run {
 	   $rc = 0;
        }
        eval {
-	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/$outfile", 
+	   $parser = Bio::Tools::Phylo::PAML->new(-file => "$tmpdir/$outfile", 
 						 -dir => "$tmpdir");
 
        };

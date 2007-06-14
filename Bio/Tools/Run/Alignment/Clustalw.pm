@@ -758,7 +758,7 @@ sub _get_tree {
         $treefile .= '.dnd';
     }
     
-    my $in = new Bio::TreeIO('-file'  => $treefile,
+    my $in = Bio::TreeIO->new('-file'  => $treefile,
                              '-format'=> 'newick');
     
     my $tree = $in->next_tree;

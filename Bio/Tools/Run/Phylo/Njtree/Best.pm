@@ -24,7 +24,7 @@ multiple sequence alignment and a species tree using NJTREE.
   use Bio::AlignIO;
   use Bio::TreeIO;
 
-  my $alignio = new Bio::AlignIO(-format => 'fasta',
+  my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/njtree_aln2.nucl.mfa');
 
   my $aln = $alignio->next_aln;
@@ -34,7 +34,7 @@ multiple sequence alignment and a species tree using NJTREE.
 
   my $tree = $treeio->next_tree;
 
-  my $njtree_best = new Bio::Tools::Run::Phylo::Njtree::Best();
+  my $njtree_best = Bio::Tools::Run::Phylo::Njtree::Best->new();
   $njtree_best->alignment($aln);
   $njtree_best->tree($tree);
   my $nhx_tree = $njtree_best->run();
@@ -214,7 +214,7 @@ sub prepare {
        ($tempalnFH,$self->{_tempalnfile}) = $self->io->tempfile
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'fasta',
+       my $alnout = Bio::AlignIO->new('-format'      => 'fasta',
 				     '-fh'          => $tempalnFH);
        $aln->set_displayname_flat(1);
        $alnout->write_aln($aln);
@@ -231,7 +231,7 @@ sub prepare {
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
-       my $treeout = new Bio::TreeIO('-format' => 'newick',
+       my $treeout = Bio::TreeIO->new('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();
@@ -295,7 +295,7 @@ sub run {
 	   $rc = 0;
        }
        eval {
-	   $nhx_tree = new Bio::TreeIO(-file => "$tmpdir/$outfile", 
+	   $nhx_tree = Bio::TreeIO->new(-file => "$tmpdir/$outfile", 
                                        -format => 'nhx');
        };
        if( $@ ) {

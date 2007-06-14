@@ -16,7 +16,7 @@ Bio::Tools::Run::EMBOSSApplication - class for EMBOSS Applications
 
   use Bio::Factory::EMBOSS;
   # get an EMBOSS application object from the EMBOSS factory
-  $factory = new Bio::Factory::EMBOSS;
+  $factory = Bio::Factory::EMBOSS->new();
   $application = $factory->program('embossversion');
   # run the application with an optional hash containing parameters
   $result = $application->run(); # returns a string or creates a file
@@ -38,7 +38,7 @@ Bio::Tools::Run::EMBOSSApplication - class for EMBOSS Applications
                -outfile   => $wateroutfile});
   # now you might want to get the alignment
   use Bio::AlignIO;
-  my $alnin = new Bio::AlignIO(-format => 'emboss',
+  my $alnin = Bio::AlignIO->new(-format => 'emboss',
 			                      -file   => $wateroutfile);
 
   while ( my $aln = $alnin->next_aln ) {
@@ -160,7 +160,7 @@ sub run {
 					$SEQIOLOADED = 1;
 				}
 				my ($tfh,$tempfile) = $self->io->tempfile(-dir => $self->tempdir);
-				my $out = new Bio::SeqIO(-format => 'fasta',
+				my $out = Bio::SeqIO->new(-format => 'fasta',
 												 -fh     => $tfh);
 				foreach my $seq ( @pieces ) {
 					$out->write_seq($seq);
@@ -175,7 +175,7 @@ sub run {
 					$ALIGNIOLOADED = 1;
 				}
 				my ($tfh,$tempfile) = $self->io->tempfile();
-				my $out = new Bio::AlignIO(-format => 'msf',
+				my $out = Bio::AlignIO->new(-format => 'msf',
 													-fh     => $tfh);
 				foreach my $p ( @pieces ) {
 					$out->write_aln($p);

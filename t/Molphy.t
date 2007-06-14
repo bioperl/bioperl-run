@@ -57,14 +57,14 @@ END {
 my %args = ( 'models' => 'jtt', 
 	     'search' => 'quick', 
 	     "other" => [ '-information', '-w']); 
-my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
+my $protml = Bio::Tools::Run::Phylo::Molphy::ProtML->new(-verbose => $verbose,
 							-flags => \%args);
 unless ($protml->executable){
   warn("Molphy package not installed. Skipping tests $Test::ntest to $NUMTESTS.\n");
 exit(0) ;
 }
 
-my $in = new Bio::AlignIO(-format => 'clustalw',
+my $in = Bio::AlignIO->new(-format => 'clustalw',
 			  -file   => Bio::Root::IO->catfile('t','data',
 							    'cel-cbr-fam.aln'));
 my $aln = $in->next_aln;

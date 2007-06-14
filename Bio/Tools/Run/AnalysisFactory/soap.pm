@@ -17,7 +17,7 @@ Do not use this object directly, it is recommended to access it and use
 it through the I<Bio::Tools::Run::AnalysisFactory> module:
 
   use Bio::Tools::Run::AnalysisFactory;
-  my $list = new Bio::Tools::Run::AnalysisFactory (-access => 'soap')
+  my $list = Bio::Tools::Run::AnalysisFactory->new(-access => 'soap')
      ->available_analyses;
   print join ("\n", @$list) . "\n";
 
@@ -123,7 +123,7 @@ BEGIN {
 
 =head2 _initialize
 
- Usage   : my $factory = new Bio::Tools::Run::AnalysisFactory (@args);
+ Usage   : my $factory = Bio::Tools::Run::AnalysisFactory->new(@args);
            (_initialize is internally called from the 'new()' method)
  Returns : nothing interesting
  Args    : This module recognises and uses following arguments:
@@ -301,7 +301,7 @@ sub create_analysis {
     my @access  = ('-access', $self->{'_access'}) if $self->{'_access'};
     my @httpproxy = ('-httpproxy', $self->{'_httpproxy'}) if $self->{'_httpproxy'};
 
-    new Bio::Tools::Run::Analysis (@name, @location, @httpproxy, @access);
+    Bio::Tools::Run::Analysis->new(@name, @location, @httpproxy, @access);
 }
 
 

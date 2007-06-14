@@ -18,11 +18,11 @@ Bio::Tools::Run::Phylo::PAML::Yn00 - Wrapper aroud the PAML program yn00
 
   use Bio::Tools::Run::Phylo::PAML::Yn00;
   use Bio::AlignIO;
-  my $alignio = new Bio::AlignIO(-format => 'phylip',
+  my $alignio = Bio::AlignIO->new(-format => 'phylip',
   	 		         -file   => 't/data/gf-s85.phylip');
   my $aln = $alignio->next_aln;
 
-  my $yn = new Bio::Tools::Run::Phylo::PAML::Yn00();
+  my $yn = Bio::Tools::Run::Phylo::PAML::Yn00->new();
   $yn->alignment($aln);
   my ($rc,$parser) = $yn->run();
   while( my $result = $parser->next_result ) {
@@ -172,7 +172,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::PAML::Yn00();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::PAML::Yn00->new();
  Function: Builds a new Bio::Tools::Run::Phylo::PAML::Yn00 object 
  Returns : Bio::Tools::Run::Phylo::PAML::Yn00
  Args    : -alignment => the L<Bio::Align::AlignI> object
@@ -227,7 +227,7 @@ sub run{
        ($tempseqFH,$tempseqfile) = $self->io->tempfile
 	   ('-dir' => $tmpdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+       my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
 				     '-interleaved' => 0,
 				     '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
@@ -270,7 +270,7 @@ sub run{
 	   $rc = 0;
        }
        eval {
-	   $parser = new Bio::Tools::Phylo::PAML(-file => "$tmpdir/mlc", 
+	   $parser = Bio::Tools::Phylo::PAML->new(-file => "$tmpdir/mlc", 
 						 -dir => "$tmpdir");
 
        };

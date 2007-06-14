@@ -66,7 +66,7 @@ ok(int($s1_ovl_perid), 15);
 my ($tfhparams,$paramsfilename) = $factory->io->tempfile(-dir=>$factory->tempdir);
 my ($tfhannot,$annotfilename) = $factory->io->tempfile(-dir=>$factory->tempdir);
 my ($tfhdummy,$dummyfilename) = $factory->io->tempfile(-dir=>$factory->tempdir);
-my $factory2 = new Bio::Tools::Run::Alignment::Probcons
+my $factory2 = Bio::Tools::Run::Alignment::Probcons->new
     (
      'iterative-refinement'  => '1000',
      'consistency'   => '5',
@@ -86,7 +86,7 @@ my $aln2 = $factory2->align($seq_array_ref);
 $aln2 = '';
 $factory2 = '';
 
-$factory2 = new Bio::Tools::Run::Alignment::Probcons
+$factory2 = Bio::Tools::Run::Alignment::Probcons->new
     (
      'iterative-refinement'  => '1000',
      'consistency'   => '5',

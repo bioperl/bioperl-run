@@ -19,7 +19,7 @@ Bio::Tools::Run::Phylo::Hyphy::SLAC - Wrapper around the Hyphy SLAC analysis
   use Bio::Tools::Run::Phylo::Hyphy::SLAC;
   use Bio::AlignIO;
 
-  my $alignio = new Bio::AlignIO(-format => 'fasta',
+  my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/hyphy1.fasta');
 
   my $aln = $alignio->next_aln;
@@ -27,7 +27,7 @@ Bio::Tools::Run::Phylo::Hyphy::SLAC - Wrapper around the Hyphy SLAC analysis
   my $treeio = Bio::TreeIO->new(
       -format => 'newick', -file => 't/data/hyphy1.tree');
 
-  my $slac = new Bio::Tools::Run::Phylo::Hyphy::SLAC();
+  my $slac = Bio::Tools::Run::Phylo::Hyphy::SLAC->new();
   $slac->alignment($aln);
   $slac->tree($tree);
   my ($rc,$results) = $slac->run();
@@ -134,7 +134,7 @@ BEGIN {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Hyphy::SLAC();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy::SLAC->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::SLAC object 
  Returns : Bio::Tools::Run::Phylo::Hyphy::SLAC
  Args    : -alignment => the Bio::Align::AlignI object

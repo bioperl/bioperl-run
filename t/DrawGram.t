@@ -50,7 +50,7 @@ if( $DEBUG ) {
 unlink($file);
 
 
-my $intree = new Bio::TreeIO(-file => 
+my $intree = Bio::TreeIO->new(-file => 
 			     Bio::Root::IO->catfile(qw(t data
 						       treefile.example)));
 

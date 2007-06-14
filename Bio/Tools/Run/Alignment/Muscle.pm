@@ -19,7 +19,7 @@ sequences or alignments using the MUSCLE program
 =head1 SYNOPSIS
 
   # Build a muscle alignment factory
-  $factory = new Bio::Tools::Run::Alignment::Muscle (@params);
+  $factory = Bio::Tools::Run::Alignment::Muscle->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';

@@ -17,7 +17,7 @@ sequences or alignments using the Probcons program
 =head1 SYNOPSIS
 
   # Build a muscle alignment factory
-  $factory = new Bio::Tools::Run::Alignment::Probcons (@params);
+  $factory = Bio::Tools::Run::Alignment::Probcons->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';
@@ -37,7 +37,7 @@ sequences or alignments using the Probcons program
   #To run probcons with training, try something like:
 
   #First round to generate train.params
-  $factory = new Bio::Tools::Run::Alignment::Probcons
+  $factory = Bio::Tools::Run::Alignment::Probcons->new
       (
        'iterative-refinement'  => '1000',
        'consistency'   => '5',
@@ -55,7 +55,7 @@ sequences or alignments using the Probcons program
   $aln = '';
   $factory = '';
 
-  $factory = new Bio::Tools::Run::Alignment::Probcons
+  $factory = Bio::Tools::Run::Alignment::Probcons->new
       (
        'iterative-refinement'  => '1000',
        'consistency'   => '5',

@@ -26,7 +26,7 @@ analysis tool
 
   # run a longer job without waiting for its completion
   use Bio::Tools::Run::Analysis;
-  my $job = new Bio::Tools::Run::Analysis (-name => 'edit::seqret')
+  my $job = Bio::Tools::Run::Analysis->new(-name => 'edit::seqret')
                  ->run ({ sequence_direct_data => 'tatatacgtatacga',
 		          osformat => 'embl'
 		          });
@@ -40,7 +40,7 @@ analysis tool
   # should read input data from a local file first
   use Bio::Tools::Run::Analysis;
   my $results =
-    new Bio::Tools::Run::Analysis (-name => 'alignment_multiple::prettyplot')
+    Bio::Tools::Run::Analysis->new(-name => 'alignment_multiple::prettyplot')
        ->wait_for ( { msf_direct_data => '@/home/testdata/my.seq' } )
        ->results ('?');
   use Data::Dumper;
@@ -49,7 +49,7 @@ analysis tool
   # get names, types of all inputs and results,
   # get short and detailed (in XML) service description
   use Bio::Tools::Run::Analysis;
-  my $service = new Bio::Tools::Run::Analysis (-name => 'edit::seqret');
+  my $service = Bio::Tools::Run::Analysis->new(-name => 'edit::seqret');
   my $hash1 = $service->input_spec;
   my $hash2 = $service->result_spec;
   my $hash3 = $service->analysis_spec;
@@ -65,7 +65,7 @@ analysis tool
   # run a job and print its job ID, keep the job un-destroyed
   use Bio::Tools::Run::Analysis;
   my $job =
-    new Bio::Tools::Run::Analysis (-name => 'edit::seqret',
+    Bio::Tools::Run::Analysis->new(-name => 'edit::seqret',
                                    -destroy_on_exit => 0)
     ->run ( { sequence_direct_data => '@/home/testdata/mzef.seq' } );
   print $job->id . "\n";
@@ -75,7 +75,7 @@ analysis tool
   # ...in another time, on another planet, you may say
   use Bio::Tools::Run::Analysis;
   my $job =
-    new Bio::Tools::Run::Analysis::Job (-name => 'edit::seqret',
+    Bio::Tools::Run::Analysis::Job->new(-name => 'edit::seqret',
 			                -id => 'edit::seqret/c8ef56:ef535489ac:-7ff4');
   print join ("\n",
 	    $job->status,
@@ -89,7 +89,7 @@ analysis tool
   # Bio::Tools::Run::Analysis::Job invisible
   use Bio::Tools::Run::Analysis;
   my $job =
-    new Bio::Tools::Run::Analysis (-name => 'edit::seqret')
+    Bio::Tools::Run::Analysis->new(-name => 'edit::seqret')
         ->create_job ('edit::seqret/c8ef56:ef535489ac:-7ff4');
   print join ("\n",
 	    $job->status,
@@ -213,7 +213,7 @@ BEGIN {
 =head2 new
 
  Usage   : my $tool =
-             new Bio::Tools::Run::Analysis (-access => 'soap',
+             Bio::Tools::Run::Analysis->new(-access => 'soap',
                                             -name => 'edit.seqret',
                                             ...
                                             );
@@ -538,7 +538,7 @@ use Bio::Root::Root;
 
 =head2 new
 
- Usage   : my $job = new Bio::Tools::Run::Analysis::Job
+ Usage   : my $job = Bio::Tools::Run::Analysis::Job->new
                        (-access => 'soap',
                         -name => 'edit.seqret',
                         -id => 'xxxyyy111222333'
@@ -578,7 +578,7 @@ sub new {
     if ($class eq 'Bio::Tools::Run::Analysis::Job') {
 
 	# this is called only the first time when somebody calls:
-	#'new Bio::Tools::Run::Analysis::Job (...)'
+	#'Bio::Tools::Run::Analysis::Job->new(...)'
 
 	my %param = @args;
 	@param { map { lc $_ } keys %param } = values %param; # lowercase keys

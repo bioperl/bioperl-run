@@ -17,7 +17,7 @@ application objects.
   use Bio::Tools::Run::AnalysisFactory::Pise;
 
   # Build a Pise factory
-  my $factory = new Bio::Tools::Run::AnalysisFactory::Pise();
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
 
   # Then create an application object (Pise::Run::Tools::PiseApplication):
   my $program = $factory->program('genscan');
@@ -46,7 +46,7 @@ application objects.
 Bio::Tools::Run::AnalysisFactory::Pise is a class to create Pise
 application objects, that let you submit jobs on a Pise server.
 
-  my $factory = new Bio::Tools::Run::AnalysisFactory::Pise(
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new(
                                               -email => 'me@myhome');
 
 The email is optional (there is default one). It can be useful,

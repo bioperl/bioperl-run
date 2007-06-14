@@ -54,7 +54,7 @@ my $verbose = 0;
 use Bio::Tools::Phylo::PAML; # PAML parser
 use Bio::Root::IO;
 
-my $inpaml = new Bio::Tools::Phylo::PAML(-file => 
+my $inpaml = Bio::Tools::Phylo::PAML->new(-file => 
 					 Bio::Root::IO->catfile(qw(t data 
 								   codeml.mlc)));
 
@@ -63,13 +63,13 @@ ok($inpaml);
 use Bio::Tools::Run::Phylo::PAML::Codeml;
 use Bio::Tools::Run::Phylo::PAML::Yn00;
 use Bio::AlignIO;
-my $codeml = new Bio::Tools::Run::Phylo::PAML::Codeml(-verbose => $verbose);
+my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new(-verbose => $verbose);
 unless ($codeml->executable) {
   warn("PAML not is installed. skipping tests $Test::ntest to $NUMTESTS\n");
   exit(0) ;
 }
 
-my $in = new Bio::AlignIO(-format => 'phylip',
+my $in = Bio::AlignIO->new(-format => 'phylip',
 			  -file   => Bio::Root::IO->catfile(qw(t data 
 							       gf-s85.phylip)));
 my $aln = $in->next_aln;
@@ -129,7 +129,7 @@ ok($MLmatrix->[0]->[1]->{'t'}, 1.0941);
 ok($yn00->error_string !~ /Error/); # we don't expect any errors;
 
 
-$codeml = new Bio::Tools::Run::Phylo::PAML::Codeml
+$codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
     (-params => { 'alpha' => 1.53 },
      -verbose => $verbose);
 

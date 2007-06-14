@@ -90,7 +90,7 @@ BEGIN {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Phylip::Base();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Phylip::Base->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Phylip::Base object 
  Returns : an instance of Bio::Tools::Run::Phylo::Phylip::Base
  Args    :

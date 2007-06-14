@@ -45,7 +45,7 @@ if( $DEBUG ) {
     unlink($file);
 }
 
-my $intree = new Bio::TreeIO(-file => Bio::Root::IO->catfile(qw(t data treefile.example)));
+my $intree = Bio::TreeIO->new(-file => Bio::Root::IO->catfile(qw(t data treefile.example)));
 
 $file = $treedraw->draw_tree(Bio::Root::IO->catfile(qw(t data 
 						       treefile.example)));

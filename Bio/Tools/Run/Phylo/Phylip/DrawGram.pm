@@ -18,7 +18,7 @@ Bio::Tools::Run::Phylo::Phylip::DrawGram - use Phylip DrawTree program to draw p
 
   use Bio::Tools::Run::Phylo::Phylip::DrawGram;
 
-  my $drawfact = new Bio::Tools::Run::Phylo::Phylip::DrawGram();
+  my $drawfact = Bio::Tools::Run::Phylo::Phylip::DrawGram->new();
   my $treeimage = $drawfact->run($tree);
 
 =head1 DESCRIPTION
@@ -133,7 +133,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Phylip::DrawGram();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Phylip::DrawGram->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Phylip::DrawGram object 
  Returns : an instance of Bio::Tools::Run::Phylo::Phylip::DrawGram
  Args    : The available DrawGram parameters

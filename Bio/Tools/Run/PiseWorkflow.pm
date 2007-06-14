@@ -11,7 +11,7 @@ Bio::Tools::Run::PiseWorkflow
 =head1 SYNOPSIS
 
   # First, create a Bio::Tools::Run::AnalysisFactory::Pise object:
-  my $factory = new Bio::Tools::Run::AnalysisFactory::Pise();
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
   # Then create the application objects (Pise::Run::Tools::PiseApplication):
   my $clustalw = $factory->program('clustalw');
   $clustalw->infile($my_alignment_file);

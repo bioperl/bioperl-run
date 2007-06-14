@@ -17,7 +17,7 @@ alignments using the Proda program.
 =head1 SYNOPSIS
 
   # Build a Proda alignment factory
-  $factory = new Bio::Tools::Run::Alignment::Proda(@params);
+  $factory = Bio::Tools::Run::Alignment::Proda->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';
@@ -34,7 +34,7 @@ alignments using the Proda program.
   #There are various additional options and input formats available.
   #See the DESCRIPTION section that follows for additional details.
 
-  $factory = new Bio::Tools::Run::Alignment::Proda();
+  $factory = Bio::Tools::Run::Alignment::Proda->new();
   @alns = $factory->align($seq_array_ref);
 
 =head1 DESCRIPTION

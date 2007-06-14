@@ -17,7 +17,7 @@ Do not use this object directly, it is recommended to access it and use
 it through the C<Bio::Tools::Run::Analysis> module:
 
   use Bio::Tools::Run::Analysis;
-  my $tool = new Bio::Tools::Run::Analysis (-access => 'soap',
+  my $tool = Bio::Tools::Run::Analysis->new(-access => 'soap',
                                             -name   => 'seqret');
 
 =head1 DESCRIPTION
@@ -121,7 +121,7 @@ BEGIN {
 
 =head2 _initialize
 
- Usage   : my $tool = new Bio::Tools::Run::Analysis (-access => 'soap',
+ Usage   : my $tool = Bio::Tools::Run::Analysis->new(-access => 'soap',
                                                      -name => 'seqret',
                                                      ...);
            (_initialize is internally called from the 'new()' method)

@@ -17,34 +17,34 @@ Bio::Tools::Run::AnalysisFactory - A directory of analysis tools
   # list all available analyses from the default location,
   # using a default (SOAP) access method
   use Bio::Tools::Run::AnalysisFactory;
-  my $list = new Bio::Tools::Run::AnalysisFactory
+  my $list = Bio::Tools::Run::AnalysisFactory->new();
                 ->available_analyses;
   use Data::Dumper; print Dumper ($list);
 
   # ditto, but from a different location
   use Bio::Tools::Run::AnalysisFactory;
   my $list =
-     new Bio::Tools::Run::AnalysisFactory (-location => 'http://somewhere/something')
+     Bio::Tools::Run::AnalysisFactory->new(-location => 'http://somewhere/something')
                 ->available_analyses;
 
   # ...and using a different access method
   # (this example is not yet impelmented)
   use Bio::Tools::Run::AnalysisFactory;
   my $list =
-     new Bio::Tools::Run::AnalysisFactory (-location => 'http://somewhere/something',
+     Bio::Tools::Run::AnalysisFactory->new(-location => 'http://somewhere/something',
                                            -access => 'novella')
                 ->available_analyses;
 
   # list available categories of analyses
   use Bio::Tools::Run::AnalysisFactory;
   my $categories =
-     new Bio::Tools::Run::AnalysisFactory
+     Bio::Tools::Run::AnalysisFactory->new();
                 ->available_categories;
   use Data::Dumper; print Dumper ($categories);
 
   # show all analyses group by categories
   use Bio::Tools::Run::AnalysisFactory;
-  my $factory = new Bio::Tools::Run::AnalysisFactory;
+  my $factory = Bio::Tools::Run::AnalysisFactory->new();
   foreach $cat ( @{ $factory->available_categories } ) {
     my @sublist = @{ $factory->available_analyses ($cat) };
     print "$cat:\n\t",
@@ -54,7 +54,7 @@ Bio::Tools::Run::AnalysisFactory - A directory of analysis tools
 
   # create an analysis object
   use Bio::Tools::Run::AnalysisFactory;
-  $service = new Bio::Tools::Run::AnalysisFactory
+  $service = Bio::Tools::Run::AnalysisFactory->new();
                  ->create_analysis ('edit.seqret');
   $service->run (
                 #...
@@ -156,7 +156,7 @@ BEGIN {
 =head2 new
 
  Usage   : my $factory =
-             new Bio::Tools::Run::AnalysisFactory (-access => 'soap',
+             Bio::Tools::Run::AnalysisFactory->new(-access => 'soap',
                                                    -location => 'http://...');
  Returns : a new Bio::Tools::Run::AnalysisFactory object representing a list
            of available analyses

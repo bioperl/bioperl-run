@@ -36,7 +36,7 @@ Bio::Factory::EMBOSS - EMBOSS application factory class
                -outfile   => $wateroutfile});
   # now you might want to get the alignment
   use Bio::AlignIO;
-  my $alnin = new Bio::AlignIO(-format => 'emboss',
+  my $alnin = Bio::AlignIO->new(-format => 'emboss',
 		               	       -file   => $wateroutfile);
 
   while ( my $aln = $alnin->next_aln ) {

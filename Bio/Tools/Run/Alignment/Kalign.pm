@@ -19,7 +19,7 @@ sequences or alignments using the KALIGN program
 =head1 SYNOPSIS
 
   # Build a kalign alignment factory
-  $factory = new Bio::Tools::Run::Alignment::Kalign (@params);
+  $factory = Bio::Tools::Run::Alignment::Kalign->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';

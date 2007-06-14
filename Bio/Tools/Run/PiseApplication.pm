@@ -17,7 +17,7 @@ Bio::Tools::Run::PiseApplication - A class manage Pise programs information, con
   use Bio::Tools::Run::AnalysisFactory::Pise;
 
   # Build a Pise factory       
-  my $factory = new Bio::Tools::Run::AnalysisFactory::Pise();
+  my $factory = Bio::Tools::Run::AnalysisFactory::Pise->new();
 
   # Then create an application object (Pise::Run::Tools::PiseApplication):
   my $program = $factory->program('genscan');

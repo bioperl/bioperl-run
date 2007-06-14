@@ -17,7 +17,7 @@ alignments using the Probalign program
 =head1 SYNOPSIS
 
   # Build a muscle alignment factory
-  $factory = new Bio::Tools::Run::Alignment::Probalign(@params);
+  $factory = Bio::Tools::Run::Alignment::Probalign->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';
@@ -34,7 +34,7 @@ alignments using the Probalign program
   #There are various additional options and input formats available.
   #See the DESCRIPTION section that follows for additional details.
 
-  $factory = new Bio::Tools::Run::Alignment::Probalign();
+  $factory = Bio::Tools::Run::Alignment::Probalign->new();
   $factory->outfile_name("$dir/$subdir/$outdir/outfile.afa");
   $aln = $factory->align($seq_array_ref);
 

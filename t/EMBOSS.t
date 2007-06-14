@@ -52,7 +52,7 @@ ok(1);
 ## the print "1..x\n" in the BEGIN block to reflect the
 ## total number of tests that will be run.
 
-my $factory = new Bio::Factory::EMBOSS(-verbose => $verbose);
+my $factory = Bio::Factory::EMBOSS->new(-verbose => $verbose);
 ok($factory);
 my $compseqapp = $factory->program('compseq');
 
@@ -77,14 +77,14 @@ my $water = $factory->program('water');
 ok ($water);
 
 # testing in-memory use of 
-my $in = new Bio::SeqIO(-format => 'fasta',
+my $in = Bio::SeqIO->new(-format => 'fasta',
 			-file =>  Bio::Root::IO->catfile('t',
 							 'data',
 							 'cysprot1a.fa'));
 my $seq = $in->next_seq();
 ok($seq);
 my @amino;
-$in = new Bio::SeqIO(-format => 'fasta',
+$in = Bio::SeqIO->new(-format => 'fasta',
 		     -file =>  Bio::Root::IO->catfile('t',
 						      'data',
 						      'amino.fa'));
@@ -116,7 +116,7 @@ if( $version ge '2.8.0' ) {
 }
 ok(-e $wateroutfile);
 
-my $alnin = new Bio::AlignIO(-format => 'emboss',
+my $alnin = Bio::AlignIO->new(-format => 'emboss',
 			    -file   => $wateroutfile);
 
 ok( $alnin);
@@ -138,7 +138,7 @@ ok(sprintf("%.2f",$aln->average_percentage_identity), $expected{'apid'});
 
 my $cons = $factory->program('cons');
 $cons->verbose(0);
-$in = new Bio::AlignIO(-format => 'msf',
+$in = Bio::AlignIO->new(-format => 'msf',
 		       -file   => Bio::Root::IO->catfile('t',
 							 'data',
 							 'cysprot.msf'));

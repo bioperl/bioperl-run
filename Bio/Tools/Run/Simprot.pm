@@ -27,7 +27,7 @@ phylogenetic tree
 
   my $tree = $treeio->next_tree;
 
-  my $simprot = new Bio::Tools::Run::Simprot();
+  my $simprot = Bio::Tools::Run::Simprot->new();
   $simprot->tree($tree);
   my ($rc,$aln,$seq) = $simprot->run();
 
@@ -309,7 +309,7 @@ sub prepare {
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
-       my $treeout = new Bio::TreeIO('-format' => 'newick',
+       my $treeout = Bio::TreeIO->new('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();
@@ -378,8 +378,8 @@ sub run {
 	   $rc = 0;
        }
        eval {
-	   $aln = new Bio::AlignIO(-file => "$outfile",-format => 'fasta');
-	   $seq = new Bio::SeqIO(-file => "$seqfile", -format => 'fasta');
+	   $aln = Bio::AlignIO->new(-file => "$outfile",-format => 'fasta');
+	   $seq = Bio::SeqIO->new(-file => "$seqfile", -format => 'fasta');
        };
        if( $@ ) {
 	   $self->warn($self->error_string);

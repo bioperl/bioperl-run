@@ -59,14 +59,14 @@ parsing of the alignment format.
 
 TO USE LAGAN:
 
-  my $lagan = new Bio::Tools::Run::Alignment::Lagan(@params);
+  my $lagan = Bio::Tools::Run::Alignment::Lagan->new(@params);
   my $report_out = $lagan->lagan($seq1, $seq2);
 
 A SimpleAlign object is returned.
 
 TO USE MLAGAN:
 
-  my $lagan = new Bio::Tools::Run::Alignment::Lagan();
+  my $lagan = Bio::Tools::Run::Alignment::Lagan->new();
   my $tree = "(($seqname1 $seqname2) $seqname3)";
   my @sequence_objs; 	#an array of bioperl Seq objects
 

@@ -121,7 +121,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Hyphy();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Hyphy object 
  Returns : Bio::Tools::Run::Phylo::Hyphy
  Args    : -alignment => the Bio::Align::AlignI object
@@ -176,7 +176,7 @@ sub prepare {
        ($tempseqFH,$tempalnfile) = $self->io->tempfile
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+       my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
 				     '-fh'          => $tempseqFH,
                                      '-interleaved' => 0);
 
@@ -197,7 +197,7 @@ sub prepare {
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
-       my $treeout = new Bio::TreeIO('-format' => 'newick',
+       my $treeout = Bio::TreeIO->new('-format' => 'newick',
 				     '-fh'     => $temptreeFH);
        $treeout->write_tree($tree);
        $treeout->close();

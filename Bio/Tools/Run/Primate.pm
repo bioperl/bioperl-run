@@ -120,7 +120,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Primate()
+ Usage   : my $obj = Bio::Tools::Run::Primate->new()
  Function: Builds a new Bio::Tools::Run::Primate objet
  Returns : Bio::Tools::Run::Primate
  Args    : query => the L<Bio::PrimarySeqI> object or a file path

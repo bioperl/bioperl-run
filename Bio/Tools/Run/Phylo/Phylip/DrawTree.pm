@@ -19,7 +19,7 @@ program to draw trees
 
   use Bio::Tools::Run::Phylo::Phylip::DrawTree;
 
-  my $treedraw = new Bio::Tools::Run::Phylo::Phylip::DrawTree();
+  my $treedraw = Bio::Tools::Run::Phylo::Phylip::DrawTree->new();
   my $treeimagefile = $drawfact->run($tree);
 
 =head1 DESCRIPTION
@@ -156,7 +156,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Phylip::DrawTree();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Phylip::DrawTree->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Phylip::DrawTree object 
  Returns : an instance of Bio::Tools::Run::Phylo::Phylip::DrawTree
  Args    : The available DrawGram parameters

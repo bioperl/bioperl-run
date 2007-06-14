@@ -254,7 +254,7 @@ sub _run {
     $self->debug("QuickTree command = $command");
     
     open(my $result, "$command |") || $self->throw("QuickTree call ($command) crashed: $?");
-    my $treeio = new Bio::TreeIO(-format => 'nhx', -fh => $result);
+    my $treeio = Bio::TreeIO->new(-format => 'nhx', -fh => $result);
     my $tree = $treeio->next_tree;
     close($result);
     

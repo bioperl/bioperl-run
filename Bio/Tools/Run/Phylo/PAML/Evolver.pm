@@ -21,7 +21,7 @@ Bio::Tools::Run::Phylo::PAML::Evolver - Wrapper aroud the PAML program evolver
 
   use Bio::Tools::Run::Phylo::PAML::Evolver;
 
-  my $evolver = new Bio::Tools::Run::Phylo::PAML::Evolver();
+  my $evolver = Bio::Tools::Run::Phylo::PAML::Evolver->new();
 
   # Get a $tree object somehow
   $evolver->tree($tree);
@@ -34,7 +34,7 @@ Bio::Tools::Run::Phylo::PAML::Evolver - Wrapper aroud the PAML program evolver
   ####
 
   # Or with all the data coming from a previous PAML run
-  my $parser = new Bio::Tools::Phylo::PAML
+  my $parser = Bio::Tools::Phylo::PAML->new
     (
      -file => "$inputfile",
     );
@@ -220,7 +220,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::PAML::Evolver();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::PAML::Evolver->new();
  Function: Builds a new Bio::Tools::Run::Phylo::PAML::Evolver object 
  Returns : Bio::Tools::Run::Phylo::PAML::Evolver
            -save_tempfiles => boolean to save the generated tempfiles and
@@ -298,7 +298,7 @@ sub prepare {
    #        ($tempseqFH,$tempseqfile) = $self->io->tempfile
    # 	   ('-dir' => $tempdir, 
    # 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-   #        my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+   #        my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
    # 				     '-fh'          => $tempseqFH,
    #                                      '-interleaved' => 0,
    #                                      '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
@@ -329,7 +329,7 @@ sub prepare {
    print $evolverfh "$params{tree_length}\n";
    # FIXME: do #1:#n branch tagging magic here
    # FIXME: this pre flush stuff is for appending mode
-   my $treeout = new Bio::TreeIO
+   my $treeout = Bio::TreeIO->new
        ('-format' => 'newick',
         '-fh'     => $evolverfh,
         -PRE =>'>>',

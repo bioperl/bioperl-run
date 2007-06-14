@@ -19,7 +19,7 @@ Bio::Tools::Run::Phylo::Hyphy::Modeltest - Wrapper around the Hyphy Modeltest an
   use Bio::Tools::Run::Phylo::Hyphy::Modeltest;
   use Bio::AlignIO;
 
-  my $alignio = new Bio::AlignIO(-format => 'fasta',
+  my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/hyphy1.fasta');
 
   my $aln = $alignio->next_aln;
@@ -27,7 +27,7 @@ Bio::Tools::Run::Phylo::Hyphy::Modeltest - Wrapper around the Hyphy Modeltest an
   my $treeio = Bio::TreeIO->new(
       -format => 'newick', -file => 't/data/hyphy1.tree');
 
-  my $modeltest = new Bio::Tools::Run::Phylo::Hyphy::Modeltest();
+  my $modeltest = Bio::Tools::Run::Phylo::Hyphy::Modeltest->new();
   $modeltest->alignment($aln);
   $modeltest->tree($tree);
   my ($rc,$results) = $modeltest->run();
@@ -123,7 +123,7 @@ BEGIN {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Hyphy::Modeltest();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy::Modeltest->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::Modeltest object 
  Returns : Bio::Tools::Run::Phylo::Hyphy::Modeltest
  Args    : -alignment => the Bio::Align::AlignI object

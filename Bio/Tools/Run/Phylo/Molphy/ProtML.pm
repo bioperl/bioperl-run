@@ -24,13 +24,13 @@ Bio::Tools::Run::Phylo::Molphy::ProtML - A wrapper for the Molphy pkg app ProtML
                'search' => 'quick',
                'other'  => [ '-information', '-w'] );
   my $verbose = 0; # change to 1 if you want some debugging output
-  my $protml = new Bio::Tools::Run::Phylo::Molphy::ProtML(-verbose => $verbose,
+  my $protml = Bio::Tools::Run::Phylo::Molphy::ProtML->new(-verbose => $verbose,
   							  -flags   => \%args);
 
   die("cannot find the protml executable") unless $protml->executable;
 
   # read in a previously built protein alignment
-  my $in = new Bio::AlignIO(-format => 'clustalw',
+  my $in = Bio::AlignIO->new(-format => 'clustalw',
   			    -file   => 't/data/cel-cbr-fam.aln');
   my $aln = $in->next_aln;
   $protml->alignment($aln);
@@ -52,7 +52,7 @@ Bio::Tools::Run::Phylo::Molphy::ProtML - A wrapper for the Molphy pkg app ProtML
   print "search space is ", $r->search_space, "\n";
         "1st tree score is ", $tree[0]->score, "\n";
 
-  my $out = new Bio::TreeIO(-file => ">saved_MLtrees.tre",
+  my $out = Bio::TreeIO->new(-file => ">saved_MLtrees.tre",
                             -format => "newick");
   $out->write_tree($tree[0]);
   $out = undef;
@@ -257,7 +257,7 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Molphy::ProtML();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Molphy::ProtML->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Molphy::ProtML object
  Returns : Bio::Tools::Run::Phylo::Molphy::ProtML
  Args    : -alignment => the Bio::Align::AlignI object
@@ -370,7 +370,7 @@ sub run {
 	('DIR' => $tmpdir,
 	 UNLINK => ($self->save_tempfiles ? 0 : 1));
     
-    my $alnout = new Bio::AlignIO('-format'      => 'phylip',
+    my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
 				  '-fh'          => $tempseqFH,
 				  '-interleaved' => 0,
 				  '-idlinebreak' => 1,
@@ -386,7 +386,7 @@ sub run {
 	my ($temptreeFH,$temptreefile) = $self->io->tempfile
 	    ('DIR' => $tmpdir,
 	     UNLINK => ($self->save_tempfiles ? 0 : 1));
-	my $treeout = new Bio::TreeIO('-format' => 'newick',
+	my $treeout = Bio::TreeIO->new('-format' => 'newick',
 				      '-fh'     => $temptreeFH);
 	$treeout->write_tree($tree);
 	$treeout->close();
@@ -399,7 +399,7 @@ sub run {
 	$self->warn("Cannot run $cmdstring");
 	return undef;
     }
-    my $parser= new Bio::Tools::Phylo::Molphy(-fh => \*PROTML);
+    my $parser= Bio::Tools::Phylo::Molphy->new(-fh => \*PROTML);
     return (1,$parser);
 }
 

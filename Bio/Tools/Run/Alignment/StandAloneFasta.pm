@@ -463,7 +463,7 @@ sub _setinput  {
     my @seqs;
     if( ! ref $input ) {
 	if( -e $input ) {
-	    my $seqio = new Bio::SeqIO(-format => 'fasta', -file => $input);
+	    my $seqio = Bio::SeqIO->new(-format => 'fasta', -file => $input);
 	    while( my $seq = $seqio->next_seq ) {
 		push @seqs, $seq;
 	    }

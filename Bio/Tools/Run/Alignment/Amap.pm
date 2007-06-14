@@ -17,7 +17,7 @@ sequences or alignments using the Amap (2.0) program
 =head1 SYNOPSIS
 
   # Build a muscle alignment factory
-  $factory = new Bio::Tools::Run::Alignment::Amap (@params);
+  $factory = Bio::Tools::Run::Alignment::Amap->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';
@@ -37,7 +37,7 @@ sequences or alignments using the Amap (2.0) program
   #To run amap with training, try something like:
 
   #First round to generate train.params
-  $factory = new Bio::Tools::Run::Alignment::Amap
+  $factory = Bio::Tools::Run::Alignment::Amap->new
       (
        'iterative-refinement'  => '1000',
        'consistency'   => '5',
@@ -55,7 +55,7 @@ sequences or alignments using the Amap (2.0) program
   $aln = '';
   $factory = '';
 
-  $factory = new Bio::Tools::Run::Alignment::Amap
+  $factory = Bio::Tools::Run::Alignment::Amap->new
       (
        'iterative-refinement'  => '1000',
        'consistency'   => '5',

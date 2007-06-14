@@ -19,7 +19,7 @@ Bio::Tools::Run::Phylo::Hyphy::REL - Wrapper around the Hyphy REL analysis
   use Bio::Tools::Run::Phylo::Hyphy::REL;
   use Bio::AlignIO;
 
-  my $alignio = new Bio::AlignIO(-format => 'fasta',
+  my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/hyphy1.fasta');
 
   my $aln = $alignio->next_aln;
@@ -27,7 +27,7 @@ Bio::Tools::Run::Phylo::Hyphy::REL - Wrapper around the Hyphy REL analysis
   my $treeio = Bio::TreeIO->new(
       -format => 'newick', -file => 't/data/hyphy1.tree');
 
-  my $rel = new Bio::Tools::Run::Phylo::Hyphy::REL();
+  my $rel = Bio::Tools::Run::Phylo::Hyphy::REL->new();
   $rel->alignment($aln);
   $rel->tree($tree);
   my ($rc,$results) = $rel->run();
@@ -116,7 +116,7 @@ BEGIN {
 =head2 new
 
  Title   : new
- Usage   : my $obj = new Bio::Tools::Run::Phylo::Hyphy::REL();
+ Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy::REL->new();
  Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::REL object 
  Returns : Bio::Tools::Run::Phylo::Hyphy::REL
  Args    : -alignment => the Bio::Align::AlignI object

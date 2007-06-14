@@ -20,7 +20,7 @@ alignments using the TCoffee program
 
   # Build a tcoffee alignment factory
   @params = ('ktuple' => 2, 'matrix' => 'BLOSUM');
-  $factory = new Bio::Tools::Run::Alignment::TCoffee (@params);
+  $factory = Bio::Tools::Run::Alignment::TCoffee->new(@params);
 
   # Pass the factory a list of sequences to be aligned.
   $inputfilename = 't/cysprot.fa';
