@@ -262,6 +262,7 @@ sub run{
             $self->warn("Program $program_name processes one sequence at a time");
         }
         push @run_args, $seq[0]->display_id();
+        push @run_args, $seq[0]->length();
     }
     
     return $self->_run(@run_args);
@@ -280,7 +281,7 @@ sub run{
 
 sub _run {
     
-    my ($self, $seq_file_name, $seq_id) = @_;
+    my ($self, $seq_file_name, $seq_id, $seq_length) = @_;
     
     my @cmd = (
                $self->executable(),
@@ -340,8 +341,10 @@ sub _run {
     
     my %parser_args = (-file => $output_file_name);
 
-    # Pass along $seq_id if we got one (only should for glimmer2)
-    if (defined($seq_id)) { $parser_args{-seqname} = $seq_id; }
+    # Pass along $seq_id and $seq_length if they were provided
+    # (only should be for glimmer2).
+    if (defined($seq_id))     { $parser_args{-seqname  } = $seq_id;     }
+    if (defined($seq_length)) { $parser_args{-seqlength} = $seq_length; }
     
     return Bio::Tools::Glimmer->new(%parser_args);
     
