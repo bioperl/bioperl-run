@@ -3,21 +3,17 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Hmmer - Wrapper for local execution of hmmsearch
-,hmmbuild, hmmcalibrate, hmmalign, hmmpfam 
+Bio::Tools::Run::Hmmer - Wrapper for local execution of hmmalign, hmmbuild,
+hmmcalibrate, hmmemit, hmmpfam, hmmsearch
 
 =head1 SYNOPSIS
 
-  #run hmmpfam|hmmalign|hmmsearch
-  my $factory = Bio::Tools::Run::Hmmer->new('program'=>'hmmsearch','hmm'=>'model.hmm');
+  # run hmmsearch (similar for hmmpfam)
+  my $factory = Bio::Tools::Run::Hmmer->new(-hmm => 'model.hmm');
 
-  # Pass the factory a Bio::Seq object or a file name
+  # Pass the factory a Bio::Seq object or a file name, returns a Bio::SearchIO
+  my $searchio = $factory->hmmsearch($seq);
 
-  # returns a Bio::SearchIO object
-  my $search = $factory->run($seq);
-
-
-  my @feat;
   while (my $result = $searchio->next_result){
    while(my $hit = $result->next_hit){
     while (my $hsp = $hit->next_hsp){
@@ -35,29 +31,36 @@ Bio::Tools::Run::Hmmer - Wrapper for local execution of hmmsearch
    }
   }
 
-  #build a hmm using hmmbuild
-  my $aio = Bio::AlignIO->new(-file=>"protein.msf",-format=>'msf');
+  # build a hmm using hmmbuild
+  my $aio = Bio::AlignIO->new(-file => "protein.msf", -format => 'msf');
   my $aln = $aio->next_aln;
-  my $factory =  Bio::Tools::Run::Hmmer->new('program'=>'hmmbuild',
-                                             'hmm'=>'model.hmm');
-  $factory->run($aln);
+  my $factory =  Bio::Tools::Run::Hmmer->new(-hmm => 'model.hmm');
+  $factory->hmmbuild($aln);
 
-  #calibrate the hmm
-  my $factory =  Bio::Tools::Run::Hmmer->new('program'=>'hmmcalibrate',
-                                             'hmm'=>'model.hmm');
-  $factory->run();
+  # calibrate the hmm
+  $factory->calibrate();
 
-  my $factory =  Bio::Tools::Run::Hmmer->new('program'=>'hmmalign',
-                                             'hmm'=>'model.hmm');
+  # emit a sequence stream from the hmm
+  my $seqio = $factory->hmmemit();
 
-   # Pass the factory a Bio::Seq object or a file name
-
-   # returns a Bio::AlignIO object
-   my $aio = $factory->run($seq);
+  # align sequences to the hmm
+  my $alnio = $factory->hmmalign(@seqs);
 
 =head1 DESCRIPTION
 
-Wrapper module for Sean Eddy's  HMMER suite of program to allow running of hmmsearch,hmmpfam,hmmalign, hmmbuild,hmmconvert. Binaries are available at http://hmmer.wustl.edu/
+Wrapper module for Sean Eddy's HMMER suite of program to allow running of
+hmmalign, hmmbuild, hmmcalibrate, hmmemit, hmmpfam and hmmsearch. Binaries are
+available at http://hmmer.janelia.org/
+
+You can pass most options understood by the command-line programs to new(), or
+set the options by calling methods with the same name as the argument. In both
+instances, case sensitivity matters.
+
+Additional methods are hmm() to specifiy the hmm file (needed for all HMMER
+programs) which you would normally set in the call to new().
+
+The HMMER programs must either be in your path, or you must set the environment
+variable HMMERDIR to point to their location.
 
 =head1 FEEDBACK
 
@@ -87,6 +90,7 @@ web:
  Shawn Hoon shawnh-at-gmx.net
  Jason Stajich jason -at- bioperl -dot- org
  Scott Markel scott -at- scitegic -dot com
+ Sendu Bala bix@sendu.me.uk
 
 =head1 APPENDIX
 
@@ -97,43 +101,381 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Hmmer;
 
-use vars qw($AUTOLOAD @ISA @HMMER_PARAMS @HMMER_SWITCHES %DOUBLE_DASH 
-            $DefaultOutFormat
-            %OK_FIELD);
 use strict;
+
 use Bio::SeqIO;
-use Bio::Root::Root;
 use Bio::SearchIO;
 use Bio::AlignIO;
-use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+use base qw(Bio::Tools::Run::WrapperBase);
 
-BEGIN {
-    $DefaultOutFormat = 'msf';
-    @HMMER_PARAMS=qw(HMM hmm PROGRAM program DB db A E T Z 
-		     outformat null pam prior pbswitch 
-		     archpri cfile gapmax idlevel informat pamwgt 
-		     swentry swexit withali mapali
-		     cpu domE domT
-                    );
-    @HMMER_SWITCHES=qw(n q oneline f g s fast hand F
-		       wblosum wgsc wme wpb wvoronoi wnone noeff 
-		       amino nucleic binary pvm xnu null2 acc compat
-		       cut_ga cut_nc cut_tc forward
-		      );
-    %DOUBLE_DASH = map { $_ => 1 } qw(oneline outformat fast hand
-		   null pam prior pbswitch amino nucleic
-		   binary  wblosum wgsc wme wpb wvoronoi 
-		   wnone noeff amino nucleic binary 
-		   archpri cfile gapmax idlevel informat 
-		   pamwgt swentry swexit cpu
-		   mapali withali pvm xnu null2 acc compat
-		   cut_ga cut_nc cut_tc forward domeE domT
-				     );
+our $DefaultFormat      = 'msf';
+our $DefaultReadMethod  = 'hmmer';
+our %ALL                = (quiet => 'q', o => 'outfile');
+our @ALIGN_PARAMS       = qw(mapali outformat withali o);
+our @ALIGN_SWITCHES     = qw(m oneline q);
+our @BUILD_PARAMS       = qw(n archpri cfile gapmax idlevel null pam pamwgt
+                             pbswitch prior swentry swexit o);
+our @BUILD_SWITCHES     = qw(f g s A F amino binary fast hand noeff nucleic
+                             wblosum wgsc wme wnone wpb wvoronoi);
+our @CALIBRATE_PARAMS   = qw(fixed histfile mean num sd seed cpu);
+our @CALIBRATE_SWITCHES = qw();
+our @EMIT_PARAMS        = qw(n seed o);
+our @EMIT_SWITCHES      = qw(c q);
+our @PFAM_PARAMS        = qw(A E T Z domE domT informat cpu);
+our @PFAM_SWITCHES      = qw(n acc cut_ga cut_gc cut_nc forward null2 xnu);
+our @SEARCH_PARAMS      = @PFAM_PARAMS;
+our @SEARCH_SWITCHES    = @PFAM_SWITCHES;
+our %OTHER              = (_READMETHOD => '_readmethod',
+                           program_name => [qw(PROGRAM program)],
+                           hmm => [qw(HMM db DB)]);
 
-    foreach my $attr ( @HMMER_PARAMS,@HMMER_SWITCHES)
-                        { $OK_FIELD{$attr}++; }
+# just to be explicit
+our @UNSUPPORTED        = qw(h verbose a compat pvm);
+
+
+=head2 new
+
+ Title   : new
+ Usage   : $HMMER->new(@params)
+ Function: Creates a new HMMER factory
+ Returns : Bio::Tools::Run::HMMER
+ Args    : -hmm => filename # the hmm, used by all program types; if not set
+                            # here, must be set with hmm() method prior to
+                            # running anything
+           -_READMETHOD => 'hmmer' (default) || 'hmmer_pull' # the parsing
+                                                             # module to use for
+                                                             # hmmpfam/hmmsearch
+
+           Any option supported by a Hmmer program, where switches are given
+           a true value, eg. -q => 1, EXCEPT for the following which are handled
+           internally/ incompatible: h verbose a compat pvm
+
+           -q is synonymous with -quiet
+           -o is synonymous with -outfile
+
+           # may be specified here, allowing run() to be used, or
+           # it can be ommitted and the corresponding method (eg.
+           # hmmalign()) used later.
+           -program => hmmalign|hmmbuild|hmmcalibrate|hmmemit|hmmpfam|hmmsearch
+
+=cut
+
+sub new {
+    my($class, @args) = @_;
+    my $self = $class->SUPER::new(@args);
+    
+    $self->_set_from_args(\@args, -methods => {(map { $_ => $ALL{$_} } keys %ALL),
+                                               (map { $_ => $OTHER{$_} } keys %OTHER),
+                                               (map { $_ => $_ } 
+                                                 (@ALIGN_PARAMS,
+                                                  @ALIGN_SWITCHES,
+                                                  @BUILD_PARAMS,
+                                                  @BUILD_SWITCHES,
+                                                  @CALIBRATE_PARAMS,
+                                                  @CALIBRATE_SWITCHES,
+                                                  @EMIT_PARAMS,
+                                                  @EMIT_SWITCHES,
+                                                  @PFAM_PARAMS,
+                                                  @PFAM_SWITCHES,
+                                                  @SEARCH_PARAMS,
+                                                  @SEARCH_SWITCHES))},
+                                  -create => 1,
+                                  -case_sensitive => 1);
+    
+    $self->informat || $self->informat($DefaultFormat);
+    $self->_READMETHOD || $self->_READMETHOD($DefaultReadMethod);
+    
+    return $self;
+}
+
+=head2 run
+
+ Title   : run
+ Usage   : $obj->run($seqFile)
+ Function: Runs one of the Hmmer programs, according to the current setting of
+           program() (as typically set during new(-program => 'name')).
+ Returns : A Bio::SearchIO, Bio::AlignIO, Bio::SeqIO or boolean depending on
+           the program being run (see method corresponding to program name for
+           details).
+ Args    : A Bio::PrimarySeqI, Bio::Align::AlignI or filename
+
+=cut
+
+sub run {
+    my $self = shift;
+    my $program = lc($self->program_name || $self->throw("The program must already be specified"));
+    $self->can($program) || $self->throw("'$program' wasn't a valid program");
+    return $self->$program(@_);
+}
+
+=head2 hmmalign
+
+ Title   : hmmalign
+ Usage   : $obj->hmmalign()
+ Function: Runs hmmalign
+ Returns : A Bio::AlignIO
+ Args    : list of Bio::SeqI OR Bio::Align::AlignI OR filename of file with
+           sequences or an alignment
+
+=cut
+
+sub hmmalign {
+    my $self = shift;
+    $self->program_name('hmmalign');
+    my $input = $self->_setinput(@_);
+    
+    unless (defined $self->o()) { 
+        $self->q(1);
+    }
+    if (! $self->outformat) {
+        $self->outformat($DefaultFormat);
+    }
+    
+    return $self->_run($input);
+}
+
+=head2 hmmbuild
+
+ Title   : hmmbuild
+ Usage   : $obj->hmmbuild()
+ Function: Runs hmmbuild, outputting an hmm to the file currently set by method
+           hmm() or db(), or failing that, o() or outfile(), or failing that, to
+           a temp location.
+ Returns : true on success
+ Args    : Bio::Align::AlignI OR filename of file with an alignment
+
+=cut
+
+sub hmmbuild {
+    my $self = shift;
+    $self->program_name('hmmbuild');
+    my $input = $self->_setinput(@_);
+    
+    unless (defined $self->hmm()) {
+        $self->hmm($self->o() || $self->io->tempfile(-dir => $self->tempdir));
+    }
+    
+    return $self->_run($input);
+}
+
+=head2 hmmcalibrate
+
+ Title   : hmmcalibrate
+ Usage   : $obj->hmmcalibrate()
+ Function: Runs hmmcalibrate
+ Returns : true on success
+ Args    : none (hmm() must be set, most likely by the -hmm option of new()), OR
+           optionally supply an hmm filename to set hmm() and run
+
+=cut
+
+sub hmmcalibrate {
+    my ($self, $hmm) = @_;
+    $self->program_name('hmmcalibrate');
+    $self->hmm($hmm) if $hmm;
+    $self->hmm || $self->throw("hmm() must be set first");
+    return $self->_run();
+}
+
+=head2 hmmemit
+
+ Title   : hmmemit
+ Usage   : $obj->hmmemit()
+ Function: Runs hmmemit
+ Returns : A Bio::SeqIO
+ Args    : none (hmm() must be set, most likely by the -hmm option of new()), OR
+           optionally supply an hmm filename to set hmm() and run
+
+=cut
+
+sub hmmemit {
+    my ($self, $hmm) = @_;
+    $self->program_name('hmmemit');
+    $self->hmm($hmm) if $hmm;
+    $self->hmm || $self->throw("hmm() must be set first");
+    
+    unless (defined $self->o()) { 
+        $self->q(1);
+    }
+    
+    return $self->_run();
+}
+
+=head2 hmmpfam
+
+ Title   : hmmpfam
+ Usage   : $obj->hmmpfam()
+ Function: Runs hmmpfam
+ Returns : A Bio::SearchIO
+ Args    : A Bio::PrimarySeqI, Bio::Align::AlignI or filename
+
+=cut
+
+sub hmmpfam {
+    my $self = shift;
+    $self->program_name('hmmpfam');
+    my $input = $self->_setinput(@_);
+    return $self->_run($input);
+}
+
+=head2 hmmsearch
+
+ Title   : hmmsearch
+ Usage   : $obj->hmmsearch()
+ Function: Runs hmmsearch
+ Returns : A Bio::SearchIO
+ Args    : A Bio::PrimarySeqI, Bio::Align::AlignI or filename
+
+=cut
+
+sub hmmsearch {
+    my $self = shift;
+    $self->program_name('hmmsearch');
+    my $input = $self->_setinput(@_);
+    return $self->_run($input);
+}
+
+=head2 _setinput
+
+ Title   : _setinput
+ Usage   : $obj->_setinput()
+ Function: Internal(not to be used directly)
+ Returns : filename
+ Args    : A Bio::PrimarySeqI, Bio::Align::AlignI or filename
+
+=cut
+
+sub _setinput {
+    my ($self, @things) = @_;
+    @things || $self->throw("At least one input is required");
+    
+    my $infile;
+    if  (ref $things[0] && $things[0]->isa("Bio::PrimarySeqI") ){# it is an object
+        $infile = $self->_writeSeqFile(@things);
+    }
+    elsif(ref $things[0] && $things[0]->isa("Bio::Align::AlignI")){
+        $infile = $self->_writeAlignFile(@things);
+    }
+    elsif (-e $things[0]) {
+        $infile = $things[0];
+    }
+    else {
+        $self->throw("Unknown kind of input '@things'");
+    }
+    
+    return $infile;
+}
+
+=head2 _run
+
+ Title   : _run
+ Usage   : $obj->_run()
+ Function: Internal(not to be used directly)
+ Returns : Bio::SearchIO
+ Args    : file name
+
+=cut
+
+sub _run {
+    my ($self, $file) = @_;
+    
+    my $str = $self->executable;
+    $str .= $self->_setparams;
+    $str .= ' '.$file if $file;
+    $self->debug("HMMER command = $str");
+    
+    my $progname = $self->program_name;
+    
+    my @in;
+    my @verbose = (-verbose => $self->verbose);
+    if ($progname =~ /align|build|emit/) {
+        my $outfile = $self->o;
+        if ($outfile || $progname eq 'hmmbuild') {
+            $str .= " > /dev/null" if $self->quiet;
+            system($str) && $self->throw("HMMER call ($str) crashed: $?\n");
+            @in = (-file => $outfile);
+        }
+        else {
+            open(my $fh, "$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
+            @in = (-fh => $fh);
+        }
+    }
+    elsif ($progname =~ /pfam|search/i) {
+        open(my $fh, "$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
+        
+        return Bio::SearchIO->new(-fh      => $fh, 
+                                  @verbose,
+                                  -format  => $self->_READMETHOD);
+    }
+    
+    if ($progname eq 'hmmalign') {
+        return Bio::AlignIO->new(@in,
+                                 @verbose,
+                                 -format => $self->outformat);
+    }
+    elsif ($progname eq 'hmmemit') {
+        return Bio::SeqIO->new(@in,
+                               @verbose,
+                               -format => 'fasta');
+    }
+    elsif ($progname =~ /calibrate/) {
+        open(my $pipe, "$str |") || $self->throw("HMMER call($str) crashed: $?\n");
+        my $io;
+        while (<$pipe>) {
+            $io .= $_;
+        }
+        close($pipe) || $self->throw("HMMER call($str) crashed: $?\n");;
+        $self->debug($io);
+    }
+    
+    return 1;
+}
+
+=head2 _setparams
+
+ Title   : _setparams
+ Usage   : Internal function, not to be called directly
+ Function: creates a string of params to be used in the command string
+ Returns : string of params
+ Args    : none
+
+=cut
+
+sub _setparams {
+    my $self = shift;
+    
+    my @execparams;
+    my @execswitches;
+    SWITCH: for ($self->program_name) {
+        /align/     && do { @execparams   = @ALIGN_PARAMS;
+                            @execswitches = @ALIGN_SWITCHES;
+                            last SWITCH; };
+        /build/     && do { @execparams   = @BUILD_PARAMS;
+                            @execswitches = @BUILD_SWITCHES;
+                            last SWITCH; };
+        /calibrate/ && do { @execparams   = @CALIBRATE_PARAMS;
+                            @execswitches = @CALIBRATE_SWITCHES;
+                            last SWITCH; };
+        /emit/      && do { @execparams   = @EMIT_PARAMS;
+                            @execswitches = @EMIT_SWITCHES;
+                            last SWITCH; };
+        /pfam/      && do { @execparams   = @PFAM_PARAMS;
+                            @execswitches = @PFAM_SWITCHES;
+                            last SWITCH; };
+        /search/    && do { @execparams   = @SEARCH_PARAMS;
+                            @execswitches = @SEARCH_SWITCHES;
+                            last SWITCH; };
+    }
+    
+    my $param_string = $self->SUPER::_setparams(-params     => \@execparams,
+                                                -switches   => \@execswitches,
+                                                -mixed_dash => 1);
+    
+    my $hmm = $self->hmm || $self->throw("Need to specify either HMM file or Database");
+    $param_string .= ' '.$hmm;
+    
+    return $param_string;
 }
 
 =head2 program_name
@@ -141,14 +483,20 @@ BEGIN {
  Title   : program_name
  Usage   : $factory>program_name()
  Function: holds the program name
- Returns:  string
- Args    : None
+ Returns : string
+ Args    : none
 
 =cut
 
 sub program_name {
-  my ($self) = shift;
-  return $self->program(@_);
+    my $self = shift;
+    if (@_) {
+        $self->{program_name} = shift;
+        
+        # hack so that when program_name changes, so does executable()
+        delete $self->{'_pathtoexe'};
+    }
+    return $self->{program_name} || '';
 }
 
 =head2 program_dir
@@ -156,212 +504,35 @@ sub program_name {
  Title   : program_dir
  Usage   : $factory->program_dir(@params)
  Function: returns the program directory, obtiained from ENV variable.
- Returns:  string
- Args    :
+ Returns : string
+ Args    : none
 
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{HMMERDIR}) if $ENV{HMMERDIR};
-}
-
-sub AUTOLOAD {
-       my $self = shift;
-       my $attr = $AUTOLOAD;
-       $attr =~ s/.*:://;
-       $self->throw("Unallowed parameter: '$attr' !") unless $OK_FIELD{$attr};
-       $self->{$attr} = shift if @_;
-       return $self->{$attr};
-}
-
-=head2 new
-
- Title   : new
- Usage   : $HMMER->new(@params)
- Function: creates a new HMMER factory
- Returns:  Bio::Tools::Run::HMMER
- Args    : 
-
-=cut
-
-sub new {
-       my ($class,@args) = @_;
-       my $self = $class->SUPER::new(@args);
-       $self->io->_initialize_io();
-       my ($attr, $value);
-       my %set = ('q' => 0, 'outformat' => '');
-       while (@args)  {
-           $attr =   shift @args;
-           $value =  shift @args;
-           next if( $attr =~ /^-/ ); # don't want named parameters
-           $self->$attr($value);
-	   $set{$attr}++;
-       }
-       # some hardcoding for the time being
-       
-       if( $self->program_name =~ /hmmalign/i ) {
-	   if( ! $set{'q'} ) { 
-	       $self->q(1);
-	   } 
-	   if( ! $set{'outformat'} ) {
-	       $self->outformat($DefaultOutFormat);
-	   }
-       }
-       return $self;
-}
-
-=head2 run
-
- Title   :   run
- Usage   :   $obj->run($seqFile)
- Function:   Runs HMMER and returns Bio::SearchIO
- Returns :   A Bio::SearchIO
- Args    :   A Bio::PrimarySeqI or file name
-
-=cut
-
-sub run{
-    my ($self,@seq) = @_;
-
-    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
-        my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
-    }
-    elsif(ref $seq[0] && $seq[0]->isa("Bio::Align::AlignI")){
-        my $infile1 = $self->_writeAlignFile(@seq);
-        return  $self->_run($infile1);
-    }
-    else {
-        return  $self->_run(@seq);
-    }   
-}
-
-=head2 _run
-
- Title   :   _run
- Usage   :   $obj->_run()
- Function:   Internal(not to be used directly)
- Returns :   An array of Bio::SeqFeature::Generic objects
- Args    :
-
-=cut
-
-sub _run {
-    my ($self,$file)= @_;
-
-    my $str = $self->executable;
-    my $param_str = $self->arguments." ".$self->_setparams;
-    $str.=" $param_str ".$file;
-
-    $self->debug("HMMER command = $str");
-    my $progname = $self->program_name;
-    if($progname=~ /hmmpfam|hmmsearch/i){
-	my $fh;
-	open($fh,"$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
-	
-	return Bio::SearchIO->new(-fh      => $fh, 
-				  -verbose => $self->verbose,
-				  -format  => "hmmer");
-    } elsif ($progname =~ /hmmalign/i ) {
-	my $fh;
-	open($fh,"$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
-	my $alnformat = $self->outformat; # should make this a parameter in the future as cmdline arguments could make this incompatible 
-	my $aln = Bio::AlignIO->new(-fh      => $fh,
-				    -verbose => $self->verbose,
-				    -format  =>$alnformat);
-
-    } else {			
-        # for hmmbuild or hmmcalibrate
-	my $status = open(OUT,"$str | ");
-	my $io;
-	while(<OUT>){
-	    $io .= $_;
-	}
-	close(OUT);
-	$self->warn($io) if $self->verbose > 0;
-	unless( $status ) {
-	    $self->throw("HMMER call($str) crashed: $?\n") unless $status==1;
-	}
-	return 1;
-    }
-}
-
-=head2 _setparams
-
- Title   :  _setparams
- Usage   :  Internal function, not to be called directly
- Function:  creates a string of params to be used in the command string
- Example :
- Returns :  string of params
- Args    :  
-
-=cut
-
-sub _setparams {
-    my ($self) = @_;
-    my $param_string;
-    foreach my $attr(@HMMER_PARAMS){
-        next if $attr=~/HMM|PROGRAM|DB/i;
-        my $value = $self->$attr();
-        next unless (defined $value);
-        my $attr_key;
-        if( $DOUBLE_DASH{$attr} ) {
-	    $attr_key = ' --'.$attr;
-	} else {
-	    $attr_key = ' -'.$attr;
-	}
-	$param_string .= $attr_key.' '.$value;
-    }
-    foreach my $attr(@HMMER_SWITCHES){
-        my $value = $self->$attr();
-        next unless (defined $value);
-        my $attr_key;
-	if( $DOUBLE_DASH{$attr} ) {
-	    $attr_key = ' --'.$attr;
-	} else {
-	    $attr_key = ' -'.$attr;
-	}
-        $param_string .= $attr_key;
-    }
-    my ($hmm) = $self->HMM || $self->DB || $self->throw("Need to specify either HMM file or Database");
-    $param_string.=' '.$hmm;
-
-    return $param_string;
-}
-
-# hacking to deal with the insanity of autoloading - not sure I like it...-jason
-sub hmm {
-    my $self = shift;
-    $self->HMM(@_);
-}
-sub db { 
-    my $self =shift;
-    $self->DB(@_);
-}
-sub PROGRAM { 
-    my $self = shift;
-    $self->program(@_);
+    return $ENV{HMMERDIR} if $ENV{HMMERDIR};
 }
 
 =head2 _writeSeqFile
 
- Title   :   _writeSeqFile
- Usage   :   obj->_writeSeqFile($seq)
- Function:   Internal(not to be used directly)
- Returns :
- Args    :
+ Title   : _writeSeqFile
+ Usage   : obj->_writeSeqFile($seq)
+ Function: Internal(not to be used directly)
+ Returns : filename
+ Args    : list of Bio::SeqI
 
 =cut
 
 sub _writeSeqFile {
-    my ($self,@seq) = @_;
-    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
-    my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'Fasta');
-    foreach my $s(@seq){
-	$in->write_seq($s);
+    my ($self, @seq) = @_;
+    my ($tfh, $inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
+    $self->informat('fasta');
+    my $out = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
+    foreach my $s (@seq) {
+        $out->write_seq($s);
     }
-    $in->close();
-    $in = undef;
+    $out->close();
+    $out = undef;
     close($tfh);
     undef $tfh;
     return $inputfile;
@@ -369,26 +540,26 @@ sub _writeSeqFile {
 
 =head2 _writeAlignFile
 
- Title   :   _writeAlignFile
- Usage   :   obj->_writeAlignFile($seq)
- Function:   Internal(not to be used directly)
- Returns :
- Args    :
+ Title   : _writeAlignFile
+ Usage   : obj->_writeAlignFile($seq)
+ Function: Internal(not to be used directly)
+ Returns : filename
+ Args    : list of Bio::Align::AlignI
 
 =cut
 
 sub _writeAlignFile{
-    my ($self,@align) = @_;
-    my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
-    my $in  = Bio::AlignIO->new('-fh'     => $tfh , 
-				'-format' => 'msf');
-    foreach my $s(@align){
-      $in->write_aln($s);
+    my ($self, @align) = @_;
+    my ($tfh, $inputfile) = $self->io->tempfile(-dir=>$self->tempdir);
+    my $out = Bio::AlignIO->new('-fh' => $tfh, '-format' => $self->informat);
+    foreach my $a (@align) {
+        $out->write_aln($a);
     }
-    $in->close();
-    $in = undef;
+    $out->close();
+    $out = undef;
     close($tfh);
     undef $tfh;
     return $inputfile;
 }
+
 1;
