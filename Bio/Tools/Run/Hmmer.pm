@@ -393,8 +393,15 @@ sub _run {
         my $outfile = $self->o;
         if ($outfile || $progname eq 'hmmbuild') {
             $str .= " > /dev/null" if $self->quiet;
-            system($str) && $self->throw("HMMER call ($str) crashed: $?\n");
-            @in = (-file => $outfile);
+            
+            if ($progname eq 'hmmbuild') {
+                my $status = system($str);
+                return $status ? 0 : 1;
+            }
+            else {
+                system($str) && $self->throw("HMMER call ($str) crashed: $?\n");
+                @in = (-file => $outfile);
+            }
         }
         else {
             open(my $fh, "$str |") || $self->throw("HMMER call ($str) crashed: $?\n");
@@ -420,16 +427,10 @@ sub _run {
                                -format => 'fasta');
     }
     elsif ($progname =~ /calibrate/) {
-        open(my $pipe, "$str |") || $self->throw("HMMER call($str) crashed: $?\n");
-        my $io;
-        while (<$pipe>) {
-            $io .= $_;
-        }
-        close($pipe) || $self->throw("HMMER call($str) crashed: $?\n");;
-        $self->debug($io);
+        $str .= " > /dev/null 2> /dev/null" if $self->quiet;
+        my $status = system($str);
+        return $status ? 0 : 1;
     }
-    
-    return 1;
 }
 
 =head2 _setparams
