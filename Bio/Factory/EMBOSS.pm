@@ -29,7 +29,7 @@ Bio::Factory::EMBOSS - EMBOSS application factory class
   my @seqs_to_check; # this would be a list of seqs to compare 
                        # (could be just 1)
   my $wateroutfile = 'out.water';
-  $water->run({-sequencea => $seq_to_test,
+  $water->run({-sequences => $seq_to_test,
                -seqall    => \@seqs_to_check,
                -gapopen   => '10.0',
                -gapextend => '0.5',
@@ -171,7 +171,7 @@ sub program {
     $attr->{name} = $value;
     $attr->{verbose} = $self->verbose;
 
-    my $appl = Bio::Tools::Run::EMBOSSApplication ->new($attr);
+    my $appl = Bio::Tools::Run::EMBOSSApplication->new($attr);
     return $appl;
 }
 
@@ -242,8 +242,7 @@ Do not call these methods directly
 
 sub _program_list {
     my ($self) = @_;
-    if( $^O =~ /MSWIN/i ||
-	$^O =~ /Mac/i ) { return; }
+    if( $^O =~ /Mac/i ) { return; }
     {
 	local * SAVERR;
 	open SAVERR, ">&STDERR";
