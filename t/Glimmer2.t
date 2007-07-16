@@ -42,11 +42,11 @@ SKIP: {
     isa_ok $glimmer2, 'Bio::Tools::Glimmer';
     
     my $first_gene = $glimmer2->next_prediction();
-    isa_ok $first_gene, 'Bio::Tools::Prediction::Gene';
+    isa_ok $first_gene, 'Bio::SeqFeature::Generic';
     is $first_gene->seq_id(), 'gi|15611071|ref|NC_000921.1|';
     
     while (my $gene = $glimmer2->next_prediction()) {
-        isa_ok $gene, 'Bio::Tools::Prediction::Gene';
+        isa_ok $gene, 'Bio::SeqFeature::Generic';
     }
 }
 

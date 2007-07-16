@@ -294,7 +294,7 @@ sub _run {
     $self->debug("Glimmer Command = $cmd");
     
     my $program_name = $self->program_name();
-    my ($output_fh, $output_file_name);
+    my ($output_fh, $output_file_name, $detail_file_name);
     my ($program_stdout, $program_stderr);
         
     my @ipc_args = (\@cmd, \undef);
@@ -310,6 +310,7 @@ sub _run {
 
         push @cmd, $glimmer3_tag;     
         $output_file_name = "$glimmer3_tag.predict";
+        $detail_file_name = "$glimmer3_tag.detail";
         push @ipc_args, \$program_stdout, \$program_stderr;
         
     }
@@ -345,6 +346,10 @@ sub _run {
     # (only should be for glimmer2).
     if (defined($seq_id))     { $parser_args{-seqname  } = $seq_id;     }
     if (defined($seq_length)) { $parser_args{-seqlength} = $seq_length; }
+
+    # Pass along the name of extra output file, with handy information about
+    # sequence lengths (only produced by glimmer3)
+    if (defined($detail_file_name)) { $parser_args{-detail} = $detail_file_name; }
     
     return Bio::Tools::Glimmer->new(%parser_args);
     

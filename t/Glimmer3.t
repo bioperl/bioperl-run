@@ -43,7 +43,7 @@ SKIP: {
     isa_ok $glimmer3, 'Bio::Tools::Glimmer';
     
     while (my $gene = $glimmer3->next_prediction()) {
-        isa_ok $gene, 'Bio::Tools::Prediction::Gene';
+        isa_ok $gene, 'Bio::SeqFeature::Generic';
     }
 }
 
