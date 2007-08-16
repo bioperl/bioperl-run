@@ -100,18 +100,19 @@ sub _alignment {
  Function: Writes the alignment object returned by _alignment() out in the
            desired format to a temp file.
  Returns : filename
- Args    : string to desribe format (default 'fasta')
+ Args    : string to desribe format (default 'fasta'), any other options to pass
+           to AlignIO
 
 =cut
 
 sub _write_alignment {
-    my ($self, $format) = @_;
+    my ($self, $format, @options) = @_;
     my $align = $self->_alignment || $self->throw("_write_alignment called when _alignment had not been set");
     $format ||= 'fasta';
     
     my ($tfh, $tempfile) = $self->io->tempfile(-dir => $self->tempdir);
     
-    my $out = Bio::AlignIO->new(-verbose => $self->verbose, '-fh' => $tfh, '-format' => $format);
+    my $out = Bio::AlignIO->new(-verbose => $self->verbose, '-fh' => $tfh, '-format' => $format, @options);
     $align->set_displayname_flat;
     $out->write_aln($align);
     
