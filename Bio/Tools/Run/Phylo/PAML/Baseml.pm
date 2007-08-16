@@ -1,6 +1,6 @@
 # $Id$
 #
-# BioPerl module for Bio::Tools::Run::Phylo::PAML::Yn00
+# BioPerl module for Bio::Tools::Run::Phylo::PAML::Baseml
 #
 # Cared for by Jason Stajich <jason-AT-bioperl_DOT_org>
 #
@@ -45,9 +45,8 @@ The values you can feed to the configuration file are documented here.
 
     'noisy'   => [ 0..3,9],
     'verbose' => [ 0,1,2], # 0:concise, 1:detailed, 2:too much
-    'runmode' => [-2,0..5], 
+    'runmode' => [0..5], 
     # for runmode
-    # -2 pairwise
     # 0: use the provided tree structure(s) in treefile
     # 1,2: mean heuristic search by star-decomposition alg
     # 2: starts from star tree while 1 reads a multifurcating 
@@ -143,7 +142,7 @@ Email jason-at-bioperl.org
 
 =head1 CONTRIBUTORS
 
-Additional contributors names and emails here
+Sendu Bala - bix@sendu.me.uk
 
 =head1 APPENDIX
 
@@ -160,22 +159,14 @@ package Bio::Tools::Run::Phylo::PAML::Baseml;
 use vars qw(@ISA %VALIDVALUES $MINNAMELEN $PROGRAMNAME $PROGRAM);
 use strict;
 use Cwd;
-use Bio::Root::Root;
 use Bio::AlignIO;
 use Bio::TreeIO;
-use Bio::Tools::Run::WrapperBase;
 use Bio::Tools::Phylo::PAML;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+use base qw(Bio::Tools::Run::Phylo::PhyloBase);
 
-
-=head2 Default Values
-
-
-=cut
 
 BEGIN { 
-
     $MINNAMELEN = 25;
     $PROGRAMNAME = 'baseml'  . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'PAMLDIR'} ) {
@@ -188,9 +179,8 @@ BEGIN {
     %VALIDVALUES = ( 
 		     'noisy'   => [ 0..3,9],
 		     'verbose' => [ 0,1,2], # 0:concise, 1:detailed, 2:too much
-		     'runmode' => [-2,0..5], 
+		     'runmode' => [0..5], 
 		     # for runmode
-                     # -2 pairwise
 		     # 0: use the provided tree structure(s) in treefile
 		     # 1,2: mean heuristic search by star-decomposition alg
 		     # 2: starts from star tree while 1 reads a multifurcating 
@@ -200,7 +190,7 @@ BEGIN {
 		     # 4: NNI perturbation with the starting tree
 		     # Tree search DOES NOT WORK WELL so estimate a tree
 		     # using other programs first
-		     'model'   => '0', 
+		     'model'   => [5, 0..8], 
 		     # for model
 		     # 0: JC69 (uncorrected)
 		     # 1: K80  (transitions/transversion weighted differently)
@@ -245,20 +235,20 @@ BEGIN {
 		                           # 2: kappa for brances
 		                           # 3:N1 4:N2
 		     'getSE'    => [0,1],
-		     'RateAncestor' => [1,0,2], # rates (alpha > 0) or 
+		     'RateAncestor' => [0,1,2], # rates (alpha > 0) or 
 		                                # ancestral states
 		     'cleandata' => [1,0], # remove sites with 
 		                           # ambiguity data (1:yes or 0:no)
 		     
-		     'fix_blength' => [-1,0,1,2], # 0: ignore, -1: random, 
+		     'fix_blength' => [0,-1,1,2], # 0: ignore, -1: random, 
 		                                  # 1: initial, 2: fixed
 		     
-#		     'icode'    => [ 0..10], # (with RateAncestor=1. 
+		     'icode'    => [ 0..10], # (with RateAncestor=1. 
 		                             #try "GC" in data,model=4,Mgene=4)
-		     'ndata'    => [5,1..10],
+		     'ndata'    => [1..10],
 		     'clock'    => [0..3], # 0: no clock, 1: clock, 2: local clock, 3: CombinedAnalysis
 		     'Small_Diff' => '1e-6', #underflow issues?
-		     
+		     'Mgene' => [0..4], # 0:rates, 1:separate; 2:diff pi, 3:diff kapa, 4:all diff
 		     );
 }
 
@@ -294,10 +284,12 @@ sub program_dir {
 =head2 new
 
  Title   : new
- Usage   : my $obj = Bio::Tools::Run::Phylo::PAML::Yn00->new();
- Function: Builds a new Bio::Tools::Run::Phylo::PAML::Yn00 object 
- Returns : Bio::Tools::Run::Phylo::PAML::Yn00
+ Usage   : my $obj = Bio::Tools::Run::Phylo::PAML::Baseml->new();
+ Function: Builds a new Bio::Tools::Run::Phylo::PAML::Baseml object 
+ Returns : Bio::Tools::Run::Phylo::PAML::Baseml
  Args    : -alignment => the L<Bio::Align::AlignI> object
+           -tree => the L<Bio::Tree::TreeI> object if you want to use runmode
+                    0 or 1
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
 
@@ -307,12 +299,12 @@ sub new {
   my($class,@args) = @_;
 
   my $self = $class->SUPER::new(@args);
-  my ($aln,$st) = $self->_rearrange([qw(ALIGNMENT SAVE_TEMPFILES)],
+  my ($aln,$tree,$st) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES)],
 				    @args);
   defined $aln && $self->alignment($aln);
+  defined $tree && $self->tree($tree);
   defined $st  && $self->save_tempfiles($st);
   
-  $self->set_default_parameters();
   return $self;
 }
 
@@ -320,7 +312,7 @@ sub new {
 
  Title   : run
  Usage   : $yn->run();
- Function: run the yn00 analysis using the default or updated parameters
+ Function: run the Baseml analysis using the default or updated parameters
            the alignment parameter must have been set
  Returns : 3 values, 
            $rc = 1 for success, 0 for errors
@@ -329,56 +321,83 @@ sub new {
                     sequencenameA->sequencenameB->datatype
            hash reference same as the previous one except it for the 
            Nei and Gojobori calculated Ka,Ks,omega values
- Args    : none
-
+ Args    : optionally, a value appropriate for alignment() and one for tree()
+ NB      : Since Baseml doesn't handle spaces in tree node ids, if a tree is
+           in use spaces will be converted to underscores in both the tree node
+           ids and alignment sequence ids.
 
 =cut
 
-sub run{
-   my ($self,$aln) = @_;
-   ($aln) ||= $self->alignment();
+sub run {
+   my ($self, $aln, $tree) = @_;
+   $aln = $self->alignment($aln) if $aln;
+   $tree = $self->tree($tree) if $tree;
+   $aln ||= $self->alignment();
+   $tree ||= $self->tree();
+   
+   my %params = $self->get_parameters;
    if( ! $aln ) { 
-       $self->warn("must have supplied a valid aligment file in order to run yn00");
+       $self->warn("must have supplied a valid aligment file in order to run baseml");
        return 0;
    }
-   my ($tmpdir) = $self->tempdir();
-   my ($tempseqFH,$tempseqfile);
-   if( ! ref($aln) && -e $aln ) { 
-       $tempseqfile = $aln;
-   } else { 
-       ($tempseqFH,$tempseqfile) = $self->io->tempfile
-	   ('-dir' => $tmpdir, 
-	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = Bio::AlignIO->new(-format      => 'phylip',
-				     -fh          => $tempseqFH,
-				     -interleaved => 0,
-				     #-idlinebreak => 1,
-				     -line_length => 60,
-				     -wrap_sequential => 1,
-				     -idlength    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
-       $alnout->write_aln($aln);
-       $alnout->close();
-       undef $alnout;   
-       close($tempseqFH);
-       undef $tempseqFH;
-   } 
+   if ((defined $params{runmode} && ($params{runmode} == 0 || $params{runmode} == 1)) && ! $tree) {
+        $self->warn("must have supplied a tree in order to run baseml in runmode 0 or 1");
+        return 0;
+   }
+   
+    # replace spaces with underscores in ids, since baseml really doesn't like
+    # spaces (actually, the resulting double quotes) in tree ids
+    if ($tree) {
+        my $changed = 0;
+        foreach my $thing ($aln->each_seq, $tree ? $tree->get_leaf_nodes : ()) {
+            my $id = $thing->id;
+            if ($id =~ / /) {
+                $id =~ s/\s+/_/g;
+                $thing->id($id);
+                $changed = 1;
+            }
+        }
+        if ($changed) {
+            my $new_aln = $aln->new;
+            foreach my $seq ($aln->each_seq) {
+                $new_aln->add_seq($seq);
+            }
+            $aln = $new_aln;
+            $aln = $self->alignment($aln);
+            $tree = $self->tree($tree);
+        }
+        
+        # check node and seq names match
+        $self->_check_names;
+    }
+   
+   # output the alignment and tree to tempfiles
+   my $tempseqfile = $self->_write_alignment('phylip',
+                                             -interleaved => 0,
+                                             -idlinebreak => 1,
+                                             -line_length => 60,
+                                             -wrap_sequential => 1,
+                                             -idlength    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
+   $tree = $self->_write_tree() if $tree;
+   
    # now let's print the baseml.ctl file.
    # many of the these programs are finicky about what the filename is 
    # and won't even run without the properly named file.  Ack
-   
+   my $tmpdir = $self->tempdir();
    my $baseml_ctl = "$tmpdir/baseml.ctl";
    open(BASEML, ">$baseml_ctl") or $self->throw("cannot open $baseml_ctl for writing");
    print BASEML "seqfile = $tempseqfile\n";
+   print BASEML "treefile = $tree\n" if $tree;
 
    my $outfile = $self->outfile_name;
 
    print BASEML "outfile = $outfile\n";
-   my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
        next if $param eq 'outfile';
        print BASEML "$param = $val\n";
    }
    close(BASEML);
+   
    my ($rc,$parser) = (1);
    {
        my $cwd = cwd();
@@ -389,10 +408,10 @@ sub run{
        open(RUN, "$ynexe |");
        my @output = <RUN>;
        $exit_status = close(RUN);
-       $self->error_string(join('',@output));
-       if( (grep { /\berr(or)?: /io } @output) || !$exit_status ) {
-	   $self->warn("There was an error - see error_string for the program output");
-	   $rc = 0;
+       $self->error_string(join('', grep { /\berr(or)?: /io } @output));
+       if ($self->error_string || !$exit_status) {
+        $self->warn("There was an error - see error_string for the program output");
+        $rc = 0;
        }
        eval {
 	   $parser = Bio::Tools::Phylo::PAML->new(-file => "$tmpdir/mlb", 
@@ -402,6 +421,7 @@ sub run{
        if( $@ ) {
 	   $self->warn($self->error_string);
        }
+       
        chdir($cwd);
    }
    if( $self->verbose > 0 ) {
@@ -410,11 +430,7 @@ sub run{
 	   $self->debug($_);
        }
    }
-       
-   unless ( $self->save_tempfiles ) {
-      unlink("$baseml_ctl");
-      $self->cleanup();
-   }
+    
    return ($rc,$parser);
 }
 
@@ -426,12 +442,12 @@ sub run{
  Returns : value of error_string
  Args    : newvalue (optional)
 
-
 =cut
 
-sub error_string{
+sub error_string {
    my ($self,$value) = @_;
    if( defined $value) {
+     chomp($value);
       $self->{'error_string'} = $value;
     }
     return $self->{'error_string'};
@@ -452,15 +468,13 @@ sub error_string{
 =cut
 
 sub alignment{
-   my ($self,$aln) = @_;
-   if( defined $aln ) { 
-       if( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
-	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function");
-	   return undef;
-       }
-       $self->{'_alignment'} = $aln;
-   }
-   return  $self->{'_alignment'};
+   my $self = shift;
+   return $self->_alignment(@_);
+}
+
+sub tree {
+    my $self = shift;
+    return $self->_tree(@_);
 }
 
 =head2 get_parameters
@@ -470,7 +484,6 @@ sub alignment{
  Function: returns the list of parameters as a hash
  Returns : associative array keyed on parameter names
  Args    : none
-
 
 =cut
 
@@ -499,6 +512,7 @@ sub get_parameters{
 
 sub set_parameter{
    my ($self,$param,$value) = @_;
+   
    if( ! defined $VALIDVALUES{$param} ) { 
        $self->warn("unknown parameter $param will not set unless you force by setting no_param_checks to true");
        return 0;
@@ -506,7 +520,8 @@ sub set_parameter{
    if( ref( $VALIDVALUES{$param}) =~ /ARRAY/i &&
        scalar @{$VALIDVALUES{$param}} > 0 ) {
        
-       unless ( grep {$value} @{ $VALIDVALUES{$param} } ) {
+       my %allowed = map { $_ => 1 } @{ $VALIDVALUES{$param} };
+       unless ( exists $allowed{$value} ) {
 	   $self->warn("parameter $param specified value $value is not recognized, please see the documentation and the code for this module or set the no_param_checks to a true value");
 	   return 0;
        }
@@ -524,7 +539,8 @@ sub set_parameter{
 	    %VALIDVALUES class variable)
  Returns : none
  Args    : boolean: keep existing parameter values
-
+ NB      : using this isn't an especially good idea! You don't need to do
+           anything to end up using default paramters: hence 'default'!
 
 =cut
 
@@ -542,7 +558,6 @@ sub set_default_parameters{
        }
    }
 }
-
 
 =head1 Bio::Tools::Run::Wrapper methods
 
@@ -588,11 +603,11 @@ sub outfile_name {
     if( @_ ) {
 	return $self->{'_basemlparams'}->{'outfile'} = shift @_;
     }
+    unless (defined $self->{'_basemlparams'}->{'outfile'}) {
+        $self->{'_basemlparams'}->{'outfile'} = 'mlb';
+    }
     return $self->{'_basemlparams'}->{'outfile'};    
 }
-
-
-
 
 =head2 tempdir
 
