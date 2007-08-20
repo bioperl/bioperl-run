@@ -592,10 +592,7 @@ sub run {
        }
        chdir($cwd);
    }
-   unless ( $self->save_tempfiles ) {
-      unlink("$codeml_ctl");
-      $self->cleanup();
-   }
+   
    return ($rc,$parser);
 }
 
