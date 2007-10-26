@@ -87,6 +87,7 @@ sub _alignment {
     elsif ($thing && -e $thing) {
         my $align_in = Bio::AlignIO->new(-verbose => $self->verbose, -file => $thing, $format ? (-format => $format) : ());
         my $aln = $align_in->next_aln || $self->throw("Alignment file '$thing' had no alignment!");
+        $align_in->close();
         $self->{_align_obj} = $aln;
     }
     
@@ -165,6 +166,7 @@ sub _tree {
         elsif (-e $thing) {
             my $tree_in = Bio::TreeIO->new(-verbose => $self->verbose, -file => $thing, $format ? (-format => $format) : ());
             $tree = $tree_in->next_tree || $self->throw("Tree file '$thing' had no tree!");
+            $tree_in->close;
         }
         
         $self->{_tree_obj} = $tree || $self->throw("'$thing' supplied but unable to generate a tree from it");
