@@ -450,6 +450,8 @@ sub _runlagan {
         return;
     }
     
+    my $version = $self->version;
+    
     my $command_string;
     if ($executable eq 'lagan.pl') {
         $command_string = $exe . " " . $input1 . " " . $input2 . $param_string;
@@ -465,7 +467,7 @@ sub _runlagan {
         $command_string .= " " . $param_string;
         
         my $matrix_file = $self->{_nucmatrixfile};
-        if ($matrix_file) {
+        if ($version <= 3 && $matrix_file) {
             # mlagan 2.0 bug-workaround
             my $orig = File::Spec->catfile($PROGRAM_DIR, 'nucmatrix.txt');
             -e $orig || $self->throw("Strange, $orig doesn't seem to exist");
@@ -492,9 +494,9 @@ sub _runlagan {
     closedir($cwd_dir);
     
     $self->debug("$command_string\n");
-    my $status = system('_POSIX2_VERSION=1 '.$command_string); # temporary hack whilst lagan script 'rechaos.pl' uses obsolete sort syntax
+    my $status = system(($version <= 3 ? '_POSIX2_VERSION=1 ' : '').$command_string); # temporary hack whilst lagan script 'rechaos.pl' uses obsolete sort syntax
     
-    if ($self->{_nucmatrixfile}) {
+    if ($version <= 1 && $self->{_nucmatrixfile}) {
         my $orig = File::Spec->catfile($PROGRAM_DIR, 'nucmatrix.txt');
         system("mv $orig.bk $orig") && $self->warn("Restore of $orig from $orig.bk failed: $!");
     }
@@ -527,7 +529,6 @@ sub _runlagan {
  Thanks to Jason Stajich for providing the framework for this subroutine
 
 =cut
-
 
 sub executable {
     my ($self, $exename, $exe, $warn) = @_;
@@ -595,6 +596,30 @@ sub program_path {
 
 sub program_dir {
     $PROGRAM_DIR;
+}
+
+=head2 version
+
+ Title   : version
+ Usage   : my $version = $lagan->version;
+ Function: returns the program version
+ Returns : number
+ Args    : none
+
+=cut
+
+sub version {
+    my $self = shift;
+    my $exe = $self->executable('mlagan') || return;
+    
+    open(my $VER, "$exe -version 2>&1 |") || die "Could not open command '$exe -version'\n";
+    my $version;
+    while (my $line = <$VER>) {
+        ($version) = $line =~ /(\d+\S+)/;
+    }
+    close($VER) || die "Could not complete command '$exe -version'\n";
+    
+    return $version;
 }
 
 1;
