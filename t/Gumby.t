@@ -75,7 +75,7 @@ SKIP: {
         my $feat = shift(@spot_results);
         isa_ok $feat, 'Bio::SeqFeature::Annotated';
         is $feat->seq_id, shift(@{$expected}), 'correct seq_id';
-        is $feat->source, 'gumby', 'correct source';
+        is $feat->source_tag, 'gumby', 'correct source';
         is $feat->start, shift(@{$expected}), 'correct feature start';
         is $feat->end, shift(@{$expected}), 'correct feature end';
         if (@{$expected}) {
@@ -111,7 +111,7 @@ SKIP: {
         my $feat = shift(@spot_results);
         isa_ok $feat, 'Bio::SeqFeature::Annotated';
         is $feat->seq_id, shift(@{$expected}), 'correct seq_id';
-        is $feat->source, 'gumby', 'correct source';
+        is $feat->source_tag, 'gumby', 'correct source';
         is $feat->start, shift(@{$expected}), 'correct feature start';
         is $feat->end, shift(@{$expected}), 'correct feature end';
         is ${[$feat->get_tag_values('kind')]}[0], shift(@{$expected}), 'correct feature kind';
