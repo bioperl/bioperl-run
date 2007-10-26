@@ -395,7 +395,7 @@ sub new {
   defined $st  && $self->save_tempfiles($st);
   defined $exe && $self->executable($exe);
 
-  $self->set_default_parameters();
+  #$self->set_default_parameters();
   if( defined $params ) {
       if( ref($params) !~ /HASH/i ) { 
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
@@ -534,14 +534,15 @@ sub run {
        $alnout->close();
        undef $alnout;   
        close($tempseqFH);
+       undef $tempseqFH;
    }
    # now let's print the codeml.ctl file.
    # many of the these programs are finicky about what the filename is 
    # and won't even run without the properly named file.  Ack
    
    my $codeml_ctl = "$tmpdir/codeml.ctl";
-   open(CODEML, ">$codeml_ctl") or $self->throw("cannot open $codeml_ctl for writing");
-   print CODEML "seqfile = $tempseqfile\n";
+   open(my $mlfh, ">$codeml_ctl") or $self->throw("cannot open $codeml_ctl for writing");
+   print $mlfh "seqfile = $tempseqfile\n";
 
    my $outfile = $self->outfile_name;
 
@@ -555,14 +556,15 @@ sub run {
        $treeout->write_tree($tree);
        $treeout->close();
        close($temptreeFH);
-       print CODEML "treefile = $temptreefile\n";
+       print $mlfh "treefile = $temptreefile\n";
    }
-   print CODEML "outfile = $outfile\n";
+   print $mlfh "outfile = $outfile\n";
    my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
-       print CODEML "$param = $val\n";
+       print $mlfh "$param = $val\n";
    }
-   close(CODEML);
+   close($mlfh);
+   
    my ($rc,$parser) = (1);
    {
        my $cwd = cwd();
@@ -570,13 +572,14 @@ sub run {
        chdir($tmpdir);
        my $codemlexe = $self->executable();
        $self->throw("unable to find or run executable for 'codeml'") unless $codemlexe && -e $codemlexe && -x _;
+       my $run;
        if( $self->{'_branchLengths'} ) { 
-	   open(RUN, "echo $self->{'_branchLengths'} | $codemlexe |") or $self->throw("Cannot open exe $codemlexe");
+	   open($run, "echo $self->{'_branchLengths'} | $codemlexe |") or $self->throw("Cannot open exe $codemlexe");
        } else {
-	   open(RUN, "$codemlexe |") or $self->throw("Cannot open exe $codemlexe");
+	   open($run, "$codemlexe |") or $self->throw("Cannot open exe $codemlexe");
        }
-       my @output = <RUN>;
-       $exit_status = close(RUN);
+       my @output = <$run>;
+       $exit_status = close($run);
        $self->error_string(join('',@output));
        if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
 	   $self->warn("There was an error - see error_string for the program output");
@@ -585,11 +588,11 @@ sub run {
        eval {
 	   $parser = Bio::Tools::Phylo::PAML->new(-file => "$tmpdir/$outfile", 
 						 -dir => "$tmpdir");
-
        };
        if( $@ ) {
 	   $self->warn($self->error_string);
        }
+       
        chdir($cwd);
    }
    
@@ -815,6 +818,9 @@ sub outfile_name {
     my $self = shift;
     if( @_ ) {
 	return $self->{'_codemlparams'}->{'outfile'} = shift @_;
+    }
+    unless (defined $self->{'_codemlparams'}->{'outfile'}) {
+        $self->{'_codemlparams'}->{'outfile'} = 'mlb';
     }
     return $self->{'_codemlparams'}->{'outfile'};    
 }

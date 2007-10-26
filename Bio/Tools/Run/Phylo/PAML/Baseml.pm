@@ -385,18 +385,18 @@ sub run {
    # and won't even run without the properly named file.  Ack
    my $tmpdir = $self->tempdir();
    my $baseml_ctl = "$tmpdir/baseml.ctl";
-   open(BASEML, ">$baseml_ctl") or $self->throw("cannot open $baseml_ctl for writing");
-   print BASEML "seqfile = $tempseqfile\n";
-   print BASEML "treefile = $tree\n" if $tree;
+   open(my $mlfh, ">$baseml_ctl") or $self->throw("cannot open $baseml_ctl for writing");
+   print $mlfh "seqfile = $tempseqfile\n";
+   print $mlfh "treefile = $tree\n" if $tree;
 
    my $outfile = $self->outfile_name;
 
-   print BASEML "outfile = $outfile\n";
+   print $mlfh "outfile = $outfile\n";
    while( my ($param,$val) = each %params ) {
        next if $param eq 'outfile';
-       print BASEML "$param = $val\n";
+       print $mlfh "$param = $val\n";
    }
-   close(BASEML);
+   close($mlfh);
    
    my ($rc,$parser) = (1);
    {
@@ -405,9 +405,9 @@ sub run {
        chdir($tmpdir);
        my $ynexe = $self->executable();
        $self->throw("unable to find executable for 'baseml'") unless $ynexe;
-       open(RUN, "$ynexe |");
-       my @output = <RUN>;
-       $exit_status = close(RUN);
+       open(my $run, "$ynexe |");
+       my @output = <$run>;
+       $exit_status = close($run);
        $self->error_string(join('', grep { /\berr(or)?: /io } @output));
        if ($self->error_string || !$exit_status) {
         $self->warn("There was an error - see error_string for the program output");
@@ -425,10 +425,11 @@ sub run {
        chdir($cwd);
    }
    if( $self->verbose > 0 ) {
-       open(IN, "$tmpdir/mlb");
-       while(<IN>) {
-	   $self->debug($_);
+       open(my $in, "$tmpdir/mlb");
+       while(<$in>) {
+       $self->debug($_);
        }
+       close($in);
    }
     
    return ($rc,$parser);
