@@ -820,7 +820,7 @@ sub outfile_name {
 	return $self->{'_codemlparams'}->{'outfile'} = shift @_;
     }
     unless (defined $self->{'_codemlparams'}->{'outfile'}) {
-        $self->{'_codemlparams'}->{'outfile'} = 'mlb';
+        $self->{'_codemlparams'}->{'outfile'} = 'mlc';
     }
     return $self->{'_codemlparams'}->{'outfile'};    
 }
