@@ -22,7 +22,7 @@ BEGIN {
     }
     use Test;
 
-    $NUMTESTS = 18;
+    $NUMTESTS = 19;
     plan tests => $NUMTESTS;
 
     unless (eval "require IO::String; 1;") {
@@ -63,7 +63,12 @@ ok($inpaml);
 use Bio::Tools::Run::Phylo::PAML::Codeml;
 use Bio::Tools::Run::Phylo::PAML::Yn00;
 use Bio::AlignIO;
-my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new(-verbose => $verbose);
+my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
+    (-params => {'runmode' => -2,
+		 'seqtype' => 1,
+		 'model'   => 0,
+	     },
+     -verbose => $verbose);
 unless ($codeml->executable) {
   warn("PAML not is installed. skipping tests $Test::ntest to $NUMTESTS\n");
   exit(0) ;
@@ -77,14 +82,19 @@ $codeml->alignment($aln);
 my ($rc,$results) = $codeml->run();
 
 ok($rc,1);
+
 if( ! defined $results ) { 
     exit(0);
 }
 
 my $result = $results->next_result;
+if( ! defined $result ) { 
+    exit(0);
+}
+
 my $MLmatrix = $result->get_MLmatrix;
 
-my ($vnum) = ($result->version =~ /(\d+\.\d+)/);
+my ($vnum) = ($result->version =~ /(\d+(\.\d+)?)/);
 # PAML 2.12 results
 if( $vnum == 3.12 ) {
     ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
@@ -93,7 +103,10 @@ if( $vnum == 3.12 ) {
     ok($MLmatrix->[0]->[1]->{'S'}, 273.5);
     ok($MLmatrix->[0]->[1]->{'N'}, 728.5);
     ok($MLmatrix->[0]->[1]->{'t'}, 1.0895);
-} elsif( $vnum >= 3.13 ) {
+ 
+    skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
+    
+} elsif( $vnum >= 3.13  && $vnum < 4) {
 # PAML 2.13 results
     ok($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
     ok($MLmatrix->[0]->[1]->{'dS'},1.2462);
@@ -101,6 +114,17 @@ if( $vnum == 3.12 ) {
     ok($MLmatrix->[0]->[1]->{'S'}, 278.8);
     ok($MLmatrix->[0]->[1]->{'N'}, 723.2);
     ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.1946);
+    skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
+
+} elsif( $vnum == 4 ) {
+    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
+    ok($MLmatrix->[0]->[1]->{'dS'},1.1459);
+    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0605);
+    ok($MLmatrix->[0]->[1]->{'S'}, 273.5);
+    ok($MLmatrix->[0]->[1]->{'N'}, 728.5);
+    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.0895);
+    ok($MLmatrix->[0]->[1]->{'lnL'}, -1957.064254);
+
 } else { 
     for( 1..6) { 
 	skip("Can't test the result output, don't know about PAML version ".$result->version,1);
