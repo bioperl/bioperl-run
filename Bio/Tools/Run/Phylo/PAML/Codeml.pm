@@ -456,26 +456,27 @@ sub prepare{
    my $codeml_ctl = "$tempdir/codeml.ctl";
    open(CODEML, ">$codeml_ctl") or $self->throw("cannot open $codeml_ctl for writing");
    print CODEML "seqfile = $tempseqfile\n";
-
    my $outfile = $self->outfile_name;
-
-   my ($temptreeFH,$temptreefile);
-   if( ! ref($tree) && -e $tree ) { 
-       $temptreefile = $tree;
-   } else { 
-       ($temptreeFH,$temptreefile) = $self->io->tempfile
-	   ('-dir' => $tempdir, 
-	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-
-       my $treeout = Bio::TreeIO->new('-format' => 'newick',
-				     '-fh'     => $temptreeFH);
-       $treeout->write_tree($tree);
-       $treeout->close();
-       close($temptreeFH);
-   }
-   print CODEML "treefile = $temptreefile\n";
-
    print CODEML "outfile = $outfile\n";
+
+   if( $tree ) {
+       my ($temptreeFH,$temptreefile);
+       if( ! ref($tree) && -e $tree ) { 
+	   $temptreefile = $tree;
+       } else { 
+	   ($temptreeFH,$temptreefile) = $self->io->tempfile
+	       ('-dir' => $tempdir, 
+		UNLINK => ($self->save_tempfiles ? 0 : 1));
+	   
+	   my $treeout = Bio::TreeIO->new('-format' => 'newick',
+					  '-fh'     => $temptreeFH);
+	   $treeout->write_tree($tree);
+	   $treeout->close();
+	   close($temptreeFH);
+       }
+       print CODEML "treefile = $temptreefile\n";
+   }
+
    my %params = $self->get_parameters;
    while( my ($param,$val) = each %params ) {
        next if $param eq 'outfile';
@@ -492,10 +493,11 @@ sub prepare{
 }
 
 
+
 =head2 run
 
  Title   : run
- Usage   : my ($rc,$parser) = $codeml->run($aln);
+ Usage   : my ($rc,$parser) = $codeml->run($aln,$tree);
  Function: run the codeml analysis using the default or updated parameters
            the alignment parameter must have been set
  Returns : Return code, L<Bio::Tools::Phylo::PAML>
@@ -506,64 +508,9 @@ sub prepare{
 =cut
 
 sub run {
-   my ($self,$aln,$tree) = @_;
-   unless ( $self->save_tempfiles ) {
-       # brush so we don't get plaque buildup ;)
-       $self->cleanup();
-   }
-   $tree = $self->tree unless $tree;
-   $aln  = $self->alignment unless $aln;
-   if( ! $aln ) { 
-       $self->warn("must have supplied a valid alignment file in order to run codeml");
-       return 0;
-   }
-   my ($tmpdir) = $self->tempdir();
-   my ($tempseqFH,$tempseqfile);
-   if( ! ref($aln) && -e $aln ) { 
-       $tempseqfile = $aln;
-   } else { 
-       ($tempseqFH,$tempseqfile) = $self->io->tempfile
-	   ('-dir' => $tmpdir, 
-	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
-				     '-fh'          => $tempseqFH,
-				 '-interleaved' => 0,
-				 '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
-       
-       $alnout->write_aln($aln);
-       $alnout->close();
-       undef $alnout;   
-       close($tempseqFH);
-       undef $tempseqFH;
-   }
-   # now let's print the codeml.ctl file.
-   # many of the these programs are finicky about what the filename is 
-   # and won't even run without the properly named file.  Ack
-   
-   my $codeml_ctl = "$tmpdir/codeml.ctl";
-   open(my $mlfh, ">$codeml_ctl") or $self->throw("cannot open $codeml_ctl for writing");
-   print $mlfh "seqfile = $tempseqfile\n";
-
+   my ($self) = shift;;
    my $outfile = $self->outfile_name;
-
-   if( $tree ) {
-       my ($temptreeFH,$temptreefile) = $self->io->tempfile
-	   ('-dir' => $tmpdir, 
-	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-
-       my $treeout = Bio::TreeIO->new('-format' => 'newick',
-				     '-fh'     => $temptreeFH);
-       $treeout->write_tree($tree);
-       $treeout->close();
-       close($temptreeFH);
-       print $mlfh "treefile = $temptreefile\n";
-   }
-   print $mlfh "outfile = $outfile\n";
-   my %params = $self->get_parameters;
-   while( my ($param,$val) = each %params ) {
-       print $mlfh "$param = $val\n";
-   }
-   close($mlfh);
+   my $tmpdir = $self->prepare(@_);
    
    my ($rc,$parser) = (1);
    {
@@ -591,11 +538,9 @@ sub run {
        };
        if( $@ ) {
 	   $self->warn($self->error_string);
-       }
-       
+       }       
        chdir($cwd);
-   }
-   
+   }   
    return ($rc,$parser);
 }
 
