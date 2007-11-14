@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     
-    $NUMTESTS = 2;
+    $NUMTESTS = 3;
     plan tests => $NUMTESTS;
 }
 
@@ -29,7 +29,7 @@ my $input = Bio::SeqIO->new( -file 	=> 't/data/NM_002254.gb',
 
 my $seq = $input->next_seq;
 
-my $mdust = Bio::Tools::Run::Mdust->new(-coords 	=> 1, 
+my $mdust = Bio::Tools::Run::Mdust->new(
 					-target		=> $seq,
 					);
 ok $mdust->isa("Bio::Tools::Run::Mdust");
@@ -43,4 +43,19 @@ $mdust->run;
 my @excluded = grep { $_->primary_tag eq 'Excluded' } $seq->top_SeqFeatures;
 
 ok (scalar(@excluded),3);
+
+my $input2 = Bio::SeqIO->new( -file	=> 't/data/NM_002254.tfa',
+			      -format	=> 'Fasta');
+
+my $seq2 = $input2->next_seq;
+
+$mdust->coords(0);
+my $masked = $mdust->run($seq2);
+
+ok $masked->seq =~ /N+/;
+
+
+
+
+
 

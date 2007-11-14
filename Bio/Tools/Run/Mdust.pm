@@ -1,6 +1,6 @@
 # $Id$
 #
-# BioPerl module for Bio::Tools::SiRNA
+# BioPerl module for Bio::Tools::Mdust
 #
 # Cared for by Donald Jackson, donald.jackson@bms.com
 #
@@ -25,15 +25,13 @@ Mdust - Perl extension for Mdust nucleotide filtering
 
 Perl wrapper for the nucleic acid complexity filtering program B<mdust> as 
 available from TIGR via L<http://www.tigr.org/tdb/tgi/software/>.  Takes a 
-Bio::PrimarySeq object of type DNA as input. Returns a Bio::Seq 
-object with the low-complexity regions changed to Ns, or a 
-Bio::Seq::RichSeq object with the low-complexity regions identified as 
-a Bio::SeqFeature::Generic with primary tag = 'Excluded'.
+Bio::SeqI or Bio::PrimarySeqI object of type DNA as input.   
 
-This module uses the environment variable MDUSTDIR to find the mdust 
-program. Set MDUSTDIR to the directory containing the mdust binary.
-For example, if mdust is installed as I</usr/local/bin/mdust>, set MDUSTDIR 
-to I</usr/local/bin>.
+If a Bio::Seq::RichSeqI is passed then the low-complexity regions will be added to the feature table of the target object as 
+Bio::SeqFeature::Generic items with primary tag = 'Excluded' .
+Otherwise a new target object will be returned with low-complexity regions masked (by N's or other character as specified by maskchar()).
+
+The mdust executable must be in a directory specified with either the PATH or MDUSTDIR environment variable.  
 
 =head1 SEE ALSO
 
@@ -84,11 +82,13 @@ use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Tools::Run::WrapperBase;
 
-use vars qw($AUTOLOAD $PROGRAMNAME @ARGNAMES $VERSION @ISA);
+use vars qw($AUTOLOAD $PROGRAMNAME @ARGNAMES @MASKCHARS $VERSION @ISA);
 
 @ISA         = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 @ARGNAMES    = qw(TARGET WSIZE CUTOFF MASKCHAR COORDS TMPDIR DEBUG);
 $PROGRAMNAME = 'mdust';
+
+@MASKCHARS   = qw(N X L);
 
 =head2 new
 
@@ -107,9 +107,11 @@ $PROGRAMNAME = 'mdust';
                   tmpdir - directory for storing temporary files
                   debug - boolean - toggle debugging output, 
                           do not remove temporary files
-  Note		: All of the arguments can also be get/set with their own accessors, such as:
+  Notes		: All of the arguments can also be get/set with their own accessors, such as:
                   my $wsize = $mdust->wsize();
 
+                  When processing multiple sequences, call Bio::Tools::Run::Mdust->new() once 
+                  then pass each sequence as an argument to the target() or run() methods.
 =cut
 
 sub new {
@@ -117,7 +119,12 @@ sub new {
     my $pkg = ref($proto) || $proto;
     my %args;
 
-    my $self = {};
+    my $self = { wsize		=> undef,
+		 cutoff		=> undef,
+		 maskchar	=> undef,
+		 coords		=> 0,
+	     };
+
     bless ($self, $pkg);
 
     @args{@ARGNAMES} = $self->_rearrange(\@ARGNAMES, @args); 
@@ -125,12 +132,16 @@ sub new {
     # load target first since it requires special handling
     $self->target($args{'TARGET'}) if ($args{'TARGET'});
 
-    # defaults are as per mdust executable
-    $self->{'wsize'} = $args{'WSIZE'} || 3;
-    $self->{'cutoff'} = $args{'CUTOFF'} || 28;
-    $self->{'maskchar'} = $args{'MASKCHAR'} || 'N';
-    $self->{'coords'} = $args{'COORDS'} || 0;
+    # package settings
+    $self->{'coords'} = $args{'COORDS'} if (defined $args{'COORDS'});
     $self->{'tmpdir'} = $args{'TMPDIR'} || $ENV{'TMPDIR'} || $ENV{'TMP'} || '.';
+
+    # mdust options
+    $self->{'wsize'} = $args{'WSIZE'} if (defined $args{'WSIZE'});
+    $self->{'cutoff'} = $args{'CUTOFF'} if (defined $args{'CUTOFF'});
+    $self->{'maskchar'} = $args{'MASKCHAR'} if (defined $args{'CUTOFF'});
+
+
     # set debugging
     $self->verbose($args{'DEBUG'});
     return $self;
@@ -142,7 +153,7 @@ sub new {
   Usage		: $mdust->run();
   Purpose	: Run mdust on the target sequence
   Args		: target (optional) - Bio::Seq object of alphabet DNA for masking
-  Returns	: Bio::Seq object (see 'new' for details)
+  Returns	: Bio::Seq object with masked sequence or low-complexity regions added to feature table.
 
 =cut
 
@@ -172,14 +183,14 @@ sub _run_mdust {
     
     my $target = $self->target or warn "No target sequence specified\n" && return undef;
 
-    # make sure program is available 
-    my $executable = $self->executable('mdust', 1);
+    # make sure program is available  - doesn't seem to check
+    #my $executable = $self->executable('mdust', 1); 
 
     # add options
-    my $mdust_cmd = $executable;
-    $mdust_cmd .= " -w " . $self->wsize;
-    $mdust_cmd .= " -v " . $self->cutoff;
-    $mdust_cmd .= " -m " . $self->maskchar;
+    my $mdust_cmd = $self->program_path;
+    $mdust_cmd .= " -w " . $self->wsize if (defined $self->wsize);
+    $mdust_cmd .= " -v " . $self->cutoff if (defined $self->cutoff);
+    $mdust_cmd .= " -m " . $self->maskchar if (defined $self->maskchar);
     $mdust_cmd .= " -c" if ($self->coords);
     print STDERR "Running mdust: $mdust_cmd\n" if ($self->debug);
     my $maskedfile = $self->_maskedfile;
@@ -194,18 +205,20 @@ sub _run_mdust {
 
     $self->throw($@) if ($@);
 
+    my $rval;
+
     if ($self->coords) { 
 	$self->_parse_coords($maskedfile);
+	$rval = $self->target;
     }
     else { # replace original seq w/ masked seq
 	      my $seqin = Bio::SeqIO->new(-file=>$maskedfile, -format => 'Fasta');
-	      my $masked = $seqin->next_seq();
-	# now swap masked seq for original
-	$target->seq( $masked->seq );
+	      $rval =  $seqin->next_seq
     }
+
     unlink $maskedfile unless $self->save_tempfiles;
 
-    return 1;
+    return $rval;
 
 }
 
@@ -215,7 +228,10 @@ sub _run_mdust {
   Usage		: $mdust->target($bio_seq)
   Purpose	: Set/get the target (sequence to be filtered).  
   Returns	: Target Bio::Seq object
-  Args 		: Bio::Seq object using the DNA alphabet (optional)
+  Args 		: Bio::SeqI or Bio::PrimarySeqI object using the DNA alphabet (optional)
+  Note		: If coordinate parsing is selected ($mdust->coords = 1) then target
+                  MUST be a Bio::Seq::RichSeqI object.  Passing a RichSeqI object automatically
+                  turns on coordinate parsing.
 
 =cut
 
@@ -231,13 +247,29 @@ sub target {
 
 }
 
+
 sub _set_target {
     my ($self, $targobj) = @_;
-    unless ($targobj->isa('Bio::SeqI')) {
-	$self->throw( -text => "Target must be passed as a Bio::Seq object",
+
+    unless ($targobj->isa('Bio::SeqI') or ($targobj->isa('Bio::PrimarySeqI'))) {
+	$self->throw( -text => "Target must be passed as a Bio::SeqI or Bio::PrimarySeqI object",
 		      -class => 'Bio::Root::BadParameter',
 		      -value => $targobj );
     } 
+
+
+    if ($self->coords) {
+	unless ($targobj->isa('Bio::Seq::RichSeqI')) {
+	    $self->throw( -text => "Target must be passed as a Bio::Seq::RichSeqSeqI object when coords == 1",
+			  -class => 'Bio::Root::BadParameter',
+			  -value => $targobj );
+	} 
+    }	
+    elsif ($targobj->isa('Bio::Seq::RichSeqI')) {
+	$self->coords(1);
+    }
+
+
     unless ($targobj->alphabet eq 'dna') {
 	$self->throw( -text => "Target must be a DNA sequence",
 		      -class => 'Bio::Root::BadParameter',
@@ -286,12 +318,41 @@ sub _parse_coords {
     return 1;
 }
 
+=head2 maskchar
+
+  Title		: maskchar
+  Usage		: $mdust->maskchar('N')
+  Purpose      	: Set/get the character for masking low-complexity regions
+  Returns	: True on success
+  Args		: Either N (default), X or L (lower case)
+
+=cut
+  
+  
+
+sub maskchar {
+    my ($self, $maskchar) = @_;
+
+    return $self->{'maskchar'} unless (defined $maskchar);
+
+    unless ( grep {$maskchar eq $_} @MASKCHARS ) {
+	$self->throw( -text => "maskchar must be one of N, X or L",
+		      -class => 'Bio::Root::BadParameter',
+		      -value => $maskchar );
+    }
+    $self->{'maskchar'} = $maskchar;
+
+    1;
+}
 
 sub DESTROY {
-    my ($self) = @_;
-    undef $self;
-    return 1;
+    my $self= shift;
+    unless ( $self->save_tempfiles ) {
+        $self->cleanup();
+    }
+    $self->SUPER::DESTROY();
 }
+
 
 sub AUTOLOAD {
     my ($self, $value) = @_;
