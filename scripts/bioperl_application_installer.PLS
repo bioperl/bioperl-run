@@ -53,6 +53,7 @@ BEGIN {
                       'EMBOSS',
                       'TCoffee',
                       'PAML',
+                      'Hyphy',
                       'Probcons',
                      ];
 }
