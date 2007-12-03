@@ -123,7 +123,7 @@ BEGIN {
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
            -tree => the Bio::Tree::TreeI object
-           -params => a hashref of PAML parameters (all passed to set_parameter)
+           -params => a hashref of parameters (all passed to set_parameter)
            -executable => where the hyphy executable resides
 
 See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
@@ -161,7 +161,7 @@ sub new {
  Usage   : my ($rc,$results) = $rel->run($aln);
  Function: run the rel analysis using the default or updated parameters
            the alignment parameter must have been set
- Returns : Return code, L<Bio::Tools::Phylo::PAML>
+ Returns : Return code, Hash
  Args    : L<Bio::Align::AlignI> object,
 	   L<Bio::Tree::TreeI> object [optional]
 
@@ -315,7 +315,7 @@ sub set_default_parameters {
 
  Title   : cleanup
  Usage   : $rel->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory after a run
  Returns : none
  Args    : none
 

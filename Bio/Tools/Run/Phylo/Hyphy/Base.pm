@@ -128,7 +128,7 @@ sub program_dir {
            -save_tempfiles => boolean to save the generated tempfiles and
                               NOT cleanup after onesself (default FALSE)
            -tree => the Bio::Tree::TreeI object
-           -params => a hashref of PAML parameters (all passed to set_parameter)
+           -params => a hashref of parameters (all passed to set_parameter)
            -executable => where the hyphy executable resides
 
 See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
@@ -494,7 +494,7 @@ sub no_param_checks {
 
  Title   : cleanup
  Usage   : $hyphy->cleanup();
- Function: Will cleanup the tempdir directory after a PAML run
+ Function: Will cleanup the tempdir directory after a run
  Returns : none
  Args    : none
 
