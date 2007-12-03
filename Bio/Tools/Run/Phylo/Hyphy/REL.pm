@@ -18,6 +18,7 @@ Bio::Tools::Run::Phylo::Hyphy::REL - Wrapper around the Hyphy REL analysis
 
   use Bio::Tools::Run::Phylo::Hyphy::REL;
   use Bio::AlignIO;
+  use Bio::TreeIO;
 
   my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/hyphy1.fasta');

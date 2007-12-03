@@ -18,6 +18,7 @@ Bio::Tools::Run::Phylo::Hyphy::FEL - Wrapper around the Hyphy FEL analysis
 
   use Bio::Tools::Run::Phylo::Hyphy::FEL;
   use Bio::AlignIO;
+  use Bio::TreeIO;
 
   my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/hyphy1.fasta');
