@@ -18,6 +18,7 @@ Bio::Tools::Run::Phylo::Hyphy::SLAC - Wrapper around the Hyphy SLAC analysis
 
   use Bio::Tools::Run::Phylo::Hyphy::SLAC;
   use Bio::AlignIO;
+  use Bio::TreeIO;
 
   my $alignio = Bio::AlignIO->new(-format => 'fasta',
   			         -file   => 't/data/hyphy1.fasta');
