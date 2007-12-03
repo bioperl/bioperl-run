@@ -24,12 +24,8 @@ Bio::Tools::Run::Phylo::Hyphy::Modeltest - Wrapper around the Hyphy Modeltest an
 
   my $aln = $alignio->next_aln;
 
-  my $treeio = Bio::TreeIO->new(
-      -format => 'newick', -file => 't/data/hyphy1.tree');
-
   my $modeltest = Bio::Tools::Run::Phylo::Hyphy::Modeltest->new();
   $modeltest->alignment($aln);
-  $modeltest->tree($tree);
   my ($rc,$results) = $modeltest->run();
 
 =head1 DESCRIPTION
