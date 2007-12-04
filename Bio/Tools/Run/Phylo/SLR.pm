@@ -313,7 +313,12 @@ Note
 BEGIN { 
 
     $MINNAMELEN = 25;
-    $PROGRAMNAME = 'Slr_Linux_static' . ($^O =~ /mswin/i ?'_windows.exe':'');
+    $PROGRAMNAME = 'Slr_Linux_static';
+    if ($^O =~ /darwin/i) {
+        $PROGRAMNAME = 'Slr_osx';
+    } elsif ($^O =~ /mswin/i) {
+        $PROGRAMNAME = 'Slr_windows.exe';
+    }
     if( defined $ENV{'SLRDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'SLRDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'_windows.exe':'');;
     }
