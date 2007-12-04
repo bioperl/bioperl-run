@@ -1,0 +1,157 @@
+
+# BioPerl module for Bio::Installer::SLR
+#
+# Cared for by Albert Vilella
+#
+# Copyright Albert Vilella
+#
+# You may distribute this module under the same terms as perl itself
+
+# POD documentation - main docs before the code
+
+=head1 NAME
+
+Bio::Installer::SLR - DESCRIPTION of Object
+
+=head1 SYNOPSIS
+
+Give standard usage here
+
+=head1 DESCRIPTION
+
+Describe the object here
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org              - General discussion
+  http://bioperl.org/MailList.shtml  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+the web:
+
+  http://bugzilla.bioperl.org/
+
+=head1 AUTHOR - Albert Vilella
+
+Email avilella-AT-gmail-DOT-com
+
+Describe contact details here
+
+=head1 CONTRIBUTORS
+
+Additional contributors names and emails here
+
+=head1 APPENDIX
+
+The rest of the documentation details each of the object methods.
+Internal methods are usually preceded with a _
+
+=cut
+
+
+# Let the code begin...
+
+
+package Bio::Installer::SLR;
+use vars qw(@ISA %DEFAULTS);
+use strict;
+
+# Object preamble - inherits from Bio::Root::Root
+
+use Bio::Root::Root;
+use Bio::Installer::Generic;
+
+@ISA = qw(Bio::Installer::Generic );
+
+BEGIN {
+    %DEFAULTS = ( 'ORIGIN_DOWNLOAD_DIR' => 'http://www.ebi.ac.uk/goldman-srv/SLR/download/current/',
+                  'BIN_FOLDER' => 'bin',
+                  'DESTINATION_DOWNLOAD_DIR' => '/tmp',
+                  'DESTINATION_INSTALL_DIR' => "$ENV{'HOME'}",
+                  'PACKAGE_NAME' => 'slr_source.tgz',
+                  'DIRECTORY_NAME' => 'slr',
+                  'ENV_NAME' => 'SLRDIR',
+                );
+}
+
+
+=head2 get_default 
+
+ Title   : get_default 
+ Usage   :
+ Function:
+ Example :
+ Returns : 
+ Args    :
+
+
+=cut
+
+sub get_default {
+    my $self = shift;
+    my $param = shift;
+    return $DEFAULTS{$param};
+}
+
+
+=head2 install
+
+ Title   : install
+ Usage   : $installer->install();
+ Function:
+ Example :
+ Returns : 
+ Args    :
+
+
+=cut
+
+sub install{
+   my ($self,@args) = @_;
+   my $dir;
+   $self->_decompress;
+   # $self->_execute_slr_install_script;
+   $dir = $self->destination_install_dir;
+   $self->_remember_env;
+}
+
+
+=head2 _execute_slr_install_script
+
+ Title   : _execute_slr_install_script
+ Usage   :
+ Function:
+ Example :
+ Returns : 
+ Args    :
+
+
+=cut
+
+sub _execute_slr_install_script{
+   my ($self,@args) = @_;
+   my $call;
+
+   my $destination = $self->destination_install_dir;
+   $destination =~ s|/$||;
+   $destination .= "/" . $self->directory_name;
+
+   chdir $destination or die "Cant cd to $destination $!\n";
+   print "\n\nCompiling now... (this might take a while)\n\n";
+   $call = "sh build.sh MP";
+   system("$call") == 0 or die "Error when trying to run install script $?\n";
+
+
+}
+
+
+1;
