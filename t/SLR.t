@@ -73,7 +73,7 @@ SKIP: {
 
 	$slr->alignment($aln2);
 	$slr->tree($tree2);
-	my ($rc,$results2) = $slr->run();
+	my($rc2,$results2) = $slr->run();
 	ok defined($results2);
 #         my $positive_sites = $results2->{'constant'};
 #         print "Site,Omega\n";
