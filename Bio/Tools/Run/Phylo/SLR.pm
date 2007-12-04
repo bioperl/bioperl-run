@@ -508,7 +508,7 @@ sub prepare{
    # many of the these programs are finicky about what the filename is 
    # and won't even run without the properly named file.
 
-   my ($treevolume,$alndirectories,$treefile) = File::Spec->splitpath( $temptreefile );
+   my ($treevolume,$treedirectories,$treefile) = File::Spec->splitpath( $temptreefile );
    my ($alnvolume,$alndirectories,$alnfile) = File::Spec->splitpath( $tempseqfile );
    my $slr_ctl = "$tempdir/slr.ctl";
    open(SLR, ">$slr_ctl") or $self->throw("cannot open $slr_ctl for writing");
