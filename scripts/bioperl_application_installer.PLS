@@ -54,6 +54,7 @@ BEGIN {
                       'TCoffee',
                       'PAML',
                       'Hyphy',
+                      'SLR',
                       'Probcons',
                      ];
 }
