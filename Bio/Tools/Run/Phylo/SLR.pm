@@ -16,28 +16,45 @@ Bio::Tools::Run::Phylo::SLR - Wrapper around the SLR program
 
 =head1 SYNOPSIS
 
-  use Bio::Tools::Run::Phylo::SLR;
-  use Bio::AlignIO;
-  use Bio::TreeIO;
+use Bio::Tools::Run::Phylo::SLR;
+use Bio::AlignIO;
+use Bio::TreeIO;
+use Bio::SimpleAlign;
 
-  my $alignio = Bio::AlignIO->new(-format => 'fasta',
-  			         -file   => 't/data/hyphy1.fasta');
+my $alignio = Bio::AlignIO->new
+    (-format => 'fasta',
+     -file   => 't/data/219877.cdna.fasta');
 
-  my $aln = $alignio->next_aln;
+my $aln = $alignio->next_aln;
 
-  my $treeio = Bio::TreeIO->new(
-      -format => 'newick', -file => 't/data/hyphy1.tree');
+my $treeio = Bio::TreeIO->new
+    (-format => 'newick', -file => 't/data/219877.tree');
 
-  my $slr = Bio::Tools::Run::Phylo::SLR->new();
-  $slr->alignment($aln);
-  $slr->tree($aln);
-  # $rc = 1 for success, 0 for errors
-  my ($rc,$results) = $slr->run();
+my $tree = $treeio->next_tree;
 
-  my $positive_sites = $results->{'positive'};
-  print "Ka = ", $MLmatrix->[0]->[1]->{'dN'},"\n";
-  print "Ks = ", $MLmatrix->[0]->[1]->{'dS'},"\n";
-  print "Ka/Ks = ", $MLmatrix->[0]->[1]->{'omega'},"\n";
+my $slr = Bio::Tools::Run::Phylo::SLR->new();
+$slr->alignment($aln);
+$slr->tree($tree);
+# $rc = 1 for success, 0 for errors
+my ($rc,$results) = $slr->run();
+
+my $positive_sites = $results->{'positive'};
+
+print "# Site\tNeutral\tOptimal\tOmega\t",
+      "lower\tupper\tLRT_Stat\tPval\tAdj.Pval\tResult\tNote\n";
+foreach my $positive_site (@$positive_sites) {
+    print 
+        $positive_site->[0], "\t",
+        $positive_site->[1], "\t",
+        $positive_site->[2], "\t",
+        $positive_site->[3], "\t",
+        $positive_site->[4], "\t",
+        $positive_site->[5], "\t",
+        $positive_site->[6], "\t",
+        $positive_site->[7], "\t",
+        $positive_site->[8], "\t",
+        "positive\n";
+}
 
 =head1 DESCRIPTION
 
