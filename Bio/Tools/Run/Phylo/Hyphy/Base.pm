@@ -176,9 +176,9 @@ sub prepare {
        ($tempseqFH,$tempalnfile) = $self->io->tempfile
 	   ('-dir' => $tempdir, 
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
-       my $alnout = Bio::AlignIO->new('-format'      => 'phylip',
-				     '-fh'          => $tempseqFH,
-                                     '-interleaved' => 0);
+       $aln->set_displayname_flat(1);
+       my $alnout = Bio::AlignIO->new('-format'      => 'fasta',
+				     '-fh'          => $tempseqFH);
 
        $alnout->write_aln($aln);
        $alnout->close();
@@ -471,13 +471,13 @@ sub outfile_name {
 
 =cut
 
-sub no_param_checks {
-   my ($self,$value) = @_;
-   if( defined $value) {
-      $self->{'no_param_checks'} = $value;
-    }
-    return $self->{'no_param_checks'};
-}
+# sub no_param_checks {
+#    my ($self,$value) = @_;
+#    if( defined $value) {
+#       $self->{'no_param_checks'} = $value;
+#     }
+#     return $self->{'no_param_checks'};
+# }
 
 =head2 tempdir
 
