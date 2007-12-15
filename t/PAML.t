@@ -67,6 +67,14 @@ my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
     (-params => {'runmode' => -2,
 		 'seqtype' => 1,
 		 'model'   => 0,
+		 'alpha'   => '0',
+		 'omega'   => 0.4,
+		 'kappa'    => 2,		 
+		 'CodonFreq'=> 2,
+		 'NSsites'   => 0,
+		 'model'    => 0,
+		 
+
 	     },
      -verbose => $verbose);
 unless ($codeml->executable) {
@@ -117,13 +125,13 @@ if( $vnum == 3.12 ) {
     skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
 
 } elsif( $vnum == 4 ) {
-    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
-    ok($MLmatrix->[0]->[1]->{'dS'},1.1459);
-    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0605);
-    ok($MLmatrix->[0]->[1]->{'S'}, 273.5);
-    ok($MLmatrix->[0]->[1]->{'N'}, 728.5);
-    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.0895);
-    ok($MLmatrix->[0]->[1]->{'lnL'}, -1957.064254);
+    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
+    ok($MLmatrix->[0]->[1]->{'dS'},1.2462);
+    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0572);
+    ok($MLmatrix->[0]->[1]->{'S'}, 278.8);
+    ok($MLmatrix->[0]->[1]->{'N'}, 723.2);
+    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.1946);
+    ok($MLmatrix->[0]->[1]->{'lnL'}, -1929.935243);
 
 } else { 
     for( 1..6) { 
