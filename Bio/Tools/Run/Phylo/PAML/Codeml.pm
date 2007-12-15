@@ -235,7 +235,7 @@ BEGIN {
     %VALIDVALUES = ( 
 		     'outfile' => 'mlc',
 		     'noisy'   => [ 0..3,9],
-		     'verbose' => [ 0,1,2], # 0:concise, 1:detailed, 2:too much
+		     'verbose' => [ 1,0,2], # 0:concise, 1:detailed, 2:too much
 
                      # (runmode) 0:user tree, 1:semi-autmatic, 2:automatic
 		     #           3:stepwise addition, 4,5:PerturbationNNI
@@ -289,11 +289,11 @@ BEGIN {
 		     'fix_kappa'=> [0,1], # 0:estimate kappa, 1:fix kappa
 		     'kappa'    => '2',   # initial or fixed kappa
 		     'fix_omega'=> [0,1], # 0: estimate omega, 1: fix omega
-		     'omega'    => '0.4', # initial or fixed omega for 
+		     'omega'    => '1', # initial or fixed omega for 
 		                          # codons or codon-base AAs
 		     'fix_alpha'=> [1,0], # 0: estimate gamma shape param
 		                          # 1: fix it at alpha
-		     'alpha'    => '0', # initial of fixed alpha
+		     'alpha'    => '0.', # initial or fixed alpha
 		                        # 0: infinity (constant rate)
 		     'Malpha'   => [0,1], # different alphas for genes
 		     'ncatG'    => [1..10], # number of categories in 
@@ -395,7 +395,7 @@ sub new {
   defined $st  && $self->save_tempfiles($st);
   defined $exe && $self->executable($exe);
 
-  #$self->set_default_parameters();
+  $self->set_default_parameters();
   if( defined $params ) {
       if( ref($params) !~ /HASH/i ) { 
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
