@@ -38,15 +38,17 @@ Bio::Tools::Run::Phylo::Phast::PhastCons - Wrapper for footprinting using
 =head1 DESCRIPTION
 
 This is a wrapper for running the phastCons application by Adam Siepel. You
-can get details here: http://compgen.bscb.cornell.edu/~acs/software.html
+can get details here: http://compgen.bscb.cornell.edu/~acs/software.html 
 phastCons is used for phylogenetic footprinting/ shadowing.
 
-Currently the interface is extremely simplified, allowing only one analysis
-method. The focus here is on ease of use, allowing phastCons to estimate as many
-parameters as possible and having it output just the 'most conserved' blocks it
-detects. You can, however, try supplying normal phastCons arguments to new(),
-or calling arg-named methods (excluding initial hyphens and converting others
-to underscores, eg. $factory->indels_only(1) to set the --indels-only arg).
+Currently the interface is extremely simplified, allowing only one
+analysis method. The focus here is on ease of use, allowing phastCons
+to estimate as many parameters as possible and having it output just
+the 'most conserved' blocks it detects. You can, however, try
+supplying normal phastCons arguments to new(), or calling arg-named
+methods (excluding initial hyphens and converting others to
+underscores, eg. $factory->indels_only(1) to set the --indels-only
+arg).
 
 The particular analysis carried out here is to:
  1. Use phyloFit to generate a tree model for initialization of the nonconserved
@@ -56,7 +58,7 @@ The particular analysis carried out here is to:
  3. Run phastCons with the trees from step 2 to discover the most conserved
     regions
 
-See the 'HowTo' at http://compgen.bscb.cornell.edu/~acs/phastCons-HOWTO.html
+See the 'HowTo' at http://compgen.bscb.cornell.edu/~acs/phastCons-HOWTO.html 
 for details on how to improve results.
 
 WARNING: the API is likely to change in the future to allow for alternative
