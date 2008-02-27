@@ -330,7 +330,7 @@ sub _run {
     #    of everything automagically. 
 
     eval {
-        IPC::Run::run(@ipc_args) || die $OS_ERROR;;
+        IPC::Run::run(@ipc_args) || die $CHILD_ERROR;;
     };
 
     if ($EVAL_ERROR) {

@@ -256,7 +256,7 @@ sub _run {
                       \undef,
                       \$program_stdout,
                       \$program_stderr, 
-                  ) || die $OS_ERROR;
+                  ) || die $CHILD_ERROR;
         
     };
     
