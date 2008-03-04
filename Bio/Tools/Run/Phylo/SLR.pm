@@ -501,7 +501,7 @@ sub prepare{
                                   '-idlinebreak' => 1,
                                   '-idlength'    => $MINNAMELEN > $aln->maxdisplayname_length() ? $MINNAMELEN : $aln->maxdisplayname_length() +1);
 
-   $alnout->write_aln($aln);
+   $alnout->write_aln($sorted_aln);
    $alnout->close();
    undef $alnout;
    close($tempseqFH);
