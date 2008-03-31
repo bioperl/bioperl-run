@@ -388,7 +388,7 @@ sub _run {
     my @feats = ();
     my $aln = $self->_alignment;
     while (my $feat = $bedin->next_feature) {
-        $feat->source('phastCons');
+        $feat->source_tag('phastCons');
         my $sv = Bio::Annotation::SimpleValue->new(-tagname => 'predicted', -value => 1);
         $feat->annotation->add_Annotation($sv);
         # $feat->type('TF_binding_site'); causes seg fault in subsequent clone()
