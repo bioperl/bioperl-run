@@ -239,7 +239,7 @@ sub run {
                        push @{$results->{$elems[$i]}}, $values[$i];
                    }
                } else {
-                   @elems = split("\t",$_);
+                   @elems = split("\,",$_);
                    $readed_header = 1;
                }
            }
