@@ -8,6 +8,7 @@
 #
 # March 2007 - first full implementation; needs some file IO tweaking between
 #              runs but works for now
+# April 2008 - add 0.81 parameters (may be removed in the 1.0 release)
 
 =head1 NAME
 
@@ -73,7 +74,7 @@ others are sent to either the designated outfile, a tempfile, or STDOUT.
 
 Since the Infernal suite is under constant development, consider this wrapper as
 highly experimental. It will only actively support the latest Infernal release
-(now at v. 0.72, used to build Rfam 8.0).
+(now at v. 0.81, used to build Rfam 8.0) until a 1.0 Infernal release is made.
 
 =head1 FEEDBACK
 
@@ -131,34 +132,57 @@ tfile thresh time toponly treeforce wgiven wgsc wnone);
 our %INFERNAL_PROGRAM = (
     cmalign =>  [qw(h l q informat nosmall regress full tfile banddump dlev
                 time inside outside post checkpost sub fsub elsilent hbanded
-                hbandp sums checkcp9 qdb beta noexpand W)], 
+                hbandp sums checkcp9 qdb beta noexpand W), # pre-0.81
+                qw(zeroinserts enfstart enfseq tau hsafe hmmonly withali
+                rf gapthresh)], # added in 0.81
+    
     cmbuild =>  [qw(h n A F binary rf gapthresh informat bandp elself nodetach
                 wgiven wnone wgsc effent etarget effnone cfile cmtbl emap gtree
                 gtbl tfile bfile local bdfile nobalance regress treeforce
-                ignorant dlev null priorfile)],
+                ignorant dlev null priorfile), # pre-0.81
+                qw(beta window rsearch rsw ctarget cmindiff call corig cdump)], # added in 0.81
+    
     cmscore  => [qw(h informat local regress scoreonly smallonly stringent qdb
-                beta)],
+                beta), # pre-0.81
+                qw(i sub trees std qdbsmall qdbboth hbanded tau hsafe hmmonly
+                betas betae taus taue)], # added in 0.81
+    
     cmsearch => [qw(h W informat toponly local noalign dumptrees thresh X inside
                 null2 learninserts hmmfb hmmweinberg hmmpad hmmonly hthresh beta
-                noqdb qdbfile hbanded hbandp banddump sums scan2bands)],
-    cmemit   => [qw(a c h n q seed full begin end cp9)],
+                noqdb qdbfile hbanded hbandp banddump sums scan2bands), # pre-0.81
+                qw(T E window nsamples partition negsc enfstart enfseq enfnohmm
+                time rtrans greedy gcfile hmmfilter hmmE hmmT hmmnegsc)], # added in 0.81
+    
+    cmemit   => [qw(a c h n q seed full begin end cp9)], # up to 0.81
     );
 
-our %INFERNAL_SWITCHES = map {$_ => 1} qw(h l a A F c q X banddump binary
+our %INFERNAL_SWITCHES = map {$_ => 1} (qw(h l a A F c q X banddump binary
     checkcp9 checkpost cp9 dumptrees effent effnone elsilent fsub full hbanded
     hmmfb hmmonly hmmweinberg ignorant inside learninserts local noalign
     nobalance nodetach noexpand noqdb nosmall null2 outside post qdb rf
     scan2bands scoreonly smallonly stringent sub sums time toponly treeforce
-    wgiven wgsc wnone);
+    wgiven wgsc wnone),
+    # new in 0.81
+    qw(zeroinserts hsafe hmmonly rf),
+    qw(i sub trees std qdbsmall qdbboth hbanded hsafe hmmonly),
+    qw(enfnohmm time rtrans greedy hmmfilter),
+    qw(rsw call corig),
+    );
 
-our %INFERNAL_DOUBLE = map {$_ => 1} qw(X banddump bandp bdfile begin beta bfile
+our %INFERNAL_DOUBLE = map {$_ => 1} (qw(X banddump bandp bdfile begin beta bfile
     binary cfile checkcp9 checkpost cmtbl cp9 dlev dumptrees effent effnone
     elself elsilent emap end etarget fsub full gapthresh gtbl gtree hbanded
     hbandp hmmfb hmmonly hmmpad hmmweinberg hthresh ignorant informat inside
     learninserts local noalign nobalance nodetach noexpand noqdb nosmall null
     null2 outside post priorfile qdb qdbfile regress rf scan2bands scoreonly
     seed smallonly stringent sub sums tfile thresh time toponly treeforce wgiven
-    wgsc wnone);
+    wgsc wnone),
+    # new in 0.81
+    qw(enfstart enfseq tau withali gapthresh),
+    qw(tau betas betae taus taue),
+    qw(T E window nsamples partition negsc enfstart enfseq hmmE hmmT hmmnegsc),
+    qw(beta window rsearch ctarget cmindiff cdump),
+);
 
 =head2 new
 
