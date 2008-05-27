@@ -136,7 +136,7 @@ sub program_dir {
            -upgma  => boolean # Use the UPGMA method to construct the tree [0]
            -kimura => boolean # Use the kimura translation for pairwise
                               # distances [0]
-           -boot   => int     # Calcuate bootstrap values with n iterations [0]
+           -boot   => int     # Calculate bootstrap values with n iterations [0]
 
 =cut
 
@@ -204,7 +204,7 @@ sub kimura {
 
  Title   : boot
  Usage   : $factory->boot(100);
- Function: Choose to calcuate bootstrap values with the supplied number of
+ Function: Choose to calculate bootstrap values with the supplied number of
            iterations.
  Returns : int (default 0)
  Args    : None to get, int to set.
