@@ -41,6 +41,10 @@ Bio::Tools::Run::Phylo::Phyml - Wrapper for rapid reconstruction of phylogenies 
       -opt_lengths => '1',
       );
   $factory = Bio::Tools::Run::Phylo::Phyml->new(%args);
+  # if you need the output files do
+  $factory->save_tempfiles(1);
+  $factory->tempdir($workdir);
+
   # and get a Bio::Align::AlignI (SimpleAlign) object from somewhere
   $tree = $factory->run($aln);
 
@@ -214,9 +218,10 @@ sub new {
         }
     }
     
-    my ($data_type, $dataset_count, $model, $kappa, $invar, 
+    my ($data_type, $data_format, $dataset_count, $model, $kappa, $invar, 
 	$category_number, $alpha, $tree, $opt_topology,
 	$opt_lengths) = $self->_rearrange([qw( DATA_TYPE
+                                               DATA_FORMAT
                                                DATASET_COUNT
                                                MODEL
                                                KAPPA
@@ -228,6 +233,7 @@ sub new {
                                                OPT_LENGTHS)], %args);
 
     $self->data_type($data_type) if $data_type;
+    $self->data_format($data_format) if $data_format;
     $self->dataset_count($dataset_count) if $dataset_count;
     $self->model($model) if $model;
     $self->kappa($kappa) if $kappa;
@@ -240,6 +246,7 @@ sub new {
     
     return $self;
 }
+
 
 =head2 data_type
 
@@ -265,6 +272,27 @@ sub data_type {
     return $self->{_data_type};
 }
 
+
+=head2 data_format
+
+ Title   : data_format
+ Usage   : $phyml->data_format('dna');
+ Function: Sets PHYLIP format to 'i' interleaved or
+           's' sequential
+ Returns : set value, defaults to  'i'
+ Args    : None to get, 'i' or 's' to set.
+
+=cut
+
+sub data_format {
+    my ($self, $value) = @_;
+    if (defined $value) {
+	$self->throw("PHYLIP format must be 'i' or 's'")
+	    unless $value eq 'i' or $value eq 's';
+	$self->{_data_format} = $value;
+    }
+    return $self->{_data_format} || 'i';
+}
 
 =head2 dataset_count
 
@@ -484,19 +512,18 @@ sub opt_lengths {
 =head2 run
 
  Title   : run
- Usage   : $factory->run($stockholm_file);
+ Usage   : $factory->run($aln_file);
            $factory->run($align_object);
  Function: Runs Phyml to generate a tree 
  Returns : Bio::Tree::Tree object
- Args    : file name for your input alignment in stockholm format, OR
-           Bio::Align::AlignI complient object (eg. Bio::SimpleAlign).
+ Args    : file name for your input alignment in a format 
+           recognised by AlignIO, OR  Bio::Align::AlignI
+           complient object (eg. Bio::SimpleAlign).
 
 =cut
 
 sub run {
     my ($self, $in) = @_;
-
-    #print "----------------$in---------\n";
 
     if (ref $in && $in->isa("Bio::Align::AlignI")) {
         $in = $self->_write_phylip_align_file($in);
@@ -509,7 +536,7 @@ sub run {
 	copy ($in, $self->tempdir);
 	my $name = File::Spec->splitpath($in); # name is the last item in the array
 	$in = File::Spec->catfile($self->tempdir, $name);
-    } 
+    }
 
     return $self->_run($in); 
 }
@@ -602,7 +629,7 @@ sub _setparams {
     my $self = shift;
     my $param_string = ' ' .  $self->data_type;
 
-    $param_string .= ' i'; # support only  'interleaved'
+    $param_string .= ' '. $self->data_format;
     $param_string .= ' '. $self->dataset_count;
 
     $param_string .= ' 0'; # no bootstap sets
@@ -640,15 +667,15 @@ sub _setparams {
 sub _write_phylip_align_file {
     my ($self, $align) = @_;
     
-    my ($tfh, $tempfile) = $self->io->tempfile(-dir=>$self->tempdir);
-    
-    my $out = Bio::AlignIO->new('-fh'     => $tfh, 
-				'-format' => 'phylip');
+    my $tempfile = File::Spec->catfile($self->tempdir, "aln$$.phylip");
+    $self->data_format('i');
+    my $out = Bio::AlignIO->new('-file'     => ">$tempfile", 
+				'-format' => 'phylip',
+				'-interleaved' => 0,
+				'-longid' => 1 );
     $out->write_aln($align);
     $out->close();
     $out = undef;
-    close($tfh);
-    undef $tfh;
     return $tempfile;
 }
 

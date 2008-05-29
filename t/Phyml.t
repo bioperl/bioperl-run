@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test::More;
     
-    plan tests => 37;
+    plan tests => 40;
     
     use_ok('Bio::Tools::Run::Phylo::Phyml');
     use_ok('Bio::AlignIO');
@@ -34,9 +34,12 @@ is ($factory->data_type('dna'), '0', 'data_type, dna');
 #use Data::Dumper; print Dumper $factory;
 is ($factory->data_type('protein'), '1', 'data_type, protein');
 
+is ($factory->data_format, 'i', 'data_format, default');
+is ($factory->data_format('s'), 's', 'data_format, sequential');
+is ($factory->data_format('i'), 'i', 'data_format, interleaved');
 
 is ($factory->dataset_count, 1, 'dataset_count, default');
-is ($factory->dataset_count(2), 2, 'data_type, 2');
+is ($factory->dataset_count(2), 2, 'data_count, 2');
 
 is ($factory->model, 'JTT', 'model, default');
 is ($factory->model('WAG'), 'WAG', 'model');
@@ -104,9 +107,11 @@ SKIP: {
 	-tree => 'BIONJ',
 	-opt_topology => '0',
 	-opt_lengths => '1',
+	-verbose => 0
 	);
 
     $factory = Bio::Tools::Run::Phylo::Phyml->new(%args);
+    $factory->save_tempfiles(1);
     $tree = $factory->run($aln);
     @leaves = $tree->get_leaf_nodes;
     is (@leaves, 5, 'Result tree from DNA SimpleAlign input had correct number of leaves');
