@@ -18,7 +18,7 @@ rmfmt, rmprune
 =head1 SYNOPSIS
 
   #run rnamotif|rmfmt|rm2ct
-  
+
   my @params = (
               descr => 'pyrR.descr',
               fmt   => 'gb',
@@ -26,14 +26,14 @@ rmfmt, rmprune
               context => 1,
               sh    => 1,
              );
-  
+
   my $factory = Bio::Tools::Run::RNAMotif->new(-program =>'rnamotif',
                                                -prune  => 1,
                                                 @params);
 
   # Pass the factory a Bio::Seq object or a file name
   # Returns a Bio::SearchIO object
-  
+
   #my $searchio = $factory->run("B_sub.gb");
   my $searchio = $factory->run($seq);
   while (my $result = $searchio->next_result){
@@ -52,14 +52,14 @@ rmfmt, rmprune
 
   # Pass a finished report through rmfmt (-a format only)
   # Returns Bio::AlignIO object
-  
+
   my $aio = Bio::AlignIO->new(-file=>"rna.msf",-format=>'msf');
   my $factory =  Bio::Tools::Run::RNAMotif->new('program'=>'rmfmt',
                                                 'a' => 1);
   my $alnin = $factory->run('trna.rnamotif');
-  
+
   my $aln = $alnin->next_aln;
-  
+
   $aio->write_aln($aln);
 
 =head1 DESCRIPTION
@@ -241,10 +241,10 @@ sub version {
             'rnamotif' - returns Bio::SearchIO
             'rmfmt -a' - returns Bio::AlignIO
             all others - sends output to outfile, tempfile, STDERR
-            
+
             Use search() (for Bio::SearchIO stream) or get_AlignIO() (for
             Bio::AlignIO stream) for a uniform Bioperl object interface.
-            
+
  Args    :  A Bio::PrimarySeqI or file name
  Note    :  This runs any RNAMotif program set via program()
 

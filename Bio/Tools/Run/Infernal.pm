@@ -16,24 +16,24 @@ Bio::Tools::Run::Infernal - Wrapper for local execution of cmalign, cmbuild,
 cmsearch, cmscore
 
 =head1 SYNOPSIS
-  
+
   # parameters which are switches are set with any value that evals TRUE,
   # others are set to a specific value
-  
+
   my @params = (hmmfb => 1,
                 thresh => 20);
-  
+
   my $factory = Bio::Tools::Run::Infernal->new(@params);
-                                                
+
   # run cmalign|cmbuild|cmsearch|cmscore|cmemit directly as a wrapper method
   # this resets the program flag if previously set
-  
+
   $factory->cmsearch(@seqs); # searches Bio::PrimarySeqI's based on set cov. model
                              # saves output to outfile()/tempfile
 
   # only values which are allowed for a program are set, so one can use the same
   # wrapper for the following...
-  
+
   $factory->cmalign(@seqs); # aligns Bio::PrimarySeqI's to a set cov. model
                             # saves output to outfile()/tempfile
   $factory->cmscore(@seqs); # scores set cov. model against Bio::PrimarySeqI's,
@@ -44,13 +44,13 @@ cmsearch, cmscore
                            # set one if no file specified
 
   # run based on the setting of the program parameter
-  
+
   my $factory = Bio::Tools::Run::Infernal->new(-program => 'cmsearch',
                                                 @params);
   my $search = $factory->run($seq);
-  
+
   # using cmsearch returns a Bio::SearchIO object
-  
+
   while (my $result = $searchio->next_result){
    while(my $hit = $result->next_hit){
     while (my $hsp = $hit->next_hsp){
@@ -64,7 +64,7 @@ cmsearch, cmscore
     }
    }
   }
-  
+
 =head1 DESCRIPTION
 
 Wrapper module for Sean Eddy's Infernal suite of programs. The current

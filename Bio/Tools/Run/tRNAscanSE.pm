@@ -17,7 +17,7 @@ Bio::Tools::Run::tRNAscanSE - Wrapper for local execution of tRNAscan-SE
 =head1 SYNOPSIS
 
   my $factory = Bio::Tools::Run::tRNAscanSE->new('-program' => 'tRNAscan-SE');
- 
+
   # Pass the factory Bio::Seq objects
   # returns a Bio::Tools::tRNAscanSE object
   my $factory = $factory->run($seq);

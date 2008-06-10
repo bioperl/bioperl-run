@@ -39,7 +39,7 @@ Bio::Tools::Run::Phylo::Gumby - Wrapper for gumby
   # or using feature objects
   $factory->annots(@bio_seqfeature_objects);
   @results = $factory->run($alignfilename, $treefilename);
-  
+
   # (mixtures of all the above are possible)
 
   # look at the results

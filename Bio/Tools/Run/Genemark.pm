@@ -23,7 +23,6 @@ family of programs.
   my $factory =
       Bio::Tools::Run::Genemark->new('-program' => 'gmhmmp',
                                      '-m'       => 'model.icm');
-  
 
   # Pass the factory Bio::Seq objects
   # returns a Bio::Tools::Genemark object

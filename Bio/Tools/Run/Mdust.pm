@@ -23,15 +23,19 @@ Mdust - Perl extension for Mdust nucleotide filtering
 
 =head1 DESCRIPTION
 
-Perl wrapper for the nucleic acid complexity filtering program B<mdust> as 
-available from TIGR via L<http://www.tigr.org/tdb/tgi/software/>.  Takes a 
-Bio::SeqI or Bio::PrimarySeqI object of type DNA as input.   
+Perl wrapper for the nucleic acid complexity filtering program
+B<mdust> as available from TIGR via
+L<http://www.tigr.org/tdb/tgi/software/>.  Takes a Bio::SeqI or
+Bio::PrimarySeqI object of type DNA as input.
 
-If a Bio::Seq::RichSeqI is passed then the low-complexity regions will be added to the feature table of the target object as 
+If a Bio::Seq::RichSeqI is passed then the low-complexity regions will
+be added to the feature table of the target object as
 Bio::SeqFeature::Generic items with primary tag = 'Excluded' .
-Otherwise a new target object will be returned with low-complexity regions masked (by N's or other character as specified by maskchar()).
+Otherwise a new target object will be returned with low-complexity
+regions masked (by N's or other character as specified by maskchar()).
 
-The mdust executable must be in a directory specified with either the PATH or MDUSTDIR environment variable.  
+The mdust executable must be in a directory specified with either the
+PATH or MDUSTDIR environment variable.
 
 =head1 SEE ALSO
 
@@ -327,8 +331,6 @@ sub _parse_coords {
   Args		: Either N (default), X or L (lower case)
 
 =cut
-  
-  
 
 sub maskchar {
     my ($self, $maskchar) = @_;

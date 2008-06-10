@@ -15,11 +15,11 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
 
   use Bio::Tools::Run::TigrAssembler;
   my $assembler = Bio::Tools::Run::TigrAssembler->new();
- 
+
   # Pass the factory a Bio::Seq object array reference
   # Returns a Bio::Assembly::Scaffold object array reference
   my $asms = $assembler->run(\@seqs);
- 
+
   for my $asm (@$asms) {
     # do something with assembled sequences
   }
@@ -28,11 +28,11 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
 
   Wrapper module for the local execution of the DNA assembly program TIGR
   Assembler v2.0. TIGR.
-  
+
   Assembler is open source software under The Artistic License and available at:
-   
+
     http://www.tigr.org/software/assembler/
-  
+
   The description enables to runs TIGR Assembler by feeding it sequence objects
   and returning assembly objects. The input could be an array of Bio::PrimarySeq
   or maybe Bio::Seq::Quality, in which case, the quality scores will
@@ -42,7 +42,7 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
   datasets, but this module offers a way to split your dataset in smaller
   datasets to be assembled _independently_. An array of Bio::Assembly::Scaffold
   objects is returned.
-  
+
   If provided in the following way, TIGR Assembler will use additional
   information present in the sequence descriptions for assembly:
     >seq_name minimum_clone_length maximum_clone_length median_clone_length
@@ -52,7 +52,7 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
      clear_end5 clear_end3
     e.g.
     >GHIBF57F 500 3000 1750 33 587
-    
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists

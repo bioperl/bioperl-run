@@ -308,6 +308,7 @@ Result
   selection). This may indicate that the alignment at that site is bad
 
 Note
+
   The following events are flagged:
   Synonymous            All codons at a site code for the same amino 
                         acid.
@@ -315,7 +316,7 @@ Note
                         the result of a recent insertion for example.
   All gaps              All sequences at a site contain a gap
                         character.
-  
+
   Sites marked "Single character" or "All gaps" are not counted
   towards the number of sites for the purposes of correcting for
   multiple comparisons since it is not possible to detect selection

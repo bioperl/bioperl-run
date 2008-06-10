@@ -36,10 +36,10 @@ alignments using the Clustalw program
 
   # Get a tree of the sequences
   $tree = $factory->tree(\@seq_array);
-  
+
   # Get both an alignment and a tree
   ($aln, $tree) = $factory->run(\@seq_array);
-  
+
   # Do a footprinting analysis on the supplied sequences, getting back the
   # most conserved sub-alignments
   my @results = $factory->footprint(\@seq_array);

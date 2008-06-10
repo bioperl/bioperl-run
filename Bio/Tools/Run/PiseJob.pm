@@ -623,7 +623,7 @@ sub stdout {
 
  Title   : output()
  Usage   : Alias for stdout()
- 
+
 =cut
 
 sub output {

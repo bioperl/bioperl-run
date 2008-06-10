@@ -18,14 +18,14 @@ programs.
 =head1 SYNOPSIS
 
   #run 
-  
+
   my @params = (
               trset => 'BL.erpin',
               region => [1, 10], 
               # Set up search strategy this way...
               strategy => [ 'umask'   => [1, 2],
                             'umask'   => [1, 2, 3, 4],
-                            'umask'   => [1, 2, 3, 4, 5, 6],                            
+                            'umask'   => [1, 2, 3, 4, 5, 6],
                             'nomask',
                             'cutoff'  => [0, 10, 15, 20]
                             ]
@@ -33,13 +33,13 @@ programs.
               #strategy => 'Ğumask 4 Ğadd 5 -nomask -cutoff 0 10 15',
               pcw => 100
              );
-  
+
   my $factory = Bio::Tools::Run::ERPIN->new(-program =>'erpin',
                                                 @params);
 
   # Pass the factory a Bio::Seq object or a file name
   # Returns a Bio::SearchIO object
-  
+
   #my $search = $factory->run("B_sub.fas");
   my $search = $factory->run($seq);
   my @feat;

@@ -221,7 +221,7 @@ sub mlagan {
         $tree =~ s/ /_/g;
         $tree =~ s/"//g;
         $tree =~ s/,/ /g;
-        
+
         # unfiddle the tree object
         foreach my $node ($tree_obj->get_nodes) {
             $node->id($orig_ids{$node->id});
@@ -252,7 +252,7 @@ sub mlagan {
            Bio::Matrix::MLagan object
            OR
            filename of an mlagan substitution matrix file
-           
+
            NB: due to a bug in mlagan 2.0, the -nucmatrixfile option does not
            work, so this Bioperl wrapper is unable to simply point mlagan to
            your desired matrix file (or to a temp file generated from your
