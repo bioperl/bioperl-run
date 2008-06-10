@@ -2,6 +2,7 @@
 # You may distribute this module under the same terms as perl itself
 #
 # POD documentation - main docs before the code
+
 =head1 NAME
 
 Bio::Tools::Run::Cap3 - wrapper for Cap3

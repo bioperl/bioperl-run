@@ -49,8 +49,15 @@ for the latter stages (the stages involving align2binomial.pl,
 generate_phyloMAX_score.pl and generate_mcs_beta.pl).
 
 You can try supplying normal MCS command-line arguments to new(), eg.
-new(-percentile => 95) or calling arg-named methods (excluding the initial
-hyphens, eg. $factory->percentile(95) to set the --percentile arg).
+
+  $factory->new(-percentile => 95)
+
+or calling arg-named methods (excluding the initial
+hyphens, eg. 
+
+  $factory->percentile(95)
+
+ to set the --percentile arg).
 
 
 You will need to enable this MCS wrapper to find the MCS scripts.

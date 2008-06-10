@@ -62,71 +62,65 @@ find regions conserved in only a subset of the species
 
 Written by Mathieu Blanchette and Martin Tompa. Available here:
 
-http://www.mcb.mcgill.ca/~blanchem/FootPrinter2.1.tar.gz 
+  http://www.mcb.mcgill.ca/~blanchem/FootPrinter2.1.tar.gz 
 
 
 =head2 Running Footprinter
 
 To run FootPrinter, you will need to set the enviroment variable
-FOOTPRINTER_DIR to where the binary is located (even if the executable is in
-your path). For example:
+FOOTPRINTER_DIR to where the binary is located (even if the executable
+is in your path). For example:
 
- setenv FOOTPRINTER_DIR /usr/local/bin/FootPrinter2.0/
+  setenv FOOTPRINTER_DIR /usr/local/bin/FootPrinter2.0/
 
 
 =head2 Available Parameters
 
-PARAM         VALUES        DESCRIPTION
-------------------------------------------------------------------------
-tree                      <file>     REQUIRED, Tree in Newick Format
-                                     to evaluate parsimony score 
-                                     REQUIRED unless tree_of_life
-                                     exists in FOOTPRINTER_DIR
-sequence_type             upstream   Default upstream
-                          downstream
-                          other
-
-size                      4-16       Specifies the size of the motifs sought
-
-max_mutations             0-20       maximum parsimony score allowed for the motifs
-
-max_mutations_per_branch  0-20       Allows at most a fixed number of mutations per 
-                                     branch of the tree
-losses                    <file>     files give span constraints so that the motifs
-                                     reported are statistically significant
-                                     Example files
-                                     universal([6-9]|1[0-2])(loose|tight)?.config
-                                     come with FootPrinter2.0.
-                                     Install these in FOOTPRINTER_DIR and use by
-                                     setting "losses" to "somewhat significant",
-                                     "significant", or "very significant". Do not
-                                     set loss_cost.
-loss_cost                 0-20       a cost associated with losing a motif along some 
-                                     branch of the tre
-subregion_size            1-infinity penalize motifs whose position in the sequences 
-                                     varies too much
-position_change_cost      0-20       Cost for changing subregion
-
-triplet_filtering         1/0        pre-filtering step that removes from consideration 
-                                     any substring that does not have a sufficiently good 
-                                     pair of matching substrings in some pair of the other 
-                                     input sequences
-pair_filtering            1/0        Same as triplet filtering, but looks only for one match 
-                                     per other sequence
-post_filtering            1/0        when used in conjunction with the triplet filtering 
-                                     option, this often significantly speeds up the program, 
-                                     while still garanteeing optimal results
-indel_cost                1-5        insertions and deletions will be allowed in the motifs 
-                                     sought, at the given cost
-inversion_cost            1-5        This option allows for motifs to undergo inversions, 
-                                     at the given cost. An inversion reverse-complements 
-                                     the motif.
-details                   1/0        Shows some of the details about the progress of the 
-                                     computation
-
-html                      1/0        produce html output (never deleted)
-
-ps                        1/0        produce postscript output (never deleted)
+  PARAM         VALUES        DESCRIPTION
+  ------------------------------------------------------------------------
+  tree                      <file>     REQUIRED, Tree in Newick Format
+                                       to evaluate parsimony score 
+                                       REQUIRED unless tree_of_life
+                                       exists in FOOTPRINTER_DIR
+  sequence_type             upstream   Default upstream
+                            downstream
+                            other
+  size                      4-16       Specifies the size of the motifs sought
+  max_mutations             0-20       maximum parsimony score allowed for the motifs
+  max_mutations_per_branch  0-20       Allows at most a fixed number of mutations per 
+                                       branch of the tree
+  losses                    <file>     files give span constraints so that the motifs
+                                       reported are statistically significant
+                                       Example files
+                                       universal([6-9]|1[0-2])(loose|tight)?.config
+                                       come with FootPrinter2.0.
+                                       Install these in FOOTPRINTER_DIR and use by
+                                       setting "losses" to "somewhat significant",
+                                       "significant", or "very significant". Do not
+                                       set loss_cost.
+  loss_cost                 0-20       a cost associated with losing a motif along some 
+                                       branch of the tre
+  subregion_size            1-infinity penalize motifs whose position in the sequences 
+                                       varies too much
+  position_change_cost      0-20       Cost for changing subregion
+  triplet_filtering         1/0        pre-filtering step that removes from consideration 
+                                       any substring that does not have a sufficiently good 
+                                       pair of matching substrings in some pair of the other 
+                                       input sequences
+  pair_filtering            1/0        Same as triplet filtering, but looks only for one match 
+                                       per other sequence
+  post_filtering            1/0        when used in conjunction with the triplet filtering 
+                                       option, this often significantly speeds up the program, 
+                                       while still garanteeing optimal results
+  indel_cost                1-5        insertions and deletions will be allowed in the motifs 
+                                       sought, at the given cost
+  inversion_cost            1-5        This option allows for motifs to undergo inversions, 
+                                       at the given cost. An inversion reverse-complements 
+                                       the motif.
+  details                   1/0        Shows some of the details about the progress of the 
+                                       computation
+  html                      1/0        produce html output (never deleted)
+  ps                        1/0        produce postscript output (never deleted)
 
 =head1 FEEDBACK
 

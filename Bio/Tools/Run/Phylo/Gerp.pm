@@ -46,8 +46,8 @@ footprinting/ shadowing (it finds 'constrained elements in multiple
 alignments').
 
 You can try supplying normal gerpcol/gerpelem command-line arguments to new(),
-eg. $factory->new(-e => 0.05) or calling arg-named methods, eg.
-$factory->e(0.05). The filename-related args (t, f, x) are handled internally
+eg. $factory-E<gt>new(-e =E<gt> 0.05) or calling arg-named methods, eg.
+$factory-E<gt>e(0.05). The filename-related args (t, f, x) are handled internally
 by the run() method. This wrapper currently only supports running GERP on a
 single alignment at a time (ie. F isn't used at all, nor are multiple fs
 possible).

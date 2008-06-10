@@ -33,7 +33,7 @@ Currently the interface is extremely simplified. Only the --tree form of usage
 is allowed (not --init-model), which means a tree must be supplied with the
 alignment (to run()). You can try supplying normal phyloFit arguments to new(),
 or calling arg-named methods (excluding initial hyphens and converting others
-to underscores, eg. $factory->gaps_as_bases(1) to set the --gaps-as-bases arg).
+to underscores, eg. $factory-E<gt>gaps_as_bases(1) to set the --gaps-as-bases arg).
 
 WARNING: the API may change in the future to allow for greater flexability and
 access to more phyloFit features.

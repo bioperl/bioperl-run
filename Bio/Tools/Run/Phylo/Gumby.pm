@@ -59,8 +59,14 @@ can get details here: http://pga.lbl.gov/gumby/. Gumby is used for phylogenetic
 footprinting/ shadowing.
 
 You can try supplying normal gumby command-line arguments to new(), eg.
-new(-ratio => 2) or calling arg-named methods (excluding the initial hyphen, eg.
-$factory->econs(1) to set the -econs arg).
+
+  $factory->new(-ratio => 2);
+
+or calling arg-named methods (excluding the initial hyphen, eg.
+
+  $factory->econs(1);
+
+to set the -econs arg).
 
 
 You will need to enable this Gumby wrapper to find the gumby program.

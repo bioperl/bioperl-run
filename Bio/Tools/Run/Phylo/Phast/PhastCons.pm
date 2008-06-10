@@ -47,10 +47,11 @@ to estimate as many parameters as possible and having it output just
 the 'most conserved' blocks it detects. You can, however, try
 supplying normal phastCons arguments to new(), or calling arg-named
 methods (excluding initial hyphens and converting others to
-underscores, eg. $factory->indels_only(1) to set the --indels-only
+underscores, eg. $factory-E<gt>indels_only(1) to set the --indels-only
 arg).
 
 The particular analysis carried out here is to:
+
  1. Use phyloFit to generate a tree model for initialization of the nonconserved
     model from the supplied alignment (all data) and species tree
  2. Run phastCons in 'training' mode for parameter estimation using all the
@@ -63,7 +64,6 @@ for details on how to improve results.
 
 WARNING: the API is likely to change in the future to allow for alternative
 analysis types.
-
 
 You will need to enable this phastCons wrapper to find the phast programs (at
 least phastCons and phyloFit).

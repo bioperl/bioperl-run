@@ -1162,7 +1162,7 @@ sub CLOSE {
     return if (!$fh  || \*STDOUT == $fh || \*STDERR == $fh || \$STDIN == $fh);
     close $fh;
 }
-    
+
 =head2 _clean_content
 
  Title   : _clean_content()
