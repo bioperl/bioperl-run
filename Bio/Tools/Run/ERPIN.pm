@@ -59,6 +59,8 @@ programs.
 
 =head1 DESCRIPTION
 
+=cut
+
 =head1 FEEDBACK
 
 =head2 Mailing Lists

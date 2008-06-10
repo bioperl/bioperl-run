@@ -204,7 +204,7 @@ sub new {
     return $self;
 }
 
-=head2 program
+=head2 program()
 
  Title   : program()
  Usage   : my $program = Bio::Tools::Run::AnalysisFactory::Pise->program(

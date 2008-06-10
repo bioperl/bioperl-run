@@ -12,11 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Phylo::Njtree::Best - Wrapper aroud the Njtree
-(Njtree/phyml) best program. Wrapper for the calculation of a
-reconciled phylogenetic tree with inferred duplication tags from a
-multiple sequence alignment and a species tree using NJTREE.
-
+Bio::Tools::Run::Phylo::Njtree::Best - Wrapper around the Njtree (Njtree/phyml) best program.
 
 =head1 SYNOPSIS
 
@@ -43,6 +39,10 @@ multiple sequence alignment and a species tree using NJTREE.
 
 This is a wrapper around the best program of Njtree by Li Heng.  See
 http://treesoft.sourceforge.net/njtree.shtml for more information.
+
+Wrapper for the calculation of a reconciled phylogenetic tree with
+inferred duplication tags from amultiple sequence alignment and a
+species tree using NJTREE.
 
 =head2 Helping the module find your executable 
 

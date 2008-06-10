@@ -12,10 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Simprot - Wrapper around the Simprot program. Wrapper
-for the calculation of a multiple sequence alignment from a
-phylogenetic tree
-
+Bio::Tools::Run::Simprot - Wrapper around the Simprot program. Wrapper for the calculation of a multiple sequence alignment from a phylogenetic tree
 
 =head1 SYNOPSIS
 
