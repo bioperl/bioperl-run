@@ -5,20 +5,17 @@ use strict;
 use vars qw($NTESTS);
 
 BEGIN {
+    use lib 't/lib';
+    use BioperlTest;
     $NTESTS = 99;
-    
-    eval { require Test::More; };
-    if( $@ ) {
-        use lib 't/lib';
-    }
-    use Test::More;
-    
-    plan tests => $NTESTS;
-    
+    test_begin(-tests => $NTESTS,
+	       -requires_modules => [qw(IPC::Run)]);
+
     use_ok('Bio::Tools::Run::Genemark');
     use_ok('Bio::Root::IO');
     use_ok('Bio::Seq');
 }
+
 
 my $verbose   = 1 if $ENV{'BIOPERLDEBUG'};
 my $model_dir = $ENV{'GENEMARK_MODELS'} if $ENV{'GENEMARK_MODELS'};

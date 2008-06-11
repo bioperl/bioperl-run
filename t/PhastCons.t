@@ -4,18 +4,15 @@
 use strict;
 
 BEGIN {
-    eval {require Test::More;};
-    if ($@) {
-        use lib 't/lib';
-    }
-    use Test::More;
-    
-    plan tests => 181;
-    
+    use lib 't/lib';
+    use BioperlTest;
+    test_begin(-tests => 181,
+	       -requires_modules => [qw(Clone)]);
     use_ok('Bio::Tools::Run::Phylo::Phast::PhastCons');
     use_ok('Bio::AlignIO');
     use_ok('Bio::TreeIO');
     use_ok('Bio::DB::Taxonomy');
+
 }
 
 END {

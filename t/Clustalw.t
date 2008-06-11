@@ -13,7 +13,7 @@ BEGIN {
   }
 
   # Setup Test::More and plan the number of tests
-  use Test::More tests => 43;
+  use Test::More tests => 42;
   
   use_ok('Bio::Tools::Run::Alignment::Clustalw');
   use_ok('Bio::SimpleAlign');

@@ -5,16 +5,11 @@ use strict;
 use vars qw($NTESTS);
 
 BEGIN {
+    use lib 't/lib';
+    use BioperlTest;
     $NTESTS = 12;
-    
-    eval { require Test::More; };
-    if( $@ ) {
-        use lib 't/lib';
-    }
-    use Test::More;
-    
-    plan tests => $NTESTS;
-    
+    test_begin(-tests => $NTESTS,
+	       -requires_modules => [qw(IPC::Run)]);
     use_ok('Bio::Tools::Run::tRNAscanSE');
     use_ok('Bio::Root::IO');
     use_ok('Bio::Seq');

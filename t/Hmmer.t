@@ -95,7 +95,7 @@ my $aln = $aio->next_aln;
 
 my $hmmbuild = $factory->executable();
 SKIP: {
-   skip "hmmbuild program not found", 1 unless $hmmbuild;
+   skip "hmmbuild program not found", 2 unless $hmmbuild;
    ok $factory->run($aln);
    ok -s $hmmout;
 }

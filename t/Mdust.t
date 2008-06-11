@@ -19,7 +19,7 @@ use Bio::SeqIO;
 
 END {
   for($Test::ntest..$NUMTESTS){
-      skip("Mdust not found. Skpping.",1);
+      skip("Mdust not found. Skipping.",1);
   }
 }
 

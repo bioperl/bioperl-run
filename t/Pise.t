@@ -5,17 +5,14 @@ our $NTESTS;
 our $error;
 
 BEGIN {
-    # to handle systems with no installed Test::More module
-    # we include the t\lib dir (where a copy of Test::More is located)
-    # as a fallback
-    $error = 0;
-    eval { require Test::More; };
-    if( $@ ) {
-		use lib 't/lib';
-    }
-    use Test::More;
+    use lib 't/lib';
+    use BioperlTest;
     $NTESTS = 11;
-    plan tests => $NTESTS;
+    test_begin(-tests => $NTESTS,
+	       -requires_networking => 1);
+    use_ok('Bio::Tools::Run::tRNAscanSE');
+    use_ok('Bio::Root::IO');
+    use_ok('Bio::Seq');
 }
 
 my $actually_submit;

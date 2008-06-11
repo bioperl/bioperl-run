@@ -3,8 +3,8 @@ use strict;
 BEGIN {
     use lib 't/lib';
     use BioperlTest;
-    test_begin(-tests => 49);
-    use_ok('Bio::Tools::Run::TigrAssembler');
+    test_begin(-tests => 49,
+	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
 
