@@ -193,7 +193,7 @@ sub new {
   }
   unless ($self->executable()) {
     if( $self->verbose >= 0 ) {
-      warn "RepeatMasker program not found as ".$self->executable.
+      warn "RepeatMasker program not found as ".($self->executable||'').
 	  " or not executable. \n"; 
     }
   }  

@@ -354,7 +354,8 @@ sub run {
        close($tfh);
        undef $tfh;
        $self->outfile_name($outfile);
-       my ($tfh, $seqfile) = $self->io->tempfile(-dir=>$self->tempdir());
+       my $seqfile;
+       ($tfh, $seqfile) = $self->io->tempfile(-dir=>$self->tempdir());
        close($tfh);
        undef $tfh;
 
