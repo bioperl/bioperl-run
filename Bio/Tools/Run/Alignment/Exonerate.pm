@@ -156,6 +156,29 @@ sub new {
        return $self;
 }
 
+=head2  version
+
+ Title   : version
+ Usage   : exit if $prog->version() < 1.8
+ Function: Determine the version number of the program
+ Example :
+ Returns : float or undef
+ Args    : none
+
+=cut
+
+sub version {
+    my ($self) = @_;
+    my $exe;
+    return undef unless $exe = $self->executable;
+    my $string = `$exe -v` ;
+    #exonerate from exonerate version 2.0.0\n...
+    my ($version) = $string =~ /exonerate version ([\d+\.]+)/m;
+    $version =~ s/\.(\d+)$/$1/;
+    return $version || undef;
+}
+
+
 =head2 run
 
  Title   :   run()

@@ -10,7 +10,7 @@ BEGIN {
     }
     use Test;
     use vars qw($NTESTS);
-    $NTESTS = 88;
+    $NTESTS = 89;
     plan tests => $NTESTS;
 }
 use Bio::Tools::Run::Alignment::Exonerate;
@@ -34,6 +34,7 @@ my $run = Bio::Tools::Run::Alignment::Exonerate->new(-verbose  => $verbose,
 exit(0) unless( $run->executable );
 
 ok $run->isa('Bio::Tools::Run::Alignment::Exonerate');
+ok $run->version;
 
 my $searchio= $run->run($query,$target);
 ok $searchio->isa("Bio::SearchIO");
@@ -70,19 +71,35 @@ RESULT: while(my $result = $searchio->next_result){
 
 $searchio= $run->run($query,$targetrev);
 ok $searchio->isa("Bio::SearchIO");
-my @expectrev = ( [qw(28   333   964 1279)],# target-start t-end query-start q-end
-		  [qw(415  537   841 963)],
-		  [qw(623 852    611 840)],
-		  [qw(1179 1332  457 610)],
-		  [qw(2046 2138  364  456)],
-		  [qw(2456 2576  243 363)],
-		  [qw(2834 3073  4 242)] );
+my @expectrev;
+if ($run->version >= 2 ) { # latest 2.0.0 version
+    @expectrev = ( # target-start t-end query-start q-end
+		   [qw(2834 3073  4 242)],
+		   [qw(2456 2576  243 363)],
+		   [qw(2046 2138  364 456)],
+		   [qw(1179 1332  457 610)],
+		   [qw(623 852    611 840)],
+		   [qw(415  537   841 963)],
+		   [qw(28   333   964 1279)]
+	);
+} else { # version 1.4.0 presumably
+    @expectrev = ( # target-start t-end query-start q-end
+		   [qw(28   333   964 1279)],
+		   [qw(415  537   841 963)],
+		   [qw(623 852    611 840)],
+		   [qw(1179 1332  457 610)],
+		   [qw(2046 2138  364  456)],
+		   [qw(2456 2576  243 363)],
+		   [qw(2834 3073  4 242)]
+	);
+
+}
 RESULT: while(my $result = $searchio->next_result){
     while( my $hit = $result->next_hit ) {
       my $i = 0;
     while( my $hsp = $hit->next_hsp ) {	
-	ok ($hsp->hit->strand, 1);
-	ok ($hsp->query->strand, -1);
+	ok ($hsp->hit->strand, -1);
+	ok ($hsp->query->strand, 1);
 	ok ($hsp->hit->start,$expectrev[$i]->[0]);
 	ok ($hsp->hit->end,$expectrev[$i]->[1]);
 	ok ($hsp->query->start,$expectrev[$i]->[2]);
