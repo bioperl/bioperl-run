@@ -533,14 +533,15 @@ sub run {
 	   $rc = 0;
        }
        eval {
-	   $parser = Bio::Tools::Phylo::PAML->new(-file => "$tmpdir/$outfile", 
-						 -dir => "$tmpdir");
+	   $parser = Bio::Tools::Phylo::PAML->new(-file => "$tmpdir/$outfile",
+						  -verbose => $self->verbose,
+						  -dir => "$tmpdir");
        };
        if( $@ ) {
 	   $self->warn($self->error_string);
-       }       
+       }
        chdir($cwd);
-   }   
+   }
    return ($rc,$parser);
 }
 

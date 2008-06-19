@@ -72,9 +72,7 @@ my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
 		 'kappa'    => 2,		 
 		 'CodonFreq'=> 2,
 		 'NSsites'   => 0,
-		 'model'    => 0,
-		 
-
+		 'model'    => 0,		 
 	     },
      -verbose => $verbose);
 unless ($codeml->executable) {
@@ -166,3 +164,60 @@ $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
      -verbose => $verbose);
 
 ok($codeml);
+
+
+# AAML
+my $cysaln = Bio::AlignIO->new(-format => 'msf',
+			       -file => Bio::Root::IO->catfile
+			       (qw(t data cysprot.msf)))->next_aln;
+
+my $cystre = Bio::TreeIO->new(-format => 'newick',
+			      -file  => Bio::Root::IO->catfile
+			       (qw(t data cysprot.raxml.tre)))->next_tree;
+ok($cysaln);
+ok($cystre);
+
+$codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
+    (
+     -verbose => 0,     
+     -tree   => $cystre,
+     -params => { 'runmode' => 0, # provide a usertree
+		  'seqtype' => 2, # AMINO ACIDS,
+		  'model'   => 0, # one dN/dS rate
+		  'NSsites' => 0, # one -- swap this with 1, 2, 3 etc
+		  'clock'   => 0, # 0 = no clock
+		  'getSE'   => 1, # get Standard Error
+		  'fix_blength' => 0, # use initial BLengths
+		  'ncatG' => 1, #increase approrpriately for NSsites,
+     },
+     -alignment => $cysaln,
+     -save_tempfiles => 1,
+    );
+unless ($codeml->executable) {
+    warn("PAML not is installed. skipping tests $Test::ntest to $NUMTESTS\n");
+    exit(0) ;
+}
+ok($codeml);
+
+($rc,$results) = $codeml->run();
+ok($rc,1);
+
+unless( defined $results ) { 
+    warn($codeml->error_string, "\n");
+    exit(0);
+}
+
+$result = $results->next_result;
+unless( defined $result ) { 
+    exit(0);
+}
+
+($vnum) = ($result->version =~ /(\d+(\.\d+)?)/);
+for my $tree ( $result->get_trees ) {
+    my $node = $tree->find_node(-id => 'CATL_HUMAN');
+    if( $vnum == 4 ) {
+	ok($node->branch_length, '0.216223');
+    } else {	
+	ok($node->branch_length, '0.216223');
+    }
+}
