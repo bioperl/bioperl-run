@@ -263,6 +263,15 @@ sub _run {
         $self->throw("GeneMark call crashed: $EVAL_ERROR"); 
     }
 
+    ## The prokaryotic version of GeneMark.HMM, at least, returns
+    ## 0 (success) even when the license has expired.   
+    if ((-z $temp_file_name) && ($program_stderr =~ /license period has ended/i)) {
+        $self->throw($program_stderr);
+    }
+    elsif ($program_stderr =~ /\d+ days remaining/i) {
+        $self->warn($program_stderr);
+    }
+
     $self->debug(join("\n", 'GeneMark STDOUT:', $program_stdout)) if $program_stdout;
     $self->debug(join("\n", 'GeneMark STDERR:', $program_stderr)) if $program_stderr;
                  
