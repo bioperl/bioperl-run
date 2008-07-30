@@ -377,6 +377,10 @@ sub add_targets {
 		elsif ($key eq "PRIMER_MAX_SIZE") {
 			if ($args{$key}>35) {$self->warn('Maximum primer size (PRIMER_MAX_SIZE) must be less than 35')}
 		}
+		elsif (uc($key) eq "SEQUENCE") {
+		    # Add seqobject if not present, since it is checked for by Bio::Tools::Primer3->next_primer()
+		    $self->{'seqobject'}=Bio::Seq->new(-seq=>$args{$key}) if not defined($self->{'seqobject'});
+		}
 
 		# need a check to see whether this is already in the array
 		# and finally add the argument to the list.
