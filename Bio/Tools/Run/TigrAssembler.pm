@@ -253,10 +253,6 @@ sub run {
       $self->throw("Not a valid Bio::PrimarySeqI");
     }
   }
-  # Remove sequences less than 40 bp long (not supported by TIGR Assembler)
-  $seqs = $self->_clean_seqs($seqs, 40);
-  return undef if scalar @$seqs <= 0;
-  
   # Assemble
   my @asms;
   my $tot_nof_seqs = scalar @$seqs;
@@ -266,38 +262,15 @@ sub run {
     my $last = $i+$max_nof_seqs-1;
     $last = $tot_nof_seqs-1 if $last > $tot_nof_seqs-1;
     my @seq_subset = @$seqs[$first..$last];
-    # Write temp FASTA and QUAL input files
+    # Write temp FASTA and QUAL input files, removing sequences less than 40bp
     my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset);
     # Assemble
-    my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
-    push @asms, $asm_obj
-  }
-  return \@asms;
-}
-
-
-=head2 _clean_seqs
-
- Title   :   _clean_seqs
- Usage   :   $assembler->_clean_seqs(\@seqs, $min_length);
- Function:   Remove sequences less than a given length
- Returns :   Bio::PrimarySeq object array reference
- Args    :   Bio::PrimarySeq object array reference
-
-=cut
-
-sub _clean_seqs {
-  my ($self, $seqs, $min_length) = @_;
-  my $size = scalar @$seqs;
-  for ( my $i = 0 ; $i < $size ; $i++ ) {
-    my $seq = $$seqs[$i];
-    if ($seq->length < $min_length) {
-      splice @$seqs, $i, 1;
-      $i--;
-      $size--;
+    if (defined $fasta_file) {
+      my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
+      push @asms, $asm_obj
     }
   }
-  return $seqs;
+  return \@asms;
 }
 
 
@@ -319,15 +292,26 @@ sub _write_seq_file {
   my $fasta_out = Bio::SeqIO->new( -fh => $fasta_h , -format => 'fasta');
   my $qual_out = Bio::SeqIO->new( -fh => $qual_h , -format => 'qual');
   my $use_qual_file = 0;
-  for ( my $i = 0 ; $i < scalar @$seqs ; $i++ ) {
+  my $size = scalar @$seqs;
+  for ( my $i = 0 ; $i < $size ; $i++ ) {
     my $seq = $$seqs[$i];
-    # Make sure to give an ID if the sequence has none to prevent TIGR Assembler
-    # from crashing
+    # Make sure that all sequences have an ID (to prevent TIGR Assembler crash)
     if (not defined $seq->id) {
       my $newid = 'tmp'.$i;
       print $newid."\n";
       $seq->id($newid);
       $self->warn("A sequence had no ID. Its ID is now $newid");
+    }
+    my $seqid = $seq->id;
+    # Remove sequences less than 40bp (not supported by TIGR_Assembler)
+    my $min_length = 40;
+    if ($seq->length < $min_length) {
+      splice @$seqs, $i, 1;
+      $i--;
+      $size--;
+      $self->warn("Sequence $seqid skipped: can not be assembled because its ".
+        "size is less than $min_length bp");
+      next;
     }
     # Write the FASTA entries in files (and QUAL if appropriate)
     $fasta_out->write_seq($seq);
@@ -340,6 +324,7 @@ sub _write_seq_file {
   close($qual_h);
   $fasta_out->close();
   $qual_out->close();
+  return undef if scalar @$seqs <= 0;
   $qual_file = undef if $use_qual_file == 0;
   return $fasta_file, $qual_file;
 }
