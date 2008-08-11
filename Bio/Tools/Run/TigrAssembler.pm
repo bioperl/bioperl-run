@@ -416,7 +416,12 @@ sub _run {
   $self->debug(join("\n", 'TIGR Assembler STDERR:', $stderr_file))
     if $stderr_file;
     # TIGR Assembler's stderr reports a lot more than just errors
-  
+ 
+  # Close filehandles
+  close($scratch_fh);
+  close($output_fh);
+  close($stderr_fh);
+ 
   # Import assembly
   my $asm_io = Bio::Assembly::IO->new(
     -file   => "<$output_file",
