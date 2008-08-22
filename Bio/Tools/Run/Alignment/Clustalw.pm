@@ -540,6 +540,42 @@ sub profile_align {
     my $aln = $self->_run('profile-aln', $infilename1, $infilename2, $param_string);
 }
 
+=head2  add_sequences
+
+ Title   : add_sequences
+ Usage   :
+ Function: Align and add sequences into an alignment
+ Example :
+ Returns : Reference to a SimpleAlign object containing the (super)alignment.
+ Args    : Names of 2 files, the first one containing an alignment and the second one containing sequences to be added
+         or references to 2 Bio::SimpleAlign objects.
+
+Throws an exception if arguments are not either strings (eg filenames)
+or references to SimpleAlign objects.
+
+
+=cut
+
+sub add_sequences {
+
+    my ($self,$input1,$input2) = @_;
+    my ($temp,$infilename1,$infilename2,$input,$seq);
+    
+    $self->io->_io_cleanup();
+    # Create input file pointer
+    $infilename1 = $self->_setinput($input1,1);
+    $infilename2 = $self->_setinput($input2,2);
+    if (!$infilename1 || !$infilename2) {$self->throw("Bad input data: $input1 or $input2 !");}
+    unless ( -e $infilename1 and -e  $infilename2) {$self->throw("Bad input file: $input1 or $input2 !");}
+    
+    
+    # Create parameter string to pass to clustalw program
+    my $param_string = $self->_setparams();
+    # run clustalw
+    my $aln = $self->_run('add_sequences', $infilename1,
+    $infilename2, $param_string);
+
+}
 
 =head2  tree
 
@@ -672,6 +708,12 @@ sub _run {
     	$command = '-profile';
     }
     
+    if ($command =~ /add_sequences/) {
+      $instring =  "-profile1=$infile1  -profile2=$infile2";
+      chmod 0777, $infile1,$infile2;
+      $command = '-sequences';
+    }
+
     if ($command =~ /tree/) {
     	if( $^O eq 'dec_osf' ) {
             $instring =  $infile1;
