@@ -1,4 +1,3 @@
-# $Id: QuickTree.pm 13928 2007-06-14 15:23:09Z sendu $
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Phyml
 #
@@ -50,7 +49,7 @@ Bio::Tools::Run::Phylo::Phyml - Wrapper for rapid reconstruction of phylogenies 
 
 =head1 DESCRIPTION
 
-This is a wrapper for running the phyml application by Stéphane
+This is a wrapper for running the phyml application by Stephane
 Guindon and Olivier Gascuel. You can download it from:
 http://atgc.lirmm.fr/phyml/
 
@@ -64,12 +63,12 @@ This can be done in (at least) three ways:
 
 =over
 
-=item 1. 
+=item 1.
 
 Make sure the Phyml executable is in your path. Copy it to, or create
 a symbolic link from a directory that is in your path.
 
-=item 2. 
+=item 2.
 
 Define an environmental variable PHYMLDIR which is a
 directory which contains the 'phyml' application: In bash:
@@ -80,7 +79,7 @@ In csh/tcsh:
 
   setenv PHYMLDIR /home/username/phyml_v2.4.4/exe
 
-=item 3. 
+=item 3.
 
 Include a definition of an environmental variable PHYMLDIR in
 every script that will use this Phyml wrapper module, e.g.:
@@ -92,7 +91,7 @@ every script that will use this Phyml wrapper module, e.g.:
 
 =head2 Running
 
-This wrapper has been tested with PHYML v2.4.4.
+This wrapper has been tested with PHYML v2.4.4 and v.3.0
 
 In its current state, the wrapper supports only input of one MSA and
 output of one tree. It can easily be extended to support more advanced
@@ -156,6 +155,12 @@ map { $models->{0}->{$_} = 1 } qw(JC69 K2P F81 HKY F84 TN93 GTR);
 # protein
 map { $models->{1}->{$_} = 1 } qw(JTT MtREV Dayhoff WAG);
 
+our $models3;
+# DNA
+map { $models3->{'nt'}->{$_} = 1 } qw(HKY85 JC69 K80 F81 F84 TN93 GTR );
+# protein
+map { $models3->{'aa'}->{$_} = 1 }
+    qw(WAG JTT MtREV Dayhoff DCMut RtREV CpREV VT Blosum62 MtMam MtArt HIVw  HIVb );
 
 =head2 program_name
 
@@ -198,7 +203,7 @@ sub program_dir {
            -kappa           => 'e' or float,         [e]
            -invar           => 'e' or float,         [e]
            -category_number => integer,              [1]
-           -alpha           => 'e' or float,         [e]
+           -alpha           => 'e' or float (int v3),[e]
            -tree            => 'BIONJ' or your own,  [BION]
            -opt_topology    => boolean               [y]
            -opt_lengths     => boolean               [y]
@@ -208,7 +213,7 @@ sub program_dir {
 sub new {
     my ($class, @args) = @_;
     my $self = $class->SUPER::new(@args);
-    
+
     # for consistency with other run modules, allow params to be dashless
     my %args = @args;
     while (my ($key, $val) = each %args) {
@@ -217,58 +222,108 @@ sub new {
             $args{'-'.$key} = $val;
         }
     }
-    
-    my ($data_type, $data_format, $dataset_count, $model, $kappa, $invar, 
+
+    my ($data_type, $data_format, $dataset_count, $model, $freq, $kappa, $invar,
 	$category_number, $alpha, $tree, $opt_topology,
-	$opt_lengths) = $self->_rearrange([qw( DATA_TYPE
-                                               DATA_FORMAT
-                                               DATASET_COUNT
-                                               MODEL
-                                               KAPPA
-                                               INVAR
-                                               CATEGORY_NUMBER
-                                               ALPHA
-                                               TREE
-                                               OPT_TOPOLOGY
-                                               OPT_LENGTHS)], %args);
+	$opt_lengths, $opt, $search, $rand_start, $rand_starts, $rand_seed)
+        = $self->_rearrange([qw( DATA_TYPE
+				 DATA_FORMAT
+				 DATASET_COUNT
+				 MODEL
+				 FREQ
+				 KAPPA
+				 INVAR
+				 CATEGORY_NUMBER
+				 ALPHA
+				 TREE
+				 OPT_TOPOLOGY
+				 OPT_LENGTHS
+				 OPT
+				 SEARCH
+				 RAND_START
+				 RAND_STARTS
+				 RAND_SEED
+			      )], %args);
 
     $self->data_type($data_type) if $data_type;
     $self->data_format($data_format) if $data_format;
     $self->dataset_count($dataset_count) if $dataset_count;
     $self->model($model) if $model;
+    $self->freq($kappa) if $freq;
     $self->kappa($kappa) if $kappa;
     $self->invar($invar) if $invar;
     $self->category_number($category_number) if $category_number;
     $self->alpha($alpha) if $alpha;
     $self->tree($tree) if $tree;
     $self->opt_topology($opt_topology) if $opt_topology;
-    $self->opt_lengths ($opt_lengths) if $opt_lengths;
-    
+    $self->opt_lengths($opt_lengths) if $opt_lengths;
+    $self->opt($opt) if $opt;
+    $self->search($search) if $search;
+    $self->rand_start($rand_start) if $rand_start;
+    $self->rand_starts($rand_starts) if $rand_starts;
+    $self->rand_seed($rand_seed) if $rand_seed;
+
+
     return $self;
+}
+
+=head2  version
+
+ Title   : version
+ Usage   : exit if $prog->version < 1.8
+ Function: Determine the version number of the program
+ Example :
+ Returns : float or undef
+ Args    : none
+
+Phyml before 3.0 did not display the version. Assume 2.44.
+
+=cut
+
+sub version {
+    my $self = shift;
+
+    return $self->{'_version'} if defined $self->{'_version'};
+    my $exe = $self->executable || return;
+    my $string = substr `$exe --help`, 0, 40 ;
+    my ($version) = $string =~ /PhyML v([\d+\.]+)/;
+    $self->{'_version'} = $version;
+    $version ? (return $version) : return '2.44'
 }
 
 
 =head2 data_type
 
  Title   : data_type
- Usage   : $phyml->data_type('dna');
- Function: Sets sequence alphabet to 'dna' or 'protein'
+ Usage   : $phyml->data_type('nt');
+ Function: Sets sequence alphabet to 'dna' (nt in v3) or 'aa'
            If leaved unset, will be set automatically
  Returns : set value, defaults to  'protein'
- Args    : None to get, 'dna' or 'protein' to set.
+ Args    : None to get, 'dna' ('nt') or 'aa' to set.
 
 =cut
 
 sub data_type {
     my ($self, $value) = @_;
-    if (defined $value) {
-	if ($value eq 'dna') {
-	    $self->{_data_type} = '0';
-	} else {
-	    $self->{_data_type} = '1';
+    if ($self->version >= 3 ) {
+	if (defined $value) {
+	    if ($value eq 'nt') {
+		$self->{_data_type} = 'nt';
+	    } else {
+		$self->{_data_type} = 'aa';
+	    }
 	}
+	return 'aa' unless defined $self->{_data_type};
+    } else {
+	if (defined $value) {
+	    if ($value eq 'dna') {
+		$self->{_data_type} = '0';
+	    } else {
+		$self->{_data_type} = '1';
+	    }
+	}
+	return '1' unless defined $self->{_data_type};
     }
-    return '1' unless defined $self->{_data_type};
     return $self->{_data_type};
 }
 
@@ -276,7 +331,7 @@ sub data_type {
 =head2 data_format
 
  Title   : data_format
- Usage   : $phyml->data_format('dna');
+ Usage   : $phyml->data_format('s');
  Function: Sets PHYLIP format to 'i' interleaved or
            's' sequential
  Returns : set value, defaults to  'i'
@@ -320,10 +375,17 @@ sub dataset_count {
 
  Title   : model
  Usage   : $phyml->model('HKY');
- Function: Choose the substitution model to use. One of 
+ Function: Choose the substitution model to use. One of
 
            JC69 | K2P | F81 | HKY | F84 | TN93 | GTR (DNA)
-           JTT | MtREV | Dayhoff | WAG (Amino-Acids)
+           JTT | MtREV | Dayhoff | WAG (amino acids)
+
+           v3.0:
+           HKY85 (default) | JC69 | K80 | F81 | F84 |
+           TN93 | GTR (DNA)
+           WAG (default) | JTT | MtREV | Dayhoff | DCMut |
+           RtREV | CpREV | VT | Blosum62 | MtMam | MtArt |
+           HIVw |  HIVb (amino acids)
 
  Returns : Name of the model, defaults to {HKY|JTT}
  Args    : None to get, string to set.
@@ -333,19 +395,60 @@ sub dataset_count {
 sub model {
     my ($self, $value) = @_;
     if (defined ($value)) {
-	$self->throw("Not a valid model name [$value] for current data type (alphabet)")
+	if ($self->version >= 3 ) {
+	    unless ($value =~ /\d{6}/) {
+		$self->throw("Not a valid model name [$value] for current data type (alphabet)")
+		unless $models3->{$self->data_type}->{$value};
+	    }
+	} else {
+	    $self->throw("Not a valid model name [$value] for current data type (alphabet)")
 	    unless $models->{$self->data_type}->{$value};
-        $self->{_model} = $value;
+	}
+	$self->{_model} = $value;
     }
+
 
     if ($self->{_model}) {
 	return $self->{_model};
     }
-    elsif ($self->data_type) {
-	return 'JTT'; # protein
+
+    if ($self->version >= 3 ) {
+	if ($self->data_type eq 'aa') {
+	    return 'WAG'; # protein
+	} else {
+	    return 'HKY85'; # DNA
+	}
     } else {
-	return 'HKY'; # DNA
+	if ($self->data_type) {
+	    return 'JTT'; # protein
+	} else {
+	    return 'HKY'; # DNA
+	}
     }
+}
+
+=head2 freq
+
+ Title   : freq
+ Usage   : $phyml->freq(e); $phyml->freq("0.2, 0.6, 0.6, 0.2");
+ Function: Sets nucleotide frequences or asks residue to be estimated
+            according to two models: e or d
+ Returns : set value,
+ Args    : None to get, string to set.
+
+v3 only.
+
+=cut
+
+sub freq {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    if (defined $value) {
+	die "Invalid value [$value]"
+	    unless $value =~ /^[\d\. ]$/ or $value eq 'e' or $value eq 'd';
+	$self->{_freq} = $value;
+    }
+    return $self->{_freq};
 }
 
 
@@ -395,14 +498,13 @@ sub invar {
 }
 
 
-
 =head2 category_number
 
  Title   : category_number
  Usage   : $phyml->category_number(4);
  Function: Sets number of relative substitution rate categories
  Returns : set value, defaults to 1
- Args    : None to get, float or integer to set.
+ Args    : None to get, integer to set.
 
 =cut
 
@@ -431,7 +533,7 @@ sub category_number {
 sub alpha {
     my ($self, $value) = @_;
     if (defined $value) {
-	die "Invalid number [$value]" 
+	die "Invalid number [$value]"
 	    unless $value =~ /^[-+]?\d*\.?\d*$/ or $value eq 'e';
 	$self->{_alpha} = $value;
     }
@@ -446,7 +548,7 @@ sub alpha {
  Usage   : $phyml->tree('/tmp/tree.nwk');
  Function: Sets starting tree, leave unset to estimate a distance tree
  Returns : set value, defaults to 'BIONJ'
- Args    : None to get, float or integer to set.
+ Args    : None to get, newick tree file name to set.
 
 =cut
 
@@ -471,18 +573,21 @@ sub tree {
  Returns : {y|n} (default y)
  Args    : None to get, boolean to set.
 
+v2.* only
+
 =cut
 
 sub opt_topology {
     my ($self, $value) = @_;
+    $self->throw("Not a valid parameter for to PhyML v3") if $self->version >= 3;
     if (defined ($value)) {
         if ($value) {
-	    $self->{opt_topology} = 'y';
+	    $self->{_opt_topology} = 'y';
 	} else {
-	    $self->{opt_topology} = 'n';
+	    $self->{_opt_topology} = 'n';
 	}
     }
-    return $self->{opt_topology} || 'y';
+    return $self->{_opt_topology} || 'y';
 }
 
 =head2 opt_lengths
@@ -493,19 +598,142 @@ sub opt_topology {
  Returns : {y|n} (default y)
  Args    : None to get, boolean to set.
 
+
+v2.* only
+
 =cut
 
 sub opt_lengths {
     my ($self, $value) = @_;
+    $self->throw("Not a valid parameter for PhyML v3") if $self->version >= 3;
     if (defined ($value)) {
         if ($value) {
-	    $self->{opt_lengths} = 'y';
+	    $self->{_opt_lengths} = 'y';
 	} else {
-	    $self->{opt_lengths} = 'n';
+	    $self->{_opt_lengths} = 'n';
 	}
     }
-    return $self->{opt_lengths} || 'y';
+    return $self->{_opt_lengths} || 'y';
 }
+
+=head2 opt
+
+ Title   : opt
+ Usage   : $factory->opt(1);
+ Function: Optimise tree parameters: tlr|tl|tr|l|n
+ Returns : {value|n} (default n)
+ Args    : None to get, string to set.
+
+v3.* only
+
+=cut
+
+sub opt {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    if (defined ($value)) {
+	$self->{_opt} = $value if $value =~ /tlr|tl|tr|l|n/;
+    }
+    return $self->{_opt} || 'n';
+}
+
+=head2 search
+
+ Title   : search
+ Usage   : $factory->search(SPR);
+ Function: Tree topology search operation algorithm: NNI|SPR|BEST
+ Returns : string (defaults to NNI)
+ Args    : None to get, string to set.
+
+v3.* only
+
+=cut
+
+sub search {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    if (defined ($value)) {
+	$self->{_search} = $value if $value =~ /NNI|SPR|BEST/;
+    }
+    return $self->{_search} || 'NNI';
+}
+
+=head2 rand_start
+
+ Title   : rand_start
+ Usage   : $factory->rand_start(1);
+ Function: Sets the initial SPR tree to random.
+ Returns : boolean (defaults to false)
+ Args    : None to get, boolean to set.
+
+v3.* only; only meaningful if $prog->search is 'SPR'
+
+=cut
+
+
+sub rand_start {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    if (defined ($value)) {
+        if ($value) {
+	    $self->{_rand_start} = 1;
+	} else {
+	    $self->{_rand_start} = 0;
+	}
+    }
+    return $self->{_rand_start} || 0;
+}
+
+
+=head2 rand_starts
+
+ Title   : rand_starts
+ Usage   : $factory->rand_starts(10);
+ Function: Sets the number of initial random SPR trees
+ Returns : integer (defaults to 1)
+ Args    : None to get, integer to set.
+
+v3.* only; only valid if $prog->search is 'SPR'
+
+=cut
+
+sub rand_starts {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    if (defined $value) {
+	die "Invalid number [$value]"
+	    unless $value =~ /^[-+]?\d+$/;
+	$self->{_rand_starts} = $value;
+    }
+    return $self->{_rand_starts} || 1;
+}
+
+
+=head2 rand_seed
+
+ Title   : rand_seed
+ Usage   : $factory->rand_seed(1769876);
+ Function: Seeds the random number generator
+ Returns : random integer
+ Args    : None to get, integer to set.
+
+v3.* only; only valid if $prog->search is 'SPR'
+
+Uses perl rand() to initialize if not explicitely set
+
+=cut
+
+sub rand_seed {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    if (defined $value) {
+	die "Invalid number [$value]"
+	    unless $value =~ /^[-+]?\d+$/;
+	$self->{_rand_seed} = $value;
+    }
+    return $self->{_rand_seed} || int rand 1000000;
+}
+
 
 
 
@@ -538,14 +766,14 @@ sub run {
 	$in = File::Spec->catfile($self->tempdir, $name);
     }
 
-    return $self->_run($in); 
+    return $self->_run($in);
 }
 
 =head2 stats
 
  Title   : stats
  Usage   : $factory->stats;
- Function: Returns the contents of the phyml '_phyml_stat.txt' ouput file
+ Function: Returns the contents of the phyml '_phyml_stat.txt' output file
  Returns : string with statistics about the run, undef before run()
  Args    : none
 
@@ -553,8 +781,7 @@ sub run {
 
 sub stats {
     my $self = shift;;
-    return $self->{_stats};    
-
+    return $self->{_stats};
 }
 
 =head2 tree_string
@@ -570,25 +797,31 @@ sub stats {
 
 sub tree_string {
     my $self = shift;;
-    return $self->{_tree};    
-
+    return $self->{_tree};
 }
 
 sub _run {
     my ($self, $file)= @_;
-    
+
     my $exe = $self->executable || return;
-    my $param_str = $self->arguments." ".$self->_setparams;
-    my $command = $exe." $file $param_str";
-  
+    my $command;
+    my $output_stat_file;
+    if ($self->version >= 3 ) {
+	$command = $exe. " -i $file". $self->_setparams;
+	$output_stat_file = '_phyml_stats.txt';
+    } else {
+	$command = $exe. " $file ". $self->arguments. $self->_setparams;
+	$output_stat_file = '_phyml_stat.txt';
+    }
+
     $self->debug("Phyml command = $command\n");
     `$command`;
 
     # stats
     {
-	my $stat_file =  $file. '_phyml_stat.txt';
-	open(my $FH_STAT, $stat_file)
-	    || $self->throw("Phyml call ($command) did not give an output: $?");
+	my $stat_file =  $file. $output_stat_file;
+	open(my $FH_STAT, "<", $stat_file)
+	    || $self->throw("Phyml call ($command) did not give an output [$stat_file]: $?");
 	local $/;
 	$self->{_stats} .= <$FH_STAT>;
     }
@@ -597,13 +830,13 @@ sub _run {
     # tree
     my $tree_file =  $file. '_phyml_tree.txt';
     {
-	open(my $FH_TREE, $tree_file)
+	open(my $FH_TREE, "<", $tree_file)
 	    || $self->throw("Phyml call ($command) did not give an output: $?");
 	local $/;
 	$self->{_tree} .= <$FH_TREE>;
     }
 
-    open(my $FH_TREE, $tree_file)
+    open(my $FH_TREE, "<", $tree_file)
 	|| $self->throw("Phyml call ($command) did not give an output: $?");
 
     my $treeio = Bio::TreeIO->new(-format => 'nhx', -fh => $FH_TREE);
@@ -627,26 +860,60 @@ sub _run {
 
 sub _setparams {
     my $self = shift;
-    my $param_string = ' ' .  $self->data_type;
+    my $param_string;
 
-    $param_string .= ' '. $self->data_format;
-    $param_string .= ' '. $self->dataset_count;
+    if ($self->version >= 3 ) {
 
-    $param_string .= ' 0'; # no bootstap sets
+	$param_string = ' -d '.  $self->data_type;
+	$param_string .= ' -q' if $self->data_format eq 's';
+	$param_string .= ' -n '. $self->dataset_count if $self->dataset_count > 1;
 
-    $param_string .= ' '. $self->model;
+	#$param_string .= ' 0';	# no bootstap sets
 
-    unless ($self->data_type) { # only for DNA
-	$param_string .= ' '. $self->kappa;
+	$param_string .= ' -m '. $self->model;
+	$param_string .= ' -f '. $self->freq if $self->freq;
+
+	if ($self->data_type eq 'dna') {
+	    $param_string .= ' -t '. $self->kappa;
+	}
+
+	$param_string .= ' -v '. $self->invar;
+	$param_string .= ' -c '. $self->category_number;
+	$param_string .= ' -a '. $self->alpha;
+	$param_string .= ' -u '. $self->tree if $self->tree ne 'BIONJ';
+	$param_string .= ' -o '. $self->opt if $self->opt;
+	$param_string .= ' -s '. $self->search;
+
+	if ($self->search eq 'SPR' ) {
+	    $param_string .= ' --rand_start ' if $self->rand_start;
+	    $param_string .= ' --n_rand_starts '. $self->rand_starts
+	        if $self->rand_starts;
+	    $param_string .= ' --r_seed '. $self->rand_seed;
+	}
+
+    } else {
+
+	$param_string = ' ' .  $self->data_type;
+
+	$param_string .= ' '. $self->data_format;
+	$param_string .= ' '. $self->dataset_count;
+
+	$param_string .= ' 0';	# no bootstap sets
+
+	$param_string .= ' '. $self->model;
+
+	unless ($self->data_type) { # only for DNA
+	    $param_string .= ' '. $self->kappa;
+	}
+
+	$param_string .= ' '. $self->invar;
+	$param_string .= ' '. $self->category_number;
+	$param_string .= ' '. $self->alpha;
+	$param_string .= ' '. $self->tree;
+	$param_string .= ' '. $self->opt_topology;
+	$param_string .= ' '. $self->opt_lengths;
+
     }
-
-    $param_string .= ' '. $self->invar;
-    $param_string .= ' '. $self->category_number;
-    $param_string .= ' '. $self->alpha;
-    $param_string .= ' '. $self->tree;
-    $param_string .= ' '. $self->opt_topology;
-    $param_string .= ' '. $self->opt_lengths;
-
     return $param_string;
 }
 
