@@ -162,34 +162,6 @@ map { $models3->{'nt'}->{$_} = 1 } qw(HKY85 JC69 K80 F81 F84 TN93 GTR );
 map { $models3->{'aa'}->{$_} = 1 }
     qw(WAG JTT MtREV Dayhoff DCMut RtREV CpREV VT Blosum62 MtMam MtArt HIVw  HIVb );
 
-=head2 program_name
-
- Title   : program_name
- Usage   : $factory>program_name()
- Function: holds the program name
- Returns : string
- Args    : None
-
-=cut
-
-sub program_name {
-    return $PROGRAM_NAME;
-}
-
-=head2 program_dir
-
- Title   : program_dir
- Usage   : $factory->program_dir(@params)
- Function: returns the program directory, obtiained from ENV variable.
- Returns : string
- Args    : None
-
-=cut
-
-sub program_dir {
-    return $PROGRAM_DIR;
-}
-
 =head2 new
 
  Title   : new
@@ -267,6 +239,34 @@ sub new {
     return $self;
 }
 
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $factory>program_name()
+ Function: holds the program name
+ Returns : string
+ Args    : None
+
+=cut
+
+sub program_name {
+    return $PROGRAM_NAME;
+}
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $factory->program_dir(@params)
+ Function: returns the program directory, obtiained from ENV variable.
+ Returns : string
+ Args    : None
+
+=cut
+
+sub program_dir {
+    return $PROGRAM_DIR;
+}
+
 =head2  version
 
  Title   : version
@@ -276,7 +276,8 @@ sub new {
  Returns : float or undef
  Args    : none
 
-Phyml before 3.0 did not display the version. Assume 2.44.
+Phyml before 3.0 did not display the version. Assume 2.44 when can not
+determine it.
 
 =cut
 
@@ -291,6 +292,73 @@ sub version {
     $version ? (return $version) : return '2.44'
 }
 
+
+=head2 run
+
+ Title   : run
+ Usage   : $factory->run($aln_file);
+           $factory->run($align_object);
+ Function: Runs Phyml to generate a tree 
+ Returns : Bio::Tree::Tree object
+ Args    : file name for your input alignment in a format 
+           recognised by AlignIO, OR  Bio::Align::AlignI
+           complient object (eg. Bio::SimpleAlign).
+
+=cut
+
+sub run {
+    my ($self, $in) = @_;
+
+    if (ref $in && $in->isa("Bio::Align::AlignI")) {
+        $in = $self->_write_phylip_align_file($in);
+    }
+    elsif (! -e $in) {
+        $self->throw("When not supplying a Bio::Align::AlignI object, ".
+		     "you must supply a readable filename");
+    }
+    elsif (-e $in) {
+	copy ($in, $self->tempdir);
+	my $name = File::Spec->splitpath($in); # name is the last item in the array
+	$in = File::Spec->catfile($self->tempdir, $name);
+    }
+
+    return $self->_run($in);
+}
+
+=head2 stats
+
+ Title   : stats
+ Usage   : $factory->stats;
+ Function: Returns the contents of the phyml '_phyml_stat.txt' output file
+ Returns : string with statistics about the run, undef before run()
+ Args    : none
+
+=cut
+
+sub stats {
+    my $self = shift;;
+    return $self->{_stats};
+}
+
+=head2 tree_string
+
+ Title   : tree_string
+ Usage   : $factory->tree_string;
+           $factory->run($align_object);
+ Function: Returns the contents of the phyml '_phyml_tree.txt' ouput file
+ Returns : string with tree in Newick format, undef before run()
+ Args    : none
+
+=cut
+
+sub tree_string {
+    my $self = shift;;
+    return $self->{_tree};
+}
+
+=head2 Getsetters
+
+These methods are used to set and get program parameters before running.
 
 =head2 data_type
 
@@ -427,30 +495,6 @@ sub model {
     }
 }
 
-=head2 freq
-
- Title   : freq
- Usage   : $phyml->freq(e); $phyml->freq("0.2, 0.6, 0.6, 0.2");
- Function: Sets nucleotide frequences or asks residue to be estimated
-            according to two models: e or d
- Returns : set value,
- Args    : None to get, string to set.
-
-v3 only.
-
-=cut
-
-sub freq {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
-    if (defined $value) {
-	die "Invalid value [$value]"
-	    unless $value =~ /^[\d\. ]$/ or $value eq 'e' or $value eq 'd';
-	$self->{_freq} = $value;
-    }
-    return $self->{_freq};
-}
-
 
 =head2 kappa
 
@@ -563,7 +607,9 @@ sub tree {
     return $self->{_tree} || 'BIONJ';
 }
 
+=head2 v2 options
 
+These methods can be used with PhyML v2* only.
 
 =head2 opt_topology
 
@@ -579,7 +625,7 @@ v2.* only
 
 sub opt_topology {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter for to PhyML v3") if $self->version >= 3;
+    $self->throw("Not a valid parameter [opt_topology] for to PhyML v3") if $self->version >= 3;
     if (defined ($value)) {
         if ($value) {
 	    $self->{_opt_topology} = 'y';
@@ -605,7 +651,7 @@ v2.* only
 
 sub opt_lengths {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter for PhyML v3") if $self->version >= 3;
+    $self->throw("Not a valid parameter [opt_lengths] for PhyML v3") if $self->version >= 3;
     if (defined ($value)) {
         if ($value) {
 	    $self->{_opt_lengths} = 'y';
@@ -614,6 +660,34 @@ sub opt_lengths {
 	}
     }
     return $self->{_opt_lengths} || 'y';
+}
+
+=head2 v3 options
+
+These methods can be used with PhyML v3* only.
+
+=head2 freq
+
+ Title   : freq
+ Usage   : $phyml->freq(e); $phyml->freq("0.2, 0.6, 0.6, 0.2");
+ Function: Sets nucleotide frequences or asks residue to be estimated
+            according to two models: e or d
+ Returns : set value,
+ Args    : None to get, string to set.
+
+v3 only.
+
+=cut
+
+sub freq {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter [freq] prior to PhyML v3") if $self->version < 3;
+    if (defined $value) {
+	die "Invalid value [$value]"
+	    unless $value =~ /^[\d\. ]$/ or $value eq 'e' or $value eq 'd';
+	$self->{_freq} = $value;
+    }
+    return $self->{_freq};
 }
 
 =head2 opt
@@ -630,7 +704,7 @@ v3.* only
 
 sub opt {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    $self->throw("Not a valid parameter [opt] prior to PhyML v3") if $self->version < 3;
     if (defined ($value)) {
 	$self->{_opt} = $value if $value =~ /tlr|tl|tr|l|n/;
     }
@@ -651,7 +725,7 @@ v3.* only
 
 sub search {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    $self->throw("Not a valid parameter [search] prior to PhyML v3") if $self->version < 3;
     if (defined ($value)) {
 	$self->{_search} = $value if $value =~ /NNI|SPR|BEST/;
     }
@@ -666,14 +740,14 @@ sub search {
  Returns : boolean (defaults to false)
  Args    : None to get, boolean to set.
 
-v3.* only; only meaningful if $prog->search is 'SPR'
+v3.* only; only meaningful if $prog-E<gt>search is 'SPR'
 
 =cut
 
 
 sub rand_start {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    $self->throw("Not a valid parameter [rand_start] prior to PhyML v3") if $self->version < 3;
     if (defined ($value)) {
         if ($value) {
 	    $self->{_rand_start} = 1;
@@ -693,13 +767,13 @@ sub rand_start {
  Returns : integer (defaults to 1)
  Args    : None to get, integer to set.
 
-v3.* only; only valid if $prog->search is 'SPR'
+v3.* only; only valid if $prog-E<gt>search is 'SPR'
 
 =cut
 
 sub rand_starts {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    $self->throw("Not a valid parameter [rand_starts] prior to PhyML v3") if $self->version < 3;
     if (defined $value) {
 	die "Invalid number [$value]"
 	    unless $value =~ /^[-+]?\d+$/;
@@ -717,15 +791,15 @@ sub rand_starts {
  Returns : random integer
  Args    : None to get, integer to set.
 
-v3.* only; only valid if $prog->search is 'SPR'
+v3.* only; only valid if $prog-E<gt>search is 'SPR'
 
-Uses perl rand() to initialize if not explicitely set
+Uses perl rand() to initialize if not explicitely set.
 
 =cut
 
 sub rand_seed {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter prior to PhyML v3") if $self->version < 3;
+    $self->throw("Not a valid parameter [rand_seed] prior to PhyML v3") if $self->version < 3;
     if (defined $value) {
 	die "Invalid number [$value]"
 	    unless $value =~ /^[-+]?\d+$/;
@@ -735,70 +809,11 @@ sub rand_seed {
 }
 
 
+=head2 Internal methods
 
-
-=head2 run
-
- Title   : run
- Usage   : $factory->run($aln_file);
-           $factory->run($align_object);
- Function: Runs Phyml to generate a tree 
- Returns : Bio::Tree::Tree object
- Args    : file name for your input alignment in a format 
-           recognised by AlignIO, OR  Bio::Align::AlignI
-           complient object (eg. Bio::SimpleAlign).
+These methods are private and should not be called outside this class.
 
 =cut
-
-sub run {
-    my ($self, $in) = @_;
-
-    if (ref $in && $in->isa("Bio::Align::AlignI")) {
-        $in = $self->_write_phylip_align_file($in);
-    }
-    elsif (! -e $in) {
-        $self->throw("When not supplying a Bio::Align::AlignI object, ".
-		     "you must supply a readable filename");
-    }
-    elsif (-e $in) {
-	copy ($in, $self->tempdir);
-	my $name = File::Spec->splitpath($in); # name is the last item in the array
-	$in = File::Spec->catfile($self->tempdir, $name);
-    }
-
-    return $self->_run($in);
-}
-
-=head2 stats
-
- Title   : stats
- Usage   : $factory->stats;
- Function: Returns the contents of the phyml '_phyml_stat.txt' output file
- Returns : string with statistics about the run, undef before run()
- Args    : none
-
-=cut
-
-sub stats {
-    my $self = shift;;
-    return $self->{_stats};
-}
-
-=head2 tree_string
-
- Title   : tree_string
- Usage   : $factory->tree_string;
-           $factory->run($align_object);
- Function: Returns the contents of the phyml '_phyml_tree.txt' ouput file
- Returns : string with tree in Newick format, undef before run()
- Args    : none
-
-=cut
-
-sub tree_string {
-    my $self = shift;;
-    return $self->{_tree};
-}
 
 sub _run {
     my ($self, $file)= @_;
