@@ -17,7 +17,7 @@ hmmcalibrate, hmmemit, hmmpfam, hmmsearch
   while (my $result = $searchio->next_result){
    while(my $hit = $result->next_hit){
     while (my $hsp = $hit->next_hsp){
-            print join("\t", ( $r->query_name,
+            print join("\t", ( $result->query_name,
                                $hsp->query->start,
                                $hsp->query->end,
                                $hit->name,
