@@ -151,6 +151,12 @@ our @UNSUPPORTED        = qw(h verbose a compat pvm);
            a true value, eg. -q => 1, EXCEPT for the following which are handled
            internally/ incompatible: h verbose a compat pvm
 
+           WARNING: the default sequence format passed to hmmpfam is msf. If
+           you are using a different format, you need to pass it with informat.
+           e.g.
+           my $factory = Bio::Tools::Run::Hmmer->new(-hmm => 'model.hmm',
+                                                     -informat => 'fasta');
+
            -q is synonymous with -quiet
            -o is synonymous with -outfile
 
