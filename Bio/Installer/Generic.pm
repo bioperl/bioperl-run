@@ -1,5 +1,3 @@
-#!/usr/local/bin/perl
-
 # BioPerl module for Bio::Installer::Generic
 #
 # Cared for by Albert Vilella
