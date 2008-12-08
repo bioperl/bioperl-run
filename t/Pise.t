@@ -2,12 +2,10 @@
 use strict;
 
 our $NTESTS;
-our $error;
 
 BEGIN {
-    use lib 't/lib';
-    use BioperlTest;
-    $NTESTS = 11;
+    use Bio::Root::Test;
+    $NTESTS = 15;
     test_begin(-tests => $NTESTS,
 	       -requires_networking => 1);
     use_ok('Bio::Tools::Run::tRNAscanSE');
@@ -24,19 +22,12 @@ END {
 	}
 }
 
-if( $error ==  1 ) {
-    exit(0);
-}
-
 SKIP: {
-	eval { require XML::Parser::PerlSAX;};
-	skip("Need XML::Parser::PerlSAX to run test, skipping test\n",11) if $@;
+	test_skip(-tests => 11, -requires_module => 'XML::Parser::PerlSAX');
+    use_ok('XML::Parser::PerlSAX');
 	use_ok('Bio::Tools::Run::AnalysisFactory::Pise');
 	use_ok('Bio::Tools::Genscan');
 	use_ok('Bio::SeqIO');
-	
-	#exit(0);
-	my $verbose = $ENV{'BIOPERLDEBUG'} || -1;
 	
 	my $email;
 	if( -e "t/pise-email.test" ) {
@@ -70,7 +61,7 @@ SKIP: {
 	if ($actually_submit) {
 		my $job;
 		eval { $job = $golden->run(); };
-		skip("Problem with job submission: $@",3) if $@;
+		skip("Problem with job submission: $@",6) if $@;
 		
 		isa_ok($job,'Bio::Tools::Run::PiseJob');
 	

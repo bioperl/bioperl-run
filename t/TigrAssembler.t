@@ -1,9 +1,8 @@
 use strict;
   
 BEGIN {
-    use lib 't/lib';
-    use BioperlTest;
-    test_begin(-tests => 49,
+    use Bio::Root::Test;
+    test_begin(-tests => 48,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
@@ -53,6 +52,10 @@ is($assembler->safe_merging_stop, 1);
 ok($assembler->resort_after(100));
 is($assembler->resort_after, 100);
 
+# test the program itself
+SKIP: {
+skip("Couldn't find the Tigr executable", 18) unless defined $assembler->executable();
+
 my $fasta_file = test_input_file('sample_dataset_1.fa');
 my $io = Bio::SeqIO->new( -file => $fasta_file );
 my @seq_arr;
@@ -85,4 +88,5 @@ ok($asms = $assembler->run(\@seq_arr));
 for my $asm (@$asms) {
   is($asm->get_nof_singlets, 198);
   is($asm->get_nof_contigs, 0);
+}
 }

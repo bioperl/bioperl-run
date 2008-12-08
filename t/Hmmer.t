@@ -3,9 +3,8 @@
 
 use strict;
 
-BEGIN { 
-   use lib 't/lib';
-   use BioperlTest;
+BEGIN {
+   use Bio::Root::Test;
    
    test_begin(-tests => 28);
    

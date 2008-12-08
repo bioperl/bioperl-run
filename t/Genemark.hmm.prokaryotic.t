@@ -5,8 +5,7 @@ use strict;
 use vars qw($NTESTS);
 
 BEGIN {
-    use lib 't/lib';
-    use BioperlTest;
+    use Bio::Root::Test;
     $NTESTS = 99;
     test_begin(-tests => $NTESTS,
 	       -requires_modules => [qw(IPC::Run)]);

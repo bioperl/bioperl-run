@@ -4,8 +4,7 @@
 use strict;
 
 BEGIN {
-    use lib 't/lib';
-    use BioperlTest;
+    use Bio::Root::Test;
     test_begin(-tests => 181,
 	       -requires_modules => [qw(Clone)]);
     use_ok('Bio::Tools::Run::Phylo::Phast::PhastCons');

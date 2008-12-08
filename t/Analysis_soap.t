@@ -5,10 +5,9 @@
 use strict;
 
 BEGIN {
-    use lib 't/lib';
-    use BioperlTest;
+    use Bio::Root::Test;
 
-    test_begin(-tests => 18);
+    test_begin(-tests => 17);
     use_ok('Bio::Tools::Run::Analysis');
     use_ok('File::Spec');
 }
@@ -16,8 +15,8 @@ BEGIN {
 
 
  SKIP: {
-     test_skip(-tests => 16, -requires_module => 'SOAP::Lite');
-     use_ok('SAOP::Lite');
+     test_skip(-tests => 15, -requires_module => 'SOAP::Lite');
+     use_ok('SOAP::Lite');
 
      my $seqret = Bio::Tools::Run::Analysis->new(-name=>'edit.seqret');
      my $seq = 'tatacga';

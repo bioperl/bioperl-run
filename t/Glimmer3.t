@@ -5,8 +5,7 @@ use strict;
 use vars qw($NTESTS);
 
 BEGIN {
-    use lib 't/lib';
-    use BioperlTest;
+    use Bio::Root::Test;
     $NTESTS = 111;
     test_begin(-tests => $NTESTS,
 	       -requires_modules => [qw(IPC::Run)]);
@@ -14,9 +13,6 @@ BEGIN {
     use_ok('Bio::Root::IO');
     use_ok('Bio::Seq');
 }
-
-
-my $verbose = 1 if $ENV{'BIOPERLDEBUG'};
 
 my $fasta_file = Bio::Root::IO->catfile('t','data','H_pylori_J99.fasta');
 my $icm_file   = Bio::Root::IO->catfile('t','data','H_pylori_J99.glimmer3.icm');
