@@ -4,13 +4,9 @@
 use strict;
 
 BEGIN {
-    eval {require Test::More;};
-    if ($@) {
-        use lib 't/lib';
-    }
-    use Test::More;
+    use Bio::Root::Test;
     
-    plan tests => 33;
+    test_begin(-tests => 33);
     
     use_ok('Bio::Tools::Run::Phylo::Gerp');
     use_ok('Bio::AlignIO');
@@ -18,9 +14,13 @@ BEGIN {
     use_ok('Bio::Root::Utilities');
 }
 
+END {
+    unlink(test_input_file('gerp', 'ENr111.mfa'));
+}
+
 # setup input files etc
-my $alignfilename = File::Spec->catfile('t', 'data', 'gerp', 'ENr111.mfa.gz');
-my $treefilename  = File::Spec->catfile('t', 'data', 'gerp', 'ENr111.gerp.tree');
+my $alignfilename = test_input_file('gerp', 'ENr111.mfa.gz');
+my $treefilename  = test_input_file('gerp', 'ENr111.gerp.tree');
 ok (-e $alignfilename, 'Found input alignment file');
 ok (-e $treefilename, 'Found input tree file');
 
