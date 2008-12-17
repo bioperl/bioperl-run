@@ -102,7 +102,7 @@ sub program_name {
 
  Title   : program_dir
  Usage   : $factory->program_dir(@params)
- Function: returns the program directory, obtiained from ENV variable, in this
+ Function: returns the program directory, obtained from ENV variable, in this
            case it is the tmhmm installation directory, not the location of
            the executable.
  Returns:  string

@@ -120,7 +120,7 @@ sub program_name {
 
  Title   : program_dir
  Usage   : ->program_dir()
- Function: returns the program directory, obtiained from ENV variable.
+ Function: returns the program directory, obtained from ENV variable.
  Returns:  string
  Args    :
 
