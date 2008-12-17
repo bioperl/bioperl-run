@@ -115,7 +115,7 @@ use base qw(Bio::Tools::Run::Phylo::PhyloBase);
 our $PROGRAM_NAME = 'semphy';
 our $PROGRAM_DIR = $ENV{'SEMPHYDIR'};
 
-# methods for the gumby args we support *** handle verbose => v...
+# methods for the semphy args we support
 our %PARAMS   = (outputfile => 'o',
                  treeoutputfile => 'T',
                  Logfile => 'l',
