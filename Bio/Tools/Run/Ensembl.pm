@@ -18,11 +18,24 @@ Bio::Tools::Run::Ensembl - A simplified front-end for setting up the registry
 
 =head1 SYNOPSIS
 
-  ***
+  use Bio::Tools::Run::Ensembl;
+  
+  # get a Bio::EnsEMBL::Gene for agene of interest
+  my $gene = Bio::Tools::Run::Ensembl->get_gene_by_name(-species => 'human',
+                                                        -name => 'BRCA2');
 
 =head1 DESCRIPTION
 
-***
+This is a simple way of accessing the Ensembl database to retrieve gene
+information. Rather than learn the whole Ensembl Perl API, you only need to
+install it (that is, check it out from CVS:
+http://www.ensembl.org/info/docs/api/api_installation.html
+- ignore the information about BioPerl version) and then you can get information
+about a gene using get_gene_by_name().
+
+For gene retrieval it is especially useful compared to direct Ensembl Perl API
+usage since it can use information from alternate data sources (orthologues,
+Swissprot, Entrez) to get your gene.
 
 =head1 FEEDBACK
 
@@ -162,7 +175,7 @@ sub get_adaptor {
 =head2 get_gene_by_name
 
  Title   : get_gene_by_name
- Usage   : my $adaptor = Bio::Tools::Run::Ensembl->get_gene_by_name();
+ Usage   : my $gene = Bio::Tools::Run::Ensembl->get_gene_by_name();
  Function: Get a gene given species and a gene name. If multiple genes match
            this combination, tries to pick the 'best' match.
  Returns : Bio::EnsEMBL::Gene
