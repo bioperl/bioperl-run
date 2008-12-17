@@ -108,7 +108,7 @@ use Bio::Tools::Match;
 use base qw(Bio::Tools::Run::WrapperBase);
 
 our $PROGRAM_NAME = 'match';
-our $PROGRAM_DIR;
+our $PROGRAM_DIR = $ENV{'MATCHDIR'};
 
 # methods for the match args we support
 our @PARAMS   = qw(mxlib mxprf imcut); # these aren't actually match args, but
@@ -118,12 +118,6 @@ our @SWITCHES = qw(b u);
 # just to be explicit, args we don't support (yet) or we handle ourselves
 our @UNSUPPORTED = qw(H HH pp ppg pn png pr jkn i p);
 
-BEGIN {
-    # lets add all the mcs scripts to the path so that when we call
-    # align2binomial.pl it can find its siblings
-    $PROGRAM_DIR = $ENV{'MATCHDIR'};
-    $ENV{PATH} = "$PROGRAM_DIR:$ENV{PATH}" if $PROGRAM_DIR;
-}
 
 =head2 program_name
 
@@ -207,15 +201,18 @@ sub _run {
     
     my $exe = $self->executable || return;
     
+    my $mxlib = File::Spec->rel2abs($self->mxlib());
+    my $mxprf_file = $self->mxprf();
+    if ($mxprf_file && -e $mxprf_file) {
+        $mxprf_file = File::Spec->rel2abs($mxprf_file);
+    }
+    
     # cd to a temp dir
     my $temp_dir = $self->tempdir;
     my $cwd = Cwd->cwd();
     chdir($temp_dir) || $self->throw("Couldn't change to temp dir '$temp_dir'");
     
-    my $mxlib = $self->mxlib();
-    
     # make the profile file if necessary
-    my $mxprf_file = $self->mxprf();
     if (! $mxprf_file || ! -e $mxprf_file) {
         my @thresh;
         if ($mxprf_file && ref($mxprf_file) eq 'ARRAY') {
@@ -236,6 +233,7 @@ sub _run {
     my $result_file = 'out';
     my $param_str = $self->_setparams();
     my $cmd_line = "$exe $mxlib $seq_file $result_file $mxprf_file".$param_str;
+    
     system($cmd_line) && $self->throw("Something went wrong whist running '$cmd_line': $! | $?");
     
     # parse the results
