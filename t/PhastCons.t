@@ -14,15 +14,9 @@ BEGIN {
 
 }
 
-END {
-    for my $filename (qw(nodes parents id2names names2id)) {
-        unlink File::Spec->catfile('t','data','taxdump', $filename);
-    }
-}
-
 # setup input files etc
-my $alignfilename = File::Spec->catfile("t", "data", "apes.multi_fasta");
-my $treefilename = File::Spec->catfile("t", "data", "apes.newick");
+my $alignfilename = test_input_file("apes.multi_fasta");
+my $treefilename = test_input_file("apes.newick");
 ok (-e $alignfilename, 'Found input alignment file');
 ok (-e $treefilename, 'Found input tree file');
 
@@ -60,9 +54,10 @@ SKIP: {
     
     # using database to generate species tree
     my $tdb = Bio::DB::Taxonomy->new(-source => 'flatfile',
-        -directory => File::Spec->catdir ('t','data','taxdump'),
-        -nodesfile => File::Spec->catfile('t','data','taxdump','nodes.dmp'),
-        -namesfile => File::Spec->catfile('t','data','taxdump','names.dmp'));
+        -directory => test_output_dir(),
+        -nodesfile => test_input_file('taxdump','nodes.dmp'),
+        -namesfile => test_input_file('taxdump','names.dmp'));
+    
     ok my @result3 = $factory->run($aln, $tdb), 'got results using db input';
     
     is_deeply \@result1, \@result2, 'results same for file and object input';
@@ -76,8 +71,8 @@ SKIP: {
             my $feat = shift(@result1);
             isa_ok $feat, 'Bio::SeqFeature::Annotated';
             is $feat->seq_id, $apes[$i], 'correct seq_id';
-            is $feat->source, 'phastCons', 'correct source';
-            is ${[$feat->annotation->get_Annotations('Name')]}[0], ${$expected}[0], 'correct feature name';
+            is $feat->source->value, 'phastCons', 'correct source';
+            is ${[$feat->annotation->get_Annotations('Name')]}[0]->value, ${$expected}[0], 'correct feature name';
             is $feat->start, ${$expected}[1], 'correct feature start';
             is $feat->end, ${$expected}[2], 'correct feature end';
             is $feat->score, 6, 'correct feature score';

@@ -4,13 +4,8 @@
 use strict;
 
 BEGIN {
-    eval {require Test::More;};
-    if ($@) {
-        use lib 't/lib';
-    }
-    use Test::More;
-    
-    plan tests => 124;
+    use Bio::Root::Test;
+    test_begin(-tests => 124);
     
     use_ok('Bio::Tools::Run::Phylo::Gumby');
     use_ok('Bio::AlignIO');
@@ -19,16 +14,10 @@ BEGIN {
     use_ok('Bio::Tools::GFF');
 }
 
-END {
-    for my $filename (qw(nodes parents id2names names2id)) {
-        unlink File::Spec->catfile('t','data','taxdump', $filename);
-    }
-}
-
 # setup input files etc
-my $alignfilename = File::Spec->catfile('t', 'data', 'gumby', 'hmrd.mfa');
-my $treefilename = File::Spec->catfile('t', 'data', 'gumby', 'hmrd.tree');
-my $gfffilename = File::Spec->catfile('t', 'data', 'gumby', 'human.gff');
+my $alignfilename = test_input_file('gumby', 'hmrd.mfa');
+my $treefilename = test_input_file('gumby', 'hmrd.tree');
+my $gfffilename = test_input_file('gumby', 'human.gff');
 ok (-e $alignfilename, 'Found input alignment file');
 ok (-e $treefilename, 'Found input tree file');
 ok (-e $gfffilename, 'Found input gff file');
@@ -60,9 +49,10 @@ SKIP: {
     
     # using database to generate species tree
     my $tdb = Bio::DB::Taxonomy->new(-source => 'flatfile',
-        -directory => File::Spec->catdir ('t','data','taxdump'),
-        -nodesfile => File::Spec->catfile('t','data','taxdump','nodes.dmp'),
-        -namesfile => File::Spec->catfile('t','data','taxdump','names.dmp'));
+        -directory => test_output_dir(),
+        -nodesfile => test_input_file('taxdump','nodes.dmp'),
+        -namesfile => test_input_file('taxdump','names.dmp'));
+    
     ok my @result3 = $factory->run($aln, $tdb), 'got results using db input';
     
     is_deeply \@result1, \@result2, 'results same for file and object input';
