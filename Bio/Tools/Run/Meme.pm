@@ -17,8 +17,7 @@ Bio::Tools::Run::Meme - Wrapper for Meme Program
 
   use Bio::Tools::Run::Meme;
 
-  my %params = (dna => 1, mod => "zoops");
-  my $factory = Bio::Tools::Run::Meme->new(%params);
+  my $factory = Bio::Tools::Run::Meme->new(-dna => 1, -mod => 'zoops');
 
   # return a Bio::AlignIO given Bio::PrimarySeqI objects
   my $alignio = $factory->run($seq1, $seq2, $seq3...);
@@ -31,7 +30,18 @@ Bio::Tools::Run::Meme - Wrapper for Meme Program
 
 =head1 DESCRIPTION
 
-***
+This is a wrapper for running meme, a transcription factor binding site
+prediction program. It can be found here:
+http://meme.sdsc.edu/meme4/meme-download.html
+
+You can try supplying normal meme command-line arguments to new(), eg.
+new(-mod => 'oops') or calling arg-named methods (excluding the initial
+hyphen(s), eg. $factory->mod('oops') to set the -mod option to 'oops').
+
+
+You will need to enable this MEME wrapper to find the meme program. During
+standard installation of meme you will have set up an environment variable
+called MEME_BIN which is used for this purpose.
 
 =head1 FEEDBACK
 
@@ -71,32 +81,20 @@ use Bio::AlignIO;
 use Bio::Map::Prediction;
 use Bio::Map::Position;
 
-use vars qw($AUTOLOAD);
 use base qw(Bio::Tools::Run::WrapperBase);
 
-our (@PARAMS, @SWITCHES, @OTHER, %OK_FIELD);
-BEGIN {
-    @SWITCHES = qw(DNA PROTEIN NOMATRIM NOENDGAPS REVCOMP PAL TEXT NOSTATUS);
+our $PROGRAM_NAME = 'meme';
+our $PROGRAM_DIR = $ENV{'MEME_BIN'};
 
-    @PARAMS = qw(MOD NMOTIFS EVT NSITES MINSITES MAXSITES WNSITES W MINW
-                 MAXW WG WS BFILE MAXITER DISTANCE PRIOR B PLIB SPFUZZ SPMAP
-                 CONS MAXSIZE P TIME SF);
-    
-    @OTHER = qw(NOISY QUIET SILENT);
+# methods for the meme args we support
+our @PARAMS   = qw(mod nmotifs evt nsites minsites maxsites wnsites w minw maxw
+                   wg ws bfile maxiter distance prior b plib spfuzz spmap cons
+                   maxsize p time sf);
+our @SWITCHES = qw(dna protein nomatrim noendgaps revcomp pal);
 
-    # Authorize attribute fields
-    foreach my $attr ( @PARAMS, @SWITCHES, @OTHER) { $OK_FIELD{$attr}++; }
-}
+# just to be explicit, args we don't support (yet) or we handle ourselves
+our @UNSUPPORTED = qw(h text nostatus);
 
-sub AUTOLOAD {
-    my $self = shift;
-    my $attr = $AUTOLOAD;
-    $attr =~ s/.*:://;
-    $attr = uc $attr;
-    $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
-    $self->{$attr} = shift if @_;
-    return $self->{$attr};
-}
 
 =head2 new
 
@@ -104,7 +102,13 @@ sub AUTOLOAD {
  Usage   : $rm->new($seq)
  Function: creates a new wrapper
  Returns:  Bio::Tools::Run::Meme
- Args    : none
+ Args    : Most options understood by meme can be supplied as key =>
+           value pairs, with a boolean value for switches. -quiet can also be
+           set to silence meme completely.
+
+           These options can NOT be used with this wrapper (they are handled
+           internally or don't make sense in this context):
+           -h -text -nostatus
 
 =cut
 
@@ -112,15 +116,8 @@ sub new {
     my ($class, @args) = @_;
     my $self = $class->SUPER::new(@args);
     
-    while (@args) { 
-        my $attr = shift @args;
-        my $value = shift @args;
-        next if( $attr =~ /^-/ ); # don't want named parameters
-        $self->$attr($value);
-    }
-    unless ($self->executable) {
-        $self->debug("Meme program not found as ".$self->executable." or not executable.");
-    }
+    $self->_set_from_args(\@args, -methods => [@PARAMS, @SWITCHES, 'quiet'],
+                                  -create => 1);
     
     return $self;
 }
@@ -136,7 +133,7 @@ sub new {
 =cut
 
 sub program_name {
-    return 'meme';
+    return $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -150,7 +147,7 @@ sub program_name {
 =cut
 
 sub program_dir {
-    return Bio::Root::IO->catfile($ENV{MEME_BIN}) if $ENV{MEME_BIN};
+    return $PROGRAM_DIR;
 }
 
 =head2  version
@@ -175,6 +172,7 @@ sub version {
  Function: Run Meme on the sequences/Bio::Map::* set as the argument
  Returns : Bio::AlignIO if sequence objects supplied, OR
            Bio::Map::Prediction if Bio::Map::* objects supplied
+           undef if no executable found
  Args    : list of Bio::PrimarySeqI compliant objects, OR
            list of Bio::Map::GeneMap objects, OR
            list of Bio::Map::Gene objects, OR
@@ -186,9 +184,8 @@ sub run {
     my ($self, @things) = @_;
     
     my $infile = $self->_setinput(@things);
-    my $param_string = $self->_setparams;
     
-    return $self->_run($infile, $param_string);
+    return $self->_run($infile);
 }
 
 =head2  _run
@@ -196,22 +193,31 @@ sub run {
  Title   : _run
  Usage   : $rm->_run ($filename,$param_string)
  Function: internal function that runs meme
- Returns : as per run()
- Args    : the filename to the input sequence file and the parameter string
+ Returns : as per run(), undef if no executable found
+ Args    : the filename to the input sequence file
 
 =cut
 
 sub _run {
-    my ($self, $infile, $param_string) = @_;
+    my ($self, $infile) = @_;
+    
+    my $exe = $self->executable || return;
     
     my $outfile = $infile.".out";
-    my $cmd_str = $self->executable.' '.$infile.' '.$param_string.' > '.$outfile;
-    if ($self->quiet || $self->verbose <= 0) {
-        $cmd_str .= " 2> /dev/null";
-    }
     
-    my $status = system($cmd_str);
-    $self->throw("Meme call ($cmd_str) crashed: $?\n") unless $status == 0;
+    my $command = $exe.$self->_setparams($infile, $outfile);
+    $self->debug("meme command = $command\n");
+    
+    open(my $pipe, "$command |") || $self->throw("meme call ($command) failed to start: $? | $!");
+    my $error = '';
+    while (<$pipe>) {
+        print unless $self->quiet;
+        $error .= $_;
+    }
+    close($pipe) || ($error ? $self->throw("meme call ($command) failed: $error") : $self->throw("meme call ($command) crashed: $?"));
+    
+    #my $status = system($cmd_str);
+    #$self->throw("Meme call ($cmd_str) crashed: $?\n") unless $status == 0;
     
     my $aio = Bio::AlignIO->new(-format => 'meme', -file => $outfile);
     unless ($self->{map_mode}) {
@@ -269,32 +275,19 @@ sub _run {
 =cut
 
 sub _setparams {
-    my ($self, @args) = @_;
+    my ($self, $infile, $outfile) = @_;
     
-    my $param_string = "";
-    
-    for my $attr (@PARAMS) {
-        my $value = $self->$attr;
-        next unless (defined $value);
-        my $attr_key = lc $attr;
-        $attr_key = ' -'.$attr_key;
-        $param_string .= $attr_key.' '.$value;
-    }
-    
-    for my $attr (@SWITCHES) {
-        my $value = $self->$attr;
-        next unless ($value);
-        my $attr_key = lc $attr;
-        $param_string .= ' -'.$attr_key;
-    }
+    my $param_string = ' '.$infile;
     
     # -text and -nostatus must be set
-    if ($param_string !~ /-text/) {
-        $param_string .= ' -text';
-    }
-    if ($param_string !~ /-nostatus/) {
-        $param_string .= ' -nostatus';
-    }
+    $param_string .= ' -text -nostatus';
+    
+    $param_string .= $self->SUPER::_setparams(-params => \@PARAMS,
+                                              -switches => \@SWITCHES,
+                                              -dash => 1);
+    
+    $param_string .= " > $outfile";
+    $param_string .= ' 2> /dev/null' if $self->quiet || $self->verbose < 0;
     
     return $param_string;
 }
