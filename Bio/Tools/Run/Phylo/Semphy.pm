@@ -118,19 +118,27 @@ our $PROGRAM_DIR = $ENV{'SEMPHYDIR'};
 # methods for the semphy args we support
 our %PARAMS   = (outputfile => 'o',
                  treeoutputfile => 'T',
+                 constraint => 'c',
+                 gaps => 'g',
+                 seed => 'r',
                  Logfile => 'l',
                  alphabet => 'a',
+                 ratio => 'z',
+                 ACGprob => 'p',
                  BPrepeats => 'BPrepeats',
+                 BPconsensus => 'BPconsensus',
                  SEMPHY => 'S',
                  modelfile => 'modelfile',
                  alpha => 'A',
                  categories => 'C',
                  semphy_verbose => 'semphy_verbose');
-our %SWITCHES = (homogeneousRatesDTME => 'J',
+our %SWITCHES = (homogeneousRatesDTME => 'homogeneousRatesDTME',
+                 NJ => 'J',
                  pairwiseGammaDTME => 'pairwiseGammaDTME',
                  commonAlphaDTME => 'commonAlphaDTME',
                  rate4siteDTME => 'rate4siteDTME',
                  posteriorDTME => 'posteriorDTME',
+                 BPonUserTree => 'BPonUserTree',
                  nucjc => 'nucjc',
                  aaJC => 'aaJC',
                  k2p => 'k2p',
@@ -141,7 +149,12 @@ our %SWITCHES = (homogeneousRatesDTME => 'J',
                  wag => 'wag',
                  cprev => 'cprev',
                  homogeneous => 'H',
-                 optimizeAlpha => 'O');
+                 optimizeAlpha => 'O',
+                 bbl => 'n',
+                 likelihood => 'L',
+                 PerPosLike => 'P',
+                 PerPosPosterior => 'B',
+                 rate => 'R');
 
 # just to be explicit, args we don't support (yet) or we handle ourselves
 our @UNSUPPORTED = qw(h help full-help s sequence t tree);
