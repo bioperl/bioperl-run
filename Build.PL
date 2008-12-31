@@ -11,8 +11,8 @@ use Bio::Root::Build;
 # Set up the Bio::Root::Build object
 my $build = Bio::Root::Build->new(
     module_name         => 'Bio',
-    dist_name           => 'bioperl-run',
-    dist_version        => 1.005002101,
+    dist_name           => 'BioPerl-run',
+    dist_version        => '1.007000',
     dist_author         => 'Bioperl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'bioperl-run - wrapper toolkit',
     license             => 'perl',
