@@ -20,10 +20,11 @@ SKIP: {
     # get an adaptor
     ok my $adaptor = Bio::Tools::Run::Ensembl->get_adaptor('human', 'Exon');
     isa_ok $adaptor, 'Bio::EnsEMBL::DBSQL::ExonAdaptor';
-    TODO: {
-        local $TODO = 'species_id is not implemented in ExonAdaptor';
-        can_ok($adaptor, 'species_id');
-        #is $adaptor->species_id, 1;
+    if ($adaptor->can('species_id')) {
+        is $adaptor->species_id, 1;
+    }
+    else {
+        ok 1;
     }
     
     # get an 'easy' gene - one that is in Ensembl
