@@ -34,8 +34,10 @@ ok( -e $profile2, 'Found profile2 file' );
 # setup global objects that are to be used in more than one test
 # Also test they were initialised correctly
 my @params = ('ktuple' => 3, 'quiet'  => 1);
+
 my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 isa_ok( $factory, 'Bio::Tools::Run::Alignment::Clustalw');
+$factory->outfile('test.aln');
 
 # test default factory values
 is( $factory->program_dir, $ENV{'CLUSTALDIR'}, 'program_dir returned correct default' );
@@ -51,7 +53,24 @@ SKIP: {
   
   # test all factory methods dependent on finding the executable
   # TODO: isnt( $factory->program_dir, undef,               'Found program in an ENV variable' );
-  ok( $factory->version >= 1.8,                             'Correct minimum program version' );
+  my $ver = $factory->version || 0;
+  
+  # remove last bit 
+  $ver =~ s{^(\d+\.\d+)\.\d+}{$1};
+  
+  my $skip;
+  
+  # clustalw2 isn't supported yet.
+  if ($ver < 1.8) {
+    diag("ClustalW version $ver not supported");
+    $skip++;
+  } if ($ver >= 2.0) {
+    diag("ClustalW version $ver not supported yet.");
+    $skip++
+  }
+  skip("ClustalW version $ver not supported yet", 16) if $skip;
+  
+  ok( $ver, "Supported program version $ver" );
   
   # test execution using filename
   my $aln = $factory->align($inputfilename);

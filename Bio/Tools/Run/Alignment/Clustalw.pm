@@ -431,9 +431,8 @@ sub version {
     return undef unless $self->executable;
     my $prog = $self->executable;
     my $string = `$prog --` ;
-    $string =~ /\(([\d.]+)\)/;
+    $string =~ /\(?([\d.]+)\)?/xms;
     return $1 || undef;
-
 }
 
 =head2  run
