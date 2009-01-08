@@ -18,7 +18,7 @@ SKIP: {
 	my @params = ('-verbose' => 0,
 			  'quiet'    => 1);
 	my $treedraw = Bio::Tools::Run::Phylo::Phylip::DrawTree->new(@params);
-	test_skip(-required_executable => $treedraw,
+	test_skip(-requires_executable => $treedraw,
               -tests => 4);
 	
 	$treedraw->fontfile(test_input_file('fontfile'));

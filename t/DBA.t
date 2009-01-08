@@ -18,7 +18,7 @@ my @params = ('matchA' => 0.75, 'matchB' => '0.55','dymem'=>'linear');
 my  $factory = Bio::Tools::Run::Alignment::DBA->new(@params);
 
 SKIP: {
-    test_skip(-required_executable => $factory,
+    test_skip(-requires_executable => $factory,
               -tests => 14);
 
     isa_ok $factory,'Bio::Tools::Run::Alignment::DBA';
