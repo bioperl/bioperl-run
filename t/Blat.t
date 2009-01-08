@@ -1,69 +1,54 @@
 #!/usr/local/bin/perl
-#-*-Perl-*-
-# ## Bioperl Test Harness Script for Modules
-# #
+# $Id$
+
 use strict;
-my $verbose = $ENV{'BIOPERLDEBUG'} || 0;
-BEGIN {
-   eval { require Test; };
-   if( $@ ) {
-      use lib 't';
-   }
-   use Test;
-   use vars qw($NTESTS);
-   $NTESTS = 11;
-   plan tests => $NTESTS;
+
+BEGIN { 
+  use lib '.';
+  use Bio::Root::Test;
+  test_begin(-tests => 14);
+  
+  use_ok('Bio::Tools::Run::Alignment::Blat');
+  use_ok('Bio::SeqIO');
+  use_ok('Bio::Seq');
 }
 
-END {
-    foreach ( $Test::ntest..$NTESTS ) {
-	skip('Unable to run Blat  tests, exe may not be installed',1);
-   }
-}
+my $db =  test_input_file("blat_dna.fa");
 
-use Bio::Tools::Run::Alignment::Blat;
-use Bio::Root::IO;
-use Bio::SeqIO;
-use Bio::Seq;
-
-my $db =  Bio::Root::IO->catfile("t","data","blat_dna.fa");
-
-my $query = Bio::Root::IO->catfile("t","data","blat_dna.fa");    
+my $query = test_input_file("blat_dna.fa");    
 
 my $factory = Bio::Tools::Run::Alignment::Blat->new('quiet'  => 1,
-						    -verbose => $verbose,
 						    "DB"     => $db);
 ok $factory->isa('Bio::Tools::Run::Alignment::Blat');
 
 my $blat_present = $factory->executable();
 
-unless ($blat_present) {
-       warn("blat  program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-       exit 0;
+SKIP: {
+   skip('blat program not found. Skipping tests', 10) unless $blat_present;
+   
+   my $searchio = $factory->align($query);
+   my $result = $searchio->next_result;
+   my $hit    = $result->next_hit;
+   my $hsp    = $hit->next_hsp;
+   ok $hsp->isa("Bio::Search::HSP::HSPI");
+   ok ($hsp->query->start,1);
+   ok ($hsp->query->end,1775);
+   ok ($hsp->hit->start,1);
+   ok ($hsp->hit->end,1775);
+   my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
+   
+   my $seq  = $sio->next_seq ;
+   
+   $searchio = $factory->align($seq);
+   $result = $searchio->next_result;
+   $hit    = $result->next_hit;
+   $hsp    = $hit->next_hsp;
+   ok $hsp->isa("Bio::Search::HSP::HSPI");
+   ok ($hsp->query->start,1);
+   ok ($hsp->query->end,1775);
+   ok ($hsp->hit->start,1);
+   ok ($hsp->hit->end,1775);
 }
-
-my $searchio = $factory->align($query);
-my $result = $searchio->next_result;
-my $hit    = $result->next_hit;
-my $hsp    = $hit->next_hsp;
-ok $hsp->isa("Bio::Search::HSP::HSPI");
-ok ($hsp->query->start,1);
-ok ($hsp->query->end,1775);
-ok ($hsp->hit->start,1);
-ok ($hsp->hit->end,1775);
-my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
-
-my $seq  = $sio->next_seq ;
-
-$searchio = $factory->align($seq);
-$result = $searchio->next_result;
-$hit    = $result->next_hit;
-$hsp    = $hit->next_hsp;
-ok $hsp->isa("Bio::Search::HSP::HSPI");
-ok ($hsp->query->start,1);
-ok ($hsp->query->end,1775);
-ok ($hsp->hit->start,1);
-ok ($hsp->hit->end,1775);
  
 1; 
 

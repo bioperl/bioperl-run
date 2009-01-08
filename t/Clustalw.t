@@ -5,15 +5,9 @@
 use strict;
 
 BEGIN {
-  # Use installed Test module, otherwise fall back
-  # to copy of Test.pm located in the t dir
-  eval { require Test::More; };
-  if ( $@ ) {
-    use lib 't/lib';
-  }
-
-  # Setup Test::More and plan the number of tests
-  use Test::More tests => 42;
+  use lib '.';
+  use Bio::Root::Test;
+  test_begin(-tests => 42);
   
   use_ok('Bio::Tools::Run::Alignment::Clustalw');
   use_ok('Bio::SimpleAlign');

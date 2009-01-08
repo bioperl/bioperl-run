@@ -3,66 +3,41 @@
 ## $Id$
 
 use strict;
-use vars qw($DEBUG);
-$DEBUG = $ENV{'BIOPERLDEBUG'} || -1;
 
 BEGIN {
-    eval { require Test; };
-    if( $@ ) { 
-	use lib 't';
-    }
-    use Test;
-    use vars qw($NTESTS);
-    $NTESTS = 7;
-    plan tests => $NTESTS;
-    unless (eval "require IO::String; 1;") {
-        print STDERR ("IO::String not installed. Skipping tests $Test::ntest to $NTESTS.\n");
-        for ($Test::ntest..$NTESTS){
-            skip(1,1);
-        }
-        exit(0);
-    }
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 9,
+			   -requires_module => 'IO::String');
+	use_ok('Bio::Tools::Run::Phylo::Phylip::Consense');
+	use_ok('Bio::AlignIO');
 }
 
-use Bio::Tools::Run::Phylo::Phylip::Consense;
-use Bio::AlignIO;
+my $verbose = test_debug();
 
-END {     
-    for ( $Test::ntest..$NTESTS ) {
-    	skip("consense not found. Skipping.",1);
-    }
-}
+my $sb_factory = Bio::Tools::Run::Phylo::Phylip::Consense->new(-verbose => $verbose);
 
-ok(1);
-my $verbose = $DEBUG;
-my $sb_factory = Bio::Tools::Run::Phylo::Phylip::Consense->new
-    (-verbose => $verbose);
-unless($sb_factory->executable){
-    warn("Consense program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
+SKIP: {
+	skip("Consense program not found. Skipping tests", 7) unless ($sb_factory->executable);
 
-ok $sb_factory->isa('Bio::Tools::Run::Phylo::Phylip::Consense');
+	isa_ok($sb_factory,'Bio::Tools::Run::Phylo::Phylip::Consense');
+	
+	$sb_factory->rooted(1);
+	
+	is $sb_factory->rooted, 1, "coludn't set rooted option";
 
-$sb_factory->rooted(1);
-
-ok $sb_factory->rooted, 1, "coludn't set rooted option";
-
-
-my $bequiet = $verbose > 0 ? 0 : 1;
-$sb_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
-
-my $inputfilename = Bio::Root::IO->catfile("t","data","consense.treefile");
-my $tree = $sb_factory->run($inputfilename);
-
-ok $tree->number_nodes, 13;
-
-my $node = $tree->find_node('CATH_RAT');
-ok $node->branch_length, "10.0";
-ok $node->id, 'CATH_RAT';
-
-my @nodes = $tree->get_nodes;
-
-ok scalar(@nodes),13;
-
-
+	$sb_factory->quiet($verbose);  # Suppress protpars messages to terminal 
+	
+	my $inputfilename = test_input_file("consense.treefile");
+	my $tree = $sb_factory->run($inputfilename);
+	
+	is $tree->number_nodes, 13;
+	
+	my $node = $tree->find_node('CATH_RAT');
+	is $node->branch_length, "10.0";
+	is $node->id, 'CATH_RAT';
+	
+	my @nodes = $tree->get_nodes;
+	
+	is scalar(@nodes),13;
+}	

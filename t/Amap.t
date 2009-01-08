@@ -1,31 +1,13 @@
 # -*-Perl-*-
-# $id$
-## Bioperl Test Harness Script for Modules
+# $Id$
 
 use strict;
 
-BEGIN {
-  # Things to do ASAP once the script is run
-  # even before anything else in the file is parsed
-  #use vars qw($NUMTESTS $DEBUG $error);
-  #$DEBUG = $ENV{'BIOIPERLDEBUG'} || 0;
+BEGIN { 
+  use lib '.';
+  use Bio::Root::Test;
+  test_begin(-tests => 18);
   
-  # Use installed Test module, otherwise fall back
-  # to copy of Test.pm located in the t dir
-  eval { require Test::More; };
-  if ( $@ ) {
-    use lib 't/lib';
-  }
-
-  # Currently no errors
-  #$error = 0;
-
-  # Setup Test::More and the number of planned tests
-  use Test::More tests=>18;
-  
-  # Use modules that are needed in this test that are from
-  # any of the Bioperl packages: Bioperl-core, Bioperl-run ... etc
-  # use_ok('<module::to::use>');
   use_ok('Bio::Tools::Run::Alignment::Amap');
   use_ok('Bio::SeqIO');
   use_ok('File::Spec');
@@ -35,7 +17,6 @@ END {
   # Things to do right at the very end, just
   # when the  interpreter finishes/exits
   # E.g. deleting intermediate files produced during the test
-  
   foreach my $file ( qw(cysprot.dnd cysprot1a.dnd mlc) ) {
     unlink $file;
   }
@@ -46,7 +27,7 @@ END {
 #ok( 1, 'All the required modules are present');
 
 # setup input files etc
-my $inputfilename = File::Spec->catfile("t","data","cysprot.fa");
+my $inputfilename = test_input_file("cysprot.fa");
 ok( -e $inputfilename, 'Found input file' );
 
 # setup output files etc
@@ -73,6 +54,7 @@ is( $factory->program_name(), 'amap',                    'Correct exe default na
 #   Wont work on particular OS,
 #   Cant find the exectuable
 # DO NOT just skip tests that seem to fail for an unknown reason
+
 SKIP: {
   # condition used to skip this block of tests
   #skip($why, $how_many_in_block);
