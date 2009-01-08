@@ -4,81 +4,23 @@
 use strict;
 
 BEGIN {
-    eval {require Test::More;};
-    if ($@) {
-        use lib 't/lib';
-    }
-    use Test::More;
-    
-    plan tests => 47;
-    
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 47);
     use_ok('Bio::Tools::Run::Phylo::Phyml');
     use_ok('Bio::AlignIO');
 }
 
 # setup input files etc
-my $inputfilename = Bio::Root::IO->catfile("t","data","protpars.phy");
+my $inputfilename = test_input_file("protpars.phy");
 ok (-e $inputfilename, 'Found protein input file');
 
-my $factory = Bio::Tools::Run::Phylo::Phyml->new(-verbose => 0);
+my $factory = Bio::Tools::Run::Phylo::Phyml->new(-verbose => test_debug());
 isa_ok($factory, 'Bio::Tools::Run::Phylo::Phyml');
 
 # test default factory values
 is ($factory->program_dir, $ENV{'PHYMLDIR'}, 'program_dir returned correct default');
 is ($factory->program_name(), 'phyml', 'Correct exe default name');
-
-cmp_ok $factory->version, '>', '2.4','version';
-
-
-# test parameters
-
-
-if ($factory->version >= 3 ) {
-    is ($factory->data_type, 'aa', 'data_type, default');
-    is ($factory->data_type('nt'), 'nt', 'data_type, dna');
-    is ($factory->data_type('aa'), 'aa', 'data_type, aa');
-
-    is ($factory->model, 'WAG', 'model, default');
-
-    is ($factory->opt, 'n', 'opt, default');
-    is ($factory->opt('tl'), 'tl', 'opt_topology');
-
-    is ($factory->freq, undef, 'freq, default');
-    is ($factory->freq('d'), 'd', 'freq');
-
-    is ($factory->search, 'NNI', 'search, default');
-    is ($factory->search('SPR'), 'SPR', 'search');
-
-    is ($factory->rand_start, 0, 'rand_start, default');
-    is ($factory->rand_start(1), 1, 'rand_start');
-
-    is ($factory->rand_starts, 1, 'rand_starts, default');
-    is ($factory->rand_starts(10), 10, 'rand_starts');
-
-    cmp_ok $factory->rand_seed, '>=', 1, 'rand_seed, default';
-    is ($factory->rand_seed(10), 10, 'rand_seed');
-    $factory->search('NNI'); #to take the fastest option for running
-
-} else { # version 2.4.4
-
-    is ($factory->data_type, '1', 'data_type, default');
-    is ($factory->data_type('dna'), '0', 'data_type, dna');
-    is ($factory->data_type('protein'), '1', 'data_type, protein');
-
-    is ($factory->model, 'JTT', 'model, default');
-
-
-    is ($factory->opt_topology, 'y', 'opt_topology, default');
-    is ($factory->opt_topology('0'), 'n', 'opt_topology');
-    is ($factory->opt_topology('1'), 'y', 'opt_topology');
-
-    is ($factory->opt_lengths, 'y', 'opt_lengths, default');
-    is ($factory->opt_lengths('0'), 'n', 'opt_lengths');
-    is ($factory->opt_lengths('1'), 'y', 'opt_lengths');
-
-    for (1..6) {ok 1;} # to have same number of tests for all versions
-
-}
 
 is ($factory->data_format, 'i', 'data_format, default');
 is ($factory->data_format('s'), 's', 'data_format, sequential');
@@ -102,19 +44,63 @@ is ($factory->alpha, 'e', 'alpha, default');
 is ($factory->alpha(1.0), '1.0', 'alpha');
 is ($factory->alpha('e'), 'e', 'alpha');
 
-
-
 is ($factory->tree, 'BIONJ', 'tree, default');
 # not a valid tree for this MSA, just testing
 my $mock_treefile = Bio::Root::IO->catfile("t","data","treefile.example");
 is ($factory->tree($mock_treefile), $mock_treefile, 'tree');
 is ($factory->tree('BIONJ'), 'BIONJ', 'tree');
 
-
 # test the program itself
 SKIP: {
-    skip("Couldn't find the phyml executable", 7) unless defined $factory->executable();
+    skip("Couldn't find the phyml executable", 23) unless defined $factory->executable();
 
+    cmp_ok $factory->version, '>', '2.4','version';
+    # test version-specific parameters
+    if ($factory->version >= 3 ) {
+        is ($factory->data_type, 'aa', 'data_type, default');
+        is ($factory->data_type('nt'), 'nt', 'data_type, dna');
+        is ($factory->data_type('aa'), 'aa', 'data_type, aa');
+    
+        is ($factory->model, 'WAG', 'model, default');
+    
+        is ($factory->opt, 'n', 'opt, default');
+        is ($factory->opt('tl'), 'tl', 'opt_topology');
+    
+        is ($factory->freq, undef, 'freq, default');
+        is ($factory->freq('d'), 'd', 'freq');
+    
+        is ($factory->search, 'NNI', 'search, default');
+        is ($factory->search('SPR'), 'SPR', 'search');
+    
+        is ($factory->rand_start, 0, 'rand_start, default');
+        is ($factory->rand_start(1), 1, 'rand_start');
+    
+        is ($factory->rand_starts, 1, 'rand_starts, default');
+        is ($factory->rand_starts(10), 10, 'rand_starts');
+    
+        cmp_ok $factory->rand_seed, '>=', 1, 'rand_seed, default';
+        is ($factory->rand_seed(10), 10, 'rand_seed');
+        $factory->search('NNI'); #to take the fastest option for running
+    
+    } else { # version 2.4.4
+    
+        is ($factory->data_type, '1', 'data_type, default');
+        is ($factory->data_type('dna'), '0', 'data_type, dna');
+        is ($factory->data_type('protein'), '1', 'data_type, protein');
+    
+        is ($factory->model, 'JTT', 'model, default');
+    
+    
+        is ($factory->opt_topology, 'y', 'opt_topology, default');
+        is ($factory->opt_topology('0'), 'n', 'opt_topology');
+        is ($factory->opt_topology('1'), 'y', 'opt_topology');
+    
+        is ($factory->opt_lengths, 'y', 'opt_lengths, default');
+        is ($factory->opt_lengths('0'), 'n', 'opt_lengths');
+        is ($factory->opt_lengths('1'), 'y', 'opt_lengths');
+    
+        for (1..6) {ok 1;} # to have same number of tests for all versions
+    }
 #    $factory->save_tempfiles(1);
 #    my $workdir = '/tmp/phyml_test';
 #    $factory->tempdir($workdir);
@@ -165,7 +151,5 @@ SKIP: {
     $tree = $factory->run($aln);
     @leaves = $tree->get_leaf_nodes;
     is (@leaves, 5, 'Result tree from DNA SimpleAlign input had correct number of leaves');
-    
-
 }
 

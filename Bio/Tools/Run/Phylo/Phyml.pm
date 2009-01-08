@@ -373,7 +373,7 @@ These methods are used to set and get program parameters before running.
 
 sub data_type {
     my ($self, $value) = @_;
-    if ($self->version >= 3 ) {
+    if ($self->version && $self->version >= 3 ) {
 	if (defined $value) {
 	    if ($value eq 'nt') {
 		$self->{_data_type} = 'nt';
@@ -463,7 +463,7 @@ sub dataset_count {
 sub model {
     my ($self, $value) = @_;
     if (defined ($value)) {
-	if ($self->version >= 3 ) {
+	if ($self->version && $self->version >= 3 ) {
 	    unless ($value =~ /\d{6}/) {
 		$self->throw("Not a valid model name [$value] for current data type (alphabet)")
 		unless $models3->{$self->data_type}->{$value};
@@ -480,7 +480,7 @@ sub model {
 	return $self->{_model};
     }
 
-    if ($self->version >= 3 ) {
+    if ($self->version && $self->version >= 3 ) {
 	if ($self->data_type eq 'aa') {
 	    return 'WAG'; # protein
 	} else {
@@ -625,7 +625,7 @@ v2.* only
 
 sub opt_topology {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [opt_topology] for to PhyML v3") if $self->version >= 3;
+    $self->throw("Not a valid parameter [opt_topology] for to PhyML v3") if $self->version && $self->version >= 3;
     if (defined ($value)) {
         if ($value) {
 	    $self->{_opt_topology} = 'y';
@@ -651,7 +651,7 @@ v2.* only
 
 sub opt_lengths {
     my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [opt_lengths] for PhyML v3") if $self->version >= 3;
+    $self->throw("Not a valid parameter [opt_lengths] for PhyML v3") if $self->version && $self->version >= 3;
     if (defined ($value)) {
         if ($value) {
 	    $self->{_opt_lengths} = 'y';
