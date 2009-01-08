@@ -24,7 +24,8 @@ ok $factory->isa('Bio::Tools::Run::Alignment::Blat');
 my $blat_present = $factory->executable();
 
 SKIP: {
-   skip('blat program not found. Skipping tests', 10) unless $blat_present;
+   test_skip(-requires_executable => $factory,
+             -tests => 10);
    
    my $searchio = $factory->align($query);
    my $result = $searchio->next_result;

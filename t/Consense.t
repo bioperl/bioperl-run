@@ -18,7 +18,8 @@ my $verbose = test_debug();
 my $sb_factory = Bio::Tools::Run::Phylo::Phylip::Consense->new(-verbose => $verbose);
 
 SKIP: {
-	skip("Consense program not found. Skipping tests", 7) unless ($sb_factory->executable);
+	test_skip(-requires_executable => $sb_factory,
+             -tests => 7);
 
 	isa_ok($sb_factory,'Bio::Tools::Run::Phylo::Phylip::Consense');
 	

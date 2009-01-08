@@ -4,60 +4,41 @@
 
 use strict;
 BEGIN {
-    eval { require Test; };
-    if( $@ ) {
-        use lib 't';
-    }
-    use Test;
-    use vars qw($NTESTS);
-    $NTESTS = 5;
-    plan tests => $NTESTS;
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 7);
+	use_ok('Bio::Tools::Run::Eponine');
+	use_ok('Bio::SeqIO');
 }
 
-use vars qw( $reason);
-$reason = 'Unable to run Eponine, java may not be installed';
+SKIP: {
+	#Java and java version check
+	my $v;
+	if (-d "java") {
+		diag("You must have java to run eponine");
+		skip("Skipping because no java present to run eponine",5);
+	}
+	open(my $PIPE,"java -version 2>&1 |") || exit;
 
-END {
-   foreach ( $Test::ntest..$NTESTS ) {
-       skip($reason,1);
-   }
+	while (<$PIPE>) { 
+		if (/Java\sversion\:?\s+\"?(\d+\.\d+)\"?/i) {
+		$v = $1;
+			last;
+		}
+	}
+	if ($v < 1.2) {
+		diag("You need at least version 1.2 of JDK to run eponine");
+		skip("Skipping due to old java version",5);
+	}
+	
+	test_skip( -requires_env => 'EPONINEDIR', -tests => 5);
+	my $inputfilename= test_input_file("eponine.fa");
+	my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999);
+
+	is ($fact->threshold, 0.999);
+	my @feats = $fact->run($inputfilename);
+	is ($feats[0]->start, 69);
+	is ($feats[0]->end, 69);
+	is ($feats[0]->strand, 1);
+	is ($feats[1]->start,178 );
 }
-
-use Bio::Tools::Run::Eponine;
-use Bio::SeqIO;
-
-#Java and java version check
-my $v;
-if (-d "java") {
-    print STDERR "You must have java to run eponine\n";
-    $reason = "Skipping because no java present to run eponine";
-    exit(0);
-}
-open(PIPE,"java -version 2>&1 |") || exit;
-
-while (<PIPE>) { 
-    if (/Java\sversion\:?\s+\"?(\d+\.\d+)\"?/i) {
-	$v = $1;
-        last;
-    }
-}
-if ($v < 1.2) {
-    print STDERR "You need at least version 1.2 of JDK to run eponine\n";
-    $reason = "Skipping due to old java version";
-    exit(0);   
-}   
-
-if( ! $ENV{'EPONINEDIR'}  ) {
-    $reason = "You must have defined EPONINEDIR to run these tests";
-    exit(0);
-}
-my $inputfilename= Bio::Root::IO->catfile("t","data","eponine.fa");
-my $fact = Bio::Tools::Run::Eponine->new("threshold" => 0.999);
-
-ok ($fact->threshold, 0.999);
-my @feats = $fact->run($inputfilename);
-ok ($feats[0]->start, 69);
-ok ($feats[0]->end, 69);
-ok ($feats[0]->strand, 1);
-ok ($feats[1]->start,178 );
-

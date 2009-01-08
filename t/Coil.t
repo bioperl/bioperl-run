@@ -13,8 +13,10 @@ BEGIN {
 }
 
 SKIP: {
-   skip("Need to define env variable COILSDIR to run test", 4) unless $ENV{'COILSDIR'};
    my  $factory = Bio::Tools::Run::Coil->new();
+   test_skip(-requires_executable => $factory,
+             -requires_env => 'COILSDIR',
+             -tests => 4);
    ok $factory->isa('Bio::Tools::Run::Coil');
 
    my $prot_file=  Bio::Root::IO->catfile("t","data","coil_protein_input");
@@ -24,8 +26,9 @@ SKIP: {
    $seq1 = $seqstream->next_seq();
 
    my $coil_present = $factory->executable();
-
-   skip("coil program not found", 3) unless $coil_present;
+   unless ($coil_present) {
+      skip("coil program not found", 3);
+   }
 
    $factory->quiet(1);
    my @feat = $factory->predict_protein_features($seq1);

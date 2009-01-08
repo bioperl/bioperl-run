@@ -3,38 +3,25 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
-use Bio::AlignIO;
 BEGIN {
-   eval { require Test; };
-   if( $@ ) {
-      use lib 't';
-   }
-   use Test;
-   use vars qw($NTESTS);
-   $NTESTS = 7;
-   plan tests => $NTESTS;
+   use lib '.';
+   use Bio::Root::Test;
+   test_begin(-tests => 12);
+   use_ok('Bio::AlignIO');
+   use_ok('Bio::Tools::Run::Alignment::Lagan');
+   use_ok('Bio::Root::IO');
+   use_ok('Bio::SeqIO');
+   use_ok('Bio::Seq');
+   use_ok('Bio::Matrix::Mlagan');   
 }
 
-END {
-   foreach ( $Test::ntest..$NTESTS ) {
-       skip('Unable to run Lagan tests, exe may not be installed',1);
-   }
-}
-ok(1);
-use Bio::Tools::Run::Alignment::Lagan;
-use Bio::Root::IO;
-use Bio::SeqIO;
-use Bio::Seq;
-use Bio::Matrix::Mlagan;
-
-my $seq1 =  Bio::Root::IO->catfile("t","data","lagan_dna.fa");
+my $seq1 =  test_input_file("lagan_dna.fa");
 my $sio = Bio::SeqIO->new(-file=>$seq1,-format=>'fasta');
 
 my $seq = $sio->next_seq;
 $seq->id("first_seq");
 my $seq2= Bio::Seq->new(-id=>"second_seq",-seq=>$seq->seq);
 my $seq3= Bio::Seq->new(-id=>"third_seq",-seq=>$seq->seq);
-
 
 my @params =
              (
@@ -46,40 +33,36 @@ my @params =
               'gapend' => -50,
               'gapcont' => -2,
          );
-  
-my  $factory = Bio::Tools::Run::Alignment::Lagan->new(@params);
-$factory->quiet(1);
-ok $factory->isa('Bio::Tools::Run::Alignment::Lagan');
 
-my $lagan_present = $factory->executable();
-
-unless ($lagan_present) {
-       warn("lagan program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-       exit 0;
+SKIP: {
+   my  $factory = Bio::Tools::Run::Alignment::Lagan->new(@params,
+                                                         -verbose => -1);
+   $factory->quiet(1);
+   isa_ok $factory,'Bio::Tools::Run::Alignment::Lagan';   
+   test_skip(-requires_executable => $factory,
+             -tests => 5,
+             -requires_env => 'LAGAN_DIR');
+   
+   my $simple_align= $factory->lagan($seq,$seq2);
+   
+   isa_ok $simple_align, 'Bio::SimpleAlign';
+   
+   is $simple_align->percentage_identity, 100;
+   
+   my $multi = $factory->mlagan([$seq,$seq2,$seq3]);
+   is $multi->percentage_identity, 100;
+   
+   my $matrix = Bio::Matrix::Mlagan->new(-values => [[qw(115 -161 -81 -161 0 -72)],
+                                                     [qw(-161 115 -161 -81 0 -72)],
+                                                     [qw(-81 -161 115 -161 0 -72)],
+                                                     [qw(-161 -81 -161 115 0 -72)],
+                                                     [qw(0 0 0 0 0 0)],
+                                                     [qw(-72 -72 -72 -72 0 -72)]],
+                                         -gap_open => -470,
+                                         -gap_continue => -25);
+   
+   is $factory->nuc_matrix($matrix), $matrix;
+   #*** weak test; doesn't show the supplied matrix had any effect on results...
+   $multi = $factory->mlagan([$seq,$seq2,$seq3]);
+   is $multi->percentage_identity, 100;
 }
-
-my $simple_align= $factory->lagan($seq,$seq2);
-
-ok $simple_align->isa('Bio::SimpleAlign');
-
-
-ok $simple_align->percentage_identity, 100;
-
-my $multi = $factory->mlagan([$seq,$seq2,$seq3]);
-ok $multi->percentage_identity, 100;
-
-my $matrix = Bio::Matrix::Mlagan->new(-values => [[qw(115 -161 -81 -161 0 -72)],
-                                                  [qw(-161 115 -161 -81 0 -72)],
-                                                  [qw(-81 -161 115 -161 0 -72)],
-                                                  [qw(-161 -81 -161 115 0 -72)],
-                                                  [qw(0 0 0 0 0 0)],
-                                                  [qw(-72 -72 -72 -72 0 -72)]],
-                                      -gap_open => -470,
-                                      -gap_continue => -25);
-
-ok $factory->nuc_matrix($matrix), $matrix;
-#*** weak test; doesn't show the supplied matrix had any effect on results...
-$multi = $factory->mlagan([$seq,$seq2,$seq3]);
-ok $multi->percentage_identity, 100;
-
-1;

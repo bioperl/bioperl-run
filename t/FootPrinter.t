@@ -2,100 +2,82 @@
 ## Bioperl Test Harness Script for Modules
 
 use strict;
+
 BEGIN {
-    eval { require Test; };
-    if( $@ ) {
-        use lib 't';
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 24);
+    use_ok('Bio::Tools::Run::FootPrinter');
+    use_ok('Bio::SeqIO');
+}
+
+SKIP: {
+    my $treefile = test_input_file("tree_of_life");
+    
+    my @params = (
+                  'size'=>10,
+                  'sequence_type'=>'upstream',
+                  'subregion_size'=>30,
+                  'position_change_cost'=>5,
+                  'triplet_filtering'=>1,
+                  'pair_filtering'=>1,
+                  'post_filtering'=>1,
+                  'inversion_cost'=>1,
+                  'tree'   =>$treefile,
+                  'details'=>0,
+                  'verbose'=>0);
+    
+    my $fact = Bio::Tools::Run::FootPrinter->new(@params);
+    test_skip(-requires_executable => $fact, -tests => 22);
+    
+    is $fact->size, 10;
+    is $fact->sequence_type, 'upstream';
+    is $fact->subregion_size, 30;
+    is $fact->position_change_cost, 5;
+    is $fact->triplet_filtering,1;
+    is $fact->pair_filtering,1;
+    is $fact->post_filtering,1;
+    is $fact->inversion_cost,1;
+    is $fact->tree, $treefile;
+    
+    my $input= test_input_file("FootPrinter.seq.fa");
+    
+    my $in  = Bio::SeqIO->new(-file => "$input" , '-format' => 'fasta');
+    my @seq;
+    while (my $seq = $in->next_seq){
+      push @seq, $seq; # 6 sequences
     }
-    use Test;
-    use vars qw($NTESTS);
-    $NTESTS = 22;
-    plan tests => $NTESTS;
-}
-use Bio::Tools::Run::FootPrinter;
-use Bio::SeqIO;
-
-END {
-    for ( $Test::ntest..$NTESTS ) {
-        skip("FootPrinter program not found. Skipping.",1);
+    my @fp= $fact->run(@seq);
+    is @fp, 6;
+    
+    my $first = shift @fp;
+    
+    my @motifs = $first->sub_SeqFeature;
+    if (@motifs == 2) {
+        # older version of FootPrinter? or version 2.1 is buggy with its silly first
+        # motif of 1 bp below
+        is $motifs[0]->seq_id,'TETRAODON-motif1';
+        is $motifs[0]->seq->seq, 'tacaggatgca';
+        is $motifs[0]->start, 352;
+        is $motifs[0]->end, 362;
+        is $motifs[1]->seq_id,'TETRAODON-motif2';
+        is $motifs[1]->seq->seq, 'ccatatttgga';
+        is $motifs[1]->start, 363;
+        is $motifs[1]->end, 373;
+        ok 1 for 1..4;
+    }
+    elsif (@motifs == 3) {
+        is $motifs[0]->seq_id,'TETRAODON-motif1';
+        is $motifs[0]->seq->seq, 't';
+        is $motifs[0]->start, 352;
+        is $motifs[0]->end, 352;
+        is $motifs[1]->seq_id,'TETRAODON-motif2';
+        is $motifs[1]->seq->seq, 'acaggatgca';
+        is $motifs[1]->start, 353;
+        is $motifs[1]->end, 362;
+        is $motifs[2]->seq_id,'TETRAODON-motif3';
+        is $motifs[2]->seq->seq, 'ccatatttgga';
+        is $motifs[2]->start, 363;
+        is $motifs[2]->end, 373;
     }
 }
-my $treefile =Bio::Root::IO->catfile("t", "data", "tree_of_life");
-
-my @params = (
-               'size'=>10,
-              'sequence_type'=>'upstream',
-              'subregion_size'=>30,
-              'position_change_cost'=>5,
-              'triplet_filtering'=>1,
-              'pair_filtering'=>1,
-              'post_filtering'=>1,
-              'inversion_cost'=>1,
-              'tree'   =>$treefile,
-              'details'=>0,
-              'verbose'=>0);
-
-my $fact = Bio::Tools::Run::FootPrinter->new(@params);
-
-if( ! $fact->executable ) { 
-    warn("FootPrinter program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-
-    exit(0);
-}
-
-ok $fact->size, 10;
-ok $fact->sequence_type, 'upstream';
-ok $fact->subregion_size, 30;
-ok $fact->position_change_cost, 5;
-ok $fact->triplet_filtering,1;
-ok $fact->pair_filtering,1;
-ok $fact->post_filtering,1;
-ok $fact->inversion_cost,1;
-ok $fact->tree, $treefile;
-
-my $input= Bio::Root::IO->catfile("t","data","FootPrinter.seq.fa");
-
-my $in  = Bio::SeqIO->new(-file => "$input" , '-format' => 'fasta');
-my @seq;
-while (my $seq = $in->next_seq){
-  push @seq, $seq; # 6 sequences
-}
-my @fp= $fact->run(@seq);
-ok @fp, 6;
-
-my $first = shift @fp;
-
-my @motifs = $first->sub_SeqFeature;
-if (@motifs == 2) {
-    # older version of FootPrinter? or version 2.1 is buggy with its silly first
-    # motif of 1 bp below
-    ok $motifs[0]->seq_id,'TETRAODON-motif1';
-    ok $motifs[0]->seq->seq, 'tacaggatgca';
-    ok $motifs[0]->start, 352;
-    ok $motifs[0]->end, 362;
-    ok $motifs[1]->seq_id,'TETRAODON-motif2';
-    ok $motifs[1]->seq->seq, 'ccatatttgga';
-    ok $motifs[1]->start, 363;
-    ok $motifs[1]->end, 373;
-    ok 1;
-    ok 1;
-    ok 1;
-    ok 1;
-}
-elsif (@motifs == 3) {
-    ok $motifs[0]->seq_id,'TETRAODON-motif1';
-    ok $motifs[0]->seq->seq, 't';
-    ok $motifs[0]->start, 352;
-    ok $motifs[0]->end, 352;
-    ok $motifs[1]->seq_id,'TETRAODON-motif2';
-    ok $motifs[1]->seq->seq, 'acaggatgca';
-    ok $motifs[1]->start, 353;
-    ok $motifs[1]->end, 362;
-    ok $motifs[2]->seq_id,'TETRAODON-motif3';
-    ok $motifs[2]->seq->seq, 'ccatatttgga';
-    ok $motifs[2]->start, 363;
-    ok $motifs[2]->end, 373;
-}
-
-
-

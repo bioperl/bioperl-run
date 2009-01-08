@@ -43,7 +43,8 @@ is( $factory->bootstrap, undef, 'bootstrap returned correct default' );
 is( $factory->program_name(), 'clustalw',                'Correct exe default name' );
 
 SKIP: {
-  skip("Couldn't find the executable", 16) unless defined $factory->executable();
+  test_skip(-requires_executable => $factory,
+           -tests => 16);  
   
   # test all factory methods dependent on finding the executable
   # TODO: isnt( $factory->program_dir, undef,               'Found program in an ENV variable' );

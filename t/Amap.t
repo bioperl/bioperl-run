@@ -58,9 +58,9 @@ is( $factory->program_name(), 'amap',                    'Correct exe default na
 SKIP: {
   # condition used to skip this block of tests
   #skip($why, $how_many_in_block);
-  skip("Couldn't find the executable", 8)
-    unless defined $factory->executable();
-  
+  test_skip(-requires_executable => $factory,
+			-tests => 8);
+
   # test all factory methods that depend on the executable
   # TODO: isnt( $factory->program_dir, undef,              'program found in ENV variable' );
   ok( $factory->version >= 2.0,                            'Correct minimum program version' );
