@@ -30,7 +30,8 @@ is ($factory->program_name(), 'meme', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the meme executable", 18) unless defined $factory->executable();
+    test_skip(-tests => 18,
+              -requires_executable => $factory);
     
     use_ok('Bio::SeqIO');
     my $si = Bio::SeqIO->new(-file => $seq1_file, -format => 'fasta');

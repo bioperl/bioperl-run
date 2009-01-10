@@ -106,9 +106,7 @@ SKIP: {
 	my $cons = $factory->program('cons');
 	$cons->verbose(0);
 	$in = Bio::AlignIO->new(-format => 'msf',
-				   -file   => Bio::Root::IO->catfile('t',
-								 'data',
-								 'cysprot.msf'));
+				   -file   => test_input_file('cysprot.msf'));
 	my $aln2 = $in->next_aln;
 	if( $version ge '2.8.0' ) {
 		$cons->run({ '-sequence' => $aln2,
@@ -155,9 +153,7 @@ SKIP: {
 	
 	 %input = ( '-word' => 4,
 		   '-incorrect_option' => 'no value',
-		   '-sequence' => Bio::Root::IO->catfile('t',
-							 'data',
-							 'dna1.fa'),
+		   '-sequence' => test_input_file('dna1.fa'),
 		   '-outfile' => $compseqoutfile);
 	eval {
 		$compseqapp->run(\%input);

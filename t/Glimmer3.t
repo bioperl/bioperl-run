@@ -14,8 +14,8 @@ BEGIN {
     use_ok('Bio::Seq');
 }
 
-my $fasta_file = Bio::Root::IO->catfile('t','data','H_pylori_J99.fasta');
-my $icm_file   = Bio::Root::IO->catfile('t','data','H_pylori_J99.glimmer3.icm');
+my $fasta_file = test_input_file('H_pylori_J99.fasta');
+my $icm_file   = test_input_file('H_pylori_J99.glimmer3.icm');
 
 my $factory    = Bio::Tools::Run::Glimmer->new(-program => 'glimmer3',
                                                -model => $icm_file);
@@ -25,11 +25,7 @@ my $seqstream = Bio::SeqIO->new(-file => $fasta_file, -format => 'fasta');
 my $seq = $seqstream->next_seq();
 
 SKIP: {
-    my $glimmer_present = $factory->executable();
-    
-    unless ($glimmer_present) {
-        skip("glimmer3 program not found. Skipping tests 5 to $NTESTS", ($NTESTS - 4));
-    }
+    test_skip(-requires_executable => $factory, -tests => 107);
     
     my $glimmer3 = $factory->run($seq);
     isa_ok $glimmer3, 'Bio::Tools::Glimmer';

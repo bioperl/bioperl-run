@@ -4,63 +4,35 @@
 # `make test'. After `make install' it should work as `perl test.t'
 
 use strict;
-use vars qw($NUMTESTS);
 
-my $error;
-
-BEGIN { 
-    # to handle systems with no installed Test module
-    # we include the t dir (where a copy of Test.pm is located)
-    # as a fallback
-    eval { require Test; };
-    $error = 0;
-    if( $@ ) {
-	use lib 't';
-    }
-    use Test;
-
-    $NUMTESTS = 6;
-    plan tests => $NUMTESTS;
+BEGIN {
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 8);
+	use_ok('Bio::Tools::Run::Primate'); 
+	use_ok('Bio::SeqIO');
 }
 
-if( $error ==  1 ) {
-    exit(0);
-}
-END { 
-    foreach ( $Test::ntest .. $NUMTESTS ) {
-	skip("unable to run all of the primate tests",1);
-    }
-}
-my $testnum;
 my $verbose = 0;
 
-## End of black magic.
-##
-## Insert additional test code below but remember to change
-## the print "1..x\n" in the BEGIN block to reflect the
-## total number of tests that will be run. 
-
-use Bio::Tools::Run::Primate; 
-
-use Bio::SeqIO;
-
-my $query = "t/data/primate_query.fa";
-my $target= "t/data/primate_target.fa";
+my $query = test_input_file('primate_query.fa');
+my $target= test_input_file('primate_target.fa');
 
 my @params = ("query" => $query,"target" => $target,"m"=>0,"b"=>"TRUE");
 my $fact = Bio::Tools::Run::Primate->new(@params);
-unless ($fact->executable){
-  warn("Primate program not found. Skipping tests $Test::ntest to $NUMTESTS.\n");
-  exit(0);
+
+SKIP: {
+    test_skip(-requires_executable => $fact,
+              -tests => 6);
+	
+	isa_ok($fact,"Bio::Tools::Run::Primate");
+	my @feat = $fact->search;
+	
+	isa_ok ($feat[0],"Bio::SeqFeature::Generic");
+	
+	is ($feat[2]->start,11);
+	is ($feat[5]->end,33);
+	is ($feat[6]->seq->seq,"TATTTCTAC");
+	is ($feat[12]->strand,-1);
+
 }
-
-ok($fact->isa("Bio::Tools::Run::Primate"));
-my @feat = $fact->search;
-
-ok ($feat[0]->isa("Bio::SeqFeature::Generic"));
-
-ok ($feat[2]->start,11);
-ok ($feat[5]->end,33);
-ok ($feat[6]->seq->seq,"TATTTCTAC");
-ok ($feat[12]->strand,-1);
-

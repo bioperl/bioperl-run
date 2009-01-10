@@ -26,7 +26,8 @@ is ($factory->program_name(), 'semphy', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the semphy executable", 12) unless defined $factory->executable();
+    test_skip(-requires_executable => $factory,
+              -tests => 12);
     use_ok('Bio::TreeIO');
     my $tree_out_file = test_output_file();
     my $to = Bio::TreeIO->new(-format => 'newick', 

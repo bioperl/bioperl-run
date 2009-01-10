@@ -34,7 +34,7 @@ is ($factory->program_name(), 'gumby', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the gumby executable", 111) unless defined $factory->executable();
+    test_skip(-requires_executable => $factory, -tests => 111);
     
     # using filename input
     ok my @result1 = $factory->run($alignfilename, $treefilename), 'got results using filename input';

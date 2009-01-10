@@ -3,9 +3,7 @@
 ## $Id$
 
 use strict;
-use vars qw($DEBUG);
 
-$DEBUG = $ENV{'BIOPERLDEBUG'} || 0;
 BEGIN {
     use lib '.';
     use Bio::Root::Test;
@@ -27,7 +25,7 @@ SKIP: {
 	ok($file);
 	ok(-e $file);
 	
-	if( $DEBUG ) {
+	if( test_debug() ) {
 		`gs $file`;
 	}
 	unlink($file);
@@ -44,7 +42,7 @@ SKIP: {
 	ok($file);
 	ok(-e $file);
 	
-	if( $DEBUG ) {
+	if( test_debug() ) {
 		`gs $file`;
 	}
 	unlink($file);

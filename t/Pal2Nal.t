@@ -24,7 +24,8 @@ is ($factory->program_name(), 'pal2nal.pl', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the Pal2Nal executable", 5) unless defined $factory->executable();
+	test_skip(-requires_executable => $factory,
+		  -tests => 5);
     
 	# Run Pal2Nal with a protein alignment file and a multi-fasta nucleotide
 	# file

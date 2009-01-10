@@ -4,21 +4,16 @@
 use strict;
 
 BEGIN {
-    eval {require Test::More;};
-    if ($@) {
-        use lib 't/lib';
-    }
-    use Test::More;
-    
-    plan tests => 13;
-    
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 13);
     use_ok('Bio::Tools::Run::Phylo::QuickTree');
     use_ok('Bio::AlignIO');
 }
 
 
 # setup input files etc
-my $inputfilename = File::Spec->catfile("t","data","cysprot.stockholm");
+my $inputfilename = test_input_file('cysprot.stockholm');
 ok (-e $inputfilename, 'Found input file');
 
 my $factory = Bio::Tools::Run::Phylo::QuickTree->new();
@@ -30,7 +25,8 @@ is ($factory->program_name(), 'quicktree', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the quicktree executable", 7) unless defined $factory->executable();
+    test_skip(-requires_executable => $factory,
+              -tests => 7);
     
     # using filename input
     my $tree = $factory->run($inputfilename);

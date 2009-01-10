@@ -46,13 +46,14 @@ is ($factory->alpha('e'), 'e', 'alpha');
 
 is ($factory->tree, 'BIONJ', 'tree, default');
 # not a valid tree for this MSA, just testing
-my $mock_treefile = Bio::Root::IO->catfile("t","data","treefile.example");
+my $mock_treefile = test_input_file("treefile.example");
 is ($factory->tree($mock_treefile), $mock_treefile, 'tree');
 is ($factory->tree('BIONJ'), 'BIONJ', 'tree');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the phyml executable", 23) unless defined $factory->executable();
+    test_skip(-requires_executable => $factory,
+              -tests => 23);
 
     cmp_ok $factory->version, '>', '2.4','version';
     # test version-specific parameters
@@ -121,7 +122,7 @@ SKIP: {
 
 
     # using AlignIO on a DNA MSA
-    $inputfilename = Bio::Root::IO->catfile("t","data","dna_seqs1.phy");
+    $inputfilename = test_input_file("dna_seqs1.phy");
     ok (-e $inputfilename, 'Found DNA input file');
     
     my $alignio = Bio::AlignIO->new(-file => $inputfilename);

@@ -7,25 +7,12 @@
 # `make test'. After `make install' it should work as `perl test.t'
 
 use strict;
-use vars qw($NUMTESTS);
 
 BEGIN {
-    $NUMTESTS = 7;
-
-    eval {require Test::More;};
-	if ($@) {
-		use lib 't/lib';
-	}
-	use Test::More;
-
-    eval {require IO::String };
-	if ($@) {
-		plan skip_all => 'IO::String not installed. This means that the module is not usable. Skipping tests';
-	}
-	else {
-		plan tests => $NUMTESTS;
-	}
-
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 7,
+			   -requires_module => 'IO::String');
 	use_ok('Bio::Root::IO');
 	use_ok('Bio::Tools::Run::Phylo::SLR');
 	use_ok('Bio::AlignIO');
@@ -35,20 +22,17 @@ BEGIN {
 ok my $slr = Bio::Tools::Run::Phylo::SLR->new();
 
 SKIP: {
-	my $present = $slr->executable();
-
-    unless ($present) {
-        skip("SLR program not found. Skipping tests", ($NUMTESTS - 5));
-    }
+	test_skip(-requires_executable => $slr,
+		  -tests => 2);
 
         # first set
 	my $alignio1 = Bio::AlignIO->new
             (-format => 'fasta',
-             -file   => 't/data/219877.cdna.fasta');
+             -file   => test_input_file('219877.cdna.fasta'));
 
 	my $treeio1 = Bio::TreeIO->new
             (-format => 'newick',
-             -file   => 't/data/219877.tree');
+             -file   => test_input_file('219877.tree'));
 
 	my $aln1 = $alignio1->next_aln;
 	my $tree1 = $treeio1->next_tree;
@@ -59,14 +43,14 @@ SKIP: {
 	ok defined($results1);
 
         # second set
-        $slr = Bio::Tools::Run::Phylo::SLR->new();
+    $slr = Bio::Tools::Run::Phylo::SLR->new();
 	my $alignio2 = Bio::AlignIO->new
             (-format => 'fasta',
-             -file   => 't/data/277523.cdna.fasta');
+             -file   => test_input_file('277523.cdna.fasta'));
 
 	my $treeio2 = Bio::TreeIO->new
             (-format => 'newick',
-             -file   => 't/data/277523.tree');
+             -file   => test_input_file('277523.tree'));
 
 	my $aln2 = $alignio2->next_aln;
 	my $tree2 = $treeio2->next_tree;
@@ -105,4 +89,5 @@ SKIP: {
 #             # print "# Site  Neutral  Optimal   Omega    lower    upper LRT_Stat    Pval     Adj.Pval  Result Note\n";
 #             print $site->[0], ",", $site->[3], "\n";
 #         }
+
 }

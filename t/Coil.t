@@ -19,7 +19,7 @@ SKIP: {
              -tests => 4);
    ok $factory->isa('Bio::Tools::Run::Coil');
 
-   my $prot_file=  Bio::Root::IO->catfile("t","data","coil_protein_input");
+   my $prot_file=  test_input_file("coil_protein_input");
 
    my $seq1 = Bio::Seq->new();
    my $seqstream = Bio::SeqIO->new(-file => $prot_file, -fmt => 'Fasta');

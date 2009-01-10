@@ -3,28 +3,12 @@
 ##
 # $Id$
 
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.t'
-
 use strict;
-use vars qw($NUMTESTS);
 
 BEGIN {
-    $NUMTESTS = 15;
-	
-    eval {require Test::More;};
-	if ($@) {
-		use lib 't/lib';
-	}
-	use Test::More;
-	
-    eval {require IO::String };
-	if ($@) {
-		plan skip_all => 'IO::String not installed. This means that the module is not usable. Skipping tests';
-	}
-	else {
-		plan tests => $NUMTESTS;
-	}
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 15, -requires_module =>'IO::String');
 	
 	use_ok('Bio::Root::IO');
 	use_ok('Bio::Tools::Run::Phylo::Hyphy::SLAC');
@@ -41,12 +25,8 @@ ok my $fel = Bio::Tools::Run::Phylo::Hyphy::FEL->new();
 ok my $modeltest = Bio::Tools::Run::Phylo::Hyphy::Modeltest->new();
 
 SKIP: {
-	my $present = $slac->executable();
+	test_skip(-requires_executable => $slac, -tests => 4);
     
-    unless ($present) {
-        skip("Hyphy program not found. Skipping tests", ($NUMTESTS - 11));
-    }
-	
 	my $alignio = Bio::AlignIO->new(-format => 'fasta',
 						 -file   => 't/data/hyphy1.fasta');
 	

@@ -39,7 +39,8 @@ is ($factory->program_name(), 'phastCons', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the phastCons executable", 166) unless defined $factory->executable();
+    test_skip(-requires_executable => $factory,
+              -tests => 166);
     
     # using filename input
     ok my @result1 = $factory->run($alignfilename, $treefilename), 'got results using filename input';

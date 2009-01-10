@@ -2,12 +2,10 @@
 # ## Bioperl Test Harness Script for Modules
 # #
 use strict;
-use vars qw($NTESTS);
 
 BEGIN {
     use Bio::Root::Test;
-    $NTESTS = 98;
-    test_begin(-tests => $NTESTS,
+    test_begin(-tests => 98,
 	       -requires_modules => [qw(IPC::Run)]);
 
     use_ok('Bio::Tools::Run::Genemark');
@@ -15,7 +13,7 @@ BEGIN {
     use_ok('Bio::Seq');
 }
 
-my $verbose   = 1 if $ENV{'BIOPERLDEBUG'};
+my $verbose   = test_debug();
 my $model_dir = $ENV{'GENEMARK_MODELS'} if $ENV{'GENEMARK_MODELS'};
 
 SKIP: {

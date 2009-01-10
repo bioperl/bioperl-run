@@ -12,29 +12,17 @@ use vars qw($NUMTESTS);
 my $error;
 my $serror;
 
-BEGIN { 
-    # to handle systems with no installed Test module
-    # we include the t dir (where a copy of Test.pm is located)
-    # as a fallback
-    eval { require Test; };
-    if( $@ ) {
-	use lib 't';
-    }
-    use Test;
-    
-    $NUMTESTS = 7;
-    plan tests => $NUMTESTS;
-
-    unless (eval "require IO::String; 1;") {
-            print STDERR ("IO::String not installed. Skipping tests $Test::ntest to $NUMTESTS.\n");
-            for ($Test::ntest..$NUMTESTS){
-                skip(1,1);
-            }
-            exit(0);
-    }
+BEGIN {
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 10,
+			   -requires_module => 'IO::String');
+	use_ok('Bio::Tools::Phylo::Molphy'); # PAML parser
+	use_ok('Bio::Tools::Run::Phylo::Molphy::ProtML');
+	use_ok('Bio::AlignIO');
 }
 
-my $verbose = $ENV{'BIOPERLDEBUG'};
+my $verbose = test_debug();
 
 END { unlink('protml.eps'); }
 ## End of black magic.
@@ -43,44 +31,33 @@ END { unlink('protml.eps'); }
 ## the print "1..x\n" in the BEGIN block to reflect the
 ## total number of tests that will be run. 
 
-use Bio::Tools::Phylo::Molphy; # PAML parser
-use Bio::Tools::Run::Phylo::Molphy::ProtML;
-use Bio::AlignIO;
-
-END {     
-    for ( $Test::ntest..$NUMTESTS) {
-        skip("Molphy not found. Skipping.",1);
-    }
-}
-
- 
 my %args = ( 'models' => 'jtt', 
 	     'search' => 'quick', 
 	     "other" => [ '-information', '-w']); 
 my $protml = Bio::Tools::Run::Phylo::Molphy::ProtML->new(-verbose => $verbose,
 							-flags => \%args);
-unless ($protml->executable){
-  warn("Molphy package not installed. Skipping tests $Test::ntest to $NUMTESTS.\n");
-exit(0) ;
+
+SKIP: {
+	test_skip(-requires_executable => $protml,
+			  -tests => 7);
+
+	my $in = Bio::AlignIO->new(-format => 'clustalw',
+				-file   => test_input_file('cel-cbr-fam.aln'));
+	my $aln = $in->next_aln;
+	$protml->alignment($aln);
+	
+	my ($rc,$results) = $protml->run();
+	is($rc,1);
+	my $r = $results->next_result;
+	ok($r);
+	my @trees;
+	while( my $t = $r->next_tree ) { 
+		push @trees, $t;
+	}
+	is(@trees,1);
+	is($r->model, 'JTT');
+	is($r->search_space,50);
+	is($trees[0]->score, -453.1);
+	ok($protml->error_string !~ /Error/); # we don't expect any errors;
+
 }
-
-my $in = Bio::AlignIO->new(-format => 'clustalw',
-			  -file   => Bio::Root::IO->catfile('t','data',
-							    'cel-cbr-fam.aln'));
-my $aln = $in->next_aln;
-$protml->alignment($aln);
-
-my ($rc,$results) = $protml->run();
-ok($rc,1);
-my $r = $results->next_result;
-ok($r);
-my @trees;
-while( my $t = $r->next_tree ) { 
-    push @trees, $t;
-}
-ok(@trees,1);
-ok($r->model, 'JTT');
-ok($r->search_space,50);
-ok($trees[0]->score, -453.1);
-ok($protml->error_string !~ /Error/); # we don't expect any errors;
-

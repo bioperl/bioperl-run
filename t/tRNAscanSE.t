@@ -16,7 +16,7 @@ BEGIN {
 
 my $verbose = test_debug();
 
-my $fasta_file = Bio::Root::IO->catfile('t','data','H_pylori_J99.fasta');
+my $fasta_file = test_input_file('H_pylori_J99.fasta');
 
 my $factory    = Bio::Tools::Run::tRNAscanSE->new(-program => 'tRNAscan-SE');
 isa_ok $factory, 'Bio::Tools::Run::tRNAscanSE';
@@ -25,11 +25,8 @@ my $seqstream = Bio::SeqIO->new(-file => $fasta_file, -format => 'fasta');
 my $seq = $seqstream->next_seq();
 
 SKIP: {
-    my $tRNAscanSE_present = $factory->executable();
-    
-    unless ($tRNAscanSE_present) {
-        skip("tRNAscanSE program not found. Skipping tests 5 to $NTESTS", ($NTESTS - 4));
-    }
+    test_skip(-requires_executable => $factory,
+              -tests => 8);
     
     my $tRNAscanSE = $factory->run($seq);
     isa_ok $tRNAscanSE, 'Bio::Tools::tRNAscanSE';

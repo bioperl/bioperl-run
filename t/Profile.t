@@ -4,48 +4,33 @@
 # #
 use strict;
 BEGIN {
-   eval { require Test; };
-   if( $@ ) {
-      use lib 't';
-   }
-   use Test;
-   use vars qw($NTESTS);
-   $NTESTS = 5;
-   plan tests => $NTESTS;
+   use lib '.';
+   use Bio::Root::Test;
+   test_begin(-tests => 7);
+   use_ok('Bio::Tools::Run::Profile');
+   use_ok('Bio::SeqIO');
+   use_ok('Bio::Seq');
 }
-
-END {
-   foreach ( $Test::ntest..$NTESTS ) {
-       skip('Unable to run Profile tests, exe may not be installed',1);
-   }
-}
-ok(1);
-use Bio::Tools::Run::Profile;
-use Bio::Root::IO;
-use Bio::SeqIO;
-use Bio::Seq;
 
 my @params;
-my $db =  Bio::Root::IO->catfile("t","data","prosite.dat");
+my $db =  test_input_file('prosite.dat');
 push @params, ('DB',$db);
 my  $factory = Bio::Tools::Run::Profile->new(@params);
-ok $factory->isa('Bio::Tools::Run::Profile');
-my $prot_file=  Bio::Root::IO->catfile("t","data","profile_prot.FastA");
+isa_ok $factory,'Bio::Tools::Run::Profile';
+my $prot_file=  test_input_file('profile_prot.FastA');
 
 my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file =>$prot_file, -fmt =>'Fasta');
 $seq1 = $seqstream->next_seq();
 
-my $profile_present = $factory->executable();
-
-unless ($profile_present) {
-    warn(" profile program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
-
-my @feat = $factory->predict_protein_features($seq1);
-
-ok $feat[0]->isa('Bio::SeqFeatureI');
-ok ($feat[0]->start, 15);
-ok ($feat[0]->end, 340);
+SKIP: {
+   test_skip(-requires_executable => $factory,
+          -tests => 3);
    
+   my @feat = $factory->predict_protein_features($seq1);
+   
+   isa_ok $feat[0],'Bio::SeqFeatureI';
+   ok ($feat[0]->start, 15);
+   ok ($feat[0]->end, 340);
+   
+}

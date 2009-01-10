@@ -7,41 +7,17 @@
 # `make test'. After `make install' it should work as `perl test.t'
 
 use strict;
-use vars qw($NUMTESTS);
-
-my $error;
-
-BEGIN { 
-    # to handle systems with no installed Test module
-    # we include the t dir (where a copy of Test.pm is located)
-    # as a fallback
-    eval { require Test; };
-    $error = 0;
-    if( $@ ) {
-	use lib 't';
-    }
-    use Test;
-
-    $NUMTESTS = 19;
-    plan tests => $NUMTESTS;
-
-    unless (eval "require IO::String; 1;") {
-        print STDERR "IO::String not installed. Skipping tests $Test::ntest to $NUMTESTS.\n";
-        for ($Test::ntest..$NUMTESTS){
-            skip(1,1);    
-        }
-        exit(0);
-    }
+BEGIN {
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 28,
+			   -requires_module => 'IO::String');
+	use_ok('Bio::Tools::Phylo::PAML'); # PAML parser
+	use_ok('Bio::Tools::Run::Phylo::PAML::Codeml');
+	use_ok('Bio::Tools::Run::Phylo::PAML::Yn00');
+	use_ok('Bio::AlignIO');
 }
 
-if( $error ==  1 ) {
-    exit(0);
-}
-END { 
-    foreach ( $Test::ntest .. $NUMTESTS ) {
-	skip("unable to run all of the PAML tests",1);
-    }
-}
 my $testnum;
 my $verbose = 0;
 
@@ -51,18 +27,11 @@ my $verbose = 0;
 ## the print "1..x\n" in the BEGIN block to reflect the
 ## total number of tests that will be run. 
 
-use Bio::Tools::Phylo::PAML; # PAML parser
-use Bio::Root::IO;
-
 my $inpaml = Bio::Tools::Phylo::PAML->new(-file => 
-					 Bio::Root::IO->catfile(qw(t data 
-								   codeml.mlc)));
+					 test_input_file('codeml.mlc'));
 
 ok($inpaml);
 
-use Bio::Tools::Run::Phylo::PAML::Codeml;
-use Bio::Tools::Run::Phylo::PAML::Yn00;
-use Bio::AlignIO;
 my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
     (-params => {'runmode' => -2,
 		 'seqtype' => 1,
@@ -75,149 +44,145 @@ my $codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
 		 'model'    => 0,		 
 	     },
      -verbose => $verbose);
-unless ($codeml->executable) {
-  warn("PAML not is installed. skipping tests $Test::ntest to $NUMTESTS\n");
-  exit(0) ;
-}
 
-my $in = Bio::AlignIO->new(-format => 'phylip',
-			  -file   => Bio::Root::IO->catfile(qw(t data 
-							       gf-s85.phylip)));
-my $aln = $in->next_aln;
-$codeml->alignment($aln);
-my ($rc,$results) = $codeml->run();
+SKIP: {
+	test_skip(-requires_executable => $codeml,
+		  -tests => 23);
 
-ok($rc,1);
+	my $in = Bio::AlignIO->new(-format => 'phylip',
+				  -file   => test_input_file('gf-s85.phylip'));
+	my $aln = $in->next_aln;
+	$codeml->alignment($aln);
+	my ($rc,$results) = $codeml->run();
+	
+	is($rc,1); 
+	
+	if( ! defined $results ) { 
+		skip('No results', 22);
+	}
+	
+	my $result = $results->next_result;
+	if( ! defined $result ) { 
+		skip('No result', 22);
+	}
+	
+	my $MLmatrix = $result->get_MLmatrix;
+	
+	my ($vnum) = ($result->version =~ /(\d+(\.\d+)?)/);
+	# PAML 2.12 results
+	if( $vnum == 3.12 ) {
+		is($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
+		is($MLmatrix->[0]->[1]->{'dS'},1.1459);
+		is($MLmatrix->[0]->[1]->{'omega'}, 0.0605);
+		is($MLmatrix->[0]->[1]->{'S'}, 273.5);
+		is($MLmatrix->[0]->[1]->{'N'}, 728.5);
+		is($MLmatrix->[0]->[1]->{'t'}, 1.0895);
+	 
+		skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
+		
+	} elsif( $vnum >= 3.13  && $vnum < 4) {
+	# PAML 2.13 results
+		is($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
+		is($MLmatrix->[0]->[1]->{'dS'},1.2462);
+		is(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0572);
+		is($MLmatrix->[0]->[1]->{'S'}, 278.8);
+		is($MLmatrix->[0]->[1]->{'N'}, 723.2);
+		is(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.1946);
+		skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
+	
+	} elsif( $vnum == 4 ) {
+		is($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
+		is($MLmatrix->[0]->[1]->{'dS'},1.2462);
+		is(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0572);
+		is($MLmatrix->[0]->[1]->{'S'}, 278.8);
+		is($MLmatrix->[0]->[1]->{'N'}, 723.2);
+		is(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.1946);
+		is($MLmatrix->[0]->[1]->{'lnL'}, -1929.935243);
+	
+	} else { 
+		for( 1..7) { 
+		skip("Can't test the result output, don't know about PAML version ".$result->version,1);
+		}
+	} 
+	
+	unlike($codeml->error_string, qr/Error/); # we don't expect any errors;
+	
+	my $yn00 = Bio::Tools::Run::Phylo::PAML::Yn00->new();
+	$yn00->alignment($aln);
+	($rc,$results) = $yn00->run();
+	is($rc,1);
+	if( ! defined $results ) { 
+		exit(0);
+	}
+	$result = $results->next_result;
+	$MLmatrix = $result->get_MLmatrix;
+	
+	is($MLmatrix->[0]->[1]->{'dN'}, 0.0846);
+	is($MLmatrix->[0]->[1]->{'dS'}, 1.0926);
+	is($MLmatrix->[0]->[1]->{'omega'}, 0.0774);
+	is($MLmatrix->[0]->[1]->{'S'}, 278.4);
+	is($MLmatrix->[0]->[1]->{'N'}, 723.6);
+	is($MLmatrix->[0]->[1]->{'t'}, 1.0941);
+	
+	unlike($yn00->error_string, qr/Error/); # we don't expect any errors;
+	
+	$codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
+		(-params => { 'alpha' => 1.53 },
+		 -verbose => $verbose);
+	
+	ok($codeml);
+	
+	
+	# AAML
+	my $cysaln = Bio::AlignIO->new(-format => 'msf',
+					   -file => test_input_file('cysprot.msf'))->next_aln;
+	
+	my $cystre = Bio::TreeIO->new(-format => 'newick',
+					  -file  => test_input_file('cysprot.raxml.tre'))->next_tree;
+	ok($cysaln);
+	ok($cystre); 
+	
+	$codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
+		(
+		 -verbose => 0,     
+		 -tree   => $cystre,
+		 -params => { 'runmode' => 0, # provide a usertree
+			  'seqtype' => 2, # AMINO ACIDS,
+			  'model'   => 0, # one dN/dS rate
+			  'NSsites' => 0, # one -- swap this with 1, 2, 3 etc
+			  'clock'   => 0, # 0 = no clock
+			  'getSE'   => 1, # get Standard Error
+			  'fix_blength' => 0, # use initial BLengths
+			  'ncatG' => 1, #increase approrpriately for NSsites,
+		 },
+		 -alignment => $cysaln,
+		 -save_tempfiles => 1,
+		);
+    test_skip(-requires_executable => $codeml,
+              -tests => 14);
+	ok($codeml);
+	
+	($rc,$results) = $codeml->run();
+	is($rc,1);
+	
 
-if( ! defined $results ) { 
-    exit(0);
-}
-
-my $result = $results->next_result;
-if( ! defined $result ) { 
-    exit(0);
-}
-
-my $MLmatrix = $result->get_MLmatrix;
-
-my ($vnum) = ($result->version =~ /(\d+(\.\d+)?)/);
-# PAML 2.12 results
-if( $vnum == 3.12 ) {
-    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0693);
-    ok($MLmatrix->[0]->[1]->{'dS'},1.1459);
-    ok($MLmatrix->[0]->[1]->{'omega'}, 0.0605);
-    ok($MLmatrix->[0]->[1]->{'S'}, 273.5);
-    ok($MLmatrix->[0]->[1]->{'N'}, 728.5);
-    ok($MLmatrix->[0]->[1]->{'t'}, 1.0895);
- 
-    skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
-    
-} elsif( $vnum >= 3.13  && $vnum < 4) {
-# PAML 2.13 results
-    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
-    ok($MLmatrix->[0]->[1]->{'dS'},1.2462);
-    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0572);
-    ok($MLmatrix->[0]->[1]->{'S'}, 278.8);
-    ok($MLmatrix->[0]->[1]->{'N'}, 723.2);
-    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.1946);
-    skip($MLmatrix->[0]->[1]->{'lnL'}, "I don't know what this should be, if you run this part, email the list so we can update the value");
-
-} elsif( $vnum == 4 ) {
-    ok($MLmatrix->[0]->[1]->{'dN'}, 0.0713);
-    ok($MLmatrix->[0]->[1]->{'dS'},1.2462);
-    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'omega'}), 0.0572);
-    ok($MLmatrix->[0]->[1]->{'S'}, 278.8);
-    ok($MLmatrix->[0]->[1]->{'N'}, 723.2);
-    ok(sprintf("%.4f",$MLmatrix->[0]->[1]->{'t'}), 1.1946);
-    ok($MLmatrix->[0]->[1]->{'lnL'}, -1929.935243);
-
-} else { 
-    for( 1..6) { 
-	skip("Can't test the result output, don't know about PAML version ".$result->version,1);
-    }
-}
-
-ok($codeml->error_string !~ /Error/); # we don't expect any errors;
-
-my $yn00 = Bio::Tools::Run::Phylo::PAML::Yn00->new();
-$yn00->alignment($aln);
-($rc,$results) = $yn00->run();
-ok($rc,1);
-if( ! defined $results ) { 
-    exit(0);
-}
-$result = $results->next_result;
-$MLmatrix = $result->get_MLmatrix;
-
-ok($MLmatrix->[0]->[1]->{'dN'}, 0.0846);
-ok($MLmatrix->[0]->[1]->{'dS'}, 1.0926);
-ok($MLmatrix->[0]->[1]->{'omega'}, 0.0774);
-ok($MLmatrix->[0]->[1]->{'S'}, 278.4);
-ok($MLmatrix->[0]->[1]->{'N'}, 723.6);
-ok($MLmatrix->[0]->[1]->{'t'}, 1.0941);
-
-ok($yn00->error_string !~ /Error/); # we don't expect any errors;
-
-
-$codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
-    (-params => { 'alpha' => 1.53 },
-     -verbose => $verbose);
-
-ok($codeml);
-
-
-# AAML
-my $cysaln = Bio::AlignIO->new(-format => 'msf',
-			       -file => Bio::Root::IO->catfile
-			       (qw(t data cysprot.msf)))->next_aln;
-
-my $cystre = Bio::TreeIO->new(-format => 'newick',
-			      -file  => Bio::Root::IO->catfile
-			       (qw(t data cysprot.raxml.tre)))->next_tree;
-ok($cysaln);
-ok($cystre);
-
-$codeml = Bio::Tools::Run::Phylo::PAML::Codeml->new
-    (
-     -verbose => 0,     
-     -tree   => $cystre,
-     -params => { 'runmode' => 0, # provide a usertree
-		  'seqtype' => 2, # AMINO ACIDS,
-		  'model'   => 0, # one dN/dS rate
-		  'NSsites' => 0, # one -- swap this with 1, 2, 3 etc
-		  'clock'   => 0, # 0 = no clock
-		  'getSE'   => 1, # get Standard Error
-		  'fix_blength' => 0, # use initial BLengths
-		  'ncatG' => 1, #increase approrpriately for NSsites,
-     },
-     -alignment => $cysaln,
-     -save_tempfiles => 1,
-    );
-unless ($codeml->executable) {
-    warn("PAML not is installed. skipping tests $Test::ntest to $NUMTESTS\n");
-    exit(0) ;
-}
-ok($codeml);
-
-($rc,$results) = $codeml->run();
-ok($rc,1);
-
-unless( defined $results ) { 
-    warn($codeml->error_string, "\n");
-    exit(0);
-}
-
-$result = $results->next_result;
-unless( defined $result ) { 
-    exit(0);
-}
-
-($vnum) = ($result->version =~ /(\d+(\.\d+)?)/);
-for my $tree ( $result->get_trees ) {
-    my $node = $tree->find_node(-id => 'CATL_HUMAN');
-    if( $vnum == 4 ) {
-	ok($node->branch_length, '0.216223');
-    } else {	
-	ok($node->branch_length, '0.216223');
-    }
+	unless( defined $results ) { 
+		warn($codeml->error_string, "\n");
+		skip('No results',1);
+	}
+	
+	$result = $results->next_result;
+	unless( defined $result ) { 
+		skip('No result',1);
+	}
+	
+	($vnum) = ($result->version =~ /(\d+(\.\d+)?)/);
+	for my $tree ( $result->get_trees ) {
+		my $node = $tree->find_node(-id => 'CATL_HUMAN');
+		if( $vnum == 4 ) {
+		is($node->branch_length, '0.216223');
+		} else {	
+		is($node->branch_length, '0.216223');
+		}
+	}
 }

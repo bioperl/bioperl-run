@@ -7,24 +7,11 @@
 # `make test'. After `make install' it should work as `perl test.t'
 
 use strict;
-use vars qw($NUMTESTS);
-
 BEGIN {
-    $NUMTESTS = 6;
-	
-    eval {require Test::More;};
-	if ($@) {
-		use lib 't/lib';
-	}
-	use Test::More;
-	
-    eval {require IO::String };
-	if ($@) {
-		plan skip_all => 'IO::String not installed. This means that the module is not usable. Skipping tests';
-	}
-	else {
-		plan tests => $NUMTESTS;
-	}
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 6,
+			   -requires_module => 'IO::String');
 	
 	use_ok('Bio::Root::IO');
 	use_ok('Bio::Tools::Run::Simprot');
@@ -35,11 +22,8 @@ BEGIN {
 ok my $simprot = Bio::Tools::Run::Simprot->new();
 
 SKIP: {
-	my $present = $simprot->executable();
-    
-    unless ($present) {
-        skip("Simprot program not found. Skipping tests", ($NUMTESTS - 5));
-    }
+    test_skip(-requires_executable => $simprot,
+              -tests => 1);
 	
 	my $treeio = Bio::TreeIO->new(
 		-format => 'nhx', -file => 't/data/simprot_tree.nh');

@@ -18,11 +18,11 @@ BEGIN {
 
 
 # setup input files etc
-my $inputfilename = File::Spec->catfile("t","data","cysprot.fa");
+my $inputfilename = test_input_file("cysprot.fa");
 ok( -e $inputfilename, 'Found input file' );
-my $profile1 = File::Spec->catfile('t','data','cysprot1a.msf');
+my $profile1 = test_input_file('cysprot1a.msf');
 ok( -e $profile1, 'Found profile1 file' );
-my $profile2 = File::Spec->catfile('t','data','cysprot1b.msf');
+my $profile2 = test_input_file('cysprot1b.msf');
 ok( -e $profile2, 'Found profile2 file' );
 
 # setup global objects that are to be used in more than one test
@@ -53,17 +53,14 @@ SKIP: {
   # remove last bit 
   $ver =~ s{^(\d+\.\d+)\.\d+}{$1};
   
-  my $skip;
-  
   # clustalw2 isn't supported yet.
   if ($ver < 1.8) {
     diag("ClustalW version $ver not supported");
-    $skip++;
+    skip("ClustalW version $ver not supported", 16);
   } if ($ver >= 2.0) {
-    diag("ClustalW version $ver not supported yet.");
-    $skip++
+    diag("Warning: ClustalW version $ver not supported yet.");
+    skip("ClustalW version $ver not supported yet", 16);
   }
-  skip("ClustalW version $ver not supported yet", 16) if $skip;
   
   ok( $ver, "Supported program version $ver" );
   
@@ -142,7 +139,7 @@ SKIP: {
     $aln = $factory->profile_align($aln1,$aln2);
     is($aln->get_seq_by_pos(2)->get_nse, 'CATH_HUMAN/1-335', 'Got correct sequence by position');
 	
-    $str2 = Bio::SeqIO->new(-file=> Bio::Root::IO->catfile("t","data","cysprot1b.fa"));
+    $str2 = Bio::SeqIO->new(-file=> test_input_file("cysprot1b.fa"));
     my $seq = $str2->next_seq();
     $aln = $factory->profile_align($aln1,$seq);
     is($aln->get_seq_by_pos(2)->get_nse,  'CATH_HUMAN/1-335', 'Got correct sequence by position');

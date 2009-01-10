@@ -4,47 +4,31 @@
 # #
 use strict;
 BEGIN {
-   eval { require Test; };
-   if( $@ ) {
-      use lib 't';
-   }
-   use Test;
-   use vars qw($NTESTS);
-   $NTESTS = 6;
-   plan tests => $NTESTS;
+   use lib '.';
+   use Bio::Root::Test;
+   test_begin(-tests => 8);
+   use_ok('Bio::Tools::Run::Seg');
+   use_ok('Bio::SeqIO');
+   use_ok('Bio::Seq');
 }
-
-END {
-   foreach ( $Test::ntest..$NTESTS ) {
-       skip('Unable to run Seg tests, exe may not be installed',1);
-   }
-}
-ok(1);
-use Bio::Tools::Run::Seg;
-use Bio::Root::IO;
-use Bio::SeqIO;
-use Bio::Seq;
 
 my  $factory = Bio::Tools::Run::Seg->new();
-ok $factory->isa('Bio::Tools::Run::Seg');
-my $prot_file=  Bio::Root::IO->catfile("t","data","test_prot.FastA");
+isa_ok $factory, 'Bio::Tools::Run::Seg';
+my $prot_file=  test_input_file('test_prot.FastA');
 
 my $seq1 = Bio::Seq->new();
 my $seqstream = Bio::SeqIO->new(-file =>$prot_file, -fmt =>'Fasta');
 $seq1 = $seqstream->next_seq();
 
-my $seg_present = $factory->executable();
-
-unless ($seg_present) {
-    warn("seg  program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-    exit 0;
-}
-
-my @feat = $factory->predict_protein_features($seq1);
-
-ok $feat[0]->isa('Bio::SeqFeatureI');
-ok ($feat[0]->start, 214);
-ok ($feat[0]->end, 226);
-ok ($feat[0]->score, 2.26);
+SKIP: {
+    test_skip(-requires_executable => $factory,
+              -tests => 4);
    
-
+   my @feat = $factory->predict_protein_features($seq1);
+   
+   isa_ok $feat[0],'Bio::SeqFeatureI';
+   is ($feat[0]->start, 214);
+   is ($feat[0]->end, 226);
+   is ($feat[0]->score, 2.26);
+   
+}

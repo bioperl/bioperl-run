@@ -11,7 +11,7 @@ BEGIN {
 }
 
 # setup input files etc
-my $alignfilename = File::Spec->catfile('t', 'data', 'gumby', 'hmrd.mfa');
+my $alignfilename = test_input_file('gumby', 'hmrd.mfa');
 ok (-e $alignfilename, 'Found input alignment file');
 
 my $factory = Bio::Tools::Run::MCS->new(-verbose => -1,
@@ -26,7 +26,8 @@ is ($factory->program_name(), 'align2binomial.pl', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the MCS executable", 15) unless defined $factory->executable();
+    test_skip(-requires_executable => $factory,
+              -tests => 15);
     
     my $alignio = Bio::AlignIO->new(-file => $alignfilename);
     my $align = $alignio->next_aln;

@@ -4,53 +4,35 @@
 #
 use strict;
 BEGIN {
-    eval { require Test; };
-    if( $@ ) {
-        use lib 't';
-    }
-    use Test;
-    use vars qw($NTESTS);
-    $NTESTS = 4;
-    plan tests => $NTESTS;
+    use lib '.';
+    use Bio::Root::Test;
+    test_begin(-tests => 6);
+	use_ok('Bio::Tools::Run::Genscan');
+	use_ok('Bio::Root::IO');
 }
 
-END {
-  foreach ( $Test::ntest..$NTESTS ) {
-	skip('Unable to run Genscan tests, exe may not be installed',1);
-  }
+SKIP: {
+	test_skip(-requires_env => 'GENSCANDIR', -tests => 4);
+
+	my $paramfile = Bio::Root::IO->catfile($ENV{'GENSCANDIR'},"HumanIso.smat");
+	my @params = ('MATRIX',$paramfile);
+	my  $factory = Bio::Tools::Run::Genscan->new(@params);
+	isa_ok $factory, 'Bio::Tools::Run::Genscan';
+	ok $factory->matrix;
+	
+	my $inputfilename = test_input_file("Genscan.FastA");
+	my $seq1 = Bio::Seq->new();
+	my $seqstream = Bio::SeqIO->new(-file => $inputfilename, -format => 'Fasta');
+	$seq1 = $seqstream->next_seq();
+	
+	test_skip(-requires_executable => $factory,
+			  -tests => 2);
+	
+	$factory->quiet(1);
+	my @feat = $factory->predict_genes($seq1);
+		
+	my $protein = $feat[0]->predicted_protein();
+	
+	isa_ok $feat[0], "Bio::SeqFeatureI";
+	isa_ok $protein, "Bio::PrimarySeqI";
 }
-
-use Bio::Tools::Run::Genscan;
-use Bio::Root::IO;
-
-
-if(! $ENV{'GENSCANDIR'}){
-    warn("Need to define env variable GENSCANDIR to run test");
-    exit(0);
-}
-
-my $paramfile = Bio::Root::IO->catfile($ENV{'GENSCANDIR'},"HumanIso.smat");
-my @params = ('MATRIX',$paramfile);
-my  $factory = Bio::Tools::Run::Genscan->new(@params);
-ok $factory->isa('Bio::Tools::Run::Genscan');
-ok $factory->matrix;
-
-my $inputfilename = Bio::Root::IO->catfile("t","data","Genscan.FastA");
-my $seq1 = Bio::Seq->new();
-my $seqstream = Bio::SeqIO->new(-file => $inputfilename, -format => 'Fasta');
-$seq1 = $seqstream->next_seq();
-
-my $genscan_present = $factory->executable();
-
-unless ($genscan_present) {
-        warn("Genscan program not found. Skipping tests $Test::ntest to $NTESTS.\n");
-            exit 0;
-}
-$factory->quiet(1);
-my @feat = $factory->predict_genes($seq1);
-    
-my $protein = $feat[0]->predicted_protein();
-
-ok $feat[0]->isa("Bio::SeqFeatureI");
-ok $protein->isa("Bio::PrimarySeqI");
-

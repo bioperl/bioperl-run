@@ -56,40 +56,36 @@ SKIP: {
 					   -query => 'HUMRASH');
 	isa_ok($golden,'Bio::Tools::Run::PiseApplication::golden');
 	
-	$actually_submit = 1;
+	my $job;
+	eval { $job = $golden->run(); };
+	skip("Problem with job submission: $@",6) if $@;
 	
-	if ($actually_submit) {
-		my $job;
-		eval { $job = $golden->run(); };
-		skip("Problem with job submission: $@",6) if $@;
-		
-		isa_ok($job,'Bio::Tools::Run::PiseJob');
-	
-		if ($job->error) {
-			print STDERR "Error: ", $job->error_message, "\n";
-		}
-		
-		ok(! $job->error, 'No error');
-	
-		$job->save($golden_outfile);
-		ok (-e $golden_outfile, 'Save data');
-	
-		my $in = Bio::SeqIO->new ( -file   => $golden_outfile,
-					   -format => 'genbank');
-		my $seq = $in->next_seq();
-		my $genscan = $factory->program('genscan',
-						-parameter_file => "HumanIso.smat",
-						);
-		isa_ok($genscan,'Bio::Tools::Run::PiseApplication::genscan');
-	
-		$genscan->seq($seq);
-	
-		eval{ $job = $genscan->run(); };
-		skip("Problem with job submission: $@",2) if $@;
+	isa_ok($job,'Bio::Tools::Run::PiseJob');
 
-		isa_ok($job,'Bio::Tools::Run::PiseJob');
-	
-		my $parser = Bio::Tools::Genscan->new(-fh => $job->fh('genscan.out'));
-		isa_ok($parser,'Bio::Tools::Genscan');
+	if ($job->error) {
+		print STDERR "Error: ", $job->error_message, "\n";
 	}
+	
+	ok(! $job->error, 'No error');
+
+	$job->save($golden_outfile);
+	ok (-e $golden_outfile, 'Save data');
+
+	my $in = Bio::SeqIO->new ( -file   => $golden_outfile,
+				   -format => 'genbank');
+	my $seq = $in->next_seq();
+	my $genscan = $factory->program('genscan',
+					-parameter_file => "HumanIso.smat",
+					);
+	isa_ok($genscan,'Bio::Tools::Run::PiseApplication::genscan');
+
+	$genscan->seq($seq);
+
+	eval{ $job = $genscan->run(); };
+	skip("Problem with job submission: $@",2) if $@;
+
+	isa_ok($job,'Bio::Tools::Run::PiseJob');
+
+	my $parser = Bio::Tools::Genscan->new(-fh => $job->fh('genscan.out'));
+	isa_ok($parser,'Bio::Tools::Genscan');
 }

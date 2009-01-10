@@ -25,7 +25,8 @@ is ($factory->program_name(), 'match', 'Correct exe default name');
 
 # test the program itself
 SKIP: {
-    skip("Couldn't find the match executable", 2) unless defined $factory->executable();
+    test_skip(-tests => 2,
+			  -requires_executable => $factory);
     
 	use_ok('Bio::SeqIO');
 	my $si = Bio::SeqIO->new(-file => $seq_file, -format => 'fasta');
