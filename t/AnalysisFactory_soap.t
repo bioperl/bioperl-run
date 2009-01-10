@@ -44,13 +44,9 @@ SKIP: {
 	isa_ok( $array_ref, 'ARRAY' );
 	ok( grep(/seqret/i, @$array_ref), 'available_analyses("edit") returned something' );
 	
-	TODO: {
-		local $TODO = 'create_analysis is failing tests';
-		eval {
-		my $service = $factory->create_analysis('edit.seqret');
-		isa_ok( $service, 'Bio::Tools::Run::Analysis::soap' );
-		};
-		ok (!$@) || diag($@);
-	}
-	
+	eval {
+	my $service = $factory->create_analysis('edit.seqret');
+	isa_ok( $service, 'Bio::Tools::Run::Analysis::soap' );
+	};
+	ok (!$@) || diag("create_analysis failed :$@");
 }
