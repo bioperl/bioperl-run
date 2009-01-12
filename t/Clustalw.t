@@ -7,7 +7,7 @@ use strict;
 BEGIN {
   use lib '.';
   use Bio::Root::Test;
-  test_begin(-tests => 42);
+  test_begin(-tests => 43);
   
   use_ok('Bio::Tools::Run::Alignment::Clustalw');
   use_ok('Bio::SimpleAlign');
@@ -24,6 +24,7 @@ my $profile1 = test_input_file('cysprot1a.msf');
 ok( -e $profile1, 'Found profile1 file' );
 my $profile2 = test_input_file('cysprot1b.msf');
 ok( -e $profile2, 'Found profile2 file' );
+my $outfile = test_output_file();
 
 # setup global objects that are to be used in more than one test
 # Also test they were initialised correctly
@@ -31,7 +32,7 @@ my @params = ('ktuple' => 3, 'quiet'  => 1);
 
 my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 isa_ok( $factory, 'Bio::Tools::Run::Alignment::Clustalw');
-$factory->outfile('test.aln');
+$factory->outfile($outfile);
 
 # test default factory values
 is( $factory->program_dir, $ENV{'CLUSTALDIR'}, 'program_dir returned correct default' );
@@ -44,7 +45,7 @@ is( $factory->program_name(), 'clustalw',                'Correct exe default na
 
 SKIP: {
   test_skip(-requires_executable => $factory,
-           -tests => 16);  
+            -tests => 17);  
   
   # test all factory methods dependent on finding the executable
   # TODO: isnt( $factory->program_dir, undef,               'Found program in an ENV variable' );
@@ -56,10 +57,10 @@ SKIP: {
   # clustalw2 isn't supported yet.
   if ($ver < 1.8) {
     diag("ClustalW version $ver not supported");
-    skip("ClustalW version $ver not supported", 16);
+    skip("ClustalW version $ver not supported", 17);
   } if ($ver >= 2.0) {
     diag("Warning: ClustalW version $ver not supported yet.");
-    skip("ClustalW version $ver not supported yet", 16);
+    skip("ClustalW version $ver not supported yet", 17);
   }
   
   ok( $ver, "Supported program version $ver" );
