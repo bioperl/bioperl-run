@@ -8,7 +8,6 @@
 
 use strict;
 BEGIN {
-    use lib '.';
     use Bio::Root::Test;
     test_begin(-tests => 28,
 			   -requires_module => 'IO::String');

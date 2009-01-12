@@ -13,7 +13,6 @@ my $error;
 my $serror;
 
 BEGIN {
-    use lib '.';
     use Bio::Root::Test;
     test_begin(-tests => 10,
 			   -requires_module => 'IO::String');

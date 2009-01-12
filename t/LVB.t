@@ -6,7 +6,6 @@ $DEBUG = test_debug();
 
 use strict;
 BEGIN {
-    use lib '.';
     use Bio::Root::Test;
     test_begin(-tests => 19);
 	use_ok('Bio::Tools::Run::Phylo::LVB');

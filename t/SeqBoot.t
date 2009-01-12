@@ -7,7 +7,6 @@ use vars qw($DEBUG);
 $DEBUG = test_debug();
 
 BEGIN {
-    use lib '.';
     use Bio::Root::Test;
     test_begin(-tests => 9);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::SeqBoot');

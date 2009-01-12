@@ -5,7 +5,6 @@
 use strict;
 my $DBEUG = test_debug();
 BEGIN {
-   use lib '.';
    use Bio::Root::Test;
    test_begin(-tests => 8);
    use_ok('Bio::Tools::Run::Phrap');

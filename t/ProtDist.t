@@ -7,7 +7,6 @@ use vars qw($DEBUG);
 $DEBUG = test_debug() || -1;
 
 BEGIN {
-    use lib '.';
     use Bio::Root::Test;
     test_begin(-tests => 14);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::ProtDist');

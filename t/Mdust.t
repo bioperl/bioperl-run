@@ -1,7 +1,6 @@
 use strict;
 use vars qw($NUMTESTS);
 BEGIN {
-    use lib '.';
     use Bio::Root::Test;
     test_begin(-tests => 5);
 	use_ok('Bio::Tools::Run::Mdust');
