@@ -31,7 +31,6 @@ SKIP: {
 	$factory->executable($factory->method);
 
 	test_skip(-requires_executable => $factory,
-			  -message => "mafft program ", $factory->method, " not found. Skipping tests",
 			  -tests => 13);	
 	
 	my $version = $factory->version;
