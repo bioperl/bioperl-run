@@ -6,7 +6,7 @@ use strict;
 BEGIN {
    use Bio::Root::Test;
    
-   test_begin(-tests => 28);
+   test_begin(-tests => 27);
    
    use_ok('Bio::Tools::Run::Hmmer');
    use_ok('Bio::SeqIO');
@@ -34,7 +34,7 @@ my $seq1 = $seqstream->next_seq();
 SKIP: {
    # here we assume if hmmpfam isn't present, nothing is present
    test_skip(-requires_executable => $factory,
-             -tests =>  21);
+             -tests =>  20);
 
    my $searchio = $factory->run($seq1);
    
@@ -82,7 +82,7 @@ SKIP: {
    
    #test HMMBUILD
    my $hmmout = test_output_file();
-   ok -e $hmmout;
+   unlink($hmmout);
    @params = ('HMM'=>$hmmout,'program'=>'hmmbuild', -verbose => $verbose, -quiet => $quiet);
    $factory = Bio::Tools::Run::Hmmer->new(@params);
    isa_ok $factory, 'Bio::Tools::Run::Hmmer';
