@@ -10,11 +10,11 @@ BEGIN {
 my $assembler = Bio::Tools::Run::TigrAssembler->new();
 isa_ok($assembler, 'Bio::Tools::Run::TigrAssembler');
 
-ok($assembler->program('aaaa'));
-is($assembler->program, 'aaaa');
+ok($assembler->program_name('aaa'));
+is($assembler->program_name, 'aaa');
 
-ok($assembler->program_name('asdf'));
-is($assembler->program_name, 'asdf');
+ok($assembler->program('asdf'));
+is($assembler->program, 'asdf');
 
 ok($assembler->program_dir('/dir'));
 is($assembler->program_dir, '/dir');
@@ -53,6 +53,7 @@ ok($assembler->resort_after(100));
 is($assembler->resort_after, 100);
 
 # test the program itself
+$assembler->program('TIGR_Assembler');
 SKIP: {
     test_skip(-requires_executable => $assembler,
               -tests => 18);

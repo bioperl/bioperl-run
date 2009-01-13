@@ -93,6 +93,7 @@ use Bio::Assembly::IO;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
+our $program = 'TIGR_Assembler';
 our $program_name = 'TIGR_Assembler';
 our @params = (qw( program max_nof_seqs ));
 our @tasm_params = (qw( minimum_percent minimum_length max_err_32 quality_file
@@ -225,6 +226,7 @@ sub new {
     ],
     -create =>  1,
   );
+  $self->program($program_name) if not defined $self->program();  
   $self->program_name($program_name) if not defined $self->program_name();
   return $self;
 }
@@ -233,24 +235,35 @@ sub new {
 =head2 run
 
  Title   :   run
- Usage   :   $obj->run(\@seqs)
+ Usage   :   $obj->run(\@seqs, \@quals);
  Function:   Runs TIGR Assembler
- Returns :   a Bio::Scaffold object array reference, or
-             undef if all sequences were too small to be usable
- Args    :   A Bio::PrimarySeq object array reference (Bio::Seq::Quality objects
-             if you want to use quality scores)
+ Returns :   a Bio::Assembly::ScaffoldI object array reference, or undef if all
+             sequences were too small to be usable
+ Args    :   - sequences as a Bio::PrimarySeqI or Bio::SeqI arrayref (e.g. can
+               be Bio::Seq::Quality for sequences and quality scores in a same
+               object)
+             - optional Bio::Seq::PrimaryQual arrayref of quality scores if
+               you have your scores in different objects from your sequences.
+               Must have same ID as sequences and same order
 
 =cut
 
 sub run {
-  my ($self, $seqs) = @_;
+  my ($self, $seqs, $quals) = @_;
   # Sanity check
   unless ($seqs) {
-    $self->throw("Must supply a Bio::PrimarySeq object array reference");
+    $self->throw("Must supply a Bio::PrimarySeqI or Bio::SeqI object array reference");
   }
   for my $seq (@$seqs) {
-    unless ($seq->isa('Bio::PrimarySeqI')) {
-      $self->throw("Not a valid Bio::PrimarySeqI");
+    unless ($seq->isa('Bio::PrimarySeqI') || $seq->isa('Bio::SeqI')) {
+      $self->throw("Not a valid Bio::PrimarySeqI or Bio::SeqI object");
+    }
+  }
+  if ($quals) {
+    for my $qual (@$quals) {
+      unless ($qual->isa('Bio::Seq::QualI')) {
+        $self->throw("Not a valid Bio::Seq::QualI object");
+      }
     }
   }
   # Assemble
@@ -262,8 +275,9 @@ sub run {
     my $last = $i+$max_nof_seqs-1;
     $last = $tot_nof_seqs-1 if $last > $tot_nof_seqs-1;
     my @seq_subset = @$seqs[$first..$last];
+    my @qual_subset = @$quals[$first..$last] if $quals;
     # Write temp FASTA and QUAL input files, removing sequences less than 40bp
-    my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset);
+    my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset, \@qual_subset);
     # Assemble
     if (defined $fasta_file) {
       my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
@@ -277,16 +291,17 @@ sub run {
 =head2 _write_seq_file
 
  Title   :   _write_seq_file
- Usage   :   $assembler->_write_seq_file(\@seqs)
+ Usage   :   $assembler->_write_seq_file(\@seqs, \@quals)
  Function:   Write temporary FASTA and QUAL files on disk
  Returns :   name of FASTA file
              name of QUAL file (undef if no quality scoress)
  Args    :   Bio::PrimarySeq object array reference
+             optional quality objects array reference
 
 =cut
 
 sub _write_seq_file {
-  my ($self, $seqs) = @_;
+  my ($self, $seqs, $quals) = @_;
   my ($fasta_h, $fasta_file) = $self->io->tempfile( -dir => $self->tempdir() );
   my ($qual_h, $qual_file) = $self->io->tempfile( -dir => $self->tempdir() );
   my $fasta_out = Bio::SeqIO->new( -fh => $fasta_h , -format => 'fasta');
@@ -315,9 +330,27 @@ sub _write_seq_file {
     }
     # Write the FASTA entries in files (and QUAL if appropriate)
     $fasta_out->write_seq($seq);
-    if ($seq->isa('Bio::Seq::Quality') && scalar @{$seq->qual} > 0) {
-      $qual_out->write_seq($seq);
-      $use_qual_file = 1;
+    if ($seq->isa('Bio::Seq::Quality')) {
+      # Quality scores embedded in seq object
+      if (scalar @{$seq->qual} > 0) {
+        $qual_out->write_seq($seq);
+        $use_qual_file = 1;
+      }
+    } else {
+      # Quality score in a different object from the sequence object
+      my $qual = $$quals[$i];
+      if (defined $qual) {
+        my $qualid = $qual->id;
+        if ($qualid eq $seqid) {
+          # valid quality score information
+          $qual_out->write_seq($qual);
+          $use_qual_file = 1;
+        } else {
+          # ID mismatch between sequence and quality score
+          $self->warn("Sequence object with ID $seqid does not match quality ".
+            "score object with ID $qualid");
+        }
+      }
     }
   }
   close($fasta_h);
