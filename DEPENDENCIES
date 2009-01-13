@@ -9,9 +9,6 @@ You can easily choose to install all of these during the normal installation
 process. Note that the PPM version of the BioPerl packages always tries to
 install all dependencies.
 
-The DBD::mysql, DB_File and XML::Parser modules require other applications or
-databases: MySQL, Berkeley DB, and expat respectively.
-
 NB: This list of packages is not authoritative. See the 'requires',
 'build_requires' and 'recommends' sections of Build.PL instead.
 
