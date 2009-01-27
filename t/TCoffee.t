@@ -70,7 +70,7 @@ SKIP: {
 	# convert any warnings about program to an actual exception
 	$factory->verbose(2);
 	lives_ok {$aln = $factory->profile_align($profile1,$profile2)};
-	skip('T-COFFEE error: $@', 13) if $@; 
+	skip("T-COFFEE error, skipping tests", 13) if $@; 
 	is $aln->no_sequences, 7;
 	
 	my $str1 = Bio::AlignIO->new(-file=> test_input_file("cysprot1a.msf"));
