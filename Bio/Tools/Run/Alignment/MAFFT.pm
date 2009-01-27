@@ -243,15 +243,16 @@ sub version {
     # slightly. i've tried to make the change compatible with both...
     # version="v5.860 (2006/06/12)"; export version
     
-    if( open(NAME, "grep 'export version' $exe | ") ) {
-	while(<NAME>) {
-	    if( /version.*?([\d.]+)\s+/ ) {
-		return $1;
-	    }
-	}
-	close(NAME);
+    if( open(my $NAME, "grep 'export version' $exe | ") ) {
+		while(<$NAME>) {
+			if( /version.*?([\d.a-z]+)\s+/ ) {
+				return $1;
+			}
+		}
+		$self->warn("No version found");
+		close($NAME);
     } else {
-	$self->warn("$!");
+		$self->warn("$!");
     }
     return;
 }
