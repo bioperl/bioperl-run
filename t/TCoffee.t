@@ -51,7 +51,7 @@ SKIP: {
 	
 	my $str = Bio::SeqIO->new('-file' => 
 				  test_input_file("cysprot.fa"), 
-				  '-format' => 'Fasta');
+				  '-format' => 'fasta');
 	my @seq_array =();
 	
 	while ( my $seq = $str->next_seq() ) {
@@ -64,10 +64,13 @@ SKIP: {
 	is $aln->no_sequences, 7;
 	my $s1_perid = $aln->average_percentage_identity;
 	
-	
 	my $profile1 = test_input_file("cysprot1a.msf");
 	my $profile2 = test_input_file("cysprot1b.msf");
-	$aln = $factory->profile_align($profile1,$profile2);
+	
+	# convert any warnings about program to an actual exception
+	$factory->verbose(2);
+	lives_ok {$aln = $factory->profile_align($profile1,$profile2)};
+	skip('T-COFFEE error: $@', 13) if $@; 
 	is $aln->no_sequences, 7;
 	
 	my $str1 = Bio::AlignIO->new(-file=> test_input_file("cysprot1a.msf"));
@@ -122,4 +125,16 @@ SKIP: {
 				 '-seq'  => test_input_file("cysprot.fa"));
 	is ($aln->no_sequences, 7);
 	is ($aln->percentage_identity,$s1_perid); #calculated before
+}
+
+END {
+	# warnings are already given above, no need to keep report
+	if (-e 'error_report.T-COFFEE') {
+		unlink('error_report.T-COFFEE');
+	}
+	if (my @dnds = glob('*.dnd')) {
+		for my $file (@dnds) {
+			unlink($file)
+		}
+	}
 }
