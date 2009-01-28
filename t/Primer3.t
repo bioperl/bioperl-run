@@ -21,7 +21,7 @@ $seq=$seqio->next_seq;
 ok $primer3 = Bio::Tools::Run::Primer3->new(-seq=>$seq);
 
 SKIP: {
-    test_skip(-requires_executable => $primer3,,
+    test_skip(-requires_executable => $primer3,
               -tests => 5);
     
     $args = $primer3->arguments;
