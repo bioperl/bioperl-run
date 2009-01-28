@@ -420,7 +420,8 @@ sub run {
 	my($self) = @_;
 	my $executable = $self->executable;
 	my $input = $self->{'primer3_input'};
-	unless (-e $executable) {
+	unless ($executable && -e $executable) {
+		$self->throw("Executable was not found. Do not know where primer3 is!") if !$executable;
 		$self->throw("$executable was not found. Do not know where primer3 is!");
 		exit(-1);
 	}
