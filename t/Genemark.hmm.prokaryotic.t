@@ -5,7 +5,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 98,
+    test_begin(-tests => 99,
 	       -requires_modules => [qw(IPC::Run)]);
 
     use_ok('Bio::Tools::Run::Genemark');
@@ -18,9 +18,21 @@ my $model_dir = $ENV{'GENEMARK_MODELS'} if $ENV{'GENEMARK_MODELS'};
 
 SKIP: {
     my $fasta_file = test_input_file('H_pylori_J99.fasta');
-    test_skip(-tests => 95,
+    test_skip(-tests => 96,
 			  -requires_env => 'GENEMARK_MODELS');
-    my $model_file = Bio::Root::IO->catfile($model_dir, 'Helicobacter_pylori_26695.mod');
+    my $model_file = '';
+	
+	for my $mod (qw(Helicobacter_pylori_26695.mod Helicobacter_pylori.mod)) {
+		my $modpath = Bio::Root::IO->catfile($model_dir, 'Helicobacter_pylori_26695.mod');
+		if (-e $modpath) {
+			$model_file = $modpath;
+			last;
+		}
+	}
+	
+	ok($model_file, "Found model file: $model_file");
+	
+	skip('Test model file not found', 95) if !$model_file;
 	
     my $factory    = Bio::Tools::Run::Genemark->new( -m => $model_file,
 			-program => 'gmhmmp');
