@@ -5,7 +5,7 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 25);
+    test_begin(-tests => 27);
 	use_ok('Bio::Tools::Run::Alignment::TCoffee');
 	use_ok('Bio::SimpleAlign');
 	use_ok('Bio::AlignIO');
@@ -38,11 +38,9 @@ $factory->quiet($bequiet);  # Suppress tcoffee messages to terminal
 my $inputfilename = test_input_file('cysprot.fa');
 my $aln;
 
-my $coffee_present = $factory->executable();
-
 SKIP: {
     test_skip(-requires_executable => $factory,
-              -tests => 18);	
+              -tests => 20);
 	my $version = $factory->version;
 	cmp_ok ($version, '>=', 1.22, "Code tested only on t_coffee versions > 1.22" );
 	$aln = $factory->align($inputfilename);
@@ -70,7 +68,7 @@ SKIP: {
 	# convert any warnings about program to an actual exception
 	$factory->verbose(2);
 	lives_ok {$aln = $factory->profile_align($profile1,$profile2)};
-	skip("T-COFFEE error, skipping tests", 13) if $@; 
+	skip("T-COFFEE error, skipping tests", 15) if $@; 
 	is $aln->no_sequences, 7;
 	
 	my $str1 = Bio::AlignIO->new(-file=> test_input_file("cysprot1a.msf"));
@@ -83,8 +81,7 @@ SKIP: {
 	
 	$aln = $factory->profile_align($aln1,$aln2);
 	is $aln->no_sequences, 7;
-	
-	
+		
 	$str1 = Bio::AlignIO->new(-file=> test_input_file("cysprot1a.msf"));
 	$aln1 = $str1->next_aln();
 	$str2 = Bio::SeqIO->new(-file=> test_input_file("cysprot1b.fa"));
@@ -103,12 +100,19 @@ SKIP: {
 		my $avg = int($aln->average_percentage_identity);
 		ok( $avg == 47 || $avg ==48, 'expect 47 or 48');    
 	}
-	
+
 	# test new 'run' generic running of factory
-	
-	$aln = $factory->run('-type' => 'profile',
+
+	$aln = $factory->run('-type' => 'align',
+				 '-seq'  => test_input_file("cysprot.fa"));
+	is ($aln->no_sequences, 7, 'simple generic run');
+	is ($aln->percentage_identity,$s1_perid); #calculated before
+		
+	lives_ok{ $aln = $factory->run('-type' => 'profile',
 				 '-profile' => $aln1,
-				 '-seq'  => test_input_file("cysprot1b.fa"));
+				 '-seq'  => test_input_file("cysprot1b.fa"))} ;
+	
+	skip("T-COFFEE error, skipping tests",3) if $@;
 	
 	is( $aln->no_sequences, 7);
 	if( $version <= 1.22 ) {
@@ -120,11 +124,6 @@ SKIP: {
 		my $avg = int($aln->average_percentage_identity);
 		ok($avg == 41 || $avg == 42, 'expect 41 or 42');    
 	}
-	
-	$aln = $factory->run('-type' => 'align',
-				 '-seq'  => test_input_file("cysprot.fa"));
-	is ($aln->no_sequences, 7);
-	is ($aln->percentage_identity,$s1_perid); #calculated before
 }
 
 END {
