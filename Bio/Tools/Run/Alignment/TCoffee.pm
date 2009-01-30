@@ -795,8 +795,6 @@ sub profile_align {
 			  [$infilename2,$type2], 
 			  $param_string)
             ;
-            
-
 }
 #################################################
 
@@ -831,7 +829,6 @@ sub _run {
         my ($type1,$type2);
         ($infile1,$type1) = @$in1;
         ($infile2,$type2) = @$in2;
-        print STDERR "$type1 : $type2\n";
         # in later versions (tested on 5.72 and 7.54) the API for profile
         # alignment changed. This attempts to do the right thing for older
         # versions but corrects for newer ones
@@ -1009,6 +1006,7 @@ sub _setinput {
             $self->warn( "got an array ref with 1st entry ".
                  $input->[0].
                  " and don't know what to do with it\n");
+            return 0;
         }
     
         return ($infilename,$type);
