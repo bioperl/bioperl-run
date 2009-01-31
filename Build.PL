@@ -6,19 +6,24 @@
 # Uses a custom subclass of Module::Build called Bio::Root::Build
 
 use strict;
-use Bio::Root::Build;
+my $v = '1.007000';
+eval "use Bio::Root::Build $v";
+if ($@) {
+    warn "BioPerl core version $v is required for BioPerl-run\n";
+    exit 0;
+}
 
 # Set up the Bio::Root::Build object
 my $build = Bio::Root::Build->new(
     module_name         => 'Bio',
     dist_name           => 'BioPerl-run',
-    dist_version        => '1.007000',
+    dist_version        => $v,
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-run - wrapper toolkit',
     license             => 'perl',
     requires            => {
                             'perl'                      => '5.6.1',
-                            'Bio::Root::Version'        => '1.7.0'
+                            #'Bio::Root::Version'        => '1.007000' # checked above
                            },
     recommends          => {
                             'Algorithm::Diff'           => '0/generating consensus protein family descriptions/Bio::Tools::Run::TribeMCL',
