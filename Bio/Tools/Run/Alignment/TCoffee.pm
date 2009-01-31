@@ -785,12 +785,7 @@ sub profile_align {
 
     my $param_string = $self->_setparams();
     # run tcoffee
-    my $aln = $input2->isa('Bio::SeqI') ? 
-            $self->_run('profile-alnseq', 
-			  [$infilename1,$type1],
-			  [$infilename2,$type2], 
-			  $param_string) :
-            $self->_run('profile-aln', 
+    my $aln = $self->_run('profile-aln', 
 			  [$infilename1,$type1],
 			  [$infilename2,$type2], 
 			  $param_string)
@@ -850,11 +845,10 @@ sub _run {
                                         );	
             }
         } else {
-            if ($command =~ /seq/) {
-                $instring .= ' -profile='.join(',',$infile1,$infile2);                
+            if ($type2 eq 'S') {
                 # second infile is a sequence, not an alignment
-                #$instring .= ' -profile='.$infile1;
-                #$instring .= ' -sequence='.$infile2;
+                $instring .= ' -profile='.join(',',$infile1);
+                $instring .= ' -seq='.join(',',$infile2);
             } else {
                 $instring .= ' -profile='.join(',',$infile1,$infile2);
             }
@@ -931,8 +925,8 @@ sub _setinput {
         $infilename = $input;
         unless (-e $input) {return 0;}
         # let's peek and guess
-        open(IN,$infilename) || $self->throw("Cannot open $infilename");
-        my $header = <IN>;
+        open(my $IN,$infilename) || $self->throw("Cannot open $infilename");
+        my $header = <$IN>;
         if( $header =~ /^\s+\d+\s+\d+/ ||
             $header =~ /Pileup/i ||
             $header =~ /clustal/i ) { # phylip
@@ -952,16 +946,17 @@ sub _setinput {
         my (undef, undef, $adjustedfilename) = File::Spec->splitpath($infilename);
         if ($adjustedfilename ne $infilename) {
             my ($fh, $tempfile) = $self->io->tempfile(-dir => cwd());
-            seek(IN, 0, 0);
-            while (<IN>) {
+            seek($IN, 0, 0);
+            while (<$IN>) {
                 print $fh $_;
             }
             close($fh);
             (undef, undef, $tempfile) = File::Spec->splitpath($tempfile);
             $infilename = $tempfile;
+            $type = 'S';
         }
         
-        close(IN);
+        close($IN);
         return ($infilename,$type);
     } elsif (ref($input) =~ /ARRAY/i ) {
         #  $input may be an array of BioSeq objects...
@@ -1006,9 +1001,7 @@ sub _setinput {
             $self->warn( "got an array ref with 1st entry ".
                  $input->[0].
                  " and don't know what to do with it\n");
-            return 0;
         }
-    
         return ($infilename,$type);
         #  $input may be a SimpleAlign object.
     } elsif ( $input->isa("Bio::Align::AlignI") ) {
