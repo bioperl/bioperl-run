@@ -57,8 +57,7 @@ You will need to enable TCoffee to find the t_coffee program. This
 can be done in (at least) three ways:
 
  1. Make sure the t_coffee executable is in your path so that
-    which t_coffee
-    returns a t_cofee executable on your system.
+    which t_coffee returns a t_coffee executable on your system.
 
  2. Define an environmental variable TCOFFEEDIR which is a dir 
     which contains the 't_coffee' app:
@@ -79,7 +78,7 @@ webserver environment has the proper PATH set or use the options 2 or
 =head1 PARAMETERS FOR ALIGNMENT COMPUTATION
 
 There are a number of possible parameters one can pass in TCoffee.
-One should really read the online manual for the best explaination of
+One should really read the online manual for the best explanation of
 all the features.  See
 http://igs-server.cnrs-mrs.fr/~cnotred/Documentation/t_coffee/t_coffee_doc.html
 
@@ -546,7 +545,7 @@ BEGIN {
     %DEFAULTS = ( 'MATRIX' => 'blosum',
                   'OUTPUT' => 'clustalw',
                   'AFORMAT'=> 'msf',
-                  'METHODS' => [qw(Mlalign_id_pair Mclustalw_pair)]
+                  'METHODS' => [qw(lalign_id_pair clustalw_pair)]
                 );
 
 
@@ -740,8 +739,9 @@ sub align {
     my $param_string = $self->_setparams();
 
     # run tcoffee
-    return &_run($self, 'align', [$infilename,$type], $param_string);
+    return $self->_run('align', [$infilename,$type], $param_string);
 }
+
 #################################################
 
 =head2  profile_align
@@ -752,11 +752,12 @@ sub align {
  Example :
  Returns : Reference to a SimpleAlign object containing the (super)alignment.
  Args    : Names of 2 files containing the subalignments
-         or references to 2 Bio::SimpleAlign objects.
-
+           or references to 2 Bio::SimpleAlign objects.
+ Note    : Needs to be updated to run with newer TCoffee code, which
+           allows more than two profile alignments.
+           
 Throws an exception if arguments are not either strings (eg filenames)
 or references to SimpleAlign objects.
-
 
 =cut
 
@@ -764,25 +765,31 @@ sub profile_align {
     my $self = shift;
     my $input1 = shift;
     my $input2 = shift;
+    
     my ($temp,$infilename1,$infilename2,$type1,$type2,$input,$seq);
 
     $self->io->_io_cleanup();
     # Create input file pointers
     ($infilename1,$type1) = $self->_setinput($input1);
     ($infilename2,$type2) = $self->_setinput($input2);
+    unless ($type1) {
+        $self->throw("Unknown type for first argument");
+    }
+    unless ($type2) {
+        $self->throw("Unknown type for second argument") 
+    }
     
     if (!$infilename1 || !$infilename2) {
      $self->throw("Bad input data: $input1 or $input2 !");
     }
 
     my $param_string = $self->_setparams();
-
-# run tcoffee
+    # run tcoffee
     my $aln = $self->_run('profile-aln', 
 			  [$infilename1,$type1],
 			  [$infilename2,$type2], 
-			  $param_string);
-
+			  $param_string)
+            ;
 }
 #################################################
 
@@ -797,7 +804,6 @@ sub profile_align {
  Args    : Name of a file containing a set of unaligned fasta sequences
            and hash of parameters to be passed to tcoffee
 
-
 =cut
 
 sub _run {
@@ -807,25 +813,48 @@ sub _run {
     my $instring;
     if ($command =~ /align/) {
         my $infile = shift ;
-	my $type;
-	($infilename,$type) = @$infile;
-	$instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
-				      $self->methods));
+        my $type;
+        ($infilename,$type) = @$infile;
+        $instring =  '-in='.join(',',($infilename, 'X'.$self->matrix,
+                          $self->methods));
     }
     if ($command =~ /profile/) {
-	my $in1 = shift ;
+        my $in1 = shift ;
         my $in2 = shift ;
-	my ($type1,$type2);
-	($infile1,$type1) = @$in1;
-	($infile2,$type2) = @$in2;
-	unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
-	    $instring = '-in='.join(',',($type2.$infile2),'X'.$self->matrix,
-				    $self->methods);
-	    $instring .= ' -profile='.$infile1;
-	} else {
-	  $instring = '-in='.join(',',($type1.$infile1, $type2.$infile2,
-				       $self->methods));	
-	}
+        my ($type1,$type2);
+        ($infile1,$type1) = @$in1;
+        ($infile2,$type2) = @$in2;
+        # in later versions (tested on 5.72 and 7.54) the API for profile
+        # alignment changed. This attempts to do the right thing for older
+        # versions but corrects for newer ones
+        if ($self->version && $self->version < 5) {
+            # this breaks severely on newer TCoffee (>= v5)
+            unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i) ) {
+                $instring = '-in='.join(',',
+                                ($type2.$infile2),
+                                'X'.$self->matrix,
+                                (map {'M'.$_} $self->methods)
+                                );
+                $instring .= ' -profile='.$infile1;
+            } else {
+                $instring = '-in='.join(',',(
+                            $type1.$infile1,
+                            $type2.$infile2,
+                            (map {'M'.$_} $self->methods)
+                                            )
+                                        );	
+            }
+        } else {
+            if ($type2 eq 'S') {
+                # second infile is a sequence, not an alignment
+                $instring .= ' -profile='.join(',',$infile1);
+                $instring .= ' -seq='.join(',',$infile2);
+            } else {
+                $instring .= ' -profile='.join(',',$infile1,$infile2);
+            }
+            $instring .= ' -matrix='.$self->matrix unless (($self->matrix =~ /none/i) || ($self->matrix =~ /null/i)) ;
+            $instring .= ' -method='.join(',',$self->methods) if ($self->methods) ;
+        }
     }
     my $param_string = shift;
 #    my ($paramfh,$parameterFile) = $self->io->tempfile;
@@ -835,14 +864,14 @@ sub _run {
 
     my $commandstring = $self->executable." $instring $param_string";
     
-    $self->debug( "tcoffee command = $commandstring \n");
+    #$self->debug( "tcoffee command = $commandstring \n");
 
     my $status = system($commandstring);
     my $outfile = $self->outfile(); 
 
     if( !-e $outfile || -z $outfile ) {
-	$self->warn( "TCoffee call crashed: $? [command $commandstring]\n");
-	return undef;
+        $self->warn( "TCoffee call crashed: $? [command $commandstring]\n");
+        return undef;
     }
 
     # retrieve alignment (Note: MSF format for AlignIO = GCG format of
@@ -892,115 +921,115 @@ sub _setinput {
     # file with the sequence/ alignment data...
     my $type = '';
     if (! ref $input) {
-	# check that file exists or throw
-	$infilename = $input;
-	unless (-e $input) {return 0;}
-	# let's peek and guess
-	open(IN,$infilename) || $self->throw("Cannot open $infilename");
-	my $header = <IN>;
-	if( $header =~ /^\s+\d+\s+\d+/ ||
-	    $header =~ /Pileup/i ||
-	    $header =~ /clustal/i ) { # phylip
-	    $type = 'A';
-	}
-    
-    # On some systems, having filenames with / in them (ie. a file in a
-    # directory) causes t-coffee to completely fail. It warns on all systems.
-    # The -no_warning option solves this, but there is still some strange
-    # bug when doing certain profile-related things. This is magically solved
-    # by copying the profile file to a temp file in the current directory, so
-    # it its filename supplied to t-coffee contains no /
-    # (It's messy here - I just do this to /all/ input files to most easily
-    #  catch all variants of providing a profile - it may only be the last
-    #  form (isa("Bio::PrimarySeqI")) that causes a problem?)
-    
-    my (undef, undef, $adjustedfilename) = File::Spec->splitpath($infilename);
-    if ($adjustedfilename ne $infilename) {
-        my ($fh, $tempfile) = $self->io->tempfile(-dir => cwd());
-        seek(IN, 0, 0);
-        while (<IN>) {
-            print $fh $_;
+        # check that file exists or throw
+        $infilename = $input;
+        unless (-e $input) {return 0;}
+        # let's peek and guess
+        open(my $IN,$infilename) || $self->throw("Cannot open $infilename");
+        my $header = <$IN>;
+        if( $header =~ /^\s+\d+\s+\d+/ ||
+            $header =~ /Pileup/i ||
+            $header =~ /clustal/i ) { # phylip
+            $type = 'A';
         }
-        close($fh);
-        (undef, undef, $tempfile) = File::Spec->splitpath($tempfile);
-        $infilename = $tempfile;
-    }
-    
-	close(IN);
-	return ($infilename,$type);
-    } elsif (ref($input) =~ /ARRAY/i ) { #  $input may be an
-	                                 #  array of BioSeq objects...
+        
+        # On some systems, having filenames with / in them (ie. a file in a
+        # directory) causes t-coffee to completely fail. It warns on all systems.
+        # The -no_warning option solves this, but there is still some strange
+        # bug when doing certain profile-related things. This is magically solved
+        # by copying the profile file to a temp file in the current directory, so
+        # it its filename supplied to t-coffee contains no /
+        # (It's messy here - I just do this to /all/ input files to most easily
+        #  catch all variants of providing a profile - it may only be the last
+        #  form (isa("Bio::PrimarySeqI")) that causes a problem?)
+        
+        my (undef, undef, $adjustedfilename) = File::Spec->splitpath($infilename);
+        if ($adjustedfilename ne $infilename) {
+            my ($fh, $tempfile) = $self->io->tempfile(-dir => cwd());
+            seek($IN, 0, 0);
+            while (<$IN>) {
+                print $fh $_;
+            }
+            close($fh);
+            (undef, undef, $tempfile) = File::Spec->splitpath($tempfile);
+            $infilename = $tempfile;
+            $type = 'S';
+        }
+        
+        close($IN);
+        return ($infilename,$type);
+    } elsif (ref($input) =~ /ARRAY/i ) {
+        #  $input may be an array of BioSeq objects...
         #  Open temporary file for both reading & writing of array
-	($tfh,$infilename) = $self->io->tempfile(-dir => cwd());
-    (undef, undef, $infilename) = File::Spec->splitpath($infilename);
-	if( ! ref($input->[0]) ) {
-	    $self->warn("passed an array ref which did not contain objects to _setinput");
-	    return undef;
-	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
-	    $temp =  Bio::SeqIO->new('-fh' => $tfh,
-				     '-format' => 'fasta');
-	    my $ct = 1;
-	    foreach $seq (@$input) {
-		return 0 unless ( ref($seq) && 
-				  $seq->isa("Bio::PrimarySeqI") );
-		if( ! defined $seq->display_id ||
-		    $seq->display_id =~ /^\s+$/) {
-		    $seq->display_id( "Seq".$ct++);
-		}
-		$temp->write_seq($seq);
-	    }
-	    $temp->close();
-	    undef $temp;
-	    close($tfh);
-	    $tfh = undef;
-	    $type = 'S';
-	} elsif( $input->[0]->isa('Bio::Align::AlignI' ) ) {
-	    $temp =  Bio::AlignIO->new('-fh' => $tfh,
-				       '-format' => $self->aformat);
-	    foreach my $aln (@$input) {
-		next unless ( ref($aln) && 
-			      $aln->isa("Bio::Align::AlignI") );
-		$temp->write_aln($aln);
-	    }
-	    $temp->close();
-	    undef $temp;
-	    close($tfh);
-	    $tfh = undef;
-	    $type = 'A';
-	}  else { 
-	    $self->warn( "got an array ref with 1st entry ".
-			 $input->[0].
-			 " and don't know what to do with it\n");
-	}
-
-	return ($infilename,$type);
-    #  $input may be a SimpleAlign object.
+        ($tfh,$infilename) = $self->io->tempfile(-dir => cwd());
+        (undef, undef, $infilename) = File::Spec->splitpath($infilename);
+        if( ! ref($input->[0]) ) {
+            $self->warn("passed an array ref which did not contain objects to _setinput");
+            return undef;
+        } elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
+            $temp =  Bio::SeqIO->new('-fh' => $tfh,
+                         '-format' => 'fasta');
+            my $ct = 1;
+            foreach $seq (@$input) {
+                return 0 unless ( ref($seq) && 
+                          $seq->isa("Bio::PrimarySeqI") );
+                if( ! defined $seq->display_id ||
+                    $seq->display_id =~ /^\s+$/) {
+                    $seq->display_id( "Seq".$ct++);
+                }
+                $temp->write_seq($seq);
+            }
+            $temp->close();
+            undef $temp;
+            close($tfh);
+            $tfh = undef;
+            $type = 'S';
+        } elsif( $input->[0]->isa('Bio::Align::AlignI' ) ) {
+            $temp =  Bio::AlignIO->new('-fh' => $tfh,
+                           '-format' => $self->aformat);
+            foreach my $aln (@$input) {
+                next unless ( ref($aln) && 
+                          $aln->isa("Bio::Align::AlignI") );
+                $temp->write_aln($aln);
+            }
+            $temp->close();
+            undef $temp;
+            close($tfh);
+            $tfh = undef;
+            $type = 'A';
+        }  else { 
+            $self->warn( "got an array ref with 1st entry ".
+                 $input->[0].
+                 " and don't know what to do with it\n");
+        }
+        return ($infilename,$type);
+        #  $input may be a SimpleAlign object.
     } elsif ( $input->isa("Bio::Align::AlignI") ) {
-	#  Open temporary file for both reading & writing of SimpleAlign object
-	($tfh, $infilename) = $self->io->tempfile(-dir => cwd());
-    (undef, undef, $infilename) = File::Spec->splitpath($infilename);
-	$temp =  Bio::AlignIO->new(-fh=>$tfh,
-				   '-format' => 'clustalw');
-	$temp->write_aln($input);
-	close($tfh);
-	undef $tfh;
-	return ($infilename,'A');
+        #  Open temporary file for both reading & writing of SimpleAlign object
+        ($tfh, $infilename) = $self->io->tempfile(-dir => cwd());
+        (undef, undef, $infilename) = File::Spec->splitpath($infilename);
+        $temp =  Bio::AlignIO->new(-fh=>$tfh,
+                       '-format' => 'clustalw');
+        $temp->write_aln($input);
+        close($tfh);
+        undef $tfh;
+        return ($infilename,'A');
     }
     
     #  or $input may be a single BioSeq object (to be added to
     # a previous alignment)
     elsif ( $input->isa("Bio::PrimarySeqI")) {
         #  Open temporary file for both reading & writing of BioSeq object
-	($tfh,$infilename) = $self->io->tempfile(-dir => cwd());
-    (undef, undef, $infilename) = File::Spec->splitpath($infilename);
-	$temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
-	$temp->write_seq($input);
-	$temp->close();
-	close($tfh);
-	undef $tfh;
-	return ($infilename,'S');
+        ($tfh,$infilename) = $self->io->tempfile(-dir => cwd());
+        (undef, undef, $infilename) = File::Spec->splitpath($infilename);
+        $temp =  Bio::SeqIO->new(-fh=> $tfh, '-format' =>'Fasta');
+        $temp->write_seq($input);
+        $temp->close();
+        close($tfh);
+        undef $tfh;
+        return ($infilename,'S');
     } else { 
-	$self->warn("Got $input and don't know what to do with it\n");
+        $self->warn("Got $input and don't know what to do with it\n");
     }
     return 0;
 }

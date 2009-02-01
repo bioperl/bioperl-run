@@ -66,7 +66,7 @@ SKIP: {
 											'color'=> {'EXON'=>'45 25 54','CNS'=>'0 0 100'},
 											'quiet'=>1);
 	isa_ok $vis,'Bio::Tools::Run::Vista';
-	is $vis->plotmin, 50,
+	is $vis->plotmin, 50;
 	is $vis->annotation, $gff_file;
 	
 	$vis->run($aln,1);
@@ -74,5 +74,4 @@ SKIP: {
 	unlink $out;
 	$vis->run($aln,'mouse');
 	ok -e $out;
-
 }
