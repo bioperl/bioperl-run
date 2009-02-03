@@ -327,16 +327,15 @@ sub get_gene_by_name {
                                                -term       => $taxid ? "$gene_name ${taxid}[taxid]" : "$gene_name \"$species\"[Organism]",
                                                -usehistory => 'y',
                                                -verbose    => -1);
-        $esearch->get_response;
         my $esummary = Bio::DB::EUtilities->new(-eutil  => 'esummary',
-                                                -cookie => $esearch->next_cookie);
-        eval {$esummary->get_response;};
-        unless ($@) {
+                                                -history => $esearch->next_History);
+        eval {$esummary->parse_data;};
+        if (!$@) {
             my $ncbi_id;
-            foreach my $docsum ($esummary->get_all_docsums) {
-                my %item = $docsum->get_item_by_name('Name');
-                if (lc($item{Content}) eq lc($gene_name)) {
-                    $ncbi_id = $docsum->esummary_id;
+            while (my $docsum = $esummary->next_DocSum) {
+                my $item = $docsum->get_Item_by_name('Name');
+                if (lc($item->get_content) eq lc($gene_name)) {
+                    $ncbi_id = $docsum->get_id;
                     last;
                 }
             }
