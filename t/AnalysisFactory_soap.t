@@ -7,7 +7,8 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
 
-    test_begin(-tests => 13);
+    test_begin(-tests => 13,
+			   -requires_networking => 1);
     use_ok('Bio::Tools::Run::AnalysisFactory');
 }
 

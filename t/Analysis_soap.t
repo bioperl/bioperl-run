@@ -7,7 +7,8 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
 
-    test_begin(-tests => 17);
+    test_begin(-tests => 17,
+			   -requires_networking => 1);
     use_ok('Bio::Tools::Run::Analysis');
     use_ok('File::Spec');
 }
