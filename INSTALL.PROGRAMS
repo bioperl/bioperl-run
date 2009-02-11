@@ -2,7 +2,6 @@ INSTALL.PROGRAMS:
 
 The Bioperl-run package has (Bio)perl wrappers written for the following applications:
 
-
 1.	Coils - Prediction of Coiled Coil Regions in Proteins 
 	Bio::Tools::Run::Coil
 	http://www.ch.embnet.org/software/COILS_form.html

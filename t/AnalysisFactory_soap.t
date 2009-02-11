@@ -7,7 +7,8 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
 
-    test_begin(-tests => 12);
+    test_begin(-tests => 13,
+			   -requires_networking => 1);
     use_ok('Bio::Tools::Run::AnalysisFactory');
 }
 
@@ -29,7 +30,7 @@ throws_ok { Bio::Tools::Run::AnalysisFactory->new(-access=>'non_existing') } qr/
 
 # Now onto the nitty gritty tests of the modules methods
 SKIP: {
-    test_skip(-tests => 8, -requires_module => 'SOAP::Lite');
+    test_skip(-tests => 9, -requires_module => 'SOAP::Lite');
 	use_ok('SOAP::Lite');
 	
 	my $array_ref = $factory->available_categories;
@@ -44,12 +45,8 @@ SKIP: {
 	isa_ok( $array_ref, 'ARRAY' );
 	ok( grep(/seqret/i, @$array_ref), 'available_analyses("edit") returned something' );
 	
-	TODO: {
-		local $TODO = 'create_analysis() is failing';
-		eval {
-			my $service = $factory->create_analysis('edit.seqret');
-			isa_ok( $service, 'Bio::Tools::Run::Analysis::soap' );
-		};
-		ok (!$@) || diag("create_analysis failed :$@");
-	}
+	my $service;
+	lives_ok {$service = $factory->create_analysis('edit.seqret')};
+	skip ("create_analysis failed :$@", 1) if $@;
+	isa_ok( $service, 'Bio::Tools::Run::Analysis::soap' );
 }

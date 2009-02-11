@@ -7,9 +7,9 @@
 
 use strict;
 my $v = '1.005009_002';
-eval "use Bio::Root::Build $v";
+eval "use Bio::Root::Build $v"; # min. core version required
 if ($@) {
-    # using die so wrappers can catch the error message    
+    # using die so wrappers can catch the error message
     die "BioPerl minimal core version $v is required for BioPerl-run\n";
 }
 
@@ -23,7 +23,7 @@ my $build = Bio::Root::Build->new(
     license             => 'perl',
     requires            => {
                             'perl'                      => '5.6.1',
-                            #'Bio::Root::Version'        => '1.007000' # checked above
+                            #'Bio::Root::Version'        => '1.006000' # checked above
                            },
     recommends          => {
                             'Algorithm::Diff'           => '0/generating consensus protein family descriptions/Bio::Tools::Run::TribeMCL',
