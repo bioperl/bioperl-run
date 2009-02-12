@@ -280,7 +280,15 @@ sub new {
 sub program_name {
 	my $self = shift;
 	return $self->{'program_name'} = shift @_ if @_;
-	return $self->{'program_name'} || $PROGRAMNAME;
+    return $self->{'program_name'} if $self->{'program_name'};
+    for (qw(primer3 primer3_core)) {
+        if ($self->io->exists_exe($_)) {
+            $PROGRAMNAME = $_;
+            last;
+        }
+    }
+    # don't set permanently, use global
+    return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -304,9 +312,9 @@ sub program_dir {
    return $self->{'program_dir'} if $self->{'program_dir'};
    
    if ($ENV{PRIMER3}) {
-      $self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3});
+        $self->{'program_dir'} = Bio::Root::IO->catfile($ENV{PRIMER3});
    } else {
-      $self->{'program_dir'}='/usr/local/bin';
+        $self->{'program_dir'} = Bio::Root::IO->catfile('usr','local','bin');
    }
    
    return $self->{'program_dir'}
