@@ -361,10 +361,11 @@ sub _mf2bin {
 
   }
   #figure out the reference sequence
-  elsif($ref =~/\d+/){ #its a rank index
+  elsif($ref =~/^\d+$/){ #its a rank index
     $reference = $seq[$ref-1];
+    my $tmp = $ref;
     $ref = $reference->id;
-    splice @seq,($ref-1),1;
+    splice @seq,($tmp-1),1;
   }
   else { #its an id
     foreach my $i(0..$#seq){
@@ -525,8 +526,8 @@ sub _run_Vista {
     #run Vista
     $self->debug( "Running Vista\n");
     my $java = $self->java;
-    
-    my $cmd  =   $self->java." ".$self->java_param.' Vista ';
+    my $param = $self->java_param || '';
+    my $cmd  =   $java." ".$param.' Vista ';
     $cmd .= " -q " if $self->quiet || $self->verbose < 0;
     $cmd .= " -d " if $self->debug;
     $cmd .= $infile;

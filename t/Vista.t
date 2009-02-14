@@ -39,7 +39,7 @@ SKIP: {
 	open (PIPE ,'java Vista 2>&1 |');
 	while(<PIPE>){
 	  if(/NoClassDefFoundError/){
-		diag('Vista.jar is not in your class path');
+		diag('Vista.jar is not in your class path:'.$_);
 		skip("Vista.jar is not in your class path",5);
 	  }
 	}
@@ -71,7 +71,6 @@ SKIP: {
 	
 	$vis->run($aln,1);
 	ok -e $out;
-	unlink $out;
 	$vis->run($aln,'mouse');
 	ok -e $out;
 }
