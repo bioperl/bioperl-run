@@ -751,7 +751,7 @@ sub _run {
         $score = $1 if ($_ =~ /Score:(\d+)/);
         # This one is printed at the end and seems the most appropriate to pick
         # up; we include the above regex incase 'Alignment Score' isn't given
-        $score = $1 if ($_ =~ /Alignment Score (\d+)/);
+        $score = $1 if ($_ =~ /Alignment Score (-?\d+)/);
     }
     close($pipe) || ($self->throw("ClustalW call ($commandstring) crashed: $?"));
     
