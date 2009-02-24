@@ -1,3 +1,5 @@
+# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+#
 # Cared for by Shawn Hoon
 #
 # Copyright Shawn Hoon
@@ -97,6 +99,17 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
 
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support 
+ 
+Please direct usage questions or support issues to the mailing list:
+  
+L<bioperl-l@bioperl.org>
+  
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
 
 =head2 Reporting Bugs
 
@@ -361,10 +374,11 @@ sub _mf2bin {
 
   }
   #figure out the reference sequence
-  elsif($ref =~/\d+/){ #its a rank index
+  elsif($ref =~/^\d+$/){ #its a rank index
     $reference = $seq[$ref-1];
+    my $tmp = $ref;
     $ref = $reference->id;
-    splice @seq,($ref-1),1;
+    splice @seq,($tmp-1),1;
   }
   else { #its an id
     foreach my $i(0..$#seq){
@@ -525,8 +539,8 @@ sub _run_Vista {
     #run Vista
     $self->debug( "Running Vista\n");
     my $java = $self->java;
-    
-    my $cmd  =   $self->java." ".$self->java_param.' Vista ';
+    my $param = $self->java_param || '';
+    my $cmd  =   $java." ".$param.' Vista ';
     $cmd .= " -q " if $self->quiet || $self->verbose < 0;
     $cmd .= " -d " if $self->debug;
     $cmd .= $infile;

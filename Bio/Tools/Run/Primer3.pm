@@ -99,6 +99,17 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://www.bioperl.org/MailList.html             - About the mailing lists
 
+=head2 Support 
+ 
+Please direct usage questions or support issues to the mailing list:
+  
+L<bioperl-l@bioperl.org>
+  
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
+
 =head2 Reporting Bugs
 
 Report bugs to the Bioperl bug tracking system to help us keep track
@@ -280,7 +291,15 @@ sub new {
 sub program_name {
 	my $self = shift;
 	return $self->{'program_name'} = shift @_ if @_;
-	return $self->{'program_name'} || $PROGRAMNAME;
+    return $self->{'program_name'} if $self->{'program_name'};
+    for (qw(primer3 primer3_core)) {
+        if ($self->io->exists_exe($_)) {
+            $PROGRAMNAME = $_;
+            last;
+        }
+    }
+    # don't set permanently, use global
+    return $PROGRAMNAME;
 }
 
 =head2 program_dir
@@ -304,9 +323,9 @@ sub program_dir {
    return $self->{'program_dir'} if $self->{'program_dir'};
    
    if ($ENV{PRIMER3}) {
-      $self->{'program_dir'}=Bio::Root::IO->catfile($ENV{PRIMER3});
+        $self->{'program_dir'} = Bio::Root::IO->catfile($ENV{PRIMER3});
    } else {
-      $self->{'program_dir'}='/usr/local/bin';
+        $self->{'program_dir'} = Bio::Root::IO->catfile('usr','local','bin');
    }
    
    return $self->{'program_dir'}
