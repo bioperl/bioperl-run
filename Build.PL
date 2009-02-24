@@ -6,7 +6,7 @@
 # Uses a custom subclass of Module::Build called Bio::Root::Build
 
 use strict;
-my $v = '1.005009_002';
+my $v = '1.006000';
 eval "use Bio::Root::Build $v"; # min. core version required
 if ($@) {
     # using die so wrappers can catch the error message
