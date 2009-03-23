@@ -800,6 +800,8 @@ sub _run {
 sub _get_tree {
     my ($self, $treefile, $param_string) = @_;
     
+    $treefile =~ s/\.[^\.]*$// ;
+    
     if ($param_string =~ /-bootstrap/) {
         $treefile .= '.phb';
     }
@@ -816,7 +818,6 @@ sub _get_tree {
     my $tree = $in->next_tree;
     unless ( $self->save_tempfiles ) {
         foreach my $f ( $treefile ) {
-            $f =~ s/\.[^\.]*$// ;
             unlink $f if( $f ne '' );
         }
     }
