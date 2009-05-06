@@ -5,12 +5,16 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Cap3 - wrapper for Cap3
+Bio::Tools::Run::Cap3 - wrapper for CAP3
 
 =head1 SYNOPSIS
 
-  # Build a Cap3 factory
-  my $factory = Bio::Tools::Run::Cap3->new($params);
+  # Build a Cap3 factory with an (optional) parameter list
+  my @params = ('y', '150');
+  my $factory = Bio::Tools::Run::Cap3->new(@params);
+
+  # Specify where CAP3 is installed, if not the default directory (/usr/local/bin):
+  $factory->program_dir('/opt/bio/bin');
 
   # Pass the factory an input file name...
   my $result = $factory->run($filename);
@@ -20,7 +24,7 @@ Bio::Tools::Run::Cap3 - wrapper for Cap3
 
 =head1 DESCRIPTION
 
-*** Describe the object here
+  Wrapper module for CAP3 program
 
 =head1 FEEDBACK
 
@@ -75,7 +79,7 @@ use Bio::Tools::Run::WrapperBase;
 use Bio::Factory::ApplicationFactoryI;
 
 BEGIN {
-    @PARAMS     = qw(a b c d e f g m n o p s u v x y);
+    @PARAMS     = qw(a b c d e f g h i j k m n o p r s t u v w x y z);
     $PROGRAMDIR = '/usr/local/bin';
 
     # Authorize attribute fields
@@ -91,6 +95,7 @@ sub new {
 
     # chained new
     my $self = $caller->SUPER::new(@args);
+    $self->{'_program_dir'} = $PROGRAMDIR;
 
     # to facilitiate tempfile cleanup
     my ( undef, $tempfile ) = $self->io->tempfile();
@@ -110,7 +115,7 @@ sub AUTOLOAD {
     my $attr_letter = substr( $attr, 0, 1 );
 
     # actual key is first letter of $attr unless first attribute
-    # letter is underscore (as in _READMETHOD), the $attr is a BLAST
+    # letter is underscore (as in _READMETHOD), the $attr is a CAP3
     # parameter and should be truncated to its first letter only
     $attr = ( $attr_letter eq '_' ) ? $attr : $attr_letter;
     $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
@@ -119,7 +124,12 @@ sub AUTOLOAD {
 }
 
 sub program_dir {
-    $PROGRAMDIR;
+    my($self, $new_dir) = @_;
+    if (defined($self)) {
+        $self->{'_program_dir'} = $new_dir if (defined($new_dir));
+        return $self->{'_program_dir'};
+    }
+    return $PROGRAMDIR;
 }
 
 sub program_name {
@@ -129,15 +139,15 @@ sub program_name {
 sub run {
 	my ($self, $input) = @_;
 	my $param_string = $self->_setparams;
-	my $exe = $self->executable;
+	my $exe = $self->executable(undef);
+    $self->throw("couldn't find executable for " . $self->program_name() . " in " . $self->program_dir()) if (!defined($exe));
 	# Create input file pointer
 	my $infilename1 = $self->_setinput($input);
 	if (! $infilename1) {
 		$self->throw(" $input ($infilename1) not array of Bio::Seq objects or file name!");
 	}
 
-	my $commandstring = $exe . $param_string . " $infilename1";
-
+	my $commandstring = $exe . " $infilename1 " . $param_string;
 	open(CAP3, "$commandstring |") || 
 	  $self->throw(sprintf("%s call crashed: %s %s\n", $self->program_name, $!, $commandstring));
 	local $/ = undef;
@@ -158,7 +168,7 @@ sub _setparams {
         $value = $self->$attr();
         next unless ( defined $value );
 
-        # put params in format expected by cap3
+        # put params in format expected by CAP3
         $attr = '-' . $attr;
         $param_string .= " $attr  $value ";
     }
@@ -179,7 +189,7 @@ sub _setinput {
 			$infilename1 = (-e $input1) ? $input1 : 0 ;
 			last SWITCH; 
       }
-		#  $input may be an array of BioSeq objects...
+      # $input may be an array of BioSeq objects...
       if (ref($input1) =~ /ARRAY/i ) {
 			($fh,$infilename1) = $self->io->tempfile();
 			$temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
