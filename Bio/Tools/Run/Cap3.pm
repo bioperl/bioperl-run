@@ -10,7 +10,7 @@ Bio::Tools::Run::Cap3 - wrapper for Cap3
 =head1 SYNOPSIS
 
   # Build a Cap3 factory
-  my $factory = Bio::Tools::Run::Coil->new($params);
+  my $factory = Bio::Tools::Run::Cap3->new($params);
 
   # Pass the factory an input file name...
   my $result = $factory->run($filename);
@@ -75,7 +75,7 @@ use Bio::Tools::Run::WrapperBase;
 use Bio::Factory::ApplicationFactoryI;
 
 BEGIN {
-    @PARAMS     = qw(a b c d e f g m n o p s u v x);
+    @PARAMS     = qw(a b c d e f g m n o p s u v x y);
     $PROGRAMDIR = '/usr/local/bin';
 
     # Authorize attribute fields
