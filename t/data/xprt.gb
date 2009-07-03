@@ -1,0 +1,141 @@
+LOCUS       NC_012004               2095 bp    DNA     linear   BCT 07-MAY-2009
+DEFINITION  Streptococcus uberis 0140J, complete genome.
+ACCESSION   NC_012004 REGION: 843183..845277
+VERSION     NC_012004.1  GI:222152201
+DBLINK      Project:353
+KEYWORDS    complete genome.
+SOURCE      Streptococcus uberis 0140J
+  ORGANISM  Streptococcus uberis 0140J
+            Bacteria; Firmicutes; Lactobacillales; Streptococcaceae;
+            Streptococcus.
+REFERENCE   1
+  AUTHORS   Ward,P.N., Holden,M.T.G., Leigh,J.A., Lennard,N., Bignell,A.,
+            Barron,A., Clark,L., Quail,M.A., Woodward,J., Barrell,B.G.,
+            Egan,S.A., Field,T.R., Maskell,D., Kehoe,M., Dowson,C.G.,
+            Chanter,N., Whatmore,A.M., Bentley,S.D. and Parkhill,J.
+  TITLE     Evidence for niche adaptation in the genome of the bovine pathogen
+            Streptococcus uberis
+  JOURNAL   BMC Genet. 10 (54) (2009) In press
+REFERENCE   2  (bases 1 to 2095)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (29-JAN-2009) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 2095)
+  AUTHORS   Holden,M.T.G.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (10-MAR-2008) Holden M.T.G., Pathogen Genomics, Sanger
+            Institute Wellcome Trust, Wellcome Trust Genome Campus, Hinxton,
+            Cambridge, CB10 1SA, UNITED KINGDOM
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence was derived from AM946015.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..2095
+                     /organism="Streptococcus uberis 0140J"
+                     /mol_type="genomic DNA"
+                     /strain="0140J"
+                     /db_xref="taxon:218495"
+     gene            <1..958
+                     /locus_tag="SUB0865"
+                     /db_xref="GeneID:7391352"
+     CDS             <1..958
+                     /locus_tag="SUB0865"
+                     /EC_number="1.7.1.7"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="GMP reductase"
+                     /protein_id="YP_002562194.1"
+                     /db_xref="GI:222153017"
+                     /db_xref="GeneID:7391352"
+                     /translation="MFNDMPVFDYEDIQLIPNKCIINSRSEADTSVQLGKYSFKLPVI
+                     PANMQTIIDETIAEQLAKDGYFYIMHRFDEESRKPFIKRMHEQNLIASISVGVKEYEY
+                     DFVTSLKEDAPEFVTIDIAHGHANSVIKMIQHIKKELPETFVIAGNVGTPEAVRELEN
+                     AGADATKVGIGPGKVCITKVKTGFGTGGWQLAALRWCAKAARKPIIADGGIRTHGDIA
+                     KSIRFGATMVMIGSLFAGHLESPGKLVEIDGETFKEYYGSASEYQKGEHKNVEGKKIL
+                     LPTKGHLSDTLTEMKQDLQSSISYAGGNDLAALRRVDYVIVKNSIWNGDSI"
+     gene            1001..1095
+                     /locus_tag="SUBs03"
+                     /db_xref="GeneID:7391353"
+     misc_RNA        1001..1095
+                     /locus_tag="SUBs03"
+                     /note="Purine riboswitch (RF00167) as predicted by Rfam,
+                     score 59.77"
+                     /db_xref="GeneID:7391353"
+     gene            1180..1761
+                     /gene="xpt"
+                     /locus_tag="SUB0866"
+                     /db_xref="GeneID:7392114"
+     CDS             1180..1761
+                     /gene="xpt"
+                     /locus_tag="SUB0866"
+                     /EC_number="2.4.2.-"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="xanthine phosphoribosyltransferase"
+                     /protein_id="YP_002562195.1"
+                     /db_xref="GI:222153018"
+                     /db_xref="GeneID:7392114"
+                     /translation="MKLLEERIIKDGNVLGENILKVDSFLTHQVDYHLMRDIGKVFAE
+                     SYADAGITKVVTIEASGIAPAVYVAEALKVPMIFAKKHKNITMTEGILTAEVYSFTKQ
+                     VTSTVSIASKFLSKDDKVLIIDDFLANGQAAKGLIEIIQQAGASVEGVGIVIEKSFQD
+                     GRQLLENMGVKVTSLARIKNFENGRLNFMEADA"
+     gene            1761..>2095
+                     /gene="pbuX"
+                     /locus_tag="SUB0867"
+                     /db_xref="GeneID:7392109"
+     CDS             1761..>2095
+                     /gene="pbuX"
+                     /locus_tag="SUB0867"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="xanthine permease"
+                     /protein_id="YP_002562196.1"
+                     /db_xref="GI:222153019"
+                     /db_xref="GeneID:7392109"
+                     /translation="MQTETQHSHSQSAILGLQHLLSMYAGSILVPIMIAGALGYSAKE
+                     LTYLISTDIFMCGLATFLQLQFNKYFGVGLPVVLGCAFQSVAPLSIIGAKQGSGAMFG
+                     ALIASGLFVILIAGVFSKIARFFPAIVTGSVITTIGLSLIPVAMGNMGNNTPKPTGQS
+                     LILAFLTIFIILAIQKFATGFIKSIAILIGLIAGTLVAALMGLVDTSAVSSAPWVHVP
+                     TPFYFGAPKFEITSIVMMCIIAIVSMVESTGVYLALSDITDETLDSNRLRNGYRAEGL
+                     AVLLGGIFNTFPYTGFSQNVGLVRLSGIKTRRPIYYTAAFLVVIGLLPKFGALAQMIP
+                     SPVLGGAMLVLFGMVALQGMQMLNRVDFQGNEHNFIIAAVSISAGVGFNGTNLFASLP
+                     STANMFLTNGIVIATVTAVLLNLIFNGNTKEN"
+ORIGIN      
+        1 ttatgaagat attcaattaa ttcctaataa gtgtatcatt aatagtcgtt ctgaggctga
+       61 tacaagcgtt caacttggaa aatacagttt taaattacca gtcataccag ctaatatgca
+      121 aacgatcatt gacgaaacga ttgctgaaca attagctaaa gatggttatt tttatatcat
+      181 gcatcgattc gatgaagaaa gccgtaagcc atttattaag cgcatgcatg agcaaaactt
+      241 gattgcttcc atttcagttg gtgtaaagga atatgaatac gattttgtca cttctttaaa
+      301 agaagatgcc cctgaatttg tgacaattga tatcgcccat ggacacgcca atagtgttat
+      361 caagatgatt cagcacatca aaaaagaatt accagagaca tttgttatcg ctggcaatgt
+      421 tgggacacct gaagcagtac gtgaattgga aaatgcagga gcagatgcaa caaaagttgg
+      481 catcggacct ggtaaagtat gtatcacaaa agttaaaact ggttttggaa caggtggctg
+      541 gcaattagct gctttacgtt ggtgtgccaa agctgcgcgt aaaccaataa tagcggatgg
+      601 tggtattcgc actcatggag atattgccaa gtctatccga tttggtgcaa ctatggtcat
+      661 gattggttcg ctttttgcag gacatcttga aagtcctggt aaactcgttg aaatcgatgg
+      721 tgaaaccttt aaagaatact atggttcagc atctgagtat caaaagggag aacacaaaaa
+      781 tgttgaaggt aaaaaaatct tattaccaac aaaaggtcat ctttcggata ccttaacaga
+      841 aatgaaacaa gatttgcaat cctcaatttc atatgcggga ggaaatgatt tagctgctct
+      901 tcgtcgcgtc gattacgtta ttgtcaaaaa ttccatctgg aatggtgatt ctatctaaga
+      961 aggtcttgaa ttttcagaaa ttcgtgatat gatagtcata acaaaaattg aataaactac
+     1021 ttatttatac tgtgaattgg cgcagtgttt ctacaagaca ccgtaatgtc taacaataag
+     1081 taagctaaaa agcttgcttg gttttaacct tgcaaagcag gaggagtagt gtcctcttgt
+     1141 tttgtggcaa gctttttttg tttttagaaa gaggtcatca tgaaattact tgaagaacgt
+     1201 attataaaag atggtaacgt tctaggcgaa aacattttaa aggttgatag ttttctaaca
+     1261 caccaagtgg attatcactt gatgcgtgac attggtaaag tttttgctga atcatatgcg
+     1321 gatgctggta tcacgaaggt tgtgacaatc gaagcatctg gtattgctcc agccgtttat
+     1381 gtcgcggaag ctttaaaagt ccctatgatc tttgcaaaga aacataaaaa tatcaccatg
+     1441 accgaaggta ttttaaccgc ggaggtatac tcatttacta aacaggtaac cagcacggtt
+     1501 tctattgcaa gtaaattttt gagtaaagat gataaagtct taattattga tgacttttta
+     1561 gctaatggtc aagccgcaaa aggcctaatt gaaattattc aacaagcggg tgccagtgtt
+     1621 gaaggtgttg gcattgtgat tgaaaagtca tttcaagatg gtcgtcaatt acttgaaaat
+     1681 atgggagtta aggttacttc tctagcacgt atcaaaaatt ttgaaaatgg aagattaaac
+     1741 tttatggagg ccgacgcata atgcaaacgg aaacacaaca ttcacattca caatcagcga
+     1801 ttttaggatt acaacattta ttatcaatgt atgctggttc tattctagtt cccatcatga
+     1861 ttgctggagc tttaggttac tctgctaaag aattgactta tttgatttca acagatattt
+     1921 tcatgtgtgg ccttgcaact tttttacaat tgcaatttaa taagtacttt ggagtgggac
+     1981 tacctgtcgt tcttggttgt gcttttcaat cagtggcacc tctatcaatt attggggcta
+     2041 aacaaggttc tggtgctatg tttggtgcct tgattgcctc aggtcttttt gtcat
+//
+
