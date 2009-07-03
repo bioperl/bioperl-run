@@ -9,6 +9,8 @@
 # March 2007 - first full implementation; needs some file IO tweaking between
 #              runs but works for now
 # April 2008 - add 0.81 parameters (may be removed in the 1.0 release)
+#
+# June  2009 - updated for v1.0. No longer supporting pre-1.0 Infernal
 
 =head1 NAME
 
@@ -20,27 +22,28 @@ cmsearch, cmscore
   # parameters which are switches are set with any value that evals TRUE,
   # others are set to a specific value
 
-  my @params = (hmmfb => 1,
-                thresh => 20);
-
   my $factory = Bio::Tools::Run::Infernal->new(@params);
 
   # run cmalign|cmbuild|cmsearch|cmscore|cmemit directly as a wrapper method
   # this resets the program flag if previously set
 
   $factory->cmsearch(@seqs); # searches Bio::PrimarySeqI's based on set cov. model
-                             # saves output to outfile()/tempfile
+                             # saves output to outfile_name or STDOUT
 
   # only values which are allowed for a program are set, so one can use the same
   # wrapper for the following...
 
   $factory->cmalign(@seqs); # aligns Bio::PrimarySeqI's to a set cov. model
-                            # saves output to outfile()/tempfile
+                            # output to outfile_name
   $factory->cmscore(@seqs); # scores set cov. model against Bio::PrimarySeqI's,
-                            # saves output to outfile()/tempfile/STDERR.
+                            # output to outfile_name/STDOUT.
   $factory->cmbuild($aln); # builds covariance model based on alignment
-                           # saves CM to model(), output to outfile()/tempfile/STDERR.
+                           # CM to outfile_name (required here), output to STDOUT.
   $factory->cmemit($file); # emits sequence from specified cov. model;
+                           # set one if no file specified
+  $factory->cmcalibrate($file); # calibrates specified cov. model;
+                           # set one if no file specified
+  $factory->cmstat($file); # summary stats for cov. model;
                            # set one if no file specified
 
   # run based on the setting of the program parameter
@@ -68,13 +71,31 @@ cmsearch, cmscore
 =head1 DESCRIPTION
 
 Wrapper module for Sean Eddy's Infernal suite of programs. The current
-implementation runs cmsearch, cmalign, cmemit, cmbuild, and cmscore. The only
-current BioPerl object returned is for cmsearch (as shown in the SYNOPSIS); all
-others are sent to either the designated outfile, a tempfile, or STDOUT.
+implementation runs cmsearch, cmcalibrate, cmalign, cmemit, cmbuild, cmscore,
+and cmstat. The only current BioPerl object returned is for cmsearch (as shown
+in the SYNOPSIS); all others are sent to either the designated outfile, a
+tempfile, or STDOUT.
 
-Since the Infernal suite is under constant development, consider this wrapper as
-highly experimental. It will only actively support the latest Infernal release
-(now at v. 0.81, used to build Rfam 8.0) until a 1.0 Infernal release is made.
+We HIGHLY suggest upgrading to Infernal 1.0.  In that spirit, this wrapper now
+supports parameters for Infernal 1.0 only; for wrapping older versions of
+Infernal we suggest using the version of Bio::Tools::Run::Infernal that came
+with previous versions of BioPerl-run.
+
+NOTE: Due to conflicts in the way Infernal parameters are now formatted vs.
+subroutine naming in Perl (specifically the inclusion of hyphens) and due to the
+very large number of parameters available, setting and resetting parameters via
+set_parameters() and reset_parameters() is required. Only parameters that are
+valid for the executable set via program()/program_name() are set, the others
+are silently ignored at this time.
+
+Also of note is some minor conflation between the use of the WrapperBase
+outfile_name() method, the -o option (which designates the outfile for cmsearch
+and cmalign), and the -outfile option (which is the outfile for sequences from
+cmscore). All three are allowed; in particular, the -outfile parameter from
+cmscore is not the actual output from the program but is for sequence output
+only. If both -o and -outfile_name is set, a warning is issued and outfile_name
+is set. Note that -o is only available for cmsearch and cmalign, while
+outfile_name is allowed for all programs.
 
 =head1 FEEDBACK
 
@@ -124,76 +145,221 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Infernal;
 
 use strict;
+use warnings;
+use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase Bio::ParameterBaseI);
+
 use Bio::SeqIO;
-use Bio::Root::Root;
 use Bio::SearchIO;
 use Bio::AlignIO;
-use Bio::Tools::Run::WrapperBase;
+use Data::Dumper;
 
-use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
-
-our @PARAMS = qw(A F W X a banddump bandp bdfile begin beta bfile binary c cfile
-checkcp9 checkpost cmtbl cp9 dlev dumptrees effent effnone elself elsilent emap
-end etarget fsub full gapthresh gtbl gtree h hbanded hbandp hmmfb hmmonly hmmpad
-hmmweinberg hthresh ignorant informat inside l learninserts local n noalign
-nobalance nodetach noexpand noqdb nosmall null null2 outside post priorfile q
-qdb qdbfile regress rf scan2bands scoreonly seed smallonly stringent sub sums
-tfile thresh time toponly treeforce wgiven wgsc wnone);
+# yes, these are the current parameters
+our %INFERNAL_PARAMS = (
+  'A'               => ['switch', '-',      qw(cmbuild)],
+  'E'               => ['param',  '-',      qw(cmsearch cmstat)],
+  'F'               => ['switch', '-',      qw(cmbuild)],
+  'Lmax'            => ['param',  '--',     qw(cmscore)],
+  'Lmin'            => ['param',  '--',     qw(cmscore)],
+  'T'               => ['param',  '-',      qw(cmsearch cmstat)],
+  'Wbeta'           => ['param',  '--',     qw(cmbuild)],
+  'Z'               => ['param',  '-',      qw(cmsearch cmstat)],
+  'a'               => ['switch', '-',      qw(cmbuild cmemit cmscore)],
+  'afile'           => ['param',  '--',     qw(cmstat)],
+  'ahmm'            => ['param',  '--',     qw(cmemit)],
+  'all'             => ['switch', '--',     qw(cmstat)],
+  'aln-hbanded'     => ['switch', '--',     qw(cmsearch)],
+  'aln-optacc'      => ['switch', '--',     qw(cmsearch)],
+  'aln2bands'       => ['switch', '--',     qw(cmscore cmsearch)],
+  'banddump'        => ['param',  '--',     qw(cmalign)],
+  'begin'           => ['param',  '--',     qw(cmemit)],
+  'beta'            => ['param',  '--',     qw(cmalign cmscore cmsearch cmstat)],
+  'betae'           => ['param',  '--',     qw(cmscore)],
+  'betas'           => ['param',  '--',     qw(cmscore)],
+  'bfile'           => ['param',  '--',     qw(cmstat)],
+  'binary'          => ['switch', '--',     qw(cmbuild)],
+  'bits'            => ['switch', '--',     qw(cmstat)],
+  'bottomonly'      => ['switch', '--',     qw(cmsearch)],
+  'c'               => ['switch', '-',      qw(cmemit)],
+  'call'            => ['switch', '--',     qw(cmbuild)],
+  'cdump'           => ['param',  '--',     qw(cmbuild)],
+  'cfile'           => ['param',  '--',     qw(cmbuild)],
+  'checkfb'         => ['switch', '--',     qw(cmalign)],
+  'checkpost'       => ['switch', '--',     qw(cmalign)],
+  'cmL'             => ['param',  '--',     qw(cmstat)],
+  'cmaxid'          => ['param',  '--',     qw(cmbuild)],
+  'cmtbl'           => ['param',  '--',     qw(cmbuild)],
+  'corig'           => ['switch', '--',     qw(cmbuild)],
+  'ctarget'         => ['param',  '--',     qw(cmbuild)],
+  'cyk'             => ['switch', '--',     qw(cmalign cmbuild cmsearch)],
+  'devhelp'         => ['switch', '--',     qw(cmalign cmbuild cmcalibrate cmemit cmscore cmsearch)],
+  'dlev'            => ['param',  '--',     qw(cmalign)],
+  'dna'             => ['switch', '--',     qw(cmalign cmemit cmsearch)],
+  'eX'              => ['param',  '--',     qw(cmbuild)],
+  'eent'            => ['switch', '--',     qw(cmbuild)],
+  'efile'           => ['param',  '--',     qw(cmstat)],
+  'ehmmre'          => ['param',  '--',     qw(cmbuild)],
+  'elself'          => ['param',  '--',     qw(cmbuild)],
+  'emap'            => ['param',  '--',     qw(cmbuild)],
+  'emit'            => ['switch', '--',     qw(cmscore)],
+  'end'             => ['param',  '--',     qw(cmemit)],
+  'enone'           => ['switch', '--',     qw(cmbuild)],
+  'ere'             => ['param',  '--',     qw(cmbuild)],
+  'exp'             => ['param',  '--',     qw(cmemit)],
+  'exp-T'           => ['param',  '--',     qw(cmcalibrate)],
+  'exp-beta'        => ['param',  '--',     qw(cmcalibrate)],
+  'exp-cmL-glc'     => ['param',  '--',     qw(cmcalibrate)],
+  'exp-cmL-loc'     => ['param',  '--',     qw(cmcalibrate)],
+  'exp-ffile'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-fract'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-gc'          => ['param',  '--',     qw(cmcalibrate)],
+  'exp-hfile'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-hmmLn-glc'   => ['param',  '--',     qw(cmcalibrate)],
+  'exp-hmmLn-loc'   => ['param',  '--',     qw(cmcalibrate)],
+  'exp-hmmLx'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-no-qdb'      => ['switch', '--',     qw(cmcalibrate)],
+  'exp-pfile'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-qqfile'      => ['param',  '--',     qw(cmcalibrate)],
+  'exp-random'      => ['switch', '--',     qw(cmcalibrate)],
+  'exp-sfile'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-tailn-cglc'  => ['param',  '--',     qw(cmcalibrate)],
+  'exp-tailn-cloc'  => ['param',  '--',     qw(cmcalibrate)],
+  'exp-tailn-hglc'  => ['param',  '--',     qw(cmcalibrate)],
+  'exp-tailn-hloc'  => ['param',  '--',     qw(cmcalibrate)],
+  'exp-tailp'       => ['param',  '--',     qw(cmcalibrate)],
+  'exp-tailxn'      => ['param',  '--',     qw(cmcalibrate)],
+  'fil-E-hmm'       => ['param',  '--',     qw(cmsearch)],
+  'fil-E-qdb'       => ['param',  '--',     qw(cmsearch)],
+  'fil-F'           => ['param',  '--',     qw(cmcalibrate)],
+  'fil-N'           => ['param',  '--',     qw(cmcalibrate)],
+  'fil-Smax-hmm'    => ['param',  '--',     qw(cmsearch)],
+  'fil-T-hmm'       => ['param',  '--',     qw(cmsearch)],
+  'fil-T-qdb'       => ['param',  '--',     qw(cmsearch)],
+  'fil-aln2bands'   => ['switch', '--',     qw(cmcalibrate)],
+  'fil-beta'        => ['param',  '--',     qw(cmsearch)],
+  'fil-dfile'       => ['param',  '--',     qw(cmcalibrate)],
+  'fil-gemit'       => ['switch', '--',     qw(cmcalibrate)],
+  'fil-no-hmm'      => ['switch', '--',     qw(cmsearch)],
+  'fil-no-qdb'      => ['switch', '--',     qw(cmsearch)],
+  'fil-nonbanded'   => ['switch', '--',     qw(cmcalibrate)],
+  'fil-tau'         => ['param',  '--',     qw(cmcalibrate)],
+  'fil-xhmm'        => ['param',  '--',     qw(cmcalibrate)],
+  'fins'            => ['switch', '--',     qw(cmalign cmbuild)],
+  'forecast'        => ['param',  '--',     qw(cmcalibrate cmsearch)],
+  'forward'         => ['switch', '--',     qw(cmscore cmsearch)],
+  'g'               => ['switch', '-',      qw(cmsearch cmstat)],
+  'ga'              => ['switch', '--',     qw(cmsearch cmstat)],
+  'gapthresh'       => ['param',  '--',     qw(cmalign cmbuild)],
+  'gcfile'          => ['param',  '--',     qw(cmsearch)],
+  'ge'              => ['switch', '--',     qw(cmstat)],
+  'gfc'             => ['switch', '--',     qw(cmstat)],
+  'gfi'             => ['switch', '--',     qw(cmstat)],
+  'gibbs'           => ['switch', '--',     qw(cmbuild)],
+  'gtbl'            => ['param',  '--',     qw(cmbuild)],
+  'gtree'           => ['param',  '--',     qw(cmbuild)],
+  'h'               => ['switch', '-',      qw(cmalign cmbuild cmcalibrate cmemit cmscore cmsearch cmstat)],
+  'hbanded'         => ['switch', '--',     qw(cmalign cmscore cmsearch)],
+  'hmm-W'           => ['param',  '--',     qw(cmsearch)],
+  'hmm-cW'          => ['param',  '--',     qw(cmsearch)],
+  'hmmL'            => ['param',  '--',     qw(cmstat)],
+  'hsafe'           => ['switch', '--',     qw(cmalign cmscore)],
+  'ignorant'        => ['switch', '--',     qw(cmbuild)],
+  'iins'            => ['switch', '--',     qw(cmbuild)],
+  'infile'          => ['param',  '--',     qw(cmscore)],
+  'informat'        => ['param',  '--',     qw(cmalign cmbuild cmsearch)],
+  'inside'          => ['switch', '--',     qw(cmalign cmscore cmsearch)],
+  'l'               => ['switch', '-',      qw(cmalign cmbuild cmemit cmscore)],
+  'lambda'          => ['param',  '--',     qw(cmsearch)],
+  'le'              => ['switch', '--',     qw(cmstat)],
+  'lfc'             => ['switch', '--',     qw(cmstat)],
+  'lfi'             => ['switch', '--',     qw(cmstat)],
+  'm'               => ['switch', '-',      qw(cmstat)],
+  'matchonly'       => ['switch', '--',     qw(cmalign)],
+  'merge'           => ['switch', '--',     qw(cmalign)],
+  'mpi'             => ['switch', '--',     qw(cmalign cmcalibrate cmscore cmsearch)],
+  'mxsize'          => ['param',  '--',     qw(cmalign cmbuild cmcalibrate cmscore cmsearch)],
+  'n'               => ['param',  '-',      qw(cmbuild cmemit cmscore)],
+  'nc'              => ['switch', '--',     qw(cmsearch cmstat)],
+  'no-null3'        => ['switch', '--',     qw(cmalign cmcalibrate cmscore cmsearch)],
+  'no-qdb'          => ['switch', '--',     qw(cmsearch)],
+  'noalign'         => ['switch', '--',     qw(cmsearch)],
+  'nobalance'       => ['switch', '--',     qw(cmbuild)],
+  'nodetach'        => ['switch', '--',     qw(cmbuild)],
+  'nonbanded'       => ['switch', '--',     qw(cmalign cmbuild cmscore)],
+  'null'            => ['param',  '--',     qw(cmbuild)],
+  'null2'           => ['switch', '--',     qw(cmsearch)],
+  'o'               => ['param',  '-',      qw(cmalign cmsearch)],
+  'old'             => ['switch', '--',     qw(cmscore)],
+  'onepost'         => ['switch', '--',     qw(cmalign)],
+  'optacc'          => ['switch', '--',     qw(cmalign)],
+  'outfile'         => ['param',  '--',     qw(cmscore)],
+  'p'               => ['switch', '-',      qw(cmalign cmsearch)],
+  'pad'             => ['switch', '--',     qw(cmscore)],
+  'pbegin'          => ['param',  '--',     qw(cmalign cmcalibrate cmemit cmscore cmsearch)],
+  'pbswitch'        => ['param',  '--',     qw(cmbuild)],
+  'pebegin'         => ['switch', '--',     qw(cmalign cmcalibrate cmemit cmscore cmsearch)],
+  'pend'            => ['param',  '--',     qw(cmalign cmcalibrate cmemit cmscore cmsearch)],
+  'pfend'           => ['param',  '--',     qw(cmalign cmcalibrate cmemit cmscore cmsearch)],
+  'prior'           => ['param',  '--',     qw(cmbuild)],
+  'q'               => ['switch', '-',      qw(cmalign)],
+  'qdb'             => ['switch', '--',     qw(cmalign cmscore)],
+  'qdbboth'         => ['switch', '--',     qw(cmscore)],
+  'qdbfile'         => ['param',  '--',     qw(cmstat)],
+  'qdbsmall'        => ['switch', '--',     qw(cmscore)],
+  'random'          => ['switch', '--',     qw(cmscore)],
+  'rdump'           => ['param',  '--',     qw(cmbuild)],
+  'refine'          => ['param',  '--',     qw(cmbuild)],
+  'regress'         => ['param',  '--',     qw(cmalign cmbuild cmscore)],
+  'resonly'         => ['switch', '--',     qw(cmalign)],
+  'rf'              => ['switch', '--',     qw(cmalign cmbuild)],
+  'rna'             => ['switch', '--',     qw(cmalign cmemit cmsearch)],
+  'rsearch'         => ['param',  '--',     qw(cmbuild)],
+  'rtrans'          => ['switch', '--',     qw(cmsearch)],
+  's'               => ['param',  '-',      qw(cmalign cmbuild cmcalibrate cmemit cmscore)],
+  'sample'          => ['switch', '--',     qw(cmalign)],
+  'scoreonly'       => ['switch', '--',     qw(cmscore)],
+  'search'          => ['switch', '--',     qw(cmscore cmstat)],
+  'seqfile'         => ['param',  '--',     qw(cmstat)],
+  'sfile'           => ['param',  '--',     qw(cmstat)],
+  'shmm'            => ['param',  '--',     qw(cmemit)],
+  'small'           => ['switch', '--',     qw(cmalign)],
+  'stall'           => ['switch', '--',     qw(cmalign cmscore cmsearch)],
+  'sub'             => ['switch', '--',     qw(cmalign cmbuild cmscore)],
+  'sums'            => ['switch', '--',     qw(cmalign cmsearch)],
+  'tabfile'         => ['param',  '--',     qw(cmsearch)],
+  'tau'             => ['param',  '--',     qw(cmalign cmbuild cmscore cmsearch)],
+  'taue'            => ['param',  '--',     qw(cmscore)],
+  'taus'            => ['param',  '--',     qw(cmscore)],
+  'tc'              => ['switch', '--',     qw(cmsearch cmstat)],
+  'tfile'           => ['param',  '--',     qw(cmalign cmbuild cmemit cmscore)],
+  'toponly'         => ['switch', '--',     qw(cmsearch cmstat)],
+  'u'               => ['switch', '-',      qw(cmemit)],
+  'v'               => ['switch', '-',      qw(cmbuild cmcalibrate)],
+  'viterbi'         => ['switch', '--',     qw(cmalign cmscore cmsearch)],
+  'wblosum'         => ['switch', '--',     qw(cmbuild)],
+  'wgiven'          => ['switch', '--',     qw(cmbuild)],
+  'wgsc'            => ['switch', '--',     qw(cmbuild)],
+  'wid'             => ['param',  '--',     qw(cmbuild)],
+  'withali'         => ['param',  '--',     qw(cmalign)],
+  'withpknots'      => ['switch', '--',     qw(cmalign)],
+  'wnone'           => ['switch', '--',     qw(cmbuild)],
+  'wpb'             => ['switch', '--',     qw(cmbuild)],
+  'x'               => ['switch', '-',      qw(cmsearch)],
+  'xfile'           => ['param',  '--',     qw(cmstat)],
+);
 
 our %INFERNAL_PROGRAM = (
-    cmalign =>  [qw(h l q informat nosmall regress full tfile banddump dlev
-                time inside outside post checkpost sub fsub elsilent hbanded
-                hbandp sums checkcp9 qdb beta noexpand W), # pre-0.81
-                qw(zeroinserts enfstart enfseq tau hsafe hmmonly withali
-                rf gapthresh)], # added in 0.81
-    
-    cmbuild =>  [qw(h n A F binary rf gapthresh informat bandp elself nodetach
-                wgiven wnone wgsc effent etarget effnone cfile cmtbl emap gtree
-                gtbl tfile bfile local bdfile nobalance regress treeforce
-                ignorant dlev null priorfile), # pre-0.81
-                qw(beta window rsearch rsw ctarget cmindiff call corig cdump)], # added in 0.81
-    
-    cmscore  => [qw(h informat local regress scoreonly smallonly stringent qdb
-                beta), # pre-0.81
-                qw(i sub trees std qdbsmall qdbboth hbanded tau hsafe hmmonly
-                betas betae taus taue)], # added in 0.81
-    
-    cmsearch => [qw(h W informat toponly local noalign dumptrees thresh X inside
-                null2 learninserts hmmfb hmmweinberg hmmpad hmmonly hthresh beta
-                noqdb qdbfile hbanded hbandp banddump sums scan2bands), # pre-0.81
-                qw(T E window nsamples partition negsc enfstart enfseq enfnohmm
-                time rtrans greedy gcfile hmmfilter hmmE hmmT hmmnegsc)], # added in 0.81
-    
-    cmemit   => [qw(a c h n q seed full begin end cp9)], # up to 0.81
-    );
-
-our %INFERNAL_SWITCHES = map {$_ => 1} (qw(h l a A F c q X banddump binary
-    checkcp9 checkpost cp9 dumptrees effent effnone elsilent fsub full hbanded
-    hmmfb hmmonly hmmweinberg ignorant inside learninserts local noalign
-    nobalance nodetach noexpand noqdb nosmall null2 outside post qdb rf
-    scan2bands scoreonly smallonly stringent sub sums time toponly treeforce
-    wgiven wgsc wnone),
-    # new in 0.81
-    qw(zeroinserts hsafe hmmonly rf),
-    qw(i sub trees std qdbsmall qdbboth hbanded hsafe hmmonly),
-    qw(enfnohmm time rtrans greedy hmmfilter),
-    qw(rsw call corig),
-    );
-
-our %INFERNAL_DOUBLE = map {$_ => 1} (qw(X banddump bandp bdfile begin beta bfile
-    binary cfile checkcp9 checkpost cmtbl cp9 dlev dumptrees effent effnone
-    elself elsilent emap end etarget fsub full gapthresh gtbl gtree hbanded
-    hbandp hmmfb hmmonly hmmpad hmmweinberg hthresh ignorant informat inside
-    learninserts local noalign nobalance nodetach noexpand noqdb nosmall null
-    null2 outside post priorfile qdb qdbfile regress rf scan2bands scoreonly
-    seed smallonly stringent sub sums tfile thresh time toponly treeforce wgiven
-    wgsc wnone),
-    # new in 0.81
-    qw(enfstart enfseq tau withali gapthresh),
-    qw(tau betas betae taus taue),
-    qw(T E window nsamples partition negsc enfstart enfseq hmmE hmmT hmmnegsc),
-    qw(beta window rsearch ctarget cmindiff cdump),
+  'cmalign'         => "cmalign [-options] <cmfile> <sequence file>\n".
+                       'cmalign [-options] --merge <cmfile> <msafile1> <msafile2>',
+  'cmbuild'         => 'cmbuild [-options] <cmfile output> <alignment file>',
+  'cmcalibrate'     => 'cmcalibrate [-options] <cmfile>',
+  'cmemit'          => 'cmemit [-options] <cmfile> <sequence output file>',
+  'cmscore'         => 'cmscore [-options] <cmfile>',
+  'cmsearch'        => 'cmsearch [-options] <cmfile> <sequence file>',
+  'cmstat'          => 'cmstat [-options] <cmfile>',
 );
+
+# this is a simple lookup for easy validation for passed methods
+our %LOCAL_PARAMS = map {$_ => 1} qw(program outfile tempfile model);
 
 =head2 new
 
@@ -208,18 +374,32 @@ our %INFERNAL_DOUBLE = map {$_ => 1} (qw(X banddump bandp bdfile begin beta bfil
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    my ($program, $model, $out, $tf) =
+    
+    # these are specific parameters we do not want passed on to set_parameters
+    my ($program, $model, $tf, $validate, $q, $o1, $o2) =
         $self->_rearrange([qw(PROGRAM
-                            MODEL
-                            OUTFILE_NAME 
-                            TEMPFILE)], @args);
-    $self->throw("Program '$program' not supported") if $program &&
-        !exists $INFERNAL_PROGRAM{$program};
-    $program ||='';
+                           MODEL_FILE
+                           TEMPFILE
+                           VALIDATE_PARAMETERS
+                           QUIET
+                           OUTFILE_NAME
+                           O)], @args);
+    
+    $q && $self->quiet($q);
+    if ($o1 && $o2) {
+        $self->warn("Only assign to either -outfile_name or -o, not both;");
+    }
+    my $out = $o1 || $o2;
+    if ($tf && $out) {
+        $self->throw("Can't set both -outfile_name/-o and -tempfile");
+    }
+    
     $self->io->_initialize_io();
-    # defining outfile specifically overrides the tempfile flag
-    # all programs but cmbuild  : outfile is optional (default to STDOUT)
-    if (($tf && !$out) || ($program eq 'cmbuild' && !$out)) {
+    
+    $self->validate_parameters($validate);
+    $program  && $self->program($program);
+    
+    if ($tf && !$out) {
         my ($tfh, $outfile) = $self->io->tempfile(-dir=> $self->io->tempdir());
         close($tfh);
         undef $tfh;
@@ -228,13 +408,9 @@ sub new {
         $out ||= '';
         $self->outfile_name($out);
     }
-    $tf        && $self->tempfile($tf);
-    $program   && $self->program($program);
-    $model     && $self->model($model);
-    $self->_set_from_args(\@args,
-            -methods => [@PARAMS],
-            -create => 1
-           );
+    $self->set_parameters(@args);
+    
+    $model      && $self->model_file($model);
     return $self;
 }
 
@@ -246,14 +422,22 @@ sub new {
             program_name()
  Returns :  String (program name)
  Args    :  String (program name)
+ Status  :  Unstable (may delegate to program_name, which is the interface method)
 
 =cut
 
 sub program {
     my $self = shift;
     if (@_) {
-        $self->{'_program'} = shift @_;
-        $self->executable( $self->{'_program'} );
+        my $p = shift;
+        $self->throw("Program '$p' not supported")
+            if !exists $INFERNAL_PROGRAM{lc $p};
+        $self->{'_program'} = lc $p;
+        # set up cache of valid parameters
+        while (my ($p, $data) = each %INFERNAL_PARAMS) {
+            my %in_exe = map {$_ => 1} @$data[2..$#{$data}];
+            $self->{valid_params}->{$p} = 1 if exists $in_exe{$self->{'_program'}};
+        }
     }
     return $self->{'_program'};
 }
@@ -269,24 +453,24 @@ sub program {
 =cut
 
 sub program_name {
-  my ($self) = shift;
-  return $self->program(@_);
+    my ($self) = shift;
+    return $self->program(@_);
 }
 
-=head2 model
+=head2 model_file
 
- Title   :  model
- Usage   :  $obj->model()
- Function:  Set the model used when run() is called.
+ Title   :  model_file
+ Usage   :  $obj->model_file()
+ Function:  Set the model file used when run() is called.
  Returns :  String (file location of covariance model)
  Args    :  String (file location of covariance model)
 
 =cut
 
-sub model {
+sub model_file {
     my $self = shift;
-    return $self->{'_model'} = shift if @_;
-    return $self->{'_model'};
+    return $self->{'_model_file'} = shift if @_;
+    return $self->{'_model_file'};
 }
 
 =head2 program_dir
@@ -300,7 +484,7 @@ sub model {
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{INFERNALDIR}) if $ENV{INFERNALDIR};
+    return Bio::Root::IO->catfile($ENV{INFERNALDIR}) if $ENV{INFERNALDIR};
 }
 
 =head2  version
@@ -321,6 +505,8 @@ sub version {
     my $v;
     if ($string =~ m{Infernal\s([\d.]+)}) {
         $v = $1;
+        $self->deprecated(-message => "Only Infernal 1.0 and above is supported.",
+                          -version => 1.006001) if $v < 1;
     }
     return $self->{'_progversion'} = $v || undef;
 }
@@ -335,17 +521,17 @@ sub version {
 
 =cut
 
+# TODO: update to accept multiple seqs, alignments
 sub run {
     my ($self,@seq) = @_;
-    # will need to add _writeAlignFile for alignment data
     if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
         my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
-    } elsif  (ref $seq[0] && $seq[0]->isa("Bio::Align::AlignI") ){# it is an object
-        my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
+        return $self->_run($infile1);
+    } elsif (ref $seq[0] && $seq[0]->isa("Bio::Align::AlignI") ){ # it is an object
+        my $infile1 = $self->_writeAlignFile(@seq);
+        return $self->_run($infile1);
     } else {
-        return  $self->_run(@seq);
+        return $self->_run(@seq);
     }
 }
 
@@ -366,9 +552,9 @@ sub cmsearch {
     $self->program('cmsearch');
     if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
         my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
+        return  $self->_run(-seq_files => [$infile1]);
     } else {
-        return  $self->_run(@seq);
+        return  $self->_run(-seq_files => \@seq);
     }
 }
 
@@ -385,11 +571,20 @@ sub cmsearch {
 sub cmalign {
     my ($self,@seq) = @_;
     $self->program('cmalign');
-    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
-        my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
+    if (ref $seq[0]) { # it is an object
+        if ($seq[0]->isa("Bio::PrimarySeqI") ){
+            my $infile1 = $self->_writeSeqFile(@seq);
+            return  $self->_run(-seq_files => [$infile1]);
+        } elsif ( $seq[0]->isa("Bio::Align::AlignI") ) {
+            if (scalar(@seq) != 2) {
+                
+            }
+            my $infile1 = $self->_writeSeqFile($seq[0]);
+            return  $self->_run(-seq_files => [$infile1]);
+        }
     } else {
-        return  $self->_run(@seq);
+        # we can maybe add a check for the file extension and try to DTRT
+        return $self->_run(-seq_files => \@seq);
     }
 }
 
@@ -399,19 +594,14 @@ sub cmalign {
  Usage   :   $obj->cmemit($modelfile)
  Function:   Runs Infernal cmemit and returns Bio::AlignIO
  Returns :   A Bio::AlignIO
- Args    :   [optional] File name containing covariance model
-             (will use model() if not passed)
+ Args    :   None; set model_file() to use a specific model
 
 =cut
 
 sub cmemit {
-    my ($self,@seq) = @_;
+    my ($self) = shift;
     $self->program('cmemit');
-    if  (ref $seq[0]){# it is an object
-        $self->throw("Arg must be covariance model file name");
-    } else {
-        return  $self->_run(@seq);
-    }
+    return $self->_run(@_);
 }
 
 =head2 cmbuild
@@ -421,7 +611,7 @@ sub cmemit {
  Function:   Runs Infernal cmbuild and saves covariance model
  Returns :   1 on success (no object for covariance models)
  Args    :   Bio::AlignIO with structural information (such as from Stockholm
-             format source) or alignment file
+             format source) or alignment file name
 
 =cut
 
@@ -430,9 +620,9 @@ sub cmbuild {
     $self->program('cmbuild');
     if  (ref $seq[0] && $seq[0]->isa("Bio::Align::AlignI") ){# it is an object
         my $infile1 = $self->_writeAlignFile(@seq);
-        return  $self->_run($infile1);
+        return  $self->_run(-align_files => [$infile1]);
     } else {
-        return  $self->_run(@seq);
+        return  $self->_run(-align_files => \@seq);
     }
 }
 
@@ -442,83 +632,358 @@ sub cmbuild {
  Usage   :   $obj->cmscore($seq)
  Function:   Runs Infernal cmscore and saves output
  Returns :   None
- Args    :   Bio::PrimarySeqI or file
+ Args    :   None; set model_file() to use a specific model
 
 =cut
 
 sub cmscore {
     my ($self,@seq) = @_;
     $self->program('cmscore');
-    if  (ref $seq[0] && $seq[0]->isa("Bio::PrimarySeqI") ){# it is an object
-        my $infile1 = $self->_writeSeqFile(@seq);
-        return  $self->_run($infile1);
-    } else {
-        return  $self->_run(@seq);
-    }
+    return  $self->_run();
 }
 
-=head2 _run
+=head2 cmcalibrate
 
- Title   :   _run
- Usage   :   $obj->_run()
- Function:   Internal(not to be used directly)
- Returns :   
- Args    :
+ Title   :   cmcalibrate
+ Usage   :   $obj->cmcalibrate('file')
+ Function:   Runs Infernal calibrate on specified CM
+ Returns :   None
+ Args    :   None; set model_file() to use a specific model
 
 =cut
 
+sub cmcalibrate {
+    my ($self,@seq) = @_;
+    $self->program('cmcalibrate');
+    return  $self->_run();
+}
+
+=head2 cmstat
+
+ Title   :   cmstat
+ Usage   :   $obj->cmstat($seq)
+ Function:   Runs Infernal cmstat and saves output
+ Returns :   None
+ Args    :   None; set model_file() to use a specific model
+
+=cut
+
+sub cmstat {
+    my ($self,@seq) = @_;
+    $self->program('cmstat');
+    return  $self->_run();
+}
+
+=head1 Bio::ParameterBaseI-specific methods
+
+These methods are part of the Bio::ParameterBaseI interface
+
+=cut
+
+=head2 set_parameters
+
+ Title   : set_parameters
+ Usage   : $pobj->set_parameters(%params);
+ Function: sets the parameters listed in the hash or array
+ Returns : None
+ Args    : [optional] hash or array of parameter/values.  These can optionally
+           be hash or array references
+ Note    : This only sets parameters; to set methods use the method name
+=cut
+
+sub set_parameters {
+    my $self = shift;
+    # circumvent any issues arising from passing in refs
+    my %args = (ref($_[0]) eq 'HASH')  ? %{$_[0]} :
+               (ref($_[0]) eq 'ARRAY') ? @{$_[0]} :
+               @_;
+    # set the parameters passed in, but only ones supported for the program
+    my ($prog, $validate) = ($self->program, $self->validate_parameters);
+    
+    # parameter cleanup
+    %args = map { my $a = $_;
+              $a =~ s{^-}{};
+              lc $a => $args{$_}
+                 } sort keys %args;
+    
+    while (my ($key, $val) = each %args) {
+        if (exists $INFERNAL_PARAMS{$key}) {
+            my ($type, $prefix) = @{$INFERNAL_PARAMS{$key}}[0..1];
+            @{$self->{parameters}->{$key}} = ($type, $prefix);
+            unshift @{$self->{parameters}->{$key}}, 
+                $type eq 'param'          ? $val :
+                $type eq 'switch' && $val ? 1 : 0;
+            if ($validate) {
+                my %in_exe = map {$_ => 1} @{$INFERNAL_PARAMS{$key}}[2..$#{$INFERNAL_PARAMS{$key}}];
+                $self->warn("Parameter $key not used for $prog") if !exists $in_exe{$key};
+            }
+        } else {
+            $self->warn("Parameter $key does not exist") if ($validate);
+        }
+    }
+}
+
+=head2 reset_parameters
+
+ Title   : reset_parameters
+ Usage   : resets values
+ Function: resets parameters to either undef or value in passed hash
+ Returns : none
+ Args    : [optional] hash of parameter-value pairs
+
+=cut
+
+sub reset_parameters {
+    my $self = shift;
+    delete $self->{parameters};
+    if (@_) {
+        $self->set_parameters(@_);
+    }
+}
+
+=head2 validate_parameters
+
+ Title   : validate_parameters
+ Usage   : $pobj->validate_parameters(1);
+ Function: sets a flag indicating whether to validate parameters via
+           set_parameters() or reset_parameters()
+ Returns : Bool
+ Args    : [optional] value evaluating to True/False
+ Note    : Optionally implemented method; up to the implementation on whether
+           to automatically validate parameters or optionally do so
+
+=cut
+
+sub validate_parameters {
+    my ($self) = shift;
+    if (@_) {
+        $self->{validate_params} = defined $_[0] ? 1 : 0;
+    }
+    return $self->{validate_params};
+}
+
+=head2 parameters_changed
+
+ Title   : parameters_changed
+ Usage   : if ($pobj->parameters_changed) {...}
+ Function: Returns boolean true (1) if parameters have changed
+ Returns : Boolean (0 or 1)
+ Args    : None
+ Note    : This module does not run state checks, so this always returns True
+
+=cut
+
+sub parameters_changed { 1 }
+
+=head2 available_parameters
+
+ Title   : available_parameters
+ Usage   : @params = $pobj->available_parameters()
+ Function: Returns a list of the available parameters
+ Returns : Array of parameters
+ Args    : [optional] name of executable being used; defaults to returning all
+           available parameters
+
+=cut
+
+sub available_parameters {
+    my ($self, $exec) = @_;
+    my @params;
+    if ($exec) {
+        $self->throw("$exec is not part of the Infernal package") if !exists($INFERNAL_PROGRAM{$exec});
+        for my $p (sort keys %INFERNAL_PARAMS) {
+            if (grep { $exec eq $_ }
+                @{$INFERNAL_PARAMS{$p}}[2..$#{$INFERNAL_PARAMS{$p}}])
+            {
+                push @params, $p;
+            }
+        }
+    } else {
+        @params = (sort keys %INFERNAL_PARAMS, sort keys %LOCAL_PARAMS);
+    }
+    return @params;
+}
+
+=head2 get_parameters
+
+ Title   : get_parameters
+ Usage   : %params = $pobj->get_parameters;
+ Function: Returns list of set key-value pairs, parameter => value
+ Returns : List of key-value pairs
+ Args    : [optional]
+           'full' - this option returns everything associated with the parameter
+                    as an array ref value; that is, not just the value but also
+                    the value, type, and prefix. Default is value only.
+           'valid'- same a 'full', but only returns the grouping valid for the
+                    currently set executable
+
+=cut
+
+sub get_parameters {
+    my ($self, $option) = @_;
+    $option ||= ''; # no option
+    my %params;
+    if (exists $self->{parameters}) {
+        %params = (ref $option eq 'ARRAY') ? (
+                    map {$_ => $self->{parameters}{$_}[0]}
+                    grep { exists $self->{parameters}{$_} } @$option) :
+                (lc $option eq 'full')     ?
+                    (%{$self->{parameters}}) :
+                (lc $option eq 'valid')    ?
+                    (map {$_ => $self->{parameters}{$_}}
+                    grep { exists $self->{valid_params}->{$_} } keys %{$self->{parameters}}) :
+                (map {$_ => $self->{parameters}{$_}[0]} keys %{$self->{parameters}});
+    } else {
+        %params = ();
+    }
+    return %params;
+}
+
+=head1 to_* methods
+
+All to_* methods are implementation-specific
+
+=cut
+
+=head2 to_exe_string
+
+ Title   : to_exe_string
+ Usage   : $string = $pobj->to_exe_string;
+ Function: Returns string (command line string in this case)
+ Returns : String 
+ Args    : 
+
+=cut
+
+sub to_exe_string {
+    my ($self, @passed) = @_;
+    my ($seqs, $aligns) = $self->_rearrange([qw(SEQ_FILES ALIGN_FILES)], @passed);
+    if ($seqs || $aligns) {
+        $self->throw("Seqs or alignments must be an array reference") unless
+            ($seqs && ref($seqs) eq 'ARRAY') || ($aligns && ref($aligns) eq 'ARRAY' );
+    }
+    
+    my %args = map {$_ => []} qw(switch param input redirect);
+    my %params = $self->get_parameters('valid');
+    
+    my ($exe, $prog, $model, $outfile) = ($self->executable,
+                                   $self->program_name,
+                                   $self->model_file,
+                                   $self->outfile_name);
+    delete $params{o} if exists $params{o};      
+
+    # outfile...
+    if (!defined($model) && $prog ne 'cmbuild') {
+        $self->throw("model_file() not defined")
+    }
+    
+    $outfile ||= '';
+    
+    for my $p (sort keys %params) {
+        if ($params{$p}[0]) {
+            my $val = $params{$p}[1] eq 'param' ? ' '.$params{$p}[0] : '';
+            push @{$args{$params{$p}[1]}}, $params{$p}[2].$p.$val;
+        }
+    }
+    
+    # TODO: not sure what happens when we pass in multiple seq or alignment
+    # filenames, may need checking 
+    if ($prog eq 'cmscore' || $prog eq 'cmstat' || $prog eq 'cmcalibrate') {
+        push @{$args{'redirect'}}, "> $outfile" if $outfile;
+        push @{$args{'input'}}, $model;
+    } elsif ($prog eq 'cmsearch') {
+        if (!defined $seqs) {
+            $self->throw('cmsearch requires a sequence file name');
+        }
+        push @{$args{'param'}}, "-o $outfile" if $outfile;
+        push @{$args{'input'}}, ($model, @$seqs);
+    } elsif ($prog eq 'cmalign') {
+        if ($params{'merge'}) {
+            $self->throw('cmalign with --merge option requires two alignment files') if
+                !defined($aligns) || @$aligns < 2;
+            push @{$args{'input'}}, ($model, @$aligns);
+        } else {
+            $self->throw('cmalign requires a sequence file') if
+                !defined $seqs;
+            push @{$args{'input'}}, ($model, @$seqs);
+        }
+        push @{$args{'param'}}, "-o $outfile" if $outfile;
+    } elsif ($prog eq 'cmbuild') {
+        $self->throw('cmbuild requires one alignment file') if
+            !defined($aligns);
+        push @{$args{'input'}}, ($outfile, @$aligns);
+    } elsif ($prog eq 'cmemit') {
+        push @{$args{'input'}}, $model;
+        push @{$args{'input'}}, $outfile if $outfile;
+    }
+    
+    my $string = "$exe ".join(' ',(@{$args{switch}},
+                                   @{$args{param}},
+                                   @{$args{input}},
+                                   @{$args{redirect}}));
+    # this assumes UNIX (win not supported)
+    # this can only be implemented under some circumstances, otherwise piping
+    # output may not work where STDOUT is used (i.e. cmsearch)
+    $string .= ' 2> /dev/null' if $self->quiet;
+    $string;
+}
+
+#=head2 _run
+#
+# Title   :   _run
+# Usage   :   $obj->_run()
+# Function:   Internal(not to be used directly)
+# Returns :   
+# Args    :
+#
+#=cut
+
+{
+    my %ALLOWED = map {$_ => 1} qw(run cmsearch cmalign cmemit cmbuild
+    cmcalibrate cmstat cmscore);
+
 sub _run {
-    my ($self,$file)= @_;
+    my ($self)= shift;
+    
     my ($prog, $model, $out, $version) = ($self->program,
-                                          $self->model,
+                                          $self->model_file,
                                           $self->outfile_name,
                                           $self->version);
+    
+    if (my $caller = (caller(1))[3]) {
+        $caller =~ s{.*::(\w+)$}{$1};
+        $self->throw("Calling _run() from disallowed method") unless exists $ALLOWED{$caller};
+    } else {
+        $self->throw("Can't call _run directly");
+    }
+    
     # a model and a file must be defined for all but cmemit; cmemit must have a
     # file or model defined (using $file if both are defined)
-    if ($prog eq 'cmemit' && (!$file && !$model) ) {
-        $self->throw("Must supply file/Bio::PrimarySeqI/Bio::AlignI or a model");
-    } elsif (!$file && !$model) {
-        $self->throw("Must supply file/Bio::PrimarySeqI/Bio::AlignI and a model");
-    }
-    $file ||= '';
-    # for cmsearch, cmscore, cmalign, cmbuild, $file should point to a sequence or alignment file
-    # for cmemit, the file is technically optional (falls back to using the model() if set)
-    # format : cmsearch [-options] <cmfile> <sequence file>
-    #          cmbuild [-options] <cmfile output> <alignment file>
-    #          cmalign [-options] <cmfile> <sequence file>
-    #          cmscore [-options] <cmfile> <sequence file>
-    #          cmemit  [-options] <cmfile>
-    # the output file (if set) : cmalign, cmemit : added in _setparams (-o option)
-    #                            cmscore, cmsearch, cmbuild: redirect STDOUT to file
-    my $str = $self->executable;
-    my $param_str = $self->_setparams;
-    $str .= $param_str ? " $param_str $model $file" : " $model $file";
-    if ($out && ($prog ne 'cmalign' || $prog ne 'cmemit')) {
-        $str .= " > $out";
-    }
+    
+    # relevant files are passed on to the string builder
+    my $str = $self->to_exe_string(@_);
     $self->debug("Infernal command: $str\n");
-    # cmsearch returns SearchIO
+    
+    # retrieve available params here to determine whether we are doing the right thing below
+    
+    # cmsearch always returns SearchIO
     # cmbuild does not return anything (outfile = STDOUT, cmfile is written to model() )
-    # cmscore does not return anything (outfile = STDOUT or outfile/tempfile)
+    # cmscore does not return anything (outfile = STDOUT or outfile)
     # cmemit - AlignIO or SeqIO (based on parameter settings)
     # cmalign - AlignIO
+    
     my $obj =
         ($prog eq 'cmsearch') ? Bio::SearchIO->new(-format => 'infernal',
-                                                -database => $file,
                                                 -version => $version,
                                                 -model => $model) :
-        ($prog eq 'cmalign' ) ? Bio::AlignIO->new(-format => 'stockholm') :
-        ($prog eq 'cmemit' && $self->a) ? Bio::AlignIO->new(-format => 'stockholm') :
+        ($prog eq 'cmalign' )                              ? Bio::AlignIO->new(-format => 'stockholm') :
+        ($prog eq 'cmemit') ? Bio::AlignIO->new(-format => 'stockholm') :
         ($prog eq 'cmemit') ? Bio::SeqIO->new(-format => 'fasta') :
               undef;
     # outfile or tempfile-based
-    
-    # only supports cmsearch for now, adding support for the others very soon...
-    #return 1 unless $prog eq 'cmsearch' || $prog eq 'cmalign';
     my @args;
     # file output
-    if ($out) {
-        local $SIG{CHLD} = 'DEFAULT';
+    if ($out || ($prog eq 'cmbuild' && $model) ) {
         my $status = system($str);
         if($status || !-e $out || -z $out ) {
             my $error = ($!) ? "$! Status: $status" : "Status: $status";
@@ -548,50 +1013,6 @@ sub _run {
     return $obj || 1;
 }
 
-=head2 _setparams
-
- Title   :  _setparams
- Usage   :  Internal function, not to be called directly
- Function:  creates a string of params to be used in the command string
- Example :
- Returns :  string of params
- Args    :  
-
-=cut
-
-# this only sets parameters which legitimately can be used for a program (listed
-# in $INFERNAL_PROGRAM)
-
-sub _setparams {
-    my ($self) = @_;
-    my $param_string;
-    my ($program, $model, $outfile) = ($self->program,
-                                       $self->model,
-                                       $self->outfile_name);
-    $self->throw("No valid program defined!")
-        if !$program || !exists $INFERNAL_PROGRAM{$program};
-        
-    # verbosity of cmemit must be turned off to get data into Bio* objects
-    $self->q(1) if $program eq 'cmemit' || $program eq 'cmalign';
-    
-    my @valid_params = @{ $INFERNAL_PROGRAM{$program} };
-    my @params;
-    foreach my $attr (@valid_params) {
-        my $value = ($self->can($attr)) ? $self->$attr() : undef;
-        next unless (defined $value);
-        my $attr_key = (exists $INFERNAL_DOUBLE{$attr}) ? '--'.$attr : '-'.$attr;
-        if (exists $INFERNAL_SWITCHES{$attr}) {
-            push @params, $attr_key;
-        } else {
-            push @params, ($attr_key, $value);
-        }
-    }
-    # output to optional outfile
-    if (($program eq 'cmemit' || $program eq 'cmalign') && $outfile) {
-        push @params, ('-o', $outfile);
-    }
-    $param_string = join ' ', @params;
-    return $param_string;
 }
 
 =head2 _writeSeqFile
@@ -634,13 +1055,81 @@ sub _writeAlignFile{
     my $in  = Bio::AlignIO->new('-fh'     => $tfh , 
                 '-format' => 'stockholm');
     foreach my $s(@align){
-      $in->write_aln($s);
+        $in->write_aln($s);
     }
     $in->close();
     $in = undef;
     close($tfh);
     undef $tfh;
     return $inputfile;
+}
+
+############### PRIVATE ###############
+
+# this is a private sub used to regenerate the class data structures,
+# dumped to STDOUT
+
+# could probably add in a description field if needed...
+
+sub _dump_params {
+    my %params;
+    my %usage;
+    for my $exec (qw(cmalign cmbuild cmcalibrate cmemit cmscore cmsearch cmstat)) {
+        my $output = `$exec --devhelp`;
+        if ($?) {
+            $output = `$exec -h`;
+        }
+        my @lines = split("\n",$output);
+        
+        for my $line (@lines) {
+            next if $line =~ /^#/;
+            if ($line =~ /^\s*(-{1,2})(\S+)\s+(<\S+>)?/) {
+                my %data;
+                ($data{prefix}, my $p, $data{arg}) = ($1, $2, $3 ? 'param' : 'switch');
+                if (exists $params{$p}) {
+                    if ($data{prefix} ne $params{$p}{prefix}) {
+                        warn("$data{prefix} for $p in $exec doesn't match prefix for same parameter in ".$params{$p}{exec}[-1].":".$params{$p}{prefix});
+                    }
+                    if ($data{arg} ne $params{$p}{arg}) {
+                        warn("$data{arg} for $p in $exec doesn't match arg for same parameter in ".$params{$p}{exec}[-1].":".$params{$p}{arg});
+                    }
+                }
+                
+                while (my ($key, $val) = each %data) {
+                    $params{$p}->{$key} = $val;
+                }
+                push @{$params{$p}->{exec}}, $exec;
+            } elsif ($line =~ /Usage:\s*(.+)$/) {
+                push @{$usage{$exec}}, $1;
+            } else {
+                #print "$line\n";
+            }
+        }
+    }
+
+    # generate  data structure
+    print "our %INFERNAL_PARAMS = (\n";
+    for my $k (sort keys %params) {
+        printf("  %-17s => [","'$k'");
+        for my $sub (qw(arg prefix exec)) {
+            my $str = (ref($params{$k}{$sub}) eq 'ARRAY') ?
+                  "qw(".join(' ', @{$params{$k}{$sub}}).")" :
+                  "'".$params{$k}{$sub}."',";
+            printf("%-10s", $str);
+        }
+        print "],\n";
+    }
+    print ");\n\n";
+    
+    # generate usage data structure
+    print "our %INFERNAL_PROGRAM = (\n";
+    for my $k (sort keys %usage) {
+        printf("  %-17s => [\n","'$k'");
+        print '   '.join(",\n   ", map {"'$_'"} @{$usage{$k}})."\n";
+        print "  ],\n";
+    }
+    print ");\n";
+
 }
 
 1;
