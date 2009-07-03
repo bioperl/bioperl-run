@@ -428,18 +428,7 @@ sub new {
 
 sub program {
     my $self = shift;
-    if (@_) {
-        my $p = shift;
-        $self->throw("Program '$p' not supported")
-            if !exists $INFERNAL_PROGRAM{lc $p};
-        $self->{'_program'} = lc $p;
-        # set up cache of valid parameters
-        while (my ($p, $data) = each %INFERNAL_PARAMS) {
-            my %in_exe = map {$_ => 1} @$data[2..$#{$data}];
-            $self->{valid_params}->{$p} = 1 if exists $in_exe{$self->{'_program'}};
-        }
-    }
-    return $self->{'_program'};
+    return $self->program_name(@_);
 }
 
 =head2 program_name
@@ -454,7 +443,18 @@ sub program {
 
 sub program_name {
     my ($self) = shift;
-    return $self->program(@_);
+    if (@_) {
+        my $p = shift;
+        $self->throw("Program '$p' not supported")
+            if !exists $INFERNAL_PROGRAM{lc $p};
+        $self->{'_program'} = lc $p;
+        # set up cache of valid parameters
+        while (my ($p, $data) = each %INFERNAL_PARAMS) {
+            my %in_exe = map {$_ => 1} @$data[2..$#{$data}];
+            $self->{valid_params}->{$p} = 1 if exists $in_exe{$self->{'_program'}};
+        }
+    }
+    return $self->{'_program'};    
 }
 
 =head2 model_file
@@ -870,7 +870,7 @@ sub to_exe_string {
                                    $self->program_name,
                                    $self->model_file,
                                    $self->outfile_name);
-    delete $params{o} if exists $params{o};      
+    delete $params{o} if exists $params{o};
 
     # outfile...
     if (!defined($model) && $prog ne 'cmbuild') {
@@ -911,7 +911,12 @@ sub to_exe_string {
     } elsif ($prog eq 'cmbuild') {
         $self->throw('cmbuild requires one alignment file') if
             !defined($aligns);
-        push @{$args{'input'}}, ($outfile, @$aligns);
+        if ($model) {
+            push @{$args{'input'}}, ($model, @$aligns);
+            push @{$args{'redirect'}}, "> $outfile" if $outfile;
+        } else {
+            push @{$args{'input'}}, ($outfile, @$aligns);
+        }
     } elsif ($prog eq 'cmemit') {
         push @{$args{'input'}}, $model;
         push @{$args{'input'}}, $outfile if $outfile;
@@ -924,9 +929,11 @@ sub to_exe_string {
     # this assumes UNIX (win not supported)
     # this can only be implemented under some circumstances, otherwise piping
     # output may not work where STDOUT is used (i.e. cmsearch)
-    $string .= ' 2> /dev/null' if $self->quiet;
+    $string .= ' > /dev/null' if $self->quiet && $prog ne 'cmsearch';
     $string;
 }
+
+############### PRIVATE ###############
 
 #=head2 _run
 #
@@ -983,7 +990,7 @@ sub _run {
     # outfile or tempfile-based
     my @args;
     # file output
-    if ($out || ($prog eq 'cmbuild' && $model) ) {
+    if ($out) {
         my $status = system($str);
         if($status || !-e $out || -z $out ) {
             my $error = ($!) ? "$! Status: $status" : "Status: $status";
@@ -1063,8 +1070,6 @@ sub _writeAlignFile{
     undef $tfh;
     return $inputfile;
 }
-
-############### PRIVATE ###############
 
 # this is a private sub used to regenerate the class data structures,
 # dumped to STDOUT
