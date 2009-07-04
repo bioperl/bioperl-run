@@ -10,7 +10,7 @@
 #              runs but works for now
 # April 2008 - add 0.81 parameters (may be removed in the 1.0 release)
 #
-# June  2009 - updated for v1.0. No longer supporting pre-1.0 Infernal
+# July  2009 - updated for v1.0. No longer supporting pre-1.0 Infernal
 
 =head1 NAME
 
@@ -28,23 +28,29 @@ cmsearch, cmscore
   # this resets the program flag if previously set
 
   $factory->cmsearch(@seqs); # searches Bio::PrimarySeqI's based on set cov. model
-                             # saves output to outfile_name or STDOUT
+                             # saves output to optional outfile_name, returns
+                             # Bio::SearchIO
 
   # only values which are allowed for a program are set, so one can use the same
   # wrapper for the following...
 
-  $factory->cmalign(@seqs); # aligns Bio::PrimarySeqI's to a set cov. model
-                            # output to outfile_name
-  $factory->cmscore(@seqs); # scores set cov. model against Bio::PrimarySeqI's,
+  $factory->cmalign(@seqs); # aligns Bio::PrimarySeqI's to a set cov. model,
+                            # --merge option allows two alignments generated
+                            #     from the same CM to be merged.
+                            # output to outfile_name, returns Bio::AlignIO
+  $factory->cmscore();      # scores set cov. model against Bio::PrimarySeqI,
                             # output to outfile_name/STDOUT.
   $factory->cmbuild($aln); # builds covariance model based on alignment
-                           # CM to outfile_name (required here), output to STDOUT.
-  $factory->cmemit($file); # emits sequence from specified cov. model;
-                           # set one if no file specified
-  $factory->cmcalibrate($file); # calibrates specified cov. model;
-                           # set one if no file specified
-  $factory->cmstat($file); # summary stats for cov. model;
-                           # set one if no file specified
+                           # CM to outfile_name or model_file (one is required
+                           # here), output to STDOUT.
+  $factory->cmemit();      # emits sequence from specified cov. model;
+                           # set one if no file specified. output to
+                           # outfile_name, returns Bio::SeqIO or (if -a is set)
+                           # Bio::AlignIO
+  $factory->cmcalibrate($file); # calibrates specified cov. model; output to
+                                # STDOUT
+  $factory->cmstat($file); # summary stats for cov. model; set one if no file
+                           # specified; output to STDOUT
 
   # run based on the setting of the program parameter
 
@@ -72,9 +78,9 @@ cmsearch, cmscore
 
 Wrapper module for Sean Eddy's Infernal suite of programs. The current
 implementation runs cmsearch, cmcalibrate, cmalign, cmemit, cmbuild, cmscore,
-and cmstat. The only current BioPerl object returned is for cmsearch (as shown
-in the SYNOPSIS); all others are sent to either the designated outfile, a
-tempfile, or STDOUT.
+and cmstat. cmsearch will return a Bio::SearchIO, cmemit a Bio::SeqIO/AlignIO,
+and cmalign a Bio::AlignIO.  All others send output to STDOUT.  Optionally,
+any program's output can be redirected to outfile_name.
 
 We HIGHLY suggest upgrading to Infernal 1.0.  In that spirit, this wrapper now
 supports parameters for Infernal 1.0 only; for wrapping older versions of
@@ -84,18 +90,9 @@ with previous versions of BioPerl-run.
 NOTE: Due to conflicts in the way Infernal parameters are now formatted vs.
 subroutine naming in Perl (specifically the inclusion of hyphens) and due to the
 very large number of parameters available, setting and resetting parameters via
-set_parameters() and reset_parameters() is required. Only parameters that are
-valid for the executable set via program()/program_name() are set, the others
-are silently ignored at this time.
-
-Also of note is some minor conflation between the use of the WrapperBase
-outfile_name() method, the -o option (which designates the outfile for cmsearch
-and cmalign), and the -outfile option (which is the outfile for sequences from
-cmscore). All three are allowed; in particular, the -outfile parameter from
-cmscore is not the actual output from the program but is for sequence output
-only. If both -o and -outfile_name is set, a warning is issued and outfile_name
-is set. Note that -o is only available for cmsearch and cmalign, while
-outfile_name is allowed for all programs.
+set_parameters() and reset_parameters() is required. All valid parameters can
+be set, but only ones valid for the executable set via program()/program_name()
+are used for calling the executables, the others are silently ignored.
 
 =head1 FEEDBACK
 
