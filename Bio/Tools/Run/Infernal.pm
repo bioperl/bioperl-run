@@ -376,41 +376,26 @@ sub new {
     my $self = $class->SUPER::new(@args);
     
     # these are specific parameters we do not want passed on to set_parameters
-    my ($program, $model, $tf, $validate, $q, $o1, $o2) =
+    my ($program, $model, $validate, $q, $o1, $o2) =
         $self->_rearrange([qw(PROGRAM
                            MODEL_FILE
-                           TEMPFILE
                            VALIDATE_PARAMETERS
                            QUIET
                            OUTFILE_NAME
                            O)], @args);
     
-    $q && $self->quiet($q);
     if ($o1 && $o2) {
         $self->warn("Only assign to either -outfile_name or -o, not both;");
     }
     my $out = $o1 || $o2;
-    if ($tf && $out) {
-        $self->throw("Can't set both -outfile_name/-o and -tempfile");
-    }
-    
-    $self->io->_initialize_io();
-    
     $self->validate_parameters($validate);
-    $program  && $self->program($program);
-    
-    if ($tf && !$out) {
-        my ($tfh, $outfile) = $self->io->tempfile(-dir=> $self->io->tempdir());
-        close($tfh);
-        undef $tfh;
-        $self->outfile_name($outfile);
-    } else {
-        $out ||= '';
-        $self->outfile_name($out);
-    }
-    $self->set_parameters(@args);
-    
+    $q          && $self->quiet($q);
+    $program    && $self->program($program);
     $model      && $self->model_file($model);
+    $out ||= '';
+    $self->outfile_name($out);
+    $self->io->_initialize_io();    
+    $self->set_parameters(@args);
     return $self;
 }
 
@@ -577,13 +562,17 @@ sub cmalign {
             return  $self->_run(-seq_files => [$infile1]);
         } elsif ( $seq[0]->isa("Bio::Align::AlignI") ) {
             if (scalar(@seq) != 2) {
-                
+                $self->throw("")
             }
-            my $infile1 = $self->_writeSeqFile($seq[0]);
-            return  $self->_run(-seq_files => [$infile1]);
+            my $infile1 = $self->_writeAlignFile($seq[0]);
+            my $infile2 = $self->_writeAlignFile($seq[1]);
+            return  $self->_run(-align_files => [$infile1, $infile2]);
         }
     } else {
         # we can maybe add a check for the file extension and try to DTRT
+        my %params = $self->get_parameters('valid');
+        $params{merge} ? return $self->_run(-align_files => \@seq):
+            return $self->_run(-seq_files => \@seq);
         return $self->_run(-seq_files => \@seq);
     }
 }
@@ -872,7 +861,6 @@ sub to_exe_string {
                                    $self->outfile_name);
     delete $params{o} if exists $params{o};
 
-    # outfile...
     if (!defined($model) && $prog ne 'cmbuild') {
         $self->throw("model_file() not defined")
     }
@@ -918,18 +906,27 @@ sub to_exe_string {
             push @{$args{'input'}}, ($outfile, @$aligns);
         }
     } elsif ($prog eq 'cmemit') {
-        push @{$args{'input'}}, $model;
-        push @{$args{'input'}}, $outfile if $outfile;
+        if (!$outfile) {
+            $self->throw('cmemit requires an outfile_name; tempfile support not implemented yet');
+        } else {
+            push @{$args{'input'}}, ($model, ,$outfile);
+        }
+    }
+    
+    # quiet!
+    if ($self->quiet && $prog ne 'cmsearch') {
+        if ($prog eq 'cmalign') {
+            push @{$args{switch}}, '-q' if !exists $params{q};
+        } else {
+            push @{$args{redirect}}, '> /dev/null';
+        }
     }
     
     my $string = "$exe ".join(' ',(@{$args{switch}},
                                    @{$args{param}},
                                    @{$args{input}},
                                    @{$args{redirect}}));
-    # this assumes UNIX (win not supported)
-    # this can only be implemented under some circumstances, otherwise piping
-    # output may not work where STDOUT is used (i.e. cmsearch)
-    $string .= ' > /dev/null' if $self->quiet && $prog ne 'cmsearch';
+
     $string;
 }
 
@@ -971,23 +968,16 @@ sub _run {
     my $str = $self->to_exe_string(@_);
     $self->debug("Infernal command: $str\n");
     
-    # retrieve available params here to determine whether we are doing the right thing below
-    
-    # cmsearch always returns SearchIO
-    # cmbuild does not return anything (outfile = STDOUT, cmfile is written to model() )
-    # cmscore does not return anything (outfile = STDOUT or outfile)
-    # cmemit - AlignIO or SeqIO (based on parameter settings)
-    # cmalign - AlignIO
+    my %has = $self->get_parameters('valid');
     
     my $obj =
         ($prog eq 'cmsearch') ? Bio::SearchIO->new(-format => 'infernal',
                                                 -version => $version,
                                                 -model => $model) :
         ($prog eq 'cmalign' )                              ? Bio::AlignIO->new(-format => 'stockholm') :
-        ($prog eq 'cmemit') ? Bio::AlignIO->new(-format => 'stockholm') :
+        ($prog eq 'cmemit' && $has{a}) ? Bio::AlignIO->new(-format => 'stockholm') :
         ($prog eq 'cmemit') ? Bio::SeqIO->new(-format => 'fasta') :
               undef;
-    # outfile or tempfile-based
     my @args;
     # file output
     if ($out) {

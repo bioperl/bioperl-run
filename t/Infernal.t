@@ -6,7 +6,7 @@ our $NUMTESTS;
 our %INFERNAL_TESTS;
 
 BEGIN {
-    $NUMTESTS = 1; # base number of tests (those not in blocks)
+    $NUMTESTS = 3; # base number of tests (those not in blocks)
 
     # I have set up eutils tests to run in sections for easier test maintenance
     # and keeping track of problematic tests. The below hash is the list of
@@ -18,22 +18,22 @@ BEGIN {
     %INFERNAL_TESTS = (
         'params'        => {'tests' => 13,
                             'sub'   => \&simple_param_tests},
-        #'cmalign_norm'  => {'tests' => 5,
-        #                    'sub'   => \&cmalign_norm},
-        #'cmalign_merge' => {'tests' => 5,
-        #                    'sub'   => \&cmalign_merge},
+        'cmalign'       => {'tests' => 6,
+                            'sub'   => \&cmalign_norm},
+        # need to add merge tests
         'cmsearch'      => {'tests' => 7,
                             'sub'   => \&cmsearch},
         'cmbuild'       => {'tests' => 4,
                             'sub'   => \&cmbuild},
         'cmstat'        => {'tests' => 2,
                             'sub'   => \&cmstat},
-        #'cmcalibrate'   => {'tests' => 5,
+        # leave this one commented (may run for quite a while dep. on CPU)
+        #'cmcalibrate'   => {'tests' => 2,
         #                    'sub'   => \&cmcalibrate},
         'cmscore'       => {'tests' => 2,
                             'sub'   => \&cmscore},
-        #'cmemit'        => {'tests' => 5,
-        #                    'sub'   => \&cmemit},
+        'cmemit'        => {'tests' => 6,
+                            'sub'   => \&cmemit},
         );
     $NUMTESTS += $INFERNAL_TESTS{$_}->{'tests'} for (keys %INFERNAL_TESTS);
 
@@ -41,6 +41,8 @@ BEGIN {
     
     test_begin(-tests               => $NUMTESTS);
     use_ok('Bio::Tools::Run::Infernal');
+    use_ok('Bio::SeqIO');
+    use_ok('Bio::AlignIO');
 }
 
 for my $test (keys %INFERNAL_TESTS) {
@@ -242,5 +244,79 @@ sub cmscore {
     ok($success, 'cmscore works');
     ok (-e $outfile, 'cmscore outfile created');
     }    
+}
+
+sub cmalign_norm {
+    my ($cm, $seqfile) = (test_input_file('purine.c.cm'),
+                          test_input_file('purine.added.fa'));
+    my $factory = Bio::Tools::Run::Infernal->new(-model_file    => $cm,
+                                                 -program       => 'cmalign');
+    SKIP: {
+    test_skip(-requires_executable => $factory,
+             -tests => 6);
+    
+    my @seqs;
+    
+    my $stream = $factory->cmalign($seqfile);
+    isa_ok($stream, 'Bio::AlignIO', 'cmalign works');
+    my $aln = $stream->next_aln;
+    isa_ok($aln, 'Bio::Align::AlignI');
+    is($aln->num_sequences, 2);
+    
+    my $seqio = Bio::SeqIO->new(-format => 'fasta', -file => $seqfile);
+    
+    while (my $seq = $seqio->next_seq) {
+        push @seqs, $seq;
+    }
+    
+    $stream = $factory->cmalign(@seqs);
+    isa_ok($stream, 'Bio::AlignIO', 'cmalign works');
+    $aln = $stream->next_aln;
+    isa_ok($aln, 'Bio::Align::AlignI');
+    is($aln->num_sequences, 2);
+    }        
+}
+
+sub cmemit {
+    my ($cm, $outfile) = (test_input_file('purine.c.cm'), test_output_file());
+    my $factory = Bio::Tools::Run::Infernal->new(-model_file    => $cm,
+                                                 -program       => 'cmemit',
+                                                 -outfile_name  => $outfile,
+                                                 -quiet         => 1
+                                                 );
+    SKIP: {
+    test_skip(-requires_executable => $factory,
+             -tests => 6);
+    
+    # seqs (default)
+    my $stream = $factory->cmemit();
+    isa_ok($stream, 'Bio::SeqIO', 'cmemit works');
+    my $seq = $stream->next_seq;
+    isa_ok($seq, 'Bio::PrimarySeqI');
+    is($seq->display_id, 'Purine-1');
+
+    # alignment (-a flag)
+    $factory->set_parameters(-a => 1);
+    $stream = $factory->cmemit();
+    isa_ok($stream, 'Bio::AlignIO', 'cmemit works');
+    my $aln = $stream->next_aln;
+    isa_ok($aln, 'Bio::Align::AlignI');
+    is($aln->num_sequences, 10);
+    }
+}
+
+sub cmcalibrate {
+    my $cm = test_input_file('purine.cm');
+    my $factory = Bio::Tools::Run::Infernal->new(-model_file    => $cm,
+                                                 -program       => 'cmcalibrate');
+    SKIP: {
+    test_skip(-requires_executable => $factory,
+             -tests => 2);
+    
+    # seqs (default)
+    my $success = $factory->cmcalibrate();
+    ok($success, 'cmcalibrate successful');
+    cmp_ok(-M $cm, '<=' ,1);
+    }
 }
 
