@@ -31,11 +31,8 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
 =head1 DESCRIPTION
 
   Wrapper module for the local execution of the DNA assembly program TIGR
-  Assembler v2.0. TIGR.
-
-  Assembler is open source software under The Artistic License and available at:
-
-    http://www.tigr.org/software/assembler/
+  Assembler v2.0. TIGR Assembler is open source software under The Artistic
+  License and available at: http://www.tigr.org/software/assembler/
 
   The description enables to runs TIGR Assembler by feeding it sequence objects
   and returning assembly objects. The input could be an array of Bio::PrimarySeq
@@ -197,7 +194,8 @@ sub max_nof_seqs {
     that the ends of sequences are lower quality and doubled base calls are the
     most frequent sequencing error.
   minimum_length: the minimum length two DNA fragments must overlap to be
-    considered as a possible assembly.
+    considered as a possible assembly (warning: in tests I did, this option
+    did not work as expected...)
   include_singlets: a flag which indicates that singletons (assemblies made up
     of a single DNA fragment) should be included in the lassie output_file - the
     default is to not include singletons.
