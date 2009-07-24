@@ -24,6 +24,10 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
     # do something with assembled sequences
   }
 
+  # Look at what command was run and what the intermediary files were using:
+  $assembler->verbose(2);
+  $assembler->save_tempfiles(1);
+
 =head1 DESCRIPTION
 
   Wrapper module for the local execution of the DNA assembly program TIGR
@@ -36,7 +40,7 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
   The description enables to runs TIGR Assembler by feeding it sequence objects
   and returning assembly objects. The input could be an array of Bio::PrimarySeq
   or maybe Bio::Seq::Quality, in which case, the quality scores will
-  automatically be used during assembly. Sequences less than 40 bp long are
+  automatically be used during assembly. Sequences less than 39 bp long are
   filtered out since they are not supported by TIGR Assembler. The
   amount of memory in your machine may prevent you to assemble large sequence
   datasets, but this module offers a way to split your dataset in smaller
@@ -287,7 +291,7 @@ sub run {
     $last = $tot_nof_seqs-1 if $last > $tot_nof_seqs-1;
     my @seq_subset = @$seqs[$first..$last];
     my @qual_subset = @$quals[$first..$last] if $quals;
-    # Write temp FASTA and QUAL input files, removing sequences less than 40bp
+    # Write temp FASTA and QUAL input files, removing sequences less than 39bp
     my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset, \@qual_subset);
     # Assemble
     if (defined $fasta_file) {
@@ -329,8 +333,10 @@ sub _write_seq_file {
       $self->warn("A sequence had no ID. Its ID is now $newid");
     }
     my $seqid = $seq->id;
-    # Remove sequences less than 40bp (not supported by TIGR_Assembler)
-    my $min_length = 40;
+    # Remove sequences less than 39bp because they make TIGR_Assembler crash.
+    # To reproduce this bug, take 2 identical sequences, trim one below 39bp,
+    # run TIGR_Assembler with its default parameters, and watch the backtrace
+    my $min_length = 39;
     if ($seq->length < $min_length) {
       splice @$seqs, $i, 1;
       $i--;
