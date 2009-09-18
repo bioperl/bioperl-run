@@ -239,7 +239,7 @@ sub new {
     ],
     -create =>  1,
   );
-  $self->program($program_name) if not defined $self->program();  
+  $self->program($program_name) if not defined $self->program();
   $self->program_name($program_name) if not defined $self->program_name();
   return $self;
 }
@@ -280,6 +280,8 @@ sub run {
     }
   }
   # Assemble
+  $self->save_tempfiles(0);
+  $self->tempdir();
   my @asms;
   my $tot_nof_seqs = scalar @$seqs;
   my $max_nof_seqs = $self->max_nof_seqs || $tot_nof_seqs;
@@ -292,11 +294,11 @@ sub run {
     # Write temp FASTA and QUAL input files, removing sequences less than 39bp
     my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset, \@qual_subset);
     # Assemble
-    if (defined $fasta_file) {
-      my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
-      push @asms, $asm_obj
-    }
+    next if not defined $fasta_file;
+    my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
+    push @asms, $asm_obj
   }
+  $self->cleanup();
   return \@asms;
 }
 
@@ -315,10 +317,12 @@ sub run {
 
 sub _write_seq_file {
   my ($self, $seqs, $quals) = @_;
-  my ($fasta_h, $fasta_file) = $self->io->tempfile( -dir => $self->tempdir() );
-  my ($qual_h, $qual_file) = $self->io->tempfile( -dir => $self->tempdir() );
+  # Store the sequences in temporary FASTA files
+  my $tmpdir = $self->tempdir();
+  my ($fasta_h, $fasta_file) = $self->io->tempfile( -dir => $tmpdir );
+  my ($qual_h,  $qual_file ) = $self->io->tempfile( -dir => $tmpdir );
   my $fasta_out = Bio::SeqIO->new( -fh => $fasta_h , -format => 'fasta');
-  my $qual_out = Bio::SeqIO->new( -fh => $qual_h , -format => 'qual');
+  my $qual_out  = Bio::SeqIO->new( -fh => $qual_h  , -format => 'qual' );
   my $use_qual_file = 0;
   my $size = scalar @$seqs;
   for ( my $i = 0 ; $i < $size ; $i++ ) {
@@ -398,12 +402,10 @@ sub _run {
   $self->throw("Need a FASTA file as input") if not defined $fasta_file;
 
   # Setup needed files and filehandles first
-  my ($scratch_fh, $scratch_file) =
-    $self->io->tempfile( -dir => $self->tempdir() );
-  my ($output_fh, $output_file) =
-    $self->io->tempfile( -dir => $self->tempdir() );
-  my ($stderr_fh, $stderr_file) =
-    $self->io->tempfile( -dir => $self->tempdir() );
+  my $tmpdir = $self->tempdir(); # retrieve existing temporary dir
+  my ($scratch_fh, $scratch_file) = $self->io->tempfile( -dir => $tmpdir );
+  my ($output_fh,  $output_file ) = $self->io->tempfile( -dir => $tmpdir );
+  my ($stderr_fh,  $stderr_file ) = $self->io->tempfile( -dir => $tmpdir );
   
   # Use quality files if possible
   $self->quality_file($qual_file) if defined $qual_file;
@@ -475,7 +477,8 @@ sub _run {
     -file   => "<$output_file",
     -format => 'tigr' );
   my $asm = $asm_io->next_assembly();
-  
+  $asm_io->close;
+
   return $asm, $output_file;
 }
 
