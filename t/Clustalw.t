@@ -6,7 +6,7 @@ use strict;
 
 BEGIN {
   use Bio::Root::Test;
-  test_begin(-tests => 43);
+  test_begin(-tests => 45);
   
   use_ok('Bio::Tools::Run::Alignment::Clustalw');
   use_ok('Bio::SimpleAlign');
@@ -44,7 +44,7 @@ is( $factory->program_name(), 'clustalw',                'Correct exe default na
 
 SKIP: {
   test_skip(-requires_executable => $factory,
-            -tests => 17);  
+            -tests => 19);  
   
   # test all factory methods dependent on finding the executable
   # TODO: isnt( $factory->program_dir, undef,               'Found program in an ENV variable' );
@@ -56,10 +56,11 @@ SKIP: {
   # clustalw2 isn't supported yet.
   if ($ver < 1.8) {
     diag("ClustalW version $ver not supported");
-    skip("ClustalW version $ver not supported", 17);
-  } if ($ver >= 2.0) {
+    skip("ClustalW version $ver not supported", 19);
+  }
+  if ($ver >= 2.0) {
     diag("Warning: ClustalW version $ver not supported yet.");
-    skip("ClustalW version $ver not supported yet", 17);
+    skip("ClustalW version $ver not supported yet", 19);
   }
   
   ok( $ver, "Supported program version $ver" );
@@ -110,6 +111,10 @@ SKIP: {
   ($aln, $tree) = $factory->run(\@seq_array);
   isa_ok($aln, 'Bio::SimpleAlign');
   isa_ok($tree, 'Bio::Tree::Tree');
+  
+  ($aln, $tree) = $factory->run($inputfilename);
+  isa_ok($aln, 'Bio::SimpleAlign');
+  isa_ok($tree, 'Bio::Tree::Tree');  
   
   # test the footprint method
   my @seqs = (Bio::Seq->new(-seq => 'AACCTGGCCAATTGGCCAATTGGGCGTACGTACGT', -id => 'rabbit'),

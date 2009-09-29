@@ -1,7 +1,6 @@
-# Wrapper  module for Exonerate Bio::Tools::Run::Alignment::Exonerate
 # $Id$
-# 
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Shawn Hoon
 #
@@ -17,7 +16,6 @@ Bio::Tools::Run::Alignment::Exonerate
 
 =head1 SYNOPSIS
 
-
   use Bio::Tools::Run::Alignment::Exonerate;
   use Bio::SeqIO;
 
@@ -29,7 +27,8 @@ Bio::Tools::Run::Alignment::Exonerate
   #exonerate parameters can all be passed via arguments parameter.
   #parameters passed are not checked for validity
 
-  my $run = Bio::Tools::Run::Alignment::Exonerate->new(arguments=>'--model est2genome --bestn 10');
+  my $run = Bio::Tools::Run::Alignment::Exonerate->
+      new(arguments=>'--model est2genome --bestn 10');
   my $searchio_obj = $run->run($query,$target);
 
   while(my $result = $searchio->next_result){
@@ -42,40 +41,43 @@ Bio::Tools::Run::Alignment::Exonerate
 
 =head1 DESCRIPTION
 
-  Wrapper for Exonerate alignment program. You can get exonerate at
-  http://www.ebi.ac.uk/~guy/exonerate/.
-  This wrapper is written without parameter checking. All parameters are passed
-  via the arugment parameter that is passed in the constructor. See SYNOPSIS.
-  For exonerate parameters, run exonerate --help for more details.
+Wrapper for Exonerate alignment program. You can get exonerate at
+http://www.ebi.ac.uk/~guy/exonerate/.  This wrapper is written without
+parameter checking. All parameters are passed via the arugment
+parameter that is passed in the constructor. See SYNOPSIS.  For
+exonerate parameters, run exonerate --help for more details.
 
+=head1 PROGRAM VERSIONS
+
+The tests have been shown to pass with exonorate versions 2.0 - 2.2.
 
 =head1 FEEDBACK
 
 =head2 Mailing Lists
 
- User feedback is an integral part of the evolution of this and other
- Bioperl modules. Send your comments and suggestions preferably to one
- of the Bioperl mailing lists.  Your participation is much appreciated.
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to one
+of the Bioperl mailing lists.  Your participation is much appreciated.
 
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
- 
+=head2 Support
+
 Please direct usage questions or support issues to the mailing list:
-  
+
 L<bioperl-l@bioperl.org>
-  
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
 
- Report bugs to the Bioperl bug tracking system to help us keep track
- the bugs and their resolution.  Bug reports can be submitted via the
- web:
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
 
   http://bugzilla.open-bio.org/
 
@@ -85,8 +87,8 @@ with code and data examples if at all possible.
 
 =head1 APPENDIX
 
- The rest of the documentation details each of the object
- methods. Internal methods are usually preceded with a _
+The rest of the documentation details each of the object
+methods. Internal methods are usually preceded with a _
 
 =cut
 
@@ -206,7 +208,7 @@ sub run {
     my ($self,$query,$target) = @_;
     my @feats;
     my ($file1) = $self->_writeInput($query);
-    my ($file2) = $self->_writeInput($target);    
+    my ($file2) = $self->_writeInput($target);
     my $assembly = $self->_run($file1,$file2);
     return $assembly;
 }
@@ -250,9 +252,9 @@ sub _run {
      my $exonerate_obj = Bio::SearchIO->new(-file=>"$outfile",-format=>'exonerate');
 
      close($tfh);
-     undef $tfh;    
+     undef $tfh;
      unlink $outfile;
-     
+
      return $exonerate_obj;
 }
 

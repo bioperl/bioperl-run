@@ -24,19 +24,20 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
     # do something with assembled sequences
   }
 
+  # Look at what command was run and what the intermediary files were using:
+  $assembler->verbose(2);
+  $assembler->save_tempfiles(1);
+
 =head1 DESCRIPTION
 
   Wrapper module for the local execution of the DNA assembly program TIGR
-  Assembler v2.0. TIGR.
-
-  Assembler is open source software under The Artistic License and available at:
-
-    http://www.tigr.org/software/assembler/
+  Assembler v2.0. TIGR Assembler is open source software under The Artistic
+  License and available at: http://www.tigr.org/software/assembler/
 
   The description enables to runs TIGR Assembler by feeding it sequence objects
   and returning assembly objects. The input could be an array of Bio::PrimarySeq
   or maybe Bio::Seq::Quality, in which case, the quality scores will
-  automatically be used during assembly. Sequences less than 40 bp long are
+  automatically be used during assembly. Sequences less than 39 bp long are
   filtered out since they are not supported by TIGR Assembler. The
   amount of memory in your machine may prevent you to assemble large sequence
   datasets, but this module offers a way to split your dataset in smaller
@@ -193,7 +194,8 @@ sub max_nof_seqs {
     that the ends of sequences are lower quality and doubled base calls are the
     most frequent sequencing error.
   minimum_length: the minimum length two DNA fragments must overlap to be
-    considered as a possible assembly.
+    considered as a possible assembly (warning: in tests I did, this option
+    did not work as expected...)
   include_singlets: a flag which indicates that singletons (assemblies made up
     of a single DNA fragment) should be included in the lassie output_file - the
     default is to not include singletons.
@@ -237,7 +239,7 @@ sub new {
     ],
     -create =>  1,
   );
-  $self->program($program_name) if not defined $self->program();  
+  $self->program($program_name) if not defined $self->program();
   $self->program_name($program_name) if not defined $self->program_name();
   return $self;
 }
@@ -278,6 +280,8 @@ sub run {
     }
   }
   # Assemble
+  $self->save_tempfiles(0);
+  $self->tempdir();
   my @asms;
   my $tot_nof_seqs = scalar @$seqs;
   my $max_nof_seqs = $self->max_nof_seqs || $tot_nof_seqs;
@@ -287,14 +291,14 @@ sub run {
     $last = $tot_nof_seqs-1 if $last > $tot_nof_seqs-1;
     my @seq_subset = @$seqs[$first..$last];
     my @qual_subset = @$quals[$first..$last] if $quals;
-    # Write temp FASTA and QUAL input files, removing sequences less than 40bp
+    # Write temp FASTA and QUAL input files, removing sequences less than 39bp
     my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset, \@qual_subset);
     # Assemble
-    if (defined $fasta_file) {
-      my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
-      push @asms, $asm_obj
-    }
+    next if not defined $fasta_file;
+    my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
+    push @asms, $asm_obj
   }
+  $self->cleanup();
   return \@asms;
 }
 
@@ -313,10 +317,12 @@ sub run {
 
 sub _write_seq_file {
   my ($self, $seqs, $quals) = @_;
-  my ($fasta_h, $fasta_file) = $self->io->tempfile( -dir => $self->tempdir() );
-  my ($qual_h, $qual_file) = $self->io->tempfile( -dir => $self->tempdir() );
+  # Store the sequences in temporary FASTA files
+  my $tmpdir = $self->tempdir();
+  my ($fasta_h, $fasta_file) = $self->io->tempfile( -dir => $tmpdir );
+  my ($qual_h,  $qual_file ) = $self->io->tempfile( -dir => $tmpdir );
   my $fasta_out = Bio::SeqIO->new( -fh => $fasta_h , -format => 'fasta');
-  my $qual_out = Bio::SeqIO->new( -fh => $qual_h , -format => 'qual');
+  my $qual_out  = Bio::SeqIO->new( -fh => $qual_h  , -format => 'qual' );
   my $use_qual_file = 0;
   my $size = scalar @$seqs;
   for ( my $i = 0 ; $i < $size ; $i++ ) {
@@ -329,8 +335,10 @@ sub _write_seq_file {
       $self->warn("A sequence had no ID. Its ID is now $newid");
     }
     my $seqid = $seq->id;
-    # Remove sequences less than 40bp (not supported by TIGR_Assembler)
-    my $min_length = 40;
+    # Remove sequences less than 39bp because they make TIGR_Assembler crash.
+    # To reproduce this bug, take 2 identical sequences, trim one below 39bp,
+    # run TIGR_Assembler with its default parameters, and watch the backtrace
+    my $min_length = 39;
     if ($seq->length < $min_length) {
       splice @$seqs, $i, 1;
       $i--;
@@ -394,12 +402,10 @@ sub _run {
   $self->throw("Need a FASTA file as input") if not defined $fasta_file;
 
   # Setup needed files and filehandles first
-  my ($scratch_fh, $scratch_file) =
-    $self->io->tempfile( -dir => $self->tempdir() );
-  my ($output_fh, $output_file) =
-    $self->io->tempfile( -dir => $self->tempdir() );
-  my ($stderr_fh, $stderr_file) =
-    $self->io->tempfile( -dir => $self->tempdir() );
+  my $tmpdir = $self->tempdir(); # retrieve existing temporary dir
+  my ($scratch_fh, $scratch_file) = $self->io->tempfile( -dir => $tmpdir );
+  my ($output_fh,  $output_file ) = $self->io->tempfile( -dir => $tmpdir );
+  my ($stderr_fh,  $stderr_file ) = $self->io->tempfile( -dir => $tmpdir );
   
   # Use quality files if possible
   $self->quality_file($qual_file) if defined $qual_file;
@@ -471,7 +477,8 @@ sub _run {
     -file   => "<$output_file",
     -format => 'tigr' );
   my $asm = $asm_io->next_assembly();
-  
+  $asm_io->close;
+
   return $asm, $output_file;
 }
 
