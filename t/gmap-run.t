@@ -3,9 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
-
 BEGIN {
+    use Bio::Root::Test;
+    test_begin(-tests => 8);
     use_ok( 'Bio::Tools::Run::Alignment::Gmap' );
 }
 
@@ -18,7 +18,11 @@ while(my $seq = $sio->next_seq()){
     push @seq,$seq;
 }
 
-my $gmapper =Bio::Tools::Run::Alignment::Gmap->new();
+my $gmapper = Bio::Tools::Run::Alignment::Gmap->new();
+
+SKIP: {
+
+test_skip(-tests => 7, -requires_executable => $gmapper);
 
 my $result_handle = $gmapper->run(\@seq);
 
@@ -40,4 +44,4 @@ like($result, qr|md5:a7f28cc6e121f649fa8eb2d44805100e|, 'Check md5 info');
 like($result, qr|Paths \(\d+\)|, 'Does it look like -A output (I)');
 like($result, qr|Alignment for path \d+|, 'Does it look like -A output (II)');
 
-
+}

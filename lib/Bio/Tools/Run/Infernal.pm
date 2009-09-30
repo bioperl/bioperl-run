@@ -106,11 +106,11 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
 =head2 Support 
- 
+
 Please direct usage questions or support issues to the mailing list:
-  
-L<bioperl-l@bioperl.org>
-  
+
+I<bioperl-l@bioperl.org>
+
 rather than to the module maintainer directly. Many experienced and 
 reponsive experts will be able look at the problem and quickly 
 address it. Please include a thorough description of the problem 
@@ -685,7 +685,7 @@ sub set_parameters {
                @_;
     # set the parameters passed in, but only ones supported for the program
     my ($prog, $validate) = ($self->program, $self->validate_parameters);
-    
+
     # parameter cleanup
     %args = map { my $a = $_;
               $a =~ s{^-}{};
@@ -856,6 +856,9 @@ sub to_exe_string {
                                    $self->program_name,
                                    $self->model_file,
                                    $self->outfile_name);
+    
+    $self->throw("Executable not found") unless defined($exe);
+    
     delete $params{o} if exists $params{o};
 
     if (!defined($model) && $prog ne 'cmbuild') {

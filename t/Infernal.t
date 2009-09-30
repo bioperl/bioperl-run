@@ -39,14 +39,20 @@ BEGIN {
 
     use Bio::Root::Test;
     
-    test_begin(-tests               => $NUMTESTS);
+    test_begin(-tests   => $NUMTESTS );
     use_ok('Bio::Tools::Run::Infernal');
     use_ok('Bio::SeqIO');
     use_ok('Bio::AlignIO');
 }
 
-for my $test (keys %INFERNAL_TESTS) {
-    $INFERNAL_TESTS{$test}->{'sub'}->();
+my $factory = Bio::Tools::Run::Infernal->new(-program     => 'cmsearch');
+
+SKIP: {
+    test_skip(-requires_executable => $factory,
+             -tests => $NUMTESTS - 3);
+    for my $test (keys %INFERNAL_TESTS) {
+        $INFERNAL_TESTS{$test}->{'sub'}->();
+    }
 }
 
 # test out parameters and command string building
@@ -129,10 +135,9 @@ sub simple_param_tests {
     );
     for my $exe (sort keys %executable) {
         my %p = %{$executable{$exe}{params}};
-        my $factory = Bio::Tools::Run::Infernal->new(-program     => $exe,
-                                                     -model_file  => 'baz.cm',
-                                                     %p);
-        #if ($exe eq 'cmbuild') { $factory->model_file('baz.cm') }
+        $factory = Bio::Tools::Run::Infernal->new(-program     => $exe,
+                                                  -model_file  => 'baz.cm',
+                                                %p);
         like($factory->to_exe_string(-seq_files => $executable{$exe}{seq_files},
                                    -align_files => $executable{$exe}{align_files}),
             qr/$executable{$exe}{test1}/,"$exe parameter setting");
@@ -156,7 +161,6 @@ sub cmsearch {
                                                  -verbose     => test_debug());
     
     SKIP: {
-    # this is giving me an odd error, needs debugging
     test_skip(-requires_executable => $factory,
              -tests => 7);
     
