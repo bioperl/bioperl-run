@@ -498,11 +498,11 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
 =head2 Support 
- 
+
 Please direct usage questions or support issues to the mailing list:
-  
-L<bioperl-l@bioperl.org>
-  
+
+I<bioperl-l@bioperl.org>
+
 rather than to the module maintainer directly. Many experienced and 
 reponsive experts will be able look at the problem and quickly 
 address it. Please include a thorough description of the problem 
@@ -768,7 +768,7 @@ sub align {
            or references to 2 Bio::SimpleAlign objects.
  Note    : Needs to be updated to run with newer TCoffee code, which
            allows more than two profile alignments.
-           
+
 Throws an exception if arguments are not either strings (eg filenames)
 or references to SimpleAlign objects.
 
