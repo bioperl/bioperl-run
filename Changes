@@ -4,17 +4,24 @@ Revision history for bioperl-run modules
 Full details of changes between all versions are available online at:
 http://www.bioperl.org/wiki/Change_log
 
+1.6.2 Release
+
+* [bug 2713] - Bio::Tools::Run::Infernal now works with Infernal 1.0 (older
+  versions deprecated) [cjfields]
+* Bio::Tools::Run::Alignment::Gmap added [hartzell]
+* [bug 2798] - patch to fix clustalw premature file unlinking error [Wei Zhou]
+
 1.6.0 Release
    
-   o All Pise and Pise-related modules and scripts have been moved to the
-     new bioperl-pise repository. The Pise service is no longer available and
-     has been replaced by Mobyle.  They have been retained as one can still
-     install a Pise server, and as these modules can possibly be used to create
-     a new BioPerl API for Mobyle.
+* All Pise and Pise-related modules and scripts have been moved to the new
+  bioperl-pise repository. The Pise service is no longer available and has been
+  replaced by Mobyle. They have been retained as one can still install a Pise
+  server, and as these modules can possibly be used to create a new BioPerl API
+  for Mobyle.
 
 1.5.2 Release in sync with bioperl core
 
-   o Several wrappers updated for newer versions of the programs.
+* Several wrappers updated for newer versions of the programs.
    
 1.5.1 Release in sync with bioperl core
 
