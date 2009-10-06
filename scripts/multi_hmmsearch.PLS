@@ -51,7 +51,7 @@ web:
 
 =head1 AUTHOR
 
-  Mauricio Herrera Cuadra <arareko-at-campus.iztacala.unam.mx>
+  Mauricio Herrera Cuadra <mauricio-at-open-bio.org>
 
 =cut
 
