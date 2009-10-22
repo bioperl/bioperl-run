@@ -660,6 +660,7 @@ sub footprint {
     for my $i (1..($length - $slice_size + 1)) {
         my $slice = $simplealn->slice($i, ($i + $slice_size - 1), 1);
         my $tree = $self->tree($slice);
+        $self->throw("No tree returned") unless defined $tree;
         my $slice_length = $tree->total_branch_length;
         
         $slice_length <= $threshold ? ($below = 1) : ($below = 0);
@@ -707,7 +708,7 @@ sub _run {
             $command = '';
         }
         else { 
-            $instring = " -infile=$infile1";
+            $instring = " -infile=". '"' . $infile1 . '"';
         }
         $param_string .= " $infile2";
     }
@@ -751,7 +752,7 @@ sub _run {
     my $output = $self->output || 'gcg';
     $self->debug( "Program ".$self->executable."\n");
     my $commandstring = $self->executable." $command"." $instring"." -output=$output". " $param_string";
-    $self->debug( "clustal command = $commandstring");
+    $self->debug( "clustal command = $commandstring\n");
     
     open(my $pipe, "$commandstring |") || $self->throw("ClustalW call ($commandstring) failed to start: $? | $!");
     my $score;
