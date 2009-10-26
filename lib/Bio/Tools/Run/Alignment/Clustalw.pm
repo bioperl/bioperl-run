@@ -731,7 +731,7 @@ sub _run {
             $command = '';
         }
         else { 
-            $instring = " $infile1";
+            $instring = " -infile=". '"' . $infile1 . '"';
         }
     	$param_string .= " $infile2";
         

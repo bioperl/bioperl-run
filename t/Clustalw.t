@@ -27,9 +27,9 @@ my $outfile = test_output_file();
 
 # setup global objects that are to be used in more than one test
 # Also test they were initialised correctly
-my @params = ('ktuple' => 3, 'quiet'  => 1);
+my @params = ('ktuple' => 2, 'quiet'  => 1);
 
-my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
+my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params, -verbose => 1);
 isa_ok( $factory, 'Bio::Tools::Run::Alignment::Clustalw');
 $factory->outfile($outfile);
 
@@ -44,7 +44,7 @@ is( $factory->program_name(), 'clustalw',                'Correct exe default na
 
 SKIP: {
   test_skip(-requires_executable => $factory,
-            -tests => 19);  
+            -tests => 19);
   
   # test all factory methods dependent on finding the executable
   # TODO: isnt( $factory->program_dir, undef,'Found program in an ENV variable' );
@@ -95,14 +95,9 @@ SKIP: {
   }
 
   # test doing a bootstrap tree
-  my $tree;
-  SKIP: {
-    if ($ver >= 2.0) {
-      skip("ClustalW version $ver not supported yet with tree()", 1);
-    }    
-    my $tree = $factory->tree($aln);
-    isa_ok( $tree, 'Bio::Tree::Tree' );
-  }
+
+  my $tree = $factory->tree($aln);
+  isa_ok( $tree, 'Bio::Tree::Tree' );
   
   # now test doing profile alignments
   $aln = $factory->profile_align($profile1,$profile2);
@@ -130,14 +125,9 @@ SKIP: {
 	      Bio::Seq->new(-seq => 'AACCTGGCTAATTGGTCAATTGGACGTACGTACGT', -id => 'rhesus'),
 	      Bio::Seq->new(-seq => 'AACCTGGCCGATTGGCCAATTGGACGTACGTACGT', -id => 'squirrelmonkey'));
   
-  SKIP: {
-    if ($ver >= 2.0) {
-      skip("ClustalW version $ver not supported yet with footprint()", 1);
-    }    
     my @results = $factory->footprint(\@seqs);
     @results = map { $_->consensus_string } @results;
     is_deeply(\@results, [qw(ATTGG TACGT)], 'footprinting worked');
-  }
   
   SKIP: {
 	# TODO: Is this needed, or should min version be bumped to > 1.82. Discuss with module author
