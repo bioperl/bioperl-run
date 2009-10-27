@@ -29,7 +29,7 @@ my $outfile = test_output_file();
 # Also test they were initialised correctly
 my @params = ('ktuple' => 2, 'quiet'  => 1);
 
-my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params, -verbose => 1);
+my $factory = Bio::Tools::Run::Alignment::Clustalw->new(@params);
 isa_ok( $factory, 'Bio::Tools::Run::Alignment::Clustalw');
 $factory->outfile($outfile);
 
