@@ -16,8 +16,8 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
   use Bio::Tools::Run::TigrAssembler;
   my $assembler = Bio::Tools::Run::TigrAssembler->new();
 
-  # Pass the factory a Bio::Seq object array reference
-  # Returns a Bio::Assembly::ScaffoldI object
+  # Pass the factory a Bio::Seq object array reference or a FASTA file
+  # Return a Bio::Assembly::ScaffoldI object
   my $asm = $assembler->run(\@seqs);
   # Do something with the contigs in $asm...
 
@@ -235,13 +235,14 @@ sub new {
  Returns :   - a Bio::Assembly::ScaffoldI object, a Bio::Assembly::IO
                object, a filename, or undef if all sequences were too small to
                be usable
- Args    :   - sequences as a Bio::PrimarySeqI or Bio::SeqI arrayref (e.g. can
-               be Bio::Seq::Quality for sequences and quality scores in a same
-               object)
-             - optional Bio::Seq::PrimaryQual arrayref of quality scores if
-               you have your scores in different objects from your sequences.
-               Must have same ID as sequences and same order
-             - type of results to return (optional):
+ Args    :   - FASTA file name or reference to an array of sequence objects,
+               Bio::PrimarySeqI or Bio::SeqI arrayref (e.g. can be Bio::Seq::
+               Quality to have sequences and quality scores in the same object)
+             - Optional: QUAL filename or Bio::Seq::PrimaryQual arrayref of
+               quality scores if you have your scores in different objects
+               from your sequences. The IDs must be the same as for the
+               sequences and be in the same order.
+             - Type of results to return (optional):
                  'Bio::Assembly::IO' object
                  'Bio::Assembly::ScaffoldI' object (default)
                  The name of a file to save the results in
@@ -250,26 +251,51 @@ sub new {
 sub run {
   my ($self, $seqs, $quals, $return_type) = @_;
   # Sanity check
+  my $input_is_file = 0;
   if (not $seqs) {
-    $self->throw("Must supply a Bio::PrimarySeqI or Bio::SeqI object array reference");
-  }
-  for my $seq (@$seqs) {
-    unless ($seq->isa('Bio::PrimarySeqI') || $seq->isa('Bio::SeqI')) {
-      $self->throw("Not a valid Bio::PrimarySeqI or Bio::SeqI object");
+    $self->throw("Must supply sequences as a FASTA filename or a sequence object".
+      " (Bio::PrimarySeqI or Bio::SeqI) array reference");
+  } else {
+    if (ref $seqs eq 'ARRAY') {
+      for my $seq (@$seqs) {
+        unless ($seq->isa('Bio::PrimarySeqI') || $seq->isa('Bio::SeqI')) {
+          $self->throw("Not a valid Bio::PrimarySeqI or Bio::SeqI object");
+        }
+      }
+    } else {
+      if (not -f $seqs) {
+        $self->throw("Input file '$seqs' does not seem to exist.");
+      } else {
+        $input_is_file = 1;
+      }
     }
   }
   if ($quals) {
-    for my $qual (@$quals) {
-      unless ($qual->isa('Bio::Seq::QualI')) {
-        $self->throw("Not a valid Bio::Seq::QualI object");
+    if (ref $quals eq 'ARRAY') {
+      for my $qual (@$quals) {
+        unless ($qual->isa('Bio::Seq::QualI')) {
+          $self->throw("Not a valid Bio::Seq::QualI object");
+        }
+      }
+    } else {
+      if (not -f $quals) {
+        $self->throw("Input file '$quals' does not seem to exist.");
       }
     }
   }
   # Assemble
   $self->save_tempfiles(0);
   $self->tempdir();
-  # Write temp FASTA and QUAL input files, removing sequences less than 39bp
-  my ($fasta_file, $qual_file) = $self->_write_seq_file($seqs, $quals);
+  # Set up input FASTA and QUAL files
+  my ($fasta_file, $qual_file);
+  if ($input_is_file) {
+    # Using input FASTA and QUAL files "as-is"!
+    $fasta_file = $seqs;
+    $qual_file  = $quals;
+  } else {
+    # Write temp FASTA and QUAL input files, removing sequences less than 39bp
+    ($fasta_file, $qual_file) = $self->_write_seq_file($seqs, $quals);
+  }
   # Assemble
   next if not defined $fasta_file;
   my $asm = $self->_run($fasta_file, $qual_file, $return_type);

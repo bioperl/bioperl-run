@@ -2,7 +2,7 @@ use strict;
   
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 53,
+    test_begin(-tests => 56,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
@@ -77,6 +77,10 @@ SKIP: {
 
 	ok($asm = $assembler->run(\@seq_arr));
 	isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+	is($asm->get_nof_singlets, 0);
+	is($asm->get_nof_contigs, 3);
+
+	ok($asm = $assembler->run($fasta_file));
 	is($asm->get_nof_singlets, 0);
 	is($asm->get_nof_contigs, 3);
 
