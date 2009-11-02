@@ -9,7 +9,7 @@
 =head1 NAME
 
 Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
- v2.0
+ v2
 
 =head1 SYNOPSIS
 
@@ -17,12 +17,12 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
   my $assembler = Bio::Tools::Run::TigrAssembler->new();
 
   # Pass the factory a Bio::Seq object array reference
-  # Returns a Bio::Assembly::Scaffold object array reference
-  my $asms = $assembler->run(\@seqs);
+  # Returns a Bio::Assembly::ScaffoldI object
+  my $asm = $assembler->run(\@seqs);
+  # Do something with the contigs in $asm...
 
-  for my $asm (@$asms) {
-    # do something with assembled sequences
-  }
+  # Alternatively, it's possible to return a Bio::Assembly::ScaffoldI or the
+  # the assembly file. See the documentation of the run() function.
 
   # Look at what command was run and what the intermediary files were using:
   $assembler->verbose(2);
@@ -107,7 +107,7 @@ use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 our $program = 'TIGR_Assembler';
 our $program_name = 'TIGR_Assembler';
-our @params = (qw( program max_nof_seqs ));
+our @params = (qw( program ));
 our @tasm_params = (qw( minimum_percent minimum_length max_err_32 quality_file
   maximum_end resort_after ));
 our @tasm_switches = (qw( include_singlets consider_low_scores safe_merging_stop
@@ -160,24 +160,6 @@ sub program_dir {
     $self->{'_program_dir'} = $val if $val;
     return $self->{'_program_dir'};
 }
-
-
-=head2 max_nof_seqs
-
- Title   : max_nof_seqs
- Usage   : $assembler->max_nof_seqs()
- Function: get/set the maximum number number of sequences to assemble at once
- Returns:  string
- Args    : string
-
-=cut
-
-sub max_nof_seqs {
-  my ($self, $val) = @_;
-  $self->{'_max_nof_seq'} = $val if $val;
-  return $self->{'_max_nof_seq'};
-}
-
 
 =head2 new
 
@@ -248,21 +230,25 @@ sub new {
 =head2 run
 
  Title   :   run
- Usage   :   $obj->run(\@seqs, \@quals);
+ Usage   :   $obj->run(\@seqs, \@quals, $return_type);
  Function:   Runs TIGR Assembler
- Returns :   a Bio::Assembly::ScaffoldI object array reference, or undef if all
-             sequences were too small to be usable
+ Returns :   - a Bio::Assembly::ScaffoldI object, a Bio::Assembly::IO
+               object, a filename, or undef if all sequences were too small to
+               be usable
  Args    :   - sequences as a Bio::PrimarySeqI or Bio::SeqI arrayref (e.g. can
                be Bio::Seq::Quality for sequences and quality scores in a same
                object)
              - optional Bio::Seq::PrimaryQual arrayref of quality scores if
                you have your scores in different objects from your sequences.
                Must have same ID as sequences and same order
-
+             - type of results to return (optional):
+                 'Bio::Assembly::IO' object
+                 'Bio::Assembly::ScaffoldI' object (default)
+                 The name of a file to save the results in
 =cut
 
 sub run {
-  my ($self, $seqs, $quals) = @_;
+  my ($self, $seqs, $quals, $return_type) = @_;
   # Sanity check
   unless ($seqs) {
     $self->throw("Must supply a Bio::PrimarySeqI or Bio::SeqI object array reference");
@@ -282,24 +268,13 @@ sub run {
   # Assemble
   $self->save_tempfiles(0);
   $self->tempdir();
-  my @asms;
-  my $tot_nof_seqs = scalar @$seqs;
-  my $max_nof_seqs = $self->max_nof_seqs || $tot_nof_seqs;
-  for (my $i = 0 ; $i < $tot_nof_seqs ; $i += $max_nof_seqs) {
-    my $first = $i;
-    my $last = $i+$max_nof_seqs-1;
-    $last = $tot_nof_seqs-1 if $last > $tot_nof_seqs-1;
-    my @seq_subset = @$seqs[$first..$last];
-    my @qual_subset = @$quals[$first..$last] if $quals;
-    # Write temp FASTA and QUAL input files, removing sequences less than 39bp
-    my ($fasta_file, $qual_file) = $self->_write_seq_file(\@seq_subset, \@qual_subset);
-    # Assemble
-    next if not defined $fasta_file;
-    my ($asm_obj, $asm_file) = $self->_run($fasta_file, $qual_file);
-    push @asms, $asm_obj
-  }
+  # Write temp FASTA and QUAL input files, removing sequences less than 39bp
+  my ($fasta_file, $qual_file) = $self->_write_seq_file($seqs, $quals);
+  # Assemble
+  next if not defined $fasta_file;
+  my $asm = $self->_run($fasta_file, $qual_file, $return_type);
   $self->cleanup();
-  return \@asms;
+  return $asm;
 }
 
 
@@ -387,29 +362,49 @@ sub _write_seq_file {
  Title   :   _run
  Usage   :   $assembler->_run()
  Function:   Assembly step
- Returns :   Bio::Assembly::Scaffold object
-             assembly file location
+ Returns :   assembly file location, Bio::Assembly::IO object, or
+               Bio::Assembly::ScaffoldI object
  Args    :   FASTA file location
              QUAL file location [optional]
+             Results type of results to return:
+               'Bio::Assembly::IO' for the results as an IO object
+               'Bio::Assembly::ScaffoldI' for a Scaffold object [default]
+               Any other value saves the results in the file with the specified
+                 name
 
 =cut
 
 sub _run {
-  my ($self, $fasta_file, $qual_file) = @_;
-  
-  # Usage: TIGR_Assembler [options] scratch_file < input_file > output_file
+  my ($self, $fasta_file, $qual_file, $return_type) = @_;
 
-  $self->throw("Need a FASTA file as input") if not defined $fasta_file;
+  # Sanity checks
+  if (not defined $fasta_file) {
+    $self->throw("Need to provide a FASTA file as input");
+  }
+  if (not defined $return_type) {
+    $return_type = 'Bio::Assembly::ScaffoldI';
+  }
+
+  # Usage: TIGR_Assembler [options] scratch_file < input_file > output_file
 
   # Setup needed files and filehandles first
   my $tmpdir = $self->tempdir(); # retrieve existing temporary dir
   my ($scratch_fh, $scratch_file) = $self->io->tempfile( -dir => $tmpdir );
-  my ($output_fh,  $output_file ) = $self->io->tempfile( -dir => $tmpdir );
   my ($stderr_fh,  $stderr_file ) = $self->io->tempfile( -dir => $tmpdir );
-  
+  my ($output_fh,  $output_file );
+  if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
+       (not $return_type eq 'Bio::Assembly::IO'       )  ) {
+    # Output is a file with specified name
+    $output_file = $return_type;
+    open $output_fh, '>', $output_file or $self->throw("Could not write file ".
+      "'$output_file': $!");
+  } else {
+    ($output_fh,  $output_file ) = $self->io->tempfile( -dir => $tmpdir );
+  }
+
   # Use quality files if possible
   $self->quality_file($qual_file) if defined $qual_file;
-  
+
   # Get command-line options
   my @options = split(/\s+/, $self->_setparams(
     -params   => \@tasm_params,
@@ -421,7 +416,7 @@ sub _run {
     splice @options, $i, 1 if $options[$i] =~ m/^\s*$/;
     $options[$i] =~ s/-(.+)/-$tasm_options{$1}/x;
   }
-  
+
   # Build command to run
   my $exe = $self->executable();
   $self->throw("Could not find TIGR Assembler executable") if not defined $exe;
@@ -437,7 +432,7 @@ sub _run {
     '>',  $output_file,
     '2>', $stderr_file
   );
-  
+
   # Print command for debugging
   if ($self->verbose() >= 0) {
     my $cmd = '';
@@ -453,9 +448,9 @@ sub _run {
       }
       $cmd .= " $value";
     }
-    $self->debug( "TIGR Assembler command = $cmd" );
+    $self->debug( "TIGR Assembler command = $cmd\n" );
   }
-  
+
   # Execute command
   eval {
     IPC::Run::run(@ipc_args) || die("problem: $!");
@@ -473,13 +468,31 @@ sub _run {
   close($stderr_fh);
  
   # Import assembly
-  my $asm_io = Bio::Assembly::IO->new(
-    -file   => "<$output_file",
-    -format => 'tigr' );
-  my $asm = $asm_io->next_assembly();
-  $asm_io->close;
-
-  return $asm, $output_file;
+  my $results;
+  my $asm_io;
+  my $asm;
+  if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
+       (not $return_type eq 'Bio::Assembly::IO'       )  ) {
+    $results = $output_file;
+  } else {
+    $asm_io = Bio::Assembly::IO->new(
+      -file   => "<$output_file",
+      -format => 'tigr' );
+    unlink $output_file;
+    if ($return_type eq 'Bio::Assembly::IO') {
+      $results = $asm_io;
+    } else {
+      $asm = $asm_io->next_assembly();
+      $asm_io->close;
+      if ($return_type eq 'Bio::Assembly::ScaffoldI') {
+        $results = $asm;
+      } else {
+        $self->throw("The return type has to be 'Bio::Assembly::IO', 'Bio::".
+          "Assembly::ScaffoldI' or a file name.");
+      }
+    }
+  }
+  return $results;
 }
 
 

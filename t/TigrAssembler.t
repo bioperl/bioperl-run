@@ -2,7 +2,7 @@ use strict;
   
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 48,
+    test_begin(-tests => 53,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
@@ -18,9 +18,6 @@ is($assembler->program, 'asdf');
 
 ok($assembler->program_dir('/dir'));
 is($assembler->program_dir, '/dir');
-
-ok($assembler->max_nof_seqs(120));
-is($assembler->max_nof_seqs, 120);
 
 ok($assembler->minimum_percent(99));
 is($assembler->minimum_percent, 99);
@@ -66,29 +63,36 @@ SKIP: {
 	}
 	
 	ok($assembler = Bio::Tools::Run::TigrAssembler->new());
-	ok(my $asms = $assembler->run(\@seq_arr));
-	for my $asm (@$asms) {
-	  isa_ok($asm, 'Bio::Assembly::Scaffold');
-	  is($asm->get_nof_singlets, 0);
-	  is($asm->get_nof_contigs, 3);
-	}
+
+	my $asm;
+	my $result_file = 'results.tigr';
+	ok($asm = $assembler->run(\@seq_arr, undef, $result_file));
+	ok($asm eq $result_file);
+	is((-f $asm), 1);
+	unlink $result_file;
+	ok($asm = $assembler->run(\@seq_arr, undef, 'Bio::Assembly::IO'));
+	isa_ok($asm, 'Bio::Assembly::IO');
+	ok($asm = $assembler->run(\@seq_arr, undef, 'Bio::Assembly::ScaffoldI'));
+	isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+
+	ok($asm = $assembler->run(\@seq_arr));
+	isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+	is($asm->get_nof_singlets, 0);
+	is($asm->get_nof_contigs, 3);
+
 	ok($assembler->include_singlets(1));
-	ok($asms = $assembler->run(\@seq_arr));
-	for my $asm (@$asms) {
-	  is($asm->get_nof_singlets, 191);
-	  is($asm->get_nof_contigs, 3);
-	}
+	ok($asm = $assembler->run(\@seq_arr));
+	is($asm->get_nof_singlets, 191);
+	is($asm->get_nof_contigs, 3);
+	
 	ok($assembler->minimum_length(1000));
-	ok($asms = $assembler->run(\@seq_arr));
-	for my $asm (@$asms) {
-	  is($asm->get_nof_singlets, 198);
-	  is($asm->get_nof_contigs, 0);
-	}
+	ok($asm = $assembler->run(\@seq_arr));
+	is($asm->get_nof_singlets, 198);
+	is($asm->get_nof_contigs, 0);
+	
 	ok($assembler->minimum_length(1));
 	ok($assembler->minimum_percent(100));
-	ok($asms = $assembler->run(\@seq_arr));
-	for my $asm (@$asms) {
-	  is($asm->get_nof_singlets, 198);
-	  is($asm->get_nof_contigs, 0);
-	}
+	ok($asm = $assembler->run(\@seq_arr));
+	is($asm->get_nof_singlets, 198);
+	is($asm->get_nof_contigs, 0);
 }
