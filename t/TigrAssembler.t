@@ -53,7 +53,7 @@ is($assembler->resort_after, 100);
 $assembler->program('TIGR_Assembler');
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 18);
+              -tests => 25);
 
 	my $fasta_file = test_input_file('sample_dataset_1.fa');
 	my $io = Bio::SeqIO->new( -file => $fasta_file );

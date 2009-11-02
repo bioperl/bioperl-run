@@ -106,7 +106,7 @@ use Bio::Assembly::IO;
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 our $program = 'TIGR_Assembler';
-our $program_name = 'TIGR_Assembler';
+our $program_name = 'TIGR_Assembler'; # name of the executable
 our @params = (qw( program ));
 our @tasm_params = (qw( minimum_percent minimum_length max_err_32 quality_file
   maximum_end resort_after ));
@@ -250,7 +250,7 @@ sub new {
 sub run {
   my ($self, $seqs, $quals, $return_type) = @_;
   # Sanity check
-  unless ($seqs) {
+  if (not $seqs) {
     $self->throw("Must supply a Bio::PrimarySeqI or Bio::SeqI object array reference");
   }
   for my $seq (@$seqs) {
@@ -366,11 +366,11 @@ sub _write_seq_file {
                Bio::Assembly::ScaffoldI object
  Args    :   FASTA file location
              QUAL file location [optional]
-             Results type of results to return:
+             Type of results to return [optional]:
                'Bio::Assembly::IO' for the results as an IO object
                'Bio::Assembly::ScaffoldI' for a Scaffold object [default]
-               Any other value saves the results in the file with the specified
-                 name
+               Any other value saves the results in a TIGR-formatted file with
+                 the specified name
 
 =cut
 
@@ -419,7 +419,9 @@ sub _run {
 
   # Build command to run
   my $exe = $self->executable();
-  $self->throw("Could not find TIGR Assembler executable") if not defined $exe;
+  if (not defined $exe) {
+    $self->throw("Could not find the executable '".$self->program_name()."'");
+  }
   my @tasm_args;
   if ( scalar @params > 0 ) {
     @tasm_args = ( $exe, @options, $scratch_file );
