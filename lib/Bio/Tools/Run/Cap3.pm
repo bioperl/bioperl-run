@@ -68,7 +68,6 @@ methods. Internal methods are usually preceded with a _
 =cut
 
 package Bio::Tools::Run::Cap3;
-use vars qw(@ISA %OK_FIELD @PARAMS *AUTOLOAD);
 
 use strict;
 use File::Copy;
@@ -85,88 +84,114 @@ use base qw(Bio::Root::Root
             Bio::Factory::ApplicationFactoryI);
 
 our $program_name = 'cap3';
+our @cap3_params = (qw(a b c d e f g h m n o p r s t u v w x y z));
+our %tasm_options = (
+  'band_expansion_size'        => 'a',
+  'differences_quality_cutoff' => 'b',
+  'clipping_quality_cutoff'    => 'c',
+  'max_qscore_sum'             => 'd',
+  'extra_nof_differences'      => 'e',
+  'max_gap_length'             => 'f',
+  'gap_penalty_factor'         => 'g',
+  'max_overhand_percent'       => 'h',
+  'match_score_factor'         => 'm',
+  'mismatch_score_factor'      => 'n',
+  'overlap_length_cutoff'      => 'o',
+  'overlap_identity_cutoff'    => 'p',
+  'reverse_orientation_value'  => 'r',
+  'overlap_score_cutoff'       => 's',
+  'max_word_occurrences'       => 't',
+  'min_correction_constraints' => 'u',
+  'min_linking_constraints'    => 'v',
+  'clipping_info_file'         => 'w',
+  'output_prefix_string'       => 'x',
+  'clipping_range'             => 'y',
+  'min_clip_good_reads'        => 'z'
+);
 
-BEGIN {
-    @PARAMS      = qw(a b c d e f g h i j k m n o p r s t u v w x y z);
-    # What are -i, -j and -k???
-    # Authorize attribute fields
-    foreach my $attr (@PARAMS) { $OK_FIELD{$attr}++; }
+=head2 program_name
+
+ Title   : program_name
+ Usage   : $assembler>program_name()
+ Function: get/set the program name
+ Returns:  string
+ Args    : string
+
+=cut
+
+sub program_name {
+    my ($self, $val) = @_;
+    $self->{'_program_name'} = $val if $val;
+    return $self->{'_program_name'};
+}
+
+
+=head2 program_dir
+
+ Title   : program_dir
+ Usage   : $assembler->program_dir()
+ Function: get/set the program dir
+ Returns:  string
+ Args    : string
+
+=cut
+
+sub program_dir {
+    my ($self, $val) = @_;
+    $self->{'_program_dir'} = $val if $val;
+    return $self->{'_program_dir'};
 }
 
 =head2 new
 
  Title   : new
- Usage   : $assembler->new()
-
-Options (default values):
-  -a  N  specify band expansion size N > 10 (20)
-  -b  N  specify base quality cutoff for differences N > 15 (20)
-  -c  N  specify base quality cutoff for clipping N > 5 (12)
-  -d  N  specify max qscore sum at differences N > 20 (200)
-  -e  N  specify clearance between no. of diff N > 10 (30)
-  -f  N  specify max gap length in any overlap N > 1 (20)
-  -g  N  specify gap penalty factor N > 0 (6)
-  -h  N  specify max overhang percent length N > 2 (20)
-  -m  N  specify match score factor N > 0 (2)
-  -n  N  specify mismatch score factor N < 0 (-5)
-  -o  N  specify overlap length cutoff > 20 (40)
-  -p  N  specify overlap percent identity cutoff N > 65 (80)
-  -r  N  specify reverse orientation value N >= 0 (1)
-  -s  N  specify overlap similarity score cutoff N > 400 (900)
-  -t  N  specify max number of word matches N > 30 (300)
-  -u  N  specify min number of constraints for correction N > 0 (3)
-  -v  N  specify min number of constraints for linking N > 0 (2)
-  -w  N  specify file name for clipping information (none)
-  -x  N  specify prefix string for output file names (cap)
-  -y  N  specify clipping range N > 5 (250)
-  -z  N  specify min no. of good reads at clip pos N > 0 (3)
+ Usage   : $assembler->new(
+             -overlap_length_cutoff   => 35,
+             -overlap_identity_cutoff => 98 # %
+           }
+ Returns : Bio::Tools::Run::Cap3 object
+ Args    : CAP3 options available in this module:
+  'band_expansion_size'        specify band expansion size N > 10 (20)
+  'differences_quality_cutoff' specify base quality cutoff for differences N > 15 (20)
+  'clipping_quality_cutoff'    specify base quality cutoff for clipping N > 5 (12)
+  'max_qscore_sum'             specify max qscore sum at differences N > 20 (200)
+  'extra_nof_differences'      specify clearance between no. of diff N > 10 (30)
+  'max_gap_length'             specify max gap length in any overlap N > 1 (20)
+  'gap_penalty_factor'         specify gap penalty factor N > 0 (6)
+  'max_overhand_percent'       specify max overhang percent length N > 2 (20)
+  'match_score_factor'         specify match score factor N > 0 (2)
+  'mismatch_score_factor'      specify mismatch score factor N < 0 (-5)
+  'overlap_length_cutoff'      specify overlap length cutoff > 20 (40)
+  'overlap_identity_cutoff'    specify overlap percent identity cutoff N > 65 (80)
+  'reverse_orientation_value'  specify reverse orientation value N >= 0 (1)
+  'overlap_score_cutoff'       specify overlap similarity score cutoff N > 400 (900)
+  'max_word_occurrences'       specify max number of word matches N > 30 (300)
+  'min_correction_constraints' specify min number of constraints for correction N > 0 (3)
+  'min_linking_constraints'    specify min number of constraints for linking N > 0 (2)
+  'clipping_info_file'         specify file name for clipping information (none)
+  'output_prefix_string'       specify prefix string for output file names (cap)
+  'clipping_range'             specify clipping range N > 5 (250)
+  'min_clip_good_reads'        specify min no. of good reads at clip pos N > 0 (3)
 
 =cut
 
 sub new {
-    my ( $caller, @args ) = @_;
+  my ( $caller, @args ) = @_;
+  my $self = $caller->SUPER::new(@args);
 
-    # chained new
-    my $self = $caller->SUPER::new(@args);
+  #####
+  # to facilitiate tempfile cleanup
+  my ( undef, $tempfile ) = $self->io->tempfile();
+  $self->outfile_name($tempfile);
+  #####
 
-    # to facilitiate tempfile cleanup
-    my ( undef, $tempfile ) = $self->io->tempfile();
-    $self->outfile_name($tempfile);
-    while (@args) {
-        my $attr  = shift @args;
-        my $value = shift @args;
-        $self->$attr($value);
-    }
-
-    $self->program_name($program_name) if not defined $self->program_name();
-
-    return $self;
-}
-
-sub AUTOLOAD {
-    my $self = shift;
-    my $attr = $AUTOLOAD;
-    $attr =~ s/.*:://;
-    my $attr_letter = substr( $attr, 0, 1 );
-    # actual key is first letter of $attr unless first attribute
-    # letter is underscore (as in _READMETHOD), the $attr is a CAP3
-    # parameter and should be truncated to its first letter only
-    $attr = ( $attr_letter eq '_' ) ? $attr : $attr_letter;
-    $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
-    $self->{$attr_letter} = shift if @_;
-    return $self->{$attr_letter};
-}
-
-sub program_dir {
-    my($self, $val) = @_;
-    $self->{'_program_dir'} = $val if $val;
-    return $self->{'_program_dir'};
-}
-
-sub program_name {
-    my($self, $val) = @_;
-    $self->{'_program_name'} = $val if $val;
-    return $self->{'_program_name'};
+  $self->_set_from_args(
+    \@args,
+    -methods => [ @cap3_params ],
+    -create =>  1,
+  );
+  $self->program_name($program_name) if not defined $self->program_name();
+  return $self;
 }
 
 =head2 run
@@ -187,143 +212,125 @@ sub program_name {
 =cut
 
 sub run {
-	my ($self, $input, $return_type) = @_;
-	my $exe = $self->executable(undef);
-   if (!defined($exe)) {
-     $self->throw("Could not find executable for '" . $self->program_name() . "' in '" . $self->program_dir() . "'");
-   }
-   if (not defined $return_type) {
-     $return_type = 'Bio::Assembly::ScaffoldI';
-   }
+  my ($self, $input, $return_type) = @_;
+  my $exe = $self->executable();
+  if (!defined($exe)) {
+    $self->throw("Could not find executable for '" . $self->program_name() . "'");
+  }
+  if (not defined $return_type) {
+    $return_type = 'Bio::Assembly::ScaffoldI';
+  }
 
-	# Create input file
-	my $infilename1 = $self->_setinput($input);
-	if (! $infilename1) {
-		$self->throw(" $input ($infilename1) not array of Bio::Seq objects or file name!");
-	}
+  # Create input file
+  my $infilename1 = $self->_setinput($input);
+  if (! $infilename1) {
+    $self->throw(" $input ($infilename1) not array of Bio::Seq objects or file name!");
+  }
 
-   # Execute CAP3
-	my $param_string = $self->_setparams;
-	my $commandstring = $exe . " $infilename1 " . $param_string;
-	open(CAP3, "$commandstring |") || 
-	  $self->throw(sprintf("%s call crashed: %s %s\n", $self->program_name, $!, $commandstring));
-	local $/ = undef;
-	#my ($result) = <CAP3>;
-   <CAP3>;
-	close CAP3;
+  # Execute CAP3
+  my $param_string = $self->_setparams(
+    -params   => \@cap3_params,
+    -join     => ' ',
+    -dash     => 1
+  );
+  my $commandstring = "$exe $infilename1 $param_string";
+  open(CAP3, "$commandstring |") ||
+    $self->throw(sprintf("%s call crashed: %s %s\n", $self->program_name, $!, $commandstring));
+  local $/ = undef;
+  #my ($result) = <CAP3>;
+  <CAP3>;
+  close CAP3;
 
-   # Result files
-   my $prefix = $self->x() || 'cap';
-   my $ace_file     = "$infilename1.$prefix.ace";
-   my $contigs_file = "$infilename1.$prefix.contigs";
-   my $qual_file    = "$infilename1.$prefix.contigs.links";
-   my $links_file   = "$infilename1.$prefix.contigs.qual";
-   my $info_file    = "$infilename1.$prefix.info";
-   my $singlet_file = "$infilename1.$prefix.singlets";
+  # Result files
+  my $prefix = $self->x() || 'cap';
+  my $ace_file     = "$infilename1.$prefix.ace";
+  my $contigs_file = "$infilename1.$prefix.contigs";
+  my $qual_file    = "$infilename1.$prefix.contigs.links";
+  my $links_file   = "$infilename1.$prefix.contigs.qual";
+  my $info_file    = "$infilename1.$prefix.info";
+  my $singlet_file = "$infilename1.$prefix.singlets";
 
-   # Remove all files except for the ACE file
-   for my $file ($contigs_file, $qual_file, $links_file, $info_file, $singlet_file) {
-     unlink $file;
-   }
+  # Remove all files except for the ACE file
+  for my $file ($contigs_file, $qual_file, $links_file, $info_file, $singlet_file) {
+    unlink $file;
+  }
 
-   # Process results
-   my $results;
-   my $asm_io;
-   my $asm;
-   if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
-        (not $return_type eq 'Bio::Assembly::IO'       )  ) {
-     # Move the ACE file to its final destination
-     move $ace_file, $return_type or $self->throw("Error: could not move ".
-       "filename '$ace_file' to '$return_type': $!");
-     $results = $return_type;
-   } else {
-     $asm_io = Bio::Assembly::IO->new(
-       -file   => "<$ace_file",
-       -format => 'ace' );
-     unlink $ace_file;
-     if ($return_type eq 'Bio::Assembly::IO') {
-       $results = $asm_io;
-     } else {
-       $asm = $asm_io->next_assembly();
-       $asm_io->close;
-       if ($return_type eq 'Bio::Assembly::ScaffoldI') {
-         $results = $asm;
-       } else {
-         $self->throw("The return type has to be 'Bio::Assembly::IO', 'Bio::".
-           "Assembly::ScaffoldI' or a file name.");
-       }
-     }
-   }
-
-   return $results;
-}
-
-sub _setparams {
-    my $self = shift;
-    my ( $attr, $value, @execparams );
-
-    @execparams = @PARAMS;
-
-    my $param_string = "";
-    for $attr (@execparams)
-    {
-        $value = $self->$attr();
-        next unless ( defined $value );
-
-        # put params in format expected by CAP3
-        $attr = '-' . $attr;
-        $param_string .= " $attr  $value ";
+  # Process results
+  my $results;
+  my $asm_io;
+  my $asm;
+  if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
+       (not $return_type eq 'Bio::Assembly::IO'       )  ) {
+    # Move the ACE file to its final destination
+    move $ace_file, $return_type or $self->throw("Error: could not move ".
+      "filename '$ace_file' to '$return_type': $!");
+    $results = $return_type;
+  } else {
+    $asm_io = Bio::Assembly::IO->new(
+      -file   => "<$ace_file",
+      -format => 'ace' );
+    unlink $ace_file;
+    if ($return_type eq 'Bio::Assembly::IO') {
+      $results = $asm_io;
+    } else {
+      $asm = $asm_io->next_assembly();
+      $asm_io->close;
+      if ($return_type eq 'Bio::Assembly::ScaffoldI') {
+        $results = $asm;
+      } else {
+        $self->throw("The return type has to be 'Bio::Assembly::IO', 'Bio::".
+          "Assembly::ScaffoldI' or a file name.");
+      }
     }
-    return $param_string;
-}
+  }
 
+  return $results;
+}
 
 sub _setinput {
-	my ($self, $input1) = @_;
-	my ($seq, $temp, $infilename1, $fh ) ;
+  my ($self, $input1) = @_;
+  my ($seq, $temp, $infilename1, $fh ) ;
 
-	# If $input1 is not a reference it better be the name of a file
-	# with the sequence data...
-	$self->io->_io_cleanup();
+  # If $input1 is not a reference it better be the name of a file
+  # with the sequence data...
+  $self->io->_io_cleanup();
 
- SWITCH:  {
-      unless (ref $input1) {
-			$infilename1 = (-e $input1) ? $input1 : 0 ;
-         # Check for line feeds \r : 
-         if ($infilename1) {
-           open my $fh, '<', $infilename1 or $self->throw("Could not read file ".
-             "'$infilename1': $!");
-           while ( my $line = <$fh> ) {
-             if ($line =~ m/\r/) {
-               $self->throw("Found a linefeed (\\r) in FASTA file '$infilename1'.".
-                 " Aborting because CAP3 misbehaves with linefeeds. Try removing".
-                 " them from your FASTA file or inputting sequence  objects to ".
-                 "the run() function.");
-               last;
-             }
-           }
-           close $fh;
-         }
-
-			last SWITCH; 
+  SWITCH:  {
+    unless (ref $input1) {
+      $infilename1 = (-e $input1) ? $input1 : 0 ;
+      # Check for line feeds \r :
+      if ($infilename1) {
+        open my $fh, '<', $infilename1 or $self->throw("Could not read file ".
+          "'$infilename1': $!");
+        while ( my $line = <$fh> ) {
+          if ($line =~ m/\r/) {
+            $self->throw("Found a linefeed (\\r) in FASTA file '$infilename1'.".
+              " Aborting because CAP3 misbehaves with linefeeds. Try removing".
+              " them from your FASTA file or inputting sequence  objects to ".
+              "the run() function.");
+            last;
+          }
+        }
+        close $fh;
       }
-      # $input may be an arrayref of BioSeq objects...
-      if (ref($input1) =~ /ARRAY/i ) {
-			($fh,$infilename1) = $self->io->tempfile();
-			$temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
-			foreach $seq (@$input1) {
-				unless ($seq->isa("Bio::PrimarySeqI") || $seq->isa('Bio::SeqI')) {
-              return 0;
-            }
-				$temp->write_seq($seq);
-			}
-			close $fh;
-			$fh = undef;
-			last SWITCH;
+      last SWITCH;
+    }
+    # $input may be an arrayref of BioSeq objects...
+    if (ref($input1) =~ /ARRAY/i ) {
+      ($fh,$infilename1) = $self->io->tempfile();
+      $temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
+      for $seq (@$input1) {
+        unless ($seq->isa("Bio::PrimarySeqI") || $seq->isa('Bio::SeqI')) {
+          return 0;
+        }
+         $temp->write_seq($seq);
       }
-      $infilename1 = 0;		# Set error flag if you get here
-	}				# End SWITCH
-	return ($infilename1);
+      close $fh;
+      last SWITCH;
+    }
+    $infilename1 = 0;		# Set error flag if you get here
+  } # End SWITCH
+  return ($infilename1);
 }
 
 1;

@@ -2,7 +2,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 22,
+    test_begin(-tests => 62,
 	       -requires_modules => [qw(Bio::Tools::Run::Cap3)]);
     use_ok('Bio::SeqIO');
 }
@@ -16,12 +16,13 @@ is($assembler->program_name, 'aaa');
 ok($assembler->program_dir('/dir'));
 is($assembler->program_dir, '/dir');
 
-ok($assembler->y(150));
-is($assembler->y, 150);
+my @params = @Bio::Tools::Run::Cap3::cap3_params;
+for my $param (@params) {
+  ok($assembler->$param(321));
+  is($assembler->$param(), 321);
+}
 
-### there are more interfaces to test a..z
-
-# test the program itself
+# Test the program itself
 $assembler->program_name('cap3');
 SKIP: {
     test_skip(-requires_executable => $assembler,
@@ -44,6 +45,7 @@ SKIP: {
   ok($asm = $assembler->run(\@seq_arr, $result_file));
   ok($asm eq $result_file);
   is((-f $asm), 1);
+  unlink $result_file;
 
   ok($asm = $assembler->run(\@seq_arr, 'Bio::Assembly::IO'));
   isa_ok($asm, 'Bio::Assembly::IO');
