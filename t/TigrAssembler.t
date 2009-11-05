@@ -1,102 +1,114 @@
 use strict;
-  
+
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 56,
+    test_begin(-tests => 75,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
 
-my $assembler = Bio::Tools::Run::TigrAssembler->new();
+my $assembler;
+ok($assembler = Bio::Tools::Run::TigrAssembler->new());
 isa_ok($assembler, 'Bio::Tools::Run::TigrAssembler');
 
 ok($assembler->program_name('aaa'));
 is($assembler->program_name, 'aaa');
 
-ok($assembler->program('asdf'));
-is($assembler->program, 'asdf');
-
 ok($assembler->program_dir('/dir'));
 is($assembler->program_dir, '/dir');
 
-ok($assembler->minimum_percent(99));
-is($assembler->minimum_percent, 99);
+my @params = @Bio::Tools::Run::TigrAssembler::program_params;
+for my $param (@params) {
+  ok($assembler->$param(321));
+  is($assembler->$param(), 321);
+}
 
-ok($assembler->minimum_length(50));
-is($assembler->minimum_length, 50);
-
-ok($assembler->include_singlets(1));
-is($assembler->include_singlets, 1);
-
-ok($assembler->max_err_32(123));
-is($assembler->max_err_32, 123);
-
-ok($assembler->consider_low_scores(1));
-is($assembler->consider_low_scores, 1);
-
-ok($assembler->maximum_end(10));
-is($assembler->maximum_end, 10);
-
-ok($assembler->ignore_tandem_32mers(1));
-is($assembler->ignore_tandem_32mers, 1);
-
-ok($assembler->use_tandem_32mers(1));
-is($assembler->use_tandem_32mers, 1);
-
-ok($assembler->safe_merging_stop(1));
-is($assembler->safe_merging_stop, 1);
-
-ok($assembler->resort_after(100));
-is($assembler->resort_after, 100);
+my @switches = @Bio::Tools::Run::TigrAssembler::program_switches;
+for my $switch (@switches) {
+  ok($assembler->$switch(1));
+  is($assembler->$switch(), 1);
+}
 
 # test the program itself
-$assembler->program('TIGR_Assembler');
+my $program_name = $Bio::Tools::Run::TigrAssembler::program_name;
+ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 25);
+              -tests => 43);
 
-	my $fasta_file = test_input_file('sample_dataset_1.fa');
-	my $io = Bio::SeqIO->new( -file => $fasta_file );
-	my @seq_arr;
-	while (my $seq = $io->next_seq) {
-	  push @seq_arr, $seq;
-	}
-	
-	ok($assembler = Bio::Tools::Run::TigrAssembler->new());
+   # Input data
+   my $result_file = 'results.tigr';
+   my $fasta_file = test_input_file('sample_dataset_1.fa');
+   my $qual_file  = test_input_file('sample_dataset_1.qual');
+   my $io = Bio::SeqIO->new( -file => $fasta_file, -format => 'fasta' );
+   my @seq_arr;
+   while (my $seq = $io->next_seq) {
+      push @seq_arr, $seq;
+   }
+   $io = Bio::SeqIO->new( -file => $qual_file, -format => 'qual' );
+   my @qual_arr;
+   while (my $qual = $io->next_seq) {
+      push @qual_arr, $qual;
+   }
 
-	my $asm;
-	my $result_file = 'results.tigr';
-	ok($asm = $assembler->run(\@seq_arr, undef, $result_file));
-	ok($asm eq $result_file);
-	is((-f $asm), 1);
-	unlink $result_file;
-	ok($asm = $assembler->run(\@seq_arr, undef, 'Bio::Assembly::IO'));
-	isa_ok($asm, 'Bio::Assembly::IO');
-	ok($asm = $assembler->run(\@seq_arr, undef, 'Bio::Assembly::ScaffoldI'));
-	isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+   my $asm;
+   ok($assembler = Bio::Tools::Run::TigrAssembler->new());
 
-	ok($asm = $assembler->run(\@seq_arr));
-	isa_ok($asm, 'Bio::Assembly::ScaffoldI');
-	is($asm->get_nof_singlets, 0);
-	is($asm->get_nof_contigs, 3);
+   # Try FASTA or sequence object input
+   ok($asm = $assembler->run($fasta_file));
+   isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+   is($asm->get_nof_singlets, 0);
+   is($asm->get_nof_contigs, 3);
 
-	ok($asm = $assembler->run($fasta_file));
-	is($asm->get_nof_singlets, 0);
-	is($asm->get_nof_contigs, 3);
+   ok($asm = $assembler->run(\@seq_arr));
+   isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+   is($asm->get_nof_singlets, 0);
+   is($asm->get_nof_contigs, 3);
 
-	ok($assembler->include_singlets(1));
-	ok($asm = $assembler->run(\@seq_arr));
-	is($asm->get_nof_singlets, 191);
-	is($asm->get_nof_contigs, 3);
-	
-	ok($assembler->minimum_length(1000));
-	ok($asm = $assembler->run(\@seq_arr));
-	is($asm->get_nof_singlets, 198);
-	is($asm->get_nof_contigs, 0);
-	
-	ok($assembler->minimum_length(1));
-	ok($assembler->minimum_percent(100));
-	ok($asm = $assembler->run(\@seq_arr));
-	is($asm->get_nof_singlets, 198);
-	is($asm->get_nof_contigs, 0);
+   # Try optional quality score input as a QUAL file or bioperl objects
+   ok($asm = $assembler->run($fasta_file, $qual_file));
+   isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+   is($asm->get_nof_singlets, 0);
+   is($asm->get_nof_contigs, 3);
+
+   ok($asm = $assembler->run(\@seq_arr, \@qual_arr));
+   isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+   is($asm->get_nof_singlets, 0);
+   is($asm->get_nof_contigs, 3);
+
+   # Try the different output types
+   ok($assembler->out_type($result_file));
+   ok($asm = $assembler->run(\@seq_arr));
+   ok($asm eq $result_file);
+   is((-f $asm), 1);
+   unlink $result_file;
+
+   ok($assembler->out_type('Bio::Assembly::IO'));
+   ok($asm = $assembler->run(\@seq_arr));
+   isa_ok($asm, 'Bio::Assembly::IO');
+   ok($asm->next_assembly);
+
+   ok($assembler->out_type('Bio::Assembly::ScaffoldI'));
+   ok($asm = $assembler->run(\@seq_arr));
+   isa_ok($asm, 'Bio::Assembly::ScaffoldI');
+   is($asm->get_nof_singlets, 0);
+   is($asm->get_nof_contigs, 3);
+
+   # Try some TIGR_assembler specific parameters
+   ok($assembler->include_singlets(1));
+   ok($asm = $assembler->run(\@seq_arr));
+   is($asm->get_nof_singlets, 191);
+   is($asm->get_nof_contigs, 3);
+
+   ok($assembler->minimum_length(1000));
+   ok($asm = $assembler->run(\@seq_arr));
+   is($asm->get_nof_singlets, 198);
+   is($asm->get_nof_contigs, 0);
+
+   ok($assembler->minimum_length(1));
+   ok($assembler->minimum_percent(100));
+   ok($asm = $assembler->run(\@seq_arr));
+   is($asm->get_nof_singlets, 198);
+   is($asm->get_nof_contigs, 0);
+
 }

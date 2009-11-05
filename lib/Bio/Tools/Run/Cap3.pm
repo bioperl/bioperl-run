@@ -9,18 +9,28 @@ Bio::Tools::Run::Cap3 - wrapper for CAP3
 
 =head1 SYNOPSIS
 
-  # Build a Cap3 factory with an (optional) parameter list
-  my @params = ('y', '150');
-  my $factory = Bio::Tools::Run::Cap3->new(@params);
+  use Bio::Tools::Run::Cap3;
+  # Run Cap3 using an input FASTA file
+  my $factory = Bio::Tools::Run::Cap3->new( -clipping_range => 150 );
+  my $asm_obj = $factory->run($fasta_file, $qual_file);
+  # An assembly object is returned by default
+  for my $contig ($assembly->all_contigs) {
+    ... do something ...
+  }
 
-  # Specify where CAP3 is installed, if not the default directory (/usr/local/bin):
-  $factory->program_dir('/opt/bio/bin');
+  # Read some sequences
+  use Bio::SeqIO;
+  my $sio = Bio::SeqIO->new(-file => $fasta_file, -format => 'fasta');
+  my @seqs;
+  while (my $seq = $sio->next_seq()) {
+    push @seqs,$seq;
+  }
 
-  # Pass the factory an input file name...
-  my $result = $factory->run($filename);
+  # Run Cap3 using input sequence objects and returning an assembly file
+  my $asm_file = 'results.ace';
+  $factory->out_type($asm_file);
+  $factory->run(\@seqs);
 
-  # or an arrayref of Sequence objects
-  my $result = $factory->run(\@seqs);
 
 =head1 DESCRIPTION
 
@@ -71,21 +81,19 @@ package Bio::Tools::Run::Cap3;
 
 use strict;
 use File::Copy;
-use Bio::Root::Root;
-use Bio::Root::IO;
-use Bio::Seq;
-use Bio::SeqIO;
-use Bio::Assembly::IO;
-use Bio::Tools::Run::WrapperBase;
-use Bio::Factory::ApplicationFactoryI;
 
-use base qw(Bio::Root::Root
-            Bio::Tools::Run::WrapperBase
-            Bio::Factory::ApplicationFactoryI);
+use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase);
 
 our $program_name = 'cap3';
-our @cap3_params = (qw(a b c d e f g h m n o p r s t u v w x y z));
-our %tasm_options = (
+our @program_params = (qw( band_expansion_size differences_quality_cutoff
+  clipping_quality_cutoff max_qscore_sum extra_nof_differences max_gap_length
+  gap_penalty_factor max_overhand_percent match_score_factor mismatch_score_factor
+  overlap_length_cutoff overlap_identity_cutoff reverse_orientation_value
+  overlap_score_cutoff max_word_occurrences min_correction_constraints
+  min_linking_constraints clipping_info_file output_prefix_string clipping_range
+  min_clip_good_reads ));
+our @program_switches;
+our %param_translation = (
   'band_expansion_size'        => 'a',
   'differences_quality_cutoff' => 'b',
   'clipping_quality_cutoff'    => 'c',
@@ -108,49 +116,21 @@ our %tasm_options = (
   'clipping_range'             => 'y',
   'min_clip_good_reads'        => 'z'
 );
-
-=head2 program_name
-
- Title   : program_name
- Usage   : $assembler>program_name()
- Function: get/set the program name
- Returns:  string
- Args    : string
-
-=cut
-
-sub program_name {
-    my ($self, $val) = @_;
-    $self->{'_program_name'} = $val if $val;
-    return $self->{'_program_name'};
-}
-
-
-=head2 program_dir
-
- Title   : program_dir
- Usage   : $assembler->program_dir()
- Function: get/set the program dir
- Returns:  string
- Args    : string
-
-=cut
-
-sub program_dir {
-    my ($self, $val) = @_;
-    $self->{'_program_dir'} = $val if $val;
-    return $self->{'_program_dir'};
-}
+our $qual_param;
+our $use_dash = 1;
+our $join = ' ';
+our $asm_format = 'ace';
 
 =head2 new
 
  Title   : new
- Usage   : $assembler->new(
+ Usage   : $factory->new(
              -overlap_length_cutoff   => 35,
              -overlap_identity_cutoff => 98 # %
            }
- Returns : Bio::Tools::Run::Cap3 object
- Args    : CAP3 options available in this module:
+ Function: Create a new Cap3 factory
+ Returns : A Bio::Tools::Run::Cap3 object
+ Args    : Cap3 options available in this module:
   'band_expansion_size'        specify band expansion size N > 10 (20)
   'differences_quality_cutoff' specify base quality cutoff for differences N > 15 (20)
   'clipping_quality_cutoff'    specify base quality cutoff for clipping N > 5 (12)
@@ -176,161 +156,101 @@ sub program_dir {
 =cut
 
 sub new {
-  my ( $caller, @args ) = @_;
-  my $self = $caller->SUPER::new(@args);
-
-  #####
-  # to facilitiate tempfile cleanup
-  my ( undef, $tempfile ) = $self->io->tempfile();
-  $self->outfile_name($tempfile);
-  #####
-
-  $self->_set_from_args(
-    \@args,
-    -methods => [ @cap3_params ],
-    -create =>  1,
-  );
+  my ($class,@args) = @_;
+  my $self = $class->SUPER::new(@args);
+  $self->_set_program_options(\@args, \@program_params, \@program_switches, \%param_translation,
+    $qual_param, $use_dash, $join);
   $self->program_name($program_name) if not defined $self->program_name();
+  $self->_assembly_format($asm_format);
   return $self;
 }
+
+
+=head2 out_type
+
+ Title   : out_type
+ Usage   : $assembler->out_type('Bio::Assembly::ScaffoldI')
+ Function: Get/set the desired type of output
+ Returns : The type of results to return
+ Args    : Desired type of results to return (optional):
+                 'Bio::Assembly::IO' object
+                 'Bio::Assembly::ScaffoldI' object (default)
+                 The name of a file to save the results in
+
+=cut
+
 
 =head2 run
 
  Title   :   run
- Usage   :   $obj->run($input, $return_type);
- Function:   Runs CAP3
- Returns :   - a Bio::Assembly::ScaffoldI object, a Bio::Assembly::IO
-               object, a filename, or undef if all sequences were too small to
-               be usable
- Args    :   - arrayred of sequences (Bio::PrimarySeqI or Bio::SeqI objects),
-                or FASTA file
-             - type of results to return [optional]:
-                'Bio::Assembly::IO' for the results as an IO object
-                'Bio::Assembly::ScaffoldI' for a Scaffold object [default]
-                Any other value saves the results in an ACE-formatted file with
-                 the specified name
+ Usage   :   $asm = $factory->run($fasta_file);
+ Function:   Run CAP3
+ Returns :   Assembly results (file, IO object or assembly object)
+ Args    :   - sequence input (FASTA file or sequence object arrayref)
+             - optional quality score input (QUAL file or quality score object
+               arrayref)
 =cut
 
-sub run {
-  my ($self, $input, $return_type) = @_;
-  my $exe = $self->executable();
-  if (!defined($exe)) {
-    $self->throw("Could not find executable for '" . $self->program_name() . "'");
-  }
-  if (not defined $return_type) {
-    $return_type = 'Bio::Assembly::ScaffoldI';
+
+=head2 _run
+
+ Title   :   _run
+ Usage   :   $factory->_run()
+ Function:   Make a system call and run Cap3
+ Returns :   An assembly file
+ Args    :   - FASTA file
+             - optional QUAL file
+
+=cut
+
+sub _run {
+  my ($self, $fasta_file, $qual_file) = @_;
+
+  # Move quality file to proper place
+  my $tmp_qual_file = "$fasta_file.qual";
+  if ($qual_file && not $qual_file eq $tmp_qual_file) {
+    $tmp_qual_file = "$fasta_file.qual"; # by Cap3 convention
+    link ($qual_file, $tmp_qual_file) or copy ($qual_file, $tmp_qual_file) or
+      $self->throw("Could not copy file '$qual_file' to '$tmp_qual_file': $!");
   }
 
-  # Create input file
-  my $infilename1 = $self->_setinput($input);
-  if (! $infilename1) {
-    $self->throw(" $input ($infilename1) not array of Bio::Seq objects or file name!");
-  }
+  # Setup needed files and filehandles
+  my ($output_fh, $output_file)   = $self->_prepare_output_file( );
 
-  # Execute CAP3
-  my $param_string = $self->_setparams(
-    -params   => \@cap3_params,
-    -join     => ' ',
-    -dash     => 1
-  );
-  my $commandstring = "$exe $infilename1 $param_string";
+  # Get program executable
+  my $exe = $self->executable;
+
+  # Get command-line options
+  my $options = join ' ', @{$self->_translate_params()};
+
+  # Usage: cap3 File_of_reads [options]
+  my $commandstring = "$exe $fasta_file $options";
   open(CAP3, "$commandstring |") ||
     $self->throw(sprintf("%s call crashed: %s %s\n", $self->program_name, $!, $commandstring));
   local $/ = undef;
-  #my ($result) = <CAP3>;
+  #my ($result) = <CAP3>; # standard output of the program
   <CAP3>;
   close CAP3;
+  close $output_fh;
 
   # Result files
-  my $prefix = $self->x() || 'cap';
-  my $ace_file     = "$infilename1.$prefix.ace";
-  my $contigs_file = "$infilename1.$prefix.contigs";
-  my $qual_file    = "$infilename1.$prefix.contigs.links";
-  my $links_file   = "$infilename1.$prefix.contigs.qual";
-  my $info_file    = "$infilename1.$prefix.info";
-  my $singlet_file = "$infilename1.$prefix.singlets";
+  my $prefix       = $self->output_prefix_string() || 'cap';
+  my $ace_file     = "$fasta_file.$prefix.ace";
+  my $contigs_file = "$fasta_file.$prefix.contigs";
+  my $qual_file    = "$fasta_file.$prefix.contigs.links";
+  my $links_file   = "$fasta_file.$prefix.contigs.qual";
+  my $info_file    = "$fasta_file.$prefix.info";
+  my $singlet_file = "$fasta_file.$prefix.singlets";
 
   # Remove all files except for the ACE file
-  for my $file ($contigs_file, $qual_file, $links_file, $info_file, $singlet_file) {
+  for my $file ($contigs_file, $qual_file, $links_file, $info_file, $singlet_file, $tmp_qual_file) {
     unlink $file;
   }
 
-  # Process results
-  my $results;
-  my $asm_io;
-  my $asm;
-  if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
-       (not $return_type eq 'Bio::Assembly::IO'       )  ) {
-    # Move the ACE file to its final destination
-    move $ace_file, $return_type or $self->throw("Error: could not move ".
-      "filename '$ace_file' to '$return_type': $!");
-    $results = $return_type;
-  } else {
-    $asm_io = Bio::Assembly::IO->new(
-      -file   => "<$ace_file",
-      -format => 'ace' );
-    unlink $ace_file;
-    if ($return_type eq 'Bio::Assembly::IO') {
-      $results = $asm_io;
-    } else {
-      $asm = $asm_io->next_assembly();
-      $asm_io->close;
-      if ($return_type eq 'Bio::Assembly::ScaffoldI') {
-        $results = $asm;
-      } else {
-        $self->throw("The return type has to be 'Bio::Assembly::IO', 'Bio::".
-          "Assembly::ScaffoldI' or a file name.");
-      }
-    }
-  }
+  # Move the ACE file to its final destination
+  move ($ace_file, $output_file) or $self->throw("Could not move file '$ace_file' to '$output_file': $!");
 
-  return $results;
-}
-
-sub _setinput {
-  my ($self, $input1) = @_;
-  my ($seq, $temp, $infilename1, $fh ) ;
-
-  # If $input1 is not a reference it better be the name of a file
-  # with the sequence data...
-  $self->io->_io_cleanup();
-
-  SWITCH:  {
-    unless (ref $input1) {
-      $infilename1 = (-e $input1) ? $input1 : 0 ;
-      # Check for line feeds \r :
-      if ($infilename1) {
-        open my $fh, '<', $infilename1 or $self->throw("Could not read file ".
-          "'$infilename1': $!");
-        while ( my $line = <$fh> ) {
-          if ($line =~ m/\r/) {
-            $self->throw("Found a linefeed (\\r) in FASTA file '$infilename1'.".
-              " Aborting because CAP3 misbehaves with linefeeds. Try removing".
-              " them from your FASTA file or inputting sequence  objects to ".
-              "the run() function.");
-            last;
-          }
-        }
-        close $fh;
-      }
-      last SWITCH;
-    }
-    # $input may be an arrayref of BioSeq objects...
-    if (ref($input1) =~ /ARRAY/i ) {
-      ($fh,$infilename1) = $self->io->tempfile();
-      $temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
-      for $seq (@$input1) {
-        unless ($seq->isa("Bio::PrimarySeqI") || $seq->isa('Bio::SeqI')) {
-          return 0;
-        }
-         $temp->write_seq($seq);
-      }
-      close $fh;
-      last SWITCH;
-    }
-    $infilename1 = 0;		# Set error flag if you get here
-  } # End SWITCH
-  return ($infilename1);
+  return $output_file;
 }
 
 1;

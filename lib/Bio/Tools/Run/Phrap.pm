@@ -19,24 +19,27 @@ Bio::Tools::Run::Phrap - a wrapper for running Phrap
 =head1 SYNOPSIS
 
   use Bio::Tools::Run::Phrap;
-  use Bio::SeqIO;
+  # Run Phrap using an input FASTA file
+  my $factory = Bio::Tools::Run::Phrap->new( -penalty => -2, -raw => 1 );
+  my $asm_obj = $factory->run($fasta_file, $qual_file);
+  # An assembly object is returned by default
+  for my $contig ($assembly->all_contigs) {
+    ... do something ...
+  }
 
   # Read some sequences
-  my $sio = Bio::SeqIO->new(-file=>$ARGV[0],-format=>'fasta');
+  use Bio::SeqIO;
+  my $sio = Bio::SeqIO->new(-file => $fasta_file, -format => 'fasta');
   my @seqs;
-  while(my $seq = $sio->next_seq()){
+  while (my $seq = $sio->next_seq()) {
     push @seqs,$seq;
   }
-  # Run Phrap
-  my $prun =Bio::Tools::Run::Phrap->new( -penalty => -2, -raw => 1 );
-  my $assembly = $prun->run(\@seqs);
-  # Input can also be a FASTA file
-  foreach my $contig($assembly->all_contigs){
-    my $collection = $contig->get_features_collection;
-    foreach my $sf($collection->get_all_features){
-      print $sf->primary_id."\t".$sf->start."\t".$sf->end."\n";
-    }
-  }
+
+  # Run Phrap using input sequence objects and returning an assembly file
+  my $asm_file = 'results.phrap';
+  $factory->out_type($asm_file);
+  $factory->run(\@seqs);
+
 
 =head1 DESCRIPTION
 
@@ -87,68 +90,36 @@ web:
 package Bio::Tools::Run::Phrap;
 
 use strict;
-use Bio::Assembly::IO;
-use Bio::Root::Root;
-use Bio::Root::IO;
-use Bio::Factory::ApplicationFactoryI;
-use Bio::Tools::Run::WrapperBase;
+use File::Copy;
 
-use base qw(Bio::Root::Root
-            Bio::Tools::Run::WrapperBase
-            Bio::Factory::ApplicationFactoryI);
+use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase);
 
 our $program_name   = 'phrap';
-our @phrap_params   = (qw(penalty gap_init gap_ext ins_gap_ext del_gap_ext
+our @program_params   = (qw(penalty gap_init gap_ext ins_gap_ext del_gap_ext
   matrix minmatch maxmatch max_group_size bandwidth minscore vector_bound masklevel
   default_qual subclone_delim n_delim group_delim trim_start forcelevel
   bypasslevel maxgap repeat_stringency node_seg node_space max_subclone_size
   trim_penalty trim_score trim_qual confirm_length confirm_trim confirm_penalty
   confirm_score indexwordsize));
-our @phrap_switches = (qw(raw word_raw revise_greedy shatter_greedy preassemble
+our @program_switches = (qw(raw word_raw revise_greedy shatter_greedy preassemble
   force_high retain_duplicates));
+our %param_translation;
+our $qual_param;
+our $use_dash = 1;
+our $join = ' ';
+our $asm_format = 'phrap';
 
-=head2 program_name
-
- Title   : program_name
- Usage   : $factory>program_name()
- Function: get/set the name of the program to execute
- Returns:  string
- Args    : string
-
-=cut
-
-sub program_name {
-  my ($self, $val) = @_;
-  $self->{'_program_name'} = $val if $val;
-  return $self->{'_program_name'};
-}
-
-=head2 program_dir
-
- Title   : program_dir
- Usage   : $factory->program_dir()
- Function: get/set the program dir
- Returns : string
- Args    : string
-
-=cut
-
-sub program_dir {
-  my ($self, $val) = @_;
-  $self->{'_program_dir'} = $val if $val;
-  return $self->{'_program_dir'};
-}
 
 =head2 new
 
  Title   : new
- Usage   : my $factory= Bio::Tools::Run::Phrap->new(
+ Usage   : $factory = Bio::Tools::Run::Phrap->new(
              -penalty => -2, # parameter option and value
              -raw     =>  1  # flag (1=yes, 0=no)
            );
- Function: creates a new Phrap factory
- Returns:  Bio::Tools::Run::Phrap
- Args    :
+ Function: Create a new Phrap factory
+ Returns : A Bio::Tools::Run::Phrap object
+ Args    : Phrap options available in this module:
 
 Option names & default values taken from the PHRAP manual:
 
@@ -362,195 +333,92 @@ effect on run time and memory usage.
 sub new {
   my ($class,@args) = @_;
   my $self = $class->SUPER::new(@args);
-  # Register methods
-  $self->_set_from_args(
-    \@args,
-    -methods => [
-      @phrap_params,
-      @phrap_switches,
-    ],
-    -create =>  1,
-  );
+  $self->_set_program_options(\@args, \@program_params, \@program_switches, \%param_translation,
+    $qual_param, $use_dash, $join);
   $self->program_name($program_name) if not defined $self->program_name();
+  $self->_assembly_format($asm_format);
   return $self;
 }
 
+=head2 out_type
+
+ Title   : out_type
+ Usage   : $assembler->out_type('Bio::Assembly::ScaffoldI')
+ Function: Get/set the desired type of output
+ Returns : The type of results to return
+ Args    : Desired type of results to return (optional):
+                 'Bio::Assembly::IO' object
+                 'Bio::Assembly::ScaffoldI' object (default)
+                 The name of a file to save the results in
+
+=cut
+
+
 =head2 run
 
- Title   :   run()
- Usage   :   my $asm = $factory->run($fasta)
- Function:   Runs Phrap
- Returns :   assembly file location, Bio::Assembly::IO object, or
-               Bio::Assembly::ScaffoldI object
- Args    :   - FASTA file name or reference to an array of sequence objects,
-               Bio::PrimarySeqI or Bio::SeqI arrayref
-             - Type of results to return [optional]:
-                'Bio::Assembly::IO' for the results as an IO object
-                'Bio::Assembly::ScaffoldI' for a Scaffold object [default]
-                Any other value saves the results in a TIGR-formatted file with
-                  the specified name
+ Title   :   run
+ Usage   :   $asm = $factory->run($fasta_file)
+ Function:   Run Phrap
+ Returns :   Assembly results (file, IO object or assembly object)
+ Args    :   - sequence input (FASTA file or sequence object arrayref)
+             - optional quality score input (QUAL file or quality score object
+               arrayref)
 =cut
 
-sub run {
-  my ($self, $seqs, $return_type) = @_;
-  my @feats;
-  # Sanity checks
-  if (not defined $seqs) {
-    $self->throw("Need to provide a FASTA file or sequence objects as input");
-  }
-  my ($fh,$infile1);
-  if (ref($seqs) =~ /ARRAY/i) {
-    # Input is an array of sequence objects
-    my @infilearr;
-    ($fh, $infile1) = $self->io->tempfile();
-    my $temp = Bio::SeqIO->new( -file => ">$infile1",
-                                -format => 'fasta' );
-    for my $seq1 (@$seqs) {
-      unless ($seq1->isa('Bio::PrimarySeqI') || $seq1->isa('Bio::SeqI')) {
-        $self->throw("Not a valid Bio::PrimarySeqI or Bio::SeqI object");
-      }
-      $temp->write_seq($seq1);
-      push @infilearr, $infile1;
-    }
-  } else {
-    # Input is a FASTA file
-    if (not -f $seqs) {
-      $self->throw("Input file '$seqs' does not seem to exist.");
-    }
-    $infile1 = $seqs;
-  }
-  if (not defined $return_type) {
-    $return_type = 'Bio::Assembly::ScaffoldI';
-  }
-
-  $self->_input($infile1);
-  my $assembly = $self->_run($return_type);
-
-  return $assembly;
-}
-
-=head2 _input
-
- Title   :   _input
- Usage   :   $factory->_input($seqFile)
- Function:   get/set for input file
- Returns :
- Args    :
-
-=cut
-
-sub _input() {
-   my ($self,$infile1) = @_;
-   $self->{'input'} = $infile1 if(defined $infile1);
-   return $self->{'input'};
-}
 
 =head2 _run
 
  Title   :   _run
  Usage   :   $factory->_run()
- Function:   Makes a system call and runs Phrap
- Returns :   An array of Bio::SeqFeature::Generic objects
- Args    :   
+ Function:   Make a system call and run Phrap
+ Returns :   An assembly file
+ Args    :   - FASTA file
+             - optional QUAL file
 
 =cut
 
 sub _run {
-  my ($self, $return_type)= @_;
+  my ($self, $fasta_file, $qual_file) = @_;
 
-  my $tmpdir = $self->tempdir();
-  my ($output_fh,$output_file);
-  if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
-       (not $return_type eq 'Bio::Assembly::IO'       )  ) {
-    # Output is a file with specified name
-    $output_file = $return_type;
-    open $output_fh, '>', $output_file or $self->throw("Could not write file ".
-      "'$output_file': $!");
-  } else {
-    ($output_fh,  $output_file ) = $self->io->tempfile( -dir => $tmpdir );
+  # Move quality file to proper place
+  my $tmp_qual_file = "$fasta_file.qual";
+  if ($qual_file && not -f $tmp_qual_file) {
+    $tmp_qual_file = "$fasta_file.qual"; # by Cap3 convention
+    link ($qual_file, $tmp_qual_file) or copy ($qual_file, $tmp_qual_file) or
+      $self->throw("Could not copy file '$qual_file' to '$tmp_qual_file': $!");
   }
 
-  # PHRAP usage:
-  # > phrap seq_file1 [seq_file2 ...] [-option value] [-option value] ..
-  my $param_str = $self->_setparams(
-    -params   => \@phrap_params,
-    -switches => \@phrap_switches,
-    -join     => ' ',
-    -dash     => 1
-  );
-  my $exe = $self->executable();
-  if (!defined($exe)) {
-    $self->throw("Could not find executable for '" . $self->program_name() . "'");
-  }
-  my $input_file = $self->_input();
-  my $str = "$exe $param_str $input_file 1> $output_file 2> /dev/null";
+  # Setup needed files and filehandles
+  my ($output_fh, $output_file)   = $self->_prepare_output_file( );
+
+  # Get program executable
+  my $exe = $self->executable;
+
+  # Get command-line options
+  my $options = join ' ', @{$self->_translate_params()};
+
+  # Usage: phrap seq_file1 [seq_file2 ...] [-option value] [-option value] ...
+  my $str = "$exe $options $fasta_file 1> $output_file 2> /dev/null";
   $self->debug($str. "\n");
   my $status = system($str);
   $self->throw( "Phrap call ($str) crashed: $? \n") unless $status==0;
   close($output_fh);
 
   # Result files
-  my $log_file = "$input_file.log";
-  my $contigs_file = "$input_file.contigs";
-  my $problems_file = "$input_file.problems";
-  my $problems_qual_file = "$input_file.problems.qual";
-  my $contigs_qual_file = "$input_file.contigs.qual";
-  my $singlets_file = "$input_file.singlets";
+  my $log_file = "$fasta_file.log";
+  my $contigs_file = "$fasta_file.contigs";
+  my $problems_file = "$fasta_file.problems";
+  my $problems_qual_file = "$fasta_file.problems.qual";
+  my $contigs_qual_file = "$fasta_file.contigs.qual";
+  my $singlets_file = "$fasta_file.singlets";
 
   # Remove all files except for the PHRAP file
   for my $file ($log_file, $contigs_file, $problems_file, $problems_qual_file,
-    $contigs_qual_file, $singlets_file) {
+    $contigs_qual_file, $singlets_file, $tmp_qual_file) {
     unlink $file;
   }
 
-  # Import assembly
-  my $results;
-  my $asm_io;
-  my $asm;
-  if ( (not $return_type eq 'Bio::Assembly::ScaffoldI') &&
-       (not $return_type eq 'Bio::Assembly::IO'       )  ) {
-    $results = $output_file;
-  } else {
-    $asm_io = Bio::Assembly::IO->new(
-      -file   => "<$output_file",
-      -format => 'phrap' );
-    unlink $output_file;
-    if ($return_type eq 'Bio::Assembly::IO') {
-      $results = $asm_io;
-    } else {
-      $asm = $asm_io->next_assembly();
-      $asm_io->close;
-      if ($return_type eq 'Bio::Assembly::ScaffoldI') {
-        $results = $asm;
-      } else {
-        $self->throw("The return type has to be 'Bio::Assembly::IO', 'Bio::".
-          "Assembly::ScaffoldI' or a file name.");
-      }
-    }
-  }
-  return $results;
-}
-
-
-=head2 _writeSeqFile
-
- Title   :   _writeSeqFile
- Usage   :   $factory->_writeSeqFile($seq)
- Function:   Creates a file from the given seq object
- Returns :   A string(filename)
- Args    :   Bio::PrimarySeqI
-
-=cut
-
-sub _writeSeqFile{
-  my ($self,$seq) = @_;
-  my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$self->tempdir());
-  my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
-  $in->write_seq($seq);
-  $in->close();
-  close($tfh);
-  undef $tfh;
-  return $inputfile;
+  return $output_file;
 }
 
 1;
