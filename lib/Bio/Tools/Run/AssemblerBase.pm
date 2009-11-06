@@ -394,7 +394,7 @@ sub _set_program_options {
   }
   $self->_set_from_args(
     $args,
-    -methods => [ @$params, @$switches ],
+    -methods => [ @$params, @$switches, 'program_name', 'program_dir', 'out_type' ],
     -create =>  1,
   );
   return 1;

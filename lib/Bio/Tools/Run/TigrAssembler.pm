@@ -30,10 +30,17 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
     push @seqs,$seq;
   }
 
-  # Run TIGR Assembler using input sequence objects and returning an assembly file
+  # Run TIGR Assembler with input sequence objects and return an assembly file
   my $asm_file = 'results.tigr';
   $factory->out_type($asm_file);
   $factory->run(\@seqs);
+
+  # Use LIGR Assembler instead
+  my $ligr = Bio::Tools::Run::TigrAssembler->new(
+    -program_name => 'LIGR_Assembler',
+    -trimmed_seq  => 1
+  );
+  $ligr->run(\@seqs);
 
 =head1 DESCRIPTION
 
@@ -55,6 +62,9 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
      clear_end5 clear_end3
     e.g.
     >GHIBF57F 500 3000 1750 33 587
+
+  This module also supports LIGR Assembler, a variant of TIGR Assembler:
+    http://sourceforge.net/projects/ligr-assembler/
 
 =head1 FEEDBACK
 
@@ -108,7 +118,7 @@ our $program_name = 'TIGR_Assembler'; # name of the executable
 our @program_params = (qw( minimum_percent minimum_length max_err_32 quality_file
   maximum_end resort_after ));
 our @program_switches = (qw( include_singlets consider_low_scores safe_merging_stop
-  ignore_tandem_32mers use_tandem_32mers not_random ));
+  ignore_tandem_32mers use_tandem_32mers not_random incl_bad_seq trimmed_seq ));
 our %param_translation = (
   'quality_file'         => 'q',
   'minimum_percent'      => 'p',
@@ -121,7 +131,9 @@ our %param_translation = (
   'use_tandem_32mers'    => 'u',
   'safe_merging_stop'    => 'X',
   'not_random'           => 'N',
-  'resort_after'         => 'r'
+  'resort_after'         => 'r',
+  'incl_bad_seq'         => 'b',
+  'trimmed_seq'          => 'i'
 );
 our $qual_param = 'quality_file';
 our $use_dash = 1;
@@ -136,7 +148,10 @@ our $asm_format = 'tigr';
                           -include_singlets => 1  );
  Function: Create a TIGR Assembler factory
  Returns : A Bio::Tools::Run::TigrAssembler object
- Args    : TIGR Assembler options available in this module:
+ Args    :
+
+TIGR Assembler options available in this module:
+
   minimum_percent: the minimum percent identity that two DNA fragments must
     achieve over their entire region of overlap in order to be considered as a
     possible assembly. Adjustments are made by the program to take into account
@@ -172,6 +187,12 @@ our $asm_format = 'tigr';
     fragments for the purpose of determining repeat regions.
   resort_after: specifies how many sequences should be merged before resorting
     the possible merges based on clone constraints.
+
+LIGR Assembler has the same options as TIGR Assembler, and the following:
+
+  incl_bad_seq: keep all sequences including potential chimeras and splice variants
+  trimmed_seq: indicates that the sequences are trimmed. High quality scores will be
+    given on the whole sequence length instead of just in the middle)
 
 =cut
 

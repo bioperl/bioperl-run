@@ -2,7 +2,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 75,
+    test_begin(-tests => 86,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
@@ -29,7 +29,7 @@ for my $switch (@switches) {
   is($assembler->$switch(), 1);
 }
 
-# test the program itself
+# Test the TIGR Assembler program itself
 my $program_name = $Bio::Tools::Run::TigrAssembler::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
@@ -110,5 +110,23 @@ SKIP: {
    ok($asm = $assembler->run(\@seq_arr));
    is($asm->get_nof_singlets, 198);
    is($asm->get_nof_contigs, 0);
+}
+
+# Test the LIGR Assembler program itself
+ok($assembler = Bio::Tools::Run::TigrAssembler->new( -program_name => 'LIGR_Assembler' ));
+SKIP: {
+    test_skip(-requires_executable => $assembler,
+              -tests => 6);
+
+   my $fasta_file  = test_input_file('sample_dataset_1.fa');
+   my $result_file = 'results.tigr';
+   my $asm;
+   ok($assembler->out_type($result_file));
+   ok($assembler->incl_bad_seq(1));
+   ok($assembler->trimmed_seq(1));
+   ok($asm = $assembler->run($fasta_file));
+   ok($asm eq $result_file);
+   is((-f $asm), 1);
+   unlink $result_file;
 
 }
