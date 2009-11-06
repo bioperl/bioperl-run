@@ -2,15 +2,14 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 89,
-	       -requires_modules => [qw(Bio::Tools::Run::Cap3)]);
+    test_begin(-tests => 67,
+	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Minimo)]);
     use_ok('Bio::SeqIO');
 }
 
-
 my $assembler;
-ok($assembler = Bio::Tools::Run::Cap3->new());
-isa_ok($assembler, 'Bio::Tools::Run::Cap3');
+ok($assembler = Bio::Tools::Run::Minimo->new());
+isa_ok($assembler, 'Bio::Tools::Run::Minimo');
 
 ok($assembler->program_name('aaa'));
 is($assembler->program_name, 'aaa');
@@ -18,24 +17,24 @@ is($assembler->program_name, 'aaa');
 ok($assembler->program_dir('/dir'));
 is($assembler->program_dir, '/dir');
 
-my @params = @Bio::Tools::Run::Cap3::program_params;
+my @params = @Bio::Tools::Run::Minimo::program_params;
 for my $param (@params) {
   ok($assembler->$param(321));
   is($assembler->$param(), 321);
 }
 
-my @switches = @Bio::Tools::Run::Cap3::program_switches;
+my @switches = @Bio::Tools::Run::Minimo::program_switches;
 for my $switch (@switches) {
   ok($assembler->$switch(1));
   is($assembler->$switch(), 1);
 }
 
 # test the program itself
-my $program_name = $Bio::Tools::Run::Cap3::program_name;
+my $program_name = $Bio::Tools::Run::Minimo::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 39);
+              -tests => 45);
 
    # Input data
    my $result_file = 'results.ace';
@@ -53,9 +52,11 @@ SKIP: {
    }
 
    my $asm;
-   ok($assembler = Bio::Tools::Run::Cap3->new());
+   ok($assembler = Bio::Tools::Run::Minimo->new());
 
    # Try FASTA or sequence object input
+   ok($assembler->min_len(20));
+   ok($assembler->min_ident(50));
    ok($asm = $assembler->run($fasta_file));
    isa_ok($asm, 'Bio::Assembly::ScaffoldI');
    is($asm->get_nof_singlets, 0);
@@ -95,14 +96,19 @@ SKIP: {
    is($asm->get_nof_singlets, 0);
    is($asm->get_nof_contigs, 3);
 
-   # Try some Cap3 specific parameters
-   ok($assembler->overlap_length_cutoff(1000));
+   # Try some Minimo specific parameters
+   ok($assembler->bad_qual(30));
+   ok($asm = $assembler->run(\@seq_arr));
+   is($asm->get_nof_singlets, 0);
+   is($asm->get_nof_contigs, 3);
+
+   ok($assembler->min_len(1000));
    ok($asm = $assembler->run(\@seq_arr));
    is($asm->get_nof_singlets, 0);
    is($asm->get_nof_contigs, 0);
 
-   ok($assembler->overlap_length_cutoff(21));
-   ok($assembler->overlap_identity_cutoff(100));
+   ok($assembler->min_len(20));
+   ok($assembler->min_ident(100));
    ok($asm = $assembler->run(\@seq_arr));
    is($asm->get_nof_singlets, 0);
    is($asm->get_nof_contigs, 0);

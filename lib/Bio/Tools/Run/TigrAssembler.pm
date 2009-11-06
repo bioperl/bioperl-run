@@ -132,8 +132,8 @@ our $asm_format = 'tigr';
 
  Title   : new
  Usage   : $factory->new( -minimum_percent  => 95,
-                            -minimum_length   => 50,
-                            -include_singlets => 1);
+                          -minimum_length   => 50,
+                          -include_singlets => 1  );
  Function: Create a TIGR Assembler factory
  Returns : A Bio::Tools::Run::TigrAssembler object
  Args    : TIGR Assembler options available in this module:
@@ -203,7 +203,7 @@ sub new {
 =head2 run
 
  Title   :   run
- Usage   :   $obj->run($fasta_file);
+ Usage   :   $factory->run($fasta_file);
  Function:   Run TIGR Assembler
  Returns :   - a Bio::Assembly::ScaffoldI object, a Bio::Assembly::IO
                object, a filename, or undef if all sequences were too small to
@@ -216,6 +216,10 @@ sub new {
 
 sub run {
   my ($self, $seqs, $quals) = @_;
+
+  # Note: overloading the Bio::Tools::Run::AssemblerBase::run() method to
+  # be able to remove small sequences!
+
   # Sanity checks
   $self->_check_executable();
   $self->_check_sequence_input($seqs);
@@ -230,8 +234,17 @@ sub run {
 
   # Prepare input files
   my ($fasta_file, $qual_file) = $self->_prepare_input_files($seqs,$quals);
-  if ($qual_file && defined $qual_param) {
-    $quals = $self->$qual_param;
+
+  # If needed, set the program argument for a QUAL file
+  my $qual_param = $self->{'_options'}->{'_qual_param'};
+  if (defined $qual_param) {
+    if ($qual_file) {
+      # Set the quality input parameter
+      $quals = $self->$qual_param($qual_file);
+    } else {
+      # Remove the quality input parameter
+      $quals = $self->$qual_param(undef);
+    }
   }
 
   # Assemble
@@ -298,7 +311,7 @@ sub _run {
 
   # Execute command
   eval {
-    IPC::Run::run(@ipc_args) || die("problem: $!");
+    IPC::Run::run(@ipc_args) || die("There was a problem running $exe: $!");
   };
   if ($@) {
     $self->throw("$exe call crashed: $@");

@@ -382,8 +382,16 @@ sub _set_program_options {
   $self->{'_options'}->{'_switches'}    = $switches;
   $self->{'_options'}->{'_translation'} = $translation;
   $self->{'_options'}->{'_qual_param'}  = $qual_param;
-  $self->{'_options'}->{'_dash'}        = $use_dash || 1;
-  $self->{'_options'}->{'_join'}        = $join || ' ';
+  if (not defined $use_dash) {
+    $self->{'_options'}->{'_dash'}      = 1;
+  } else {
+    $self->{'_options'}->{'_dash'}      = $use_dash;
+  }
+  if (not defined $use_dash) {
+    $self->{'_options'}->{'_join'}      = ' ';
+  } else {
+    $self->{'_options'}->{'_join'}      = $join;
+  }
   $self->_set_from_args(
     $args,
     -methods => [ @$params, @$switches ],
@@ -406,6 +414,8 @@ sub _set_program_options {
 
 sub _translate_params {
   my ($self)   = @_;
+
+  # Get option string
   my $params   = $self->{'_options'}->{'_params'};
   my $switches = $self->{'_options'}->{'_switches'};
   my $join     = $self->{'_options'}->{'_join'};
@@ -417,7 +427,9 @@ sub _translate_params {
     -join      => $join,
     -dash      => $dash
   );
-  my @options  = split(/$join/, $options);
+
+  # Translate options
+  my @options  = split(/(\s|$join)/, $options);
   for (my $i = 0; $i < scalar @options; $i++) {
     my ($prefix, $name) = ( $options[$i] =~ m/^(-?)(.+)$/ );
     if (defined $name) {
@@ -429,6 +441,11 @@ sub _translate_params {
       $i--;
     }
   }
+  $options = join('', @options);
+
+  # Now arrayify the options
+  @options = split(' ', $options);
+
   return \@options;
 }
 
@@ -456,9 +473,17 @@ sub run {
 
   # Prepare input files
   my ($fasta_file, $qual_file) = $self->_prepare_input_files($seqs,$quals);
+
+  # If needed, set the program argument for a QUAL file
   my $qual_param = $self->{'_options'}->{'_qual_param'};
-  if ($qual_file && defined $qual_param) {
-    $quals = $self->$qual_param;
+  if (defined $qual_param) {
+    if ($qual_file) {
+      # Set the quality input parameter
+      $quals = $self->$qual_param($qual_file);
+    } else {
+      # Remove the quality input parameter
+      $quals = $self->$qual_param(undef);
+    }
   }
 
   # Assemble
