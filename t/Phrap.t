@@ -1,5 +1,11 @@
 use strict;
 
+# These tests will return similar warnings because of the incomplete status of
+# the Phrap parser:
+# --------------------- WARNING ---------------------
+# MSG: Adding non-nucleotidic sequence RFPERU_003_E10.x01.phd.1
+# ---------------------------------------------------  
+
 BEGIN {
     use Bio::Root::Test;
     test_begin(-tests => 127,

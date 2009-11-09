@@ -215,7 +215,7 @@ sub _run {
     $cmd .= join ( $join, @program_args );
     for ( my $i = 1 ; $i < scalar @ipc_args ; $i++ ) {
       my $element = $ipc_args[$i];
-      my $ref = ref $element;
+      my $ref = ref($element);
       my $value;
       if ( $ref && $ref eq 'SCALAR') {
         $value = $$element;

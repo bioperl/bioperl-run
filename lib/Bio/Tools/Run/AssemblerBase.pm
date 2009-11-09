@@ -449,6 +449,29 @@ sub _translate_params {
   return \@options;
 }
 
+
+=head2 _prepare_input_sequences
+
+ Title   : _prepare_input_sequences
+ Usage   : ($seqs, $quals) = $assembler->_prepare_input_sequences(\@seqs, \@quals);
+ Function: Do something to the input sequence and qual objects. By default,
+           nothing happens. Overload this method in the specific assembly module
+           if processing of the sequences is needed (e.g. as in the
+           TigrAssembler module).
+ Returns : - sequence input
+           - optional quality score input
+ Args    : - sequence input (FASTA file or sequence object arrayref)
+           - optional quality score input (QUAL file or quality score object
+               arrayref)
+
+=cut
+
+sub _prepare_input_sequences {
+  my ($self, $seqs, $quals) = @_;
+  return $seqs, $quals;
+}
+
+
 =head2 run
 
  Title   : run
@@ -466,12 +489,16 @@ sub _translate_params {
 
 sub run {
   my ($self, $seqs, $quals) = @_;
+
   # Sanity checks
   $self->_check_executable();
   $self->_check_sequence_input($seqs);
   $self->_check_optional_quality_input($quals);
 
-  # Prepare input files
+  # Process objects if needed
+  $self->_prepare_input_sequences($seqs, $quals);
+
+  # Write input files
   my ($fasta_file, $qual_file) = $self->_prepare_input_files($seqs,$quals);
 
   # If needed, set the program argument for a QUAL file

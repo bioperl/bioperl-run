@@ -139,6 +139,7 @@ our $qual_param = 'quality_file';
 our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'tigr';
+our $min_len = 39;
 
 =head2 new
 
@@ -235,54 +236,14 @@ sub new {
                arrayref)
 =cut
 
-sub run {
-  my ($self, $seqs, $quals) = @_;
-
-  # Note: overloading the Bio::Tools::Run::AssemblerBase::run() method to
-  # be able to remove small sequences!
-
-  # Sanity checks
-  $self->_check_executable();
-  $self->_check_sequence_input($seqs);
-  $self->_check_optional_quality_input($quals);
-
-  # Need to remove sequences less than 39bp
-  # Do that only if input is bioperl object arrayref
-  if (ref $seqs =~ m/ARRAY/i && ref $quals =~ m/ARRAY/i) {
-    my $min_len = 39;
-    ($seqs, $quals) = $self->_remove_small_sequences($seqs, $quals, $min_len);
-  }
-
-  # Prepare input files
-  my ($fasta_file, $qual_file) = $self->_prepare_input_files($seqs,$quals);
-
-  # If needed, set the program argument for a QUAL file
-  my $qual_param = $self->{'_options'}->{'_qual_param'};
-  if (defined $qual_param) {
-    if ($qual_file) {
-      # Set the quality input parameter
-      $quals = $self->$qual_param($qual_file);
-    } else {
-      # Remove the quality input parameter
-      $quals = $self->$qual_param(undef);
-    }
-  }
-
-  # Assemble
-  my $output_file = $self->_run($fasta_file, $qual_file);
-
-  # Export results in desired object type
-  my $asm = $self->_export_results($output_file);
-  return $asm;
-}
 
 =head2 _run
 
  Title   :   _run
- Usage   :   $factory->_run()
- Function:   Make a system call and run TIGR Assembler
+ Usage   :   $assembler->_run()
+ Function:   Make a system call and run Newbler
  Returns :   An assembly file
- Args    :   - FASTA file
+ Args    :   - FASTA file, SFF file and MID, or analysis dir and MID
              - optional QUAL file
 
 =cut
@@ -318,7 +279,7 @@ sub _run {
     $cmd .= join ( $join, @program_args );
     for ( my $i = 1 ; $i < scalar @ipc_args ; $i++ ) {
       my $element = $ipc_args[$i];
-      my $ref = ref $element;
+      my $ref = ref($element);
       my $value;
       if ( $ref && $ref eq 'SCALAR') {
         $value = $$element;
@@ -353,7 +314,7 @@ sub _run {
 =head2 _remove_small_sequences
 
  Title   :   _remove_small_sequences
- Usage   :   $assembler->_remove_small_sequences(\@seqs, \@quals, $threshold_length)
+ Usage   :   $assembler->_remove_small_sequences(\@seqs, \@quals)
  Function:   Remove sequences below a threshold length
  Returns :   a new sequence object array reference
              a new quality score object array reference
@@ -362,27 +323,34 @@ sub _run {
 
 =cut
 
+# Aliasing function _prepare_input_sequences to _remove_small_sequences
+*_prepare_input_sequences = \&_remove_small_sequences; #ok
+
 sub _remove_small_sequences {
-  my ($self, $seqs, $quals, $min_len) = @_;
-  my @removed;
+  my ($self, $seqs, $quals) = @_;
+  # The threshold length, $min_len, has been registered as a global variable
   my @new_seqs;
   my @new_quals;
-  my $nof_seqs = scalar @$seqs;
-  for my $i (1 .. $nof_seqs) {
-    my $seq = $$seqs[$i-1];
-    if ($seq->length >= $min_len) {
-      push @new_seqs, $seq;
-      if ($quals) {
-        my $qual = $$quals[$i-1];
-        push @new_quals, $qual;
+
+  if (ref($seqs) =~ m/ARRAY/i) {
+    my @removed;
+    my $nof_seqs = scalar @$seqs;
+    for my $i (1 .. $nof_seqs) {
+      my $seq = $$seqs[$i-1];
+      if ($seq->length >= $min_len) {
+        push @new_seqs, $seq;
+        if ($quals) {
+          my $qual = $$quals[$i-1];
+          push @new_quals, $qual;
+        }
+      } else {
+        push @removed, $seq->id;
       }
-    } else {
-      push @removed, $seq->id;
     }
-  }
-  if (scalar @removed > 0) {
-    $self->warn("The following sequences were removed because they are smaller".
-      " than $min_len bp: @removed\n");
+    if (scalar @removed > 0) {
+      $self->warn("The following sequences were removed because they are smaller".
+        " than $min_len bp: @removed\n");
+    }
   }
   return \@new_seqs, \@new_quals;
 }
