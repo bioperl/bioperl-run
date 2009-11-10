@@ -133,26 +133,54 @@ our $asm_format = 'ace';
                             -min_ident => 95 );
  Function: Creates a Newbler factory
  Returns : A Bio::Tools::Run::Newbler object
- Args    : Newbler options available in this module:
+ Args    : Newbler options available in this module (from the Newbler manual):
 
- shortcut             Shortcut some of the computationally expensive algorithms to save some time. Useful for large datasets.
- ace_raw              output the full "raw" read sequence
- ace_trimmed          output only the "trimmed" sequences
- expected_depth       expected depth of the assembly
- mid_conf_file        MID configuration file for decoding the multiplex information
- no_trim              turns off the quality and primer trimming of the input sequences
- vector_trim          specify a vector trimming database (in FASTA format) to trim the ends of input sequences
- vector_screen        specify a vector screening database (in FASTA format) to remove contaminants, i.e. input reads that align against a sequence in the database
- aln_identity_score   set the alignment identity score
- aln_difference_score set the alignment difference score
- in_memory            keep all sequence data in memory throughout the computation. Can speed up the computation but requires more computer memory
- min_ovl_identity     minimum overlap identity
- min_ovl_length       minimum overlap length
- no_auto_rescore      do not use the quality score re-scoring algorithm
- seed_count           set the seed count parameter
- seed_length          set the seed length parameter
- seed_step            set the seed step parameter
- no_duplicates        treat each read as a separate read and do not group them into duplicates for assembly or consensus calling
+ large                Shortcut some of the computationally expensive algorithms
+                        to save some time. Useful for large or complex datasets
+                        (default: off).
+ ace_raw              Output the full "raw" read sequence (default: off).
+ ace_trimmed          Output only the "trimmed" sequences (after low quality,
+                        vector and key trimming) (default: on).
+ expected_depth       Expected depth of the assembly. Filters out random-chance
+                        level events at bigger depths. 0 means to not use the
+                        expected depth information (default: 0).
+ mid_conf_file        MID configuration file for decoding the multiplex data.
+ no_trim              Disable the quality and primer trimming of the input
+                        sequences (default: off).
+ vector_trim          Specify a vector trimming database (in FASTA format) to
+                        trim the ends of input sequences.
+ vector_screen        Specify a vector screening database (in FASTA format) to
+                        remove contaminants, i.e. input reads that align
+                        against a sequence in the database.
+ aln_identity_score   Set the alignment identity score. When multiple alignments
+                        are found, it is the per-overlap column identity score
+                        used to sort the overlaps for use in the progressive
+                        alignment (default: 2).
+ aln_difference_score Set the alignment difference score. For multiple alignments
+                        this is the per-overlap difference score used to sort the
+                        overlaps for use in the progressive multi-alignment
+                        (default: -3).
+ in_memory            Keep all sequence data in memory throughout the computation.
+                        Can speed up the computation but requires more computer
+                        memory (default: off).
+ min_ovl_identity     Minimum overlap identity, i.e. the minimum percent identity
+                        of overlaps used by the assembler (default: 40).
+ min_ovl_length       Minimum overlap length, i.e. the minimum length of overlaps
+                        considered by the assembler (default: 90).
+ no_auto_rescore      Do not use the quality score re-scoring algorithm (default:
+                        off).
+ seed_count           Set the seed count parameter, the number of seeds required
+                        in a window before an extension is made (default: 1).
+ seed_length          Set the seed length parameter, i.e. the number of bases
+                        between seed generation locations used in the exact
+                        k-mer matching part of the overlap detection (between 6
+                        16) (default: 16).
+ seed_step            Set the seed step parameter, i.e. the number of bases used
+                        for each seed in the exact k-mer matching part of the
+                        overlap detection (i.e. the "k" value) (default: 12).
+ no_duplicates        Treat each read as a separate read and do not group them
+                        into duplicates for assembly or consensus calling
+                       (default: off).
 
 =cut
 
