@@ -324,7 +324,7 @@ sub _run {
 =cut
 
 # Aliasing function _prepare_input_sequences to _remove_small_sequences
-*_prepare_input_sequences = \&_remove_small_sequences; #ok
+*_prepare_input_sequences = \&_remove_small_sequences;
 
 sub _remove_small_sequences {
   my ($self, $seqs, $quals) = @_;
