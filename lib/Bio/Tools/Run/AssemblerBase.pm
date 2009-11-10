@@ -361,6 +361,36 @@ sub _export_results {
   return $results;
 }
 
+
+=head2 _register_program_commands()
+
+ Title   : _register_program_commands
+ Usage   : $assembler->_register_program_commands( \@commands, \%prefixes )
+ Function: Register the commands a program accepts (for programs that act
+           as frontends for a set of commands, each command having its own
+           set of params/switches)
+ Returns : true on success
+ Args    : arrayref to a list of commands (scalar strings),
+           hashref to a translation table of the form
+           { $prefix1 => $command1, ... } [optional]
+ Note    : To implement a program with this kind of calling structure, 
+           include a parameter called 'command' in the 
+           @program_params global
+ Note    : The translation table is used to associate parameters and 
+           switches specified in _set_program_options with the correct
+           program command. In the globals @program_params and
+           @program_switches, specify elements as 'prefix1|param' and 
+           'prefix1|switch', etc.
+
+=cut
+
+sub _register_program_commands {
+    my ($self, $commands, $prefixes) = @_;
+    $self->{'_options'}->{'_commands'}      = $commands;
+    $self->{'_options'}->{'_prefixes'}      = $prefixes;
+    return 1;
+}
+
 =head2 _set_program_options
 
  Title   : _set_program_options
@@ -378,6 +408,30 @@ sub _export_results {
 
 sub _set_program_options {
   my ($self, $args, $params, $switches, $translation, $qual_param, $use_dash, $join) = @_;
+  # I think we need to filter on the basis of -command here...
+  my %args = @$args;
+  my $cmd = $args{'-command'} || $args{'command'};
+  if ($cmd) {
+      my (@p,@s, %x);
+      $self->warn('Command found, but no commands registered; invoke _register_program_commands') unless $self->{'_options'}->{'_commands'};
+      $self->throw("Command '$cmd' not registered") unless grep /^$cmd$/, @{$self->{'_options'}->{'_commands'}};
+      if ($self->{'_options'}->{'_prefixes'}) {
+	  $cmd = $self->{'_options'}->{'_prefixes'}->{$cmd};
+      } # else, the command is its own prefix
+
+      # problem here: if a param/switch does not have a prefix (pfx|), then
+      # should probably allow it to pass thru...
+      @p = (grep(!/^.*?\|/, @$params), grep(/^${cmd}\|/, @$params));
+      @s = (grep(!/^.*?\|/, @$switches), grep(/^${cmd}\|/, @$switches));
+      s/.*?\|// for @p;
+      s/.*?\|// for @s;
+      @x{@p, @s} = @{$translation}{
+	  grep( !/^.*?\|/, @$params, @$switches),
+	  grep(/^${cmd}\|/, @$params, @$switches) };
+      $translation = \%x;
+      $params = \@p;
+      $switches = \@s;
+  }
   $self->{'_options'}->{'_params'}      = $params;
   $self->{'_options'}->{'_switches'}    = $switches;
   $self->{'_options'}->{'_translation'} = $translation;
@@ -392,6 +446,10 @@ sub _set_program_options {
   } else {
     $self->{'_options'}->{'_join'}      = $join;
   }
+  # if there is a paramter 'command' in @program_params, and
+  # new is called with new( -command => $cmd, ... ), then 
+  # _set_from_args will create an accessor $self->command containing 
+  # the value $cmd...
   $self->_set_from_args(
     $args,
     -methods => [ @$params, @$switches, 'program_name', 'program_dir', 'out_type' ],
@@ -433,12 +491,18 @@ sub _translate_params {
   for (my $i = 0; $i < scalar @options; $i++) {
     my ($prefix, $name) = ( $options[$i] =~ m/^(-?)(.+)$/ );
     if (defined $name) {
-      if (defined $$translat{$name}) {
-        $options[$i] = $prefix.$$translat{$name};
-      }
-    } else {
-      splice @options, $i, 1;
-      $i--;
+	if ($name =~ /command/i) {
+	    $name = $options[$i+2]; # get the command
+	    splice @options, $i, 4;
+	    unshift @options, $name; # put it first
+	}
+	elsif (defined $$translat{$name}) {
+	    $options[$i] = $prefix.$$translat{$name};
+	}
+    } 
+    else {
+	splice @options, $i, 1;
+	$i--;
     }
   }
   $options = join('', @options);
