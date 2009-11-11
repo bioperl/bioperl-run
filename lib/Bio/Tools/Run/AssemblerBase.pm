@@ -4,7 +4,7 @@ use strict;
 use Bio::SeqIO;
 use Bio::Assembly::IO;
 
-use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
+use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase Bio::ParameterBaseI);
 
 our $default_out_type = 'Bio::Assembly::ScaffoldI';
 
@@ -441,12 +441,12 @@ sub _set_program_options {
   } else {
     $self->{'_options'}->{'_dash'}      = $use_dash;
   }
-  if (not defined $use_dash) {
+  if (not defined $join) {
     $self->{'_options'}->{'_join'}      = ' ';
   } else {
     $self->{'_options'}->{'_join'}      = $join;
   }
-  # if there is a paramter 'command' in @program_params, and
+  # if there is a parameter 'command' in @program_params, and
   # new is called with new( -command => $cmd, ... ), then 
   # _set_from_args will create an accessor $self->command containing 
   # the value $cmd...
@@ -454,6 +454,13 @@ sub _set_program_options {
     $args,
     -methods => [ @$params, @$switches, 'program_name', 'program_dir', 'out_type' ],
     -create =>  1,
+      # when our parms are accessed, signal parameters are unchanged for
+      # future reads (until set_parameters is called)
+    -code => 
+      'my $self = shift; 
+       $self->parameters_changed(0);
+       return $self->{\'_\'.$method} = shift if @_;
+       return $self->{\'_\'.$method};'
   );
   return 1;
 }
@@ -583,6 +590,173 @@ sub run {
   # Export results in desired object type
   my $asm = $self->_export_results($output_file);
   return $asm;
+}
+
+=head1 Bio:ParameterBaseI compliance
+
+=head2 set_parameters()
+
+ Title   : set_parameters
+ Usage   : $pobj->set_parameters(%params);
+ Function: sets the parameters listed in the hash or array
+ Returns : true on success
+ Args    : [optional] hash or array of parameter/values.  
+
+=cut
+
+sub set_parameters {
+    my ($self, @args) = @_;
+
+    # currently stored stuff
+    my $opts = $self->{'_options'};
+    my $params = $opts->{'_params'};
+    my $switches = $opts->{'_switches'};
+    my $translation = $opts->{'_translation'};
+    my $qual_param = $opts->{'_qual_param'};
+    my $use_dash = $opts->{'_dash'};
+    my $join = $opts->{'_join'};
+
+    $self->_set_program_options(\@args, $params, $switches, $translation,
+				$qual_param, $use_dash, $join);
+    # the question is, are previously-set parameters left alone when
+    # not specified in @args?
+    $self->parameters_changed(1);
+    return 1;
+}
+
+=head2 reset_parameters()
+
+ Title   : reset_parameters
+ Usage   : resets values
+ Function: resets parameters to either undef or value in passed hash
+ Returns : none
+ Args    : [optional] hash of parameter-value pairs
+
+=cut
+
+sub reset_parameters {
+    my ($self, @args) = @_;
+
+    my @reset_args;
+    # currently stored stuff
+    my $opts = $self->{'_options'};
+    my $params = $opts->{'_params'};
+    my $switches = $opts->{'_switches'};
+    my $translation = $opts->{'_translation'};
+    my $qual_param = $opts->{'_qual_param'};
+    my $use_dash = $opts->{'_dash'};
+    my $join = $opts->{'_join'};
+
+    # don't like this, b/c _set_program_args will create a bunch of
+    # accessors with undef values, but oh well for now /maj
+
+    for my $p (@$params) {
+	push(@reset_args, $p => undef) unless grep /^$p$/, @args;
+    }
+    for my $s (@$switches) {
+	push(@reset_args, $s => undef) unless grep /^$s$/, @args;
+    }
+    push @args, @reset_args;
+
+    $self->_set_program_options(\@args, $params, $switches, $translation,
+				$qual_param, $use_dash, $join);
+    $self->parameters_changed(1);
+}
+
+=head2 parameters_changed()
+
+ Title   : parameters_changed
+ Usage   : if ($pobj->parameters_changed) {...}
+ Function: Returns boolean true (1) if parameters have changed
+ Returns : Boolean (0 or 1)
+ Args    : [optional] Boolean
+
+=cut
+
+sub parameters_changed {
+    my $self = shift;
+    return $self->{'_parameters_changed'} = shift if @_;
+    return $self->{'_parameters_changed'};
+}
+
+=head2 available_parameters()
+
+ Title   : available_parameters
+ Usage   : @params = $pobj->available_parameters()
+ Function: Returns a list of the available parameters
+ Returns : Array of parameters
+ Args    : 'params' for settable program paramters
+           'switches' for boolean program switches
+           default: all 
+
+=cut
+
+sub available_parameters {
+    my $self = shift;
+    my $subset = shift;
+    my $opts = $self->{'_options'};
+    my @ret;
+    for ($subset) {
+	(!defined || /^a/) && do {
+	    @ret = (@{$opts->{'_params'}}, @{$opts->{'_switches'}});
+	    last;
+	};
+	m/^p/i && do {
+	    @ret = @{$opts->{'_params'}};
+	    last;
+	};
+	m/^s/i && do {
+	    @ret = @{$opts->{'_switches'}};
+	    last;
+	};
+	do { #fail
+	    $self->throw("available_parameters: unrecognized subset");
+	};
+    }
+    return @ret;
+}
+
+=head2 get_parameters()
+
+ Title   : get_parameters
+ Usage   : %params = $pobj->get_parameters;
+ Function: Returns list of key-value pairs of parameter => value
+ Returns : List of key-value pairs
+ Args    : [optional] A string is allowed if subsets are wanted or (if a
+           parameter subset is default) 'all' to return all parameters
+
+=cut
+
+sub get_parameters {
+    my $self = shift;
+    my $subset = shift;
+    $subset ||= 'all';
+    my @ret;
+    my $opts = $self->{'_options'};
+    for ($subset) {
+	m/^p/i && do { #params only
+	    for (@{$opts->{'_params'}}) {
+		push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
+	    }
+	    last;
+	};
+	m/^s/i && do { #switches only
+	    for (@{$opts->{'_switches'}}) {
+		push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
+	    }
+	    last;
+	};
+	m/^a/i && do { # all
+	    for (@{$opts->{'_params'}},@{$opts->{'_switches'}}) {
+		push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
+	    }
+	    last;
+	};
+	do {
+	    $self->throw("get_parameters: unrecognized subset");
+	};
+    }
+    return @ret;
 }
 
 1;
