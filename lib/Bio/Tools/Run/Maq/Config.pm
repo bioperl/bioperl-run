@@ -88,6 +88,7 @@ push @ISA, 'Exporter';
 @EXPORT = qw(
              @program_commands
              %command_prefixes
+             %composite_commands
              @program_params
              @program_switches
              %param_translation
@@ -96,7 +97,10 @@ push @ISA, 'Exporter';
 
 @EXPORT_OK = qw();
 
-our @program_commands = qw( 
+
+
+our @program_commands = qw(
+    run
     fasta2bfa
     fastq2bfq
     map
@@ -123,6 +127,16 @@ our @program_commands = qw(
     export2maq
 );
 
+# composite commands: pseudo-commands that run a 
+# sequence of commands
+# composite command prefix => list of prefixes of commands this
+#  composite command runs
+#
+
+our %composite_commands = (
+    'run'        => [qw( map asm c2q )]
+    );
+
 # prefixes only for commands that take params/switches...
 our %command_prefixes = (
     'fastq2bfq'  => 'q2q',
@@ -135,24 +149,25 @@ our %command_prefixes = (
     'cns2win'    => 'c2w',
     'submap'     => 'sub',
     'eland2maq'  => 'l2m',
-    'export2maq' => 'x2m'
+    'export2maq' => 'x2m',
+    'run'        => 'run'
     );
 
 our @program_params = qw(
     command
     q2q|n
+    map|adaptor_file         
+    map|first_read_length    
+    map|max_hits             
     map|max_mismatches       
     map|max_outer_distance   
     map|max_outer_distance_rf
-    map|first_read_length    
-    map|second_read_length   
-    map|mutation_rate        
-    map|adaptor_file         
-    map|unmapped_dump        
-    map|mismatch_thr         
     map|mismatch_dump        
-    map|max_hits             
     map|mismatch_posn_dump   
+    map|mismatch_thr         
+    map|mutation_rate        
+    map|second_read_length   
+    map|unmapped_dump        
     asm|error_dep_coeff      
     asm|het_fraction         
     asm|max_mismatches       
@@ -293,4 +308,27 @@ our %command_files = (
     'export2maq' => [qw( map lis xpt )]
     );
 
+INIT {
+    # add subcommand params and switches for
+    # composite commands
+    my @sub_params;
+    my @sub_switches;
+    foreach my $cmd (keys %composite_commands) {
+	foreach my $subcmd ( @{$composite_commands{$cmd}} ) {
+	    my @sub_program_params = grep /^$subcmd\|/, @program_params;
+	    my @sub_program_switches = grep /^$subcmd\|/, @program_switches;
+	    for (@sub_program_params) {
+		m/^$subcmd\|(.*)/;
+		push @sub_params, "$cmd\|${subcmd}_".$1;
+	    }
+	    for (@sub_program_switches) {
+		m/^$subcmd\|(.*)/;
+		push @sub_switches, "$cmd\|${subcmd}_".$1;
+	    }
+	}
+    }
+    push @program_params, @sub_params;
+    push @program_switches, @sub_switches;
+    # translations for subcmd params/switches not necessary
+}
 1;
