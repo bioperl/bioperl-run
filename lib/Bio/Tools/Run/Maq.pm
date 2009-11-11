@@ -116,7 +116,11 @@ our $asm_format = 'maq';
 sub new {
   my ($class,@args) = @_;
   my $self = $class->SUPER::new(@args);
+  $self->parameters_changed(1); 
   $self->_register_program_commands( \@program_commands, \%command_prefixes );
+  unless (grep /command/, @args) {
+      push @args, '-command', 'run';
+  }
   $self->_set_program_options(\@args, \@program_params, \@program_switches,
     \%param_translation, $qual_param, $use_dash, $join);
   $self->program_name($program_name) if not defined $self->program_name();
@@ -125,12 +129,11 @@ sub new {
       chomp $kludge[0];
       $self->program_name($kludge[0]);
   }
+  $self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
   $self->_assembly_format($asm_format);
   return $self;
 }
 
-
-# maq requires a reference sequence; this should be a required run parameter
 
 # easyrun pipeline:
 # (puts intermediate files in a specified directory)
@@ -184,8 +187,9 @@ sub _run {
   my ($cmd, $filespec, @ipc_args);
   # Get program executable
   my $exe = $self->executable;
-  # Get command-line options
-  my $options = $self->_translate_params();
+
+  # treat run() as a separate command and duplicate the component-specific
+  # parameters in the config globals
 
   # Setup needed files and filehandles first
   my $tdir = $self->tempdir();
@@ -197,15 +201,21 @@ sub _run {
 
   $_->close for ($maph, $cnsh, $maqh);
 
+  # Get command-line options for the component commands:
+  my $subcmd_args = $self->_collate_subcmd_args();
   # map reads to ref seq
+  # set up subcommand options
+  
   my $maq = Bio::Tools::Run::Maq->new( 
-      -command => 'map'
+      -command => 'map',
+      @{$subcmd_args->{map}}
       );
-  $maq->run_maq( -map => $mapf, -bfa => $ref_file, -bfq1 => $rd1_file
+  $maq->run_maq( -map => $mapf, -bfa => $ref_file, -bfq1 => $rd1_file,
 		 -bfq2 => $rd2_file );
   # assemble reads into consensus
   $maq = Bio::Tools::Run::Maq->new(
-      -command => 'assemble'
+      -command => 'assemble',
+      @{$subcmd_args->{asm}}
       );
   $maq->run_maq( -cns => $cnsf, -bfa => $ref_file, -map => $mapf );
   # convert map into plain text
@@ -213,13 +223,15 @@ sub _run {
       -command => 'mapview'
       );
   $maq->run_maq( -map => $mapf, -txt => $maqf );
+
   # convert consensus into plain text fastq
   $maq = Bio::Tools::Run::Maq->new(
-      -command => 'cns2fq'
+      -command => 'cns2fq',
+      @{$subcmd_args->{c2q}}
       );
   $maq->run_maq( -cns => $cnsf, -faq => $faqf );
   
-  return ($maqf, $cnsf);
+  return ($maqf, $faqf);
 
 }
 
@@ -263,15 +275,15 @@ sub run_maq {
     my ($in, $out, $err);
     for (@$filespec) {
 	m/^1?>(.*)/ && do {
-	    open($out,">", $args{$1}) or $self->throw("Open for write error : $!");
+	    defined($args{$1}) && ( open($out,">", $args{$1}) or $self->throw("Open for write error : $!"));
 	    next;
 	};
 	m/^2>#?(.*)/ && do {
-	    open($err, ">", $args{$1}) or $self->throw("Open for write error : $!");
+	    defined($args{$1}) && (open($err, ">", $args{$1}) or $self->throw("Open for write error : $!"));
 	    next;
 	};
 	m/^<#?(.*)/ && do {
-	    open($in, "<", $args{$1}) or $self->throw("Open for read error : $!");
+	    defined($args{$1}) && (open($in, "<", $args{$1}) or $self->throw("Open for read error : $!"));
 	    next;
 	}
     }
@@ -340,6 +352,7 @@ sub _check_optional_quality_input {
 =cut
 
 sub _prepare_input_sequences {
+
     my ($self, @args) = @_;
     my (%args, $read1, $read2, $refseq);
     if (grep /^-/, @args) { # named parms
@@ -363,33 +376,59 @@ sub _prepare_input_sequences {
     ($rd1_h, $rd1_file) = $self->io->tempfile( -dir => $self->tempdir() );
     $ref_h->close;
     $rd1_h->close;
-    my $exe = $self->executable;
-    eval {
-	IPC::Run::run( [$exe, 'fasta2bfa', $refseq, $ref_file] ) ||
-	    die("There was a problem running $exe fasta2bfa : $!");
-    };
-    if ($@) {
-	$self->throw( "$exe call crashed : $@" );
-    }
-    eval {
-	IPC::Run::run( [$exe, 'fastq2bfq', $read1, $rd1_file] ) ||
-	    die("There was a problem running $exe fastq2bfq : $!");
-    };
-    if ($@) {
-	$self->throw( "$exe call crashed : $@" );
-    }
+    my $fac = Bio::Tools::Run::Maq->new( -command => 'fasta2bfa' );
+    $fac->run_maq( -bfa => $ref_file, -fas => $refseq );
+    $fac->set_parameters( -command => 'fastq2bfq' );
+    $fac->run_maq( -bfq => $rd1_file, -faq => $read1 );
     if (defined $read2) {
 	($rd2_h, $rd2_file) = $self->io->tempfile( -dir => $self->tempdir() );
 	$rd2_h->close;
-	eval {
-	    IPC::Run::run( [$exe, 'fastq2bfq', $read2, $rd2_file] ) ||
-		die("There was a problem running $exe fastq2bfq : $!");
-	};
-	if ($@) {
-	    $self->throw( "$exe call crashed : $@" );
-	}
+	$fac->run_maq( -bfq => $rd2_file, -faq => $read2);
     }
     return ($rd1_file, $ref_file, $rd2_file);
+}
+
+
+
+=head2 _collate_subcmd_args()
+
+ Title   : _collate_subcmd_args
+ Usage   : $args_hash = $self->_collate_subcmd_args
+ Function: collate parameters and switches into command-specific
+           arg lists for passing to new()
+ Returns : hash of named argument lists
+ Args    : [optional] composite cmd prefix (scalar string) 
+           [default is 'run']
+
+=cut
+
+sub _collate_subcmd_args {
+    my $self = shift;
+    my $cmd = shift;
+    my %ret;
+    # default command is 'run'
+    $cmd ||= 'run';
+    my @subcmds = @{$composite_commands{$cmd}};
+    my %subcmds;
+    my $cur_options = $self->{'_options'};
+
+    # collate
+    foreach my $subcmd (@subcmds) {
+	# find the composite cmd form of the argument in 
+	# the current params and switches
+	# e.g., map_max_mismatches
+	my @params = grep /^${subcmd}_/, @{$$cur_options{'_params'}};
+	my @switches = grep /^${subcmd}_/, @{$$cur_options{'_switches'}};
+	$ret{$subcmd} = [];
+	# create an argument list suitable for passing to new() of
+	# the subcommand factory...
+	foreach my $opt (@params, @switches) {
+	    my $subopt = $opt; 
+	    $subopt =~ s/^${subcmd}_//; 
+	    push(@{$ret{$subcmd}}, '-'.$subopt => $self->$opt) if defined $self->$opt;
+	}
+    }
+    return \%ret;
 }
 
 =head2 run
@@ -411,11 +450,11 @@ sub run {
 
   # Sanity checks
   $self->_check_executable();
-#  $self->_check_sequence_input($seqs);
-#  $self->_check_optional_quality_input($quals);
   $rd1_file or $self->throw("Fastq reads file required at arg 1");
   $ref_file or $self->throw("Fasta refseq file required at arg 2");
+
   my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$rd1_file);
+
   $guesser->guess eq 'fastq' or $self->throw("Reads file doesn't look like fastq at arg 1");
   $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$ref_file);
   $guesser->guess eq 'fasta' or $self->throw("Refseq file doesn't look like fasta at arg 2");
@@ -470,7 +509,5 @@ sub stderr {
     return $self->{'stderr'} = shift if @_;
     return $self->{'stderr'};
 }
-
-
 
 1;
