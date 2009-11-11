@@ -14,22 +14,134 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Maq - Run wrapper for Heng Li's maq short-read assembler *Pre-ALPHA!*
+Bio::Tools::Run::Maq - Run wrapper for the Maq short-read assembler *BETA*
 
 =head1 SYNOPSIS
 
-Give standard usage here
+ # create an assembly
+ $maq_fac = Bio::Tools::Run::Maq->new();
+ $maq_assy = $maq_fac->run( 'reads.fastq', 'refseq.fas' );
+ # paired-end 
+ $maq_assy = $maq_fac->run( 'reads.fastq', 'refseq.fas', 'paired-reads.fastq');
+ # be more strict
+ $maq_fac->set_parameters( -c2q_min_map_quality => 60 );
+ $maq_assy = $maq_fac->run( 'reads.fastq', 'refseq.fas', 'paired-reads.fastq');
+
+ # run maq commands separately
+ $maq_fac = Bio::Tools::Run::Maq->new(
+    -command => 'pileup',
+    -single_end_quality => 1 );
+ $maq_fac->run_maq( -bfa => 'refseq.bfa',
+                    -map => 'maq_assy.map',
+                    -txt => 'maq_assy.pup.txt' );
 
 =head1 DESCRIPTION
 
-This module provides two modes of action. The first is a simple
-pipeline through the C<maq> commands, taking your read data in and
-squirting an assembly out. The pipeline is based on the one performed
-by C<maq.pl easyrun>.
+This module provides a wrapper interface for Heng Li's
+reference-directed short read assembly suite C<maq> (see
+L<http://maq.sourceforge.net/maq-man.shtml> for manuals and
+downloads).
 
-The second mode is direct access to C<maq> commands, by specifying the
-C<-command =E<gt> $maq_command> argument and providing the input and
-output files as described at L<http://maq.sourceforge.net/maq-manpage.shtml>.
+There are two modes of action. 
+
+=over 
+
+=item * EasyMaq
+
+The first is a simple pipeline through the C<maq> commands, taking
+your read data in and squirting out an assembly object of type
+L<Bio::Assembly::IO::maq>. The pipeline is based on the one performed
+by C<maq.pl easyrun>:
+
+ Action                  maq commands
+ ------                  ------------
+ data conversion to      fasta2bfa, fastq2bfq
+ maq binary formats
+
+ map sequence reads      map
+ to reference seq
+
+ assemble, creating      assemble
+ consensus
+
+ convert map & cns       mapview, cns2fq
+ files to plaintext
+ (for B:A:IO:maq)
+
+Command-line options can be directed to the C<map>, C<assemble>, and
+C<cns2fq> steps. See L</OPTIONS> below.
+
+=item * BigMaq
+
+The second mode is direct access to C<maq> commands. To run a C<maq>
+command, construct a run factory, specifying the desired command using
+the C<-command> argument in the factory constructor, along with
+options specific to that command (see L</OPTIONS>):
+
+ $maqfac->Bio::Tools::Run::Maq->new( -command => 'fasta2bfa' );
+
+To execute, use the C<run_maq> methods. Input and output files are
+specified in the arguments of C<run_maq> (see L</FILES>):
+
+ $maqfac->run_maq( -fas => "myref.fas", -bfa => "myref.bfa" );
+
+=back
+
+=head1 OPTIONS
+
+C<maq> is complex, with many subprograms (commands) and command-line
+options and file specs for each. This module attempts to provide
+commands and options comprehensively. You can browse the choices like so:
+
+ $maqfac = Bio::Tools::Run::Maq->new( -command => 'assemble' );
+ # all maq commands
+ @all_commands = $maqfac->available_parameters('commands'); 
+ @all_commands = $maqfac->available_commands; # alias
+ # just for assemble
+ @assemble_params = $maqfac->available_parameters('params');
+ @assemble_switches = $maqfac->available_parameters('switches');
+ @assemble_all_options = $maqfac->available_parameters();
+
+Reasonably mnemonic names have been assigned to the single-letter
+command line options. These are the names returned by
+C<available_parameters>, and can be used in the factory constructor
+like typical BioPerl named parameters.
+
+See L<http://maq.sourceforge.net/maq-manpage.shtml> for the gory details.
+
+=head1 FILES
+
+When a command requires filenames, these are provided to the C<run_maq> method, not
+the constructor (C<new()>). To see the set of files required by a command, use
+C<available_parameters('filespec')> or the alias C<filespec()>:
+
+  $maqfac = Bio::Tools::Run::Maq->new( -command => 'map' );
+  @filespec = $maqfac->filespec;
+
+This example returns the following array:
+
+ map
+ bfa 
+ bfq1 
+ #bfq2 
+ 2>#log
+
+This indicates that map (C<maq> binary mapfile), bfa (C<maq> binary
+fasta), and bfq (C<maq> binary fastq) files MUST be specified, another
+bfq file MAY be specified, and a log file receiving STDERR also MAY be
+specified. Use these in the C<run_maq> call like so:
+
+ $maqfac->run_maq( -map => 'my.map', -bfa => 'myrefseq.bfa',
+                   -bfq1 => 'reads1.bfq', -bfq2 => 'reads2.bfq' );
+
+Here, the C<log> parameter was unspecified. Therefore, the object will store
+the programs STDERR output for you in the C<stderr()> attribute:
+
+ handle_map_warning($maqfac) if ($maqfac->stderr =~ /warning/);
+
+STDOUT for a run is also saved, in C<stdout()>, unless a file is specified
+to slurp it according to the filespec. C<maq> STDOUT usually contains useful
+information on the run. 
 
 =head1 FEEDBACK
 
@@ -103,7 +215,7 @@ our $join = ' ';
 
 our $asm_format = 'maq';
 
-=head2 new
+=head2 new()
 
  Title   : new
  Usage   : my $obj = new Bio::Tools::Run::Maq();
@@ -134,105 +246,47 @@ sub new {
   return $self;
 }
 
+=head2 run
 
-# easyrun pipeline:
-# (puts intermediate files in a specified directory)
-# - guess format, and convert to bfa or bfq (running fasta2bfa/fastq2bfq)
-# - allows single or paired reads on option spec...
-# - runs maq map, creating logfile from stderr (hack default options...)
-#   * branches for paired or unpaired reads
-#   * maq map $mapopt aln$tag.map ref.bfa $bfqs 2> aln$tab.map.log
-# - if more than one map file, mapmerge executed
-#   * maq mapmerge all.map @map_files
-#   * otherwise, cp mapfile to all.map
-# - runs maq mapcheck ref.bfa $map_file > mapcheck.txt
-# - runs maq assemble (-N -Q options) consensus.cns ref.bfa $map_file 2> logfile
-# - creates various reports
-#   * parses consensus.cns to various formats: cns.fq cns.snp cns.win
-#   * performs indel analyses
-
-# pipeline for Bio::Assembly::IO::maq compat--
-# need to produce mapview rendering of map file, fastq rendering of consensus
-#
-# required input: single-end reads in fastq, refseq in fasta
-# optional : paired-end reads in two fastq files
-#     
-# allow manipulation of parameters relating to the tools used
-#
-# run the canned pipeline with new instances of this module!
-#   - check reads, ref
-#   - convert reads, ref to bfq, bfa
-#   - run map
-#   - run mapmerge, if nec.
-#   - run assemble
-#   - run mapview on map
-#   - run cns2fq on consensus
-#   - acquire the assembly with Bio::Assembly::IO::maq
-#   - return the scaffold object
-
-=head2 _run
-
- Title   :   _run
- Usage   :   $factory->_run()
- Function:   Run a maq assembly pipeline
- Returns :   depends on call (An assembly file)
- Args    :   - single end read file in maq bfq format
-             - reference seq file in maq bfa format
-             - [optional] paired end read file in maq bfq format
-
+ Title   : run
+ Usage   : $assembly = $maq_assembler->run($read1_fastq_file, 
+                                           $refseq_fasta_file,
+                                           $read2_fastq_file);
+ Function: Run the maq assembly pipeline. 
+ Returns : Assembly results (file, IO object or Assembly object)
+ Args    : - fastq file containing single-end reads
+           - fasta file containing the reference sequence
+           - [optional] fastq file containing paired-end reads 
+             
 =cut
 
-sub _run {
+sub run {
   my ($self, $rd1_file, $ref_file, $rd2_file) = @_;
-  my ($cmd, $filespec, @ipc_args);
-  # Get program executable
-  my $exe = $self->executable;
 
-  # treat run() as a separate command and duplicate the component-specific
-  # parameters in the config globals
+  # Sanity checks
+  $self->_check_executable();
+  $rd1_file or $self->throw("Fastq reads file required at arg 1");
+  $ref_file or $self->throw("Fasta refseq file required at arg 2");
 
-  # Setup needed files and filehandles first
-  my $tdir = $self->tempdir();
-  my ($maph, $mapf) = $self->io->tempfile( -template => 'mapXXXX', -dir => $tdir ); #map
-  my ($cnsh, $cnsf) = $self->io->tempfile( -template => 'cnsXXXX', -dir => $tdir ); #consensus
-  my ($maqh, $maqf) = $self->_prepare_output_file();
-  my ($nm,$dr,$suf) = fileparse($maqf,".maq");
-  my $faqf = $dr.$nm.".cns.fastq";
+  my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$rd1_file);
 
-  $_->close for ($maph, $cnsh, $maqh);
+  $guesser->guess eq 'fastq' or $self->throw("Reads file doesn't look like fastq at arg 1");
+  $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$ref_file);
+  $guesser->guess eq 'fasta' or $self->throw("Refseq file doesn't look like fasta at arg 2");
+  if ($rd2_file) {
+      $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$rd2_file);
+      $guesser->guess eq 'fastq' or $self->throw("Reads file doesn't look like fastq at arg 3");
+  }
 
-  # Get command-line options for the component commands:
-  my $subcmd_args = $self->_collate_subcmd_args();
-  # map reads to ref seq
-  # set up subcommand options
-  
-  my $maq = Bio::Tools::Run::Maq->new( 
-      -command => 'map',
-      @{$subcmd_args->{map}}
-      );
-  $maq->run_maq( -map => $mapf, -bfa => $ref_file, -bfq1 => $rd1_file,
-		 -bfq2 => $rd2_file );
-  # assemble reads into consensus
-  $maq = Bio::Tools::Run::Maq->new(
-      -command => 'assemble',
-      @{$subcmd_args->{asm}}
-      );
-  $maq->run_maq( -cns => $cnsf, -bfa => $ref_file, -map => $mapf );
-  # convert map into plain text
-  $maq = Bio::Tools::Run::Maq->new(
-      -command => 'mapview'
-      );
-  $maq->run_maq( -map => $mapf, -txt => $maqf );
+  # maq format conversion
+  ($rd1_file, $ref_file, $rd2_file) = $self->_prepare_input_sequences($rd1_file, $ref_file, $rd2_file);
 
-  # convert consensus into plain text fastq
-  $maq = Bio::Tools::Run::Maq->new(
-      -command => 'cns2fq',
-      @{$subcmd_args->{c2q}}
-      );
-  $maq->run_maq( -cns => $cnsf, -faq => $faqf );
-  
-  return ($maqf, $faqf);
+  # Assemble
+  my ($maq_file, $faq_file) = $self->_run($rd1_file, $ref_file, $rd2_file);
 
+  # Export results in desired object type
+  my $asm  = $self->_export_results($maq_file);
+  return $asm
 }
 
 =head2 run_maq()
@@ -323,6 +377,46 @@ sub run_maq {
     return @args;
 }
 
+=head2 stdout()
+
+ Title   : stdout
+ Usage   : $fac->stdout()
+ Function: store the output from STDOUT for the run, 
+           if no file specified in run_maq()
+ Example : 
+ Returns : scalar string
+ Args    : on set, new value (a scalar or undef, optional)
+
+=cut
+
+sub stdout {
+    my $self = shift;
+    
+    return $self->{'stdout'} = shift if @_;
+    return $self->{'stdout'};
+}
+
+=head2 stderr()
+
+ Title   : stderr
+ Usage   : $fac->stderr()
+ Function: store the output from STDERR for the run, 
+           if no file is specified in run_maq()
+ Example : 
+ Returns : scalar string
+ Args    : on set, new value (a scalar or undef, optional)
+
+=cut
+
+sub stderr {
+    my $self = shift;
+    
+    return $self->{'stderr'} = shift if @_;
+    return $self->{'stderr'};
+}
+
+
+
 =head1 Bio::Tools::Run::AssemblerBase overrides
 
 =head2 _check_sequence_input()
@@ -388,8 +482,6 @@ sub _prepare_input_sequences {
     return ($rd1_file, $ref_file, $rd2_file);
 }
 
-
-
 =head2 _collate_subcmd_args()
 
  Title   : _collate_subcmd_args
@@ -431,83 +523,104 @@ sub _collate_subcmd_args {
     return \%ret;
 }
 
-=head2 run
+=head2 _run()
 
- Title   : run
- Usage   : $assembly = $maq_assembler->run($read1_fastq_file, 
-                                           $refseq_fasta_file,
-                                           $read2_fastq_file);
- Function: Run the maq assembly pipeline. 
- Returns : Assembly results (file, IO object or Assembly object)
- Args    : - fastq file containing single-end reads
-           - fasta file containing the reference sequence
-           - [optional] fastq file containing paired-end reads 
-             
+ Title   :   _run
+ Usage   :   $factory->_run()
+ Function:   Run a maq assembly pipeline
+ Returns :   depends on call (An assembly file)
+ Args    :   - single end read file in maq bfq format
+             - reference seq file in maq bfa format
+             - [optional] paired end read file in maq bfq format
+
 =cut
 
-sub run {
+sub _run {
   my ($self, $rd1_file, $ref_file, $rd2_file) = @_;
+  my ($cmd, $filespec, @ipc_args);
+  # Get program executable
+  my $exe = $self->executable;
 
-  # Sanity checks
-  $self->_check_executable();
-  $rd1_file or $self->throw("Fastq reads file required at arg 1");
-  $ref_file or $self->throw("Fasta refseq file required at arg 2");
+  # treat run() as a separate command and duplicate the component-specific
+  # parameters in the config globals
 
-  my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$rd1_file);
+  # Setup needed files and filehandles first
+  my $tdir = $self->tempdir();
+  my ($maph, $mapf) = $self->io->tempfile( -template => 'mapXXXX', -dir => $tdir ); #map
+  my ($cnsh, $cnsf) = $self->io->tempfile( -template => 'cnsXXXX', -dir => $tdir ); #consensus
+  my ($maqh, $maqf) = $self->_prepare_output_file();
+  my ($nm,$dr,$suf) = fileparse($maqf,".maq");
+  my $faqf = $dr.$nm.".cns.fastq";
 
-  $guesser->guess eq 'fastq' or $self->throw("Reads file doesn't look like fastq at arg 1");
-  $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$ref_file);
-  $guesser->guess eq 'fasta' or $self->throw("Refseq file doesn't look like fasta at arg 2");
-  if ($rd2_file) {
-      $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$rd2_file);
-      $guesser->guess eq 'fastq' or $self->throw("Reads file doesn't look like fastq at arg 3");
-  }
+  $_->close for ($maph, $cnsh, $maqh);
 
-  # maq format conversion
-  ($rd1_file, $ref_file, $rd2_file) = $self->_prepare_input_sequences($rd1_file, $ref_file, $rd2_file);
+  # Get command-line options for the component commands:
+  my $subcmd_args = $self->_collate_subcmd_args();
+  # map reads to ref seq
+  # set up subcommand options
+  
+  my $maq = Bio::Tools::Run::Maq->new( 
+      -command => 'map',
+      @{$subcmd_args->{map}}
+      );
+  $maq->run_maq( -map => $mapf, -bfa => $ref_file, -bfq1 => $rd1_file,
+		 -bfq2 => $rd2_file );
+  # assemble reads into consensus
+  $maq = Bio::Tools::Run::Maq->new(
+      -command => 'assemble',
+      @{$subcmd_args->{asm}}
+      );
+  $maq->run_maq( -cns => $cnsf, -bfa => $ref_file, -map => $mapf );
+  # convert map into plain text
+  $maq = Bio::Tools::Run::Maq->new(
+      -command => 'mapview'
+      );
+  $maq->run_maq( -map => $mapf, -txt => $maqf );
 
-  # Assemble
-  my ($maq_file, $faq_file) = $self->_run($rd1_file, $ref_file, $rd2_file);
+  # convert consensus into plain text fastq
+  $maq = Bio::Tools::Run::Maq->new(
+      -command => 'cns2fq',
+      @{$subcmd_args->{c2q}}
+      );
+  $maq->run_maq( -cns => $cnsf, -faq => $faqf );
+  
+  return ($maqf, $faqf);
 
-  # Export results in desired object type
-  my $asm  = $self->_export_results($maq_file);
-  return $asm
 }
 
-=head2 stdout
+=head2 available_parameters()
 
- Title   : stdout
- Usage   : $obj->stdout($newval)
- Function: retrieve the stdout dribble from last run
- Example : 
- Returns : value of stdout (a scalar)
- Args    : on set, new value (a scalar or undef, optional)
+ Title   : available_parameters
+ Usage   : @cmds = $fac->available_commands('commands');
+ Function: Use to browse available commands, params, or switches
+ Returns : array of scalar strings
+ Args    : 'commands' : all maq commands
+           'params'   : parameters for this object's command
+           'switches' : boolean switches for this object's command
+           'filespec' : the filename spec for this object's command
+ 4Geeks  : Overrides Bio::ParameterBaseI via 
+           Bio::Tools::Run::AssemblerBase
 
 =cut
 
-sub stdout {
+sub available_parameters {
     my $self = shift;
-    
-    return $self->{'stdout'} = shift if @_;
-    return $self->{'stdout'};
+    my $subset = shift;
+    for ($subset) { # get commands
+	m/^c/i && do {
+	    return grep !/^run$/, @program_commands;
+	};
+	m/^f/i && do { # get file spec
+	    return @{$command_files{$self->command}};
+	};
+	do { #else delegate...
+	    return $self->SUPER::available_parameters($subset);
+	};
+    }
 }
 
-=head2 stderr
+sub available_commands { shift->available_parameters('commands') };
 
- Title   : stderr
- Usage   : $obj->stderr($newval)
- Function: retrieve the stderr dribble from last run
- Example : 
- Returns : value of stderr (a scalar)
- Args    : on set, new value (a scalar or undef, optional)
-
-=cut
-
-sub stderr {
-    my $self = shift;
-    
-    return $self->{'stderr'} = shift if @_;
-    return $self->{'stderr'};
-}
-
+sub filespec { shift->available_parameters('filespec') };
+	
 1;

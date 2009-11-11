@@ -282,6 +282,7 @@ our %param_translation = (
 #
 
 our %command_files = (
+    'run'        => [qw( faq fas faq )],
     'fastq2bfq'  => [qw( faq bfq )],
     'fasta2bfa'  => [qw( fas bfa )],
     'map'        => [qw( map bfa bfq1 #bfq2 2>#log )],
