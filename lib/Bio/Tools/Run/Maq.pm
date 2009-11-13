@@ -607,6 +607,9 @@ sub available_parameters {
     my $self = shift;
     my $subset = shift;
     for ($subset) { # get commands
+	!defined && do { # delegate
+	    return $self->SUPER::available_parameters($subset);
+	};	    
 	m/^c/i && do {
 	    return grep !/^run$/, @program_commands;
 	};
