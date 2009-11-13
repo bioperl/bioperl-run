@@ -6,7 +6,7 @@ use warnings;
 no warnings qw(once);
 our $home;
 BEGIN {
-    $home = '..'; # set to '.' for Build use, 
+    $home = '.'; # set to '.' for Build use, 
                       # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
