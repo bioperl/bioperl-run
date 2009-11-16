@@ -2,7 +2,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 67,
+    test_begin(-tests => 69,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Minimo)]);
     use_ok('Bio::SeqIO');
 }
@@ -113,4 +113,7 @@ SKIP: {
    is($asm->get_nof_singlets, 0);
    is($asm->get_nof_contigs, 0);
 
+   # Function alias
+   ok($assembler->minimum_overlap_similarity(100));
+   ok($assembler->minimum_overlap_length(20));
 }

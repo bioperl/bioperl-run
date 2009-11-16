@@ -140,8 +140,7 @@ our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'tigr';
 our $min_len = 39;
-*minimum_overlap_length = \&minimum_percent;
-*minimum_overlap_similarity = \&minimum_length;
+
 
 =head2 new
 
@@ -204,6 +203,8 @@ sub new {
   my $self = $class->SUPER::new(@args);
   $self->_set_program_options(\@args, \@program_params, \@program_switches,
     \%param_translation, $qual_param, $use_dash, $join);
+  *minimum_overlap_length = \&minimum_percent;
+  *minimum_overlap_similarity = \&minimum_length;
   $self->program_name($program_name) if not defined $self->program_name();
   $self->_assembly_format($asm_format);
   return $self;

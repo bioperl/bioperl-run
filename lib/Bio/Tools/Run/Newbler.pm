@@ -125,8 +125,6 @@ our $qual_param;
 our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'ace';
-*minimum_overlap_length = \&min_ovl_length;
-*minimum_overlap_similarity = \&min_ovl_identity;
 
 
 =head2 new
@@ -171,7 +169,9 @@ our $asm_format = 'ace';
                         of overlaps used by the assembler (default: 40).
  min_ovl_length / minimum_overlap_length
                       Minimum overlap length, i.e. the minimum length of overlaps
-                        considered by the assembler (default: 90).
+                        considered by the assembler (default: 90). Warning: It
+			seems like this parameter is not respected by the program
+			in the current version
  no_auto_rescore      Do not use the quality score re-scoring algorithm (default:
                         off).
  seed_count           Set the seed count parameter, the number of seeds required
@@ -194,6 +194,8 @@ sub new {
   my $self = $class->SUPER::new(@args);
   $self->_set_program_options(\@args, \@program_params, \@program_switches,
     \%param_translation, $qual_param, $use_dash, $join);
+  *minimum_overlap_length = \&min_ovl_length;
+  *minimum_overlap_similarity = \&min_ovl_identity;
   $self->program_name($program_name) if not defined $self->program_name();
   $self->_assembly_format($asm_format);
   return $self;

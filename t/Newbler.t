@@ -3,7 +3,7 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
     use File::Basename;
-    test_begin(-tests => 95,
+    test_begin(-tests => 97,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Newbler)]);
     use_ok('Bio::SeqIO');
 }
@@ -124,4 +124,8 @@ SKIP: {
    ok($asm = $assembler->run(\@seq_arr));
    is($asm->get_nof_singlets, 0);
    is($asm->get_nof_contigs, 0);
+
+   # Function alias
+   ok($assembler->minimum_overlap_similarity(100));
+   ok($assembler->minimum_overlap_length(20));
 }

@@ -120,8 +120,6 @@ our $qual_param;
 our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'ace';
-*minimum_overlap_length = \&overlap_length_cutoff;
-*minimum_overlap_similarity = \&overlap_identity_cutoff;
 
 =head2 new
 
@@ -164,6 +162,8 @@ sub new {
   my $self = $class->SUPER::new(@args);
   $self->_set_program_options(\@args, \@program_params, \@program_switches, \%param_translation,
     $qual_param, $use_dash, $join);
+  *minimum_overlap_length = \&overlap_length_cutoff;
+  *minimum_overlap_similarity = \&overlap_identity_cutoff;
   $self->program_name($program_name) if not defined $self->program_name();
   $self->_assembly_format($asm_format);
   return $self;

@@ -2,7 +2,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 86,
+    test_begin(-tests => 88,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');
 }
@@ -110,6 +110,10 @@ SKIP: {
    ok($asm = $assembler->run(\@seq_arr));
    is($asm->get_nof_singlets, 198);
    is($asm->get_nof_contigs, 0);
+
+   # Function alias
+   ok($assembler->minimum_overlap_similarity(100));
+   ok($assembler->minimum_overlap_length(20));
 }
 
 # Test the LIGR Assembler program itself
