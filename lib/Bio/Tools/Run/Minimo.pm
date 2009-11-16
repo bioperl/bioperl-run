@@ -109,6 +109,8 @@ our $qual_param = 'qual_in';
 our $use_dash = 1;
 our $join = '=';
 our $asm_format = 'ace';
+*minimum_overlap_length = \&min_len;
+*minimum_overlap_similarity = \&min_ident;
 
 =head2 new
 
@@ -124,9 +126,11 @@ our $asm_format = 'ace';
      bad_qual     Quality score to set for bases outside clear range
                     if no quality file was given (default: 10). If your
                     sequences are trimmed, try the same value as GOOD_QUAL.
-     min_len      Minimum contig overlap length (between 20 and 100 bp,
+     min_len / minimum_overlap_length
+                  Minimum contig overlap length (between 20 and 100 bp,
                     default: 35)
-     min_ident    Minimum contig overlap identity percentage (between 0
+     min_ident / minimum_overlap_similarity
+                  Minimum contig overlap identity percentage (between 0
                     and 100 %, default: 98)
      out_prefix   Prefix to use for the output file path and name
 

@@ -125,6 +125,9 @@ our $qual_param;
 our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'ace';
+*minimum_overlap_length = \&min_ovl_length;
+*minimum_overlap_similarity = \&min_ovl_identity;
+
 
 =head2 new
 
@@ -163,9 +166,11 @@ our $asm_format = 'ace';
  in_memory            Keep all sequence data in memory throughout the computation.
                         Can speed up the computation but requires more computer
                         memory (default: off).
- min_ovl_identity     Minimum overlap identity, i.e. the minimum percent identity
+ min_ovl_identity / minimum_overlap_similarity
+                      Minimum overlap identity, i.e. the minimum percent identity
                         of overlaps used by the assembler (default: 40).
- min_ovl_length       Minimum overlap length, i.e. the minimum length of overlaps
+ min_ovl_length / minimum_overlap_length
+                      Minimum overlap length, i.e. the minimum length of overlaps
                         considered by the assembler (default: 90).
  no_auto_rescore      Do not use the quality score re-scoring algorithm (default:
                         off).

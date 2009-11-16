@@ -140,6 +140,8 @@ our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'tigr';
 our $min_len = 39;
+*minimum_overlap_length = \&minimum_percent;
+*minimum_overlap_similarity = \&minimum_length;
 
 =head2 new
 
@@ -153,14 +155,14 @@ our $min_len = 39;
 
 TIGR Assembler options available in this module:
 
-  minimum_percent: the minimum percent identity that two DNA fragments must
-    achieve over their entire region of overlap in order to be considered as a
-    possible assembly. Adjustments are made by the program to take into account
-    that the ends of sequences are lower quality and doubled base calls are the
-    most frequent sequencing error.
-  minimum_length: the minimum length two DNA fragments must overlap to be
-    considered as a possible assembly (warning: in tests I did, this option
-    did not work as expected...)
+  minimum_percent / minimum_overlap_similarity: the minimum percent identity
+    that two DNA fragments must achieve over their entire region of overlap in
+    order to be considered as a possible assembly. Adjustments are made by the
+    program to take into account that the ends of sequences are lower quality
+    and doubled base calls are the most frequent sequencing error.
+  minimum_length / minimum_overlap_length: the minimum length two DNA fragments
+    must overlap to be considered as a possible assembly (warning: this option
+    is not strictly respected by TIGR Assembler...)
   include_singlets: a flag which indicates that singletons (assemblies made up
     of a single DNA fragment) should be included in the lassie output_file - the
     default is to not include singletons.

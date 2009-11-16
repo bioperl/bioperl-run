@@ -120,6 +120,8 @@ our $qual_param;
 our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'ace';
+*minimum_overlap_length = \&overlap_length_cutoff;
+*minimum_overlap_similarity = \&overlap_identity_cutoff;
 
 =head2 new
 
@@ -131,27 +133,29 @@ our $asm_format = 'ace';
  Function: Create a new Cap3 factory
  Returns : A Bio::Tools::Run::Cap3 object
  Args    : Cap3 options available in this module:
-  'band_expansion_size'        specify band expansion size N > 10 (20)
-  'differences_quality_cutoff' specify base quality cutoff for differences N > 15 (20)
-  'clipping_quality_cutoff'    specify base quality cutoff for clipping N > 5 (12)
-  'max_qscore_sum'             specify max qscore sum at differences N > 20 (200)
-  'extra_nof_differences'      specify clearance between no. of diff N > 10 (30)
-  'max_gap_length'             specify max gap length in any overlap N > 1 (20)
-  'gap_penalty_factor'         specify gap penalty factor N > 0 (6)
-  'max_overhand_percent'       specify max overhang percent length N > 2 (20)
-  'match_score_factor'         specify match score factor N > 0 (2)
-  'mismatch_score_factor'      specify mismatch score factor N < 0 (-5)
-  'overlap_length_cutoff'      specify overlap length cutoff > 20 (40)
-  'overlap_identity_cutoff'    specify overlap percent identity cutoff N > 65 (80)
-  'reverse_orientation_value'  specify reverse orientation value N >= 0 (1)
-  'overlap_score_cutoff'       specify overlap similarity score cutoff N > 400 (900)
-  'max_word_occurrences'       specify max number of word matches N > 30 (300)
-  'min_correction_constraints' specify min number of constraints for correction N > 0 (3)
-  'min_linking_constraints'    specify min number of constraints for linking N > 0 (2)
-  'clipping_info_file'         specify file name for clipping information (none)
-  'output_prefix_string'       specify prefix string for output file names (cap)
-  'clipping_range'             specify clipping range N > 5 (250)
-  'min_clip_good_reads'        specify min no. of good reads at clip pos N > 0 (3)
+  band_expansion_size        specify band expansion size N > 10 (20)
+  differences_quality_cutoff specify base quality cutoff for differences N > 15 (20)
+  clipping_quality_cutoff    specify base quality cutoff for clipping N > 5 (12)
+  max_qscore_sum             specify max qscore sum at differences N > 20 (200)
+  extra_nof_differences      specify clearance between no. of diff N > 10 (30)
+  max_gap_length             specify max gap length in any overlap N > 1 (20)
+  gap_penalty_factor         specify gap penalty factor N > 0 (6)
+  max_overhand_percent       specify max overhang percent length N > 2 (20)
+  match_score_factor         specify match score factor N > 0 (2)
+  mismatch_score_factor      specify mismatch score factor N < 0 (-5)
+  overlap_length_cutoff / minimum_overlap_length
+                             specify overlap length cutoff > 20 (40)
+  overlap_identity_cutoff / minimum_overlap_similarity
+                             specify overlap percent identity cutoff N > 65 (80)
+  reverse_orientation_value  specify reverse orientation value N >= 0 (1)
+  overlap_score_cutoff       specify overlap similarity score cutoff N > 400 (900)
+  max_word_occurrences       specify max number of word matches N > 30 (300)
+  min_correction_constraints specify min number of constraints for correction N > 0 (3)
+  min_linking_constraints    specify min number of constraints for linking N > 0 (2)
+  clipping_info_file         specify file name for clipping information (none)
+  output_prefix_string       specify prefix string for output file names (cap)
+  clipping_range             specify clipping range N > 5 (250)
+  min_clip_good_reads        specify min no. of good reads at clip pos N > 0 (3)
 
 =cut
 
