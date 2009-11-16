@@ -261,11 +261,39 @@ sub _run {
     unlink $file;
   }
 
+  # Clean the ACE file
+  $self->_clean_file($ace_file);
+
   # Move the ACE file to its final destination
   move ($ace_file, $output_file) or $self->throw("Could not move file ".
     "'$ace_file' to '$output_file': $!");
 
   return $output_file;
+}
+
+=head2 _clean_file
+
+ Title   :   _clean_file
+ Usage   :   $factory->_clean_file($file)
+ Function:   Clean file in place by removing NULL characters. NULL characters
+             can be present in the output files of AMOS 2.0.8 but they do not
+             validate as proper sequence characters in Bioperl.
+ Returns :   1 for success
+ Args    :   Filename
+
+=cut
+
+sub _clean_file {
+  my ($self, $file) = @_;
+  # Set in-place file editing mode
+  local $^I = "~";
+  local @ARGV = ( $file );
+  # Replace lines in file
+  while (<>) {
+    s/\x0//g;
+    print;
+  }
+  return 1;
 }
 
 1;
