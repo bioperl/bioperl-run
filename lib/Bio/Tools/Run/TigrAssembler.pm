@@ -184,9 +184,10 @@ TIGR Assembler options available in this module:
     comparison opposite of the -t flag which is now the default).
   safe_merging_stop: a flag which causes merging to stop when only sequences
     which appear to be repeats are left and these cannot be merged based on
-    clone length constraints. not_random: a flag which indicates the DNA
-    fragments in the input_file should not be treated as random genomic
-    fragments for the purpose of determining repeat regions.
+    clone length constraints.
+  not_random: a flag which indicates that the DNA fragments in the input_file
+    should not be treated as random genomic fragments for the purpose of
+    determining repeat regions.
   resort_after: specifies how many sequences should be merged before resorting
     the possible merges based on clone constraints.
 

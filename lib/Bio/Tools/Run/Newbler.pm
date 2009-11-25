@@ -170,8 +170,8 @@ our $asm_format = 'ace';
  min_ovl_length / minimum_overlap_length
                       Minimum overlap length, i.e. the minimum length of overlaps
                         considered by the assembler (default: 90). Warning: It
-			seems like this parameter is not respected by the program
-			in the current version
+                        seems like this parameter is not respected by the program
+                        in the current version
  no_auto_rescore      Do not use the quality score re-scoring algorithm (default:
                         off).
  seed_count           Set the seed count parameter, the number of seeds required

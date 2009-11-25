@@ -138,7 +138,7 @@ our $asm_format = 'ace';
   extra_nof_differences      specify clearance between no. of diff N > 10 (30)
   max_gap_length             specify max gap length in any overlap N > 1 (20)
   gap_penalty_factor         specify gap penalty factor N > 0 (6)
-  max_overhand_percent       specify max overhang percent length N > 2 (20)
+  max_overhang_percent       specify max overhang percent length N > 2 (20)
   match_score_factor         specify match score factor N > 0 (2)
   mismatch_score_factor      specify mismatch score factor N < 0 (-5)
   overlap_length_cutoff / minimum_overlap_length
