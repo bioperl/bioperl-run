@@ -21,6 +21,8 @@ Bio::Tools::Run::Maq - Run wrapper for the Maq short-read assembler *BETA*
  # create an assembly
  $maq_fac = Bio::Tools::Run::Maq->new();
  $maq_assy = $maq_fac->run( 'reads.fastq', 'refseq.fas' );
+ # if IO::Uncompress::Gunzip is available...
+ $maq_assy = $maq_fac->run( 'reads.fastq.gz', 'refseq.gz');
  # paired-end 
  $maq_assy = $maq_fac->run( 'reads.fastq', 'refseq.fas', 'paired-reads.fastq');
  # be more strict
@@ -189,6 +191,11 @@ Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Maq;
 use strict;
+our $HAVE_IO_UNCOMPRESS;
+
+BEGIN {
+    eval "require IO::Uncompress::Gunzip; $HAVE_IO_UNCOMPRESS = 1";
+}
 
 use IPC::Run;
 
@@ -257,6 +264,8 @@ sub new {
  Args    : - fastq file containing single-end reads
            - fasta file containing the reference sequence
            - [optional] fastq file containing paired-end reads 
+ Note    : gzipped inputs are allowed if IO::Uncompress::Gunzip
+           is available
              
 =cut
 
@@ -267,7 +276,20 @@ sub run {
   $self->_check_executable();
   $rd1_file or $self->throw("Fastq reads file required at arg 1");
   $ref_file or $self->throw("Fasta refseq file required at arg 2");
-
+  # expand gzipped files as nec.
+  for ($rd1_file, $ref_file, $rd2_file) {
+      next unless $_;
+      if (/\.gz[^.]*$/) {
+	  unless ($HAVE_IO_UNCOMPRESS) {
+	      croak( "IO::Uncompress::Gunzip not available, can't expand '$_'" );
+	  }
+	  my ($tfh, $tf) = $self->io->tempfile;
+	  my $z = IO::Uncompress::Gunzip->new($_);
+	  while (<$z>) { print $tfh $_ }
+	  close $tfh;
+	  $_ = $tf;
+      }
+  }
   my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$rd1_file);
 
   $guesser->guess eq 'fastq' or $self->throw("Reads file doesn't look like fastq at arg 1");
@@ -286,7 +308,7 @@ sub run {
 
   # Export results in desired object type
   my $asm  = $self->_export_results($maq_file);
-  return $asm
+  return $asm;
 }
 
 =head2 run_maq()
