@@ -122,6 +122,7 @@ our %command_prefixes = (
     );
 
 our @program_params = qw(
+    command
     view|tab_delim
     view|out_file
     view|pass_flags

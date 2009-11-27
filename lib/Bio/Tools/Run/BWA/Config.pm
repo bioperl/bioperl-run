@@ -217,7 +217,7 @@ our %command_files = (
     'index'       => [qw( fas )],     
     'aln'         => [qw( fas faq >sai )],     
     'samse'       => [qw( fas sai faq >sam )],     
-    'sampe'       => [qw( fas sai1 sai2 faq1 faq2 > sam )],     
+    'sampe'       => [qw( fas sai1 sai2 faq1 faq2 >sam )],     
     'dbwtsw'      => [qw( fas faq )]
     );
 
