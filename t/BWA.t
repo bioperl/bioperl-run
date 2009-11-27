@@ -6,12 +6,12 @@ use warnings;
 no warnings qw(once);
 our $home;
 BEGIN {
-    $home = '..'; # set to '.' for Build use, 
+    $home = '.'; # set to '.' for Build use, 
                       # '..' for debugging from .t file
     unshift @INC, $home;
     unshift @INC, '../..';
     use Bio::Root::Test;
-    test_begin(-tests => 1000,
+    test_begin(-tests => 36,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BWA Bio::Tools::Run::Samtools)]);
 }
 
@@ -19,6 +19,7 @@ use File::Temp qw(tempfile tempdir);
 use File::Copy;
 
 use Bio::Tools::Run::WrapperBase;
+use Bio::Assembly::IO::sam;
 
 # test command functionality
 
@@ -27,6 +28,7 @@ ok my $bwafac = Bio::Tools::Run::BWA->new(
     -n_threads            => 1,
     -subopt_hit_threshold => 35
     ), "make a factory using command 'aln'";
+
 # ParameterBaseI compliance : really AssemblerBase tests...
 ok $bwafac->parameters_changed, "parameters changed on construction";
 ok $bwafac->subopt_hit_threshold, "access parameter";
@@ -78,7 +80,7 @@ is( join(' ', @{$bwafac->_translate_params}),
 
 SKIP : { 
     test_skip( -requires_executable => $bwafac,
-	       -tests => 100 ); #####change this!
+	       -tests => 12 ); 
     my $tdir = tempdir( "bwaXXXX", CLEANUP => 1);
     copy(test_input_file('r1bwa.fq'), File::Spec->catfile($tdir, 'r1.fq')) or die "copy failed (1)";
     copy(test_input_file('r2bwa.fq'), File::Spec->catfile($tdir, 'r2.fq')) or die "copy failed (2)";
@@ -100,13 +102,13 @@ SKIP : {
     #test run (assembly pipeline)
     ok $bwa = Bio::Tools::Run::BWA->new(), "make a full assembly factory";
     is ($bwa->command, 'run', "command attribute set");
-    $DB::single = 1;
+
     ok my $assy = $bwa->run($rd1, $refseq, $rd2), "make full assy";
-    is ($assy->get_nof_contigs, 175, "number of contigs");
-    is ($assy->get_nof_singlets, 179, "number of singlets");
+    is ($assy->get_nof_contigs, 204, "number of contigs");
+    is ($assy->get_nof_singlets, 220, "number of singlets");
     
 }
     
- sub test_input_file {
-      return "./data/".shift;
-  }
+#  sub test_input_file {
+#       return "./data/".shift;
+#   }
