@@ -324,11 +324,12 @@ sub _prepare_output_file {
  Function: Export the assembly results
  Returns : Exported assembly (file or IO object or assembly object)
  Args    : -Name of the file containing an assembly
+           -[optional] additional named args required by the B:A:IO object
 
 =cut
 
 sub _export_results {
-  my ($self, $asm_file) = @_;
+  my ($self, $asm_file, @named_args) = @_;
   my $results;
   my $asm_io;
   my $asm;
@@ -340,7 +341,8 @@ sub _export_results {
   } else {
     $asm_io = Bio::Assembly::IO->new(
       -file   => "<$asm_file",
-      -format => $self->_assembly_format() );
+      -format => $self->_assembly_format(),
+	@named_args );
     unlink $asm_file;
     if ($out_type eq 'Bio::Assembly::IO') {
       # Results are a Bio::Assembly::IO object
