@@ -213,7 +213,7 @@ our %param_translation = (
 #
 
 our %command_files = (
-#    'run'        => [qw( faq fas faq )],
+    'run'        => [qw( faq fas faq )],
     'index'       => [qw( fas )],     
     'aln'         => [qw( fas faq >sai )],     
     'samse'       => [qw( fas sai faq >sam )],     

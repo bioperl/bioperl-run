@@ -173,8 +173,10 @@ Internal methods are usually preceded with a _
 
 use IPC::Run;
 our $HAVE_IO_UNCOMPRESS;
+our $HAVE_SAMTOOLS;
 BEGIN {
     eval "require IO::Uncompress::Gunzip; \$HAVE_IO_UNCOMPRESS = 1";
+    eval "require Bio::Tools::Run::Samtools; \$HAVE_SAMTOOLS = 1";
 }
 
 # Object preamble - inherits from Bio::Root::Root
@@ -184,6 +186,7 @@ use Bio::Root::Root;
 use Bio::Tools::Run::BWA::Config;
 use Bio::Tools::GuessSeqFormat;
 use File::Basename qw(fileparse);
+use Cwd;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase );
 
@@ -248,6 +251,9 @@ sub run {
 
   # Sanity checks
   $self->_check_executable();
+  unless ($HAVE_SAMTOOLS) {
+      cluck( "Bio::Tools::Run::Samtools is not available. A .sam output alignment will be created, but must be converted to binary SAM (.bam) before it can be passed to Bio::Assembly::IO, as follows: \n\t\$ samtools view -Sb out.sam > out.bam" );
+  }
   $rd1_file or $self->throw("Fastq reads file required at arg 1");
   $ref_file or $self->throw("Fasta refseq file required at arg 2");
   for ($rd1_file, $ref_file, $rd2_file) {
@@ -276,9 +282,25 @@ sub run {
 
   #Assemble
   my ($sam_file) = $self->_run($rd1_file, $ref_file, $rd2_file);
-
+  $DB::single = 1;
+  if ($HAVE_SAMTOOLS) {
+      my ($nm,$dr,$suf) = fileparse($sam_file, ".sam");
+      # goofy kludge for samtools...
+      my $pwd = getcwd;
+      chdir($dr);
+      my $samt = Bio::Tools::Run::Samtools->new( -command => 'view', 
+						 -sam_input => 1,
+						 -bam_output => 1,
+	                                         -refseq => $ref_file);
+      my $bam_file = $nm.'.bam';
+      $samt->run( -bam => $nm.$suf, -out => $bam_file ) or croak( "Problem converting .sam file");
+      $bam_file = File::Spec->catfile($dr, $bam_file);
+      $sam_file = $bam_file;
+      chdir($pwd);
+  }
+  
   # Export results in desired object type
-  my $asm = $self->_export_results($sam_file);
+  my $asm = $self->_export_results($sam_file, -refdb => $ref_file);
   return $asm;
 
 }
@@ -518,9 +540,10 @@ sub _run {
   $bwa->run_bwa( -fas => $ref_file );
   # map reads to reference seqs
   $bwa = Bio::Tools::Run::BWA->new(
-      -comand => 'aln',
+      -command => 'aln',
       @{$subcmd_args->{aln}}
       );
+
   $bwa->run_bwa( -fas => $ref_file, -faq => $rd1_file, -sai => $saif );
   # do paired run if nec
   $bwa->run_bwa( -fas => $ref_file, -faq => $rd2_file, -sai => $sai2f ) 
@@ -539,6 +562,7 @@ sub _run {
 		     -sam => $samf );
   }
   # note this returns a text-sam file-- needs conversion for B:A:IO::sam...
+  # conversion done in run(), if Bio::Tools::Run::Samtools available.
   return $samf;
 
 }
