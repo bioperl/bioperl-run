@@ -186,6 +186,7 @@ use Bio::Root::Root;
 use Bio::Tools::Run::BWA::Config;
 use Bio::Tools::GuessSeqFormat;
 use File::Basename qw(fileparse);
+use File::Copy;
 use Cwd;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase );
@@ -282,7 +283,7 @@ sub run {
 
   #Assemble
   my ($sam_file) = $self->_run($rd1_file, $ref_file, $rd2_file);
-  $DB::single = 1;
+
   if ($HAVE_SAMTOOLS) {
       my ($nm,$dr,$suf) = fileparse($sam_file, ".sam");
       # goofy kludge for samtools...
@@ -294,13 +295,18 @@ sub run {
 	                                         -refseq => $ref_file);
       my $bam_file = $nm.'.bam';
       $samt->run( -bam => $nm.$suf, -out => $bam_file ) or croak( "Problem converting .sam file");
+      $samt = Bio::Tools::Run::Samtools->new( -command => 'sort' );
+      $samt->run( -bam => $bam_file, -pfx => $nm.'.srt' ) or croak( "Problem sorting .bam file");
+      move( $nm.'.srt.bam', $bam_file );
+      $samt = Bio::Tools::Run::Samtools->new( -command => 'index' );
+      $samt->run( -bam => $bam_file );
       $bam_file = File::Spec->catfile($dr, $bam_file);
       $sam_file = $bam_file;
       chdir($pwd);
   }
   
   # Export results in desired object type
-  my $asm = $self->_export_results($sam_file, -refdb => $ref_file);
+  my $asm = $self->_export_results($sam_file, -refdb => $ref_file, -keep_asm => 1);
   return $asm;
 
 }
