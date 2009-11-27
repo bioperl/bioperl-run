@@ -9,13 +9,15 @@ BEGIN {
     $home = '..'; # set to '.' for Build use, 
                       # '..' for debugging from .t file
     unshift @INC, $home;
+    unshift @INC, '../..';
     use Bio::Root::Test;
     test_begin(-tests => 1000,
-	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BWA)]);
+	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BWA Bio::Tools::Run::Samtools)]);
 }
 
 use File::Temp qw(tempfile tempdir);
 use File::Copy;
+
 use Bio::Tools::Run::WrapperBase;
 
 # test command functionality
@@ -82,13 +84,10 @@ SKIP : {
     copy(test_input_file('r2bwa.fq'), File::Spec->catfile($tdir, 'r2.fq')) or die "copy failed (2)";
     copy(test_input_file('Ft.frag.fas'), File::Spec->catfile($tdir, 'ref.fas')) or die "copy failed (3)";
     my ($rd1, $rd2, $refseq) = qw( r1.fq r2.fq ref.fas );
-    my ($sai1h, $sai1f) = tempfile( "saiXXXX", DIR => $tdir, UNLINK => 1 );
-    my ($sai2h, $sai2f) = tempfile( "saiXXXX", DIR => $tdir, UNLINK => 1 );
-    my ($samh, $samf) = tempfile( "samXXXX", DIR => $tdir, UNLINK => 1 );
-    $_->close for ($sai1h, $sai2h, $samh);
-    ($sai1f, $sai2f, $samf) = map { (File::Spec->splitpath($_))[-1] } ($sai1f, $sai2f, $samf);
+    my ($sai1f, $sai2f, $samf, $bamf) = ('sai1.sai', 'sai2.sai', 'out.sam', 'out.bam');
+
     chdir($tdir); # make indices in the tempdir
-    $DB::single=1;
+
     ok my $bwa = Bio::Tools::Run::BWA->new( -command => 'index' ), "make refseq index factory";   
     ok $bwa->run_bwa( -fas => $refseq ), "index refseq"; 
     ok $bwa = Bio::Tools::Run::BWA->new( -command => 'aln' ), "make aln factory";
@@ -99,7 +98,12 @@ SKIP : {
 		      -sai2 => $sai2f, -faq2 => $rd2, -sam => $samf ), "assemble paired reads";
 
     #test run (assembly pipeline)
-    # need the Samtools wrapper here too.
+    ok $bwa = Bio::Tools::Run::BWA->new(), "make a full assembly factory";
+    is ($bwa->command, 'run', "command attribute set");
+    $DB::single = 1;
+    ok my $assy = $bwa->run($rd1, $refseq, $rd2), "make full assy";
+    is ($assy->get_nof_contigs, 175, "number of contigs");
+    is ($assy->get_nof_singlets, 179, "number of singlets");
     
 }
     
