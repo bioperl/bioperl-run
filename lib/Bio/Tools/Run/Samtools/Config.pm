@@ -76,7 +76,7 @@ Internal methods are usually preceded with a _
 package Bio::Tools::Run::Samtools::Config;
 use strict;
 use warnings;
-#no warnings qw(qw);
+no warnings qw(qw);
 use Exporter;
 
 our (@ISA, @EXPORT, @EXPORT_OK);
@@ -127,6 +127,7 @@ our @program_params = qw(
     view|out_file
     view|pass_flags
     view|filt_flags
+    view|refseq
     view|qual_threshold
     view|library
     view|read_group
@@ -162,6 +163,7 @@ our %param_translation = (
     'view|tab_delim' => 't',
     'view|out_file' => 'o',
     'view|pass_flags' => 'f',
+    'view|refseq'   => 'T',
     'view|filt_flags' => 'F',
     'view|qual_threshold' => 'q',
     'view|library' => 'l',
@@ -210,7 +212,7 @@ our %command_files = (
     'sort' => [qw( bam pfx )],
     'index' => [qw( bam )],
     'merge' => [qw( obm *ibm )],
-    'faidx' => [qw( fas rgn )],
+    'faidx' => [qw( fas #rgn )],
     'pileup' => [qw( bam >out )],
     'fixmate' => [qw( ibm obm )],
     'rmdup' => [qw( ibm obm )],
