@@ -324,6 +324,7 @@ sub _prepare_output_file {
  Function: Export the assembly results
  Returns : Exported assembly (file or IO object or assembly object)
  Args    : -Name of the file containing an assembly
+           - -keep_asm => boolean (if true, do not unlink $asm_file)
            -[optional] additional named args required by the B:A:IO object
 
 =cut
@@ -333,6 +334,9 @@ sub _export_results {
   my $results;
   my $asm_io;
   my $asm;
+  my %args = @named_args;
+  my $keep_asm = $args{'-keep_asm'};
+  delete $args{'-keep_asm'};
   my $out_type = $self->out_type();
   if ( (not $out_type eq 'Bio::Assembly::ScaffoldI') &&
        (not $out_type eq 'Bio::Assembly::IO'       )  ) {
@@ -343,7 +347,9 @@ sub _export_results {
       -file   => "<$asm_file",
       -format => $self->_assembly_format(),
 	@named_args );
-    unlink $asm_file;
+    # this unlink is a problem for Bio::DB::Sam (in B:A:I:sam), which needs
+    # the original bam file around. 
+    unlink $asm_file unless $keep_asm;
     if ($out_type eq 'Bio::Assembly::IO') {
       # Results are a Bio::Assembly::IO object
       $results = $asm_io;
