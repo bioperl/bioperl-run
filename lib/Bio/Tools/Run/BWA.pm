@@ -16,7 +16,7 @@ use strict;
 
 =head1 NAME
 
-Bio::Tools::Run::BWA - Run wrapper for the BWA short-read assembler *Pre-ALPHA!*
+Bio::Tools::Run::BWA - Run wrapper for the BWA short-read assembler *BETA*
 
 =head1 SYNOPSIS
 

@@ -14,7 +14,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Samtools - a run wrapper for the samtools suite
+Bio::Tools::Run::Samtools - a run wrapper for the samtools suite *BETA*
 
 =head1 SYNOPSIS
 
