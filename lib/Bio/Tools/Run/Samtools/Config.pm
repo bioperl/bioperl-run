@@ -208,11 +208,11 @@ our %param_translation = (
 #
 
 our %command_files = (
-    'view' => [qw( bam >out )],
+    'view' => [qw( bam #*rgn >out )],
     'sort' => [qw( bam pfx )],
     'index' => [qw( bam )],
     'merge' => [qw( obm *ibm )],
-    'faidx' => [qw( fas #rgn )],
+    'faidx' => [qw( fas #*rgn )],
     'pileup' => [qw( bam >out )],
     'fixmate' => [qw( ibm obm )],
     'rmdup' => [qw( ibm obm )],
