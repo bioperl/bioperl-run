@@ -217,7 +217,7 @@ sub _run {
   # Print command for debugging
   if ($self->verbose() >= 0) {
     my $cmd = '';
-    $cmd .= join ( $join, @program_args );
+    $cmd .= join ( ' ', @program_args );
     for ( my $i = 1 ; $i < scalar @ipc_args ; $i++ ) {
       my $element = $ipc_args[$i];
       my $ref = ref($element);

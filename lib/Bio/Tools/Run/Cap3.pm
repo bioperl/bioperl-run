@@ -229,6 +229,11 @@ sub _run {
 
   # Usage: cap3 File_of_reads [options]
   my $commandstring = "$exe $fasta_file $options";
+
+  if ($self->verbose() >= 0) {
+    $self->debug( "$exe command = $commandstring\n" );
+  }
+
   open(CAP3, "$commandstring |") ||
     $self->throw(sprintf("%s call crashed: %s %s\n", $self->program_name, $!, $commandstring));
   local $/ = undef;
