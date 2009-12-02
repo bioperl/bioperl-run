@@ -1,3 +1,79 @@
+# $Id$
+#
+# BioPerl module for Bio::Tools::Run::AssemblerBase
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
+#
+# Cared for by Florent Angly <florent dot angly at gmail dot com>
+#
+# Copyright Florent Angly
+#
+# You may distribute this module under the same terms as perl itself
+
+# POD documentation - main docs before the code
+
+=head1 NAME
+
+Bio::Tools::Run::AssemblerBase - base class for wrapping external assemblers
+
+=head1 SYNOPSIS
+
+Give standard usage here
+
+=head1 DESCRIPTION
+
+Describe the object here
+# use of globals for configuration...
+# I've created the separate Config.pm module, and 'use'd it in the 
+# main module, for instance...
+# other configuration globals:
+# $use_dash = [1|single|double|mixed]
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules. Send your comments and suggestions preferably to
+the Bioperl mailing list.  Your participation is much appreciated.
+
+  bioperl-l@bioperl.org                  - General discussion
+http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support
+
+Please direct usage questions or support issues to the mailing list:
+
+L<bioperl-l@bioperl.org>
+
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
+with code and data examples if at all possible.
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via
+the web:
+
+  http://bugzilla.open-bio.org/
+
+=head1 AUTHOR - Florent Angly
+
+Email florent dot angly at gmail dot com
+
+=head1 CONTRIBUTORS
+
+Mark A. Jensen - maj -at- fortinbras -dot- us
+
+=head1 APPENDIX
+
+The rest of the documentation details each of the object methods.
+Internal methods are usually preceded with a _
+
+=cut
+
 package Bio::Tools::Run::AssemblerBase;
 
 use strict;
@@ -409,7 +485,8 @@ sub _register_program_commands {
            - parameters that the program accepts, optional (default: none)
            - switches that the program accepts, optional (default: none)
            - parameter translation, optional (default: no translation occurs)
-           - use dash for the program parameters, optional (default: yes, use dash)
+           - dash option for the program parameters, [1|single|double|mixed],
+             optional (default: yes, use single dashes only)
            - join, optional (default: ' ')
 
 =cut
@@ -494,11 +571,37 @@ sub _translate_params {
   my $join     = $self->{'_options'}->{'_join'};
   my $dash     = $self->{'_options'}->{'_dash'};
   my $translat = $self->{'_options'}->{'_translation'};
+  # patch to access the multiple dash choices of _setparams...
+  my @dash_args;
+  $dash ||= 1; # default as advertised
+  for ($dash) {
+      $_ == 1 && do {
+	  @dash_args = ( -dash => 1 );
+	  last;
+      };
+      /s/ && do { #single dash only
+	  @dash_args = ( -dash => 1);
+	  last;
+      };
+      /d/ && do { # double dash only
+	  @dash_args = ( -double_dash => 1);
+	  last;
+      };
+      /m/ && do { # mixed dash: one-letter opts get -,
+                  # long opts get --
+	  @dash_args = ( -mixed_dash => 1);
+	  last;
+      };
+      do { 
+	  $self->warn( "Dash spec '$dash' not recognized; using 'single'" );
+	  @dash_args = ( -dash => 1 );
+      };
+  }
   my $options  = $self->_setparams(
     -params    => $params,
     -switches  => $switches,
     -join      => $join,
-    -dash      => $dash
+    @dash_args
   );
 
   # Translate options
