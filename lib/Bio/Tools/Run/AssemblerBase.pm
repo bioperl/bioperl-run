@@ -653,6 +653,46 @@ sub _prepare_input_sequences {
   return $seqs, $quals;
 }
 
+=head2 _collate_subcmd_args()
+
+ Title   : _collate_subcmd_args
+ Usage   : $args_hash = $self->_collate_subcmd_args
+ Function: collate parameters and switches into command-specific
+           arg lists for passing to new()
+ Returns : hash of named argument lists
+ Args    : [optional] composite cmd prefix (scalar string) 
+           [default is 'run']
+
+=cut
+
+sub _collate_subcmd_args {
+    my $self = shift;
+    my $cmd = shift;
+    my %ret;
+    # default command is 'run'
+    $cmd ||= 'run';
+    my @subcmds = @{$composite_commands{$cmd}};
+    my %subcmds;
+    my $cur_options = $self->{'_options'};
+
+    # collate
+    foreach my $subcmd (@subcmds) {
+	# find the composite cmd form of the argument in 
+	# the current params and switches
+	# e.g., map_max_mismatches
+	my @params = grep /^${subcmd}_/, @{$$cur_options{'_params'}};
+	my @switches = grep /^${subcmd}_/, @{$$cur_options{'_switches'}};
+	$ret{$subcmd} = [];
+	# create an argument list suitable for passing to new() of
+	# the subcommand factory...
+	foreach my $opt (@params, @switches) {
+	    my $subopt = $opt; 
+	    $subopt =~ s/^${subcmd}_//; 
+	    push(@{$ret{$subcmd}}, '-'.$subopt => $self->$opt) if defined $self->$opt;
+	}
+    }
+    return \%ret;
+}
 
 =head2 run
 
