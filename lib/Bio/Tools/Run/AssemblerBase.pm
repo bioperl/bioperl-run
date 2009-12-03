@@ -579,15 +579,15 @@ sub _translate_params {
 	  @dash_args = ( -dash => 1 );
 	  last;
       };
-      /s/ && do { #single dash only
+      /^s/ && do { #single dash only
 	  @dash_args = ( -dash => 1);
 	  last;
       };
-      /d/ && do { # double dash only
+      /^d/ && do { # double dash only
 	  @dash_args = ( -double_dash => 1);
 	  last;
       };
-      /m/ && do { # mixed dash: one-letter opts get -,
+      /^m/ && do { # mixed dash: one-letter opts get -,
                   # long opts get --
 	  @dash_args = ( -mixed_dash => 1);
 	  last;
@@ -607,7 +607,7 @@ sub _translate_params {
   # Translate options
   my @options  = split(/(\s|$join)/, $options);
   for (my $i = 0; $i < scalar @options; $i++) {
-    my ($prefix, $name) = ( $options[$i] =~ m/^(-?)(.+)$/ );
+    my ($prefix, $name) = ( $options[$i] =~ m/^(-{0,2})(.+)$/ );
     if (defined $name) {
 	if ($name =~ /command/i) {
 	    $name = $options[$i+2]; # get the command
@@ -624,6 +624,14 @@ sub _translate_params {
     }
   }
   $options = join('', @options);
+
+  # this is a kludge for mixed options: the reason mixed doesn't 
+  # work right on the pass through _setparams is that the 
+  # *aliases* and not the actual params are passed to it. 
+  # here we just rejigger the dashes
+  if ($dash =~ /^m/) {
+      $options =~ s/--([a-z0-9](?:\s|$))/-$1/gi;
+  }
 
   # Now arrayify the options
   @options = split(' ', $options);
