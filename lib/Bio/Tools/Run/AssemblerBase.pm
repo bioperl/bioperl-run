@@ -671,7 +671,7 @@ sub _collate_subcmd_args {
     my %ret;
     # default command is 'run'
     $cmd ||= 'run';
-    my @subcmds = @{$composite_commands{$cmd}};
+    my @subcmds = @{$self->{'_options'}->{'_composite_commands'}->{$cmd}};
     my %subcmds;
     my $cur_options = $self->{'_options'};
 
