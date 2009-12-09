@@ -15,7 +15,7 @@ Bio::Tools::Run::TigrAssembler - Wrapper for local execution of TIGR Assembler
 
   use Bio::Tools::Run::TigrAssembler;
   # Run TIGR Assembler using an input FASTA file
-  my $factory = Bio::Tools::Run::TigrAssembler->new( -minimum_length => 35 );
+  my $factory = Bio::Tools::Run::TigrAssembler->new( -minimum_overlap_length => 35 );
   my $asm_obj = $factory->run($fasta_file, $qual_file);
   # An assembly object is returned by default
   for my $contig ($assembly->all_contigs) {

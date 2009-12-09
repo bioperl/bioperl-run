@@ -14,7 +14,7 @@
 
   use Bio::Tools::Run::Minimo;
   # Run Minmo using an input FASTA file
-  my $factory = Bio::Tools::Run::Minimo->new( -minimum_length => 35 );
+  my $factory = Bio::Tools::Run::Minimo->new( -minimum_overlap_length => 35 );
   my $asm_obj = $factory->run($fasta_file, $qual_file);
   # An assembly object is returned by default
   for my $contig ($assembly->all_contigs) {
