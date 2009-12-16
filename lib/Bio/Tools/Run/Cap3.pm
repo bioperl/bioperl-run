@@ -87,7 +87,7 @@ use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase);
 our $program_name = 'cap3';
 our @program_params = (qw( band_expansion_size differences_quality_cutoff
   clipping_quality_cutoff max_qscore_sum extra_nof_differences max_gap_length
-  gap_penalty_factor max_overhand_percent match_score_factor mismatch_score_factor
+  gap_penalty_factor max_overhang_percent match_score_factor mismatch_score_factor
   overlap_length_cutoff overlap_identity_cutoff reverse_orientation_value
   overlap_score_cutoff max_word_occurrences min_correction_constraints
   min_linking_constraints clipping_info_file output_prefix_string clipping_range
@@ -101,7 +101,7 @@ our %param_translation = (
   'extra_nof_differences'      => 'e',
   'max_gap_length'             => 'f',
   'gap_penalty_factor'         => 'g',
-  'max_overhand_percent'       => 'h',
+  'max_overhang_percent'       => 'h',
   'match_score_factor'         => 'm',
   'mismatch_score_factor'      => 'n',
   'overlap_length_cutoff'      => 'o',
