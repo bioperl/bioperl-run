@@ -256,7 +256,7 @@ sub _run {
   my ($self, $fasta_file, $qual_file) = @_;
 
   # Setup needed files and filehandles first
-  my ($output_fh, $output_file)   = $self->_prepare_output_file( );
+  my ($output_fh,  $output_file ) = $self->_prepare_output_file( );
   my ($scratch_fh, $scratch_file) = $self->io->tempfile( -dir => $self->tempdir() );
   my ($stderr_fh,  $stderr_file ) = $self->io->tempfile( -dir => $self->tempdir() );
 

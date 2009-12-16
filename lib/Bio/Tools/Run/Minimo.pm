@@ -93,7 +93,7 @@ use File::Basename;
 use base qw( Bio::Root::Root Bio::Tools::Run::AssemblerBase );
 
 our $program_name = 'Minimo'; # name of the executable
-our @program_params = (qw( qual_in good_qual bad_qual min_len min_ident out_prefix ace_exp ));
+our @program_params = (qw( qual_in good_qual bad_qual min_len min_ident aln_wiggle out_prefix ace_exp ));
 our @program_switches;
 our %param_translation = (
   'qual_in'    => 'D QUAL_IN',
@@ -101,6 +101,7 @@ our %param_translation = (
   'bad_qual'   => 'D BAD_QUAL',
   'min_len'    => 'D MIN_LEN',
   'min_ident'  => 'D MIN_IDENT',
+  'aln_wiggle' => 'D ALN_WIGGLE',
   'out_prefix' => 'D OUT_PREFIX',
   'ace_exp'    => 'D ACE_EXP'
 );
@@ -131,6 +132,8 @@ our $asm_format = 'ace';
      min_ident / minimum_overlap_similarity
                   Minimum contig overlap identity percentage (between 0
                     and 100 %, default: 98)
+     aln_wiggle   Alignment wiggle value when determining the consensus
+                    sequence (default: 2 bp)
      out_prefix   Prefix to use for the output file path and name
 
 =cut

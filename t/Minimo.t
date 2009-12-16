@@ -2,7 +2,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 69,
+    test_begin(-tests => 72,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Minimo)]);
     use_ok('Bio::SeqIO');
 }
@@ -34,7 +34,7 @@ my $program_name = $Bio::Tools::Run::Minimo::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 45);
+              -tests => 48);
 
    # Input data
    my $result_file = 'results.ace';
@@ -98,6 +98,7 @@ SKIP: {
 
    # Try some Minimo specific parameters
    ok($assembler->bad_qual(30));
+   ok($assembler->aln_wiggle(3));
    ok($asm = $assembler->run(\@seq_arr));
    is($asm->get_nof_singlets, 0);
    is($asm->get_nof_contigs, 3);
