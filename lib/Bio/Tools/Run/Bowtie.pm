@@ -351,7 +351,7 @@ sub run_bowtie {
     		last;
     	};
     	/^c/ && do { # this will deal with crossbow file when I sort them out
-    		@files = map { ( $_ , shift @files ) } ('--12');
+    		@files = unshift(@files,'--12');
     		last;
     	}
     }
