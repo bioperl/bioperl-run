@@ -239,8 +239,13 @@ sub new {
 sub run {
 	my ($self, $rd1, $ref_file, $rd2_file) = @_;
 
-	# Sanity checks
+	# Sanity checks or version return
 	$self->_check_executable();
+	my $cmd = $self->command if $self->can('command');
+	if ($cmd eq 'version') {
+		my $bowtie_file = $self->_run();
+		return $bowtie_file;
+	}
 	$rd1 or $self->throw("Fasta/q reads file/Bio::Seq required at arg 1");
 	$ref_file or $self->throw("Bowtie index required at arg 2");
 	# expand gzipped files as nec.
