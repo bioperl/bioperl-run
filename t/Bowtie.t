@@ -104,7 +104,7 @@ SKIP : {
     my $rda2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fa');
     my $rdq1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fq');
     my $rdq2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fq');
-    my $refseq = test_input_file('bowtie', 'reads', 'e_coli');
+    my $refseq = test_input_file('bowtie', 'indexes', 'e_coli');
     my $inlstr;
     my $inlobj;
     my $in = Bio::SeqIO->new( -file => $rda, -forma => 'Fasta' );
