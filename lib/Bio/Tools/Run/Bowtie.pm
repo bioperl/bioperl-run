@@ -161,6 +161,7 @@ use Bio::Root::Root;
 use Bio::Seq;
 use Bio::Tools::Run::Bowtie::Config;
 use Bio::Tools::GuessSeqFormat;
+use Bio::Tools::Run::Samtools;
 use File::Basename qw(fileparse);
 
 use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase );
@@ -204,6 +205,20 @@ sub new {
       chomp $kludge[0];
       $self->program_name($kludge[0]);
   }
+
+    ######## MUST use SAM output for this, as Bio::Assembly::IO already handles this.
+    ######## This may change - not that this points to a feature that would be nice in
+    ######## AssemblyBase - mutually exclusive switches/params
+    $self->set_parameters( -sam_format => 1 ) if not defined $self->sam_format;
+#    $self->reset_parameters( -concise => 0 ); # note here explicitly reseting to 0 as reset otherwise sets to true
+#    $self->reset_parameters( -quiet => 0 ); # though additional note - setting them to 0 breaks $self->command() below
+#    $self->reset_parameters( -refout => 0 );
+#    $self->reset_parameters( -refidx => 0 );    
+    ########
+    ########
+
+
+
   $self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
   $self->_assembly_format($asm_format);
   return $self;
@@ -261,8 +276,29 @@ sub run {
 	# Assemble
 	my $bowtie_file = $self->_run($rd1, $ref_file, $rd2_file);
 
-	# Export results in desired object type
-	return $self->_export_results($bowtie_file);
+	if ($self->sam_format) {
+		my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
+		my ($srth, $srtf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
+		$_->close for ($bamh, $srth);
+		
+		my $samt = Bio::Tools::Run::Samtools->new( -command => 'view',
+		                                           -sam_input => 1,
+		                                           -bam_output => 1 );
+
+		$samt->run( -bam => $bowtie_file, -out => $bamf);
+
+		$samt = Bio::Tools::Run::Samtools->new( -command => 'sort',
+		                                        -sam_input => 1,
+		                                        -bam_output => 1 );
+
+		$samt->run( -bam => $bamf, -out => $srtf);
+		
+		
+		# Export results in desired object type
+		return $self->_export_results($srtf);
+	} 
+	
+	return $bowtie_file;
 }
 
 =head2 run_bowtie()
@@ -282,19 +318,6 @@ sub run_bowtie {
     # to set up the run, need to add the files to the call
     # -- provide these as arguments to this function
     
-    
-    ######## MUST use SAM output for this, as Bio::Assembly::IO already handles this.
-    ######## This may change - not that this points to a feature that would be nice in
-    ######## AssemblyBase - mutually exclusive switches/params
-#    $self->reset_parameters( -concise => 0 ); # note here explicitly reseting to 0 as reset otherwise sets to true
-#    $self->reset_parameters( -quiet => 0 ); # though additional note - setting them to 0 breaks $self->command() below
-#    $self->reset_parameters( -refout => 0 );
-#    $self->reset_parameters( -refidx => 0 );    
-    $self->set_parameters( -sam_format => 1 );
-    ########
-    ########
-
-
     my $cmd = $self->command if $self->can('command');
     $self->throw("No bowtie command specified for the object") unless $cmd;
     # setup files necessary for this command
