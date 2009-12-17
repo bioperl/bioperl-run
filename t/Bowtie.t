@@ -117,7 +117,7 @@ SKIP : {
     
     $bowtiefac->set_parameters( -inline => 1 );
     ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq => $inlseq ), "read sequence as strings in memory";
+			 -seq => $inlstr ), "read sequence as strings in memory";
     
     like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
 
