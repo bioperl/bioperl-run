@@ -469,29 +469,26 @@ sub _prepare_input_sequences {
 	# Could use the AssemblerBase routine for this, except that would not permit
 	# an array of strings - not decided at this stage.
 
-	# TODO sort through inline sequence handling
-	#  - B:Seq to string of B:Seq->seq
-   #  - @B:Seq to join'd string of B:Seq->seq
-   #  - @string to join'd string
-   #  must then -> $self->set_parameters( -inline => 1 )'
-
-	if (-e $read1) {
+	if (-e $read1) { # we have a file
 		my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$read1);
 		$guesser->guess =~ m/^fast[qa]$/ or $self->throw("Reads file doesn't look like fasta/q at arg 1");
-	} elsif (!$read1->isa("Bio::PrimarySeqI")) {
+	} elsif ($read1->isa("Bio::PrimarySeqI")) { # we have a Bio::*Seq*
+		$read1=$read1->seq();
+	} else { # we have something else
 		if (ref($read1) =~ /ARRAY/i) {
 			my @ts;
 			foreach my $seq (@$read1) {
-				unless ($seq->isa("Bio::PrimarySeqI")) {
-					next if $read1=~m/[[^:alpha:]]/;
-					push @ts,Bio::Seq->new(-seq => $read1);
+				if ($seq->isa("Bio::PrimarySeqI")) {
+					$seq=$seq->seq();
+				} else {
+					next if $read1=~m/[[^:alpha:]]/;					
 				}
+				push @ts,$seq;
 			}
-			@$read1=@ts;
-			$self->throw("bowtie requires at least one sequence read") unless (@$read1);
-		} else { #must be a string - > convert to Bio::Seq object or...
+			$read1=join(',',@ts);
+			$self->throw("bowtie requires at least one sequence read") unless (@ts);
+		} else { #must be a string... fail if non-alpha
 			$self->throw("bowtie requires at least one sequence read") if $read1=~m/[[^:alpha:]]/;
-			$read1=Bio::Seq->new(-seq => $read1, -alphabet => 'dna');
 		}
 	}
 	
