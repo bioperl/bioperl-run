@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Bowtie::Config
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org <mailto:bioperl-l@bioperl.org>>
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Dan Kortschak <dan.kortschak@adelaide.edu.au>
 #
