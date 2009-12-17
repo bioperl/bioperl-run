@@ -286,10 +286,10 @@ sub run_bowtie {
     ######## MUST use SAM output for this, as Bio::Assembly::IO already handles this.
     ######## This may change - not that this points to a feature that would be nice in
     ######## AssemblyBase - mutually exclusive switches/params
-    $self->reset_parameters( -concise );
-    $self->reset_parameters( -quiet );
-    $self->reset_parameters( -refout );
-    $self->reset_parameters( -refidx );    
+    $self->reset_parameters( -concise => 0 ); # note here explicitly reseting to 0 as reset otherwise sets to true
+    $self->reset_parameters( -quiet => 0 );
+    $self->reset_parameters( -refout => 0 );
+    $self->reset_parameters( -refidx => 0 );    
     $self->set_parameters( -sam_format => 1 );
     ########
     ########
