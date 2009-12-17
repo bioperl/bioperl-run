@@ -343,7 +343,6 @@ sub run_bowtie {
     for (0..$l) {
         splice(@files, $_, 1, @{$files[$_]}) if (ref($files[$_]) eq 'ARRAY');
     }
-    @files = map { defined $_ ? $_ : () } @files; # squish undefs
     my $index=shift @files;
     for ($cmd) {
     	/^p/ && do {
@@ -355,6 +354,7 @@ sub run_bowtie {
     		last;
     	}
     }
+    @files = map { defined $_ ? $_ : () } @files; # squish undefs
     shift @$options; # dump program name
     my @ipc_args = ( $exe, @$options, $index, @files );
 
