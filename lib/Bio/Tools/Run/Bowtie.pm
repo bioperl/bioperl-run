@@ -206,15 +206,12 @@ sub new {
       $self->program_name($kludge[0]);
   }
 
-    ######## MUST use SAM output for this, as Bio::Assembly::IO already handles this.
-    ######## This may change - not that this points to a feature that would be nice in
-    ######## AssemblyBase - mutually exclusive switches/params
+    ######## Should use SAM output for this, as Bio::Assembly::IO already handles this.
 #    $self->set_parameters( -sam_format => 1 ) if not defined $self->sam_format;
-    ########
-    ########
-
-
-
+    ######## Currently cannot deal with absence of a fasta db, which bowtie does not
+    ######## need and may not be present. How to fix this?
+    ######## So in future should default to SAM though this may change.
+    
   $self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
   $self->_assembly_format($asm_format);
   return $self;
@@ -533,6 +530,42 @@ sub _run {
 	return $bowtief;
 }
 
+=head2 set_parameters()
+
+ Title   : set_parameters
+ Usage   : $pobj->set_parameters(%params);
+ Function: sets the parameters listed in the hash or array maintaining sane options.
+ Returns : true on success
+ Args    : [optional] hash or array of parameter/values.  
+
+=cut
+
+sub set_parameters {
+    my ($self, @args) = @_;
+
+    # Mutually exclusive switches/params prevented from being set to
+    # avoid confusion resulting from setting incompatible switches.
+
+    $self->throw("Input args not an even number") unless !(@args % 2);
+    my %args = @args;
+
+    foreach my $param (keys %args) {
+    	  foreach my $conflict (@{$incompat_params{$param}}) {
+    	  	   $self->reset_parameters( $conflict );
+    	  }
+    	  foreach my $requirement (@{$corequisite_switches{$param}}) {
+    	  	   # There is only one case and it is not a true corequisite,
+    	  	   # but if it were, calling ourself would be bad, so delegate this.
+    	  	   $self->SUPER::set_parameters( $requirement => 1 );
+    	  }
+    }
+
+    # Now delegate setting the actual desired parameter.
+    my $success = $self->SUPER::set_parameters(\@args);
+
+    return $success;
+}
+
 =head2 available_parameters()
 
  Title   : available_parameters
@@ -566,6 +599,7 @@ sub available_parameters {
         };
     }
 }
+
 
 sub available_commands { shift->available_parameters('commands') };
 

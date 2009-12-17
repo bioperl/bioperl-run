@@ -91,6 +91,8 @@ push @ISA, 'Exporter';
              %composite_commands
              @program_params
              @program_switches
+             %incompat_params
+             %corequisite_switches
              %param_translation
              %command_files
             );
@@ -177,6 +179,35 @@ our @program_switches = qw(
     par|reverse_reverse
     par|forward_forward
 );
+
+our %incompat_params = (
+    max_seed_mismatches      => [qw( max_mismatches )],
+    max_mismatches           => [qw( max_seed_mismatches )],
+    fastq                    => [qw( fasta raw inline )],
+    fasta                    => [qw( fastq raw inline )],
+    raw                      => [qw( fastq fasta inline )],
+    inline                   => [qw( fastq fasta raw )],
+    phred33                  => [qw( phred64 solexa solexa1_3 integer_qual )],
+    phred64                  => [qw( phred33 solexa solexa1_3 integer_qual )],
+    solexa                   => [qw( phred33 phred64 solexa1_3 integer_qual )],
+    solexa1_3                => [qw( phred33 phred64 solexa integer_qual )],
+    integer_qual             => [qw( phred33 phred64 solexa solexa1_3 )],
+    no_forward_alignment     => [qw( no_reverse_alignment )],
+    no_reverse_alignment     => [qw( no_forward_alignment )],
+    all                      => [qw( report_n_alignments )],
+    report_n_alignments      => [qw( all )],
+    sam_format               => [qw( concise  )],
+    concise                  => [qw( sam_format )],
+    forward_reverse          => [qw( reverse_reverse forward_forward )],
+    reverse_reverse          => [qw( forward_reverse forward_forward )],
+    forward_forward          => [qw( reverse_reverse forward_forward )]
+);
+
+our %corequisite_switches = (
+    strata                   => [qw( best )]
+);
+
+
 
 our %param_translation = (
     'one|fastq'                    => 'q',
