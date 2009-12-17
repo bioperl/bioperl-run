@@ -183,7 +183,7 @@ SKIP : {
     is( $bowtiefac->max_seed_mismatches, 2, "seed mismatch param set");
     is( $bowtiefac->seed_length, 28, "seed length param set");
     is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
-    ok my $assy = $bowtiefac->run_bowtie( -seq => $rdq, -ind => $refseq ), "make full assy";
+    ok my $assy = $bowtiefac->run($rdq, $refseq), "make alignment";
     #some fuzziness in these: bowtie gives ?+?
     cmp_ok( $assy->get_nof_contigs, '>=', 10000, "number of contigs"); # these aren't yet known
     cmp_ok( $assy->get_nof_singlets,'>=',10000, "number of singlets"); # these aren't yet known

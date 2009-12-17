@@ -299,7 +299,7 @@ our %param_translation = (
 
 our %command_files = (
     'single'     => [qw( ind seq )],
-    'paired'     => [qw( ind seq1 seq2 )]
+    'paired'     => [qw( ind seq seq2 )]
     ); #crossbow format not implemented yet - will attempt when I see what it looks like
 
 INIT {

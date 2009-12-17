@@ -502,7 +502,7 @@ sub _run {
 
 	$bowtieh->close;
 
-	$self->run_bowtie( -ref_seq => $ref_file, -rd1 => $rd1, -rd2 => $rd2_file, -out => $bowtief );
+	$self->run_bowtie( -ind => $ref_file, -seq => $rd1, -seq2 => $rd2_file, -out => $bowtief );
   
 	return $bowtief;
 }
