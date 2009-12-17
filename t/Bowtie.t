@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: Bowtie.t 16367 2009-11-13 15:25:18Z maj $
+#$Id: Bowtie.t 16367 2009-11-13 15:25:18Z kortsch $
 
 use strict;
 use warnings;
@@ -37,7 +37,7 @@ is ($bowtiefac->min_insert_size, 300, "original parameter unchanged");
 ok !$bowtiefac->parameters_changed, "parameters_changed cleared on read";
 ok $bowtiefac->set_parameters( -min_insert_size => 100 ), "change an original parameter";
 is ($bowtiefac->min_insert_size, 100, "parameter really changed");
-ok $bowtiefac->reset_parameters( -min_insert_size => 200 ), "reset parameters with arg";
+ok $bowtiefac->reset_parameters( -min_insert_Size => 200 ), "reset parameters with arg";
 ok !$bowtiefac->max_mismatches, "original parameters undefined";
 is ($bowtiefac->min_insert_size, 200, "parameter really reset via arg");
 

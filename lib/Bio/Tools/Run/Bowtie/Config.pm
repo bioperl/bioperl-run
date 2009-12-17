@@ -1,12 +1,12 @@
-# $Id: Config.pm 16363 2009-11-11 21:43:27Z maj $
+# $Id: Config.pm 16363 2009-11-11 21:43:27Z kortsch $
 #
 # BioPerl module for Bio::Tools::Run::Bowtie::Config
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org <mailto:bioperl-l@bioperl.org>>
 #
-# Cared for by Mark A. Jensen <maj@fortinbras.us <mailto:maj@fortinbras.us>>
+# Cared for by Dan Kortschak <dan.kortschak@adelaide.edu.au>
 #
-# Copyright Mark A. Jensen
+# Copyright Dan Kortschak and Mark A. Jensen
 #
 # You may distribute this module under the same terms as perl itself
 

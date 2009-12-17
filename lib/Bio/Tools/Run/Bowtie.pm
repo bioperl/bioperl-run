@@ -1,12 +1,12 @@
-# $Id: Bowtie.pm 16408 2009-11-27 02:23:27Z maj $
+# $Id: Bowtie.pm 16408 2009-11-27 02:23:27Z kortsch $
 #
 # BioPerl module for Bio::Tools::Run::Bowtie
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
-# Cared for by Mark A. Jensen <maj@fortinbras.us>
+# Cared for by Dan Kortschak <dan.kortschak@adelaide.edu.au>
 #
-# Copyright Mark A. Jensen
+# Copyright Dan Kortschak and Mark A. Jensen
 #
 # You may distribute this module under the same terms as perl itself
 
@@ -39,55 +39,10 @@ Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *BETA*
 
 =head1 DESCRIPTION
 
-This module provides a wrapper interface for Heng Li's
-reference-directed short read assembly suite C<bowtie> (see
-L<http://bowtie.sourceforge.net/bowtie-man.shtml> for manuals and
-downloads).
+This module provides a wrapper interface for Ben Langmead and Col
+Trapnell's ultrafast memory-efficient short read aligner C<bowtie>
+(see L<http://bowtie-bio.sourceforge.net/> for manuals and downloads).
 
-There are two modes of action.
-
-=over
-
-=item * EasyBowtie
-
-The first is a simple pipeline through the C<bowtie> commands, taking
-your read data in and squirting out an assembly object of type
-L<Bio::Assembly::IO::bowtie>. The pipeline is based on the one performed
-by C<bowtie.pl easyrun>:
-
- Action                  bowtie commands
- ------                  ------------
- data conversion to      fasta2bfa, fastq2bfq
- bowtie binary formats
-
- map sequence reads      map
- to reference seq
-
- assemble, creating      assemble
- consensus
-
- convert map & cns       mapview, cns2fq
- files to plaintext
- (for B:A:IO:bowtie)
-
-Command-line options can be directed to the C<map>, C<assemble>, and
-C<cns2fq> steps. See L</OPTIONS> below.
-
-=item * BigBowtie
-
-The second mode is direct access to C<bowtie> commands. To run a C<bowtie>
-command, construct a run factory, specifying the desired command using
-the C<-command> argument in the factory constructor, along with
-options specific to that command (see L</OPTIONS>):
-
- $bowtiefac->Bio::Tools::Run::Bowtie->new( -command => 'fasta2bfa' );
-
-To execute, use the C<run_bowtie> methods. Input and output files are
-specified in the arguments of C<run_bowtie> (see L</FILES>):
-
- $bowtiefac->run_bowtie( -fas => "myref.fas", -bfa => "myref.bfa" );
-
-=back
 
 =head1 OPTIONS
 
@@ -175,9 +130,9 @@ the web:
 
   http://bugzilla.open-bio.org/
 
-=head1 AUTHOR - Mark A. Jensen
+=head1 AUTHOR - Dan Kortschak (based heavily on code by Mark A. Jensen)
 
- Email maj -at- fortinbras -dot- us
+ Email dan.kortschak adelaide.edu.au
 
 =head1 APPENDIX
 
