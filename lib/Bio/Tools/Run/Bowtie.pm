@@ -549,21 +549,34 @@ sub set_parameters {
     $self->throw("Input args not an even number") unless !(@args % 2);
     my %args = @args;
 
-    foreach my $param (keys %args) {
-    	  foreach my $conflict (@{$incompat_params{$param}}) {
-    	  	   $self->reset_parameters( $conflict );
-    	  }
-    	  foreach my $requirement (@{$corequisite_switches{$param}}) {
-    	  	   # There is only one case and it is not a true corequisite,
-    	  	   # but if it were, calling ourself would be bad, so delegate this.
-    	  	   $self->SUPER::set_parameters( $requirement => 1 );
-    	  }
+    foreach (keys %args) {
+          s/^-//;
+          foreach my $conflict (@{$incompat_params{$_}}) {
+                   $self->reset_parameters( '-'.$conflict => 0 );
+          }
+          foreach my $requirement (@{$corequisite_switches{$_}}) {
+                   # There is only one case and it is not a true corequisite,
+                   # but if it were, calling ourself would be bad, so delegate this.
+                   push @args, ('-'.$requirement,1);
+          }
     }
 
-    # Now delegate setting the actual desired parameter.
-    my $success = $self->SUPER::set_parameters(\@args);
+    # currently stored stuff
+    my $opts = $self->{'_options'};
+    my $params = $opts->{'_params'};
+    my $switches = $opts->{'_switches'};
+    my $translation = $opts->{'_translation'};
+    my $qual_param = $opts->{'_qual_param'};
+    my $use_dash = $opts->{'_dash'};
+    my $join = $opts->{'_join'};
 
-    return $success;
+    $self->_set_program_options(\@args, $params, $switches, $translation,
+                                $qual_param, $use_dash, $join);
+    # the question is, are previously-set parameters left alone when
+    # not specified in @args?
+    $self->parameters_changed(1);
+
+    return 1;
 }
 
 =head2 available_parameters()
