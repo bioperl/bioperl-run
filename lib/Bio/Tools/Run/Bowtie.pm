@@ -14,28 +14,20 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *BETA*
+Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *ALPHA*
 
 =head1 SYNOPSIS
 
  # create an assembly
  $bowtie_fac = Bio::Tools::Run::Bowtie->new();
- $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'refseq.fas' );
+ $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base' );
  # if IO::Uncompress::Gunzip is available...
- $bowtie_assy = $bowtie_fac->run( 'reads.fastq.gz', 'refseq.gz');
+ $bowtie_assy = $bowtie_fac->run( 'reads.fastq.gz', 'index_base' );
  # paired-end
- $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'refseq.fas', 'paired-reads.fastq');
+ $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base', 'paired-reads.fastq' );
  # be more strict
- $bowtie_fac->set_parameters( -c2q_min_map_quality => 60 );
- $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'refseq.fas', 'paired-reads.fastq');
-
- # run bowtie commands separately
- $bowtie_fac = Bio::Tools::Run::Bowtie->new(
-    -command => 'pileup',
-    -single_end_quality => 1 );
- $bowtie_fac->run_bowtie( -bfa => 'refseq.bfa',
-                    -map => 'bowtie_assy.map',
-                    -txt => 'bowtie_assy.pup.txt' );
+ $bowtie_fac->set_parameters( -max_qual_mismatch => 50 );
+ $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base', 'paired-reads.fastq' );
 
 =head1 DESCRIPTION
 
@@ -46,15 +38,14 @@ Trapnell's ultrafast memory-efficient short read aligner C<bowtie>
 
 =head1 OPTIONS
 
-C<bowtie> is complex, with many subprograms (commands) and command-line
-options and file specs for each. This module attempts to provide
-commands and options comprehensively. You can browse the choices like so:
+C<bowtie> is complex, with command-line options. This module attempts to 
+provide and options comprehensively. You can browse the choices like so:
 
- $bowtiefac = Bio::Tools::Run::Bowtie->new( -command => 'assemble' );
+ $bowtiefac = Bio::Tools::Run::Bowtie->new( -command => 'single' );
  # all bowtie commands
  @all_commands = $bowtiefac->available_parameters('commands');
  @all_commands = $bowtiefac->available_commands; # alias
- # just for assemble
+ # just for single
  @assemble_params = $bowtiefac->available_parameters('params');
  @assemble_switches = $bowtiefac->available_parameters('switches');
  @assemble_all_options = $bowtiefac->available_parameters();
@@ -64,7 +55,13 @@ command line options. These are the names returned by
 C<available_parameters>, and can be used in the factory constructor
 like typical BioPerl named parameters.
 
-See L<http://bowtie.sourceforge.net/bowtie-manpage.shtml> for the gory details.
+As a number of options are mutually exclusive, and the interpretation of
+intent is based on last-pass option reaching bowtie with potentially unpredicted
+results. This module will prevent inconsistent switches and parameters
+from being passed.
+
+See L<http://bowtie.sourceforge.net/bowtie-manpage.shtml> for details of bowtie
+options.
 
 =head1 FILES
 
@@ -72,33 +69,25 @@ When a command requires filenames, these are provided to the C<run_bowtie> metho
 the constructor (C<new()>). To see the set of files required by a command, use
 C<available_parameters('filespec')> or the alias C<filespec()>:
 
-  $bowtiefac = Bio::Tools::Run::Bowtie->new( -command => 'map' );
+  $bowtiefac = Bio::Tools::Run::Bowtie->new( -command => 'paired' );
   @filespec = $bowtiefac->filespec;
 
 This example returns the following array:
 
- map
- bfa
- bfq1
- #bfq2
- 2>#log
+ ind
+ seq
+ seq2
+ out
 
-This indicates that map (C<bowtie> binary mapfile), bfa (C<bowtie> binary
-fasta), and bfq (C<bowtie> binary fastq) files MUST be specified, another
-bfq file MAY be specified, and a log file receiving STDERR also MAY be
-specified. Use these in the C<run_bowtie> call like so:
+This indicates that ind (C<bowtie> index file base name), seq (fasta/fastq),and seq2
+(fasta/fastq) files MUST be specified. Use these in the C<run_bowtie> call like so:
 
- $bowtiefac->run_bowtie( -map => 'my.map', -bfa => 'myrefseq.bfa',
-                   -bfq1 => 'reads1.bfq', -bfq2 => 'reads2.bfq' );
+ $bowtiefac->run_bowtie( -ind => 'index_base', -seq => 'seq-a.fq',
+                   -seq2 => 'seq-b.fq', -out => 'align.out' );
 
-Here, the C<log> parameter was unspecified. Therefore, the object will store
-the programs STDERR output for you in the C<stderr()> attribute:
+The object will store the programs STDERR output for you in the C<stderr()> attribute:
 
  handle_map_warning($bowtiefac) if ($bowtiefac->stderr =~ /warning/);
-
-STDOUT for a run is also saved, in C<stdout()>, unless a file is specified
-to slurp it according to the filespec. C<bowtie> STDOUT usually contains useful
-information on the run.
 
 =head1 FEEDBACK
 
@@ -109,7 +98,7 @@ Bioperl modules. Send your comments and suggestions preferably to
 the Bioperl mailing list.  Your participation is much appreciated.
 
   bioperl-l@bioperl.org                  - General discussion
-http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
 =head2 Support
 
@@ -117,7 +106,7 @@ Please direct usage questions or support issues to the mailing list:
 
 L<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and
+Rather than to the module maintainer directly. Many experienced and
 reponsive experts will be able look at the problem and quickly
 address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
@@ -217,19 +206,22 @@ sub new {
   return $self;
 }
 
-=head2 run
+=head2 run()
 
  Title   : run
  Usage   : $assembly = $bowtie_assembler->run($read1_fastq_file,
-                                           $refseq_fasta_file,
+                                           $index_location,
                                            $read2_fastq_file);
  Function: Run the bowtie assembly pipeline.
  Returns : Assembly results (file, IO object or Assembly object)
  Args    : - fastq file containing single-end reads
-           - fasta file containing the reference sequence
+           - name of the base of the bowtie index
            - [optional] fastq file containing paired-end reads
  Note    : gzipped inputs are allowed if IO::Uncompress::Gunzip
            is available
+           
+           While the intention is to return a Bio::AssemblyIO object
+           this functionality has not yet been fully implemented.
 
 =cut
 
@@ -297,7 +289,7 @@ sub run {
 
  Title   : run_bowtie
  Usage   : $obj->run_bowtie( @file_args )
- Function: Run a bowtie command as specified during object contruction
+ Function: Run a bowtie command as specified during object construction
  Returns :
  Args    : a specification of the files to operate on:
 
@@ -456,9 +448,9 @@ sub _check_optional_quality_input {
     return 1;
 }
 
-=head2 _prepare_input_sequences
+=head2 _prepare_input_sequences()
 
- Convert input fastq and fasta to bowtie format.
+ Prepare and check input sequences for bowtie.
 
 =cut
 
@@ -503,11 +495,11 @@ sub _prepare_input_sequences {
 
  Title   :   _run
  Usage   :   $factory->_run()
- Function:   Run a bowtie assembly pipeline
- Returns :   depends on call (An assembly file)
- Args    :   - single end read file in bowtie bfq format
-             - reference seq file in bowtie bfa format
-             - [optional] paired end read file in bowtie bfq format
+ Function:   Run a bowtie alignment
+ Returns :   depends on output switches (An alignment file)
+ Args    :   - single end read file in fasta/fastq format
+             - index base of bowtie index collection 
+             - [optional] paired end read file in fasta/fastq format
 
 =cut
 
@@ -534,7 +526,8 @@ sub _run {
 
  Title   : set_parameters
  Usage   : $pobj->set_parameters(%params);
- Function: sets the parameters listed in the hash or array maintaining sane options.
+ Function: sets the parameters listed in the hash or array,
+           maintaining sane options.
  Returns : true on success
  Args    : [optional] hash or array of parameter/values.  
 
