@@ -209,7 +209,7 @@ sub new {
     ######## MUST use SAM output for this, as Bio::Assembly::IO already handles this.
     ######## This may change - not that this points to a feature that would be nice in
     ######## AssemblyBase - mutually exclusive switches/params
-    $self->set_parameters( -sam_format => 1 ) if not defined $self->sam_format;
+#    $self->set_parameters( -sam_format => 1 ) if not defined $self->sam_format;
 #    $self->reset_parameters( -concise => 0 ); # note here explicitly reseting to 0 as reset otherwise sets to true
 #    $self->reset_parameters( -quiet => 0 ); # though additional note - setting them to 0 breaks $self->command() below
 #    $self->reset_parameters( -refout => 0 );
