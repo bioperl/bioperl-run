@@ -38,27 +38,14 @@ is ($bowtiefac->min_insert_size, 300, "original parameter unchanged");
 ok !$bowtiefac->parameters_changed, "parameters_changed cleared on read";
 ok $bowtiefac->set_parameters( -min_insert_size => 100 ), "change an original parameter";
 is ($bowtiefac->min_insert_size, 100, "parameter really changed");
-ok $bowtiefac->reset_parameters( -min_insert_size => 200 ), "reset parameters with arg";
+ok $bowtiefac->reset_parameters( -min_insert_Size => 200 ), "reset parameters with arg";
 ok !$bowtiefac->max_mismatches, "original parameters undefined";
 is ($bowtiefac->min_insert_size, 200, "parameter really reset via arg");
 
 $bowtiefac->set_parameters(
-    -command            => 'single',
-    -try_hard           => 1,
-    -suppress           => 1000,
-    -max_mismatches     => 4
-    );
-ok $bowtiefac->parameters_changed, "parameters changed";
-
-is( scalar $bowtiefac->available_parameters, 48, "all available options");
-is( scalar $bowtiefac->available_parameters('params'), 21, "available parameters" );
-is( scalar $bowtiefac->available_parameters('switches'), 27, "available switches" );
-#back to beginning
-$bowtiefac->set_parameters(
     -command            => 'paired',
     -try_hard           => 1,
-    -min_insert_size    => 300,
-    -solexa             => 1,
+    -suppress           => 1000,
     -max_mismatches     => 4
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
@@ -66,14 +53,27 @@ ok $bowtiefac->parameters_changed, "parameters changed";
 is( scalar $bowtiefac->available_parameters, 54, "all available options");
 is( scalar $bowtiefac->available_parameters('params'), 24, "available parameters" );
 is( scalar $bowtiefac->available_parameters('switches'), 30, "available switches" );
+#back to beginning - but with single
+$bowtiefac->set_parameters(
+    -command            => 'single',
+    -try_hard           => 1,
+    -min_insert_size    => 300,
+    -solexa             => 1,
+    -max_mismatches     => 4
+    );
+ok $bowtiefac->parameters_changed, "parameters changed";
+
+is( scalar $bowtiefac->available_parameters, 48, "all available options");
+is( scalar $bowtiefac->available_parameters('params'), 21, "available parameters" );
+is( scalar $bowtiefac->available_parameters('switches'), 27, "available switches" );
 my %pms = $bowtiefac->get_parameters;
 is_deeply( \%pms, 
-		{ command            => 'paired',
+		{ command            => 'single',
 		  min_insert_size    => 300,
 		  max_mismatches     => 4,
 		  solexa             => 1,
 		  try_hard           => 1}, "get_parameters correct");
-is( $bowtiefac->command, 'paired', "command attribute set");
+is( $bowtiefac->command, 'single', "command attribute set");
 
 is_deeply( $bowtiefac->{_options}->{_commands}, 
 	   [@Bio::Tools::Run::Bowtie::program_commands], 
@@ -84,7 +84,10 @@ is_deeply( $bowtiefac->{_options}->{_prefixes},
 	   "internal prefix hash set");
 
 is_deeply( $bowtiefac->{_options}->{_params}, 
-	   [qw( command error_dep_coeff het_fraction max_mismatches max_quality_sum min_map_quality num_haplotypes)], 
+	   [qw( command skip upto trim5 trim3 max_seed_mismatches max_qual_mismatch
+	        max_quality_sum seed_length max_mismatches max_backtracks max_search_ram
+	        report_n_alignments supress offset_base alignmed_file unaligned_file
+	        excess_file threads offrate random_seed)], 
 	   "commands filtered by prefix");
 is( join(' ', @{$bowtiefac->_translate_params}),
     "paired -I 300 -v 4 --solexa-quals -y", "translate params" );
