@@ -1,4 +1,4 @@
-# $Id: Config.pm 16363 2009-11-11 21:43:27Z kortsch $
+# $Id: Config.pm kortsch $
 #
 # BioPerl module for Bio::Tools::Run::Bowtie::Config
 #

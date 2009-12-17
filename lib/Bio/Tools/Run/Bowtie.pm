@@ -1,4 +1,4 @@
-# $Id: Bowtie.pm 16408 2009-11-27 02:23:27Z kortsch $
+# $Id: Bowtie.pm kortsch $
 #
 # BioPerl module for Bio::Tools::Run::Bowtie
 #
@@ -165,7 +165,7 @@ use File::Basename qw(fileparse);
 
 use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase );
 
-## bowtie ( from tigr )
+## bowtie
 our $program_name = 'bowtie'; # name of the executable
 
 # Note:
@@ -255,7 +255,7 @@ sub run {
 		$guesser->guess =~ m/^fast[qa]$/ or $self->throw("Reads file doesn't look like fasta/q at arg 3");
 	}
 
-	# bowtie prepate the multiple input types for the first argument
+	# bowtie prepare the multiple input types for the first argument
 	$rd1 = $self->_prepare_input_sequences($rd1);
 
 	# Assemble
