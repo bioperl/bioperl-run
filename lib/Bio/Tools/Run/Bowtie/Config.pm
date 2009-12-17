@@ -116,7 +116,8 @@ our %composite_commands = (
 # prefixes only for commands that take params/switches...
 our %command_prefixes = (
     'single'     => 'one',
-    'paired'     => 'par'
+    'paired'     => 'par',
+    'version'    => 'ver'
     );
 
 our @program_params = qw(
@@ -173,7 +174,7 @@ our @program_switches = qw(
     one|full_ref_name
     one|memory_mapped_io
     one|shared_memory
-    one|version    
+    ver|version    
     par|forward_reverse
     par|reverse_reverse
     par|forward_forward
@@ -226,7 +227,6 @@ our %param_translation = (
     'one|memory_mapped_io'         => 'mm',
     'one|shared_memory'            => 'shmem',
     'one|random_seed'              => 'seed',
-    'one|version'                  => 'version',
 
     'par|fastq'                    => 'q',
     'par|fasta'                    => 'f',
@@ -280,7 +280,8 @@ our %param_translation = (
     'par|memory_mapped_io'         => 'mm',
     'par|shared_memory'            => 'shmem',
     'par|random_seed'              => 'seed',
-    'par|version'                  => 'version'
+
+    'ver|version'                  => 'version'
     );
 
 #
@@ -298,8 +299,9 @@ our %param_translation = (
 #
 
 our %command_files = (
-    'single'     => [qw( ind seq out)],
-    'paired'     => [qw( ind seq seq2 out)]
+    'single'     => [qw( ind seq out )],
+    'paired'     => [qw( ind seq seq2 out )],
+    'version'    => [qw( )]
     ); #crossbow format not implemented yet - will attempt when I see what it looks like
 
 INIT {
