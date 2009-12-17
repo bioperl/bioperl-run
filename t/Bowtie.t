@@ -50,9 +50,9 @@ $bowtiefac->set_parameters(
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
 
-is( scalar $bowtiefac->available_parameters, 54, "all available options");
+is( scalar $bowtiefac->available_parameters, 53, "all available options");
 is( scalar $bowtiefac->available_parameters('params'), 24, "available parameters" );
-is( scalar $bowtiefac->available_parameters('switches'), 30, "available switches" );
+is( scalar $bowtiefac->available_parameters('switches'), 29, "available switches" );
 #back to beginning - but with single
 $bowtiefac->set_parameters(
     -command            => 'single',
@@ -63,9 +63,9 @@ $bowtiefac->set_parameters(
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
 
-is( scalar $bowtiefac->available_parameters, 48, "all available options");
+is( scalar $bowtiefac->available_parameters, 47, "all available options");
 is( scalar $bowtiefac->available_parameters('params'), 21, "available parameters" );
-is( scalar $bowtiefac->available_parameters('switches'), 27, "available switches" );
+is( scalar $bowtiefac->available_parameters('switches'), 26, "available switches" );
 my %pms = $bowtiefac->get_parameters;
 is_deeply( \%pms, 
 		{ command            => 'single',

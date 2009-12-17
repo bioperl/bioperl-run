@@ -102,7 +102,6 @@ push @ISA, 'Exporter';
 our @program_commands = qw(
     single
     paired
-    version
 ); #crossbow format not implemented yet - will attempt when I see what it looks like
 
 # composite commands: pseudo-commands that run a 
@@ -117,8 +116,7 @@ our %composite_commands = (
 # prefixes only for commands that take params/switches...
 our %command_prefixes = (
     'single'     => 'one',
-    'paired'     => 'par',
-    'version'    => 'ver'
+    'paired'     => 'par'
     );
 
 our @program_params = qw(
@@ -175,7 +173,6 @@ our @program_switches = qw(
     one|full_ref_name
     one|memory_mapped_io
     one|shared_memory
-    ver|version    
     par|forward_reverse
     par|reverse_reverse
     par|forward_forward
@@ -280,9 +277,7 @@ our %param_translation = (
     'par|offrate'                  => 'o',
     'par|memory_mapped_io'         => 'mm',
     'par|shared_memory'            => 'shmem',
-    'par|random_seed'              => 'seed',
-
-    'ver|version'                  => 'version'
+    'par|random_seed'              => 'seed'
     );
 
 #
@@ -301,8 +296,7 @@ our %param_translation = (
 
 our %command_files = (
     'single'     => [qw( ind seq out )],
-    'paired'     => [qw( ind seq seq2 out )],
-    'version'    => [qw( )]
+    'paired'     => [qw( ind seq seq2 out )]
     ); #crossbow format not implemented yet - will attempt when I see what it looks like
 
 INIT {
