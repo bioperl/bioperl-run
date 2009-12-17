@@ -170,19 +170,20 @@ SKIP : {
     # test single
     # these parms are the bowtie defaults
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-map_max_mismatches => 2,
-	-asm_max_mismatches => 7,
-	-c2q_min_map_quality => 40
+	-command             => 'single',
+	-max_seed_mismatches => 2,
+	-seed_length         => 28,
+	-max_qual_mismatch   => 70
 	), "make an alignment factory";
     
-    is( $bowtiefac->command, 'run', "command attribute set");
-    is( $bowtiefac->map_max_mismatches, 2, "map param set");
-    is( $bowtiefac->asm_max_mismatches, 7, "asm param set");
-    is( $bowtiefac->c2q_min_map_quality, 40, "c2q param set");
-    ok my $assy = $bowtiefac->run($rd1,$refseq,$rd2), "make full assy";
-    #some fuzziness in these: sometimes bowtie gives 41+4, sometimes 42+6.
-    cmp_ok( $assy->get_nof_contigs, '>=', 41, "number of contigs");
-    cmp_ok( $assy->get_nof_singlets,'>=',4, "number of singlets");
+    is( $bowtiefac->command, 'single', "command attribute set");
+    is( $bowtiefac->max_seed_mismatches, 2, "seed mismatch param set");
+    is( $bowtiefac->seed_length, 28, "seed length param set");
+    is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
+    ok my $assy = $bowtiefac->run($rdq,$refseq), "make full assy";
+    #some fuzziness in these: bowtie gives ?+?
+    cmp_ok( $assy->get_nof_contigs, '>=', 10000, "number of contigs"); # these aren't yet known
+    cmp_ok( $assy->get_nof_singlets,'>=',10000, "number of singlets"); # these aren't yet known
 
 }
 1;
