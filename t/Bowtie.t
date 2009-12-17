@@ -122,33 +122,33 @@ SKIP : {
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq => $inlstr ), "read sequence as strings in memory";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq => $inlobj ), "read sequence as seq objects";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
     $bowtiefac->reset_parameters( -inline );
     $bowtiefac->set_parameters( -raw => 1 );
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq => $rdr ), "read raw sequence";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
     $bowtiefac->reset_parameters( -raw );
     $bowtiefac->set_parameters( -fasta => 1 );
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq => $rda ), "read fasta sequence";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
     $bowtiefac->reset_parameters( -fasta );
     $bowtiefac->set_parameters( -fastq => 1 );
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq => $rda ), "read fastq sequence";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
     
 
     # paired reads
@@ -160,14 +160,14 @@ SKIP : {
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq1 => $rda1,  -seq2 => $rda2 ), "read paired fasta sequence";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
     $bowtiefac->reset_parameters( -fasta );
     $bowtiefac->set_parameters( -fastq => 1 );
     ok $bowtiefac->run_bowtie( -ind => $refseq,
 			 -seq1 => $rdq1,  -seq2 => $rdq2 ), "read paired fastq sequence";
     
-    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
     
 
     # test single
