@@ -189,9 +189,5 @@ SKIP : {
     cmp_ok( $assy->get_nof_singlets,'>=',10000, "number of singlets"); # these aren't yet known
 
 }
+
 1;
-
-#  sub test_input_file {
-#      return "./data/".shift;
-#  }
-
