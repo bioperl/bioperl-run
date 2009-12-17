@@ -185,9 +185,8 @@ SKIP : {
     is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
     ok my $sam = $bowtiefac->_run($rdq, $refseq), "bowtie can make alignment";
     ok (-e $sam)&&(-r $sam), "make readable output";
-    my $lines;
     open (FILE, $sam);
-    $lines++ while (<FILE>);
+    my $lines =()= <FILE>;
     close FILE;    	
     is( $lines, 1003, "number of alignments");
 #    ok my $assy = $bowtiefac->run($rdq, $refseq), "make alignment";
