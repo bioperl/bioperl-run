@@ -96,7 +96,7 @@ is( join(' ', @{$bowtiefac->_translate_params}),
 
 SKIP : {
     test_skip( -requires_executable => $bowtiefac,
-	       -tests => 27 ); #not sure yet on numbers
+	       -tests => 24 ); # three tests not included due to absence of SAM functionality at this stage
     my $rdr = test_input_file('bowtie', 'reads', 'e_coli_1000.raw');
     my $rda = test_input_file('bowtie', 'reads', 'e_coli_1000.fa');
     my $rdq = test_input_file('bowtie', 'reads', 'e_coli_1000.fq');
