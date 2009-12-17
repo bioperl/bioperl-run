@@ -16,6 +16,7 @@ BEGIN {
 
 use File::Temp qw(tempfile tempdir);
 use Bio::Tools::Run::WrapperBase;
+use Bio::SeqIO;
 
 # test command functionality
 
@@ -89,103 +90,90 @@ is( join(' ', @{$bowtiefac->_translate_params}),
     "paired -I 300 -v 4 --solexa-quals -y", "translate params" );
 
 # test run_bowtie filearg parsing
-# a pipeline...
 
 SKIP : {
     test_skip( -requires_executable => $bowtiefac,
-	       -tests => 27 );
-    my $rd1 = test_input_file('r1.fq');
-    my $rd2 = test_input_file('r2.fq');
-    my $refseq = test_input_file('campycoli.fas');
-    
-    my $tdir = tempdir( "bowtieXXXX", CLEANUP => 1);
-    my ($r1h, $r1f) = tempfile( "rd1XXXX", DIR => $tdir );
-    $r1h->close;
-    my ($r2h, $r2f) = tempfile( "rd2XXXX", DIR => $tdir );
-    $r2h->close;
-    my ($refh, $reff) = tempfile( "refXXXX", DIR => $tdir );
-    $refh->close;
-    my ($map1h, $map1f) = tempfile( "mapXXXX", DIR => $tdir );
-    $map1h->close;
-    my ($map2h, $map2f) = tempfile( "mapXXXX", DIR => $tdir );
-    $map2h->close;
-    my ($mmaph, $mmapf) = tempfile( "mapXXXX", DIR => $tdir );
-    $mmaph->close;
-    my ($cnsh, $cnsf) = tempfile( "cnsXXXX", DIR => $tdir );
-    $cnsh->close;
-    my ($bowtieh, $bowtief) = tempfile( "bowtieXXXX", DIR => $tdir );
-    $bowtieh->close;
-    my ($fqh, $fqf) = tempfile( "faqXXXX", DIR => $tdir );
-    $fqh->close;
-    
+	       -tests => 27 ); #not sure yet on numbers
+    my $rdr = test_input_file('bowtie', 'reads', 'e_coli_1000.raw');
+    my $rda = test_input_file('bowtie', 'reads', 'e_coli_1000.fa');
+    my $rdq = test_input_file('bowtie', 'reads', 'e_coli_1000.fq');
+    my $rda1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fa');
+    my $rda2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fa');
+    my $rdq1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fq');
+    my $rdq2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fq');
+    my $refseq = test_input_file('bowtie', 'reads', 'e_coli');
+    my $inlstr;
+    my $inlobj;
+    my $in = Bio::SeqIO->new( -file => $rda, -forma => 'Fasta' );
+    while ( my $seq = $in->next_seq() ) {
+        push @$inlobj,$seq;
+        push @$inlstr,$seq->seq();
+    }
+
+    # unpaired reads
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-command            => 'fasta2bfa'
-	), "make fasta2bfa conversion factory";
+	-command            => 'single'
+	), "make unpaired reads bowtie factory";
     
-    ok $bowtiefac->run_bowtie( -fas => $refseq,
-			 -bfa => $reff ), "convert refseq to bfa";
+    $bowtiefac->set_parameters( -inline => 1 );
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq => $inlseq ), "read sequence as strings in memory";
     
-    like($bowtiefac->stderr, qr/1 sequence/, "bowtie success");
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq => $inlobj ), "read sequence as seq objects";
     
-    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-command            => 'fastq2bfq'
-	), "make fastq2bfq conversion factory";
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+
+    $bowtiefac->reset_parameters( -inline );
+    $bowtiefac->set_parameters( -raw => 1 );
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq => $rdr ), "read raw sequence";
     
-    ok $bowtiefac->run_bowtie( -faq => $rd1,
-			 -bfq => $r1f ), "convert r1.fq to bfa";
-    like($bowtiefac->stderr, qr/125 sequences were loaded/, "bowtie success");
-    ok $bowtiefac->run_bowtie( -faq => $rd2,
-			 -bfq => $r2f ), "convert r2.fq to bfa";
-    like($bowtiefac->stderr, qr/125 sequences were loaded/, "bowtie success");
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+
+    $bowtiefac->reset_parameters( -raw );
+    $bowtiefac->set_parameters( -fasta => 1 );
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq => $rda ), "read fasta sequence";
     
-    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-command            => 'map',
-	), "make map factory";
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+
+    $bowtiefac->reset_parameters( -fasta );
+    $bowtiefac->set_parameters( -fastq => 1 );
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq => $rda ), "read fastq sequence";
     
-    ok $bowtiefac->run_bowtie( -map => $map1f,
-			 -bfa => $reff,
-			 -bfq1 => $r1f ), "map single-end reads";
-    ok $bowtiefac->run_bowtie( -map => $map2f,
-			 -bfa => $reff,
-			 -bfq2 => $r2f,
-			 -bfq1 => $r1f ), "map paired-end reads";
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
     
-    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-command            => 'mapmerge'
-	), "make mapmerge factory";
-    
-    ok $bowtiefac->run_bowtie( -out_map => $mmapf,
-			 -in_map => [$map1f, $map2f] ), "merge maps";
-    
+
+    # paired reads
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
 	-command            => 'paired'
-	), "make paired factory";
+	), "make paired reads bowtie factory";
     
-    ok $bowtiefac->run_bowtie( -cns => $cnsf,
-			 -bfa => $reff,
-			 -map => $mmapf ), "paired consensus";
+    $bowtiefac->set_parameters( -fasta => 1 );
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq1 => $rda1,  -seq2 => $rda2 ), "read paired fasta sequence";
     
-    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-command            => 'mapview'
-	), "make mapview converter";
-    
-    
-    ok $bowtiefac->run_bowtie( -map => $mmapf,
-			 -txt => $bowtief ), "convert mmap";
-    
-    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
-	-command            => 'cns2fq'
-	), "make consensus->fastq converter";
-    ok $bowtiefac->run_bowtie( -cns => $cnsf,
-			 -faq => $fqf ), "convert consensus -> fastq";
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
 
-    # test run (assembly pipeline) 
-    # these parms are the bowtie defaults for the respective programs
+    $bowtiefac->reset_parameters( -fasta );
+    $bowtiefac->set_parameters( -fastq => 1 );
+    ok $bowtiefac->run_bowtie( -ind => $refseq,
+			 -seq1 => $rdq1,  -seq2 => $rdq2 ), "read paired fastq sequence";
+    
+    like($bowtiefac->stderr, qr/# reads processed: 1000/, "bowtie success");
+    
+
+    # test single
+    # these parms are the bowtie defaults
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
 	-map_max_mismatches => 2,
 	-asm_max_mismatches => 7,
 	-c2q_min_map_quality => 40
-	), "make an assembly factory";
+	), "make an alignment factory";
     
     is( $bowtiefac->command, 'run', "command attribute set");
     is( $bowtiefac->map_max_mismatches, 2, "map param set");
