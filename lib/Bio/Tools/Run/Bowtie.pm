@@ -344,7 +344,18 @@ sub run_bowtie {
         splice(@files, $_, 1, @{$files[$_]}) if (ref($files[$_]) eq 'ARRAY');
     }
     @files = map { defined $_ ? $_ : () } @files; # squish undefs
-    my @ipc_args = ( $exe, @$options, @files );
+    my $index=shift @files;
+    for ($cmd) {
+    	/^p/ && do {
+    		@files = map { ( $_ , shift @files ) } ('-1','-2');
+    		last;
+    	};
+    	/^c/ && do { # this will deal with crossbow file when I sort them out
+    		@files = map { ( $_ , shift @files ) } ('--12');
+    		last;
+    	}
+    }
+    my @ipc_args = ( $exe, @$options, $index, @files );
 
     eval {
         IPC::Run::run(\@ipc_args, $in, $out, $err) or
