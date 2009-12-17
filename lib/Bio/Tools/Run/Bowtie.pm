@@ -278,7 +278,7 @@ sub run {
 
 	if ($self->sam_format) {
 		my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
-		my ($srth, $srtf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
+		my ($srth, $srtf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.srt' );
 		$_->close for ($bamh, $srth);
 		
 		my $samt = Bio::Tools::Run::Samtools->new( -command => 'view',
@@ -287,15 +287,13 @@ sub run {
 
 		$samt->run( -bam => $bowtie_file, -out => $bamf);
 
-		$samt = Bio::Tools::Run::Samtools->new( -command => 'sort',
-		                                        -sam_input => 1,
-		                                        -bam_output => 1 );
+		$samt = Bio::Tools::Run::Samtools->new( -command => 'sort' );
 
-		$samt->run( -bam => $bamf, -out => $srtf);
+		$samt->run( -bam => $bamf, -pfx => $srtf);
 		
 		
 		# Export results in desired object type
-		return $self->_export_results($srtf);
+		return $self->_export_results($srtf.'.bam');
 	} 
 	
 	return $bowtie_file;
