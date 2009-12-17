@@ -243,6 +243,7 @@ sub run {
 	$self->_check_executable();
 	my $cmd = $self->command if $self->can('command');
 	if ($cmd eq 'version') {
+		$self->set_parameters( -version => 1 ) if not $self->version;
 		my $bowtie_file = $self->_run();
 		return $bowtie_file;
 	}
