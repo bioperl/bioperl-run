@@ -350,11 +350,12 @@ sub run_bowtie {
     		@files = map { ( $_ , shift @files ) } ('-1','-2');
     		last;
     	};
-    	/^c/ && do { # this will deal with crossbow file when I sort them out
+    	/^c/ && do { # this will deal with crossbow files when I sort them out
     		@files = unshift(@files,'--12');
     		last;
     	}
     }
+    shift @$options; # dump program name
     my @ipc_args = ( $exe, @$options, $index, @files );
 
     eval {
