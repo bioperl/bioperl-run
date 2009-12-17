@@ -468,6 +468,13 @@ sub _prepare_input_sequences {
 
 	# Could use the AssemblerBase routine for this, except that would not permit
 	# an array of strings - not decided at this stage.
+
+	# TODO sort through inline sequence handling
+	#  - B:Seq to string of B:Seq->seq
+   #  - @B:Seq to join'd string of B:Seq->seq
+   #  - @string to join'd string
+   #  must then -> $self->set_parameters( -inline => 1 )'
+
 	if (-e $read1) {
 		my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$read1);
 		$guesser->guess =~ m/^fast[qa]$/ or $self->throw("Reads file doesn't look like fasta/q at arg 1");
