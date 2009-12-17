@@ -102,6 +102,7 @@ push @ISA, 'Exporter';
 our @program_commands = qw(
     single
     paired
+    version
 ); #crossbow format not implemented yet - will attempt when I see what it looks like
 
 # composite commands: pseudo-commands that run a 
