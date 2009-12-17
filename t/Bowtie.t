@@ -38,7 +38,7 @@ is ($bowtiefac->min_insert_size, 300, "original parameter unchanged");
 ok !$bowtiefac->parameters_changed, "parameters_changed cleared on read";
 ok $bowtiefac->set_parameters( -min_insert_size => 100 ), "change an original parameter";
 is ($bowtiefac->min_insert_size, 100, "parameter really changed");
-ok $bowtiefac->reset_parameters( -min_insert_Size => 200 ), "reset parameters with arg";
+ok $bowtiefac->reset_parameters( -min_insert_size => 200 ), "reset parameters with arg";
 ok !$bowtiefac->max_mismatches, "original parameters undefined";
 is ($bowtiefac->min_insert_size, 200, "parameter really reset via arg");
 
@@ -90,7 +90,7 @@ is_deeply( $bowtiefac->{_options}->{_params},
 	        excess_file threads offrate random_seed)], 
 	   "commands filtered by prefix");
 is( join(' ', @{$bowtiefac->_translate_params}),
-    "paired -I 300 -v 4 --solexa-quals -y", "translate params" );
+    "single -I 300 -v 4 --solexa-quals -y", "translate params" );
 
 # test run_bowtie filearg parsing
 
