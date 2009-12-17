@@ -507,7 +507,6 @@ sub _run {
 
 	# Setup needed files and filehandles first
 	my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.sam' );
-	my ($nm,$dr,$suf) = fileparse($bowtief,'.sam');
 
 	$bowtieh->close;
 
