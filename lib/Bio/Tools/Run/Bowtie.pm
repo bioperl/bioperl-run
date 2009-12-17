@@ -488,7 +488,7 @@ sub _run {
 	my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.sam' );
 	my ($nm,$dr,$suf) = fileparse($bowtief,'.sam');
 
-	$_->close($bowtieh);
+	$bowtieh->close;
 
 	$self->run_bowtie( -ref_seq => $ref_file, -rd1 => $rd1, -rd2 => $rd2_file, -out => $bowtief );
   
