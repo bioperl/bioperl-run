@@ -105,6 +105,7 @@ SKIP : {
     my $rdr = test_input_file('bowtie', 'reads', 'e_coli_1000.raw');
     my $rda = test_input_file('bowtie', 'reads', 'e_coli_1000.fa');
     my $rdq = test_input_file('bowtie', 'reads', 'e_coli_1000.fq');
+    my $rdc = test_input_file('bowtie', 'reads', 'e_coli.cb');
     my $rda1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fa');
     my $rda2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fa');
     my $rdq1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fq');
@@ -182,13 +183,15 @@ SKIP : {
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
 	-max_qual_mismatch   => 70
-	), "make an alignment factory";
+	), "make a single alignment factory";
     
     is( $bowtiefac->command, 'single', "command attribute set");
     is( $bowtiefac->max_seed_mismatches, 2, "seed mismatch param set");
     is( $bowtiefac->seed_length, 28, "seed length param set");
     is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
-    ok my $sam = $bowtiefac->run("GAACGATACCCACCCAACTATCGCCATTCCAGCAT",$refseq), "make variable basedalignment";
+    $bowtiefac->set_parameters( -inline => 1 );
+    ok my $sam = $bowtiefac->_run("GAACGATACCCACCCAACTATCGCCATTCCAGCAT",$refseq), "make variable based alignment";
+    $bowtiefac->set_parameters( -fastq => 1 );
     ok $sam = $bowtiefac->_run($rdq, $refseq), "make file based alignment";
     ok (-e $sam)&&(-r $sam), "make readable output";
     open (FILE, $sam);
@@ -199,6 +202,23 @@ SKIP : {
     #some fuzziness in these: bowtie gives ?+?
 #    cmp_ok( $assy->get_nof_contigs, '>=', 10000, "number of contigs"); # these aren't yet known
 #    cmp_ok( $assy->get_nof_singlets,'>=',10000, "number of singlets"); # these aren't yet known
+
+    # test crossbow
+    # these parms are again the bowtie defaults
+    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
+	-command             => 'crossbow',
+	-max_seed_mismatches => 2,
+	-seed_length         => 28,
+	-max_qual_mismatch   => 70
+	), "make a crossbow alignment factory";
+    
+    is( $bowtiefac->command, 'crossbow', "command attribute set");
+    ok $sam = $bowtiefac->_run($rdc, $refseq), "make file based alignment";
+    ok (-e $sam)&&(-r $sam), "make readable output";
+    open (FILE, $sam);
+    my $lines =()= <FILE>;
+    close FILE;    	
+    is( $lines, 3, "number of alignments");
 
 }
 

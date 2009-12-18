@@ -362,11 +362,11 @@ sub run_bowtie {
     my $index=shift @files;
     for ($cmd) {
     	/^p/ && do {
-    		@files = map { ( $_ , shift @files ) } ('-1','-2','');
+    		@files = map { ( $_ , shift @files ) } ('-1','-2',undef);
     		last;
     	};
-    	/^c/ && do { # this will deal with crossbow files when I sort them out
-    		@files = unshift(@files,'--12','');
+    	/^c/ && do {
+    		@files = map { ( $_ , shift @files ) } ('--12',undef,undef);
     		last;
     	}
     }
@@ -456,43 +456,73 @@ sub _check_optional_quality_input {
 
 sub _prepare_input_sequences {
 
-	my ($self, @args) = @_;
-	my (%args, $read1);
-	if (grep (/^-/, @args)) { # named parms
-		$self->throw("Input args not an even number") unless !(@args % 2);
-		%args = @args;
-		($read1) = @args{qw( -read1 )};
-	} else {
-		($read1) = @args;
-	}
+        my ($self, @args) = @_;
+        my (%args, $read1);
+        if (grep (/^-/, @args)) { # named parms
+                $self->throw("Input args not an even number") unless !(@args % 2);
+                %args = @args;
+                ($read1) = @args{qw( -read1 )};
+        } else {
+                ($read1) = @args;
+        }
 
-	# Could use the AssemblerBase routine for this, except that would not permit
-	# an array of strings - not decided at this stage.
-
-	if (-e $read1) { # we have a file
-		my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$read1);
-		$guesser->guess =~ m/^fast[qa]$/ or $self->throw("Reads file doesn't look like fasta/q at arg 1");
-	} elsif ($read1->isa("Bio::PrimarySeqI")) { # we have a Bio::*Seq*
-		$read1=$read1->seq();
-	} else { # we have something else
-		if (ref($read1) =~ /ARRAY/i) {
-			my @ts;
-			foreach my $seq (@$read1) {
-				if ($seq->isa("Bio::PrimarySeqI")) {
-					$seq=$seq->seq();
-				} else {
-					next if $read1=~m/[[^:alpha:]]/;					
-				}
-				push @ts,$seq;
-			}
-			$read1=join(',',@ts);
-			$self->throw("bowtie requires at least one sequence read") unless (@ts);
-		} else { #must be a string... fail if non-alpha
-			$self->throw("bowtie requires at least one sequence read") if $read1=~m/[[^:alpha:]]/;
-		}
-	}
-	
-	return $read1;
+        # Could use the AssemblerBase routine for this, except that would not permit
+        # an array of strings - not decided at this stage.
+        if ($self->inline) { # expect inline data
+		        if ($read1->isa("Bio::PrimarySeqI")) { # we have a Bio::*Seq*
+		                $read1=$read1->seq();
+		        } else { # we have something else
+		                if (ref($read1) =~ /ARRAY/i) {
+		                        my @ts;
+		                        foreach my $seq (@$read1) {
+		                                if ($seq->isa("Bio::PrimarySeqI")) {
+		                                        $seq=$seq->seq();
+		                                } else {
+		                                        next if $read1=~m/[[^:alpha:]]/;
+		                                }
+		                                push @ts,$seq;
+		                        }
+		                        $read1=join(',',@ts);
+		                        $self->throw("bowtie requires at least one sequence read") unless (@ts);
+		                } else { #must be a string... fail if non-alpha
+		                        $self->throw("bowtie requires at least one valid sequence read") if $read1=~m/[[^:alpha:]]/;
+		                }
+		        }
+		        	    
+        } elsif ( -e $read1 ) { # expect a file - so test whether its appropriate
+              my $cmd = $self->command if $self->can('command');
+              my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$read1);
+              if ($cmd =~ m/^c/) {
+                      $self->carp("Reads file assumed to be crossbow format at arg 1 (no crossbow guesser implementation to confirm)");
+                      # crossbow format - general format 'name\tseq1\tqual1[\tseq2\tqual2]'
+                      # can mix single reads and paired reads
+                      # e.g.
+                      # r0	GAACGATACCCACCCAACTATCGCCATTCCAGCAT	EDCCCBAAAA@@@@?>===<;;9:99987776554
+                      # r1	TATTCTTCCGCATCCTTCATACTCCTGCCGGTCAG	EDCCCBAAAA@@@@?>===<;;9:99987776554	GAATACTGGCGGATTACCGGGGAAGCTGGAGC	EDCCCBAAAA@@@@?>===<;;9:99987776                      
+              } else {
+	              for ($guesser->guess) {
+	              	       m/^fasta$/ && do { 
+	                            ($self->fastq or $self->raw or $cmd =~ m/^c/) and $self->throw("Fasta reads file inappropriate at arg 1");
+	                            $self->fasta(1);
+	                            last;
+	              	       };
+	              	       m/^fastq$/ && do { 
+	                            ($self->fasta or $self->raw or $cmd =~ m/^c/) and $self->throw("Fastq reads file inappropriate at arg 1");
+	                            $self->fastq(1);
+	                            last;
+	              	       };
+	              	       m/^raw$/ && do { 
+	                            ($self->fasta or $self->fastq or $cmd =~ m/^c/) and $self->throw("Raw reads file inappropriate at arg 1");
+	                            $self->raw(1);
+	                            last;
+	              	       }
+	              }
+              }
+        } else {
+        	     $self->throw("bowtie sequence read file does not exist");
+        }
+        
+        return $read1;
 }
 
 =head2 _run()

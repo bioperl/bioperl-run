@@ -104,7 +104,8 @@ push @ISA, 'Exporter';
 our @program_commands = qw(
     single
     paired
-); #crossbow format not implemented yet - will attempt when I see what it looks like
+    crossbow
+);
 
 # composite commands: pseudo-commands that run a 
 # sequence of commands
@@ -118,7 +119,8 @@ our %composite_commands = (
 # prefixes only for commands that take params/switches...
 our %command_prefixes = (
     'single'     => 'one',
-    'paired'     => 'par'
+    'paired'     => 'par',
+    'crossbow'   => 'crb'
     );
 
 our @program_params = qw(
@@ -308,7 +310,60 @@ our %param_translation = (
     'par|offrate'                  => 'o',
     'par|memory_mapped_io'         => 'mm',
     'par|shared_memory'            => 'shmem',
-    'par|random_seed'              => 'seed'
+    'par|random_seed'              => 'seed',
+
+    'crb|fastq'                    => 'q',
+    'crb|fasta'                    => 'f',
+    'crb|raw'                      => 'r',
+    'crb|inline'                   => 'c',
+    'crb|skip'                     => 's',
+    'crb|upto'                     => 'u',
+    'crb|trim5'                    => '5',
+    'crb|trim3'                    => '3',
+    'crb|phred33'                  => 'phred33-quals',
+    'crb|phred64'                  => 'phred64-quals',
+    'crb|solexa'                   => 'solexa-quals',
+    'crb|solexa1_3'                => 'solexa1.3-quals',
+    'crb|integer_qual'             => 'integer-quals',
+    'crb|max_seed_mismatches'      => 'n',
+    'crb|max_qual_mismatch'        => 'e',
+    'crb|max_quality_sum'          => 'Q',
+    'crb|seed_length'              => 'l',
+    'crb|no_maq_rounding'          => 'nomaqround',
+    'crb|max_mismatches'           => 'v',
+    'crb|min_insert_size'          => 'I',
+    'crb|max_insert_size'          => 'X',
+    'crb|forward_reverse'          => 'fr',
+    'crb|reverse_forward'          => 'rf',
+    'crb|forward_forward'          => 'ff',
+    'crb|no_forward_alignment'     => 'nofw',
+    'crb|no_reverse_alignment'     => 'norc',
+    'crb|max_backtracks'           => 'maxbts',
+    'crb|max_mate_attempts'        => 'pairtries',
+    'crb|try_hard'                 => 'y',
+    'crb|max_search_ram'           => 'chunkmbs',
+    'crb|report_n_alignments'      => 'k',
+    'crb|all'                      => 'a',
+    'crb|supress'                  => 'm',
+    'crb|best'                     => 'best',
+    'crb|strata'                   => 'strata',
+    'crb|fix_strand_bias'          => 'strandfix',
+    'crb|sam_format'               => 'S',
+    'crb|concise'                  => 'concise',
+    'crb|time'                     => 't',
+    'crb|offset_base'              => 'B',
+    'crb|quiet'                    => 'quiet',
+    'crb|ref_map'                  => 'refout',
+    'crb|ref_index'                => 'refidx',
+    'crb|alignmed_file'            => 'al',
+    'crb|unaligned_file'           => 'un',
+    'crb|excess_file'              => 'max',
+    'crb|full_ref_name'            => 'fullref',
+    'crb|threads'                  => 'p',
+    'crb|offrate'                  => 'o',
+    'crb|memory_mapped_io'         => 'mm',
+    'crb|shared_memory'            => 'shmem',
+    'crb|random_seed'              => 'seed'
     );
 
 #
@@ -326,17 +381,20 @@ our %param_translation = (
 #
 
 our %command_files = (
-    'single'     => [qw( ind seq out )],
-    'paired'     => [qw( ind seq seq2 out )]
-    ); #crossbow format not implemented yet - will attempt when I see what it looks like
+    'single'     => [qw( ind seq #out )],
+    'paired'     => [qw( ind seq seq2 #out )],
+    'crossbow'   => [qw( ind seq #out )]
+    );
 
 INIT {
 	# bowtie doesn't really have subprograms so we do it this way
 	foreach (@program_params) {
 		push @program_params, "par\|".$1 if (m/^one\|(.*)/);
+		push @program_params, "crb\|".$1 if (m/^par\|(.*)/);
 	}
 	foreach (@program_switches) {
 		push @program_switches, "par\|".$1 if (m/^one\|(.*)/);
+		push @program_switches, "crb\|".$1 if (m/^par\|(.*)/);
 	}
 	
 #	# add subcommand params and switches for
