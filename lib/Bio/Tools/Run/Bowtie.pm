@@ -184,7 +184,7 @@ sub new {
   $self->parameters_changed(1);
   $self->_register_program_commands( \@program_commands, \%command_prefixes );
   unless (grep /command/, @args) {
-      push @args, '-command', 'bowtie';
+      push @args, '-command', 'single';
   }
   $self->_set_program_options(\@args, \@program_params, \@program_switches,
     \%param_translation, $qual_param, $use_dash, $join);
@@ -492,31 +492,26 @@ sub _prepare_input_sequences {
         } elsif ( -e $read1 ) { # expect a file - so test whether its appropriate
               my $cmd = $self->command if $self->can('command');
               my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$read1);
-              if ($cmd =~ m/^c/) {
-                      $self->carp("Reads file assumed to be crossbow format at arg 1 (no crossbow guesser implementation to confirm)");
-                      # crossbow format - general format 'name\tseq1\tqual1[\tseq2\tqual2]'
-                      # can mix single reads and paired reads
-                      # e.g.
-                      # r0	GAACGATACCCACCCAACTATCGCCATTCCAGCAT	EDCCCBAAAA@@@@?>===<;;9:99987776554
-                      # r1	TATTCTTCCGCATCCTTCATACTCCTGCCGGTCAG	EDCCCBAAAA@@@@?>===<;;9:99987776554	GAATACTGGCGGATTACCGGGGAAGCTGGAGC	EDCCCBAAAA@@@@?>===<;;9:99987776                      
-              } else {
-	              for ($guesser->guess) {
-	              	       m/^fasta$/ && do { 
-	                            ($self->fastq or $self->raw or $cmd =~ m/^c/) and $self->throw("Fasta reads file inappropriate at arg 1");
-	                            $self->fasta(1);
-	                            last;
-	              	       };
-	              	       m/^fastq$/ && do { 
-	                            ($self->fasta or $self->raw or $cmd =~ m/^c/) and $self->throw("Fastq reads file inappropriate at arg 1");
-	                            $self->fastq(1);
-	                            last;
-	              	       };
-	              	       m/^raw$/ && do { 
-	                            ($self->fasta or $self->fastq or $cmd =~ m/^c/) and $self->throw("Raw reads file inappropriate at arg 1");
-	                            $self->raw(1);
-	                            last;
-	              	       }
-	              }
+              for ($guesser->guess) {
+                       m/^fasta$/ && do { 
+                            ($self->fastq or $self->raw or $cmd =~ m/^c/) and $self->throw("Fasta reads file inappropriate at arg 1");
+                            $self->fasta(1);
+                            last;
+                       };
+                       m/^fastq$/ && do { 
+                            ($self->fasta or $self->raw or $cmd =~ m/^c/) and $self->throw("Fastq reads file inappropriate at arg 1");
+                            $self->fastq(1);
+                            last;
+                       };
+                       m/^crossbow$/ && do { 
+                            $cmd =~ m/^c/ or $self->throw("Crossbow reads file inappropriate at arg 1"); # this is unrecoverable since the object has default program defined
+                            last;
+                       };
+                       m/^raw$/ && do { 
+                            ($self->fasta or $self->fastq or $cmd =~ m/^c/) and $self->throw("Raw reads file inappropriate at arg 1");
+                            $self->raw(1);
+                            last;
+                       }
               }
         } else {
         	     $self->throw("bowtie sequence read file does not exist");

@@ -10,7 +10,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 61,
+    test_begin(-tests => 66,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
 }
 
