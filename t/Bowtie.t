@@ -10,7 +10,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 55,
+    test_begin(-tests => 61,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
 }
 
@@ -41,6 +41,11 @@ is ($bowtiefac->min_insert_size, 100, "parameter really changed");
 ok $bowtiefac->reset_parameters( -min_insert_size => 200 ), "reset parameters with arg";
 ok !$bowtiefac->max_mismatches, "original parameters undefined";
 is ($bowtiefac->min_insert_size, 200, "parameter really reset via arg");
+ok $bowtiefac->set_parameters( -sam_format => 1 ), "set an exclusive group parameter";
+ok $bowtiefac->sam_format, "parameter really set";
+ok $bowtiefac->set_parameters( -concise => 1 ), "set an incompatible parameter";
+ok $bowtiefac->concise, "parameter really set";
+ok !$bowtiefac->sam_format, "original exclusive parameter really unset";
 
 $bowtiefac->set_parameters(
     -command            => 'paired',
@@ -183,7 +188,8 @@ SKIP : {
     is( $bowtiefac->max_seed_mismatches, 2, "seed mismatch param set");
     is( $bowtiefac->seed_length, 28, "seed length param set");
     is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
-    ok my $sam = $bowtiefac->_run($rdq, $refseq), "bowtie can make alignment";
+    ok my $sam = $bowtiefac->run("GAACGATACCCACCCAACTATCGCCATTCCAGCAT",$refseq), "make variable basedalignment";
+    ok $sam = $bowtiefac->_run($rdq, $refseq), "make file based alignment";
     ok (-e $sam)&&(-r $sam), "make readable output";
     open (FILE, $sam);
     my $lines =()= <FILE>;
