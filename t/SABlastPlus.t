@@ -180,7 +180,7 @@ SKIP : {
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file(test-spa-p.fas),
+	-db_data => test_input_file('test-spa-p.fas'),
 	-create => 1);
     ok $result = $fac->blastp( -query => $aaseq ), "run blastp";
     is $result->num_hits, 485, "blastp hits";
