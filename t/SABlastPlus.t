@@ -159,12 +159,12 @@ SKIP : {
     diag("run BLAST methods");
 
     $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => 'data/test-spa.fas',
+	-db_data => test_input_file('test-spa.fas');
 	-create => 1);
 
-    ok my $result = $fac->run( -method => 'blastn', -query => 'data/test-query.fas'), "run blastn";
+    ok my $result = $fac->run( -method => 'blastn', -query => test_input_file('test-query.fas')), "run blastn";
     is $result->num_hits, 500, "default hit limit";
-    ok $result = $fac->blastn( -query => 'data/test-query.fas', 
+    ok $result = $fac->blastn( -query => test_input_file('test-query.fas'),
 			       -method_args => [ -num_alignments => 1000 ] ), "return more alignments (arg spec)";
     is $result->num_hits, 764, "got more hits";
     $fac->cleanup;
@@ -180,7 +180,7 @@ SKIP : {
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => 'data/test-spa-p.fas',
+	-db_data => test_input_file(test-spa-p.fas),
 	-create => 1);
     ok $result = $fac->blastp( -query => $aaseq ), "run blastp";
     is $result->num_hits, 485, "blastp hits";
