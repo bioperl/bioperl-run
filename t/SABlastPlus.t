@@ -159,7 +159,7 @@ SKIP : {
     diag("run BLAST methods");
 
     $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa.fas');
+	-db_data => test_input_file('test-spa.fas'),
 	-create => 1);
 
     ok my $result = $fac->run( -method => 'blastn', -query => test_input_file('test-query.fas')), "run blastn";
