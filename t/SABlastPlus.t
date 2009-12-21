@@ -31,7 +31,8 @@ ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'),
 
 SKIP : {
     test_skip( -tests => 53,
-	       -requires_env => 'BLASTPLUSDIR',
+	       -requires_env => 'BLASTPLUSDIR');
+    test_skip( -tests => 53,
 	       -requires_executable => $bpfac);
     diag('DB and mask make tests');
 # exceptions/warnings
