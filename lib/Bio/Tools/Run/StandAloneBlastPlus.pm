@@ -554,7 +554,7 @@ sub new {
 
 
     # check db
-    if ($self->check_db == 0) {
+    if (defined $self->check_db and $self->check_db == 0) {
 	$self->throw("DB '".$self->db."' can't be found. To create, set -create => 1.") unless $create;
     }
     if (!$self->db) {
@@ -1085,7 +1085,10 @@ sub _fastize {
 	(ref eq 'ARRAY') && (ref $$data[0]) &&
 	    ($$data[0]->isa('Bio::Seq') || $$data[0]->isa('Bio::PrimarySeq'))
 	    && do {
-		my $fh = File::Temp->new(TEMPLATE => 'DBDXXXXX', UNLINK => 0, SUFFIX => '.fas');
+		my $fh = File::Temp->new(TEMPLATE => 'DBDXXXXX', 
+					 UNLINK => 0, 
+					 DIR => $self->db_dir,
+					 SUFFIX => '.fas');
 		my $fname = $fh->filename;
 		$fh->close;
 		$self->_register_temp_for_cleanup($fname);
@@ -1103,7 +1106,10 @@ sub _fastize {
 	    }
 	    else {
 		# convert
-		my $fh = File::Temp->new(TEMPLATE => 'DBDXXXXX', UNLINK => 0, SUFFIX => '.fas');
+		my $fh = File::Temp->new(TEMPLATE => 'DBDXXXXX', 
+					 UNLINK => 0, 
+					 DIR => $self->db_dir,
+					 SUFFIX => '.fas');
 		my $fname = $fh->filename;
 		$fh->close;
 		$self->_register_temp_for_cleanup($fname);

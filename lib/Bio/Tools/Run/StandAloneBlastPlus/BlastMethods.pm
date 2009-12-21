@@ -220,6 +220,7 @@ sub run {
     }
     unless ($outfile) { # create a tempfile name
 	my $fh = File::Temp->new(TEMPLATE => 'BLOXXXXX',
+				 DIR => $self->db_dir,
 				 UNLINK => 0);
 	$outfile = $fh->filename;
 	$fh->close;
