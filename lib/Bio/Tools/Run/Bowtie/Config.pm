@@ -87,6 +87,7 @@ our (@ISA, @EXPORT, @EXPORT_OK);
 push @ISA, 'Exporter';
 @EXPORT = qw(
              @program_commands
+             %command_executables
              %command_prefixes
              %composite_commands
              @program_params
@@ -95,6 +96,7 @@ push @ISA, 'Exporter';
              %corequisite_switches
              %param_translation
              %command_files
+             %accepted_types
             );
 
 @EXPORT_OK = qw();
@@ -105,7 +107,23 @@ our @program_commands = qw(
     single
     paired
     crossbow
+    build
+    inspect
+    convert
+    map
 );
+
+
+our %command_executables = (
+    'single'     => 'bowtie',
+    'paired'     => 'bowtie',
+    'crossbow'   => 'bowtie',
+    'build'      => 'bowtie-build',
+    'inspect'    => 'bowtie-inspect',
+    'convert'    => 'bowtie-maqconvert',
+    'map'        => 'bowtie-maptool'
+    );
+
 
 # composite commands: pseudo-commands that run a 
 # sequence of commands
@@ -120,7 +138,11 @@ our %composite_commands = (
 our %command_prefixes = (
     'single'     => 'one',
     'paired'     => 'par',
-    'crossbow'   => 'crb'
+    'crossbow'   => 'crb',
+    'build'      => 'bld',
+    'inspect'    => 'ins',
+    'convert'    => 'cnv',
+    'map'        => 'map'
     );
 
 our @program_params = qw(
@@ -145,9 +167,23 @@ our @program_params = qw(
     one|threads
     one|offrate
     one|random_seed
+
     par|min_insert_size
     par|max_insert_size
     par|max_mate_attempts
+
+    bld|max_bucket_block
+    bld|max_bucket_div
+    bld|diff_cover
+    bld|off_rate
+    bld|ftabchars
+
+    bld|seed
+    bld|cutoff
+
+    ins|seq_width
+
+    map|names
     );
 
 our @program_switches = qw(
@@ -177,9 +213,34 @@ our @program_switches = qw(
     one|full_ref_name
     one|memory_mapped_io
     one|shared_memory
+
     par|forward_reverse
     par|reverse_reverse
     par|forward_forward
+
+    bld|fasta
+    bld|in_line
+    bld|no_auto
+    bld|packed
+    bld|no_diff_cover
+    bld|no_ref
+    bld|just_ref
+    bld|NtoA
+    bld|big_endian
+    bld|little_endian
+
+    ins|names_only
+
+    cnv|old_maq
+
+    map|bowtie_in
+    map|binary_in
+    map|bowtie_out
+    map|binary_out
+    map|concise_out
+    map|fastq_out
+    map|fasta_out
+    map|sort
 );
 
 our %incompat_params = (
@@ -258,6 +319,7 @@ our %param_translation = (
     'one|memory_mapped_io'         => 'mm',
     'one|shared_memory'            => 'shmem',
     'one|random_seed'              => 'seed',
+    'one|version'                  => 'version',
 
     'par|fastq'                    => 'q',
     'par|fasta'                    => 'f',
@@ -311,6 +373,7 @@ our %param_translation = (
     'par|memory_mapped_io'         => 'mm',
     'par|shared_memory'            => 'shmem',
     'par|random_seed'              => 'seed',
+    'par|version'                  => 'version',
 
     'crb|fastq'                    => 'q',
     'crb|fasta'                    => 'f',
@@ -363,7 +426,45 @@ our %param_translation = (
     'crb|offrate'                  => 'o',
     'crb|memory_mapped_io'         => 'mm',
     'crb|shared_memory'            => 'shmem',
-    'crb|random_seed'              => 'seed'
+    'crb|random_seed'              => 'seed',
+    'crb|version'                  => 'version',
+
+    'bld|fasta'                    => 'f',
+    'bld|in_line'                  => 'c',
+    'bld|no_auto'                  => 'a',
+    'bld|packed'                   => 'p',
+    'bld|max_bucket_block'         => 'bmax',
+    'bld|max_bucket_div'           => 'bmaxdivn',
+    'bld|diff_cover'               => 'dcv',
+    'bld|no_diff_cover'            => 'nodc',
+    'bld|no_ref'                   => 'r',
+    'bld|just_ref'                 => '3',
+    'bld|off_rate'                 => 'o',
+    'bld|ftabchars'                => 't',
+    'bld|NtoA'                     => 'ntoa',
+    'bld|big_endian'               => 'big',
+    'bld|little_endian'            => 'little',
+    'bld|seed'                     => 'seed',
+    'bld|cutoff'                   => 'cutoff',
+    'bld|version'                  => 'version',
+
+    'ins|seq_width'                => 'a',
+    'ins|names_only'               => 'n',
+    'ins|version'                  => 'version',
+
+    'cnv|old_maq'                  => 'o',
+    'cnv|version'                  => 'version',
+
+    'map|bowtie_in'                => 'd',
+    'map|binary_in'                => 'b',
+    'map|bowtie_out'               => 'D',
+    'map|binary_out'               => 'B',
+    'map|concise_out'              => 'C',
+    'map|fastq_out'                => 'Q',
+    'map|fasta_out'                => 'F',
+    'map|sort'                     => 's',
+    'map|names'                    => 'n',
+    'map|version'                  => 'version'
     );
 
 #
@@ -383,18 +484,30 @@ our %param_translation = (
 our %command_files = (
     'single'     => [qw( ind seq #out )],
     'paired'     => [qw( ind seq seq2 #out )],
-    'crossbow'   => [qw( ind seq #out )]
+    'crossbow'   => [qw( ind seq #out )],
+    'build'      => [qw( ref out )],
+    'inspect'    => [qw( ind >#out )],
+    'convert'    => [qw( bwt out bfa )],
+    'map'        => [qw( bwt #out )]
+    );
+
+our %accepted_types = (
+    'seq'        => [qw( fasta fastq raw crossbow )],
+    'seq2'       => [qw( fasta fastq raw )],
+    'ref'        => [qw( fasta )],
+    'bwt'        => [qw( bowtie )]
+#    'bfa'        => [qw( bfa )], # in place for when/if a binary faster guesser is written
     );
 
 INIT {
 	# bowtie doesn't really have subprograms so we do it this way
 	foreach (@program_params) {
 		push @program_params, "par\|".$1 if (m/^one\|(.*)/);
-		push @program_params, "crb\|".$1 if (m/^par\|(.*)/);
+		push @program_params, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
 	}
 	foreach (@program_switches) {
 		push @program_switches, "par\|".$1 if (m/^one\|(.*)/);
-		push @program_switches, "crb\|".$1 if (m/^par\|(.*)/);
+		push @program_switches, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
 	}
 	
 #	# add subcommand params and switches for
