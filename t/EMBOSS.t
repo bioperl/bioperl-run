@@ -8,7 +8,7 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 21,
+    test_begin(-tests => 31,
 			   -requires_modules => [qw(XML::Twig Bio::Factory::EMBOSS)]);
 	use_ok('Bio::Root::IO');
 	use_ok('Bio::SeqIO');
