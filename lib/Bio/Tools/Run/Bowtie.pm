@@ -635,6 +635,74 @@ sub available_parameters {
     }
 }
 
+=head2 version
+
+ Title   : version
+ Usage   : $version = $bowtiefac->version()
+ Function: Returns the program version (if available)
+ Returns : string representing location and version of the program 
+
+=cut
+
+sub version{
+   my ($self) = @_;
+
+   my $cmd = $self->command if $self->can('command');
+
+   defined $cmd or $self->throw("No command defined - cannot determine program_dir");
+
+   my ($in, $out, $err);
+   my $dum;
+   $in = \$dum;
+   $out = \$self->{'stdout'};
+   $err = \$self->{'stderr'};
+
+   # Get program executable
+   my $exe = $self->executable;
+   # Get --version - yes this is overkill, but want to keep this general in case the situation changes
+   my $version_switch = $param_translation{"$command_prefixes{$cmd}|version"};
+   my $dash = $self->{'_options'}->{'_dash'};
+   for ($dash) {
+      $_ == 1 && do {
+         $version_switch = '-'.$version_switch;
+         last;
+      };
+      /^s/ && do { #single dash only
+         $version_switch = '-'.$version_switch;
+         last;
+      };
+      /^d/ && do { # double dash only
+         $version_switch = '--'.$version_switch;
+         last;
+      };
+      /^m/ && do { # mixed dash: one-letter opts get -,
+         $version_switch = '--'.$version_switch;
+         $version_switch =~ s/--([a-z0-9](?:\s|$))/-$1/gi;
+         last;
+      };
+      do { 
+         $self->warn( "Dash spec '$dash' not recognized; using 'single'" );
+         $version_switch = '-'.$version_switch;
+      };
+   }
+
+   my @ipc_args = ( $exe, $version_switch );
+
+   eval {
+      IPC::Run::run(\@ipc_args, $in, $out, $err) or
+           die ("There was a problem running $exe : $!");
+   };
+   if ($@) {
+       $self->throw("$exe call crashed: $@");
+   }
+
+   my @details = split("\n",$self->stdout);
+   (my $version) = grep /$exe version [[:graph:]]*$/, @details;
+   $version =~ s/version //;
+   (my $addressing) = grep /-bit$/, @details;
+
+   return $version.' '.$addressing;
+}
 
 sub available_commands { shift->available_parameters('commands') };
 
