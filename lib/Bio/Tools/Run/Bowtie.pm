@@ -161,8 +161,6 @@ use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase );
 our @program_names = qw( bowtie
                          bowtie-build
                          bowtie-inspect
-                         bowtie-maptool
-                         bowtie-maqconvert
                        ); # names of the executables
 
 our $default_cmd = 'single';
@@ -295,9 +293,12 @@ sub run {
 		
 				$samt->run( -bam => $bamf, -pfx => $srtf);
 				
+				# get the sequence so samtools can work with it
+				my $inspection = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
+				my $refdb = $inspection->run( $arg2 );
 				
 				# Export results in desired object type
-				return $self->_export_results($srtf.'.bam');
+				return $self->_export_results($srtf.'.bam', -refdb => $refdb );
 			}
 
 			return $bowtief;
@@ -305,7 +306,7 @@ sub run {
 		
 		m/build/ && do {
 			$arg1 or $self->throw("Fasta read(s) file/Bio::Seq required at arg 1");
-			$arg2 or $self->throw("Bowtie index base required at arg 2");
+			$arg2 ||= $self->tempdir().'/index';
 
 			# expand gzipped file as nec.
 			if ($arg1 =~ (m/\.gz[^.]*$/)) {
@@ -343,51 +344,6 @@ sub run {
 			$self->run_bowtie( -ind => $arg1, -out => $descf );
 			
 			return $descf;
-		};
-		
-		m/convert/ && do {
-			$arg1 or $self->throw("Bowtie alignment required at arg 1");
-			$arg2 or $self->throw("Binary fasta reference required at arg 2");
-			
-			$self->_validate_file_input( -bwt => $arg1 ) or
-				$self->throw("Alignment '$arg1' doesn't look like a bowtie alignment at arg 1");
-			$self->_validate_file_input( -bfa => $arg2 ) or # This will never fail - in place for
-			                                                # when someone writes a guesser helper
-			                                                # for binary fasta.
-				$self->throw("Alignment '$arg2' doesn't look like a binary fasta file at arg 2");
-			
-			my $maqf;
-			if (defined $arg3) {
-				$maqf = $arg3;
-			} else {
-				(my $maqh, $maqf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.maq' );
-				$maqh->close;
-			}
-			
-			# Convert alignment
-			$self->run_bowtie( -bwt => $arg1, -bfa => $arg2, -out => $maqf );
-			
-			return $maqf;
-		};
-		
-		m/map/ && do {
-			$arg1 or $self->throw("Bowtie alignment required at arg 1");
-			
-			$self->_validate_file_input( -bwt => $arg1 ) or
-				$self->throw("Alignment doesn't look like a bowtie alignment at arg 1");
-			
-			my $mapf;
-			if (defined $arg2) {
-				$mapf = $arg2;
-			} else {
-				(my $maph, $mapf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.text' );
-				$maph->close;
-			}
-			
-			# Map alignment
-			$self->run_bowtie( -bwt => $arg1, -out => $mapf );
-			
-			return $mapf;
 		}
 	}
 }
@@ -584,7 +540,7 @@ sub _validate_file_input {
 	}
 	
 	for (keys %args) {
-		m/^seq|seq2|ref|bwt$/ && do {
+		m/^seq|seq2|ref$/ && do {
 			return unless ( -e $args{$_} && -r $args{$_} );
 			my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$args{$_});
 			return $guesser->guess if grep {$guesser->guess =~ m/$_/} @{$accepted_types{$_}};
@@ -593,11 +549,6 @@ sub _validate_file_input {
 			return 'ebwt' if
 				(-e $args{$_}.'.1.ebwt' && -e $args{$_}.'.2.ebwt' && -e $args{$_}.'.3.ebwt' &&
 				-e $args{$_}.'.4.ebwt' && -e $args{$_}.'.rev.1.ebwt' && -e $args{$_}.'.rev.2.ebwt');
-		};
-		m/^bfa$/ && do {
-			return unless ( -e $args{$_} && -r $args{$_} );
-			$self->warn("No method to determine binary fasta format - trusting");
-			return 'bfa';
 		}
 	}
 	return;
@@ -674,21 +625,22 @@ sub _prepare_input_sequences {
 				my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$file);
 				for ($guesser->guess) {
 					m/^fasta$/ && do {
-						($self->fastq or $self->raw or $cmd =~ m/^cr/) and $self->throw("Fasta reads file '$file' inappropriate");
+						$cmd =~ m/^b/ && last;
+						($cmd =~ m/^c/ or $self->fastq or $self->raw) and $self->throw("Fasta reads file '$file' inappropriate");
 						$self->fasta(1);
 						last;
 					};
 					m/^fastq$/ && do {
-						($self->fasta or $self->raw or $cmd =~ m/^cr/) and $self->throw("Fastq reads file '$file' inappropriate");
+						($cmd =~ m/^[cb]/ or $self->fasta or $self->raw) and $self->throw("Fastq reads file '$file' inappropriate");
 						$self->fastq(1);
 						last;
 					};
 					m/^crossbow$/ && do {
-						$cmd =~ m/^cr/ or $self->throw("Crossbow reads file '$file' inappropriate"); # this is unrecoverable since the object has default program defined
+						$cmd =~ m/^c/ or $self->throw("Crossbow reads file '$file' inappropriate"); # this is unrecoverable since the object has default program defined
 						last;
 					};
 					m/^raw$/ && do {
-						($self->fasta or $self->fastq or $cmd =~ m/^cr/) and $self->throw("Raw reads file '$file' inappropriate");
+						($cmd =~ m/^[cb]/ or $self->fasta or $self->fastq) and $self->throw("Raw reads file '$file' inappropriate");
 						$self->raw(1);
 						last;
 					};

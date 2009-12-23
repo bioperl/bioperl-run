@@ -109,8 +109,6 @@ our @program_commands = qw(
     crossbow
     build
     inspect
-    convert
-    map
 );
 
 
@@ -119,9 +117,7 @@ our %command_executables = (
     'paired'     => 'bowtie',
     'crossbow'   => 'bowtie',
     'build'      => 'bowtie-build',
-    'inspect'    => 'bowtie-inspect',
-    'convert'    => 'bowtie-maqconvert',
-    'map'        => 'bowtie-maptool'
+    'inspect'    => 'bowtie-inspect'
     );
 
 
@@ -140,9 +136,7 @@ our %command_prefixes = (
     'paired'     => 'par',
     'crossbow'   => 'crb',
     'build'      => 'bld',
-    'inspect'    => 'ins',
-    'convert'    => 'cnv',
-    'map'        => 'map'
+    'inspect'    => 'ins'
     );
 
 our @program_params = qw(
@@ -182,9 +176,7 @@ our @program_params = qw(
     bld|cutoff
 
     ins|seq_width
-
-    map|names
-    );
+);
 
 our @program_switches = qw(
     one|fastq
@@ -219,7 +211,7 @@ our @program_switches = qw(
     par|forward_forward
 
     bld|fasta
-    bld|in_line
+    bld|inline
     bld|no_auto
     bld|packed
     bld|no_diff_cover
@@ -230,17 +222,6 @@ our @program_switches = qw(
     bld|little_endian
 
     ins|names_only
-
-    cnv|old_maq
-
-    map|bowtie_in
-    map|binary_in
-    map|bowtie_out
-    map|binary_out
-    map|concise_out
-    map|fastq_out
-    map|fasta_out
-    map|sort
 );
 
 our %incompat_params = (
@@ -430,7 +411,7 @@ our %param_translation = (
     'crb|version'                  => 'version',
 
     'bld|fasta'                    => 'f',
-    'bld|in_line'                  => 'c',
+    'bld|inline'                   => 'c',
     'bld|no_auto'                  => 'a',
     'bld|packed'                   => 'p',
     'bld|max_bucket_block'         => 'bmax',
@@ -450,21 +431,7 @@ our %param_translation = (
 
     'ins|seq_width'                => 'a',
     'ins|names_only'               => 'n',
-    'ins|version'                  => 'version',
-
-    'cnv|old_maq'                  => 'o',
-    'cnv|version'                  => 'version',
-
-    'map|bowtie_in'                => 'd',
-    'map|binary_in'                => 'b',
-    'map|bowtie_out'               => 'D',
-    'map|binary_out'               => 'B',
-    'map|concise_out'              => 'C',
-    'map|fastq_out'                => 'Q',
-    'map|fasta_out'                => 'F',
-    'map|sort'                     => 's',
-    'map|names'                    => 'n',
-    'map|version'                  => 'version'
+    'ins|version'                  => 'version'
     );
 
 #
@@ -486,17 +453,13 @@ our %command_files = (
     'paired'     => [qw( ind seq seq2 #out )],
     'crossbow'   => [qw( ind seq #out )],
     'build'      => [qw( ref out )],
-    'inspect'    => [qw( ind >#out )],
-    'convert'    => [qw( bwt out bfa )],
-    'map'        => [qw( bwt #out )]
+    'inspect'    => [qw( ind >#out )]
     );
 
-our %accepted_types = (
+our %accepted_types = ( # ind is not a single file, so not included here
     'seq'        => [qw( fasta fastq raw crossbow )],
     'seq2'       => [qw( fasta fastq raw )],
-    'ref'        => [qw( fasta )],
-    'bwt'        => [qw( bowtie )]
-#    'bfa'        => [qw( bfa )], # in place for when/if a binary faster guesser is written
+    'ref'        => [qw( fasta )]
     );
 
 INIT {
