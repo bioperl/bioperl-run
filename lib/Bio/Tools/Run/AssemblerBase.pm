@@ -506,13 +506,13 @@ sub _set_program_options {
 
       # problem here: if a param/switch does not have a prefix (pfx|), then
       # should probably allow it to pass thru...
-      @p = (grep(!/^.*?\|/, @$params), grep(/^${cmd}\|/, @$params));
-      @s = (grep(!/^.*?\|/, @$switches), grep(/^${cmd}\|/, @$switches));
+      @p = (grep(!/^.*?\|/, @$params), $cmd ? grep(/^${cmd}\|/, @$params) : ());
+      @s = (grep(!/^.*?\|/, @$switches), $cmd ? grep(/^${cmd}\|/, @$switches) : ());
       s/.*?\|// for @p;
       s/.*?\|// for @s;
       @x{@p, @s} = @{$translation}{
 	  grep( !/^.*?\|/, @$params, @$switches),
-	  grep(/^${cmd}\|/, @$params, @$switches) };
+	  $cmd ? grep(/^${cmd}\|/, @$params, @$switches) : () };
       $translation = \%x;
       $params = \@p;
       $switches = \@s;
