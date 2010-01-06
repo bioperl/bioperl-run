@@ -298,7 +298,7 @@ sub run {
 				my $refdb = $inspection->run( $arg2 );
 				
 				# Export results in desired object type
-				return $self->_export_results($srtf.'.bam', -refdb => $refdb );
+				return $self->_export_results($srtf.'.bam', -refdb => $refdb, -keep_asm => 1 );
 			}
 
 			return $bowtief;
