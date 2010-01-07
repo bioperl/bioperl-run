@@ -21,13 +21,25 @@ Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *ALPHA
  # create an assembly
  $bowtie_fac = Bio::Tools::Run::Bowtie->new();
  $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base' );
+ 
  # if IO::Uncompress::Gunzip is available...
  $bowtie_assy = $bowtie_fac->run( 'reads.fastq.gz', 'index_base' );
+ 
  # paired-end
+ $bowtie_fac = Bio::Tools::Run::Bowtie->new(-command => 'paired' );
  $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base', 'paired-reads.fastq' );
+ 
  # be more strict
  $bowtie_fac->set_parameters( -max_qual_mismatch => 50 );
- $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base', 'paired-reads.fastq' );
+ 
+ # create a Bio::Assembly::Scaffold object
+ $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base', 'paired-reads.fastq'  );
+ 
+ # print consensus sequences from assembly object
+ for $contig ($bowtie_assy->all_contigs) {
+    print $contig->get_consensus_sequence->seq,"\n";
+ }
+ 
 
 =head1 DESCRIPTION
 
@@ -194,6 +206,10 @@ sub new {
 	unless (grep /command/, @args) {
 		push @args, '-command', $default_cmd;
 	}
+	#default to SAM output if no other format specified - will then default to object creation
+	unless (grep /(?:sam_format|concise|quiet|refout|refidx)/, @args) {
+		push @args, '-sam_format', 1;
+	}
 	$self->_set_program_options(\@args, \@program_params, \@program_switches,
 	                            \%param_translation, $qual_param, $use_dash, $join);
 	my $cmd = $self->command if $self->can('command');
@@ -204,7 +220,7 @@ sub new {
 		chomp $kludge[0];
 		$self->program_name($kludge[0]);
 	}
-
+	
 	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
 	$self->_assembly_format($asm_format);
 	return $self;
@@ -278,7 +294,7 @@ sub run {
 		
 			$self->run_bowtie( -ind => $arg2, -seq => $arg1, -seq2 => $arg3, -out => $bowtief );
 		
-			if ($self->sam_format && $self->want_object) {
+			if ($self->sam_format && !$self->want_raw) {
 				my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
 				my ($srth, $srtf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.srt' );
 				$_->close for ($bamh, $srth);
@@ -348,22 +364,20 @@ sub run {
 	}
 }
 
-=head2 want_object()
+=head2 want_raw()
 
- Title   : want_object
- Usage   : $bowtiefac->want_object( $arg )
- Function: make factory return a Bio::Assembly::IO
-           if possible - sam_format must be set for this
-           (only for 'bowtie' command)
+ Title   : want_raw
+ Usage   : $bowtiefac->want_raw( $arg )
+ Function: make factory return raw results in file
  Returns : boolean want_object state
  Args    : [optional] boolean
 
 =cut
 
-sub want_object {
+sub want_raw {
 	my $self = shift;
-	return $self->{'_want_object'} = shift if @_;
-	return $self->{'_want_object'};
+	return $self->{'_want_raw'} = shift if @_;
+	return $self->{'_want_raw'};
 }
 
 =head2 run_bowtie()
