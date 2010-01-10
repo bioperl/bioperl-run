@@ -77,7 +77,7 @@ options.
 
 =head1 FILES
 
-When a command requires filenames, these are provided to the C<run_bowtie> method, not
+When a command requires filenames, these are provided to the C<_run> method, not
 the constructor (C<new()>). To see the set of files required by a command, use
 C<available_parameters('filespec')> or the alias C<filespec()>:
 
@@ -93,9 +93,9 @@ This example returns the following array:
 
 This indicates that ind (C<bowtie> index file base name), seq (fasta/fastq),and seq2
 (fasta/fastq) files MUST be specified, and that the out file MAY be specified. Use
-these in the C<run_bowtie> call like so:
+these in the C<_run> call like so:
 
- $bowtiefac->run_bowtie( -ind => 'index_base', -seq => 'seq-a.fq',
+ $bowtiefac->_run( -ind => 'index_base', -seq => 'seq-a.fq',
                    -seq2 => 'seq-b.fq', -out => 'align.out' );
 
 The object will store the programs STDOUT and STDERR output for you in the C<stdout()>
@@ -133,9 +133,13 @@ the web:
 
   http://bugzilla.open-bio.org/
 
-=head1 AUTHOR - Dan Kortschak (based heavily on code by Mark A. Jensen)
+=head1 AUTHOR - Dan Kortschak
 
  Email dan.kortschak adelaide.edu.au
+
+=head1 CONTRIBUTORS
+
+ Mark A. Jensen (maj -at- fortinbras -dot- us)
 
 =head1 APPENDIX
 
@@ -152,7 +156,7 @@ use strict;
 our $HAVE_IO_UNCOMPRESS;
 
 BEGIN {
-    eval "require IO::Uncompress::Gunzip; $HAVE_IO_UNCOMPRESS = 1";
+    eval 'require IO::Uncompress::Gunzip; $HAVE_IO_UNCOMPRESS = 1';
 }
 
 use IPC::Run;
@@ -163,20 +167,17 @@ use lib '../../..';
 use Bio::Root::Root;
 use Bio::Seq;
 use Bio::Tools::Run::Bowtie::Config;
+use Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Run::WrapperBase::CommandExts;
 use Bio::Tools::GuessSeqFormat;
 use Bio::Tools::Run::Samtools;
 use File::Basename qw(fileparse);
 
-use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase );
+use base qw( Bio::Tools::Run::WrapperBase::CommandExts Bio::Tools::Run::AssemblerBase Bio::Root::Root );
 
 ## bowtie
-our @program_names = qw( bowtie
-                         bowtie-build
-                         bowtie-inspect
-                       ); # names of the executables
-
+our $program_name = '*bowtie';
 our $default_cmd = 'single';
-our $program_name = $command_executables{$default_cmd};
 
 # Note:
 #  other globals required by Bio::Tools::Run::AssemblerBase are
@@ -200,29 +201,22 @@ our $asm_format = 'bowtie';
 
 sub new {
 	my ($class,@args) = @_;
-	my $self = $class->SUPER::new(@args);
-	$self->parameters_changed(1);
-	$self->_register_program_commands( \@program_commands, \%command_prefixes );
 	unless (grep /command/, @args) {
 		push @args, '-command', $default_cmd;
 	}
 	#default to SAM output if no other format specified - will then default to object creation
 	unless (grep /(?:sam_format|concise|quiet|refout|refidx)/, @args) {
 		push @args, '-sam_format', 1;
+		$asm_format = 'sam';
 	}
-	$self->_set_program_options(\@args, \@program_params, \@program_switches,
-	                            \%param_translation, $qual_param, $use_dash, $join);
-	my $cmd = $self->command if $self->can('command');
-	my $program_name=$command_executables{$cmd};
-	$self->program_name($program_name) if not defined $self->program_name();
-	if ($^O =~ /cygwin/) {
-		my @kludge = `PATH=\$PATH:/usr/bin:/usr/local/bin which $program_name`;
-		chomp $kludge[0];
-		$self->program_name($kludge[0]);
+	my $self = $class->SUPER::new(@args);
+	foreach (keys %command_executables) {
+		my $executable = `which $command_executables{$_}`;
+		chomp $executable;
+		$self->executables($_, $executable);
 	}
-	
-	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
 	$self->_assembly_format($asm_format);
+	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
 	return $self;
 }
 
@@ -239,9 +233,6 @@ sub new {
            - [optional] fastq file containing paired-end reads
  Note    : gzipped inputs are allowed if IO::Uncompress::Gunzip
            is available
-           
-           While the intention is to return a Bio::AssemblyIO object
-           this functionality has not yet been fully implemented.
 
 =cut
 
@@ -287,14 +278,29 @@ sub run {
 			
 			# Assemble
 			my $suffix = $self->sam_format ? '.sam' : '.bowtie';
-			$self->_assembly_format($self->sam_format ? 'sam' : 'bowtie');
 			
 			my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
 			$bowtieh->close;
 		
-			$self->run_bowtie( -ind => $arg2, -seq => $arg1, -seq2 => $arg3, -out => $bowtief );
+			my %params = ( -ind => $arg2, -seq => $arg1, -seq2 => $arg3, -out => $bowtief );
+			map {
+				delete $params{$_} unless defined $params{$_}
+			} keys %params;
+			$self->_run(%params);
 		
+### This will be refactored into a Bio::Assembly::IO::bowtie module
+#
+#   Essentially just a wrapper around B:A:IO:sam - will lose SAM re/setting
+
 			if ($self->sam_format && !$self->want_raw) {
+
+				# we don't have the type
+				my $format_tmp;
+				unless	($format_tmp = $self->_assembly_format =~ /sam/i) {
+					$self->_assembly_format('sam');
+					$self->warn("Assembly format not appropriately set to - temporarily setting to SAM.");
+				}
+
 				my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
 				my ($srth, $srtf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.srt' );
 				$_->close for ($bamh, $srth);
@@ -312,9 +318,24 @@ sub run {
 				# get the sequence so samtools can work with it
 				my $inspection = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
 				my $refdb = $inspection->run( $arg2 );
+
+#
+##
 				
 				# Export results in desired object type
-				return $self->_export_results($srtf.'.bam', -refdb => $refdb, -keep_asm => 1 );
+				my $scaffold = $self->_export_results($srtf.'.bam', -refdb => $refdb, -keep_asm => 1 );
+
+##
+# This deleted during refactor
+
+				# ... restore this because they presumably know what they are doing
+				$self->_assembly_format($format_tmp);
+
+#
+#
+###
+
+				return $scaffold;
 			}
 
 			return $bowtief;
@@ -342,7 +363,7 @@ sub run {
 		
 			# Build index
 			my $index = $arg2; # bowtie indexes are 6 files - the return value is meaningless
-			$self->run_bowtie( -ref => $arg1, -out => $arg2 );
+			$self->_run( -ref => $arg1, -out => $arg2 );
 			
 			return $index;
 		};
@@ -357,7 +378,7 @@ sub run {
 			my ($desch, $descf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
 			$desch->close;
 
-			$self->run_bowtie( -ind => $arg1, -out => $descf );
+			$self->_run( -ind => $arg1, -out => $descf );
 			
 			return $descf;
 		}
@@ -379,168 +400,6 @@ sub want_raw {
 	return $self->{'_want_raw'} = shift if @_;
 	return $self->{'_want_raw'};
 }
-
-=head2 run_bowtie()
-
- Title   : run_bowtie
- Usage   : $obj->run_bowtie( @file_args )
- Function: Run a bowtie command as specified during object construction
- Returns :
- Args    : a specification of the files to operate on:
-
-=cut
-
-sub run_bowtie {
-	my ($self, @args) = @_;
-	# _translate_params will provide an array of command/parameters/switches
-	# -- these are set at object construction
-	# to set up the run, need to add the files to the call
-	# -- provide these as arguments to this function
-
-	my $cmd = $self->command if $self->can('command');
-	$self->throw("No bowtie command specified for the object") unless $cmd;
-	# setup files necessary for this command
-	my $filespec = $command_files{$cmd};
-	$self->throw("No command-line file specification is defined for command '$cmd'; check Bio::Tools::Run::Bowtie::Config") unless $filespec;
-
-	# parse args based on filespec
-	# require named args
-	$self->throw("Named args are required") unless !(@args % 2);
-	s/^-// for @args;
-	my %args = @args;
-	# validate
-	my @req = map {
-		my $s = $_;
-		$s =~ s/^[012]?[<>]//;
-		$s =~ s/[^a-zA-Z0-9_]//g;
-		$s
-	} grep !/[#]/, @$filespec;
-	!defined($args{$_}) && $self->throw("Required filearg '$_' not specified") for @req;
-	# set up redirects
-	my ($in, $out, $err);
-	for (@$filespec) {
-		m/^1?>#?(.*)/ && do {
-			defined($args{$1}) && ( open($out,">", $args{$1}) or $self->throw("Open for write error : $!"));
-			next;
-		};
-		m/^2>#?(.*)/ && do {
-			defined($args{$1}) && (open($err, ">", $args{$1}) or $self->throw("Open for write error : $!"));
-			next;
-		};
-		m/^<#?(.*)/ && do {
-			defined($args{$1}) && (open($in, "<", $args{$1}) or $self->throw("Open for read error : $!"));
-			next;
-		}
-	}
-	my $dum;
-	$in || ($in = \$dum);
-	$out || ($out = \$self->{'stdout'});
-	$err || ($err = \$self->{'stderr'});
-
-	# Get program executable
-	my $exe = $self->executable;
-	# Get command-line options
-	my $options = $self->_translate_params();
-	# Get file specs sans redirects in correct order
-	my @specs = map {
-	my $s = $_;
-		$s =~ s/[^a-zA-Z0-9_]//g;
-		$s
-	} grep !/[<>]/, @$filespec;
-	my @files = @args{@specs};
-	# expand arrayrefs
-	my $l = $#files;
-	for (0..$l) {
-		splice(@files, $_, 1, @{$files[$_]}) if (ref($files[$_]) eq 'ARRAY');
-	}
-	my $index=shift @files;
-	for ($cmd) {
-		/^p/ && do {
-			@files = map { ($_, shift @files) } ('-1', '-2', undef);
-			last;
-		};
-		/^c/ && do {
-			@files = map { ($_, shift @files) } ('--12', undef, undef);
-			last;
-		}
-	}
-	@files = map { defined $_ ? $_ : () } @files; # squish undefs
-	shift @$options; # dump program name
-
-	my @ipc_args = ( $exe, @$options, $index, @files );
-
-	eval {
-		IPC::Run::run(\@ipc_args, $in, $out, $err) or
-			die ("There was a problem running $exe : $!");
-	};
-	if ($@) {
-		$self->throw("$exe call crashed: $@") unless $self->no_throw_on_crash;
-		return 0;
-	}
-
-	# return arguments as specified on call
-	return @args;
-}
-
-=head2 no_throw_on_crash()
-
- Title   : no_throw_on_crash
- Usage   : 
- Function: prevent throw on execution error
- Returns : 
- Args    : [optional] boolean
-
-=cut
-
-sub no_throw_on_crash {
-	my $self = shift;
-	return $self->{'_no_throw'} = shift if @_;
-	return $self->{'_no_throw'};
-}
-
-=head2 stdout()
-
- Title   : stdout
- Usage   : $fac->stdout()
- Function: store the output from STDOUT for the run,
-           if no file specified in run_bowtie()
- Example :
- Returns : scalar string
- Args    : on set, new value (a scalar or undef, optional)
-
-=cut
-
-sub stdout {
-	my $self = shift;
-
-	return $self->{'stdout'} = shift if @_;
-	return $self->{'stdout'};
-}
-
-=head2 stderr()
-
- Title   : stderr
- Usage   : $fac->stderr()
- Function: store the output from STDERR for the run,
-           if no file is specified in run_bowtie()
- Example :
- Returns : scalar string
- Args    : on set, new value (a scalar or undef, optional)
-
-=cut
-
-sub stderr {
-	my $self = shift;
-
-	return $self->{'stderr'} = shift if @_;
-	return $self->{'stderr'};
-}
-
-=head2 _validate_file_input()
-
- Validate input file for bowtie executables.
-
-=cut
 
 sub _validate_file_input {
 	my ($self, @args) = @_;
@@ -609,7 +468,7 @@ sub _prepare_input_sequences {
 	}
 
 	# Could use the AssemblerBase routine for this, except that would not permit
-	# an array of strings - not decided at this stage.
+	# an array of strings
 	if ($self->inline) { # expect inline data
 		if ($read->isa("Bio::PrimarySeqI")) { # we have a Bio::*Seq*
 			$read=$read->seq();
@@ -692,68 +551,95 @@ sub set_parameters {
 	$self->throw("Input args not an even number") unless !(@args % 2);
 	my %args = @args;
 
+
 	foreach (keys %args) {
+		my @added;
+		my @removed;
 		s/^-//;
 		foreach my $conflict (@{$incompat_params{$_}}) {
-			$self->reset_parameters( '-'.$conflict => 0 );
+			return if grep /$conflict/, @added;
+			$args{'-'.$conflict}=0;
+			push @removed, $conflict;
 		}
 		foreach my $requirement (@{$corequisite_switches{$_}}) {
-			# There is only one case and it is not a true corequisite,
-			# but if it were, calling ourself would be bad, so delegate this.
-			push @args, ('-'.$requirement,1);
+			return if grep /$requirement/, @removed;
+			$args{'-'.$requirement}=1;
+			push @added, $requirement;
 		}
 	}
 
-	# currently stored stuff
-	my $opts = $self->{'_options'};
-	my $params = $opts->{'_params'};
-	my $switches = $opts->{'_switches'};
-	my $translation = $opts->{'_translation'};
-	my $qual_param = $opts->{'_qual_param'};
-	my $use_dash = $opts->{'_dash'};
-	my $join = $opts->{'_join'};
+	# check for asm_format change requirements
+	return unless $self->_check_format_modifiers(%args);
 
-	$self->_set_program_options(\@args, $params, $switches, $translation,
-	                            $qual_param, $use_dash, $join);
-	# the question is, are previously-set parameters left alone when
-	# not specified in @args?
-	$self->parameters_changed(1);
-
-	return 1;
+	return $self->SUPER::set_parameters(%args);
 }
 
-=head2 available_parameters()
+=head2 reset_parameters()
 
- Title   : available_parameters
- Usage   : @cmds = $fac->available_commands('commands');
- Function: Use to browse available commands, params, or switches
- Returns : array of scalar strings
- Args    : 'commands' : all bowtie commands
-           'params'   : parameters for this object's command
-           'switches' : boolean switches for this object's command
-           'filespec' : the filename spec for this object's command
- 4Geeks  : Overrides Bio::ParameterBaseI via
-           Bio::Tools::Run::AssemblerBase
+ Title   : reset_parameters
+ Usage   : $bowtiefac->reset_parameters(%params);
+ Function: resets the parameters listed in the hash or array,
+           maintaining sane options.
+ Returns : none
+ Args    : [optional] hash or array of parameter/values.  
 
 =cut
 
-sub available_parameters {
-	my $self = shift;
-	my $subset = shift;
-	for ($subset) { # get commands
-		!defined && do { # delegate
-			return $self->SUPER::available_parameters($subset);
-		};
-		m/^c/i && do {
-			return grep !/^run$/, @program_commands;
-		};
-		m/^f/i && do { # get file spec
-			return @{$command_files{$self->command}};
-		};
-		do { #else delegate...
-			return $self->SUPER::available_parameters($subset);
-		};
+sub reset_parameters {
+	my ($self, @args) = @_;
+
+	# Mutually exclusive switches/params prevented from being reset to
+	# avoid confusion resulting from resetting corequireed switches.
+
+	$self->throw("Input args not an even number") unless !(@args % 2);
+	my %args = @args;
+
+	foreach (keys %args) {
+		s/^-//;
+		foreach my $requirement (@{$corequisite_switches{$_}}) {
+			$args{'-'.$requirement}=0;
+		}
 	}
+
+	# check for asm_format change requirements
+	return unless $self->_check_format_modifiers(%args);
+
+	$self->SUPER::reset_parameters(%args);
+}
+
+=head2 _check_format_modifiers()
+
+ Title   : _check_format_modifiers
+ Usage   : $bowtiefac->_check_format_modifiers(%params);
+ Function: sets _assembly_format appropriately for chosen switches
+ Returns : boolean success or failure
+ Args    : hash or array of parameter/values.  
+
+=cut
+
+sub _check_format_modifiers {
+	my ($self, @args) = @_;
+	s/^-// for @args;
+	my %args = @args;
+
+	my %formats;
+	my @format_modifiers = keys %format_lookup;
+	@formats{@format_modifiers} = @args{@format_modifiers};
+	foreach (keys %formats) {
+		$self->_assembly_format(undef) if !$formats{$_} and
+		                                  $self->_assembly_format() =~ m/$format_lookup{$_}/;
+		delete $formats{$_} unless $formats{$_};
+	}
+	if (!keys %formats) {
+		$self->_assembly_format('bowtie') unless $self->_assembly_format();
+	} elsif (keys %formats == 1) {
+		my ($format) = (keys %formats);
+		$self->_assembly_format($format_lookup{$format});
+	} else {
+		return;
+	}
+
+	return 1;
 }
 
 =head2 version()
@@ -770,7 +656,7 @@ sub version{
 
 	my $cmd = $self->command if $self->can('command');
 
-	defined $cmd or $self->throw("No command defined - cannot determine program_dir");
+	defined $cmd or $self->throw("No command defined - cannot determine program executable");
 
 	my ($in, $out, $err);
 	my $dum;
@@ -780,32 +666,9 @@ sub version{
 
 	# Get program executable
 	my $exe = $self->executable;
-	# Get '--version' - yes this is overkill, but want to keep this general in case the situation changes
+	# Get version switch from switches, translate and dash it
 	my $version_switch = $param_translation{"$command_prefixes{$cmd}|version"};
-	my $dash = $self->{'_options'}->{'_dash'};
-	for ($dash) {
-		$_ == 1 && do {
-			$version_switch = '-'.$version_switch;
-			last;
-		};
-		/^s/ && do { #single dash only
-			$version_switch = '-'.$version_switch;
-			last;
-		};
-		/^d/ && do { # double dash only
-			$version_switch = '--'.$version_switch;
-			last;
-		};
-		/^m/ && do { # mixed dash: one-letter opts get -,
-			$version_switch = '--'.$version_switch;
-			$version_switch =~ s/--([a-z0-9](?:\s|$))/-$1/gi;
-			last;
-		};
-		do { 
-			$self->warn( "Dash spec '$dash' not recognized; using 'single'" );
-			$version_switch = '-'.$version_switch;
-		};
-	}
+	$version_switch = $self->_dash_switch( $version_switch );
 
 	my @ipc_args = ( $exe, $version_switch );
 

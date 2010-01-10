@@ -33,14 +33,14 @@ User feedback is an integral part of the evolution of this and other
 Bioperl modules. Send your comments and suggestions preferably to
 the Bioperl mailing list.  Your participation is much appreciated.
 
-  bioperl-l@bioperl.org <mailto:bioperl-l@bioperl.org>                  - General discussion
+bioperl-l@bioperl.org                  - General discussion
 http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
 =head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
-L<bioperl-l@bioperl.org <mailto:bioperl-l@bioperl.org>>
+L<bioperl-l@bioperl.org>
 
 rather than to the module maintainer directly. Many experienced and
 reponsive experts will be able look at the problem and quickly
@@ -55,9 +55,9 @@ the web:
 
   http://bugzilla.open-bio.org/
 
-=head1 AUTHOR - Mark A. Jensen
+=head1 AUTHOR - Dan Kortschak
 
-Email maj@fortinbras.us <mailto:maj@fortinbras.us>
+Email dan.kortschak adelaide.edu.au
 
 Describe contact details here
 
@@ -81,13 +81,14 @@ use warnings;
 no warnings qw(qw);
 use Bio::Root::Root;
 use Exporter;
-use base qw(Bio::Root::Root );
+use base qw(Bio::Root::Root);
 
 our (@ISA, @EXPORT, @EXPORT_OK);
 push @ISA, 'Exporter';
 @EXPORT = qw(
              @program_commands
              %command_executables
+             %format_lookup
              %command_prefixes
              %composite_commands
              @program_params
@@ -118,6 +119,13 @@ our %command_executables = (
     'crossbow'   => 'bowtie',
     'build'      => 'bowtie-build',
     'inspect'    => 'bowtie-inspect'
+    );
+
+our %format_lookup = (
+    'sam_format' => 'sam',
+    'concise'    => undef,
+    'refout'     => undef,
+    'refidx'     => 'bowtie'
     );
 
 
@@ -472,28 +480,6 @@ INIT {
 		push @program_switches, "par\|".$1 if (m/^one\|(.*)/);
 		push @program_switches, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
 	}
-	
-#	# add subcommand params and switches for
-#	# composite commands
-#	my @sub_params;
-#	my @sub_switches;
-#	foreach my $cmd (keys %composite_commands) {
-#		foreach my $subcmd ( @{$composite_commands{$cmd}} ) {
-#			my @sub_program_params = grep /^$subcmd\|/, @program_params;
-#			my @sub_program_switches = grep /^$subcmd\|/, @program_switches;
-#			for (@sub_program_params) {
-#				m/^$subcmd\|(.*)/;
-#				push @sub_params, "$cmd\|${subcmd}_".$1;
-#			}
-#			for (@sub_program_switches) {
-#				m/^$subcmd\|(.*)/;
-#				push @sub_switches, "$cmd\|${subcmd}_".$1;
-#			}
-#		}
-#	}
-#	push @program_params, @sub_params;
-#	push @program_switches, @sub_switches;
-#	# translations for subcmd params/switches not necessary
 }
 
 1;
