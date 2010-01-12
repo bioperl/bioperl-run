@@ -96,7 +96,6 @@ package Bio::DB::ESoap;
 use strict;
 use warnings;
 
-use lib '../..'; # remove later
 use Bio::Root::Root;
 use Bio::DB::ESoap::WSDL;
 use SOAP::Lite;

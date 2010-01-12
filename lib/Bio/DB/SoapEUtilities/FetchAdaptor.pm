@@ -97,10 +97,6 @@ use Bio::Root::Root;
 
 use base qw(Bio::Root::Root );
 
-our %TYPE_MODULE_XLT = (
-    
-    );
-
 =head2 new
 
  Title   : new

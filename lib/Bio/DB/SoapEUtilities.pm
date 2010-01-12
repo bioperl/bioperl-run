@@ -417,7 +417,6 @@ Internal methods are usually preceded with a _
 package Bio::DB::SoapEUtilities;
 use strict;
 
-use lib '../..'; # remove later
 use Bio::Root::Root;
 use Bio::DB::ESoap;
 use Bio::DB::SoapEUtilities::DocSumAdaptor;

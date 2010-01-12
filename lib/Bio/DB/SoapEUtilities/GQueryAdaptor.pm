@@ -92,7 +92,6 @@ use strict;
 
 use Bio::Root::Root;
 
-
 use base qw(Bio::Root::Root );
 
 =head2 new
