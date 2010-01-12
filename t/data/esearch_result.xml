@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+<SOAP-ENV:Body>
+<eSearchResult xmlns="http://www.ncbi.nlm.nih.gov/soap/eutils/esearch"><Count>777</Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>
+		<Id>4212556</Id>
+		<Id>7103559</Id>
+		<Id>7036330</Id>
+		<Id>7005509</Id>
+		<Id>6515581</Id>
+		<Id>6333573</Id>
+		<Id>6067533</Id>
+		<Id>5849183</Id>
+		<Id>5625162</Id>
+		<Id>5613996</Id>
+		<Id>5451592</Id>
+		<Id>5188376</Id>
+		<Id>5182770</Id>
+		<Id>5174340</Id>
+		<Id>5132346</Id>
+		<Id>5079123</Id>
+		<Id>4625535</Id>
+		<Id>4233539</Id>
+		<Id>4227906</Id>
+		<Id>4171988</Id>
+	</IdList><TranslationSet/><TranslationStack>   <TermSet>    <Term>shine[All Fields]</Term>    <Field>All Fields</Field>    <Count>781</Count>    <Explode>Y</Explode>   </TermSet>   <TermSet>    <Term>dalgarno[All Fields]</Term>    <Field>All Fields</Field>    <Count>777</Count>    <Explode>Y</Explode>   </TermSet>   <OP>AND</OP>   <OP>GROUP</OP>  </TranslationStack><QueryTranslation>shine[All Fields] AND dalgarno[All Fields]</QueryTranslation></eSearchResult>
+
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

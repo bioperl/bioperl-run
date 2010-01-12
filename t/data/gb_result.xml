@@ -1,0 +1,417 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+<SOAP-ENV:Body><eFetchResult xmlns="http://www.ncbi.nlm.nih.gov/soap/eutils/efetch_seq">
+<GBSet>
+<GBSeq>
+  <GBSeq_locus>CAB02640</GBSeq_locus>
+  <GBSeq_length>193</GBSeq_length>
+  <GBSeq_moltype>AA</GBSeq_moltype>
+  <GBSeq_topology>linear</GBSeq_topology>
+  <GBSeq_division>BCT</GBSeq_division>
+  <GBSeq_update-date>23-OCT-2008</GBSeq_update-date>
+  <GBSeq_create-date>21-NOV-2003</GBSeq_create-date>
+  <GBSeq_definition>PROBABLE PYRIMIDINE OPERON REGULATORY PROTEIN PYRR [Mycobacterium tuberculosis H37Rv]</GBSeq_definition>
+  <GBSeq_primary-accession>CAB02640</GBSeq_primary-accession>
+  <GBSeq_accession-version>CAB02640.1</GBSeq_accession-version>
+  <GBSeq_other-seqids>
+    <GBSeqid>emb|CAB02640.1|</GBSeqid>
+    <GBSeqid>gi|1621261</GBSeqid>
+  </GBSeq_other-seqids>
+  <GBSeq_source>Mycobacterium tuberculosis H37Rv</GBSeq_source>
+  <GBSeq_organism>Mycobacterium tuberculosis H37Rv</GBSeq_organism>
+  <GBSeq_taxonomy>Bacteria; Actinobacteria; Actinobacteridae; Actinomycetales; Corynebacterineae; Mycobacteriaceae; Mycobacterium; Mycobacterium tuberculosis complex</GBSeq_taxonomy>
+  <GBSeq_references>
+    <GBReference>
+      <GBReference_reference>1</GBReference_reference>
+      <GBReference_authors>
+        <GBAuthor>Cole,S.T.</GBAuthor>
+        <GBAuthor>Brosch,R.</GBAuthor>
+        <GBAuthor>Parkhill,J.</GBAuthor>
+        <GBAuthor>Garnier,T.</GBAuthor>
+        <GBAuthor>Churcher,C.</GBAuthor>
+        <GBAuthor>Harris,D.</GBAuthor>
+        <GBAuthor>Gordon,S.V.</GBAuthor>
+        <GBAuthor>Eiglmeier,K.</GBAuthor>
+        <GBAuthor>Gas,S.</GBAuthor>
+        <GBAuthor>Barry,C.E. III</GBAuthor>
+        <GBAuthor>Tekaia,F.</GBAuthor>
+        <GBAuthor>Badcock,K.</GBAuthor>
+        <GBAuthor>Basham,D.</GBAuthor>
+        <GBAuthor>Brown,D.</GBAuthor>
+        <GBAuthor>Chillingworth,T.</GBAuthor>
+        <GBAuthor>Connor,R.</GBAuthor>
+        <GBAuthor>Davies,R.</GBAuthor>
+        <GBAuthor>Devlin,K.</GBAuthor>
+        <GBAuthor>Feltwell,T.</GBAuthor>
+        <GBAuthor>Gentles,S.</GBAuthor>
+        <GBAuthor>Hamlin,N.</GBAuthor>
+        <GBAuthor>Holroyd,S.</GBAuthor>
+        <GBAuthor>Hornsby,T.</GBAuthor>
+        <GBAuthor>Jagels,K.</GBAuthor>
+        <GBAuthor>Krogh,A.</GBAuthor>
+        <GBAuthor>McLean,J.</GBAuthor>
+        <GBAuthor>Moule,S.</GBAuthor>
+        <GBAuthor>Murphy,L.</GBAuthor>
+        <GBAuthor>Oliver,K.</GBAuthor>
+        <GBAuthor>Osborne,J.</GBAuthor>
+        <GBAuthor>Quail,M.A.</GBAuthor>
+        <GBAuthor>Rajandream,M.A.</GBAuthor>
+        <GBAuthor>Rogers,J.</GBAuthor>
+        <GBAuthor>Rutter,S.</GBAuthor>
+        <GBAuthor>Seeger,K.</GBAuthor>
+        <GBAuthor>Skelton,J.</GBAuthor>
+        <GBAuthor>Squares,R.</GBAuthor>
+        <GBAuthor>Squares,S.</GBAuthor>
+        <GBAuthor>Sulston,J.E.</GBAuthor>
+        <GBAuthor>Taylor,K.</GBAuthor>
+        <GBAuthor>Whitehead,S.</GBAuthor>
+        <GBAuthor>Barrell,B.G.</GBAuthor>
+      </GBReference_authors>
+      <GBReference_title>Deciphering the biology of Mycobacterium tuberculosis from the complete genome sequence</GBReference_title>
+      <GBReference_journal>Nature 393 (6685), 537-544 (1998)</GBReference_journal>
+      <GBReference_xref>
+        <GBXref>
+          <GBXref_dbname>doi</GBXref_dbname>
+          <GBXref_id>10.1038/31159</GBXref_id>
+        </GBXref>
+      </GBReference_xref>
+      <GBReference_pubmed>9634230</GBReference_pubmed>
+      <GBReference_remark>Erratum:[Nature 1998 Nov 12;396(6707):190]</GBReference_remark>
+    </GBReference>
+    <GBReference>
+      <GBReference_reference>2</GBReference_reference>
+      <GBReference_authors>
+        <GBAuthor>Camus,J.C.</GBAuthor>
+        <GBAuthor>Pryor,M.J.</GBAuthor>
+        <GBAuthor>Medigue,C.</GBAuthor>
+        <GBAuthor>Cole,S.T.</GBAuthor>
+      </GBReference_authors>
+      <GBReference_title>Re-annotation of the genome sequence of Mycobacterium tuberculosis H37Rv</GBReference_title>
+      <GBReference_journal>Microbiology (Reading, Engl.) 148 (PT 10), 2967-2973 (2002)</GBReference_journal>
+      <GBReference_pubmed>12368430</GBReference_pubmed>
+    </GBReference>
+    <GBReference>
+      <GBReference_reference>3</GBReference_reference>
+      <GBReference_position>1..193</GBReference_position>
+      <GBReference_authors>
+        <GBAuthor>Parkhill,J.</GBAuthor>
+      </GBReference_authors>
+      <GBReference_title>Direct Submission</GBReference_title>
+      <GBReference_journal>Submitted (11-JUN-1998) Submitted on behalf of the Mycobacterium tuberculosis sequencing and mapping teams, Sanger Centre, Wellcome Trust Genome Campus, Hinxton, Cambridge CB10 1SA Unite de Genetique Moleculaire Bacterienne, Institut Pasteur, 28 rue du Docteur Roux, 75724 Paris Cedex 15, France E-mail: parkhill@sanger.ac.uk</GBReference_journal>
+    </GBReference>
+  </GBSeq_references>
+  <GBSeq_comment>Notes:~Details of M. tuberculosis sequencing at the Sanger Centre are available on the World Wide Web.~(URL, http://www.sanger.ac.uk/Projects/M_tuberculosis/)</GBSeq_comment>
+  <GBSeq_source-db>embl accession BX842576.1</GBSeq_source-db>
+  <GBSeq_feature-table>
+    <GBFeature>
+      <GBFeature_key>source</GBFeature_key>
+      <GBFeature_location>1..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>1</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>CAB02640.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>organism</GBQualifier_name>
+          <GBQualifier_value>Mycobacterium tuberculosis H37Rv</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>strain</GBQualifier_name>
+          <GBQualifier_value>H37Rv</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>taxon:83332</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+    <GBFeature>
+      <GBFeature_key>Protein</GBFeature_key>
+      <GBFeature_location>1..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>1</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>CAB02640.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>product</GBQualifier_name>
+          <GBQualifier_value>PROBABLE PYRIMIDINE OPERON REGULATORY PROTEIN PYRR</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>function</GBQualifier_name>
+          <GBQualifier_value>BINDS TO THE CONSERVED SEQUENCE IN THE PYR OPERON MRNA AND DISRUPTS THE ANTITERMINATOR, PERMITTING TERMINATOR HAIRPIN FORMATION AND PROMOTING TRANSCRIPTION TERMINATION</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+    <GBFeature>
+      <GBFeature_key>Region</GBFeature_key>
+      <GBFeature_location>11..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>11</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>CAB02640.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>region_name</GBQualifier_name>
+          <GBQualifier_value>Pribosyltran</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>note</GBQualifier_name>
+          <GBQualifier_value>Phosphoribosyl transferase domain; cl00309</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>CDD:140596</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+    <GBFeature>
+      <GBFeature_key>CDS</GBFeature_key>
+      <GBFeature_location>1..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>1</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>CAB02640.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>gene</GBQualifier_name>
+          <GBQualifier_value>pyrR</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>locus_tag</GBQualifier_name>
+          <GBQualifier_value>Rv1379</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>coded_by</GBQualifier_name>
+          <GBQualifier_value>BX842576.1:169611..170192</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>note</GBQualifier_name>
+          <GBQualifier_value>Rv1379, (MTCY02B12.13), len: 193 aa. Probable pyrR, pyrimidine operon regulatory protein, similar to PYRR_BACCL|P41007 pyrimidine operon regulatory protein from Bacillus caldolyticus (179 aa), FASTA scores: opt: 544, E(): 1.1e-30, (54.2% identity in 179 aa overlap).</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>transl_table</GBQualifier_name>
+          <GBQualifier_value>11</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>GOA:P65941</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>InterPro:IPR000836</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>InterPro:IPR002375</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>PDB:1W30</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>UniProtKB/Swiss-Prot:P65941</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+  </GBSeq_feature-table>
+  <GBSeq_sequence>mgaagdaaigresrelmsaadvgrtisriahqiiektalddpvgpdaprvvllgiptrgvtlanrlagniteysgihvghgalditlyrddlmikpprplastsipaggiddalvilvddvlysgrsvrsaldalrdvgrpravqlavlvdrghrelplradyvgknvptsrsesvhvrlrehdgrdgvvisr</GBSeq_sequence>
+</GBSeq>
+
+<GBSeq>
+  <GBSeq_locus>EAS10332</GBSeq_locus>
+  <GBSeq_length>193</GBSeq_length>
+  <GBSeq_moltype>AA</GBSeq_moltype>
+  <GBSeq_topology>linear</GBSeq_topology>
+  <GBSeq_division>BCT</GBSeq_division>
+  <GBSeq_update-date>09-APR-2007</GBSeq_update-date>
+  <GBSeq_create-date>09-MAR-2006</GBSeq_create-date>
+  <GBSeq_definition>Phosphoribosyltransferase [Mycobacterium gilvum PYR-GCK]</GBSeq_definition>
+  <GBSeq_primary-accession>EAS10332</GBSeq_primary-accession>
+  <GBSeq_accession-version>EAS10332.1</GBSeq_accession-version>
+  <GBSeq_other-seqids>
+    <GBSeqid>gb|EAS10332.1|</GBSeqid>
+    <GBSeqid>gnl|WGS:AAPA|MflvDRAFT_2382</GBSeqid>
+    <GBSeqid>gi|89318838</GBSeqid>
+  </GBSeq_other-seqids>
+  <GBSeq_project>15760</GBSeq_project>
+  <GBSeq_source>Mycobacterium gilvum PYR-GCK</GBSeq_source>
+  <GBSeq_organism>Mycobacterium gilvum PYR-GCK</GBSeq_organism>
+  <GBSeq_taxonomy>Bacteria; Actinobacteria; Actinobacteridae; Actinomycetales; Corynebacterineae; Mycobacteriaceae; Mycobacterium</GBSeq_taxonomy>
+  <GBSeq_references>
+    <GBReference>
+      <GBReference_reference>1</GBReference_reference>
+      <GBReference_position>1..193</GBReference_position>
+      <GBReference_authors>
+        <GBAuthor>Copeland,A.</GBAuthor>
+        <GBAuthor>Lucas,S.</GBAuthor>
+        <GBAuthor>Lapidus,A.</GBAuthor>
+        <GBAuthor>Barry,K.</GBAuthor>
+        <GBAuthor>Detter,J.C.</GBAuthor>
+        <GBAuthor>Glavina del Rio,T.</GBAuthor>
+        <GBAuthor>Hammon,N.</GBAuthor>
+        <GBAuthor>Israni,S.</GBAuthor>
+        <GBAuthor>Dalin,E.</GBAuthor>
+        <GBAuthor>Tice,H.</GBAuthor>
+        <GBAuthor>Bruce,D.</GBAuthor>
+        <GBAuthor>Pitluck,S.</GBAuthor>
+        <GBAuthor>Richardson,P.</GBAuthor>
+      </GBReference_authors>
+      <GBReference_consortium>US DOE Joint Genome Institute (JGI-PGF)</GBReference_consortium>
+      <GBReference_title>Sequencing of the draft genome and assembly of Mycobacterium flavescens PYR-GCK</GBReference_title>
+      <GBReference_journal>Unpublished</GBReference_journal>
+    </GBReference>
+    <GBReference>
+      <GBReference_reference>2</GBReference_reference>
+      <GBReference_position>1..193</GBReference_position>
+      <GBReference_authors>
+        <GBAuthor>Larimer,F.</GBAuthor>
+        <GBAuthor>Land,M.</GBAuthor>
+      </GBReference_authors>
+      <GBReference_consortium>US DOE Joint Genome Institute (JGI-ORNL)</GBReference_consortium>
+      <GBReference_title>Annotation of the draft genome assembly of Mycobacterium gilvum PYR-GCK</GBReference_title>
+      <GBReference_journal>Unpublished</GBReference_journal>
+    </GBReference>
+    <GBReference>
+      <GBReference_reference>3</GBReference_reference>
+      <GBReference_position>1..193</GBReference_position>
+      <GBReference_authors>
+        <GBAuthor>Copeland,A.</GBAuthor>
+        <GBAuthor>Lucas,S.</GBAuthor>
+        <GBAuthor>Lapidus,A.</GBAuthor>
+        <GBAuthor>Barry,K.</GBAuthor>
+        <GBAuthor>Detter,J.C.</GBAuthor>
+        <GBAuthor>Glavina del Rio,T.</GBAuthor>
+        <GBAuthor>Hammon,N.</GBAuthor>
+        <GBAuthor>Israni,S.</GBAuthor>
+        <GBAuthor>Dalin,E.</GBAuthor>
+        <GBAuthor>Tice,H.</GBAuthor>
+        <GBAuthor>Bruce,D.</GBAuthor>
+        <GBAuthor>Pitluck,S.</GBAuthor>
+        <GBAuthor>Richardson,P.</GBAuthor>
+      </GBReference_authors>
+      <GBReference_consortium>US DOE Joint Genome Institute (JGI-PGF)</GBReference_consortium>
+      <GBReference_title>Direct Submission</GBReference_title>
+      <GBReference_journal>Submitted (08-MAR-2006) US DOE Joint Genome Institute, 2800 Mitchell Drive B100, Walnut Creek, CA 94598-1698, USA</GBReference_journal>
+    </GBReference>
+  </GBSeq_references>
+  <GBSeq_comment>URL -- http://www.jgi.doe.gov~Contact: Paul Richardson (microbes@cuba.jgi-psf.org)~Whole genome sequencing and draft assembly at JGI-PGF~Annotation by JGI-ORNL~Source DNA and bacteria available from Charles Miller (cdmiller@biology.usu.edu))~The JGI and collaborators endorse the principles for the distribution and use of large scale sequencing data adopted by the larger genome sequencing community and urge users of this data to follow them. It is our intention to publish the work of this project in a timely fashion and we welcome collaborative interaction on the project and analysis.~(http://www.genome.gov/page.cfm?pageID=10506376)~~This WGS project has been superceded by the complete genome in (non-WGS) GenBank records CP000656-CP000659.; Method: conceptual translation.</GBSeq_comment>
+  <GBSeq_source-db>accession AAPA01000007.1</GBSeq_source-db>
+  <GBSeq_feature-table>
+    <GBFeature>
+      <GBFeature_key>source</GBFeature_key>
+      <GBFeature_location>1..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>1</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>EAS10332.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>organism</GBQualifier_name>
+          <GBQualifier_value>Mycobacterium gilvum PYR-GCK</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>strain</GBQualifier_name>
+          <GBQualifier_value>PYR-GCK</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>taxon:350054</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+    <GBFeature>
+      <GBFeature_key>Protein</GBFeature_key>
+      <GBFeature_location>1..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>1</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>EAS10332.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>product</GBQualifier_name>
+          <GBQualifier_value>Phosphoribosyltransferase</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+    <GBFeature>
+      <GBFeature_key>Region</GBFeature_key>
+      <GBFeature_location>11..186</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>11</GBInterval_from>
+          <GBInterval_to>186</GBInterval_to>
+          <GBInterval_accession>EAS10332.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>region_name</GBQualifier_name>
+          <GBQualifier_value>Pribosyltran</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>note</GBQualifier_name>
+          <GBQualifier_value>Phosphoribosyl transferase domain; cl00309</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>CDD:140596</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+    <GBFeature>
+      <GBFeature_key>CDS</GBFeature_key>
+      <GBFeature_location>1..193</GBFeature_location>
+      <GBFeature_intervals>
+        <GBInterval>
+          <GBInterval_from>1</GBInterval_from>
+          <GBInterval_to>193</GBInterval_to>
+          <GBInterval_accession>EAS10332.1</GBInterval_accession>
+        </GBInterval>
+      </GBFeature_intervals>
+      <GBFeature_quals>
+        <GBQualifier>
+          <GBQualifier_name>locus_tag</GBQualifier_name>
+          <GBQualifier_value>MflvDRAFT_2382</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>coded_by</GBQualifier_name>
+          <GBQualifier_value>AAPA01000007.1:178491..179072</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>transl_table</GBQualifier_name>
+          <GBQualifier_value>11</GBQualifier_value>
+        </GBQualifier>
+        <GBQualifier>
+          <GBQualifier_name>db_xref</GBQualifier_name>
+          <GBQualifier_value>InterPro:IPR000836</GBQualifier_value>
+        </GBQualifier>
+      </GBFeature_quals>
+    </GBFeature>
+  </GBSeq_feature-table>
+  <GBSeq_sequence>mgapdqsgsdrelmsaadvsrtiariahqiiektaldgpdgprvillgiptrgvtlasrlatniaefsgvqvahgaldttlyrddlmtkppralaetsipaggidgalvilvddvlytgrsvrsaldalrdlgrpkavqlavlvdrghrelpiradyvgknvptsrsenvkvrltendgvdiiaiapyggppr</GBSeq_sequence>
+</GBSeq>
+</GBSet>
+
+</eFetchResult>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

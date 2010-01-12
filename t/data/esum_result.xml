@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+<SOAP-ENV:Body>
+<eSummaryResult xmlns="http://www.ncbi.nlm.nih.gov/soap/eutils/esummary">
+<DocSum>
+	<Id>828392</Id>
+	<Item Name="Name" Type="String"><ItemContent>PYR4</ItemContent></Item>
+	<Item Name="Description" Type="String"><ItemContent>PYR4 (PYRIMIDIN 4); dihydroorotase/ hydrolase/ hydrolase, acting on carbon-nitrogen (but not peptide) bonds, in cyclic amides</ItemContent></Item>
+	<Item Name="Orgname" Type="String"><ItemContent>Arabidopsis thaliana</ItemContent></Item>
+	<Item Name="Status" Type="Integer"><ItemContent>0</ItemContent></Item>
+	<Item Name="CurrentID" Type="Integer"><ItemContent>0</ItemContent></Item>
+	<Item Name="Chromosome" Type="String"><ItemContent>4</ItemContent></Item>
+	<Item Name="GeneticSource" Type="String"><ItemContent>genomic</ItemContent></Item>
+	<Item Name="MapLocation" Type="String"></Item>
+	<Item Name="OtherAliases" Type="String"><ItemContent>AT4G22930, DHOASE, DIHYDROOROTASE, F7H19.110, F7H19_110, PYRIMIDIN 4</ItemContent></Item>
+	<Item Name="OtherDesignations" Type="String"></Item>
+	<Item Name="NomenclatureSymbol" Type="String"></Item>
+	<Item Name="NomenclatureName" Type="String"></Item>
+	<Item Name="NomenclatureStatus" Type="String"></Item>
+	<Item Name="TaxID" Type="Integer"><ItemContent>3702</ItemContent></Item>
+	<Item Name="Mim" Type="List"></Item>
+	<Item Name="GenomicInfo" Type="List">
+		<Item Name="GenomicInfoType" Type="Structure">
+			<Item Name="ChrLoc" Type="String"><ItemContent>4</ItemContent></Item>
+			<Item Name="ChrAccVer" Type="String"><ItemContent>NC_003075.7</ItemContent></Item>
+			<Item Name="ChrStart" Type="Integer"><ItemContent>12018883</ItemContent></Item>
+			<Item Name="ChrStop" Type="Integer"><ItemContent>12021590</ItemContent></Item>
+		</Item>
+	</Item>
+	<Item Name="GeneWeight" Type="Integer"><ItemContent>851</ItemContent></Item>
+	<Item Name="Summary" Type="String"><ItemContent>Encodes dihydroorotase (PYR4).</ItemContent></Item>
+	<Item Name="ChrSort" Type="String"><ItemContent>04</ItemContent></Item>
+	<Item Name="ChrStart" Type="Integer"><ItemContent>12018883</ItemContent></Item>
+</DocSum>
+
+<DocSum>
+	<Id>790</Id>
+	<Item Name="Name" Type="String"><ItemContent>CAD</ItemContent></Item>
+	<Item Name="Description" Type="String"><ItemContent>carbamoyl-phosphate synthetase 2, aspartate transcarbamylase, and dihydroorotase</ItemContent></Item>
+	<Item Name="Orgname" Type="String"><ItemContent>Homo sapiens</ItemContent></Item>
+	<Item Name="Status" Type="Integer"><ItemContent>0</ItemContent></Item>
+	<Item Name="CurrentID" Type="Integer"><ItemContent>0</ItemContent></Item>
+	<Item Name="Chromosome" Type="String"><ItemContent>2</ItemContent></Item>
+	<Item Name="GeneticSource" Type="String"><ItemContent>genomic</ItemContent></Item>
+	<Item Name="MapLocation" Type="String"><ItemContent>2p22-p21</ItemContent></Item>
+	<Item Name="OtherAliases" Type="String"></Item>
+	<Item Name="OtherDesignations" Type="String"><ItemContent>CAD trifunctional protein|carbamoylphosphate synthetase 2/aspartate transcarbamylase/dihydroorotase|multifunctional protein CAD</ItemContent></Item>
+	<Item Name="NomenclatureSymbol" Type="String"><ItemContent>CAD</ItemContent></Item>
+	<Item Name="NomenclatureName" Type="String"><ItemContent>carbamoyl-phosphate synthetase 2, aspartate transcarbamylase, and dihydroorotase</ItemContent></Item>
+	<Item Name="NomenclatureStatus" Type="String"><ItemContent>Official</ItemContent></Item>
+	<Item Name="TaxID" Type="Integer"><ItemContent>9606</ItemContent></Item>
+	<Item Name="Mim" Type="List">
+		<Item Name="int" Type="Integer"><ItemContent>114010</ItemContent></Item>
+	</Item>
+	<Item Name="GenomicInfo" Type="List">
+		<Item Name="GenomicInfoType" Type="Structure">
+			<Item Name="ChrLoc" Type="String"><ItemContent>2</ItemContent></Item>
+			<Item Name="ChrAccVer" Type="String"><ItemContent>NC_000002.11</ItemContent></Item>
+			<Item Name="ChrStart" Type="Integer"><ItemContent>27440257</ItemContent></Item>
+			<Item Name="ChrStop" Type="Integer"><ItemContent>27466653</ItemContent></Item>
+		</Item>
+	</Item>
+	<Item Name="GeneWeight" Type="Integer"><ItemContent>6258</ItemContent></Item>
+	<Item Name="Summary" Type="String"><ItemContent>The de novo synthesis of pyrimidine nucleotides is required for mammalian cells to proliferate. This gene encodes a trifunctional protein which is associated with the enzymatic activities of the first 3 enzymes in the 6-step pathway of pyrimidine biosynthesis: carbamoylphosphate synthetase (CPS II), aspartate transcarbamoylase, and dihydroorotase. This protein is regulated by the mitogen-activated protein kinase (MAPK) cascade, which indicates a direct link between activation of the MAPK cascade and de novo biosynthesis of pyrimidine nucleotides. [provided by RefSeq]</ItemContent></Item>
+	<Item Name="ChrSort" Type="String"><ItemContent>02</ItemContent></Item>
+	<Item Name="ChrStart" Type="Integer"><ItemContent>27440257</ItemContent></Item>
+</DocSum>
+
+<DocSum>
+	<Id>470338</Id>
+	<Item Name="Name" Type="String"><ItemContent>CAD</ItemContent></Item>
+	<Item Name="Description" Type="String"><ItemContent>carbamoyl-phosphate synthetase 2, aspartate transcarbamylase, and dihydroorotase</ItemContent></Item>
+	<Item Name="Orgname" Type="String"><ItemContent>Pan troglodytes</ItemContent></Item>
+	<Item Name="Status" Type="Integer"><ItemContent>0</ItemContent></Item>
+	<Item Name="CurrentID" Type="Integer"><ItemContent>0</ItemContent></Item>
+	<Item Name="Chromosome" Type="String"><ItemContent>2A</ItemContent></Item>
+	<Item Name="GeneticSource" Type="String"><ItemContent>genomic</ItemContent></Item>
+	<Item Name="MapLocation" Type="String"></Item>
+	<Item Name="OtherAliases" Type="String"></Item>
+	<Item Name="OtherDesignations" Type="String"><ItemContent>carbamoylphosphate synthetase 2/aspartate transcarbamylase/dihydroorotase</ItemContent></Item>
+	<Item Name="NomenclatureSymbol" Type="String"></Item>
+	<Item Name="NomenclatureName" Type="String"></Item>
+	<Item Name="NomenclatureStatus" Type="String"></Item>
+	<Item Name="TaxID" Type="Integer"><ItemContent>9598</ItemContent></Item>
+	<Item Name="Mim" Type="List"></Item>
+	<Item Name="GenomicInfo" Type="List">
+		<Item Name="GenomicInfoType" Type="Structure">
+			<Item Name="ChrLoc" Type="String"><ItemContent>2A</ItemContent></Item>
+			<Item Name="ChrAccVer" Type="String"><ItemContent>NC_006469.2</ItemContent></Item>
+			<Item Name="ChrStart" Type="Integer"><ItemContent>27812912</ItemContent></Item>
+			<Item Name="ChrStop" Type="Integer"><ItemContent>27841995</ItemContent></Item>
+		</Item>
+	</Item>
+	<Item Name="GeneWeight" Type="Integer"><ItemContent>802</ItemContent></Item>
+	<Item Name="Summary" Type="String"></Item>
+	<Item Name="ChrSort" Type="String"><ItemContent>02A</ItemContent></Item>
+	<Item Name="ChrStart" Type="Integer"><ItemContent>27812912</ItemContent></Item>
+</DocSum>
+
+</eSummaryResult>
+
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

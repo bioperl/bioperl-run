@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+<SOAP-ENV:Body>
+<eLinkResult xmlns="http://www.ncbi.nlm.nih.gov/soap/eutils/elink">
+
+	<LinkSet>
+		<DbFrom>gene</DbFrom>
+		<IdList>
+			<Id>790</Id>
+		</IdList>
+		<LinkSetDb>
+			<DbTo>taxonomy</DbTo>
+			<LinkName>gene_taxonomy</LinkName>
+			<Link>
+				<Id>9606</Id>
+			</Link>
+		</LinkSetDb>
+	</LinkSet>
+
+	<LinkSet>
+		<DbFrom>gene</DbFrom>
+		<IdList>
+			<Id>828392</Id>
+		</IdList>
+		<LinkSetDb>
+			<DbTo>taxonomy</DbTo>
+			<LinkName>gene_taxonomy</LinkName>
+			<Link>
+				<Id>3702</Id>
+			</Link>
+		</LinkSetDb>
+	</LinkSet>
+
+	<LinkSet>
+		<DbFrom>gene</DbFrom>
+		<IdList>
+			<Id>470338</Id>
+		</IdList>
+		<LinkSetDb>
+			<DbTo>taxonomy</DbTo>
+			<LinkName>gene_taxonomy</LinkName>
+			<Link>
+				<Id>9598</Id>
+			</Link>
+		</LinkSetDb>
+	</LinkSet>
+</eLinkResult>
+
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

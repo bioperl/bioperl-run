@@ -1,0 +1,909 @@
+<?xml version="1.0"?>
+<wsdl:definitions 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" 
+    xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" 
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
+    xmlns:s0="http://www.ncbi.nlm.nih.gov/soap/eutils/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/" 
+    targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/"
+    xmlns:nseg="http://www.ncbi.nlm.nih.gov/soap/eutils/egquery" 
+    xmlns:nsei="http://www.ncbi.nlm.nih.gov/soap/eutils/einfo" 
+    xmlns:nsel="http://www.ncbi.nlm.nih.gov/soap/eutils/elink" 
+    xmlns:nsese="http://www.ncbi.nlm.nih.gov/soap/eutils/esearch" 
+    xmlns:nsesu="http://www.ncbi.nlm.nih.gov/soap/eutils/esummary" 
+    xmlns:nsesp="http://www.ncbi.nlm.nih.gov/soap/eutils/espell" 
+    xmlns:nseps="http://www.ncbi.nlm.nih.gov/soap/eutils/epost" 
+>
+<!--    version="2.0" -->
+<types>
+  <xs:schema targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/egquery" xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/egquery" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" >
+    <!--  version="2.0" -->
+    <!--  http://www.ncbi.nlm.nih.gov/entrez/query/DTD/egquery.dtd  date: 2004/05/03 16:19:48  -->
+    <xs:element name="Result">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element name="Term" type="xs:string"/>
+	  <xs:element name="eGQueryResult" type="tns:eGQueryResultType"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    <xs:complexType name="ResultItemType">
+      <xs:sequence>
+	<xs:element name="DbName" type="xs:string"/>
+	<xs:element name="MenuName" type="xs:string"/>
+	<xs:element name="Count" type="xs:string"/>
+	<xs:element name="Status" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="eGQueryResultType">
+      <xs:sequence>
+	<xs:element name="ERROR" type="xs:string" minOccurs="0"/>
+	<xs:element name="ResultItem" type="tns:ResultItemType" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    <!-- input params -->
+    <xs:element name="term" type="xs:string" />
+    <xs:element name="tool" type="xs:string" />
+    <xs:element name="email" type="xs:string" />
+    
+    <xs:element name="eGqueryRequest">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:term" minOccurs="0"/>
+	  <xs:element ref="tns:tool" minOccurs="0"/>
+	  <xs:element ref="tns:email" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  
+  <xs:schema targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/einfo" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/einfo" elementFormDefault="qualified"	>
+    
+    <!--   version="2.0" -->
+    <!--   http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eInfo_020511.dtd  date: 2006-12-04 -->
+    <xs:complexType name="DbInfoType">
+      <xs:sequence>
+	<xs:element name="DbName" type="xs:string"/>
+	<xs:element name="MenuName" type="xs:string"/>
+	<xs:element name="Description" type="xs:string"/>
+	<xs:element name="Count" type="xs:string"/>
+	<xs:element name="LastUpdate" type="xs:string"/>
+	<xs:element name="FieldList" type="tns:FieldListType"/>
+	<xs:element name="LinkList" type="tns:LinkListType" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="DbListType">
+      <xs:choice>
+	<xs:element name="DbName" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="FieldType">
+      <xs:sequence>
+	<xs:element name="Name" type="xs:string"/>
+	<xs:element name="FullName" type="xs:string"/>
+	<xs:element name="Description" type="xs:string"/>
+	<xs:element name="TermCount" type="xs:string"/>
+	<xs:element name="IsDate" type="xs:string"/>
+	<xs:element name="IsNumerical" type="xs:string"/>
+	<xs:element name="SingleToken" type="xs:string"/>
+	<xs:element name="Hierarchy" type="xs:string"/>
+	<xs:element name="IsHidden" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="FieldListType">
+      <xs:sequence>
+	<xs:element name="Field" type="tns:FieldType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LinkType">
+      <xs:sequence>
+	<xs:element name="Name" type="xs:string"/>
+	<xs:element name="Menu" type="xs:string"/>
+	<xs:element name="Description" type="xs:string"/>
+	<xs:element name="DbTo" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LinkListType">
+      <xs:sequence>
+	<xs:element name="Link" type="tns:LinkType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    <!-- input params -->
+    <xs:element name="db" type="xs:string" />
+    <xs:element name="tool" type="xs:string" />
+    		<xs:element name="email" type="xs:string" />
+		
+		<xs:element name="eInfoRequest">
+		  <xs:complexType>
+		    <xs:sequence>
+		      <xs:element ref="tns:db" minOccurs="0"/>
+		      <xs:element ref="tns:tool" minOccurs="0"/>
+		      <xs:element ref="tns:email" minOccurs="0"/>
+		    </xs:sequence>
+		  </xs:complexType>
+		</xs:element>
+		
+		<!-- output params -->
+		<xs:element name="eInfoResult">
+		  <xs:complexType>
+		    <xs:sequence>
+		      <xs:element name="ERROR" type="xs:string" minOccurs="0"/>
+		      <xs:element name="DbList" type="tns:DbListType" minOccurs="0"/>
+		      <xs:element name="DbInfo" type="tns:DbInfoType" minOccurs="0"/>
+		    </xs:sequence>
+		  </xs:complexType>
+		</xs:element>
+		
+		
+  </xs:schema>
+  
+  
+  <xs:schema targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/esearch" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/esearch" elementFormDefault="qualified"	>
+    
+    <!--  version="2.0" -->
+    <!--  http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eSearch_020511.dtd  date: 2006-06-28  -->
+    
+    <xs:element name="Count" type="xs:string"/>
+    <xs:element name="ERROR" type="xs:string"/>
+    <xs:element name="Explode" type="xs:string"/>
+    <xs:element name="FieldNotFound" type="xs:string"/>
+    <xs:element name="From" type="xs:string"/>
+    <xs:element name="Id" type="xs:string"/>
+    <xs:element name="OutputMessage" type="xs:string"/>
+    <xs:element name="PhraseIgnored" type="xs:string"/>
+    <xs:element name="PhraseNotFound" type="xs:string"/>
+    <xs:element name="QueryKey" type="xs:string"/>
+    <xs:element name="QueryTranslation" type="xs:string"/>
+    <xs:element name="QuotedPhraseNotFound" type="xs:string"/>
+    <xs:element name="RetMax" type="xs:string"/>
+    <xs:element name="RetStart" type="xs:string"/>
+    <xs:element name="To" type="xs:string"/>
+    <xs:element name="WebEnv" type="xs:string"/>
+    <xs:complexType name="ErrorListType">
+      <xs:sequence>
+	<xs:element ref="tns:PhraseNotFound" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:FieldNotFound" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IdListType">
+      <xs:sequence>
+	<xs:element ref="tns:Id" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="TermSetType">
+      <xs:sequence>
+	<xs:element name="Term" type="xs:string" />
+	<xs:element name="Field" type="xs:string" />
+	<xs:element ref="tns:Count"/>
+	<xs:element ref="tns:Explode"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="TranslationType">
+      <xs:sequence>
+	<xs:element ref="tns:From"/>
+	<xs:element ref="tns:To"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="TranslationSetType">
+      <xs:sequence>
+	<xs:element name="Translation" type="tns:TranslationType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="TranslationStackType">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+	<xs:element name="TermSet" type="tns:TermSetType"/>
+	<xs:element name="OP" type="xs:string" />
+      </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="WarningListType">
+      <xs:sequence>
+	<xs:element ref="tns:PhraseIgnored" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:QuotedPhraseNotFound" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:OutputMessage" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    <xs:element name="eSearchResult">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:ERROR" minOccurs="0"/>
+	  <xs:element ref="tns:Count" minOccurs="0"/>
+	  <xs:element ref="tns:RetMax" minOccurs="0"/>
+	  <xs:element ref="tns:RetStart" minOccurs="0"/>
+	  <xs:element ref="tns:QueryKey" minOccurs="0"/>
+	  <xs:element ref="tns:WebEnv" minOccurs="0"/>
+	  <xs:element name="IdList" type="tns:IdListType" minOccurs="0"/>
+	  <xs:element name="TranslationSet" type="tns:TranslationSetType" minOccurs="0"/>
+	  <xs:element name="TranslationStack" type="tns:TranslationStackType" minOccurs="0"/>
+	  <xs:element ref="tns:QueryTranslation" minOccurs="0"/>
+	  <xs:element name="ErrorList" type="tns:ErrorListType" minOccurs="0"/>
+	  <xs:element name="WarningList" type="tns:WarningListType" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+    <!--  TOO COMPLEX FOR AXIS2
+	 <xs:element name="eSearchResult">
+	 <xs:complexType>
+	 <xs:sequence>
+	 <xs:sequence minOccurs="0">
+	 <xs:element ref="tns:ERROR" minOccurs="0"/>
+	 <xs:sequence minOccurs="0">
+	 <xs:element ref="tns:Count" minOccurs="0"/>
+	 <xs:sequence minOccurs="0">
+	 <xs:element ref="tns:RetMax" minOccurs="0"/>
+	 <xs:element ref="tns:RetStart" minOccurs="0"/>
+	 <xs:element ref="tns:QueryKey" minOccurs="0"/>
+	 <xs:element ref="tns:WebEnv" minOccurs="0"/>
+	 <xs:element name="IdList" type="tns:IdListType" minOccurs="0"/>
+	 <xs:element name="TranslationSet" type="tns:TranslationSetType" minOccurs="0"/>
+	 <xs:element name="TranslationStack" type="tns:TranslationStackType" minOccurs="0"/>
+	 <xs:element ref="tns:QueryTranslation" minOccurs="0"/>
+	 </xs:sequence>
+	 </xs:sequence>
+	 </xs:sequence>
+	 <xs:element name="ErrorList" type="tns:ErrorListType" minOccurs="0"/>
+	 <xs:element name="WarningList" type="tns:WarningListType" minOccurs="0"/>
+	 </xs:sequence>
+	 </xs:complexType>
+	 </xs:element>
+    -->
+    
+    <!-- input params -->
+    <xs:element name="db" type="xs:string" />
+    <xs:element name="term" type="xs:string" />
+    <xs:element name="usehistory" type="xs:string" />
+    <xs:element name="tool" type="xs:string" />
+    <xs:element name="email" type="xs:string" />
+    <xs:element name="field" type="xs:string" />
+    <xs:element name="reldate" type="xs:string" />
+    <xs:element name="mindate" type="xs:string" />
+    <xs:element name="maxdate" type="xs:string" />
+    <xs:element name="datetype" type="xs:string" />
+    <xs:element name="rettype" type="xs:string" />
+    <xs:element name="sort" type="xs:string" />
+    <xs:element name="eSearchRequest">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:db" minOccurs="0"/>
+	  <xs:element ref="tns:term" minOccurs="0"/>
+	  <xs:element ref="tns:WebEnv" minOccurs="0"/>
+	  <xs:element ref="tns:QueryKey" minOccurs="0"/>
+	  <xs:element ref="tns:usehistory" minOccurs="0"/>
+	  <xs:element ref="tns:tool" minOccurs="0"/>
+	  <xs:element ref="tns:email" minOccurs="0"/>
+	  <xs:element ref="tns:field" minOccurs="0"/>
+	  <xs:element ref="tns:reldate" minOccurs="0"/>
+	  <xs:element ref="tns:mindate" minOccurs="0"/>
+	  <xs:element ref="tns:maxdate" minOccurs="0"/>
+	  <xs:element ref="tns:datetype" minOccurs="0"/>
+	  <xs:element ref="tns:RetStart" minOccurs="0"/>
+	  <xs:element ref="tns:RetMax" minOccurs="0"/>
+	  <xs:element ref="tns:rettype" minOccurs="0"/>
+	  <xs:element ref="tns:sort" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  
+  <xs:schema targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/esummary" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/esummary" elementFormDefault="qualified" >
+    
+    <!--   version="2.0"  -->
+    <!--   http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eSummary_041029.dtd  date:  2004-10-29  -->
+    
+    <xs:complexType name="DocSumType">
+      <xs:sequence>
+	<xs:element name="Id" type="xs:string" />
+	<xs:element name="Item" type="tns:ItemType" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Too complex for Axis2 
+	 <xs:complexType name="ItemType" mixed="true">
+	 <xs:choice minOccurs="0" maxOccurs="unbounded">
+	 <xs:element name="Item" type="tns:ItemType"/>
+	 </xs:choice>
+	 <xs:attribute name="Name" type="xs:string" use="required"/>
+	 <xs:attribute name="Type" use="required">
+	 <xs:simpleType>
+	 <xs:restriction base="xs:NMTOKEN">
+	 <xs:enumeration value="Integer"/>
+	 <xs:enumeration value="Date"/>
+	 <xs:enumeration value="String"/>
+	 <xs:enumeration value="Structure"/>
+	 <xs:enumeration value="List"/>
+	 <xs:enumeration value="Flags"/>
+	 <xs:enumeration value="Qualifier"/>
+	 <xs:enumeration value="Enumerator"/>
+	 <xs:enumeration value="Unknown"/>
+	 </xs:restriction>
+	 </xs:simpleType>
+	 </xs:attribute>
+	 </xs:complexType>
+    -->	
+    <xs:complexType name="ItemType">
+      <xs:sequence>
+	<xs:element name="Item" type="tns:ItemType" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element name="ItemContent" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="Name" type="xs:string" use="required"/>
+      <xs:attribute name="Type" use="required">
+	<xs:simpleType>
+	  <xs:restriction base="xs:NMTOKEN">
+	    <xs:enumeration value="Integer"/>
+	    <xs:enumeration value="Date"/>
+	    <xs:enumeration value="String"/>
+	    <xs:enumeration value="Structure"/>
+	    <xs:enumeration value="List"/>
+	    <xs:enumeration value="Flags"/>
+	    <xs:enumeration value="Qualifier"/>
+	    <xs:enumeration value="Enumerator"/>
+	    <xs:enumeration value="Unknown"/>
+	  </xs:restriction>
+	</xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+    
+    <xs:element name="eSummaryResult">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element name="ERROR"  type="xs:string" minOccurs="0"/>
+	  <xs:element name="DocSum" type="tns:DocSumType" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+    <!-- input params -->
+    <xs:element name="db" type="xs:string" />
+    <xs:element name="id" type="xs:string" />
+    <xs:element name="WebEnv" type="xs:string" />
+    <xs:element name="query_key" type="xs:string" />
+    <xs:element name="retstart" type="xs:string" />
+    <xs:element name="retmax" type="xs:string" />
+    <xs:element name="tool" type="xs:string" />
+    <xs:element name="email" type="xs:string" />
+    <xs:element name="eSummaryRequest">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:db" minOccurs="0"/>
+	  <xs:element ref="tns:id" minOccurs="0"/>
+	  <xs:element ref="tns:WebEnv" minOccurs="0"/>
+	  <xs:element ref="tns:query_key" minOccurs="0"/>
+	  <xs:element ref="tns:retstart" minOccurs="0"/>
+	  <xs:element ref="tns:retmax" minOccurs="0"/>
+	  <xs:element ref="tns:tool" minOccurs="0"/>
+	  <xs:element ref="tns:email" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  
+  <xs:schema targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/elink" xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/elink" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" >
+    
+    <!--   version="2.0" -->
+    <!--   http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eLink_090910.dtd date: 09/14/2009 -->
+    
+    <xs:element name="Attribute" type="xs:string"/>
+    <xs:element name="Category" type="xs:string"/>
+    <xs:element name="DbFrom" type="xs:string"/>
+    <xs:element name="DbTo" type="xs:string"/>
+    <xs:element name="ERROR" type="xs:string"/>
+    <xs:element name="HtmlTag" type="xs:string"/>
+    <xs:element name="IconUrl" type="xs:string"/>
+    <xs:complexType name="IdType">
+      <xs:simpleContent>
+	<xs:extension base="xs:string">
+	  <xs:attribute name="HasLinkOut">
+	    <xs:simpleType>
+	      <xs:restriction base="xs:NMTOKEN">
+		<xs:enumeration value="Y"/>
+		<xs:enumeration value="N"/>
+	      </xs:restriction>
+	    </xs:simpleType>
+	  </xs:attribute>
+	  <xs:attribute name="HasNeighbor">
+	    <xs:simpleType>
+	      <xs:restriction base="xs:NMTOKEN">
+		<xs:enumeration value="Y"/>
+		<xs:enumeration value="N"/>
+	      </xs:restriction>
+	    </xs:simpleType>
+	  </xs:attribute>
+	</xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="IdCheckListType">
+      <xs:sequence>
+	<xs:choice minOccurs="0" maxOccurs="unbounded">
+	  <xs:element name="Id" type="tns:IdType"/>
+	  <xs:element name="IdLinkSet" type="tns:IdLinkSetType"/>
+	</xs:choice>
+	<xs:element ref="tns:ERROR" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IdLinkSetType">
+      <xs:sequence>
+	<xs:element name="Id" type="tns:IdType"/>
+	<xs:element name="LinkInfo" type="tns:LinkInfoType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IdListType">
+      <xs:sequence>
+	<xs:element name="Id" type="tns:IdType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IdUrlListType">
+      <xs:sequence>
+	<xs:element name="IdUrlSet" type="tns:IdUrlSetType" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:ERROR" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IdUrlSetType">
+      <xs:sequence>
+	<xs:element name="Id" type="tns:IdType"/>
+	<xs:choice>
+	  <xs:element name="ObjUrl" type="tns:ObjUrlType" maxOccurs="unbounded"/>
+	  <xs:element ref="tns:Info"/>
+	</xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Info" type="xs:string"/>
+    <xs:complexType name="LinkType">
+      <xs:sequence>
+	<xs:element name="Id" type="tns:IdType"/>
+	<xs:element ref="tns:Score" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LinkInfoType">
+      <xs:sequence>
+	<xs:element ref="tns:DbTo"/>
+	<xs:element ref="tns:LinkName"/>
+	<xs:element ref="tns:MenuTag" minOccurs="0"/>
+	<xs:element ref="tns:HtmlTag" minOccurs="0"/>
+	<xs:element ref="tns:Url" minOccurs="0"/>
+	<xs:element ref="tns:Priority"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:element name="LinkName" type="xs:string"/>
+    
+    
+    <!-- TOO complex for Axis2
+	 <xs:complexType name="LinkSetType">
+	 <xs:sequence>
+	 <xs:element ref="tns:DbFrom"/>
+	 <xs:choice>
+	 <xs:sequence>
+	 <xs:element name="IdList" type="tns:IdListType" minOccurs="0"/>
+	 <xs:choice>
+	 <xs:element name="LinkSetDb" type="tns:LinkSetDbType" minOccurs="0" maxOccurs="unbounded"/>
+	 <xs:sequence>
+	 <xs:element name="LinkSetDbHistory" type="tns:LinkSetDbHistoryType" minOccurs="0" maxOccurs="unbounded"/>
+	 <xs:element ref="tns:WebEnv"/>
+	 </xs:sequence>
+	 </xs:choice>
+	 </xs:sequence>
+	 <xs:element name="IdUrlList" type="tns:IdUrlListType"/>
+	 <xs:element name="IdCheckList" type="tns:IdCheckListType"/>
+	 <xs:element ref="tns:ERROR"/>
+	 </xs:choice>
+	 </xs:sequence>
+	 </xs:complexType>
+	 
+	 <xs:complexType name="LinkSetDbType">
+	 <xs:sequence>
+	 <xs:element ref="tns:DbTo"/>
+	 <xs:element ref="tns:LinkName"/>
+	 <xs:choice>
+	 <xs:element name="Link" type="tns:LinkType" minOccurs="0" maxOccurs="unbounded"/>
+	 <xs:element ref="tns:Info"/>
+	 </xs:choice>
+	 <xs:element ref="tns:ERROR" minOccurs="0"/>
+	 </xs:sequence>
+	 </xs:complexType>
+    -->
+    
+    <xs:complexType name="LinkSetType">
+      <xs:sequence>
+	<xs:element ref="tns:DbFrom"/>
+	<xs:element name="IdList" type="tns:IdListType" minOccurs="0"/>
+	<xs:element name="LinkSetDb" type="tns:LinkSetDbType" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element name="LinkSetDbHistory" type="tns:LinkSetDbHistoryType" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:WebEnv" minOccurs="0"/>
+	<xs:element name="IdUrlList" type="tns:IdUrlListType" minOccurs="0"/>
+	<xs:element name="IdCheckList" type="tns:IdCheckListType" minOccurs="0"/>
+	<xs:element ref="tns:ERROR" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="LinkSetDbType">
+      <xs:sequence>
+	<xs:element ref="tns:DbTo"/>
+	<xs:element name="LinkName" type="xs:string" />
+	<xs:element name="Link" type="tns:LinkType" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:Info" minOccurs="0"/>
+	<xs:element ref="tns:ERROR" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    
+    <!-- TOO complex for Axis2
+	 <xs:complexType name="LinkSetDbHistoryType">
+	 <xs:sequence>
+	 <xs:element ref="tns:DbTo"/>
+	 <xs:element ref="tns:LinkName"/>
+	 <xs:choice>
+	 <xs:element ref="tns:QueryKey"/>
+	 <xs:element ref="tns:Info"/>
+	 </xs:choice>
+	 <xs:element ref="tns:ERROR" minOccurs="0"/>
+	 </xs:sequence>
+	 </xs:complexType>
+    -->   
+    <xs:complexType name="LinkSetDbHistoryType">
+      <xs:sequence>
+	<xs:element ref="tns:DbTo"/>
+	<xs:element ref="tns:LinkName"/>
+	<xs:element ref="tns:QueryKey"  minOccurs="0"/>
+	<xs:element ref="tns:Info"  minOccurs="0"/>
+	<xs:element ref="tns:ERROR" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    <xs:element name="MenuTag" type="xs:string"/>
+    <xs:element name="Name" type="xs:string"/>
+    <xs:element name="NameAbbr" type="xs:string"/>
+    <xs:complexType name="ObjUrlType">
+      <xs:sequence>
+	<xs:element ref="tns:Url"/>
+	<xs:element ref="tns:IconUrl" minOccurs="0"/>
+	<xs:element ref="tns:LinkName" minOccurs="0"/>
+	<xs:element ref="tns:SubjectType" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:Category" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element ref="tns:Attribute" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element name="Provider" type="tns:ProviderType"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Priority" type="xs:string"/>
+    <xs:complexType name="ProviderType">
+      <xs:sequence>
+	<xs:element ref="tns:Name"/>
+	<xs:element ref="tns:NameAbbr"/>
+	<xs:element name="Id" type="tns:IdType"/>
+	<xs:element ref="tns:Url"/>
+	<xs:element ref="tns:IconUrl" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:element name="QueryKey" type="xs:string"/>
+    <xs:element name="Score" type="xs:string"/>
+    <xs:element name="SubjectType" type="xs:string"/>
+    <xs:element name="Url" type="xs:string"/>
+    <xs:element name="eLinkResult">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element name="LinkSet" type="tns:LinkSetType" minOccurs="0" maxOccurs="unbounded"/>
+	  <xs:element ref="tns:ERROR" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+    <!-- input params -->
+    <xs:element name="db" type="xs:string"/>
+    <xs:element name="id" type="xs:string" />
+    <xs:element name="reldate" type="xs:string"/>
+    <xs:element name="mindate" type="xs:string"/>
+    <xs:element name="maxdate" type="xs:string"/>
+    <xs:element name="datetype" type="xs:string"/>
+    <xs:element name="term" type="xs:string"/>
+    <xs:element name="dbfrom" type="xs:string"/>
+    <xs:element name="WebEnv" type="xs:string"/>
+    <xs:element name="query_key" type="xs:string"/>
+    <xs:element name="cmd" type="xs:string"/>
+    <xs:element name="tool" type="xs:string"/>
+    <xs:element name="email" type="xs:string"/>
+    <xs:element name="linkname" type="xs:string"/>
+    <xs:element name="eLinkRequest">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:db" minOccurs="0"/>
+	  <xs:element ref="tns:id" minOccurs="0" maxOccurs="unbounded"/>
+	  <xs:element ref="tns:reldate" minOccurs="0"/>
+	  <xs:element ref="tns:mindate" minOccurs="0"/>
+	  <xs:element ref="tns:maxdate" minOccurs="0"/>
+	  <xs:element ref="tns:datetype" minOccurs="0"/>
+	  <xs:element ref="tns:term" minOccurs="0"/>
+	  <xs:element ref="tns:dbfrom" minOccurs="0"/>
+	  <xs:element ref="tns:linkname" minOccurs="0"/>
+	  <xs:element ref="tns:WebEnv" minOccurs="0"/>
+	  <xs:element ref="tns:query_key" minOccurs="0"/>
+	  <xs:element ref="tns:cmd" minOccurs="0"/>
+	  <xs:element ref="tns:tool" minOccurs="0"/>
+	  <xs:element ref="tns:email" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+  </xs:schema>
+  
+  
+  <xs:schema targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/espell" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/espell" elementFormDefault="qualified" >
+    
+    <!--   version="2.0"  -->
+    <!--   http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eSpell.dtd  date: 2005/03/02 17:46:05  -->
+    <xs:element name="CorrectedQuery" type="xs:string"/>
+    <xs:element name="Database" type="xs:string"/>
+    <xs:element name="ERROR" type="xs:string"/>
+    <xs:element name="Original" type="xs:string"/>
+    <xs:element name="Query" type="xs:string"/>
+    <xs:element name="Replaced" type="xs:string"/>
+    <xs:element name="SpelledQuery">
+      <xs:complexType>
+	<xs:choice minOccurs="0" maxOccurs="unbounded">
+	  <xs:element ref="tns:Replaced"/>
+	  <xs:element ref="tns:Original"/>
+	</xs:choice>
+      </xs:complexType>
+    </xs:element>
+    <xs:element name="eSpellResult">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:Database"/>
+	  <xs:element ref="tns:Query"/>
+	  <xs:element ref="tns:CorrectedQuery"/>
+	  <xs:element ref="tns:SpelledQuery"/>
+	  <xs:element ref="tns:ERROR"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+    <!-- input params -->
+    <xs:element name="db" type="xs:string"/>
+    <xs:element name="term" type="xs:string"/>
+    <xs:element name="tool" type="xs:string"/>
+    <xs:element name="email" type="xs:string"/>
+    <xs:element name="eSpellRequest">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:db" minOccurs="0"/>
+	  <xs:element ref="tns:term" minOccurs="0"/>
+	  <xs:element ref="tns:tool" minOccurs="0"/>
+	  <xs:element ref="tns:email" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+  </xs:schema>
+  
+  <xs:schema 
+      targetNamespace="http://www.ncbi.nlm.nih.gov/soap/eutils/epost" 
+      xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+      xmlns:tns="http://www.ncbi.nlm.nih.gov/soap/eutils/epost" 
+      elementFormDefault="qualified"
+      >
+    
+    <!--   version="2.0" -->
+    <!--   http://www.ncbi.nlm.nih.gov/entrez/query/DTD/ePost_020511.dtd  -->
+    
+    <xs:complexType name="InvalidIdListType">
+      <xs:sequence>
+	<xs:element  name="Id" type="xs:string" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+    
+    <xs:element name="ePostResult">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element name="InvalidIdList" type="tns:InvalidIdListType" minOccurs="0"/>
+	  <xs:element name="QueryKey" type="xs:string" minOccurs="0"/>
+	  <xs:element name="WebEnv" type="xs:string" minOccurs="0"/>
+	  <xs:element name="ERROR" type="xs:string" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+    <!-- input params -->
+    <xs:element name="db" type="xs:string"/>
+    <xs:element name="id" type="xs:string"/>
+    <xs:element name="WebEnv" type="xs:string"/>
+    <xs:element name="tool" type="xs:string"/>
+    <xs:element name="email" type="xs:string"/>
+    <xs:element name="ePostRequest">
+      <xs:complexType>
+	<xs:sequence>
+	  <xs:element ref="tns:db" minOccurs="0"/>
+	  <xs:element ref="tns:id" minOccurs="0"/>
+	  <xs:element ref="tns:WebEnv" minOccurs="0"/>
+	  <xs:element ref="tns:tool" minOccurs="0"/>
+	  <xs:element ref="tns:email" minOccurs="0"/>
+	</xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+  </xs:schema>
+  
+</types>
+
+<!-- eGQuery -->
+<message name="eGqueryRequest_m">
+  <part name="request" element="nseg:eGqueryRequest" />
+</message>
+<message name="eGqueryResponse_m">
+  <part name="result" element="nseg:Result"/>
+</message>
+
+
+<!-- eInfo -->
+<message name="eInfoRequest_m">
+  <part name="request" element="nsei:eInfoRequest" />
+</message>
+<message name="eInfoResponse_m">
+  <part name="result" element="nsei:eInfoResult" />
+</message>
+
+<!-- eSearch -->
+<message name="eSearchRequest_m">
+  <part name="request" element="nsese:eSearchRequest" />
+</message>
+<message name="eSearchResponse_m">
+  <part name="result" element="nsese:eSearchResult"/>
+</message>
+
+<!-- eSummary -->
+<message name="eSummaryRequest_m">
+  <part name="request" element="nsesu:eSummaryRequest" />
+</message>
+<message name="eSummaryResponse_m">
+  <part name="result" element="nsesu:eSummaryResult" />
+</message>
+
+<!-- eLink -->
+<message name="eLinkRequest_m">
+  <part name="request" element="nsel:eLinkRequest" />
+</message>
+<message name="eLinkResponse_m">
+  <part name="result" element="nsel:eLinkResult" />
+</message>
+
+<!-- eSpell -->
+<message name="eSpellRequest_m">
+  <part name="request" element="nsesp:eSpellRequest"/>
+</message>
+<message name="eSpellResponse_m">
+  <part name="result" element="nsesp:eSpellResult"/>
+</message>
+
+<!-- ePost -->
+<message name="ePostRequest_m">
+  <part name="request" element="nseps:ePostRequest"/>
+</message>
+<message name="ePostResponse_m">
+  <part name="result" element="nseps:ePostResult"/>
+</message>
+
+
+<!-- operations and bindings -->
+
+<portType name="eUtilsServiceSoap">
+  <operation name="run_eGquery">
+    <input message="s0:eGqueryRequest_m"/>
+    <output message="s0:eGqueryResponse_m"/>
+  </operation>
+  
+  <operation name="run_eInfo">
+    <input message="s0:eInfoRequest_m"/>
+    <output message="s0:eInfoResponse_m"/>
+  </operation>
+  
+  <operation name="run_eSearch">
+    <input message="s0:eSearchRequest_m"/>
+    <output message="s0:eSearchResponse_m"/>
+  </operation>
+  
+  <operation name="run_eSummary">
+    <input message="s0:eSummaryRequest_m"/>
+    <output message="s0:eSummaryResponse_m"/>
+  </operation>
+  
+  <operation name="run_eLink">
+    <input message="s0:eLinkRequest_m"/>
+    <output message="s0:eLinkResponse_m"/>
+  </operation>
+  
+  <operation name="run_eSpell">
+    <input message="s0:eSpellRequest_m"/>
+    <output message="s0:eSpellResponse_m"/>
+  </operation>
+  
+  <operation name="run_ePost">
+    <input message="s0:ePostRequest_m"/>
+    <output message="s0:ePostResponse_m"/>
+  </operation>
+  
+</portType>
+
+<binding name="eUtilsServiceSoap" type="s0:eUtilsServiceSoap">
+  <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+  <operation name="run_eGquery">
+    <soap:operation soapAction="egquery" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  <operation name="run_eInfo">
+    <soap:operation soapAction="einfo" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  <operation name="run_eSearch">
+    <soap:operation soapAction="esearch" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  <operation name="run_eSummary">
+    <soap:operation soapAction="esummary" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  <operation name="run_eLink">
+    <soap:operation soapAction="elink" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  <operation name="run_eSpell">
+    <soap:operation soapAction="espell" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  <operation name="run_ePost">
+    <soap:operation soapAction="epost" style="document"/>
+    <input>
+      <soap:body use="literal"  />
+    </input>
+    <output>
+      <soap:body use="literal" />
+    </output>
+  </operation>
+  
+  
+</binding>
+
+<service name="eUtilsService">
+  <port name="eUtilsServiceSoap" binding="s0:eUtilsServiceSoap">
+    <soap:address location="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/soap/v2.0/soap_adapter_2_0.cgi"/>
+  </port>
+</service>
+
+</wsdl:definitions>
