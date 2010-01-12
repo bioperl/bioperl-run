@@ -561,7 +561,7 @@ sub run {
 		# (so can specify -rettype, basically)
 		my $fetched = $self->efetch( -db => $self->db,
 					     -id => $ids,
-					     @arg )->run(-no_parse => 1, @args);
+					     @args )->run(-no_parse => 1, @args);
 		$adaptor = Bio::DB::SoapEUtilities::FetchAdaptor->new(
 		    -result => $fetched
 		    );
