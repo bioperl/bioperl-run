@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: SoapEU-function.t 16665 2010-01-12 01:25:14Z maj $
+#$Id$
 #testing SoapEUtilities with network queries
 # idea: reproduce the examples at
 # http://www.bioperl.org/wiki/HOWTO:EUtilities_Cookbook
@@ -10,7 +10,7 @@ our $home;
 BEGIN {
     use Bio::Root::Test;
     use lib '.';
-    $home = '..'; # set to '.' for Build use, 
+    $home = '.'; # set to '.' for Build use, 
                       # '..' for debugging from .t file
     unshift @INC, $home;
     test_begin(-tests => 116,
@@ -170,4 +170,4 @@ is $i, 5, "got all linksets";
 }
 
 # remove later
-sub test_input_file { "data/".shift };
+#sub test_input_file { "data/".shift };

@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: SoapEU-unit.t 16649 2010-01-11 14:20:07Z maj $
+#$Id$
 #testing SoapEUtilities and components
 use strict;
 use warnings;
@@ -7,7 +7,7 @@ our $home;
 BEGIN {
     use Bio::Root::Test;
     use lib '.';
-    $home = '..'; # set to '.' for Build use, 
+    $home = '.'; # set to '.' for Build use, 
                       # '..' for debugging from .t file
     unshift @INC, $home;
     test_begin(-tests => 139,
@@ -434,4 +434,4 @@ is ($i, 2, "got all seqs");
 1;
 
 # remove later
-sub test_input_file { "data/".shift };
+#sub test_input_file { "data/".shift };
