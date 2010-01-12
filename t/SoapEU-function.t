@@ -37,8 +37,8 @@ my $nbr_test_id = 1621261;
 my @linkout_test_ids = qw(28864546 53828898 14523048 14336674 1817575);
 
 SKIP : {
-#    test_skip(-tests => 100, #modify
-#	      -requires_networking => 1); # add back on final commit
+    test_skip(-tests => 116, 
+	      -requires_networking => 1); 
 ok $fac = Bio::DB::SoapEUtilities->new(), "SoapEUtilities factory";
 
 diag("Retrieve raw data records from GenBank, save raw data to file, then parse via Bio::SeqIO");
