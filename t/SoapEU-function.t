@@ -21,7 +21,7 @@ BEGIN {
                                         Bio::DB::SoapEUtilities::FetchAdaptor
                                         Bio::DB::SoapEUtilities::LinkAdaptor
                                         Bio::DB::SoapEUtilities::DocSumAdaptor
-                                        Soap::Lite
+                                        SOAP::Lite
                                         XML::Twig
                                         )]);
 }
