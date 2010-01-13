@@ -139,7 +139,7 @@ sub next_query {
     return unless $som->valueof($stem);
     my ($ret, %params);
     my $get = sub { $som->valueof("$stem/".shift) };
-    my $toplev = $get->();
+    my $toplev = $get->('');
     my $get_tl = sub { $toplev->{ shift @_ } };
     
     $params{'-term'} = $som->valueof("//Term");

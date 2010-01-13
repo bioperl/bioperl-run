@@ -171,7 +171,8 @@ sub _load_adaptor {
     # specials
     for ($result->fetch_type) {
 	$_ eq 'seq' && do {
-	    $_[1] = $type = 'species' if $result->fetch_db eq 'taxonomy';
+	    $_[1] = $type = 'species' if $result->fetch_db and 
+		$result->fetch_db eq 'taxonomy';
 	    last;
 	};
 	# else, leave $type alone

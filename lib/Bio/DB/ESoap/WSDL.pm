@@ -487,7 +487,7 @@ sub _parse {
 		Bio::WebAgent->new()->get($self->url, ':content_file' => $tfh->filename);
 		$tfh->close;
 		$self->_twig->parsefile($tfh->filename);
-		$self->wsdl($tfh);
+		$self->wsdl($tfh->filename);
 	    };
 	    $self->throw("URL parse failed : $@") if $@;
 	}
@@ -657,7 +657,7 @@ sub _get_types {
     $visited ||= [];
     # assuming max 1 xs:sequence or xs:choice per element
     my $seq = ($elt->descendants('xs:sequence'))[0];
-    $is_choice = '|' unless $seq;
+    $is_choice = ($seq ? '' : '|');
     $seq ||= ($elt->descendants('xs:choice'))[0];
     return 1 unless $seq;
     foreach ( $seq->descendants('xs:element') ) {
@@ -674,7 +674,8 @@ sub _get_types {
 		# find the type def in schema
 		$type =~ s/.*?://; # strip tns
 		if (grep /^$type$/, @$visited) { # check for circularity
-		    push @$res, { $_->att('name').$is_choice => "$type(reused)"};
+		    
+		    push @$res, { $_->att('name').$is_choice => "$type(reused)"}if $_->att('name');
 		    last;
 		}
 		push @$visited, $type;

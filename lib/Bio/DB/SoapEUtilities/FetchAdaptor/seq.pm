@@ -423,7 +423,7 @@ sub _read_references {
 	$params{'-consortium'} = $get->('consortium');
 
 	my $pos = $get->('position');
-	$pos =~ /^([0-9]+)[.]+([0-9]+)$/;
+	$pos and $pos =~ /^([0-9]+)[.]+([0-9]+)$/;
 	$params{'-start'} = $1;
 	$params{'-end'} = $2;
 	$params{'-gb_reference'} = $get->('reference');
