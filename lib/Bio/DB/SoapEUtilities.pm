@@ -543,7 +543,6 @@ sub run {
 	    $_ eq 'esearch' && do {
 		# do an efetch with the same db and a returned list of ids...
 		# reentering here!
-		$DB::single =1;
 		my $ids = $result->ids;
 		if (!$result->count) {
 		    $self->warn("Can't fetch; no records returned");
