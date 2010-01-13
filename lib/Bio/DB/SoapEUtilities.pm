@@ -96,14 +96,14 @@ direction, it is up to the user to report to the mailing list
 
 To begin, make a factory:
 
- my $fac = Bio::DB::EUtilities->new();
+ my $fac = Bio::DB::SoapEUtilities->new();
 
 From the factory, utilities are called, parameters are set, and
 results or adaptors are retrieved.
 
 If you have your own copy of the wsdl, use
 
- my $fac = Bio::Db::EUtilities->new( -wsdl_file => $my_wsdl );
+ my $fac = Bio::Db::SoapEUtilities->new( -wsdl_file => $my_wsdl );
 
 otherwise, the correct one will be obtained over the network (by
 L<Bio::DB::ESoap> and friends).
