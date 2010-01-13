@@ -559,7 +559,7 @@ sub run {
 		# pass run() args to the downstream utility here
 		# (so can specify -rettype, basically)
 		# note @args will contain -auto_adapt => 1 here.
-		my $adaptor = $self->efetch( -db => $self->db,
+	        $adaptor = $self->efetch( -db => $self->db,
 					     -id => $ids,
 					     @args )->run(-no_parse => 1, @args);
 		last;
@@ -590,7 +590,7 @@ sub run {
 	    };
 	    # else, ignore
 	}
-	return $adaptor || $result;
+	return ($adaptor || $result);
     }
     else {
 	return $result;
