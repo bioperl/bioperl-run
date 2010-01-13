@@ -559,13 +559,11 @@ sub run {
 		}
 		# pass run() args to the downstream utility here
 		# (so can specify -rettype, basically)
-		my $fetched = $self->efetch( -db => $self->db,
+		# note @args will contain -auto_adapt => 1 here.
+		my $adaptor = $self->efetch( -db => $self->db,
 					     -id => $ids,
 					     @args )->run(-no_parse => 1, @args);
-		$adaptor = Bio::DB::SoapEUtilities::FetchAdaptor->new(
-		    -result => $fetched
-		    );
-		last
+		last;
 	    };
 	    $_ eq 'elink' && do {
 		$adaptor = Bio::DB::SoapEUtilities::LinkAdaptor->new(
