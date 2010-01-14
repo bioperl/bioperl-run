@@ -558,7 +558,7 @@ sub set_parameters {
 		s/^-//;
 		foreach my $conflict (@{$incompat_params{$_}}) {
 			return if grep /$conflict/, @added;
-			$args{'-'.$conflict}=0;
+			delete $args{'-'.$conflict};
 			push @removed, $conflict;
 		}
 		foreach my $requirement (@{$corequisite_switches{$_}}) {
@@ -597,7 +597,7 @@ sub reset_parameters {
 	foreach (keys %args) {
 		s/^-//;
 		foreach my $requirement (@{$corequisite_switches{$_}}) {
-			$args{'-'.$requirement}=0;
+			delete $args{'-'.$requirement};
 		}
 	}
 
