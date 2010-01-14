@@ -173,7 +173,7 @@ use Bio::Tools::GuessSeqFormat;
 use Bio::Tools::Run::Samtools;
 use File::Basename qw(fileparse);
 
-use base qw( Bio::Tools::Run::WrapperBase::CommandExts Bio::Tools::Run::AssemblerBase Bio::Root::Root );
+use base qw( Bio::Tools::Run::WrapperBase Bio::Tools::Run::AssemblerBase Bio::Root::Root );
 
 ## bowtie
 our $program_name = '*bowtie';
