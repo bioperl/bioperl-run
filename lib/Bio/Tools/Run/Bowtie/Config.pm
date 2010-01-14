@@ -470,16 +470,13 @@ our %accepted_types = ( # ind is not a single file, so not included here
     'ref'        => [qw( fasta )]
     );
 
-INIT {
-	# bowtie doesn't really have subprograms so we do it this way
-	foreach (@program_params) {
-		push @program_params, "par\|".$1 if (m/^one\|(.*)/);
-		push @program_params, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
-	}
-	foreach (@program_switches) {
-		push @program_switches, "par\|".$1 if (m/^one\|(.*)/);
-		push @program_switches, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
-	}
+foreach (@program_params) {
+        push @program_params, "par\|".$1 if (m/^one\|(.*)/);
+        push @program_params, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
+}
+foreach (@program_switches) {
+        push @program_switches, "par\|".$1 if (m/^one\|(.*)/);
+        push @program_switches, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
 }
 
 1;
