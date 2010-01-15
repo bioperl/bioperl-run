@@ -238,8 +238,7 @@ sub run {
 	%usr_args = @$method_args;
     }
     # make db if necessary
-    $self->make_db unless $self->check_db;
-
+    $self->make_db unless $self->check_db or $self->is_remote;
     $self->{_factory} = Bio::Tools::Run::BlastPlus->new( -command => $method );
     if (%usr_args) {
 	my @avail_parms = $self->factory->available_parameters('all');

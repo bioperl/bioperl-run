@@ -496,7 +496,7 @@ sub new {
     my $self = $class->SUPER::new(@args);
     my ($db_name, $db_data, $db_dir, $db_make_args,
 	$mask_file, $mask_data, $mask_make_args, $masker, 
-	$create, $overwrite, $program_dir) 
+	$create, $overwrite, $is_remote, $program_dir) 
                  = $self->_rearrange([qw( 
                                           DB_NAME
                                           DB_DATA
@@ -508,6 +508,7 @@ sub new {
                                           MASKER
                                           CREATE
                                           OVERWRITE
+                                          REMOTE
                                           PROG_DIR
                                            )], @args);
 
@@ -547,6 +548,7 @@ sub new {
     $self->set_mask_make_args( $mask_make_args) if ($mask_make_args);
     $self->{'_create'} = $create;
     $self->{'_overwrite'} = $overwrite;
+    $self->{'_is_remote'} = $is_remote;
     $self->{'_db_data'} = $db_data;
     
     $self->{'_mask_file'} = $mask_file;
@@ -554,7 +556,7 @@ sub new {
 
 
     # check db
-    if (defined $self->check_db and $self->check_db == 0) {
+    if (defined $self->check_db and $self->check_db == 0 and !$self->is_remote) {
 	$self->throw("DB '".$self->db."' can't be found. To create, set -create => 1.") unless $create;
     }
     if (!$self->db) {
@@ -623,6 +625,7 @@ sub factory { shift->{_factory} }
 sub masker { shift->{_masker} }
 sub create { shift->{_create} }
 sub overwrite { shift->{_overwrite} }
+sub is_remote { shift->{_is_remote} }
 
 =head1 DB methods
 
@@ -875,6 +878,10 @@ sub db_info {
 	$self->warn("db_info: db not specified and no db attached");
 	return;
     }
+    if ($db->is_remote) {
+	$self->warn("db_info: sorry, can't get info for remote database (complain to NCBI)");
+	return;
+    }
     if ($db eq $self->db and $self->{_db_info}) {
 	return $self->{_db_info}; # memoized
     }
@@ -1028,6 +1035,7 @@ sub check_db {
 	$self->{_factory} = $bp_class->new( -command => 'blastdbcmd',
 					    -info => 1,
 					    -db => $ckdb );
+#	$DB::single=1;
 	$self->factory->no_throw_on_crash(1);
 	$self->factory->_run();
 	$self->factory->no_throw_on_crash(0);
@@ -1231,6 +1239,7 @@ sub AUTOLOAD {
     $method =~ s/.*:://;
     my @ret;
     if (grep /^$method$/, @Bio::Tools::Run::StandAloneBlastPlus::BlastMethods) {
+	push @args, ('-method_args' => ['-remote' => 1] ) if ($self->is_remote);
 	return $self->run( -method => $method, @args );
     }
     if ($self->factory and $self->factory->can($method)) { # factory method
