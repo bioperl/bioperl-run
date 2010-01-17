@@ -878,7 +878,7 @@ sub db_info {
 	$self->warn("db_info: db not specified and no db attached");
 	return;
     }
-    if ($db->is_remote) {
+    if ($self->is_remote) {
 	$self->warn("db_info: sorry, can't get info for remote database (complain to NCBI)");
 	return;
     }
