@@ -202,9 +202,12 @@ sub new {
 	unless (grep /command/, @args) {
 		push @args, '-command', $default_cmd;
 	}
-	#default to SAM output if no other format specified
-	unless (grep /(?:sam_format|concise|quiet|refout|refidx)/, @args) {
-		push @args, '-sam_format', 1;
+	#default to SAM output if no other format specified and we are running an alignment
+	my %args=@args;
+	if ($args{'-command'} =~ m/(?:single|paired|crossbow)/) {
+		unless (grep /(?:sam_format|concise|quiet|refout|refidx)/, @args) {
+			push @args, ('-sam_format', 1);
+		}
 	}
 	my $self = $class->SUPER::new(@args);
 	foreach (keys %command_executables) {
@@ -214,7 +217,7 @@ sub new {
 	}
 	my ($want_raw) = $self->_rearrange([qw(WANT_RAW)],@args);
 	$self->want_raw($want_raw);
-	$self->_assembly_format($self->_determine_format);
+	$asm_format = $self->_assembly_format;
 	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
 	return $self;
 }
@@ -276,9 +279,8 @@ sub run {
 			}
 			
 			# Assemble
-			my $format = $self->_determine_format;
+			my $format = $self->_assembly_format;
 			my $suffix = '.'.$format;
-			$self->_assembly_format($format);
 			
 			my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
 		
@@ -291,7 +293,7 @@ sub run {
 			$self->_run(%params);
 			
 			my $scaffold;
-			for ($self->_assembly_format) {
+			for ($format) {
 				m/^bowtie/i && !$self->want_raw && do {
 					$scaffold = $self->_export_results($bowtief, -index => $arg2, -keep_asm => 1 );
 					last;
@@ -312,6 +314,8 @@ sub run {
 			$arg1 or $self->throw("Fasta read(s) file/Bio::Seq required at arg 1");
 			$arg2 ||= $self->tempdir().'/index';
 
+			$self->_assembly_format;
+			
 			# expand gzipped file as nec.
 			if ($arg1 =~ (m/\.gz[^.]*$/)) {
 				unless ($HAVE_IO_UNCOMPRESS) {
@@ -341,9 +345,7 @@ sub run {
 				$self->throw("'$arg1' doesn't look like a bowtie index or index component is missing at arg 1");
 			
 			# Inspect index
-			my $format = $self->_determine_format;
-			my $suffix = '.'.$format;
-			$self->_assembly_format($format);
+			my $suffix = '.'.$self->_assembly_format;
 			my ($desch, $descf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
 			$desch->close;
 
@@ -373,7 +375,7 @@ sub want_raw {
 =head2 _determine_format()
 
  Title   : _determine_format
- Usage   : $bowtiefac->_determine
+ Usage   : $bowtiefac->_determine_format
  Function: determine the format of output for current options
  Returns : format of bowtie output
  Args    :
@@ -476,6 +478,24 @@ sub _validate_file_input {
 
 =head1 Bio::Tools::Run::AssemblerBase overrides
 
+=head2 _assembly_format()
+
+ Title   : _assembly_format
+ Usage   : $bowtiefac->_determine_format
+ Function: set the format of output for current options
+ Returns : format of bowtie output
+ Args    :
+
+=cut
+
+sub _assembly_format {
+	my $self = shift;
+
+	my $format = $self->_determine_format;
+	return $self->SUPER::_assembly_format($format);
+}
+	
+
 =head2 _check_sequence_input()
 
  No-op.
@@ -483,7 +503,7 @@ sub _validate_file_input {
 =cut
 
 sub _check_sequence_input {
-    return 1;
+	return 1;
 }
 
 =head2 _check_optional_quality_input()
@@ -493,7 +513,7 @@ sub _check_sequence_input {
 =cut
 
 sub _check_optional_quality_input {
-    return 1;
+	return 1;
 }
 
 =head2 _prepare_input_sequences()
@@ -555,7 +575,7 @@ sub _prepare_input_sequences {
 						$self->fastq(1);
 						last;
 					};
-					m/^crossbow$/ && do {
+					m/^tab$/ && do {
 						$cmd =~ m/^c/ or $self->throw("Crossbow reads file '$file' inappropriate"); # this is unrecoverable since the object has default program defined
 						last;
 					};
@@ -616,78 +636,7 @@ sub set_parameters {
 		}
 	}
 
-	# check for asm_format change requirements
-	return unless $self->_check_format_modifiers(%args);
-
 	return $self->SUPER::set_parameters(%args);
-}
-
-=head2 reset_parameters()
-
- Title   : reset_parameters
- Usage   : $bowtiefac->reset_parameters(%params);
- Function: resets the parameters listed in the hash or array,
-           maintaining sane options.
- Returns : none
- Args    : [optional] hash or array of parameter/values.  
-
-=cut
-
-sub reset_parameters {
-	my ($self, @args) = @_;
-
-	# Mutually exclusive switches/params prevented from being reset to
-	# avoid confusion resulting from resetting corequireed switches.
-
-	$self->throw("Input args not an even number") unless !(@args % 2);
-	my %args = @args;
-
-	foreach (keys %args) {
-		s/^-//;
-		foreach my $requirement (@{$corequisite_switches{$_}}) {
-			delete $args{'-'.$requirement};
-		}
-	}
-
-	# check for asm_format change requirements
-	return unless $self->_check_format_modifiers(%args);
-
-	$self->SUPER::reset_parameters(%args);
-}
-
-=head2 _check_format_modifiers()
-
- Title   : _check_format_modifiers
- Usage   : $bowtiefac->_check_format_modifiers(%params);
- Function: sets _assembly_format appropriately for chosen switches
- Returns : boolean success or failure
- Args    : hash or array of parameter/values.  
-
-=cut
-
-sub _check_format_modifiers {
-	my ($self, @args) = @_;
-	s/^-// for @args;
-	my %args = @args;
-
-	my %formats;
-	my @format_modifiers = keys %format_lookup;
-	@formats{@format_modifiers} = @args{@format_modifiers};
-	foreach (keys %formats) {
-		$self->_assembly_format(undef) if !$formats{$_} and
-		                                  $self->_assembly_format() =~ m/$format_lookup{$_}/;
-		delete $formats{$_} unless $formats{$_};
-	}
-	if (!keys %formats) {
-		$self->_assembly_format('bowtie') unless $self->_assembly_format();
-	} elsif (keys %formats == 1) {
-		my ($format) = (keys %formats);
-		$self->_assembly_format($format_lookup{$format});
-	} else {
-		return;
-	}
-
-	return 1;
 }
 
 =head2 version()

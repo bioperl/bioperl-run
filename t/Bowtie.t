@@ -10,7 +10,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 66,
+    test_begin(-tests => 67,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
 }
 
@@ -59,7 +59,7 @@ is( scalar $bowtiefac->available_parameters, 53, "all available options");
 is( scalar $bowtiefac->available_parameters('params'), 24, "available parameters" );
 is( scalar $bowtiefac->available_parameters('switches'), 29, "available switches" );
 #back to beginning - but with single
-$bowtiefac->set_parameters(
+$bowtiefac = Bio::Tools::Run::Bowtie->new(
     -command            => 'single',
     -try_hard           => 1,
     -min_insert_size    => 300,
@@ -95,7 +95,7 @@ is_deeply( $bowtiefac->{_options}->{_params},
 	        excess_file threads offrate random_seed)], 
 	   "commands filtered by prefix");
 is( join(' ', @{$bowtiefac->_translate_params}),
-    "single -I 300 -v 4 --solexa-quals -y", "translate params" );
+    "-v 4 --solexa-quals -y -S", "translate params" ); # we default to SAM so '-S' appears
 
 # test run_bowtie filearg parsing
 
@@ -111,9 +111,10 @@ SKIP : {
     my $rdq1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fq');
     my $rdq2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fq');
     my $refseq = test_input_file('bowtie', 'indexes', 'e_coli');
+# INLINE processing not working with CommandExts
     my $inlstr;
     my $inlobj;
-    my $in = Bio::SeqIO->new( -file => $rda, -forma => 'Fasta' );
+    my $in = Bio::SeqIO->new( -file => $rda, -format => 'Fasta' );
     while ( my $seq = $in->next_seq() ) {
         push @$inlobj,$seq;
         push @$inlstr,$seq->seq();
@@ -124,35 +125,23 @@ SKIP : {
 	-command            => 'single'
 	), "make unpaired reads bowtie factory";
     
-    $bowtiefac->set_parameters( -inline => 1 );
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq => $inlstr ), "read sequence as strings in memory";
-    
-    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
-
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq => $inlobj ), "read sequence as seq objects";
-    
-    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
-
-    $bowtiefac->reset_parameters( -inline );
     $bowtiefac->set_parameters( -raw => 1 );
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq => $rdr ), "read raw sequence";
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $rdr ), "read raw sequence";
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
-    $bowtiefac->reset_parameters( -raw );
+    $bowtiefac->reset_parameters( -raw => 0 );
     $bowtiefac->set_parameters( -fasta => 1 );
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq => $rda ), "read fasta sequence";
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $rda ), "read fasta sequence";
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
-    $bowtiefac->reset_parameters( -fasta );
+    $bowtiefac->reset_parameters( -fasta => 0 );
     $bowtiefac->set_parameters( -fastq => 1 );
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq => $rda ), "read fastq sequence";
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $rdq ), "read fastq sequence";
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
     
@@ -163,62 +152,87 @@ SKIP : {
 	), "make paired reads bowtie factory";
     
     $bowtiefac->set_parameters( -fasta => 1 );
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq1 => $rda1,  -seq2 => $rda2 ), "read paired fasta sequence";
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $rda1,  -seq2 => $rda2 ), "read paired fasta sequence";
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
-    $bowtiefac->reset_parameters( -fasta );
+    $bowtiefac->reset_parameters( -fasta => 0 );
     $bowtiefac->set_parameters( -fastq => 1 );
-    ok $bowtiefac->run_bowtie( -ind => $refseq,
-			 -seq1 => $rdq1,  -seq2 => $rdq2 ), "read paired fastq sequence";
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $rdq1,  -seq2 => $rdq2 ), "read paired fastq sequence";
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
     
 
     # test single
-    # these parms are the bowtie defaults
+    # these parms are the bowtie defaults - getting raw is not default for module
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
 	-command             => 'single',
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
-	-max_qual_mismatch   => 70
+	-max_qual_mismatch   => 70,
+	-want_raw            => 1
 	), "make a single alignment factory";
     
     is( $bowtiefac->command, 'single', "command attribute set");
     is( $bowtiefac->max_seed_mismatches, 2, "seed mismatch param set");
     is( $bowtiefac->seed_length, 28, "seed length param set");
     is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
-    $bowtiefac->set_parameters( -inline => 1 );
-    ok my $sam = $bowtiefac->_run("GAACGATACCCACCCAACTATCGCCATTCCAGCAT",$refseq), "make variable based alignment";
+    my $sam;
     $bowtiefac->set_parameters( -fastq => 1 );
-    ok $sam = $bowtiefac->_run($rdq, $refseq), "make file based alignment";
-    ok (-e $sam)&&(-r $sam), "make readable output";
+    ok $sam = $bowtiefac->run($rdq, $refseq), "make file based alignment";
+    ok (-e $sam)&&(-r _), "make readable output";
     open (FILE, $sam);
     my $lines =()= <FILE>;
     close FILE;    	
     is( $lines, 1003, "number of alignments");
-#    ok my $assy = $bowtiefac->run($rdq, $refseq), "make alignment";
+    is($bowtiefac->want_raw( 0 ), 0, "change mode");
+    ok my $assy = $bowtiefac->run($rdq, $refseq), "make alignment";
     #some fuzziness in these: bowtie gives ?+?
-#    cmp_ok( $assy->get_nof_contigs, '>=', 10000, "number of contigs"); # these aren't yet known
-#    cmp_ok( $assy->get_nof_singlets,'>=',10000, "number of singlets"); # these aren't yet known
+    is( $assy->get_nof_contigs, 4, "number of contigs"); # these aren't yet known
+    is( $assy->get_nof_singlets, 691, "number of singlets"); # these aren't yet known
 
     # test crossbow
-    # these parms are again the bowtie defaults
+    # these parms are again the bowtie defaults - getting raw is not default for module
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
 	-command             => 'crossbow',
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
-	-max_qual_mismatch   => 70
+	-max_qual_mismatch   => 70,
+	-want_raw            => 1
 	), "make a crossbow alignment factory";
     
     is( $bowtiefac->command, 'crossbow', "command attribute set");
-    ok $sam = $bowtiefac->_run($rdc, $refseq), "make file based alignment";
-    ok (-e $sam)&&(-r $sam), "make readable output";
+    ok $sam = $bowtiefac->run($rdc, $refseq), "make file based alignment";
+    ok (-e $sam)&&(-r _), "make readable output";
     open (FILE, $sam);
-    my $lines =()= <FILE>;
+    $lines =()= <FILE>;
     close FILE;    	
-    is( $lines, 3, "number of alignments");
+    is( $lines, 6, "number of alignments"); # 3 alignments and 3 SAM header lines
+
+# INLINE processing not working with CommandExts
+    $bowtiefac = Bio::Tools::Run::Bowtie->new(
+	-command             => 'single',
+	-max_seed_mismatches => 2,
+	-seed_length         => 28,
+	-max_qual_mismatch   => 70
+	), "make a single alignment factory";
+    
+
+    $bowtiefac->set_parameters( -inline => 1 );
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $inlstr ), "read sequence as strings in memory";
+    
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
+
+    ok $bowtiefac->_run( -ind => $refseq,
+                         -seq => $inlobj ), "read sequence as seq objects";
+    
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
+
+    $bowtiefac->set_parameters( -inline => 1 );
+    ok $sam = $bowtiefac->run($rdr,$refseq), "make variable based alignment";
 
 }
 
