@@ -10,7 +10,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 67,
+    test_begin(-tests => 69,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
 }
 
@@ -182,17 +182,17 @@ SKIP : {
     my $sam;
     $bowtiefac->set_parameters( -fastq => 1 );
     ok $sam = $bowtiefac->run($rdq, $refseq), "make file based alignment";
-    ok (-e $sam)&&(-r _), "make readable output";
+    ok eval { (-e $sam)&&(-r _) }, "make readable output";
     open (FILE, $sam);
     my $lines =()= <FILE>;
     close FILE;    	
     is( $lines, 1003, "number of alignments");
     is($bowtiefac->want_raw( 0 ), 0, "change mode");
     ok my $assy = $bowtiefac->run($rdq, $refseq), "make alignment";
-    #some fuzziness in these: bowtie gives ?+?
-    is( $assy->get_nof_contigs, 4, "number of contigs"); # these aren't yet known
-    is( $assy->get_nof_singlets, 691, "number of singlets"); # these aren't yet known
+    is( $assy->get_nof_contigs, 4, "number of contigs");
+    is( $assy->get_nof_singlets, 691, "number of singlets");
 
+    # tests from here may fail due to insufficient memory - works with >=2GB
     # test crossbow
     # these parms are again the bowtie defaults - getting raw is not default for module
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
@@ -205,14 +205,14 @@ SKIP : {
     
     is( $bowtiefac->command, 'crossbow', "command attribute set");
     ok $sam = $bowtiefac->run($rdc, $refseq), "make file based alignment";
-    ok (-e $sam)&&(-r _), "make readable output";
+    ok eval { (-e $sam)&&(-r _) }, "make readable output";
     open (FILE, $sam);
     $lines =()= <FILE>;
     close FILE;    	
     is( $lines, 6, "number of alignments"); # 3 alignments and 3 SAM header lines
 
 # INLINE processing not working with CommandExts
-    $bowtiefac = Bio::Tools::Run::Bowtie->new(
+    ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
 	-command             => 'single',
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
@@ -220,7 +220,7 @@ SKIP : {
 	), "make a single alignment factory";
     
 
-    $bowtiefac->set_parameters( -inline => 1 );
+    ok $bowtiefac->set_parameters( -inline => 1 );
     ok $bowtiefac->_run( -ind => $refseq,
                          -seq => $inlstr ), "read sequence as strings in memory";
     
