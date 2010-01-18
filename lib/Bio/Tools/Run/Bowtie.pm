@@ -50,7 +50,7 @@ Trapnell's ultrafast memory-efficient short read aligner C<bowtie>
 
 =head1 OPTIONS
 
-C<bowtie> is complex, with command-line options. This module attempts to 
+C<bowtie> is complex, with many command-line options. This module attempts to 
 provide and options comprehensively. You can browse the choices like so:
 
  $bowtiefac = Bio::Tools::Run::Bowtie->new( -command => 'single' );
@@ -164,20 +164,20 @@ use IPC::Run;
 # Object preamble - inherits from Bio::Root::Root
 
 use lib '../../..';
-use Bio::Root::Root;
-use Bio::Seq;
 use Bio::Tools::Run::Bowtie::Config;
 use Bio::Tools::Run::WrapperBase;
 use Bio::Tools::Run::WrapperBase::CommandExts;
 use Bio::Tools::GuessSeqFormat;
 use Bio::Tools::Run::Samtools;
-use File::Basename qw(fileparse);
+use Bio::Seq;
 
-use base qw( Bio::Tools::Run::WrapperBase Bio::Tools::Run::AssemblerBase Bio::Root::Root );
+use base qw( Bio::Tools::Run::WrapperBase Bio::Tools::Run::AssemblerBase );
 
 ## bowtie
 our $program_name = '*bowtie';
 our $default_cmd = 'single';
+
+our $asm_format; # this is determined dynamically
 
 # Note:
 #  other globals required by Bio::Tools::Run::AssemblerBase are
@@ -186,8 +186,6 @@ our $default_cmd = 'single';
 our $qual_param = undef;
 our $use_dash = 'mixed';
 our $join = ' ';
-
-our $asm_format = 'bowtie';
 
 =head2 new()
 
@@ -204,10 +202,9 @@ sub new {
 	unless (grep /command/, @args) {
 		push @args, '-command', $default_cmd;
 	}
-	#default to SAM output if no other format specified - will then default to object creation
+	#default to SAM output if no other format specified
 	unless (grep /(?:sam_format|concise|quiet|refout|refidx)/, @args) {
 		push @args, '-sam_format', 1;
-		$asm_format = 'sam';
 	}
 	my $self = $class->SUPER::new(@args);
 	foreach (keys %command_executables) {
@@ -215,7 +212,9 @@ sub new {
 		chomp $executable;
 		$self->executables($_, $executable);
 	}
-	$self->_assembly_format($asm_format);
+	my ($want_raw) = $self->_rearrange([qw(WANT_RAW)],@args);
+	$self->want_raw($want_raw);
+	$self->_assembly_format($self->_determine_format);
 	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
 	return $self;
 }
@@ -277,68 +276,36 @@ sub run {
 			}
 			
 			# Assemble
-			my $suffix = $self->sam_format ? '.sam' : '.bowtie';
+			my $format = $self->_determine_format;
+			my $suffix = '.'.$format;
+			$self->_assembly_format($format);
 			
 			my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
-			$bowtieh->close;
 		
+			$bowtieh->close;
+
 			my %params = ( -ind => $arg2, -seq => $arg1, -seq2 => $arg3, -out => $bowtief );
 			map {
 				delete $params{$_} unless defined $params{$_}
 			} keys %params;
 			$self->_run(%params);
-		
-### This will be refactored into a Bio::Assembly::IO::bowtie module
-#
-#   Essentially just a wrapper around B:A:IO:sam - will lose SAM re/setting
-
-			if ($self->sam_format && !$self->want_raw) {
-
-				# we don't have the type
-				my $format_tmp;
-				unless	($format_tmp = $self->_assembly_format =~ /sam/i) {
-					$self->_assembly_format('sam');
-					$self->warn("Assembly format not appropriately set to - temporarily setting to SAM.");
-				}
-
-				my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
-				my ($srth, $srtf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.srt' );
-				$_->close for ($bamh, $srth);
-				
-				my $samt = Bio::Tools::Run::Samtools->new( -command => 'view',
-				                                           -sam_input => 1,
-				                                           -bam_output => 1 );
-		
-				$samt->run( -bam => $bowtief, -out => $bamf);
-		
-				$samt = Bio::Tools::Run::Samtools->new( -command => 'sort' );
-		
-				$samt->run( -bam => $bamf, -pfx => $srtf);
-				
-				# get the sequence so samtools can work with it
-				my $inspection = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
-				my $refdb = $inspection->run( $arg2 );
-
-#
-##
-				
-				# Export results in desired object type
-				my $scaffold = $self->_export_results($srtf.'.bam', -refdb => $refdb, -keep_asm => 1 );
-
-##
-# This deleted during refactor
-
-				# ... restore this because they presumably know what they are doing
-				$self->_assembly_format($format_tmp);
-
-#
-#
-###
-
-				return $scaffold;
+			
+			my $scaffold;
+			for ($self->_assembly_format) {
+				m/^bowtie/i && !$self->want_raw && do {
+					$scaffold = $self->_export_results($bowtief, -index => $arg2, -keep_asm => 1 );
+					last;
+				};
+				m/^sam/i && !$self->want_raw && do {
+					my $bamf = $self->_make_bam($bowtief);
+					my $inspector = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
+					my $refdb = $inspector->run($arg2);
+					$scaffold = $self->_export_results($bamf, -refdb => $refdb, -keep_asm => 1 );
+					last;
+				};
 			}
 
-			return $bowtief;
+			return $scaffold ? $scaffold : $bowtief;
 		};
 		
 		m/build/ && do {
@@ -374,7 +341,9 @@ sub run {
 				$self->throw("'$arg1' doesn't look like a bowtie index or index component is missing at arg 1");
 			
 			# Inspect index
-			my $suffix = $self->names_only ? '.text' : '.fasta';
+			my $format = $self->_determine_format;
+			my $suffix = '.'.$format;
+			$self->_assembly_format($format);
 			my ($desch, $descf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
 			$desch->close;
 
@@ -401,11 +370,89 @@ sub want_raw {
 	return $self->{'_want_raw'};
 }
 
+=head2 _determine_format()
+
+ Title   : _determine_format
+ Usage   : $bowtiefac->_determine
+ Function: determine the format of output for current options
+ Returns : format of bowtie output
+ Args    :
+
+=cut
+
+sub _determine_format {
+        my ($self) = shift;
+
+	my $cmd = $self->command if $self->can('command');
+	for ($cmd) {
+		m/build/ && do {
+			return 'ebwt';
+			last;
+		};
+		m/inspect/ && do {
+			return $self->{'_names_only'} ? 'text' : 'fasta';
+			last;
+		};
+		m/(?:single|paired|crossbow)/ && do {
+			my $format = 'bowtie'; # this is our default position
+			for (keys %format_lookup) {
+				$format = $format_lookup{$_} if $self->{'_'.$_};
+			}
+			return $format;
+		}
+	}
+}
+
+=head2 _make_bam()
+
+ Title   : _make_bam
+ Usage   : $bowtiefac->_make_bam( $file )
+ Function: make a sorted BAM format file from SAM file
+ Returns : sorted BAM file name
+ Args    : SAM file name
+
+=cut
+
+sub _make_bam {
+        my ($self, $file) = @_;
+        
+        $self->throw("'$file' does not exist or is not readable")
+                unless ( -e $file && -r _ );
+
+        # make a sorted bam file from a sam file input
+        my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
+        my ($srth, $srtf) = $self->io->tempfile( -dir => $self->io->tempdir(CLEANUP=>1), -suffix => '.srt' ); 
+		# shared tempdir, so make new - otherwise it is scrubbed during Bio::DB::Sam
+	$_->close for ($bamh, $srth);
+        
+        my $samt = Bio::Tools::Run::Samtools->new( -command => 'view',
+                                                   -sam_input => 1,
+                                                   -bam_output => 1 );
+
+        $samt->run( -bam => $file, -out => $bamf );
+
+        $samt = Bio::Tools::Run::Samtools->new( -command => 'sort' );
+
+        $samt->run( -bam => $bamf, -pfx => $srtf);
+
+        return $srtf.'.bam'
+}
+
+=head2 _validate_file_input()
+
+ Title   : _validate_file_input
+ Usage   : $bowtiefac->_validate_file_input( -type => $file )
+ Function: validate file type for file spec
+ Returns : file type if valid type for file spec
+ Args    : hash of filespec => file_name
+
+=cut
+
 sub _validate_file_input {
 	my ($self, @args) = @_;
 	my (%args);
 	if (grep (/^-/, @args)) { # named parms
-		$self->throw("Wrong number of args - requires one named arg") unless !(@args == 3);
+		$self->throw("Wrong number of args - requires one named arg") if (@args > 2);
 		s/^-// for @args;
 		%args = @args;
 	} else {
@@ -414,7 +461,7 @@ sub _validate_file_input {
 	
 	for (keys %args) {
 		m/^seq|seq2|ref$/ && do {
-			return unless ( -e $args{$_} && -r $args{$_} );
+			return unless ( -e $args{$_} && -r _ );
 			my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$args{$_});
 			return $guesser->guess if grep {$guesser->guess =~ m/$_/} @{$accepted_types{$_}};
 		};
@@ -548,7 +595,7 @@ sub set_parameters {
 	# Mutually exclusive switches/params prevented from being set to
 	# avoid confusion resulting from setting incompatible switches.
 
-	$self->throw("Input args not an even number") unless !(@args % 2);
+	$self->throw("Input args not an even number") if (@args % 2);
 	my %args = @args;
 
 
@@ -559,6 +606,7 @@ sub set_parameters {
 		foreach my $conflict (@{$incompat_params{$_}}) {
 			return if grep /$conflict/, @added;
 			delete $args{'-'.$conflict};
+			$args{'-'.$conflict} = undef if $self->{'_'.$conflict};
 			push @removed, $conflict;
 		}
 		foreach my $requirement (@{$corequisite_switches{$_}}) {
