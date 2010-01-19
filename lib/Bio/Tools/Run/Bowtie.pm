@@ -639,7 +639,7 @@ sub set_parameters {
 		}
 		foreach my $requirement (@{$corequisite_switches{$_}}) {
 			return if grep /$requirement/, @removed;
-			$args{'-'.$requirement}=1;
+			$args{'-'.$requirement}=1 if $args{$_};
 			push @added, $requirement;
 		}
 	}
