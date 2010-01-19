@@ -537,29 +537,33 @@ sub _prepare_input_sequences {
 	# Could use the AssemblerBase routine for this, except that would not permit
 	# an array of strings
 	if ($self->inline) { # expect inline data
-		if ($read->isa("Bio::PrimarySeqI")) { # we have a Bio::*Seq*
+		if (UNIVERSAL::isa($read,'can') && $read->isa("Bio::PrimarySeqI")) { # we have a Bio::*Seq*
 			$read=$read->seq();
 		} else { # we have something else
 			if (ref($read) =~ /ARRAY/i) {
 				my @ts;
-					foreach my $seq (@$read) {
-						if ($seq->isa("Bio::PrimarySeqI")) {
-							$seq=$seq->seq();
-						} else {
-							next if $read=~m/[[^:alpha:]]/;
-						}
-						push @ts,$seq;
+				foreach my $seq (@$read) {
+					if ($seq->isa("Bio::PrimarySeqI")) {
+						$seq=$seq->seq();
+					} else {
+						next if $read=~m/[[^:alpha:]]/;
 					}
-					$read=join(',',@ts);
-					$self->throw("bowtie requires at least one sequence read") unless (@ts);
+					push @ts,$seq;
+				}
+				$self->throw("bowtie requires at least one sequence read") unless (@ts);
+				if (@ts>1) {
+					$read="'".join(',',@ts)."'";
+				} else {
+					($read)=@ts;
+				} 
 			} else { #must be a string... fail if non-alpha
 				$self->throw("bowtie requires at least one valid sequence read") if $read=~m/[[^:alpha:]]/;
 			}
 		}    	    
 	} else { # expect file(s) - so test whether it's/they're appropriate
 	         # and make a comma-separated list of filenames
-		my @t = (ref($read) =~ /ARRAY/i) ? @$read : ($read);
-		for my $file (@t) {
+		my @ts = (ref($read) =~ /ARRAY/i) ? @$read : ($read);
+		for my $file (@ts) {
 			if ( -e $file ) {
 				my $cmd = $self->command if $self->can('command');
 				my $guesser = Bio::Tools::GuessSeqFormat->new(-file=>$file);
@@ -592,7 +596,11 @@ sub _prepare_input_sequences {
 				$self->throw("Sequence read file '$file' does not exist");
 			}
 		}
-		$read = join(',',@t);	
+		if (@ts>1) {
+			$read="'".join(',',@ts)."'";
+		} else {
+			($read)=@ts;
+		} 
 	}
 
 	return $read;

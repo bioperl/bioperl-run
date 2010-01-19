@@ -10,7 +10,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 69,
+    test_begin(-tests => 72,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
 }
 
@@ -111,14 +111,14 @@ SKIP : {
     my $rdq1 = test_input_file('bowtie', 'reads', 'e_coli_1000_1.fq');
     my $rdq2 = test_input_file('bowtie', 'reads', 'e_coli_1000_2.fq');
     my $refseq = test_input_file('bowtie', 'indexes', 'e_coli');
-# INLINE processing not working with CommandExts
-    my $inlstr;
-    my $inlobj;
+    my @inlstr;
+    my @inlobj;
     my $in = Bio::SeqIO->new( -file => $rda, -format => 'Fasta' );
     while ( my $seq = $in->next_seq() ) {
-        push @$inlobj,$seq;
-        push @$inlstr,$seq->seq();
+        push @inlstr,$seq->seq();
+        push @inlobj,$seq;
     }
+    my $inlstr = "'".join(',',@inlstr)."'";
 
     # unpaired reads
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
@@ -211,12 +211,12 @@ SKIP : {
     close FILE;    	
     is( $lines, 6, "number of alignments"); # 3 alignments and 3 SAM header lines
 
-# INLINE processing not working with CommandExts
     ok $bowtiefac = Bio::Tools::Run::Bowtie->new(
 	-command             => 'single',
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
-	-max_qual_mismatch   => 70
+	-max_qual_mismatch   => 70,
+	-want_raw            => 1
 	), "make a single alignment factory";
     
 
@@ -226,13 +226,18 @@ SKIP : {
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
-    ok $bowtiefac->_run( -ind => $refseq,
-                         -seq => $inlobj ), "read sequence as seq objects";
+    ok $bowtiefac->run( \@inlstr, $refseq ), "read sequence as seq objects";
     
     like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
-    $bowtiefac->set_parameters( -inline => 1 );
+    ok $bowtiefac->run( \@inlobj, $refseq ), "read sequence as seq objects";
+    
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
+
+    $bowtiefac->set_parameters( -inline => 0 );
     ok $sam = $bowtiefac->run($rdr,$refseq), "make variable based alignment";
+
+    like($bowtiefac->stderr, qr/reads processed: 1000/, "bowtie success");
 
 }
 
