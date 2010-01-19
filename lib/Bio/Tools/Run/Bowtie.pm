@@ -613,7 +613,9 @@ sub _prepare_input_sequences {
  Function: sets the parameters listed in the hash or array,
            maintaining sane options.
  Returns : true on success
- Args    : [optional] hash or array of parameter/values.  
+ Args    : [optional] hash or array of parameter/values.
+ Note    : This will unset conflicts and set required options,
+           but will not prevent non-sane requests in the arguments
 
 =cut
 
