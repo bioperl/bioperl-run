@@ -121,11 +121,13 @@ our %command_executables = (
     'inspect'    => 'bowtie-inspect'
     );
 
+# These should be in clobbering order - more delicate formats first
 our %format_lookup = (
-    'sam_format' => 'sam',
-    'concise'    => undef,
-    'refout'     => undef,
-    'refidx'     => 'bowtie'
+    'sam_format'       => 'sam',
+    'refidx'           => 'bowtie',
+    'concise'          => undef,
+    'suppress_columns' => undef,
+    'refout'           => undef
     );
 
 
@@ -156,13 +158,19 @@ our @program_params = qw(
     one|max_seed_mismatches
     one|max_qual_mismatch
     one|max_quality_sum
+    one|snp_penalty
+    one|snp_frac
     one|seed_length
     one|max_mismatches
     one|max_backtracks
     one|max_search_ram
     one|report_n_alignments
     one|supress
+    one|supress_random
     one|offset_base
+    one|defaul_mapq
+    one|sam_rg
+    one|suppress_columns
     one|alignmed_file
     one|unaligned_file
     one|excess_file
@@ -191,6 +199,7 @@ our @program_switches = qw(
     one|fasta
     one|raw
     one|inline
+    one|color_space
     one|phred33
     one|phred64
     one|solexa
@@ -204,7 +213,12 @@ our @program_switches = qw(
     one|best
     one|strata
     one|fix_strand_bias
+    one|print_color
+    one|color_quals
+    one|color_keep_ends
     one|sam_format
+    one|sam_no_head
+    one|sam_no_sq
     one|concise
     one|time
     one|be_quiet
@@ -220,6 +234,8 @@ our @program_switches = qw(
 
     bld|fasta
     bld|inline
+    bld|color_space
+    bld|both
     bld|no_auto
     bld|packed
     bld|no_diff_cover
@@ -230,8 +246,10 @@ our @program_switches = qw(
     bld|little_endian
 
     ins|names_only
+    ins|summary
 );
 
+# be careful of collisions here - this could do with command specification
 our %incompat_params = (
     max_seed_mismatches      => [qw( max_mismatches )],
     max_mismatches           => [qw( max_seed_mismatches )],
@@ -249,14 +267,27 @@ our %incompat_params = (
     all                      => [qw( report_n_alignments )],
     report_n_alignments      => [qw( all )],
     sam_format               => [qw( concise  )],
-    concise                  => [qw( sam_format )],
+    concise                  => [qw( sam_format suppress_columns )],
+    suppress_columns         => [qw( concise )],
     forward_reverse          => [qw( reverse_reverse forward_forward )],
     reverse_reverse          => [qw( forward_reverse forward_forward )],
-    forward_forward          => [qw( reverse_reverse forward_forward )]
+    forward_forward          => [qw( reverse_reverse forward_forward )],
+    color_space              => [qw( both )],
+    both                     => [qw( color_space)]
 );
 
 our %corequisite_switches = (
-    strata                   => [qw( best )]
+    strata                   => [qw( best )],
+    suppress_random          => [qw( best )],
+    snp_penalty              => [qw( color_space )],
+    snp_frac                 => [qw( color_space )],
+    print_color              => [qw( color_space )],
+    color_quals              => [qw( color_space )],
+    color_keep_ends          => [qw( color_space )],
+    defaul_mapq              => [qw( sam_format )],
+    sam_no_head              => [qw( sam_format )],
+    sam_no_sq                => [qw( sam_format )],
+    sam_rg                   => [qw( sam_format )]
 );
 
 
@@ -266,6 +297,7 @@ our %param_translation = (
     'one|fasta'                    => 'f',
     'one|raw'                      => 'r',
     'one|inline'                   => 'c',
+    'one|color_space'              => 'C',
     'one|skip'                     => 's',
     'one|upto'                     => 'u',
     'one|trim5'                    => '5',
@@ -289,11 +321,22 @@ our %param_translation = (
     'one|report_n_alignments'      => 'k',
     'one|all'                      => 'a',
     'one|supress'                  => 'm',
+    'one|supress_random'           => 'M',
     'one|best'                     => 'best',
     'one|strata'                   => 'strata',
     'one|fix_strand_bias'          => 'strandfix',
+    'one|snp_penalty'              => 'snpphred',
+    'one|snp_frac'                 => 'snpfrac',
+    'one|print_color'              => 'col-cseq',
+    'one|color_quals'              => 'colc-cqual',
+    'one|color_keep_ends'          => 'col-keepends',
     'one|sam_format'               => 'S',
+    'one|defaul_mapq'              => 'mapq',
+    'one|sam_no_head'              => 'sam_nohead',
+    'one|sam_no_sq'                => 'sam_nosq',
+    'one|sam_rg'                   => 'sam-RG',
     'one|concise'                  => 'concise',
+    'one|suppress_columns'         => 'suppress',
     'one|time'                     => 't',
     'one|offset_base'              => 'B',
     'one|be_quiet'                 => 'quiet',
@@ -314,6 +357,7 @@ our %param_translation = (
     'par|fasta'                    => 'f',
     'par|raw'                      => 'r',
     'par|inline'                   => 'c',
+    'par|color_space'              => 'C',
     'par|skip'                     => 's',
     'par|upto'                     => 'u',
     'par|trim5'                    => '5',
@@ -342,12 +386,23 @@ our %param_translation = (
     'par|max_search_ram'           => 'chunkmbs',
     'par|report_n_alignments'      => 'k',
     'par|all'                      => 'a',
-    'par|supress'                  => 'm',
+    'par|suppress'                 => 'm',
+    'par|suppress_random'          => 'M',
     'par|best'                     => 'best',
     'par|strata'                   => 'strata',
     'par|fix_strand_bias'          => 'strandfix',
+    'par|snp_penalty'              => 'snpphred',
+    'par|snp_frac'                 => 'snpfrac',
+    'par|print_color'              => 'col-cseq',
+    'par|color_quals'              => 'colc-cqual',
+    'par|color_keep_ends'          => 'col-keepends',
     'par|sam_format'               => 'S',
+    'par|defaul_mapq'              => 'mapq',
+    'par|sam_no_head'              => 'sam_nohead',
+    'par|sam_no_sq'                => 'sam_nosq',
+    'par|sam_rg'                   => 'sam-RG',
     'par|concise'                  => 'concise',
+    'par|suppress_columns'         => 'suppress',
     'par|time'                     => 't',
     'par|offset_base'              => 'B',
     'par|be_quiet'                 => 'quiet',
@@ -368,6 +423,7 @@ our %param_translation = (
     'crb|fasta'                    => 'f',
     'crb|raw'                      => 'r',
     'crb|inline'                   => 'c',
+    'crb|color_space'              => 'C',
     'crb|skip'                     => 's',
     'crb|upto'                     => 'u',
     'crb|trim5'                    => '5',
@@ -396,15 +452,26 @@ our %param_translation = (
     'crb|max_search_ram'           => 'chunkmbs',
     'crb|report_n_alignments'      => 'k',
     'crb|all'                      => 'a',
-    'crb|supress'                  => 'm',
+    'crb|suppress'                 => 'm',
+    'crb|suppress_random'          => 'M',
     'crb|best'                     => 'best',
     'crb|strata'                   => 'strata',
     'crb|fix_strand_bias'          => 'strandfix',
+    'crb|snp_penalty'              => 'snpphred',
+    'crb|snp_frac'                 => 'snpfrac',
+    'crb|print_color'              => 'col-cseq',
+    'crb|color_quals'              => 'colc-cqual',
+    'crb|color_keep_ends'          => 'col-keepends',
     'crb|sam_format'               => 'S',
+    'crb|defaul_mapq'              => 'mapq',
+    'crb|sam_no_head'              => 'sam_nohead',
+    'crb|sam_no_sq'                => 'sam_nosq',
+    'crb|sam_rg'                   => 'sam-RG',
     'crb|concise'                  => 'concise',
+    'crb|suppress_columns'         => 'suppress',
     'crb|time'                     => 't',
     'crb|offset_base'              => 'B',
-    'crb|be_quiet'                    => 'quiet',
+    'crb|be_quiet'                 => 'quiet',
     'crb|ref_map'                  => 'refout',
     'crb|ref_index'                => 'refidx',
     'crb|alignmed_file'            => 'al',
@@ -420,6 +487,8 @@ our %param_translation = (
 
     'bld|fasta'                    => 'f',
     'bld|inline'                   => 'c',
+    'bld|color_space'              => 'C',
+    'bld|both'                     => 'B',
     'bld|no_auto'                  => 'a',
     'bld|packed'                   => 'p',
     'bld|max_bucket_block'         => 'bmax',
@@ -439,6 +508,7 @@ our %param_translation = (
 
     'ins|seq_width'                => 'a',
     'ins|names_only'               => 'n',
+    'ins|summary'                  => 's',
     'ins|version'                  => 'version'
     );
 

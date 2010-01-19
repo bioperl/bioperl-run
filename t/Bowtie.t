@@ -55,9 +55,9 @@ $bowtiefac->set_parameters(
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
 
-is( scalar $bowtiefac->available_parameters, 53, "all available options");
-is( scalar $bowtiefac->available_parameters('params'), 24, "available parameters" );
-is( scalar $bowtiefac->available_parameters('switches'), 29, "available switches" );
+is( scalar $bowtiefac->available_parameters, 65, "all available options");
+is( scalar $bowtiefac->available_parameters('params'), 30, "available parameters" );
+is( scalar $bowtiefac->available_parameters('switches'), 35, "available switches" );
 #back to beginning - but with single
 $bowtiefac = Bio::Tools::Run::Bowtie->new(
     -command            => 'single',
@@ -68,9 +68,9 @@ $bowtiefac = Bio::Tools::Run::Bowtie->new(
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
 
-is( scalar $bowtiefac->available_parameters, 47, "all available options");
-is( scalar $bowtiefac->available_parameters('params'), 21, "available parameters" );
-is( scalar $bowtiefac->available_parameters('switches'), 26, "available switches" );
+is( scalar $bowtiefac->available_parameters, 59, "all available options");
+is( scalar $bowtiefac->available_parameters('params'), 27, "available parameters" );
+is( scalar $bowtiefac->available_parameters('switches'), 32, "available switches" );
 my %pms = $bowtiefac->get_parameters;
 is_deeply( \%pms, 
 		{ command            => 'single',
@@ -90,10 +90,12 @@ is_deeply( $bowtiefac->{_options}->{_prefixes},
 	   "internal prefix hash set");
 
 is_deeply( $bowtiefac->{_options}->{_params}, 
-	   [qw( command skip upto trim5 trim3 max_seed_mismatches max_qual_mismatch
-	        max_quality_sum seed_length max_mismatches max_backtracks max_search_ram
-	        report_n_alignments supress offset_base alignmed_file unaligned_file
-	        excess_file threads offrate random_seed)], 
+	   [qw( command skip upto trim5 trim3 max_seed_mismatches
+	        max_qual_mismatch max_quality_sum snp_penalty snp_frac
+	        seed_length max_mismatches max_backtracks max_search_ram
+	        report_n_alignments supress supress_random offset_base
+	        defaul_mapq sam_rg suppress_columns alignmed_file
+	        unaligned_file excess_file threads offrate random_seed )],
 	   "commands filtered by prefix");
 is( join(' ', @{$bowtiefac->_translate_params}),
     "-v 4 --solexa-quals -y -S", "translate params" ); # we default to SAM so '-S' appears

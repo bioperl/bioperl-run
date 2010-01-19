@@ -389,11 +389,10 @@ sub _determine_format {
 	for ($cmd) {
 		m/build/ && do {
 			return 'ebwt';
-			last;
 		};
 		m/inspect/ && do {
+			$self->{'_summary'} && return 'text';
 			return $self->{'_names_only'} ? 'text' : 'fasta';
-			last;
 		};
 		m/(?:single|paired|crossbow)/ && do {
 			my $format = 'bowtie'; # this is our default position
