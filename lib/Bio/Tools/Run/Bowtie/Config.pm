@@ -207,7 +207,7 @@ our @program_switches = qw(
     one|sam_format
     one|concise
     one|time
-    one|quiet
+    one|be_quiet
     one|ref_map
     one|ref_index
     one|full_ref_name
@@ -296,7 +296,7 @@ our %param_translation = (
     'one|concise'                  => 'concise',
     'one|time'                     => 't',
     'one|offset_base'              => 'B',
-    'one|quiet'                    => 'quiet',
+    'one|be_quiet'                 => 'quiet',
     'one|ref_map'                  => 'refout',
     'one|ref_index'                => 'refidx',
     'one|alignmed_file'            => 'al',
@@ -350,7 +350,7 @@ our %param_translation = (
     'par|concise'                  => 'concise',
     'par|time'                     => 't',
     'par|offset_base'              => 'B',
-    'par|quiet'                    => 'quiet',
+    'par|be_quiet'                 => 'quiet',
     'par|ref_map'                  => 'refout',
     'par|ref_index'                => 'refidx',
     'par|alignmed_file'            => 'al',
@@ -404,7 +404,7 @@ our %param_translation = (
     'crb|concise'                  => 'concise',
     'crb|time'                     => 't',
     'crb|offset_base'              => 'B',
-    'crb|quiet'                    => 'quiet',
+    'crb|be_quiet'                    => 'quiet',
     'crb|ref_map'                  => 'refout',
     'crb|ref_index'                => 'refidx',
     'crb|alignmed_file'            => 'al',

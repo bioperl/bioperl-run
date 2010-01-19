@@ -74,10 +74,11 @@ is( scalar $bowtiefac->available_parameters('switches'), 26, "available switches
 my %pms = $bowtiefac->get_parameters;
 is_deeply( \%pms, 
 		{ command            => 'single',
-		  min_insert_size    => 300,
 		  max_mismatches     => 4,
 		  solexa             => 1,
-		  try_hard           => 1}, "get_parameters correct");
+		  try_hard           => 1,
+		  sam_format         => 1}, "get_parameters correct"); # we are single so filter 300 out
+		                                                       # and again, we default to SAM
 is( $bowtiefac->command, 'single', "command attribute set");
 
 is_deeply( $bowtiefac->{_options}->{_commands}, 
