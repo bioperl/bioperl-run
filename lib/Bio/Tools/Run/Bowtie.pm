@@ -18,12 +18,20 @@ Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *ALPHA
 
 =head1 SYNOPSIS
 
+ # create an index
+ $bowtie_build = Bio::Tools::Run::Bowtie->new();
+ $index = $bowtie_fac->run( 'reference.fasta', 'index_base' );
+
+ # or with named args...
+
+ $index = $bowtie_fac->run( -ref => 'reference.fasta', -ind => 'index_base' );
+
  # create an assembly
  $bowtie_fac = Bio::Tools::Run::Bowtie->new();
  $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base' );
  
- # if IO::Uncompress::Gunzip is available...
- $bowtie_assy = $bowtie_fac->run( 'reads.fastq.gz', 'index_base' );
+ # if IO::Uncompress::Gunzip is available and with named args...
+ $bowtie_assy = $bowtie_fac->run( -seq => 'reads.fastq.gz', -ind => 'index_base' );
  
  # paired-end
  $bowtie_fac = Bio::Tools::Run::Bowtie->new(-command => 'paired' );
@@ -77,7 +85,7 @@ options.
 
 =head1 FILES
 
-When a command requires filenames, these are provided to the C<_run> method, not
+When a command requires filenames, these are provided to the C<run> method, not
 the constructor (C<new()>). To see the set of files required by a command, use
 C<available_parameters('filespec')> or the alias C<filespec()>:
 
@@ -93,10 +101,14 @@ This example returns the following array:
 
 This indicates that ind (C<bowtie> index file base name), seq (fasta/fastq),and seq2
 (fasta/fastq) files MUST be specified, and that the out file MAY be specified. Use
-these in the C<_run> call like so:
+these in the C<run> call like so:
 
- $bowtiefac->_run( -ind => 'index_base', -seq => 'seq-a.fq',
-                   -seq2 => 'seq-b.fq', -out => 'align.out' );
+ $bowtiefac->run( -ind => 'index_base', -seq => 'seq-a.fq',
+                  -seq2 => 'seq-b.fq', -out => 'align.out' );
+
+Note that named parameters in this form allow you to specify the location of the outfile;
+without named parameters, the outfile is located in a tempdir and does not persist beyond
+the life of the object - with the exception of index creation.
 
 The object will store the programs STDOUT and STDERR output for you in the C<stdout()>
 and C<stderr()> attributes:
@@ -228,19 +240,44 @@ sub new {
  Usage   : $assembly = $bowtie_assembler->run($read1_fastq_file,
                                            $index_location,
                                            $read2_fastq_file);
+           $assembly = $bowtie_assembler->run(%params);
  Function: Run the bowtie assembly pipeline.
  Returns : Assembly results (file, IO object or Assembly object)
  Args    : - fastq file containing single-end reads
            - name of the base of the bowtie index
            - [optional] fastq file containing paired-end reads
+           Named params are also available with args:
+           -seq, -seq2, -ind (bowtie index), -ref (fasta reference) and -out
  Note    : gzipped inputs are allowed if IO::Uncompress::Gunzip
            is available
 
 =cut
 
 sub run {
-	my ($self, $arg1, $arg2, $arg3) = @_; # these are useless names because the different
-	                                      # programs take very different arguments
+	my $self = shift;
+
+	my ($arg1, $arg2, $arg3);                # these are useless names because the different
+	                                         # programs take very different arguments
+	my ($index, $seq, $seq2, $ref, $out); # these are the meaningful names that are used
+	                                         # with named args
+
+	if (!(@_ % 2)) {
+		my %args = @_;
+		if ((grep /^-\w+/, keys %args) == keys %args) {
+			($index, $seq, $seq2, $ref, $out) =
+				$self->_rearrange([qw( IND SEQ SEQ2 REF OUT )], @_);
+		} elsif (grep /^-\w+/, keys %args) {
+			$self->throw("Badly formed named args: ".join(' ',@_));
+		} else {
+			($arg1, $arg2) = @_;
+		}
+	} else {
+		if (grep /^-\w+/, @_) {
+			$self->throw("Badly formed named args: ".join(' ',@_));
+		} else {
+			($arg1, $arg2, $arg3) = @_;
+		}
+	}
 
 	# Sanity checks
 	$self->_check_executable();
@@ -248,11 +285,14 @@ sub run {
 
 	for ($cmd) {
 		m/(?:single|paired|crossbow)/ && do {
-			$arg1 or $self->throw("Fasta/fastq/raw read(s) file/Bio::Seq required at arg 1");
-			$arg2 or $self->throw("Bowtie index base required at arg 2");
+			$seq ||= $arg1;
+			$index ||= $arg2;
+			$seq2 ||= $arg3;
+			$seq or $self->throw("Fasta/fastq/raw read(s) file/Bio::Seq required at arg 1/-seq");
+			$index or $self->throw("Bowtie index base required at arg 2/-index");
 
 			# expand gzipped files as nec.
-			for ($arg1, $arg3) {
+			for ($seq, $seq2) {
 				next unless $_;
 				if (/\.gz[^.]*$/) {
 					unless ($HAVE_IO_UNCOMPRESS) {
@@ -267,26 +307,30 @@ sub run {
 			}
 
 			# confirm index files exist
-			$self->_validate_file_input( -ind => $arg2 ) or
-				$self->throw("Incorrect filetype (expecting bowtie index) or absent file arg 2");
+			$self->_validate_file_input( -ind => $index ) or
+				$self->throw("Incorrect filetype (expecting bowtie index) or absent file arg 2/-index");
 		
 			# bowtie prepare the multiple input types
-			$arg1 = $self->_prepare_input_sequences($arg1);
+			$seq = $self->_prepare_input_sequences($seq);
 			if ($cmd =~ m/^p/) {
-				$arg3 && ($arg3 = $self->_prepare_input_sequences($arg3));				
+				$seq2 && ($seq2 = $self->_prepare_input_sequences($seq2));				
 			} else {
-				$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
+				$seq2 && $self->throw("Second sequence input not wanted for command: $cmd");
 			}
 			
 			# Assemble
 			my $format = $self->_assembly_format;
 			my $suffix = '.'.$format;
 			
-			my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
-		
-			$bowtieh->close;
+			if ($out) {
+				$out .= $suffix;
+			} else {
+				my ($bowtieh, $bowtief) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
+				$bowtieh->close;
+				$out = $bowtief;
+			}
 
-			my %params = ( -ind => $arg2, -seq => $arg1, -seq2 => $arg3, -out => $bowtief );
+			my %params = ( -ind => $index, -seq => $seq, -seq2 => $seq2, -out => $out );
 			map {
 				delete $params{$_} unless defined $params{$_}
 			} keys %params;
@@ -295,29 +339,32 @@ sub run {
 			my $scaffold;
 			for ($format) {
 				m/^bowtie/i && !$self->want_raw && do {
-					$scaffold = $self->_export_results($bowtief, -index => $arg2, -keep_asm => 1 );
+					$scaffold = $self->_export_results( $out, -index => $index, -keep_asm => 1 );
 					last;
 				};
 				m/^sam/i && !$self->want_raw && do {
-					my $bamf = $self->_make_bam($bowtief);
+					my $bamf = $self->_make_bam($out);
 					my $inspector = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
-					my $refdb = $inspector->run($arg2);
+					my $refdb = $inspector->run($index);
 					$scaffold = $self->_export_results($bamf, -refdb => $refdb, -keep_asm => 1 );
 					last;
 				};
 			}
 
-			return $scaffold ? $scaffold : $bowtief;
+			return $scaffold ? $scaffold : $out;
 		};
 		
 		m/build/ && do {
-			$arg1 or $self->throw("Fasta read(s) file/Bio::Seq required at arg 1");
-			$arg2 ||= $self->tempdir().'/index';
+			$ref ||= $arg1;
+			$index ||= $arg2;
+			$ref or $self->throw("Fasta read(s) file/Bio::Seq required at arg 1/-ref");
+			$index ||= $self->io->tempdir(CLEANUP => 1).'/index'; # we want a new one each time
+			$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
 
 			$self->_assembly_format;
 			
 			# expand gzipped file as nec.
-			if ($arg1 =~ (m/\.gz[^.]*$/)) {
+			if ($ref =~ (m/\.gz[^.]*$/)) {
 				unless ($HAVE_IO_UNCOMPRESS) {
 					croak( "IO::Uncompress::Gunzip not available, can't expand '$_'" );
 				}
@@ -325,33 +372,40 @@ sub run {
 				my $z = IO::Uncompress::Gunzip->new($_);
 				while (<$z>) { print $tfh $_ }
 				close $tfh;
-				$arg1 = $tf;
+				$ref = $tf;
 			}
 
 			# bowtie prepare the two input types for the first argument
-			$arg1 = $self->_prepare_input_sequences($arg1);
-			$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
+			$ref = $self->_prepare_input_sequences($ref);
 		
 			# Build index
-			my $index = $arg2; # bowtie indexes are 6 files - the return value is meaningless
-			$self->_run( -ref => $arg1, -out => $arg2 );
+			$self->_run( -ref => $ref, -out => $index );
 			
 			return $index;
 		};
 		
 		m/inspect/ && do {
-			$arg1 or $self->throw("Bowtie index required at arg 1");
-			$self->_validate_file_input( -ind => $arg1 ) or
-				$self->throw("'$arg1' doesn't look like a bowtie index or index component is missing at arg 1");
-			
+			$index ||= $arg1;
+			$out ||= $arg2;
+			$index or $self->throw("Bowtie index required at arg 1");
+			$self->_validate_file_input( -ind => $index ) or
+				$self->throw("'$index' doesn't look like a bowtie index or index component is missing at arg 1/-ind");
+			$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
+
 			# Inspect index
 			my $suffix = '.'.$self->_assembly_format;
-			my ($desch, $descf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
-			$desch->close;
 
-			$self->_run( -ind => $arg1, -out => $descf );
+			if ($out) {
+				$out .= $suffix;
+			} else {
+				my ($desch, $descf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
+				$desch->close;
+				$out = $descf;
+			}
+
+			$self->_run( -ind => $index, -out => $out );
 			
-			return $descf;
+			return $out;
 		}
 	}
 }

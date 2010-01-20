@@ -530,7 +530,7 @@ our %command_files = (
     'single'     => [qw( ind seq #out )],
     'paired'     => [qw( ind -1|seq -2|seq2 #out )],
     'crossbow'   => [qw( ind -12|seq #out )],
-    'build'      => [qw( ref out )],
+    'build'      => [qw( ref #out )],
     'inspect'    => [qw( ind >#out )]
     );
 
