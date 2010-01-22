@@ -26,15 +26,20 @@ Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *BETA*
 
  $index = $bowtie_fac->run( -ref => 'reference.fasta', -ind => 'index_base' );
 
+ # get the base name of the last index from an index builder
+ $index = $bowtie_fac->result;
+ 
  # create an assembly
  $bowtie_fac = Bio::Tools::Run::Bowtie->new();
+ $bowtie_fac->want('Bio::Assembly::Scaffold');
  $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base' );
  
  # if IO::Uncompress::Gunzip is available and with named args...
  $bowtie_assy = $bowtie_fac->run( -seq => 'reads.fastq.gz', -ind => 'index_base' );
  
  # paired-end
- $bowtie_fac = Bio::Tools::Run::Bowtie->new(-command => 'paired' );
+ $bowtie_fac = Bio::Tools::Run::Bowtie->new(-command => 'paired',
+                                            -want => 'Bio::Assembly::Scaffold');
  $bowtie_assy = $bowtie_fac->run( 'reads.fastq', 'index_base', 'paired-reads.fastq' );
  
  # be more strict
@@ -48,7 +53,12 @@ Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *BETA*
     print $contig->get_consensus_sequence->seq,"\n";
  }
  
-
+ # get the file object of the last assembly
+ $io = $bowtie_fac->result( -want => 'Bio::Root::IO' );
+ 
+ #... or the file name directly
+ $filename = $bowtie_fac->result( -want => 'raw' );
+ 
 =head1 DESCRIPTION
 
 This module provides a wrapper interface for Ben Langmead and Col
