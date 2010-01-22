@@ -10,7 +10,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 72,
+    test_begin(-tests => 73,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
 }
 
@@ -175,13 +175,14 @@ SKIP : {
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
 	-max_qual_mismatch   => 70,
-	-want_raw            => 1
+	-want                => 'raw'
 	), "make a single alignment factory";
     
     is( $bowtiefac->command, 'single', "command attribute set");
     is( $bowtiefac->max_seed_mismatches, 2, "seed mismatch param set");
     is( $bowtiefac->seed_length, 28, "seed length param set");
     is( $bowtiefac->max_qual_mismatch, 70, "quality mismatch param set");
+    is( $bowtiefac->want, 'raw', "return type set");
     my $sam;
     $bowtiefac->set_parameters( -fastq => 1 );
     ok $sam = $bowtiefac->run($rdq, $refseq), "make file based alignment";
@@ -190,7 +191,7 @@ SKIP : {
     my $lines =()= <FILE>;
     close FILE;    	
     is( $lines, 1003, "number of alignments");
-    is($bowtiefac->want_raw( 0 ), 0, "change mode");
+    is($bowtiefac->want( 'Bio::Assembly::Scaffold' ), 'Bio::Assembly::Scaffold', "change mode");
     ok my $assy = $bowtiefac->run($rdq, $refseq), "make alignment";
     is( $assy->get_nof_contigs, 4, "number of contigs");
     is( $assy->get_nof_singlets, 691, "number of singlets");
@@ -202,8 +203,7 @@ SKIP : {
 	-command             => 'crossbow',
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
-	-max_qual_mismatch   => 70,
-	-want_raw            => 1
+	-max_qual_mismatch   => 70
 	), "make a crossbow alignment factory";
     
     is( $bowtiefac->command, 'crossbow', "command attribute set");
@@ -218,8 +218,7 @@ SKIP : {
 	-command             => 'single',
 	-max_seed_mismatches => 2,
 	-seed_length         => 28,
-	-max_qual_mismatch   => 70,
-	-want_raw            => 1
+	-max_qual_mismatch   => 70
 	), "make a single alignment factory";
     
 

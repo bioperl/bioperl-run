@@ -227,8 +227,8 @@ sub new {
 		chomp $executable;
 		$self->executables($_, $executable);
 	}
-	my ($want_raw) = $self->_rearrange([qw(WANT_RAW)],@args);
-	$self->want_raw($want_raw);
+	my ($want) = $self->_rearrange([qw(WANT)],@args);
+	$self->want($want);
 	$asm_format = $self->_assembly_format;
 	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
 	return $self;
@@ -336,22 +336,11 @@ sub run {
 			} keys %params;
 			$self->_run(%params);
 			
-			my $scaffold;
-			for ($format) {
-				m/^bowtie/i && !$self->want_raw && do {
-					$scaffold = $self->_export_results( $out, -index => $index, -keep_asm => 1 );
-					last;
-				};
-				m/^sam/i && !$self->want_raw && do {
-					my $bamf = $self->_make_bam($out);
-					my $inspector = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
-					my $refdb = $inspector->run($index);
-					$scaffold = $self->_export_results($bamf, -refdb => $refdb, -keep_asm => 1 );
-					last;
-				};
-			}
-
-			return $scaffold ? $scaffold : $out;
+			$self->{'_result'}->{'index'} = $index;
+			$self->{'_result'}->{'file_name'} = $out;
+			$self->{'_result'}->{'file'} = Bio::Root::IO->new( -file => $out );
+			
+			return $self->result;
 		};
 		
 		m/build/ && do {
@@ -381,6 +370,8 @@ sub run {
 			# Build index
 			$self->_run( -ref => $ref, -out => $index );
 			
+			$self->{'_result'}->{'file_name'} = $index;
+			
 			return $index;
 		};
 		
@@ -405,25 +396,107 @@ sub run {
 
 			$self->_run( -ind => $index, -out => $out );
 			
-			return $out;
+			$self->{'_result'}->{'file_name'} = $out;
+			$self->{'_result'}->{'file'} = Bio::Root::IO->new( -file => $out );
+			
+			return $self->result;
 		}
 	}
 }
 
-=head2 want_raw()
+=head2 want()
 
- Title   : want_raw
- Usage   : $bowtiefac->want_raw( $arg )
- Function: make factory return raw results in file
- Returns : boolean want_object state
- Args    : [optional] boolean
+ Title   : want
+ Usage   : $bowtiefac->want( $class )
+ Function: make factory return $class, or raw (scalar) results in file
+ Returns : return wanted type
+ Args    : [optional] string indicating class or raw of wanted result
 
 =cut
 
-sub want_raw {
+sub want {
 	my $self = shift;
-	return $self->{'_want_raw'} = shift if @_;
-	return $self->{'_want_raw'};
+	return $self->{'_want'} = shift if @_;
+	return $self->{'_want'};
+}
+
+=head2 result()
+
+ Title   : result
+ Usage   : $bowtiefac->result( [-want => $type] )
+ Function: return result in wanted format
+ Returns : results
+ Args    : [optional] hashref of wanted type
+
+=cut
+
+sub result {
+	my ($self, @args) = @_;
+	
+	my $want = $self->want ? $self->want : $self->want($self->_rearrange([qw(WANT)],@args));
+	my $cmd = $self->command if $self->can('command');
+
+	return $self->{'_result'}->{'file_name'} if (!$want || $want eq 'raw' || $cmd eq 'build');
+	return $self->{'_result'}->{'file'} if ($want =~ m/^Bio::Root::IO/);
+
+	my $format = $self->_assembly_format;
+	
+	for ($cmd) {
+		m/(?:single|paired|crossbow)/ && do {
+			my $scaffold;
+			for ($format) {
+				m/^bowtie/i && $want =~ m/^Bio::Assembly::Scaffold/ && do {
+					unless (defined $self->{'_result'}->{'object'} &&
+						ref($self->{'_result'}->{'object'}) =~ m/^Bio::Assembly::Scaffold/) {
+							$self->{'_result'}->{'object'} =
+								$self->_export_results( $self->{'_result'}->{'file_name'},
+								                       -index => $self->{'_result'}->{'index'},
+								                       -keep_asm => 1 );
+					}
+					last;
+				};
+				m/^sam/i && $want =~ m/^Bio::Assembly::Scaffold/ && do {
+					unless (defined $self->{'_result'}->{'object'} &&
+						ref($self->{'_result'}->{'object'}) =~ m/^Bio::Assembly::Scaffold/) {
+							my $bamf = $self->_make_bam($self->{'_result'}->{'file_name'});
+							my $inspector = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
+							my $refdb = $inspector->run($self->{'_result'}->{'index'});
+							$self->{'_result'}->{'object'} =
+								$self->_export_results($bamf, -refdb => $refdb, -keep_asm => 1 );
+					}
+					last;
+				};
+				do {
+					$self->warn("Don't know how to create a $want object for $cmd.");
+					return;
+				}
+			};
+			last;
+		};
+		m/inspect/ && do {
+			for ($want) {
+				m/^Bio::SeqIO/ && $format eq 'fasta' && do {
+					unless (defined $self->{'_result'}->{'object'} &&
+						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqIO/) {
+							$self->{'_result'}->{'object'} =
+								Bio::SeqIO->new(-file => $self->{'_result'}->{'file'},
+								                -format => 'fasta');
+					}
+					last;
+				};
+				m/^Bio::SeqIO/ && $format ne 'fasta' && do {
+					$self->warn("Don't know how to create a $want object for names only - try -want => 'Bio::Root::IO'.");
+					return;
+				};
+				do {
+					$self->warn("Don't know how to create a $want object for $cmd.");
+					return;
+				}
+			}
+		}
+	}
+	
+	return $self->{'_result'}->{'object'};
 }
 
 =head2 _determine_format()
