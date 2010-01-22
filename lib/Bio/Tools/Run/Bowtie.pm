@@ -14,7 +14,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *ALPHA*
+Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *BETA*
 
 =head1 SYNOPSIS
 

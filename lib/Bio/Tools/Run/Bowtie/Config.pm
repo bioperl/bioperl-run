@@ -22,8 +22,8 @@ Used internally by L<Bio::Tools::Run::Bowtie>.
 
 =head1 DESCRIPTION
 
-This package exports information describing maq commands, parameters,
-switches, and input and output filetypes for individual maq commands.
+This package exports information describing bowtie commands, parameters,
+switches, and input and output filetypes for individual bowtie commands.
 
 =head1 FEEDBACK
 
