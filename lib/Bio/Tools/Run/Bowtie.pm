@@ -348,6 +348,7 @@ sub run {
 			
 			$self->{'_result'}->{'index'} = $index;
 			$self->{'_result'}->{'file_name'} = $out;
+			$self->{'_result'}->{'format'} = $format;
 			$self->{'_result'}->{'file'} = Bio::Root::IO->new( -file => $out );
 			
 			return $self->result;
@@ -360,7 +361,7 @@ sub run {
 			$index ||= $self->io->tempdir(CLEANUP => 1).'/index'; # we want a new one each time
 			$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
 
-			$self->_assembly_format;
+			my $format = $self->_assembly_format;
 			
 			# expand gzipped file as nec.
 			if ($ref =~ (m/\.gz[^.]*$/)) {
@@ -379,7 +380,7 @@ sub run {
 		
 			# Build index
 			$self->_run( -ref => $ref, -out => $index );
-			
+			$self->{'_result'}->{'format'} = $format;
 			$self->{'_result'}->{'file_name'} = $index;
 			
 			return $index;
@@ -394,7 +395,8 @@ sub run {
 			$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
 
 			# Inspect index
-			my $suffix = '.'.$self->_assembly_format;
+			my $format = $self->_assembly_format;
+			my $suffix = '.'.$format;
 
 			if ($out) {
 				$out .= $suffix;
@@ -407,6 +409,7 @@ sub run {
 			$self->_run( -ind => $index, -out => $out );
 			
 			$self->{'_result'}->{'file_name'} = $out;
+			$self->{'_result'}->{'format'} = $format;
 			$self->{'_result'}->{'file'} = Bio::Root::IO->new( -file => $out );
 			
 			return $self->result;
@@ -433,7 +436,7 @@ sub want {
 =head2 result()
 
  Title   : result
- Usage   : $bowtiefac->result( [-want => $type] )
+ Usage   : $bowtiefac->result( [-want => $type|$format] )
  Function: return result in wanted format
  Returns : results
  Args    : [optional] hashref of wanted type
@@ -445,11 +448,11 @@ sub result {
 	
 	my $want = $self->want ? $self->want : $self->want($self->_rearrange([qw(WANT)],@args));
 	my $cmd = $self->command if $self->can('command');
+	my $format = $self->{'_result'}->{'format'};
 
+	return $self->{'_result'}->{'format'} if (defined $want && $want eq 'format');
 	return $self->{'_result'}->{'file_name'} if (!$want || $want eq 'raw' || $cmd eq 'build');
 	return $self->{'_result'}->{'file'} if ($want =~ m/^Bio::Root::IO/);
-
-	my $format = $self->_assembly_format;
 	
 	for ($cmd) {
 		m/(?:single|paired|crossbow)/ && do {
