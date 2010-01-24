@@ -356,7 +356,7 @@ our %param_translation = (
 #
 
 our %command_files = (
-    'bam_to_bed'           => [qw( -i|bam #>out )],
+    'bam_to_bed'           => [qw( -i|bam >#out )],
     'fasta_from_bed'       => [qw( -fi|seq -bed|bed -fo|#out )],
     'mask_fasta_from_bed'  => [qw( -fi|seq -bed|bed -fo|#out )],
     'shuffle'              => [qw( -i|bed -g|genome >#out )],

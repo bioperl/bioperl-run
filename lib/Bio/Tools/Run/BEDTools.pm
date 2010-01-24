@@ -494,13 +494,16 @@ sub want {
  Function: return result in wanted format
  Returns : results
  Args    : [optional] hashref of wanted type
+ Note    : -want arg does not persist between result() call when
+           specified in result(), for persistence, use want()
 
 =cut
 
 sub result {
 	my ($self, @args) = @_;
 	
-	my $want = $self->want ? $self->want : $self->want($self->_rearrange([qw(WANT)],@args));
+	my $want = $self->_rearrange([qw(WANT)],@args);
+	$want ||= $self->want;
 	my $cmd = $self->command if $self->can('command');
 	my $format = $self->{'_result'}->{'format'};
 
@@ -508,7 +511,7 @@ sub result {
 	return $self->{'_result'}->{'file_name'} if (!$want || $want eq 'raw');
 	return $self->{'_result'}->{'file'} if ($want =~ m/^Bio::Root::IO/);
 	
-	for ($format) {
+	for ($format) { # these are dissected more finely than seems resonable to allow easy extension 
 		m/bed/ && do {
 			for ($want) {
 				m/Bio::SeqSeqFeature::Collection/ && do {
@@ -516,8 +519,8 @@ sub result {
 						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqSeqFeature::Collection/) {
 							$self->{'_result'}->{'object'} = $self->_read_bed;
 					};
-					last;
-				}
+					return $self->{'_result'}->{'object'};
+				};
 			}
 		};
 		m/bedpe/ && do {
@@ -527,8 +530,8 @@ sub result {
 						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqSeqFeature::Collection/) {
 							$self->{'_result'}->{'object'} = $self->_read_bedpe;
 					};
-					last;
-				}
+					return $self->{'_result'}->{'object'};
+				};
 			}
 		};
 		m/bam/ && do {
@@ -540,11 +543,11 @@ sub result {
 					unless (defined $self->{'_result'}->{'object'} &&
 						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqIO/) {
 							$self->{'_result'}->{'object'} =
-								Bio::SeqIO->new(-file => $self->{'_result'}->{'file'},
+								Bio::SeqIO->new(-file => $self->{'_result'}->{'file_name'},
 								                -format => $format);
 					};
-					last;
-				}
+					return $self->{'_result'}->{'object'};
+				};
 			}
 		};
 		m/tab/ && do {
@@ -554,11 +557,9 @@ sub result {
 			return $self->{'_result'}->{'file'};
 		};
 		do {
-			$self->warn("Result format not defined - have you called run() yet?");
+			$self->warn("Result format '$_' not recognised - have you called run() yet?");
 		}
 	}
-	
-	return $self->{'_result'}->{'object'};
 }
 
 =head2 _determine_format()
@@ -588,7 +589,7 @@ sub _determine_format {
 			return 'bam';
 		};
 		m/^fasta_from_bed$/ && do {
-			return $self->output_tab_format ? 'raw' : 'fasta';
+			return $self->output_tab_format ? 'tab' : 'fasta';
 		}
 	}
 
@@ -610,7 +611,8 @@ sub _read_bed {
 	
 	my %strand_translate = (
 		'+' => 1,
-		'-' => -1
+		'-' => -1,
+		'.' => 0
 		);
 	
 	my $in = $self->{'_result'}->{'file'};
@@ -620,6 +622,7 @@ sub _read_bed {
 		my ($chr, $start, $end, $name, $score, $strand,
 		    $thick_start, $thick_end, $item_RGB, $block_count, $block_size, $block_start) =
 			split("\cI",$feature);
+		$strand ||= '.'; # BED3 doesn't have strand data - for 'merge' and 'complement'
 
 		push @features, Bio::SeqFeature::Generic->new( -seq_id  => $chr,
 		                                               -primary => $name,
@@ -657,7 +660,8 @@ sub _read_bedpe {
 	
 	my %strand_translate = (
 		'+' => 1,
-		'-' => -1
+		'-' => -1,
+		'.' => 0
 		);
 	
 	my $in = $self->{'_result'}->{'file'};
@@ -666,6 +670,8 @@ sub _read_bedpe {
 		chomp $feature;
 		my ($chr1, $start1, $end1, $chr2, $start2, $end2, $name, $score, $strand1, $strand2, @add) =
 			split("\cI",$feature);
+		$strand1 ||= '.';
+		$strand2 ||= '.';
 
 		push @features,  Bio::SeqFeature::FeaturePair->new( -primary       => $name,
 							            -seq_id        => $chr1,

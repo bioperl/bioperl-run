@@ -5,18 +5,26 @@ use strict;
 use warnings;
 no warnings qw(once);
 our $home;
+
+my $v = 0; # private verbosity - this module only
+
 BEGIN {
     $home = '.';	# set to '.' for Build use, 
-						# '..' for debugging from .t file
+			# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 119,
+    test_begin(-tests => 280,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BEDTools)]);
 }
 
 use Bio::Tools::Run::WrapperBase;
 use Bio::SeqIO;
 use Bio::Tools::GuessSeqFormat;
+
+# test command functionality
+
+ok my $bedtoolsfac = Bio::Tools::Run::BEDTools->new, "make a default factory";
+is $bedtoolsfac->command, 'bam_to_bed', "default to command 'bam_to_bed'";
 
 my @commands = qw(
     bam_to_bed       fasta_from_bed       mask_fasta_from_bed  shuffle              window
@@ -103,26 +111,46 @@ my %format_lookup = (
     'subtract'             => 'bed'
     );
 
-# test command functionality
-
-ok my $bedtoolsfac = Bio::Tools::Run::BEDTools->new, "make a default factory";
-
-is $bedtoolsfac->command, 'bam_to_bed', "default to command 'bam_to_bed'";
+my %result_lookup = (
+    'bam_to_bed'           => 1385,  # OK
+    'fasta_from_bed'       => 1385,  # OK
+    'mask_fasta_from_bed'  => 1,     # OK
+    'shuffle'              => 828,   # OK
+    'window'               => 74998, # OK
+    'closest'              => 845,   # OK
+    'genome_coverage'      => 38,    # OK
+    'merge'                => 242,   # OK
+    'slop'                 => 828,   # OK
+    'complement'           => 243,   # OK
+    'intersect'            => 72534, # OK
+    'pair_to_bed'          => undef, # test not defined yet
+    'sort'                 => 828,   # OK
+    'coverage'             => 57261, # OK
+    'links'                => 11603, # OK
+    'pair_to_pair'         => undef, # test not defined yet
+    'subtract'             => 57959  # OK
+    );
 
 SKIP : {
     test_skip( -requires_executable => $bedtoolsfac,
 	       -tests => 24 );
 
-    for (@commands) {
+    COMMAND : for (@commands) {
+
+        $v && diag("Testing command: '$_'");
         ok( my $bedtoolsfac = Bio::Tools::Run::BEDTools->new(-command => $_),
             "make a factory using command '$_'" );
+        $v && diag(" return command");
         is( my $command = $bedtoolsfac->command, $_, "factory command for '$_' is correct" );
+        $v && diag(" return switches and params");
         is( scalar $bedtoolsfac->available_parameters, $p{$_}+1+$s{$_}, "all available options for '$_'" );
         is( scalar $bedtoolsfac->available_parameters('params'), $p{$_}+1, "available parameters for '$_'" );
         is( scalar $bedtoolsfac->available_parameters('switches'), $s{$_}, "available switches for '$_'" );
+        $v && diag(" return executable version");
         ok( $bedtoolsfac->version, "get version for '$_'" );
 
         for ($command) {
+            $v && diag(" run command as default");
             m/^bam_to_bed$/ && do {
                 ok( my $result = $bedtoolsfac->run( -bam => $bam_file ),
                     "can run command '$command'" );
@@ -153,70 +181,95 @@ SKIP : {
                 last;
             };
             m/^pair_to_pair$/ && do {
-                # no test here yet
+                # no test here yet #
+                next COMMAND;      #
+                ####################
                 last;
             };
             m/^pair_to_bed$/ && do {
-                # no test here yet
+                # no test here yet #
+                next COMMAND;      #
+                ####################
                 last;
             };
             do {
                 # we should never get here - internal test
-                ok( eval { 0 }, "all commands tested '$_'");
+                fail( "all commands tested - missed '$_'");
             };
-            ok( eval { (-e $bedtoolsfac->result && -r _) }, "result files exists for command '$command'");
-            ok( my $format = $bedtoolsfac->result( -want => 'format' ),
-                "can return output format for command '$command'" );
-            like( $format, qr/(?:$format_lookup{$command})/,
-                "result claims to be in correct format for command '$command'" );
-            unless ($command eq 'links') {
-                my $guesser = Bio::Tools::SeqFormatGuesser->new( -file => $bedtoolsfac->result );
-                for ($format_lookup{$command}) {
-                    m/^(?:bed|bedpe|tab)$/ && do {
-                        is( $guesser->guess, 'tab', "file format consistent with claim for '$command'" );
-                        last;
-                    };
-                    m/^fasta$/ && do {
-                        is( $guesser->guess, 'fasta', "file format consistent with claim for '$command'" );
-                    }
-                }
-            }
-            is( $bedtoolsfac->want('Bio::Root::IO'), 'Bio::Root::IO',
-                "can set want to IO object for command '$command'" );
-            ok( my $objres = $bedtoolsfac->result, "can get the basic object result for command '$command'" );
-            like( ref($objres), qr/Bio::Root::IO/, "returned object is correct for command '$command'" );
-                my $guesser = Bio::Tools::SeqFormatGuesser->new( -file => $bedtoolsfac->result );
+        }
+
+        $v && diag(" check file has been written");
+        ok( eval { (-e $bedtoolsfac->result && -r _) }, "result files exists for command '$command'");
+        $v && diag(" check can get internal result format description and confirm it");
+        ok( my $format = $bedtoolsfac->result( -want => 'format' ),
+            "can return output format for command '$command'" );
+        like( $format, qr/(?:$format_lookup{$command})/,
+            "result claims to be in correct format for command '$command'" );
+        $v && diag(" check can get internal result file name value");
+        ok( my $file = $bedtoolsfac->result(-want=>'raw'),
+            "can return output file for command '$command'" );
+        if ($command eq 'links') {
+            $v && diag(" check result file is html and correct size");
+            ok eval { (-e $file)&&(-r _) }, "make readable output";
+            open (FILE, $file);
+            my $lines =(my $first_line)= <FILE>;
+            close FILE;         
+            like( $first_line, qr/\<html\>/, " - html tag line");
+            is( $lines, $result_lookup{$command}, " - number of lines");
+        } elsif ($command eq 'genome_coverage') {
+            $v && diag(" check result file is correct size");
+            ok eval { (-e $file)&&(-r _) }, "make readable output";
+            open (FILE, $file);
+            my $lines =()= <FILE>;
+            close FILE;         
+            is( $lines, $result_lookup{$command}, " - number of lines");
+        } else {
+            $v && diag(" check can get internal result format matches result file");
+            my $guesser = Bio::Tools::GuessSeqFormat->new( -file => $file );
             for ($format_lookup{$command}) {
-                m/^(?:bed|bedpe)$/ && do {
-                    ok( my $objres = $bedtoolsfac->result( -want => 'Bio::SeqSeqFeature::Collection' ),
-                        "can get the specific object result for command '$command'" );
-                    like( ref($objres), qr/Bio::SeqFeature::Collection/,
-                        "returned object is correct for command '$command'" );
-                    is( scalar $objres->get_all_features, 0,
-                        "correct number of features for command '$command'" );
+                m/^(?:bed|bedpe|tab)$/ && do {
+                    is( $guesser->guess, 'tab', "file format of '$file' consistent with claim for '$command'" );
                     last;
                 };
                 m/^fasta$/ && do {
-                    ok( my $objres = $bedtoolsfac->result( -want => 'Bio::SeqIO' ),
-                        "can get the specific object result for command '$command'" );
-                    like( ref($objres), qr/Bio::SeqIO/,
-                        "returned object is correct for command '$command'" );
-                    my $seq_count = 0;
-                    while( my $seq = $objres->next_seq ) {
-                        $seq_count++;
-                    }
-                    for ($command) {
-                        m/^fasta_from_bed$/ && do {
-                            is( $seq_count, 1385, "correct number of sequences for command '$command'" );
-                            last;
-                        };
-                        m/^mask_fasta_from_bed$/ && do {
-                            is( $seq_count, 1, "correct number of sequences for command '$command'" );
-                        }
-                    }
+                    is( $guesser->guess, 'fasta', "file format consistent with claim for '$command'" );
                 }
-            }            
+            }
         }
+        $v && diag(" check can get and set wanted result type");
+        is( $bedtoolsfac->want('Bio::Root::IO'), 'Bio::Root::IO',
+            "can set want to IO object for command '$command'" );
+        $v && diag(" check can get a Bio::Root::IO object");
+        ok( my $objres = $bedtoolsfac->result, "can get the basic object result for command '$command'" );
+        $v && diag(" - check can it is actually a Bio::Root::IO object");
+        isa_ok( $objres, 'Bio::Root::IO', "returned object is correct for command '$command'" );
+        for ($format_lookup{$command}) {
+            $v && diag(" check can can get format-specific result object if supported");
+            m/(?:bed|bedpe)/ && do {
+                $v && diag(" - Bio::SeqSeqFeature::Collection");
+                ok( my $objres = $bedtoolsfac->result( -want => 'Bio::SeqSeqFeature::Collection' ),
+                    "can get the specific object result for command '$command'" );
+                isa_ok( $objres, 'Bio::SeqFeature::Collection',
+                    "returned object is correct for command '$command'" );
+                $v && diag(" - correct number of features");
+                is( scalar $objres->get_all_features, $result_lookup{$command},
+                    "correct number of features for command '$command'" );
+                last;
+            };
+            m/^fasta$/ && do {
+                $v && diag(" - Bio::SeqIO");
+                ok( my $objres = $bedtoolsfac->result( -want => 'Bio::SeqIO' ),
+                    "can get the specific object result for command '$command'" );
+                isa_ok( $objres, 'Bio::SeqIO',
+                    "returned object is correct for command '$command'" );
+                my $seq_count = 0;
+                while( my $seq = $objres->next_seq ) {
+                    $seq_count++;
+                }
+                $v && diag(" - correct number of sequences");
+                is( $seq_count, $result_lookup{$command}, "correct number of sequences for command '$command'" );
+            }
+        }            
     }
 }
 
