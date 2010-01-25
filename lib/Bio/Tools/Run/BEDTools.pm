@@ -113,8 +113,11 @@ attribute:
 
  handle_bed_warning($bedtools_fac) if ($bedtools_fac->stderr =~ /Usage:/);
 
-For the commands 'fasta_from_bed' and 'mask_fasta_from_bed' STDOUT may also
-be capturred in the C<stdout()> attribute.
+For the commands 'fasta_from_bed' and 'mask_fasta_from_bed' STDOUT will also
+be captured in the C<stdout()> attribute by default and all other commands
+can be forced to capture program output in STDOUT by setting the -out
+filespec parameter to '-'. Currently, STDOUT-captured results are not
+automatically available as objects.
 
 =head1 FEEDBACK
 
@@ -428,20 +431,22 @@ sub run {
 	my $format = $self->_determine_format(\%params);
 	my $suffix = '.'.$format;
 	
-	if ($out) {
-		$out .= $suffix;
-	} else {
+	if (!defined $out) {
 		my ($outh, $outf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => $suffix );
 		$outh->close;
 		$out = $outf;
-	}	
-	$params{'-out'} = $out;
+	} elsif ($out ne '-') {
+		$out .= $suffix;
+	} else {
+		undef $out;
+	}
+	$params{'-out'} = $out if defined $out;
 
 	$self->_run(%params);
 
-	$self->{'_result'}->{'file_name'} = $out;
+	$self->{'_result'}->{'file_name'} = $out // '-';
 	$self->{'_result'}->{'format'} = $format;
-	$self->{'_result'}->{'file'} = Bio::Root::IO->new( -file => $out );
+	$self->{'_result'}->{'file'} = defined $out ? Bio::Root::IO->new( -file => $out ) : undef;
 	
 	return $self->result;
 }
@@ -509,6 +514,13 @@ sub result {
 
 	return $self->{'_result'}->{'format'} if (defined $want && $want eq 'format');
 	return $self->{'_result'}->{'file_name'} if (!$want || $want eq 'raw');
+
+	# This may be implemented in the future - load relevant object from memory.
+	if ($self->{'_result'}->{'file_name'} eq '-') {
+		$self->warn("Cannot return objects from STDOUT captured results.");
+		return;
+	}
+
 	return $self->{'_result'}->{'file'} if ($want =~ m/^Bio::Root::IO/);
 	
 	for ($format) { # these are dissected more finely than seems resonable to allow easy extension 
