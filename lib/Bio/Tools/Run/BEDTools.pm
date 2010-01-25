@@ -14,7 +14,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::BEDTools - Run wrapper for the BEDTools suite of programs *ALPHA*
+Bio::Tools::Run::BEDTools - Run wrapper for the BEDTools suite of programs *BETA*
 
 =head1 SYNOPSIS
 
@@ -37,7 +37,7 @@ Bio::Tools::Run::BEDTools - Run wrapper for the BEDTools suite of programs *ALPH
 =head1 DESCRIPTION
 
 This module provides a wrapper interface for Aaron R. Quinlan and Ira M. Hall's
-BEDTools utilities C<BEDTools> that allow for (among other things):
+utilities C<BEDTools> that allow for (among other things):
 
 =over
 
@@ -424,6 +424,7 @@ sub run {
 		'-bed'        => $bed,
 		'-bed1'       => $bed1,
 		'-bed2'       => $bed2,
+		'-bedpe'     => $bedpe,
 		'-bedpe1'     => $bedpe1,
 		'-bedpe2'     => $bedpe2,
 		'-seq'        => $seq,

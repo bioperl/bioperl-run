@@ -13,7 +13,7 @@ BEGIN {
 			# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 280,
+    test_begin(-tests => 305,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BEDTools)]);
 }
 
@@ -90,6 +90,9 @@ chomp $hg19_genome;
 my $bam_file = test_input_file('Ft.bam');
 my $bed_file = test_input_file('Ft.bed');
 my $fas_file = test_input_file('Ft.frag.fas');
+my $bedpe1_file = test_input_file('e_coli_1.bedpe');
+my $bedpe2_file = test_input_file('e_coli_2.bedpe');
+my $bed3_file = test_input_file('e_coli.bed3');
  
 my %format_lookup = (
     'bam_to_bed'           => 'bed',
@@ -123,17 +126,17 @@ my %result_lookup = (
     'slop'                 => 828,   # OK
     'complement'           => 243,   # OK
     'intersect'            => 72534, # OK
-    'pair_to_bed'          => undef, # test not defined yet
+    'pair_to_bed'          => 2,     # OK
     'sort'                 => 828,   # OK
     'coverage'             => 57261, # OK
     'links'                => 11603, # OK
-    'pair_to_pair'         => undef, # test not defined yet
+    'pair_to_pair'         => 497,   # OK
     'subtract'             => 57959  # OK
     );
 
 SKIP : {
     test_skip( -requires_executable => $bedtoolsfac,
-	       -tests => 278 );
+	       -tests => 303 );
 
     COMMAND : for (@commands) {
 
@@ -168,7 +171,8 @@ SKIP : {
                 last;
             };
             m/^(?:shuffle|slop|complement|genome_coverage)$/ && do {
-                $bedtoolsfac->add_bidirectional(100) if $command eq 'slop';
+                is( $bedtoolsfac->add_bidirectional(100), 100,
+                    "can set parameter -add_bidirectional => 100 " ) if $command eq 'slop';
                 ok( my $result = $bedtoolsfac->run( -bed    => $gene_bed,
                                                     -genome => $hg18_genome ),
                     "can run command '$command'" );
@@ -181,15 +185,17 @@ SKIP : {
                 last;
             };
             m/^pair_to_pair$/ && do {
-                # no test here yet #
-                next COMMAND;      #
-                ####################
+                is( $bedtoolsfac->type('neither'), 'neither',
+                    "can set parameter -type => 'neither'" );
+                ok( my $result = $bedtoolsfac->run( -bedpe1 => $bedpe1_file,
+                                                    -bedpe2 => $bedpe2_file ),
+                    "can run command '$command'" );
                 last;
             };
             m/^pair_to_bed$/ && do {
-                # no test here yet #
-                next COMMAND;      #
-                ####################
+                ok( my $result = $bedtoolsfac->run( -bedpe => $bedpe1_file,
+                                                    -bed => $bed3_file ),
+                    "can run command '$command'" );
                 last;
             };
             do {
