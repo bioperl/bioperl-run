@@ -133,7 +133,7 @@ my %result_lookup = (
 
 SKIP : {
     test_skip( -requires_executable => $bedtoolsfac,
-	       -tests => 24 );
+	       -tests => 278 );
 
     COMMAND : for (@commands) {
 
@@ -246,8 +246,8 @@ SKIP : {
         for ($format_lookup{$command}) {
             $v && diag(" check can can get format-specific result object if supported");
             m/(?:bed|bedpe)/ && do {
-                $v && diag(" - Bio::SeqSeqFeature::Collection");
-                ok( my $objres = $bedtoolsfac->result( -want => 'Bio::SeqSeqFeature::Collection' ),
+                $v && diag(" - Bio::SeqFeature::Collection");
+                ok( my $objres = $bedtoolsfac->result( -want => 'Bio::SeqFeature::Collection' ),
                     "can get the specific object result for command '$command'" );
                 isa_ok( $objres, 'Bio::SeqFeature::Collection',
                     "returned object is correct for command '$command'" );

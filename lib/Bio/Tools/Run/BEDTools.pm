@@ -116,8 +116,7 @@ attribute:
 For the commands 'fasta_from_bed' and 'mask_fasta_from_bed' STDOUT will also
 be captured in the C<stdout()> attribute by default and all other commands
 can be forced to capture program output in STDOUT by setting the -out
-filespec parameter to '-'. Currently, STDOUT-captured results are not
-automatically available as objects.
+filespec parameter to '-'.
 
 =head1 FEEDBACK
 
@@ -195,12 +194,16 @@ use base qw( Bio::Tools::Run::WrapperBase );
 our $program_name = '*bedtools';
 our $default_cmd = 'bam_to_bed';
 
-# Note:
-#  imported from Bio::Tools::Run::BEDTools::Config
-
+# Note: Other globals imported from Bio::Tools::Run::BEDTools::Config
 our $qual_param = undef;
 our $use_dash = 'single';
 our $join = ' ';
+
+our %strand_translate = (
+	'+' => 1,
+	'-' => -1,
+	'.' => 0
+	);
 
 =head2 new()
 
@@ -280,7 +283,9 @@ sub run {
            mask_fasta_from_bed  seq		bed		#out
 
 =cut
-		m/^fasta_from_bed$/ && do {
+		m/fasta_from_bed$/ && do {
+			($out // 0) eq '-' &&
+				$self->throw("Cannot capture results in STDOUT with sequence commands.");
 			$seq = $self->_uncompress($seq);
 			$self->_validate_file_input(-seq => $seq) || $self->throw("File '$seq' not fasta format.");
 			$bed = $self->_uncompress($bed);
@@ -511,62 +516,69 @@ sub result {
 	$want ||= $self->want;
 	my $cmd = $self->command if $self->can('command');
 	my $format = $self->{'_result'}->{'format'};
+	my $file_name = $self->{'_result'}->{'file_name'};
 
 	return $self->{'_result'}->{'format'} if (defined $want && $want eq 'format');
 	return $self->{'_result'}->{'file_name'} if (!$want || $want eq 'raw');
-
-	# This may be implemented in the future - load relevant object from memory.
-	if ($self->{'_result'}->{'file_name'} eq '-') {
-		$self->warn("Cannot return objects from STDOUT captured results.");
-		return;
-	}
-
-	return $self->{'_result'}->{'file'} if ($want =~ m/^Bio::Root::IO/);
+	return $self->{'_result'}->{'file'} if ($want =~ m/^Bio::Root::IO/); # this will be undef if -out eq '-'
 	
 	for ($format) { # these are dissected more finely than seems resonable to allow easy extension 
 		m/bed/ && do {
 			for ($want) {
-				m/Bio::SeqSeqFeature::Collection/ && do {
+				m/Bio::SeqFeature::Collection/ && do {
 					unless (defined $self->{'_result'}->{'object'} &&
-						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqSeqFeature::Collection/) {
+						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqFeature::Collection/) {
 							$self->{'_result'}->{'object'} = $self->_read_bed;
-					};
+					}
 					return $self->{'_result'}->{'object'};
 				};
+				$self->warn("Cannot make '$_' for $format.");
+				return;
 			}
+			last;
 		};
 		m/bedpe/ && do {
 			for ($want) {
-				m/Bio::SeqSeqFeature::Collection/ && do {
+				m/Bio::SeqFeature::Collection/ && do {
 					unless (defined $self->{'_result'}->{'object'} &&
-						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqSeqFeature::Collection/) {
+						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqFeature::Collection/) {
 							$self->{'_result'}->{'object'} = $self->_read_bedpe;
-					};
+					}
 					return $self->{'_result'}->{'object'};
 				};
+				$self->warn("Cannot make '$_' for $format.");
+				return;
 			}
+			last;
 		};
 		m/bam/ && do {
-			return $self->{'_result'}->{'file'};
+			$self->warn("Cannot make '$_' for $format.");
+			return;
 		};
 		m/^(?:fasta|raw)$/ && do {
 			for ($want) {
 				m/Bio::SeqIO/ && do {
+					$file_name eq '-' && $self->throw("Cannot make a SeqIO object from STDOUT.");
 					unless (defined $self->{'_result'}->{'object'} &&
 						ref($self->{'_result'}->{'object'}) =~ m/^Bio::SeqIO/) {
 							$self->{'_result'}->{'object'} =
-								Bio::SeqIO->new(-file => $self->{'_result'}->{'file_name'},
+								Bio::SeqIO->new(-file => $file_name,
 								                -format => $format);
-					};
+					}
 					return $self->{'_result'}->{'object'};
 				};
+				$self->warn("Cannot make '$_' for $format.");
+				return;
 			}
+			last;
 		};
 		m/tab/ && do {
-			return $self->{'_result'}->{'file'};
+			$self->warn("Cannot make '$_' for $format.");
+			return;
 		};
 		m/html/ && do {
-			return $self->{'_result'}->{'file'};
+			$self->warn("Cannot make '$_' for $format.");
+			return;
 		};
 		do {
 			$self->warn("Result format '$_' not recognised - have you called run() yet?");
@@ -619,42 +631,49 @@ sub _determine_format {
 =cut
 
 sub _read_bed {
-        my ($self) = shift;
+	my ($self) = shift;
 	
-	my %strand_translate = (
-		'+' => 1,
-		'-' => -1,
-		'.' => 0
-		);
-	
-	my $in = $self->{'_result'}->{'file'};
 	my @features;
-	while (my $feature = $in->_readline) {
-		chomp $feature;
-		my ($chr, $start, $end, $name, $score, $strand,
-		    $thick_start, $thick_end, $item_RGB, $block_count, $block_size, $block_start) =
-			split("\cI",$feature);
-		$strand ||= '.'; # BED3 doesn't have strand data - for 'merge' and 'complement'
-
-		push @features, Bio::SeqFeature::Generic->new( -seq_id  => $chr,
-		                                               -primary => $name,
-		                                               -start   => $start,
-		                                               -end     => $end,
-		                                               -strand  => $strand_translate{$strand},
-		                                               -score   => $score,
-		                                               -tag     => { thick_start => $thick_start,
-		                                                             thick_end   => $thick_end,
-		                                                             item_RGB    => $item_RGB,
-		                                                             block_count => $block_count,
-		                                                             block_size  => $block_size,
-		                                                             block_start => $block_size }
-		                                             );
+	
+	if ($self->{'_result'}->{'file_name'} ne '-') {
+		my $in = $self->{'_result'}->{'file'};
+		while (my $feature = $in->_readline) {
+			chomp $feature;
+			push @features, _read_bed_line($feature);
+		}
+	} else {
+		for my $feature (split("\cJ", $self->stdout)) {
+			push @features, _read_bed_line($feature);
+		}
 	}
 	
 	my $collection = Bio::SeqFeature::Collection->new;
 	$collection->add_features(\@features);
 	
 	return $collection;
+}
+
+sub _read_bed_line {
+	my $feature = shift;
+
+	my ($chr, $start, $end, $name, $score, $strand,
+	    $thick_start, $thick_end, $item_RGB, $block_count, $block_size, $block_start) =
+		split("\cI",$feature);
+	$strand ||= '.'; # BED3 doesn't have strand data - for 'merge' and 'complement'
+	
+	return Bio::SeqFeature::Generic->new( -seq_id  => $chr,
+	                                      -primary => $name,
+	                                      -start   => $start,
+	                                      -end     => $end,
+	                                      -strand  => $strand_translate{$strand},
+	                                      -score   => $score,
+	                                      -tag     => { thick_start => $thick_start,
+	                                                    thick_end   => $thick_end,
+	                                                    item_RGB    => $item_RGB,
+	                                                    block_count => $block_count,
+	                                                    block_size  => $block_size,
+	                                                    block_start => $block_size }
+	                                    );
 }
 
 =head2 _read_bedpe()
@@ -668,44 +687,50 @@ sub _read_bed {
 =cut
 
 sub _read_bedpe {
-        my ($self) = shift;
+	my ($self) = shift;
 	
-	my %strand_translate = (
-		'+' => 1,
-		'-' => -1,
-		'.' => 0
-		);
-	
-	my $in = $self->{'_result'}->{'file'};
 	my @features;
-	while (my $feature = $in->_readline) {
-		chomp $feature;
-		my ($chr1, $start1, $end1, $chr2, $start2, $end2, $name, $score, $strand1, $strand2, @add) =
-			split("\cI",$feature);
-		$strand1 ||= '.';
-		$strand2 ||= '.';
-
-		push @features,  Bio::SeqFeature::FeaturePair->new( -primary       => $name,
-							            -seq_id        => $chr1,
-							            -start         => $start1,
-							            -end           => $end1,
-							            -strand        => $strand_translate{$strand1},
-							           								
-							            -hprimary_tag  => $name,
- 							            -hseqname      => $chr2,
-							            -hstart        => $start2,
-							            -hend          => $end2,
-							            -hstrand       => $strand_translate{$strand2},
-							            
-							            -score         => $score
-		                                                  );
-		
+	
+	if ($self->{'_result'}->{'file_name'} ne '-') {
+		my $in = $self->{'_result'}->{'file'};
+		while (my $feature = $in->_readline) {
+			chomp $feature;
+			push @features, _read_bedpe_line($feature);
+		}
+	} else {
+		for my $feature (split("\cJ", $self->stdout)) {
+			push @features, _read_bedpe_line($feature);
+		}
 	}
 	
 	my $collection = Bio::SeqFeature::Collection->new;
 	$collection->add_features(\@features);
 	
 	return $collection;
+}
+
+sub _read_bedpe_line {
+	my $feature = shift;
+	
+	my ($chr1, $start1, $end1, $chr2, $start2, $end2, $name, $score, $strand1, $strand2, @add) =
+		split("\cI",$feature);
+	$strand1 ||= '.';
+	$strand2 ||= '.';
+	
+	return Bio::SeqFeature::FeaturePair->new( -primary       => $name,
+	                                          -seq_id        => $chr1,
+	                                          -start         => $start1,
+	                                          -end           => $end1,
+	                                          -strand        => $strand_translate{$strand1},
+
+	                                          -hprimary_tag  => $name,
+	                                          -hseqname      => $chr2,
+	                                          -hstart        => $start2,
+	                                          -hend          => $end2,
+	                                          -hstrand       => $strand_translate{$strand2},
+	
+	                                          -score         => $score
+	                                        );
 }
 
 =head2 _validate_file_input()
