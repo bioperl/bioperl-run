@@ -22,7 +22,8 @@ Not used directly.
 
 =head1 DESCRIPTION
 
-Describe the object here
+Exports global configuration variables (as required by
+L<Bio::Tools::Run::WrapperBase::CommandExts>) to Samtools.pm.
 
 =head1 FEEDBACK
 
@@ -58,12 +59,6 @@ the web:
 
 Email maj -at- fortinbras -dot- us
 
-Describe contact details here
-
-=head1 CONTRIBUTORS
-
-Additional contributors names and emails here
-
 =head1 APPENDIX
 
 The rest of the documentation details each of the object methods.
@@ -82,6 +77,7 @@ use Exporter;
 our (@ISA, @EXPORT, @EXPORT_OK);
 push @ISA, 'Exporter';
 @EXPORT = qw(
+             $program_dir
              @program_commands
              %command_prefixes
              @program_params
@@ -92,6 +88,7 @@ push @ISA, 'Exporter';
 
 @EXPORT_OK = qw();
 
+our $program_dir;
 our @program_commands = qw(
     view
     sort
@@ -218,30 +215,5 @@ our %command_files = (
     'rmdup' => [qw( ibm obm )],
     'fillmd' => [qw( bam fas )]
     );
-
-# not required at present--maj
-# INIT {
-#     # add subcommand params and switches for
-#     # composite commands
-#     my @sub_params;
-#     my @sub_switches;
-#     foreach my $cmd (keys %composite_commands) {
-# 	foreach my $subcmd ( @{$composite_commands{$cmd}} ) {
-# 	    my @sub_program_params = grep /^$subcmd\|/, @program_params;
-# 	    my @sub_program_switches = grep /^$subcmd\|/, @program_switches;
-# 	    for (@sub_program_params) {
-# 		m/^$subcmd\|(.*)/;
-# 		push @sub_params, "$cmd\|${subcmd}_".$1;
-# 	    }
-# 	    for (@sub_program_switches) {
-# 		m/^$subcmd\|(.*)/;
-# 		push @sub_switches, "$cmd\|${subcmd}_".$1;
-# 	    }
-# 	}
-#     }
-#     push @program_params, @sub_params;
-#     push @program_switches, @sub_switches;
-#     # translations for subcmd params/switches not necessary
-# }
 
 1;

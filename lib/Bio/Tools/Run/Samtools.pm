@@ -143,15 +143,16 @@ Internal methods are usually preceded with a _
 package Bio::Tools::Run::Samtools;
 use strict;
 use warnings;
-use IPC::Run;
-use lib '../../..';
+ use lib '../../../../live';
+ use lib '../../..';
 use Bio::Root::Root;
 use Bio::Tools::Run::Samtools::Config;
 
 # currently an AssemblerBase object, but the methods we need from 
 # there should really go in an updated WrapperBase.../maj
 
-use base qw(Bio::Root::Root Bio::Tools::Run::AssemblerBase);
+use base qw(Bio::Tools::Run::WrapperBase Bio::Root::Root);
+use Bio::Tools::Run::WrapperBase::CommandExts;
 
 our $program_name = 'samtools';
 our $use_dash = 1;
@@ -167,150 +168,12 @@ our $join = ' ';
 
 =cut
 
-sub new {
-    my ($class,@args) = @_;
+sub new { 
+    my ($class, @args) = @_;
+    $program_dir ||= $ENV{SAMTOOLSDIR};
     my $self = $class->SUPER::new(@args);
-    $self->parameters_changed(1); 
-    $self->_register_program_commands( \@program_commands, \%command_prefixes );
-    unless (grep /command/, @args) {
-	push @args, '-command', 'run';
-    }
-    $self->_set_program_options(\@args, \@program_params, \@program_switches,
-				\%param_translation, undef, $use_dash, $join);
-    $self->program_name($program_name) if not defined $self->program_name();
-    if ($^O =~ /cygwin/) {
-	my @kludge = `PATH=\$PATH:/usr/bin:/usr/local/bin which $program_name`;
-	chomp $kludge[0];
-	$self->program_name($kludge[0]);
-    }
-    $self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
     return $self;
 }
 
-=head2 run()
-
- Title   : run
- Usage   : $obj->run( @file_args )
- Function: Run a samtools command as specified during object contruction
- Returns : 
- Args    : a specification of the files to operate on:
-
-=cut
-
-sub run {
-    my ($self, @args) = @_;
-    # _translate_params will provide an array of command/parameters/switches
-    # -- these are set at object construction
-    # to set up the run, need to add the files to the call
-    # -- provide these as arguments to this function
-    $self->_check_executable;
-    my $cmd = $self->command if $self->can('command');
-    $self->throw("No samtools command specified for the object") unless $cmd;
-    # setup files necessary for this command
-    my $filespec = $command_files{$cmd};
-    $self->throw("No command-line file specification is defined for command '$cmd'; check Bio::Tools::Run::Samtools::Config") unless $filespec;
-
-    # parse args based on filespec
-    # require named args
-    $self->throw("Named args are required") unless !(@args % 2);
-    s/^-// for @args;
-    my %args = @args; 
-    # validate
-    my @req = map { 
-	my $s = $_; 
-	$s =~ s/^[012]?[<>]//;
-	$s =~ s/[^a-zA-Z0-9_]//g; 
-	$s
-    } grep !/[#]/, @$filespec;
-    !defined($args{$_}) && $self->throw("Required filearg '$_' not specified") for @req;
-    # set up redirects
-    my ($in, $out, $err);
-    for (@$filespec) {
-	m/^1?>(.*)/ && do {
-	    defined($args{$1}) && ( open($out,">", $args{$1}) or $self->throw("Open for write error : $!"));
-	    next;
-	};
-	m/^2>#?(.*)/ && do {
-	    defined($args{$1}) && (open($err, ">", $args{$1}) or $self->throw("Open for write error : $!"));
-	    next;
-	};
-	m/^<#?(.*)/ && do {
-	    defined($args{$1}) && (open($in, "<", $args{$1}) or $self->throw("Open for read error : $!"));
-	    next;
-	}
-    }
-    my $dum;
-    $in || ($in = \$dum);
-    $out || ($out = \$self->{'stdout'});
-    $err || ($err = \$self->{'stderr'});
-    
-    # Get program executable
-    my $exe = $self->executable;
-    # Get command-line options
-    my $options = $self->_translate_params();
-    # Get file specs sans redirects in correct order
-    my @specs = map { 
-	my $s = $_; 
-	$s =~ s/[^a-zA-Z0-9_]//g; 
-	$s
-    } grep !/[<>]/, @$filespec;
-    my @files = @args{@specs};
-    # expand arrayrefs
-    my $l = $#files;
-    for (0..$l) {
-	splice(@files, $_, 1, @{$files[$_]}) if (ref($files[$_]) eq 'ARRAY');
-    }
-    @files = map { defined $_ ? $_ : () } @files; # squish undefs
-    my @ipc_args = ( $exe, @$options, @files );
-
-    eval {
-	IPC::Run::run(\@ipc_args, $in, $out, $err) or
-	    die ("There was a problem running $exe : $!");
-    };
-    if ($@) {
-	$self->throw("$exe call crashed: $@");
-    }
-
-    # return arguments as specified on call
-    return @args;
-}
-
-=head2 stdout()
-
- Title   : stdout
- Usage   : $fac->stdout()
- Function: store the output from STDOUT for the run, 
-           if no file specified in run_maq()
- Example : 
- Returns : scalar string
- Args    : on set, new value (a scalar or undef, optional)
-
-=cut
-
-sub stdout {
-    my $self = shift;
-    
-    return $self->{'stdout'} = shift if @_;
-    return $self->{'stdout'};
-}
-
-=head2 stderr()
-
- Title   : stderr
- Usage   : $fac->stderr()
- Function: store the output from STDERR for the run, 
-           if no file is specified in run_maq()
- Example : 
- Returns : scalar string
- Args    : on set, new value (a scalar or undef, optional)
-
-=cut
-
-sub stderr {
-    my $self = shift;
-    
-    return $self->{'stderr'} = shift if @_;
-    return $self->{'stderr'};
-}
-
+sub run { shift->_run(@_) }
 1;
