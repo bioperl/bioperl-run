@@ -225,11 +225,6 @@ sub new {
   $self->_set_program_options(\@args, \@program_params, \@program_switches,
     \%param_translation, $qual_param, $use_dash, $join);
   $self->program_name($program_name) if not defined $self->program_name();
-  if ($^O =~ /cygwin/) {
-      my @kludge = `PATH=\$PATH:/usr/bin:/usr/local/bin which $program_name`;
-      chomp $kludge[0];
-      $self->program_name($kludge[0]);
-  }
   $self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
   $self->_assembly_format($asm_format);
   return $self;
