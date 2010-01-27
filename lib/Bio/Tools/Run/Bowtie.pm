@@ -56,6 +56,10 @@ Bio::Tools::Run::Bowtie - Run wrapper for the Bowtie short-read assembler *BETA*
  # get the file object of the last assembly
  $io = $bowtie_fac->result( -want => 'Bio::Root::IO' );
  
+ # get a merged SeqFeature::Collection of all hits
+ #  - currently only available with SAM format 
+ $io = $bowtie_fac->result( -want => 'Bio::SeqFeature::Collection' );
+ 
  #... or the file name directly
  $filename = $bowtie_fac->result( -want => 'raw' );
  
@@ -468,14 +472,30 @@ sub result {
 					}
 					last;
 				};
+				m/^bowtie/i && $want =~ m/^Bio::SeqFeature::Collection/ && do {
+					$self->warn("Don't know how to create a $want object for $cmd with bowtie format - try SAM format.");
+					last;
+				};
 				m/^sam/i && $want =~ m/^Bio::Assembly::Scaffold/ && do {
 					unless (defined $self->{'_result'}->{'object'} &&
 						ref($self->{'_result'}->{'object'}) =~ m/^Bio::Assembly::Scaffold/) {
-							my $bamf = $self->_make_bam($self->{'_result'}->{'file_name'});
+							my $bamf = $self->_make_bam($self->{'_result'}->{'file_name'}, 1);
 							my $inspector = Bio::Tools::Run::Bowtie->new( -command => 'inspect' );
 							my $refdb = $inspector->run($self->{'_result'}->{'index'});
 							$self->{'_result'}->{'object'} =
 								$self->_export_results($bamf, -refdb => $refdb, -keep_asm => 1 );
+					}
+					last;
+				};
+				m/^sam/i && $want =~ m/^Bio::SeqFeature::Collection/ && do {
+					unless (defined $self->{'_result'}->{'object'} &&
+						ref($self->{'_result'}->{'object'}) =~ m/^Bio::Assembly::Scaffold/) {
+							my $bamf = $self->_make_bam($self->{'_result'}->{'file_name'}, 0);
+							my $convert = Bio::Tools::Run::BEDTools->new( -command => 'bam_to_bed' );
+							my $bedf = $convert->run( -bed => $bamf );
+							my $merge = Bio::Tools::Run::BEDTools->new( -command => 'merge' );
+							$merge->run($self->{'_result'}->{'index'});
+							$self->{'_result'}->{'object'} = $merge->result( -want => $want );
 					}
 					last;
 				};
@@ -547,24 +567,22 @@ sub _determine_format {
 =head2 _make_bam()
 
  Title   : _make_bam
- Usage   : $bowtiefac->_make_bam( $file )
+ Usage   : $bowtiefac->_make_bam( $file, $sort )
  Function: make a sorted BAM format file from SAM file
  Returns : sorted BAM file name
- Args    : SAM file name
+ Args    : SAM file name and boolean flag to select sorted BAM format
 
 =cut
 
 sub _make_bam {
-        my ($self, $file) = @_;
+        my ($self, $file, $sort) = @_;
         
         $self->throw("'$file' does not exist or is not readable")
                 unless ( -e $file && -r _ );
 
         # make a sorted bam file from a sam file input
         my ($bamh, $bamf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bam' );
-        my ($srth, $srtf) = $self->io->tempfile( -dir => $self->io->tempdir(CLEANUP=>1), -suffix => '.srt' ); 
-		# shared tempdir, so make new - otherwise it is scrubbed during Bio::DB::Sam
-	$_->close for ($bamh, $srth);
+	$bamh->close;
         
         my $samt = Bio::Tools::Run::Samtools->new( -command => 'view',
                                                    -sam_input => 1,
@@ -572,11 +590,18 @@ sub _make_bam {
 
         $samt->run( -bam => $file, -out => $bamf );
 
-        $samt = Bio::Tools::Run::Samtools->new( -command => 'sort' );
-
-        $samt->run( -bam => $bamf, -pfx => $srtf);
-
-        return $srtf.'.bam'
+	if ($sort) {
+		my ($srth, $srtf) = $self->io->tempfile( -dir => $self->io->tempdir(CLEANUP=>1), -suffix => '.srt' ); 
+			# shared tempdir, so make new - otherwise it is scrubbed during Bio::DB::Sam
+		$srth->close;
+		
+		$samt = Bio::Tools::Run::Samtools->new( -command => 'sort' );
+		$samt->run( -bam => $bamf, -pfx => $srtf);
+		
+		return $srtf.'.bam';
+	} else {
+		return $bamf;
+	}
 }
 
 =head2 _validate_file_input()
