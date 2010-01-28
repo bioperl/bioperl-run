@@ -250,7 +250,9 @@ sub run {
 	}
     }
 
-    $blast_args{-db} = $self->db;
+    $blast_args{-db} = !$self->db_dir 
+	? $self->db 
+	: File::Spec->catdir($self->db_dir,$self->db);
     $blast_args{-query} = $self->_fastize($query);
     $blast_args{-out} = $outfile;
     # user arg override
