@@ -237,7 +237,7 @@ user.
  }
 
 See the pod for the FetchAdaptor subclasses (e.g.,
-L<Bio::DB::EUtilities::FetchAdaptor::seq>) for more detail.
+L<Bio::DB::SoapEUtilities::FetchAdaptor::seq>) for more detail.
 
 =item * C<elink>, the Link adaptor, and the C<linkset> iterator
 
@@ -476,7 +476,9 @@ sub run {
     my ($adaptor);
     my %args = @args;
     # add tool argument for NCBI records
-    $args{tool} = "SoapEUtilities(BioPerl)";
+    $args{tool} = "BioPerl";
+    my %params = $self->get_parameters;
+    $self->warn("No -email parameter set : be advised that NCBI requires a valid email to accompany all requests") unless $params{email};
     my $util = $self->_caller_util;
     # pass util args to run only to a downstream utility (i.e., efetch
     # on autofetch..
@@ -559,8 +561,13 @@ sub run {
 		# pass run() args to the downstream utility here
 		# (so can specify -rettype, basically)
 		# note @args will contain -auto_adapt => 1 here.
+
+		# keep the email arg
+		my %parms = $self->get_parameters;
 	        $adaptor = $self->efetch( -db => $self->db,
-					     -id => $ids,
+					  -id => $ids,
+					  -email => $parms{email},
+					  -tool => $parms{tool},
 					     @args )->run(-no_parse => 1, @args);
 		last;
 	    };
