@@ -174,7 +174,7 @@ use lib '../../../..';
 use Bio::Tools::Run::BlastPlus;
 use File::Temp;
 use File::Copy;
-
+use File::Spec;
 our @BlastMethods = qw( blastp blastn blastx tblastn tblastx 
                        psiblast rpsblast rpstblastn );
 
