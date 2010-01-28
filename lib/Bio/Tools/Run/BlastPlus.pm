@@ -104,24 +104,4 @@ sub new {
 }
 
 
-# making this work: 
-# this is truly a suite of programs: no "front-end" command-line application.
-# so need to emulate a front-end application in the wrapper
-# what is, e.g., $program_name? Also, need to make sure that the 
-# right executables are found and run.
-# could do this through program_dir
-#
-# could have a pseudo-program "*blast", which provides a meaningful name, 
-# but * indicates that a hash of executables must be maintained, and that
-# commands are really programs, and the correct executable must be looked up 
-# and run.
-#
-# so if  $program_name =~ /^\*/, @program_commands are real programs, and 
-# we need to find their executables and store in a hash.
-
-# problem: that WrapperBase really set up to handle only one executable at a time
-# so we can (1)override the WrapperBase methods, or (2) add our own.
-
-
-
 1;
