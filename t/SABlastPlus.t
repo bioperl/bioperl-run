@@ -10,12 +10,15 @@ BEGIN {
     $home = '.'; # set to '.' for Build use,
                      # '../lib' for debugging from .t file
     unshift @INC, $home;
-    test_begin(-tests => 57,
+#    unshift @INC, "../run-lib";
+#    unshift @INC, "../live";
+    test_begin(-tests => 63,
 	       -requires_modules => [qw( 
                                       Bio::Tools::Run::BlastPlus
                                       )]);
 }
 
+$ENV{BLASTPLUSDIR} = "/usr/local/bin";
 use_ok( 'Bio::Tools::Run::StandAloneBlastPlus' );
 use_ok( 'Bio::Tools::Run::WrapperBase' );
 use_ok( 'Bio::Tools::Run::WrapperBase::CommandExts' );
@@ -27,9 +30,9 @@ ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'),
     "BlastPlus factory";
 
 SKIP : {
-    test_skip( -tests => 53,
+    test_skip( -tests => 59,
 	       -requires_env => 'BLASTPLUSDIR');
-    test_skip( -tests => 53,
+    test_skip( -tests => 59,
 	       -requires_executable => $bpfac);
     diag('DB and mask make tests');
 # exceptions/warnings
@@ -153,6 +156,34 @@ SKIP : {
     $fac->_register_temp_for_cleanup( 'aiodb', 'siodb' );
     $fac->cleanup;
 
+# bug#3003 :
+    $DB::single=1;
+    mkdir "./a"; mkdir "./a/b";
+    ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
+	-db_dir => "./a/b",
+	-db_name => "test",
+	-db_data => test_input_file('test-spa.fas'),
+	-create => 1
+	), "dbdir : ./a/b; dbname : test; create";
+    ok $fac->make_db, "make db";
+    lives_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
+		   -db_dir => "./a",
+		   -db_name => "b/test"
+		   ) };
+    lives_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
+		   -db_dir => ".",
+		   -db_name => "a/b/test"
+		   ) };
+    lives_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
+		   -db_name => "a/b/test"
+		   ) };
+    dies_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
+		   -db_name => "/a/b/test"
+		   ) };
+    $fac->_register_temp_for_cleanup('a/b/test');
+    $fac->cleanup;
+    rmdir 'a/b';
+    rmdir 'a';
     # exception tests here someday.
 
     # blast method tests
@@ -210,5 +241,5 @@ SKIP : {
     
 } # SKIP to here
 
-
+#sub test_input_file { "./data/".shift };
 1;
