@@ -423,7 +423,7 @@ use Bio::Root::Root;
 use Bio::SeqIO;
 use Bio::Tools::GuessSeqFormat;
 use Bio::Tools::Run::StandAloneBlastPlus::BlastMethods;
-use File::Temp;
+use File::Temp 0.22;
 use IO::String;
 
 use base qw(Bio::Root::Root);
@@ -487,7 +487,7 @@ my $bp_class = 'Bio::Tools::Run::BlastPlus';
  Function: Builds a new Bio::Tools::Run::StandAloneBlastPlus object
  Returns : an instance of Bio::Tools::Run::StandAloneBlastPlus
  Args    : named argument (key => value) pairs:
-           -db : blastdb name, fasta file, or Bio::Seq collection
+           -db : blastdb name
 
 =cut
 
@@ -514,18 +514,41 @@ sub new {
 
     # parm taint checks
     if ($db_name) {
-	$self->throw("DB name not valid") unless $db_name =~ /^[a-z0-9_.+-]+$/i;
-	$self->{_db} = $db_name;
+	$self->throw("DB name contains invalid characters") unless $db_name =~ m{^[a-z0-9_/:.+-]+$}i;
     }
 
-    if ( $db_dir ) { # or create if not there??
-	$self->throw("DB directory (DB_DIR) not valid") unless (-d $db_dir);
+    if ( $db_dir ) { 
+	$self->throw("DB directory (DB_DIR) not found") unless (-d $db_dir);
 	$self->{'_db_dir'} = $db_dir;
     }
     else {
 	$self->{'_db_dir'} = '.';
     }
-
+    # now handle these systematically (bug #3003)
+    # allow db_name to include path info
+    # let db_dir act as root if present and db_name is a relative path
+    # db property contains the pathless name only
+    if ($db_name) {
+	my ($v,$d,$f) = File::Spec->splitpath($db_name);
+	$self->throw("No DB name at the end of path '$db_name'") unless $f;
+	$f =~ s/\..*$//; # tolerant of extensions, but ignore them
+	$self->{_db} = $f;
+	# now establish db_path property as the internal authority on 
+	# db location...
+	if ( File::Spec->file_name_is_absolute($db_name) ) {
+	    $self->throw("Path specified in DB name ('$d') does not exist") unless !$d || (-d $d);
+	    $self->{_db_path} = File::Spec->catfile($d,$f);
+	    $self->{_db_dir} = $d;
+	    # ignore $db_dir, give heads-up
+	    $self->warn("DB name is an absolute path; DB_DIR ignored") if $db_dir;
+	}
+	else {
+	    $d = File::Spec->catdir($v, $db_dir, $d);
+	    $self->throw("Path specified by DB_DIR+DB_NAME ('$d') does not exist") unless !$d || (-d $d);
+	    $self->{_db_path} = File::Spec->catfile($d,$f);
+	}
+    }
+	
     if ($masker) {
 	$self->throw("Masker '$masker' not available") unless 
 	    grep /^$masker$/, keys %AVAILABLE_MASKERS;
@@ -571,12 +594,15 @@ sub new {
 				     DIR => $self->db_dir,
 				     UNLINK => 1);
 	    $self->{_db} = $fh->filename;
-	    $self->_register_temp_for_cleanup($self->db);
+	    $self->{_db_path} = File::Spec->catfile($self->db_dir,$self->db);
+	    $self->_register_temp_for_cleanup($self->db_path);
 	    $fh->close;
 	}
 	else {
 	    $self->{_db_dir} = File::Temp->newdir('DBDXXXXX');
 	    $self->{_db} = 'DBTEMP';
+	    $self->{_db_path} = File::Spec->catfile($self->db_dir, 
+						    $self->db);
 	}
     }
 
@@ -599,6 +625,7 @@ sub db_name { shift->{_db} }
 sub set_db_name { shift->{_db} = shift }
 sub db_dir { shift->{_db_dir} }
 sub set_db_dir { shift->{_db_dir} = shift }
+sub db_path { shift->{_db_path} }
 sub db_data { shift->{_db_data} }
 sub set_db_data { shift->{_db_data} = shift }
 sub db_type { shift->{_db_type} }
@@ -661,6 +688,7 @@ sub make_db {
     my ($v,$d,$name) = File::Spec->splitpath($data);
     $name =~ s/\.fas$//;
     $self->{_db} ||= $name;
+    $self->{_db_path} = File::Spec->catfile($self->db_dir,$self->db);
     # <#######[
     # deal with creating masks here, 
     # and provide correct parameters to the 
@@ -675,7 +703,7 @@ sub make_db {
     my %db_args = (
 	-in => $data,
 	-dbtype => $self->db_type,
-	-out => $self->db,
+	-out => $self->db_path,
 	-title => $self->db,
 	-parse_seqids => 1 # necessary for masking
 	);
@@ -722,17 +750,6 @@ sub make_db {
 # windowmasker   nucl          mask overrep data, low-complexity (optional)
 # dustmasker     nucl          mask low-complexity
 # segmasker      prot  
-
-#needs some thought
-# want to be able to create mask and db in one go (say on object construction)
-# also want to be able to create a mask from given data as a separate
-# task using the factory.
-# so this method should be independent, and also called by make_db
-# if masking is specified.
-# question then is arguments: do this: 
-# must specify mask data (a seq collection),
-# allow specification of mask program, mask pgm args,
-# but if either of these not present, default to the object attribute
 
 sub make_mask {
     my $self = shift;
@@ -791,7 +808,7 @@ sub make_mask {
 			     DIR => $self->db_dir);
     my $mask_outfile = $mh->filename;
     $mh->close;
-    $self->_register_temp_for_cleanup($mask_outfile);
+    $self->_register_temp_for_cleanup(File::Spec->catfile($self->db_dir,$mask_outfile));
 
     %mask_args = (
 	-in => $data,
@@ -873,7 +890,7 @@ sub make_mask {
 sub db_info {
     my $self = shift;
     my $db = shift;
-    $db ||= $self->db;
+    $db ||= $self->db_path;
     unless ($db) {
 	$self->warn("db_info: db not specified and no db attached");
 	return;
@@ -1022,19 +1039,19 @@ sub mask_make_args { shift->{_mask_make_args} }
 sub check_db {
     my $self = shift;
     my ($db) = @_;
-    my $db_dir;
+    my $db_path;
     if ($db) {
 	my ($v,$d,$f) = File::Spec->splitpath($db);
-	$db = $f;
-	$db_dir = $d;
+	$f =~ s/\..*$//; # ignore extensions
+	$db_path = File::Spec->catfile($d||'.',$f);
     }
-    $db ||= $self->db;
-    $db_dir ||= $self->db_dir;
-    if ( $db && $db_dir ) {
-	my $ckdb = File::Spec->catfile($db_dir, $db);
+    else {
+	$db_path = $self->db_path;
+    }
+    if ( $db_path ) {
 	$self->{_factory} = $bp_class->new( -command => 'blastdbcmd',
 					    -info => 1,
-					    -db => $ckdb );
+					    -db => $db_path );
 #	$DB::single=1;
 	$self->factory->no_throw_on_crash(1);
 	$self->factory->_run();
@@ -1072,7 +1089,7 @@ sub no_throw_on_crash {
  Title   : _fastize
  Usage   : 
  Function: convert a sequence collection to a temporary
-           fasta file
+           fasta file (sans gaps)
  Returns : fasta filename (scalar string)
  Args    : sequence collection 
 
@@ -1102,7 +1119,12 @@ sub _fastize {
 		$self->_register_temp_for_cleanup($fname);
 		my $fasio = Bio::SeqIO->new(-file=>">$fname", -format=>"fasta")
 		   or $self->throw("Can't create temp fasta file");
-		$fasio->write_seq($_) for @$data;
+		for (@$data) {
+		    my $s = $_->seq;
+		    $s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
+		    $_->seq( $s );
+		    $fasio->write_seq($_);
+		}
 		$fasio->close;
 		$data = $fname;
 		last;
@@ -1123,19 +1145,37 @@ sub _fastize {
 		$self->_register_temp_for_cleanup($fname);
 		my $fasio = Bio::SeqIO->new(-file=>">$fname", -format=>"fasta") 
 		    or $self->throw("Can't create temp fasta file");
+		require Bio::PrimarySeq;
 		if ($data->isa('Bio::AlignIO')) {
 		    my $aln = $data->next_aln;
-		    $fasio->write_seq($_) for $aln->each_seq;
+		    for ($aln->each_seq) {
+			# must de-gap
+			my $s = $_->seq;
+			$s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
+			$_->seq( $s );
+			$fasio->write_seq($_) 
+		    }
 		}
 		elsif ($data->isa('Bio::SeqIO')) {
 		    while (local $_ = $data->next_seq) {
+			my $s = $_->seq;
+			$s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
+			$_->seq( $s );			
 			$fasio->write_seq($_);
 		    }
 		}
 		elsif ($data->isa('Bio::Align::AlignI')) {
-		    $fasio->write_seq($_) for $data->each_seq;
+		    for( $data->each_seq) {
+			my $s = $_->seq;
+			$s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
+			$_->seq( $s );
+			$fasio->write_seq($_) 
+		    }
 		}
 		elsif ($data->isa('Bio::Seq') || $data->isa('Bio::PrimarySeq')) {
+		    my $s = $data->seq;
+		    $s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
+		    $data->seq($s);
 		    $fasio->write_seq($data);
 		}
 		else {
@@ -1170,7 +1210,7 @@ sub _register_temp_for_cleanup {
     for (@files) {
 	my ($v, $d, $n) = File::Spec->splitpath($_);
 	$_ = File::Spec->catfile($self->db_dir, $n) unless length($d);
-	push @{$self->{_cleanup_list}}, $_;
+	push @{$self->{_cleanup_list}}, File::Spec->rel2abs($_);
     }
     return 1;
 }
@@ -1189,16 +1229,18 @@ sub cleanup {
     my $self = shift;
     return unless $self->{_cleanup_list};
     for (@{$self->{_cleanup_list}}) {
-	m/\./ && do {
+	m/(\.[a-z0-9_]+)+$/i && do {
 	    unlink $_;
 	    next;
 	};
 	do { # catch all index files
 	    if ( -e $_.".psq" ) {
 		unlink glob($_.".p*");
+		unlink glob($_.".??.p*");
 	    }
 	    elsif ( -e $_.".nsq" ) {
 		unlink glob($_.".n*");
+		unlink glob($_.".??.n*");
 	    }
 	    else {
 		unlink $_;
