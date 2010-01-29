@@ -9,7 +9,6 @@ BEGIN {
     use Bio::Root::Test;
     $home = '.'; # set to '.' for Build use,
                      # '../lib' for debugging from .t file
-#    $home = '../lib';
     unshift @INC, $home;
     test_begin(-tests => 57,
 	       -requires_modules => [qw( 
@@ -23,8 +22,6 @@ use_ok( 'Bio::Tools::Run::WrapperBase::CommandExts' );
 use Bio::SeqIO;
 use Bio::AlignIO;
 
-## for testing; remove following line for production....
-#$ENV{BLASTPLUSDIR} = "C:\\Program\ Files\\NCBI\\blast-2.2.22+\\bin";
 
 ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'), 
     "BlastPlus factory";
@@ -58,7 +55,7 @@ SKIP : {
     is $fac->db, 'test', "correct name";
     is ref $fac->db_info, 'HASH', "dbinfo hash returned";
     is $fac->db_type, 'nucl', "correct type";
-    
+
     ok $fac->make_mask(
 	-data=>test_input_file('test-spa.fas'), 
 	-masker=>'windowmasker'), "windowmasker mask made";
@@ -78,7 +75,7 @@ SKIP : {
     ok $fac->make_mask(
 	-data=>$fac->db, 
 	-masker=>'segmasker'), "segmasker mask made; blastdb as data";
-    
+    $fac->_register_temp_for_cleanup('test');
     $fac->cleanup;
     
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
@@ -88,6 +85,7 @@ SKIP : {
 	);
     ok $fac->make_db, "protein db made with pre-built mask";
     is $fac->db_filter_algorithms->[0]{algorithm_name}, 'seg', "db_info records mask info";
+
     $fac->cleanup;
     
 
@@ -120,7 +118,7 @@ SKIP : {
 	);
     $fac->no_throw_on_crash(1);
     ok $fac->make_db, "mask built and db made on construction (dustmasker)";
-    $fac->_register_temp_for_cleanup('test');
+
     $fac->cleanup;
     # tests with Bio:: objects as input
 
@@ -140,6 +138,7 @@ SKIP : {
 	-create => 1
 	);
     ok $fac->make_db, "make db from Bio::AlignIO";
+
     $fac->cleanup;
 
     $aio = Bio::AlignIO->new(-file=>test_input_file('test-aln.msf'));
@@ -211,5 +210,5 @@ SKIP : {
     
 } # SKIP to here
 
-# sub test_input_file { "data/".shift }
+
 1;
