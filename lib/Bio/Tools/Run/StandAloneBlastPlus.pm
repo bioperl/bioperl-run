@@ -540,7 +540,7 @@ sub new {
 	    $self->{_db_path} = File::Spec->catfile($d,$f);
 	    $self->{_db_dir} = $d;
 	    # ignore $db_dir, give heads-up
-	    $self->warn("DB name is an absolute path; DB_DIR ignored") if $db_dir;
+	    $self->warn("DB name is an absolute path; setting db_dir to '".$self->db_dir."'") if $db_dir;
 	}
 	else {
 	    $d = File::Spec->catdir($self->db_dir, $d);
