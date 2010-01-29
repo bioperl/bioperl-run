@@ -543,7 +543,7 @@ sub new {
 	    $self->warn("DB name is an absolute path; DB_DIR ignored") if $db_dir;
 	}
 	else {
-	    $d = File::Spec->catdir($v, $db_dir, $d);
+	    $d = File::Spec->catdir($self->db_dir, $d);
 	    $self->throw("Path specified by DB_DIR+DB_NAME ('$d') does not exist") unless !$d || (-d $d);
 	    $self->{_db_path} = File::Spec->catfile($d,$f);
 	}
