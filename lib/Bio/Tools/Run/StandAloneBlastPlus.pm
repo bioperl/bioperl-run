@@ -593,8 +593,9 @@ sub new {
 	    my $fh = File::Temp->new(TEMPLATE => 'DBXXXXX',
 				     DIR => $self->db_dir,
 				     UNLINK => 1);
-	    $self->{_db} = $fh->filename;
-	    $self->{_db_path} = File::Spec->catfile($self->db_dir,$self->db);
+	    my ($v,$d,$f) = File::Spec->splitpath($fh->filename);
+	    $self->{_db} = $f;
+	    $self->{_db_path} = $fh->filename;
 	    $self->_register_temp_for_cleanup($self->db_path);
 	    $fh->close;
 	}
