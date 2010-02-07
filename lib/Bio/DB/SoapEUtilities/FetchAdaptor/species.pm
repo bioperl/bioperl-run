@@ -122,6 +122,7 @@ sub next_obj {
     my $get_tl = sub { $toplev->{ shift @_ } };
     my $sp = _read_species($get_tl);
     $self->warn("FetchAdaptor::species - parse error, no Bio::Species returned") unless $sp;
+    ($self->{_idx})++;
     return $sp;
 }
 1;
