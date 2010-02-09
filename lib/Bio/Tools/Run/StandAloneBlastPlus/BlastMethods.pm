@@ -238,7 +238,7 @@ sub run {
 	%usr_args = @$method_args;
     }
     # make db if necessary
-    $self->make_db unless $self->check_db or $self->is_remote;
+    $self->make_db unless $self->check_db or $self->is_remote or $usr_args{'-subject'} or $usr_args{'-SUBJECT'}; # no db nec if this is bl2seq...
     $self->{_factory} = Bio::Tools::Run::BlastPlus->new( -command => $method );
     if (%usr_args) {
 	my @avail_parms = $self->factory->available_parameters('all');

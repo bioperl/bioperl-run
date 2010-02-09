@@ -583,7 +583,8 @@ sub new {
 	$self->throw("DB '".$self->db."' can't be found. To create, set -create => 1.") unless $create;
     }
     if (!$self->db) {
-	$self->throw('No database or db data specified. '.
+	# allow this to pass; catch lazily at make_db...
+	$self->debug('No database or db data specified. '.
 		     'To create a new database, provide '.
 		     '-db_data => [fasta|\@seqs|$seqio_object]')
 	    unless $self->db_data;
