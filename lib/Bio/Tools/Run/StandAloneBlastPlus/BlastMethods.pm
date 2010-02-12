@@ -178,8 +178,6 @@ use File::Spec;
 our @BlastMethods = qw( blastp blastn blastx tblastn tblastx 
                        psiblast rpsblast rpstblastn );
 
-
-
 =head2 run()
 
  Title   : run
@@ -279,6 +277,7 @@ sub run {
 	    $ret = Bio::SearchIO->new(-file => $outfile);
 
 	    $self->{_blastout} = $outfile;
+	    $self->{_results} = $ret;
 	    $ret = $ret->next_result;
 	    last;
 	};
@@ -289,8 +288,6 @@ sub run {
     
     return $ret;
 }
-
-
 
 =head2 bl2seq()
 
@@ -345,6 +342,40 @@ sub bl2seq {
 
 }
 
+=head2 next_result()
+
+ Title   : next_result
+ Usage   : $result = $fac->next_result;
+ Function: get the next BLAST result
+ Returns : Bio::Search::Result::BlastResult object
+ Args    : none
+
+=cut
+
+sub next_result() {
+    my $self = shift;
+    return unless $self->{_results};
+    return $self->{_results}->next_result;
+}
+
+=head2 rewind_results()
+
+ Title   : rewind_results
+ Usage   : $fac->rewind_results;
+ Function: rewind BLAST results
+ Returns : true on success
+ Args    : 
+
+=cut
+
+sub rewind_results {
+    my $self = shift;
+    return unless $self->blast_out;
+    $self->{_results} = Bio::SearchIO->new( -file => $self->blast_out );
+    return 1;
+}
+
+
 =head2 blast_out()
 
  Title   : blast_out
@@ -355,7 +386,7 @@ sub bl2seq {
 
 =cut
 
-sub blast_output { shift->{_blastout} }
+sub blast_out { shift->{_blastout} }
 
 # =head2 _demodernize()
 
