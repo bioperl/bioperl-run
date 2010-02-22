@@ -222,9 +222,7 @@ sub new {
 	}
 	my $self = $class->SUPER::new(@args);
 	foreach (keys %command_executables) {
-		my $executable = `which $command_executables{$_}`;
-		chomp $executable;
-		$self->executables($_, $executable);
+		$self->executables($_, $self->_find_executable($command_executables{$_}));
 	}
 	$self->want($self->_rearrange([qw(WANT)],@args));
 	$self->parameters_changed(1); # set on instantiation, per Bio::ParameterBaseI
