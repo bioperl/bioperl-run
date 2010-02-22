@@ -237,9 +237,7 @@ sub new {
 	}
 	my $self = $class->SUPER::new(@args);
 	foreach (keys %command_executables) {
-		my $executable = `which $command_executables{$_}`;
-		chomp $executable;
-		$self->executables($_, $executable);
+		$self->executables($_, $self->_find_executable($command_executables{$_}));
 	}
 	my ($want) = $self->_rearrange([qw(WANT)],@args);
 	$self->want($want);
