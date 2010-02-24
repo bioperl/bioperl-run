@@ -196,6 +196,7 @@ use Bio::Tools::Run::WrapperBase::CommandExts;
 use Bio::Tools::GuessSeqFormat;
 use Bio::Tools::Run::Samtools;
 use Bio::Seq;
+use File::Basename;
 
 use base qw( Bio::Tools::Run::WrapperBase Bio::Tools::Run::AssemblerBase );
 
@@ -262,6 +263,11 @@ sub new {
            -seq, -seq2, -ind (bowtie index), -ref (fasta reference) and -out
  Note    : gzipped inputs are allowed if IO::Uncompress::Gunzip
            is available
+           The behaviour for locating indexes follows the definition in
+           the bowtie manual - you may use the environment variable
+           BOWTIE_INDEXES to specify the index path or use an 'indexes'
+           directory under the directory where the bowtie executable
+           is located
 
 =cut
 
@@ -320,7 +326,11 @@ sub run {
 
 			# confirm index files exist
 			$self->_validate_file_input( -ind => $index ) or
-				$self->throw("Incorrect filetype (expecting bowtie index) or absent file arg 2/-index");
+			($self->_validate_file_input( -ind => $self->io->catfile(dirname($self->executable),'indexes',$index)) and 
+				$index = $self->io->catfile(dirname($self->executable),'indexes',$index)) or
+			($self->_validate_file_input( -ind => $self->io->catfile($ENV{BOWTIE_INDEXES},$index)) and
+			        $index = $self->io->catfile($ENV{BOWTIE_INDEXES},$index)) or
+					$self->throw("Incorrect filetype (expecting bowtie index) or absent file arg 2/-index");
 		
 			# bowtie prepare the multiple input types
 			$seq = $self->_prepare_input_sequences($seq);
@@ -392,8 +402,13 @@ sub run {
 			$index ||= $arg1;
 			$out ||= $arg2;
 			$index or $self->throw("Bowtie index required at arg 1");
+
 			$self->_validate_file_input( -ind => $index ) or
-				$self->throw("'$index' doesn't look like a bowtie index or index component is missing at arg 1/-ind");
+			($self->_validate_file_input( -ind => $self->io->catfile(dirname($self->executable),'indexes',$index)) and 
+				$index = $self->io->catfile(dirname($self->executable),'indexes',$index)) or
+			($self->_validate_file_input( -ind => $self->io->catfile($ENV{BOWTIE_INDEXES},$index)) and
+			        $index = $self->io->catfile($ENV{BOWTIE_INDEXES},$index)) or
+					$self->throw("'$index' doesn't look like a bowtie index or index component is missing at arg 1/-ind");
 			$arg3 && $self->throw("Second sequence input not wanted for command: $cmd");
 
 			# Inspect index
