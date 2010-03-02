@@ -580,14 +580,16 @@ sub new {
 
     # check db
     if (defined $self->check_db and $self->check_db == 0 and !$self->is_remote) {
-	$self->throw("DB '".$self->db."' can't be found. To create, set -create => 1.") unless $create;
+	$self->throw("DB '".$self->db."' can't be found. To create, set -create => 1.") unless ($create || $overwrite);
     }
     if (!$self->db) {
 	# allow this to pass; catch lazily at make_db...
-	$self->debug('No database or db data specified. '.
-		     'To create a new database, provide '.
-		     '-db_data => [fasta|\@seqs|$seqio_object]')
-	    unless $self->db_data;
+	if (!$self->db_data) {
+	    $self->debug('No database or db data specified. '.
+			 'To create a new database, provide '.
+			 '-db_data => [fasta|\@seqs|$seqio_object]')
+	}
+
 	# no db specified; create temp db
 	$self->{_create} = 1;
 	if ($self->db_dir) {
@@ -675,7 +677,7 @@ sub is_remote { shift->{_is_remote} }
 sub make_db {
     my $self = shift;
     my @args = @_;
-    return 1 if $self->check_db; # already there
+    return 1 if ( $self->check_db || !$self->overwrite ); # already there or force make
     $self->throw('No database or db data specified. '.
 		 'To create a new database, provide '.
 		 '-db_data => [fasta|\@seqs|$seqio_object]') 
