@@ -653,7 +653,6 @@ sub set_mask_data { shift->{_mask_data} = shift }
 =cut
 
 sub factory { shift->{_factory} }
-sub masker { shift->{_masker} }
 sub create { shift->{_create} }
 sub overwrite { shift->{_overwrite} }
 sub is_remote { shift->{_is_remote} }
