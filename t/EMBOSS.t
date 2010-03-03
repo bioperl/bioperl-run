@@ -32,7 +32,7 @@ ok($factory);
 SKIP: {
 	my $compseqapp = $factory->program('compseq');
 	
-	skip('EMBOSS not installed',17) if !$compseqapp;
+	skip('EMBOSS not installed',27) if !$compseqapp;
 	
 	my $version = $factory->version;
 	
