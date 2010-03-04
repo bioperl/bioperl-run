@@ -185,14 +185,21 @@ sub new {
     $file =~ s/(border)/$1="1"/;
     $file =~ s/=(\d+)/="$1"/g;
     $file =~ s/<br>/<br><\/br>/g;
+    $file =~ s{</td>}{FOO}g;
     $file =~ s/&nbsp;//g;
 
-    my $t = new XML::Twig( TwigHandlers =>
+    my $t = XML::Twig->new( TwigHandlers =>
 			   {
 			       '/table/tr' => \&_row  }
 			   );
     
-    $t->parse( $file); # results written into global %OPT
+    eval {
+    $t->parse( $file);
+    }; # results written into global %OPT
+    
+    if ($@) {
+        Bio::Root::Root->throw("XML parsing error: $@");
+    }
     
     my %acd = %OPT; # copy to a private hash
     $acd{'_name'} = $prog;
