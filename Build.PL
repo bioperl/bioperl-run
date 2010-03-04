@@ -8,9 +8,9 @@ use warnings;
 use Module::Build;
 
 my $build = Module::Build->new(
-    module_name         => 'Bio::Run',
     dist_name           => 'BioPerl-Run',
     dist_version        => '1.006900',
+    module_name         => 'Bio::Run',
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
     license             => 'perl',
@@ -66,9 +66,15 @@ if ($build->args('network')) {
 elsif ($build->feature('Network')) {
     $do_network_tests = $accept ? 0 : $build->y_n("Do you want to run tests that require connection to servers across the internet\n(likely to cause some failures)? y/n", 'n');
 }
+
 if ($do_network_tests) {
     $build->notes(network => 1);
     $build->log_info("  - will run internet-requiring tests\n");
+    my $use_email = $build->y_n("Do you want to run tests requiring a valid email address? y/n",'n');
+    if ($use_email) {
+        my $address = $build->prompt("Enter email address:");
+        $build->notes(email => $address);
+    }
 }
 else {
     $build->notes(network => 0);
