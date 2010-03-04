@@ -116,12 +116,10 @@ SKIP: {
 	}
 	ok(-e $consoutfile);
 	
-	
 	# testing acd parsing and EMBOSSacd methods
 	
 	$compseqapp = $factory->program('compseq');
 	
-	exit unless $compseqapp->acd;
 	ok my $acd = $compseqapp->acd;
 	is $compseqapp->acd->name, 'compseq';
 	ok my $compseq_mand_acd = $compseqapp->acd->mandatory;

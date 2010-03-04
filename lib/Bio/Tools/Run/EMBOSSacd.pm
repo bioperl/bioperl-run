@@ -182,10 +182,9 @@ sub new {
     }
     
     # converting HTML -> XHTML for XML parsing
-    $file =~ s/(border)/$1="1"/;
+    $file =~ s/border/border="1"/;
     $file =~ s/=(\d+)/="$1"/g;
     $file =~ s/<br>/<br><\/br>/g;
-    $file =~ s{</td>}{FOO}g;
     $file =~ s/&nbsp;//g;
 
     my $t = XML::Twig->new( TwigHandlers =>
@@ -193,13 +192,9 @@ sub new {
 			       '/table/tr' => \&_row  }
 			   );
     
-    eval {
-    $t->parse( $file);
-    }; # results written into global %OPT
+    $t->safe_parse( $file);
     
-    if ($@) {
-        Bio::Root::Root->throw("XML parsing error: $@");
-    }
+    #Bio::Root::Root->throw("XML parsing error: $@");
     
     my %acd = %OPT; # copy to a private hash
     $acd{'_name'} = $prog;
