@@ -496,7 +496,7 @@ sub new {
     my $self = $class->SUPER::new(@args);
     my ($db_name, $db_data, $db_dir, $db_make_args,
 	$mask_file, $mask_data, $mask_make_args, $masker, 
-	$create, $overwrite, $is_remote, $program_dir) 
+	$create, $overwrite, $is_remote, $prog_dir, $program_dir) 
                  = $self->_rearrange([qw( 
                                           DB_NAME
                                           DB_DATA
@@ -510,6 +510,7 @@ sub new {
                                           OVERWRITE
                                           REMOTE
                                           PROG_DIR
+                                          PROGRAM_DIR
                                            )], @args);
 
     # parm taint checks
@@ -524,6 +525,7 @@ sub new {
     else {
 	$self->{'_db_dir'} = '.';
     }
+    $program_dir ||= $prog_dir; # alias
     # now handle these systematically (bug #3003)
     # allow db_name to include path info
     # let db_dir act as root if present and db_name is a relative path
