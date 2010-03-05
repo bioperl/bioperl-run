@@ -678,7 +678,8 @@ sub is_remote { shift->{_is_remote} }
 sub make_db {
     my $self = shift;
     my @args = @_;
-    return 1 if ( $self->check_db || !$self->overwrite ); # already there or force make
+    return 1 if ( $self->check_db && !$self->overwrite ); # already there or force make
+
     $self->throw('No database or db data specified. '.
 		 'To create a new database, provide '.
 		 '-db_data => [fasta|\@seqs|$seqio_object]') 
