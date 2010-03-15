@@ -1127,8 +1127,10 @@ sub _fastize {
 		   or $self->throw("Can't create temp fasta file");
 		for (@$data) {
 		    my $s = $_->seq;
+		    my $a = $_->alphabet;
 		    $s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
 		    $_->seq( $s );
+		    $_->alphabet($a);
 		    $fasio->write_seq($_);
 		}
 		$fasio->close;
@@ -1157,31 +1159,39 @@ sub _fastize {
 		    for ($aln->each_seq) {
 			# must de-gap
 			my $s = $_->seq;
+			my $a = $_->alphabet;
 			$s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
 			$_->seq( $s );
+			$_->alphabet($a);
 			$fasio->write_seq($_) 
 		    }
 		}
 		elsif ($data->isa('Bio::SeqIO')) {
 		    while (local $_ = $data->next_seq) {
 			my $s = $_->seq;
+			my $a = $_->alphabet;
 			$s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
-			$_->seq( $s );			
+			$_->seq( $s );
+			$_->alphabet($a);
 			$fasio->write_seq($_);
 		    }
 		}
 		elsif ($data->isa('Bio::Align::AlignI')) {
 		    for( $data->each_seq) {
 			my $s = $_->seq;
+			my $a = $_->alphabet;
 			$s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
 			$_->seq( $s );
+			$_->alphabet($a);
 			$fasio->write_seq($_) 
 		    }
 		}
 		elsif ($data->isa('Bio::Seq') || $data->isa('Bio::PrimarySeq')) {
 		    my $s = $data->seq;
+		    my $a = $data->alphabet;
 		    $s =~ s/[$Bio::PrimarySeq::GAP_SYMBOLS]//g;
 		    $data->seq($s);
+		    $data->alphabet($a);
 		    $fasio->write_seq($data);
 		}
 		else {
