@@ -251,8 +251,8 @@ sub new {
 
   my $self = $class->SUPER::new(@args);
 #   $self->{'_branchLengths'} = 0;
-  my ($aln, $tree, $st, $params, $exe, 
-      $ubl) = $self->_rearrange([qw(TREE SAVE_TEMPFILES PARAMS EXECUTABLE)],
+  my ($tree, $st, $params, $exe)
+      = $self->_rearrange([qw(TREE SAVE_TEMPFILES PARAMS EXECUTABLE)],
 				    @args);
   defined $tree && $self->tree($tree);
   defined $st  && $self->save_tempfiles($st);
