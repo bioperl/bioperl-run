@@ -411,7 +411,6 @@ sub run {
     # FIXME: We should look for the stuff we prepared in the prepare method here
     my $rc = (1);
     {
-        my $cwd = cwd();
         my $exit_status;
         my ($tmpdir) = $self->tempdir();
         chdir($tmpdir);
@@ -432,8 +431,6 @@ sub run {
             my $aln = $in->next_aln();
             $self->alignment($aln);
         }
-        #chdir($cwd);
-        ####
     }
     return $rc;
 }
