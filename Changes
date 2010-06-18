@@ -5,7 +5,10 @@ Full details of changes between all versions are available online at:
 http://www.bioperl.org/wiki/Change_log
 
 1.6.2 Release
-
+* Improved Bio::Tools::Run::AssemblerBase module and update of the wrappers
+  that use it [fangly, maj]
+* Support for running new de novo and comparative assemblers: 454 Newbler
+  [fangly], Minimo [fangly], Maq [maj], Samtools [maj], Bowtie [maj]
 * [bug 2728] add support to Bio::Tools::Run::Alignment::ClustalW for ClustalW2
   [cjfields]
 * [RT 50363] make a bit more Windows friendly with file paths
