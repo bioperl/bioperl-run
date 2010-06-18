@@ -125,6 +125,7 @@ our $qual_param;
 our $use_dash = 1;
 our $join = ' ';
 our $asm_format = 'ace';
+our $asm_variant = '454';
 
 
 =head2 new
@@ -198,6 +199,7 @@ sub new {
   *minimum_overlap_similarity = \&min_ovl_identity;
   $self->program_name($program_name) if not defined $self->program_name();
   $self->_assembly_format($asm_format);
+  $self->_assembly_variant($asm_variant);
   return $self;
 }
 

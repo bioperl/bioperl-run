@@ -147,7 +147,7 @@ sub out_type {
 =head2 _assembly_format
 
  Title   : _assembly_format
- Usage   : $assembler->_assembly_format('tigr')
+ Usage   : $assembler->_assembly_format('ace')
  Function: get/set the driver to use to parse the assembly results
  Returns : the driver to use to parse the assembly results
  Args    : the driver to use to parse the assembly results (optional)
@@ -160,6 +160,26 @@ sub _assembly_format {
     $self->{'_assembly_format'} = $asm_format;
   }
   return $self->{'_assembly_format'};
+}
+
+
+=head2 _assembly_variant
+
+ Title   : _assembly_variant
+ Usage   : $assembler->_assembly_variant('454')
+ Function: get/set the driver variant to use to parse the assembly results. For
+           example, the ACE format has the ACE-454 and the ACE-consed variants
+ Returns : the driver variant to use to parse the assembly results
+ Args    : the driver variant to use to parse the assembly results (optional)
+
+=cut
+
+sub _assembly_variant {
+  my ($self, $asm_variant) = @_;
+  if (defined $asm_variant) {
+    $self->{'_assembly_variant'} = $asm_variant;
+  }
+  return $self->{'_assembly_variant'};
 }
 
 
@@ -420,8 +440,9 @@ sub _export_results {
     $results = $asm_file;
   } else {
     $asm_io = Bio::Assembly::IO->new(
-      -file   => "<$asm_file",
-      -format => $self->_assembly_format(),
+      -file    => "<$asm_file",
+      -format  => $self->_assembly_format(),
+      -variant => $self->_assembly_variant(),
 	@named_args );
     # this unlink is a problem for Bio::DB::Sam (in B:A:I:sam), which needs
     # the original bam file around. 
