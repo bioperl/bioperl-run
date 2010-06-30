@@ -8,11 +8,12 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 31,
-			   -requires_modules => [qw(XML::Twig Bio::Factory::EMBOSS)]);
+    test_begin(-tests => 32,
+			   -requires_modules => [qw(XML::Twig)]);
 	use_ok('Bio::Root::IO');
 	use_ok('Bio::SeqIO');
 	use_ok('Bio::AlignIO');
+	use_ok('Bio::Factory::EMBOSS');
 }
 
 my $compseqoutfile = test_output_file();
@@ -26,12 +27,14 @@ my $verbose = test_debug();
 ## the print "1..x\n" in the BEGIN block to reflect the
 ## total number of tests that will be run.
 
-my $factory = Bio::Factory::EMBOSS->new(-verbose => $verbose);
+my $factory = Bio::Factory::EMBOSS->new();
 ok($factory);
 
 SKIP: {
 	my $compseqapp = $factory->program('compseq');
 	
+    $factory->verbose($verbose);
+    
 	skip('EMBOSS not installed',27) if !$compseqapp;
 	
 	my $version = $factory->version;
