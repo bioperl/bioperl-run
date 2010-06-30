@@ -30,11 +30,11 @@ SKIP: {
    my $result = $searchio->next_result;
    my $hit    = $result->next_hit;
    my $hsp    = $hit->next_hsp;
-   ok $hsp->isa("Bio::Search::HSP::HSPI");
-   ok ($hsp->query->start,1);
-   ok ($hsp->query->end,1775);
-   ok ($hsp->hit->start,1);
-   ok ($hsp->hit->end,1775);
+   isa_ok($hsp, "Bio::Search::HSP::HSPI");
+   is($hsp->query->start,1);
+   is($hsp->query->end,1775);
+   is($hsp->hit->start,1);
+   is($hsp->hit->end,1775);
    my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
    
    my $seq  = $sio->next_seq ;
@@ -43,11 +43,11 @@ SKIP: {
    $result = $searchio->next_result;
    $hit    = $result->next_hit;
    $hsp    = $hit->next_hsp;
-   ok $hsp->isa("Bio::Search::HSP::HSPI");
-   ok ($hsp->query->start,1);
-   ok ($hsp->query->end,1775);
-   ok ($hsp->hit->start,1);
-   ok ($hsp->hit->end,1775);
+   isa_ok($hsp, "Bio::Search::HSP::HSPI");
+   is($hsp->query->start,1);
+   is($hsp->query->end,1775);
+   is($hsp->hit->start,1);
+   is($hsp->hit->end,1775);
 }
  
 1; 
