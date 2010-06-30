@@ -23,7 +23,9 @@ ok $primer3 = Bio::Tools::Run::Primer3->new(-seq=>$seq);
 SKIP: {
     test_skip(-requires_executable => $primer3,
               -tests => 6);
-    
+    my $v = $primer3->version;
+    skip("Primer3 wrapper only supports Primer3 v1", 6) if
+        !defined $v || $v ge '1.2';
     $args = $primer3->arguments;
     is($$args{'PRIMER_SEQUENCE_ID'}, "(string, optional) an id. Optional. Note must be present if PRIMER_FILE_FLAG is set");
     ok $primer3->add_targets('PRIMER_SEQUENCE_ID'=>'test seq');
