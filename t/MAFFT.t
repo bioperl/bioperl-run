@@ -36,7 +36,7 @@ SKIP: {
 	ok($version);
 	$aln = $factory->align($inputfilename);
 	ok($aln);
-	is( $aln->no_sequences, 7);
+	is( $aln->num_sequences, 7);
 	
 	my $str = Bio::SeqIO->new('-file' => 
 				  test_input_file("cysprot.fa"), 
@@ -50,14 +50,14 @@ SKIP: {
 	my $seq_array_ref = \@seq_array;
 	
 	$aln = $factory->align($seq_array_ref);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	my $s1_perid = $aln->average_percentage_identity;
 	cmp_ok(int($s1_perid), '>=', 42, '42 or 43 expected');
 	
 	for my $method ( grep { !/rough/ } $factory->methods ) {
 		$factory->method($method);
 		$aln = $factory->align($inputfilename);
-		is $aln->no_sequences, 7;
+		is $aln->num_sequences, 7;
 		my $s1_perid = $aln->average_percentage_identity;
 		ok($s1_perid);
 		

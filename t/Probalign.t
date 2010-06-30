@@ -32,7 +32,7 @@ SKIP: {
 	cmp_ok ($version, '>=', 3.3,"Code tested only on probalign versions > 3.3" );
 	$aln = $factory->align($inputfilename);
 	ok($aln);
-	is( $aln->no_sequences, 7);
+	is( $aln->num_sequences, 7);
 	
 	my $str = Bio::SeqIO->new('-file' => $inputfilename,
 				  '-format' => 'Fasta');
@@ -45,7 +45,7 @@ SKIP: {
 	my $seq_array_ref = \@seq_array;
 	
 	$aln = $factory->align($seq_array_ref);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	my $s1_perid = POSIX::ceil($aln->average_percentage_identity);
 	is($s1_perid == 43 || $s1_perid == 44, 1,
 	   'diff versions of PROBALIGN have different vals');
@@ -55,7 +55,7 @@ SKIP: {
 	@params = ('-outfile_name'      => $outfile);
 	$factory = Bio::Tools::Run::Alignment::Probalign->new(@params);
 	$aln = $factory->align($seq_array_ref);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	$s1_perid = POSIX::ceil($aln->average_percentage_identity);
 	is($s1_perid == 43 || $s1_perid == 44, 1,
 	   'diff versions of PROBALIGN have different vals');
@@ -63,7 +63,7 @@ SKIP: {
 	
 	$inputfilename = test_input_file("cysprot1a.fa");
 	$aln = $factory->align($inputfilename);
-	is $aln->no_sequences, 3;
+	is $aln->num_sequences, 3;
 	$s1_perid = POSIX::ceil($aln->average_percentage_identity);
 	
 	is($s1_perid == 41 || $s1_perid == 42, 1,

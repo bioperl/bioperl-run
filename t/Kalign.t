@@ -23,7 +23,7 @@ SKIP: {
 	is($version >= 2, 1, "Code tested only on kalign versions >= 2" );
 	$aln = $factory->align($inputfilename);
 	ok($aln);
-	is( $aln->no_sequences, 7);
+	is( $aln->num_sequences, 7);
 	
 	my $str = Bio::SeqIO->new('-file' => test_input_file("cysprot.fa"), 
 				  '-format' => 'Fasta');
@@ -36,7 +36,7 @@ SKIP: {
 	my $seq_array_ref = \@seq_array;
 	
 	$aln = $factory->align($seq_array_ref);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	my $s1_perid = $aln->average_percentage_identity;
 	is(int($s1_perid), 42);
 }

@@ -24,7 +24,7 @@ SKIP: {
 	cmp_ok ($version, '>=', 1.09, "Code tested only on probcons versions > 1.09" );
 	$aln = $factory->align($inputfilename);
 	ok($aln);
-	is( $aln->no_sequences, 7);
+	is( $aln->num_sequences, 7);
 	
 	my $str = Bio::SeqIO->new('-file' => $inputfilename,
 				  '-format' => 'Fasta');
@@ -37,7 +37,7 @@ SKIP: {
 	my $seq_array_ref = \@seq_array;
 	
 	$aln = $factory->align($seq_array_ref);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	my $s1_avg_perid = $aln->average_percentage_identity;
 	is(int($s1_avg_perid), 43);
 	my $s1_ovl_perid = $aln->overall_percentage_identity;

@@ -73,7 +73,7 @@ SKIP: {
   
   # now test its output
   isa_ok( $aln, 'Bio::SimpleAlign');
-  is( $aln->no_sequences, 7,                               'Correct number of seqs returned' );
+  is( $aln->num_sequences, 7,                               'Correct number of seqs returned' );
   
   # test execution using an array of Seq objects
   my $str = Bio::SeqIO->new(
@@ -87,7 +87,7 @@ SKIP: {
   $aln = $factory->align(\@seq_array);
   # now test its output
   isa_ok( $aln, 'Bio::SimpleAlign');
-  is( $aln->no_sequences, 7,                            'Correct number of seqs returned' );
+  is( $aln->num_sequences, 7,                            'Correct number of seqs returned' );
 
   # Use this alignment to fully test the methods
   is( int($aln->average_percentage_identity), 45,       'Got the correct ave % identity' );

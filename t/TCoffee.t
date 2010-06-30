@@ -45,7 +45,7 @@ SKIP: {
 	cmp_ok ($version, '>=', 1.22, "Code tested only on t_coffee versions > 1.22" );
 	$aln = $factory->align($inputfilename);
 	ok($aln);
-	is( $aln->no_sequences, 7);
+	is( $aln->num_sequences, 7);
 	
 	my $str = Bio::SeqIO->new('-file' => 
 				  test_input_file("cysprot.fa"), 
@@ -59,7 +59,7 @@ SKIP: {
 	my $seq_array_ref = \@seq_array;
 	
 	$aln = $factory->align($seq_array_ref);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	my $s1_perid = $aln->average_percentage_identity;
 	
 	my $profile1 = test_input_file("cysprot1a.msf");
@@ -69,28 +69,28 @@ SKIP: {
 	$factory->verbose(2);
 	lives_ok {$aln = $factory->profile_align($profile1,$profile2)};
 	skip("T-COFFEE error, skipping tests", 15) if $@; 
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 	
 	my $str1 = Bio::AlignIO->new(-file=> test_input_file("cysprot1a.msf"));
 	my $aln1 = $str1->next_aln();
-	is $aln1->no_sequences, 3;
+	is $aln1->num_sequences, 3;
 	
 	my $str2 = Bio::AlignIO->new(-file=> test_input_file("cysprot1b.msf"));
 	my $aln2 = $str2->next_aln();
-	is $aln2->no_sequences, 4;
+	is $aln2->num_sequences, 4;
 	
 	$aln = $factory->profile_align($aln1,$aln2);
-	is $aln->no_sequences, 7;
+	is $aln->num_sequences, 7;
 		
 	$str1 = Bio::AlignIO->new(-file=> test_input_file("cysprot1a.msf"));
 	$aln1 = $str1->next_aln();
 	$str2 = Bio::SeqIO->new(-file=> test_input_file("cysprot1b.fa"));
 	my $seq = $str2->next_seq();
 	
-	is $aln1->no_sequences, 3;
+	is $aln1->num_sequences, 3;
 	is( int($aln1->average_percentage_identity), 39);
 	$aln = $factory->profile_align($aln1,$seq);
-	is( $aln->no_sequences, 4);
+	is( $aln->num_sequences, 4);
 	if( $version <= 1.22 ) {
 		cmp_ok( $aln->overall_percentage_identity, '>', 18);    
 		is( int($aln->average_percentage_identity), 44);
@@ -105,7 +105,7 @@ SKIP: {
 
 	$aln = $factory->run('-type' => 'align',
 				 '-seq'  => test_input_file("cysprot.fa"));
-	is ($aln->no_sequences, 7, 'simple generic run');
+	is ($aln->num_sequences, 7, 'simple generic run');
 	is ($aln->percentage_identity,$s1_perid); #calculated before
 		
 	lives_ok{ $aln = $factory->run('-type' => 'profile',
@@ -114,7 +114,7 @@ SKIP: {
 	
 	skip("T-COFFEE error, skipping tests",3) if $@;
 	
-	is( $aln->no_sequences, 7);
+	is( $aln->num_sequences, 7);
 	if( $version <= 1.22 ) {
 		cmp_ok( $aln->overall_percentage_identity, '>', 18);
 		is( int($aln->average_percentage_identity), 44);
