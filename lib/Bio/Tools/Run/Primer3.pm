@@ -36,7 +36,7 @@ output files.
 
 This module provides a bioperl interface to the program primer3. See
 http://frodo.wi.mit.edu/primer3/primer3_code.html for
-details and to download the software. This module should work for 
+details and to download the software. This module only works for
 primer3 release 1 but is not guaranteed to work with earlier versions.
 
   # design some primers.
@@ -524,6 +524,30 @@ sub arguments {
 	unless ($self->{'input_options'}) {$self->_input_args}
 	if ($required) {return ${$self->{'input_options'}}{'$required'}}
 	else {return $self->{'input_options'}}
+}
+
+=head2  version
+
+ Title   : version
+ Usage   : $v = $prog->version();
+ Function: Determine the version number of the program
+ Example :
+ Returns : float or undef
+ Args    : none
+
+=cut
+
+sub version {
+    my ($self) = @_;
+    return unless my $exe = $self->executable;
+    if (!defined $self->{'_progversion'}) {
+        my $string = `$exe -about 2>&1`;
+        my $v;
+        if ($string =~ m{primer3\s+release\s+([\d\.]+)}) {
+            $self->{'_progversion'} = $1;
+        }
+    }
+    return $self->{'_progversion'} || undef;
 }
 
 =head2 _input_args()
