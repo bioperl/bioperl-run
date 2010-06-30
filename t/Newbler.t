@@ -3,7 +3,7 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
     use File::Basename;
-    test_begin(-tests => 97,
+    test_begin(-tests => 98,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Newbler)]);
     use_ok('Bio::SeqIO');
 }
@@ -98,6 +98,7 @@ SKIP: {
    ok($assembler->out_type('Bio::Assembly::IO'));
    ok($asm = $assembler->run(\@seq_arr));
    isa_ok($asm, 'Bio::Assembly::IO');
+   is($asm->{'variant'}, '454', 'ACE 454 variant');
    ok($asm->next_assembly);
 
    ok($assembler->out_type('Bio::Assembly::ScaffoldI'));

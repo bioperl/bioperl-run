@@ -273,7 +273,7 @@ sub run {
 
     # if here, success 
     for ($method) {
-	m/^[t]?blast[npx]/ && do {
+	m/^(t|psi|rps|rpst)?blast[npx]?/ && do { 
 	    $ret = Bio::SearchIO->new(-file => $outfile);
 
 	    $self->{_blastout} = $outfile;
