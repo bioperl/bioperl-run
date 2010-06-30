@@ -11,7 +11,7 @@ BEGIN {
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    eval { $ulimit = `ulimit -n` };
+    eval { $ulimit = qx/ulimit -n 3>&-/ };
     if ($@ || !defined($ulimit)) {
         # skip all run tests, we can't ensure the ulimit is high enough for
         # these tests (needs ulimit -n of ~1000)
