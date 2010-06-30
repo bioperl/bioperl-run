@@ -35,7 +35,7 @@ my $program_name = $Bio::Tools::Run::Cap3::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 39);
+              -tests => 41);
 
    # Input data
    my $result_file = 'results.ace';
