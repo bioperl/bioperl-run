@@ -40,7 +40,7 @@ my $program_name = $Bio::Tools::Run::Phrap::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 38);
+              -tests => 39);
 
    # Input data
    my $result_file = 'results.phrap';

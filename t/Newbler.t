@@ -47,7 +47,7 @@ my $program_name = $Bio::Tools::Run::Newbler::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 43);
+              -tests => 46);
 
    # Input data
    my $result_file = 'results.ace';

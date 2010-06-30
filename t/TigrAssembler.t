@@ -34,7 +34,7 @@ my $program_name = $Bio::Tools::Run::TigrAssembler::program_name;
 ok($assembler->program_name($program_name));
 SKIP: {
     test_skip(-requires_executable => $assembler,
-              -tests => 43);
+              -tests => 45);
 
    # Input data
    my $result_file = 'results.tigr';
