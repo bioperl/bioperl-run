@@ -194,7 +194,7 @@ use strict;
 our $HAVE_IO_UNCOMPRESS;
 
 BEGIN {
-    eval "require IO::Uncompress::Gunzip; $HAVE_IO_UNCOMPRESS = 1";
+    eval {require IO::Uncompress::Gunzip; $HAVE_IO_UNCOMPRESS = 1};
 }
 
 use IPC::Run;

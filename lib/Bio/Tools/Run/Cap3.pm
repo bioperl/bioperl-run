@@ -246,7 +246,7 @@ sub _run {
   my $prefix       = $self->output_prefix_string() || 'cap';
   my $ace_file     = "$fasta_file.$prefix.ace";
   my $contigs_file = "$fasta_file.$prefix.contigs";
-  my $qual_file    = "$fasta_file.$prefix.contigs.links";
+  $qual_file    = "$fasta_file.$prefix.contigs.links";
   my $links_file   = "$fasta_file.$prefix.contigs.qual";
   my $info_file    = "$fasta_file.$prefix.info";
   my $singlet_file = "$fasta_file.$prefix.singlets";
