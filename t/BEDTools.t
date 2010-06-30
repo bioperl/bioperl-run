@@ -74,18 +74,18 @@ my %s = (
     );
 
 my ($rmsk_bed) = `find /usr -name 'rmsk.hg18.chr21.bed' 2>/dev/null`;
-chomp $rmsk_bed;
+chomp $rmsk_bed if $rmsk_bed;
 my ($gene_bed) = `find /usr -name 'knownGene.hg18.chr21.bed' 2>/dev/null`;
-chomp $gene_bed;
+chomp $gene_bed if $gene_bed;
 
 my ($mm8_genome) = `find /usr -name 'mouse.mm8.genome' 2>/dev/null`;
-chomp $mm8_genome;
+chomp $mm8_genome if $mm8_genome;
 my ($mm9_genome) = `find /usr -name 'mouse.mm9.genome' 2>/dev/null`;
-chomp $mm9_genome;
+chomp $mm9_genome if $mm9_genome;
 my ($hg18_genome) = `find /usr -name 'human.hg18.genome' 2>/dev/null`;
-chomp $hg18_genome;
+chomp $hg18_genome if $hg18_genome;
 my ($hg19_genome) = `find /usr -name 'human.hg19.genome' 2>/dev/null`;
-chomp $hg19_genome;
+chomp $hg19_genome if $hg19_genome;
 
 my $bam_file = test_input_file('Ft.bam');
 my $bed_file = test_input_file('Ft.bed');

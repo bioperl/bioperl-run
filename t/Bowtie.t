@@ -5,13 +5,22 @@ use strict;
 use warnings;
 no warnings qw(once);
 our $home;
+our $ulimit;
 BEGIN {
     $home = '.';	# set to '.' for Build use, 
 						# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
+    eval { $ulimit = `ulimit -n` };
+    if ($@) {
+        # skip all tests, we can't ensure the ulimit is high enough for these
+        # tests (needs ulimit -n of ~1000)
+        $ulimit = 0;
+    }
+    
     test_begin(-tests => 73,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
+    
 }
 
 use File::Temp qw(tempfile tempdir);

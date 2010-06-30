@@ -23,8 +23,13 @@ BEGIN {
                                         Bio::DB::SoapEUtilities::DocSumAdaptor
                                         SOAP::Lite
                                         XML::Twig
-                                        )]);
+                                        )],
+           -requires_email      => 1);
 }
+
+my $email = test_email();
+
+diag("Using $email for tests") if test_debug();
 
 my ($fac, $result, $seqio, $seq, $i);
 my @prot_ids = qw(1621261 89318838 68536103 20807972 730439);
@@ -39,11 +44,11 @@ my @linkout_test_ids = qw(28864546 53828898 14523048 14336674 1817575);
 SKIP : {
     test_skip(-tests => 116, 
 	      -requires_networking => 1); 
-ok $fac = Bio::DB::SoapEUtilities->new(), "SoapEUtilities factory";
+ok $fac = Bio::DB::SoapEUtilities->new(-verbose => test_debug), "SoapEUtilities factory";
 
 diag("Retrieve raw data records from GenBank, save raw data to file, then parse via Bio::SeqIO");
 
-ok $result = $fac->efetch( -db => 'protein', -id => \@prot_ids_2 )->run(-no_parse=>1), "run efetch, no parse methods";
+ok $result = $fac->efetch(-email =>$email, -db => 'protein', -id => \@prot_ids_2 )->run(-no_parse=>1), "run efetch, no parse methods";
 
 ok $seqio = Bio::DB::SoapEUtilities::FetchAdaptor->new(-result=>$result), "create adaptor";
 for ($i=0; $seq = $seqio->next_seq; $i++) {
@@ -73,6 +78,7 @@ is scalar @{$result->TSeqSet_TSeq_TSeqGi}, 5, "retrieved all GIs via \$result->T
 
 diag("Downloading a large contig");
 ok $fac->efetch->reset_parameters( -db => 'nucleotide',
+                                  -email =>$email,
 				   -id => $lg_contig), "set parms for lg contig example";
 ok $seqio = $fac->efetch->run( -auto_adapt => 1 ), "run with auto_adapt";
 
@@ -89,43 +95,46 @@ TODO: {
 }
 
 diag("Get the scientific name for an organism");
-ok $fac->efetch->reset_parameters( -db=>'taxonomy', -id=>[$sciname_id, $sciname_id+1] ), "set params for sciname test";
+ok $fac->efetch->reset_parameters( -email =>$email,
+                                  -db=>'taxonomy',
+                                  -id=>[$sciname_id, $sciname_id+1] ), "set params for sciname test";
 ok my $spio = $fac->efetch->run(-auto_adapt => 1), "run with autoadapt";
 ok my $sp = $spio->next_species;
 like $sp->scientific_name, qr/Bacillus thuringiensis/, "sciname";
 is ($sciname_id, $sp->ncbi_taxid, "taxid retrieved and correct");
 
-ok $fac->esummary( -db => 'taxonomy', -id => $sciname_id ), "set esummary parms";
+ok $fac->esummary( -email =>$email, -db => 'taxonomy', -id => $sciname_id ), "set esummary parms";
 ok my $docs = $fac->run(-auto_adapt=>1), "run with autoadapt";
 ok my $doc = $docs->next_docsum, "iterate adaptor";
 like $doc->ScientificName, qr/Bacillus thuringiensis/, "sciname";
 is ($sciname_id, $doc->TaxId, "taxid retrieved and correct");
 
 diag("Simple database query");
-ok $fac->esearch( -db=>'protein', -term=> 'BRCA and human', -usehistory=>1 );
+ok $fac->esearch( -email =>$email, -db=>'protein', -term=> 'BRCA and human', -usehistory=>1 );
 ok $result = $fac->run, "run with method parsing";
 is $result->QueryTranslation, 
    'BRCA[All Fields] AND ("Homo sapiens"[Organism] OR human[All Fields])',
 "query translation";
 cmp_ok $result->count, ">=", 73, "result count";
-ok $fac->esearch->reset_parameters( -WebEnv => $result->webenv, 
+ok $fac->esearch->reset_parameters(-email =>$email,
+                                   -WebEnv => $result->webenv, 
 				    -QueryKey => $result->query_key,
 				    -RetMax => 100 );
 ok my $wresult = $fac->esearch->run, "run web environment query with retmax set";
 cmp_ok $wresult->count, ">=", 73, "all ids retrieved";
 
 diag("What databases are available for querying via eUtils?");
-ok $result = $fac->einfo()->run, "run einfo general query";
+ok $result = $fac->einfo(-email =>$email)->run, "run einfo general query";
 cmp_ok scalar(@{$result->dbs}), ">=", 42, "bunch o' dbs";
 
 diag("What information is available for database 'x'?");
-ok $result = $fac->einfo(-db=>'pubmed')->run, "run pubmed info";
+ok $result = $fac->einfo(-email =>$email,-db=>'pubmed')->run, "run pubmed info";
 is $result->db, 'pubmed', "dbname";
 cmp_ok $result->record_count, ">=", 19000000, "record count";
 
 diag("How do I run a global query against all Entrez databases?");
 
-ok my $queries = $fac->egquery( -term => 'BRCA and human' )->run(-auto_adapt=>1), "run fac for eGQuery, autoadapt";
+ok my $queries = $fac->egquery(-email =>$email, -term => 'BRCA and human' )->run(-auto_adapt=>1), "run fac for eGQuery, autoadapt";
 
 ok my $query = $queries->query_by_db('protein'), "query by db (protein)";
 is $query->term, 'BRCA and human', "term accessor correct";
@@ -137,7 +146,7 @@ cmp_ok scalar($queries->found_in_dbs), ">=", 11, "found in enuf dbs";
 cmp_ok scalar($queries->found_in_dbs), "<=", $i, "but not in too many";
 
 diag("I want the document summaries for a list of IDs from database 'x'.");
-ok  $docs = $fac->esummary( -db=>'gene', -id=>\@prot_ids_2 )->run(-auto_adapt=>1), "run esummary, autoadapt";
+ok  $docs = $fac->esummary(-email =>$email, -db=>'gene', -id=>\@prot_ids_2 )->run(-auto_adapt=>1), "run esummary, autoadapt";
 my @tax = (3702, 9606, 9598);
 my @acc = qw( NC_003075.7 NC_000002.11 NC_006469.2 );
 for ($i=0; my $doc = $docs->next_docsum; $i++) {
@@ -150,7 +159,8 @@ is $i, 3, "got all docsums";
 
 diag("I want a list of database 'x' UIDs that are linked from a list of database 'y' UIDs");
 
-ok my $links =$fac->elink( -db => 'nucleotide',
+ok my $links =$fac->elink(-email =>$email,
+                          -db => 'nucleotide',
 			 -dbfrom => 'protein',
 			 -id => \@prot_ids )->run( -auto_adapt => 1), 
 "run elink protein->nucleotide, auto adapt";
