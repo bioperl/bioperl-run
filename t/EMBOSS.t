@@ -137,25 +137,25 @@ SKIP: {
 	is $acd->default('-reverse'), 'No';
 }
 
-	__END__
-	
-	## comparing input and ACD qualifiers
-	## commented out because verbose > 1 prints error messages
-	## that would confuse users running tests
-	
-	$compseqapp->verbose(1);
-	%input = ( '-word' => 4,
-		   '-outfile' => $compseqoutfile);
-	eval {
-		my $a = $compseqapp->run(\%input);
-	};
-	ok 1 if $@; # '-sequence' missing
-	
-	 %input = ( '-word' => 4,
-		   '-incorrect_option' => 'no value',
-		   '-sequence' => test_input_file('dna1.fa'),
-		   '-outfile' => $compseqoutfile);
-	eval {
-		$compseqapp->run(\%input);
-	};
-	ok 1 if $@; # -incorrect_option is incorrect	
+__END__
+
+## comparing input and ACD qualifiers
+## commented out because verbose > 1 prints error messages
+## that would confuse users running tests
+
+$compseqapp->verbose(1);
+%input = ( '-word' => 4,
+       '-outfile' => $compseqoutfile);
+eval {
+    my $a = $compseqapp->run(\%input);
+};
+ok 1 if $@; # '-sequence' missing
+
+ %input = ( '-word' => 4,
+       '-incorrect_option' => 'no value',
+       '-sequence' => test_input_file('dna1.fa'),
+       '-outfile' => $compseqoutfile);
+eval {
+    $compseqapp->run(\%input);
+};
+ok 1 if $@; # -incorrect_option is incorrect	
