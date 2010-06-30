@@ -12,11 +12,14 @@ BEGIN {
     unshift @INC, $home;
     use Bio::Root::Test;
     eval { $ulimit = `ulimit -n` };
-    if ($@) {
-        # skip all tests, we can't ensure the ulimit is high enough for these
-        # tests (needs ulimit -n of ~1000)
+    if ($@ || !defined($ulimit)) {
+        # skip all run tests, we can't ensure the ulimit is high enough for
+        # these tests (needs ulimit -n of ~1000)
         $ulimit = 0;
+    } else {
+        chomp $ulimit
     }
+    print STDERR $ulimit;
     
     test_begin(-tests => 73,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
@@ -113,7 +116,8 @@ is( join(' ', @{$bowtiefac->_translate_params}),
 
 SKIP : {
     test_skip( -requires_executable => $bowtiefac,
-	       -tests => 24 ); # three tests not included due to absence of SAM functionality at this stage
+	       -tests => 40 ); # three tests not included due to absence of SAM functionality at this stage
+    skip("; set 'ulimit -n' to 1000 for bowtie tests", 40) unless $ulimit >= 1000;
     my $rdr = test_input_file('bowtie', 'reads', 'e_coli_1000.raw');
     my $rda = test_input_file('bowtie', 'reads', 'e_coli_1000.fa');
     my $rdq = test_input_file('bowtie', 'reads', 'e_coli_1000.fq');
