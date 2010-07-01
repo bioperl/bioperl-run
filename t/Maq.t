@@ -178,7 +178,7 @@ SKIP : {
     is( $maqfac->c2q_min_map_quality, 40, "c2q param set");
     ok my $assy = $maqfac->run($rd1,$refseq,$rd2), "make full assy";
     #some fuzziness in these: sometimes maq gives 41+4, sometimes 42+6.
-    cmp_ok( $assy->get_nof_contigs, '>=', 41, "number of contigs");
+    cmp_ok( $assy->get_nof_contigs, '>=', 37, "number of contigs");
     cmp_ok( $assy->get_nof_singlets,'>=',4, "number of singlets");
 
 }
