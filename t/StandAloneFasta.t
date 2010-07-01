@@ -16,7 +16,7 @@ my $verbose = -1;
 my $version = '35';
 my @params = ( 'b' =>'15', 
 	       'd' => 0,
-	       'O' =>'resultfile',
+	       'O' => test_output_file(),
 	       'm'=>'9',
 	       "program"=>"fasta$version");
 my $factory = Bio::Tools::Run::Alignment::StandAloneFasta->new
@@ -43,7 +43,7 @@ SKIP: {
 	$result = $fastareport->next_result;
 	$hit    = $result->next_hit();
 	$hsp    = $hit->next_hsp();
-	is $hsp->algorithm, 'SMITH-WATERMAN';
+	like $hsp->algorithm, qr/SMITH-WATERMAN|SSEARCH/;
 	is $hsp->num_identical, 2982;
 	is $hsp->length, 2982;
 	
