@@ -26,7 +26,6 @@ BEGIN {
     
 }
 
-use File::Temp qw(tempfile tempdir);
 use Bio::Tools::Run::WrapperBase;
 use Bio::SeqIO;
 

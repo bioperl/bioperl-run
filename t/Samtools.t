@@ -14,9 +14,7 @@ BEGIN {
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Samtools)]);
 }
 
-use File::Temp qw(tempfile tempdir);
 use File::Copy;
-use File::Spec;
 use Bio::Tools::Run::WrapperBase;
 
 ok my $samt = Bio::Tools::Run::Samtools->new(
@@ -75,27 +73,24 @@ is( join(' ', @{$samt->_translate_params}),
 SKIP : {
     test_skip( -requires_executable => $samt,
 	       -tests => 12 );
-    my $tdir = tempdir( "smtXXXX", CLEANUP => 1);
-    copy(test_input_file('Ft.bam'), File::Spec->catfile($tdir, 'Ft.bam')) or die "copy failed (1)";
-    copy(test_input_file('Ft.frag.fas'), File::Spec->catfile($tdir, 'ref.fas')) or die "copy failed (2)";
-    chdir $tdir;
+    my %tmpfiles;
+    for (qw(refseq bamfile samfile rtbamfile fai bai)) {
+        $tmpfiles{$_} = test_output_file();
+    }
+    copy(test_input_file('Ft.bam'), $tmpfiles{bamfile}) or die "copy failed (1)";
+    copy(test_input_file('Ft.frag.fas'), $tmpfiles{refseq}) or die "copy failed (2)";
     ok $samt = Bio::Tools::Run::Samtools->new( -command => 'faidx' ), "fasta index factory";
-    ok $samt->run( -fas => 'ref.fas' ), "make fasta index";
-    ok -e 'ref.fas.fai', "fai file present";
+    ok $samt->run( -fas => $tmpfiles{refseq}, -out => $tmpfiles{fai}), "make fasta index";
+    ok -e $tmpfiles{fai}, "fai file present";
     ok $samt = Bio::Tools::Run::Samtools->new( -command => 'view' ), "bam -> sam cvt factory";
 
-    ok $samt->run( -bam => 'Ft.bam', -out => 'Ft.sam' ), "convert bam -> sam";
-    ok -T 'Ft.sam', "sam file present and text";
-    ok $samt->set_parameters( -sam_input => 1, -bam_output => 1, -refseq => 'ref.fas' ), "sam -> bam cvt factory";
-    ok $samt->run( -bam => 'Ft.sam', -out => 'Ft.rt.bam' ), "convert sam -> bam";
-    ok -B 'Ft.rt.bam', "bam file present and binary";
+    ok $samt->run( -bam => $tmpfiles{bamfile}, -out => $tmpfiles{samfile} ), "convert bam -> sam";
+    ok -T $tmpfiles{samfile}, "sam file present and text";
+    ok $samt->set_parameters( -sam_input => 1, -bam_output => 1, -refseq => $tmpfiles{refseq} ), "sam -> bam cvt factory";
+    ok $samt->run( -bam => $tmpfiles{samfile}, -out => $tmpfiles{rtbamfile} ), "convert sam -> bam";
+    ok -B $tmpfiles{rtbamfile}, "bam file present and binary";
     ok $samt = Bio::Tools::Run::Samtools->new( -command => 'index' ), 'bam index factory';
-    ok $samt->run( -bam => 'Ft.rt.bam'), 'make bam index';
-    ok -B 'Ft.rt.bam.bai', 'bai file present and binary';
+    ok $samt->run( -bam => $tmpfiles{rtbamfile}, -out => $tmpfiles{bai}), 'make bam index';
+    ok -B $tmpfiles{bai}, 'bai file present and binary';
 }
-
-#  sub test_input_file {
-#       return "./data/".shift;
-#   }
-
 
