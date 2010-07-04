@@ -260,7 +260,7 @@ been set).
 =cut
 
 sub run{
-    my ($self, $seq1, $seq2)=@_;
+    my ($self, $seq1, $seq2) = @_;
     my ($attr, $value, $switch);
     $self->io->_io_cleanup();
     # Create input file pointer
@@ -288,7 +288,7 @@ sub _run {
     my $instring;
     $self->debug("Program ".$self->executable."\n");
     unless ( $self->executable ) {
-      $self->throw("Cannot run Genewise unless the executable is found.  Check your environment variables or make sure genewise is in your path.");
+        $self->throw("Cannot run Genewise unless the executable is found.  Check your environment variables or make sure genewise is in your path.");
     }
     my $paramstring = $self->_setparams;
 
@@ -297,13 +297,13 @@ sub _run {
     # with open(FH, "... |");
     if (($self->silent && $self->quiet) &&
         ($^O !~ /os2|dos|MSWin32|amigaos/)) {
-      # yeah, like genewise is really going to run on Windows...
-      $commandstring .= ' 2> /dev/null';
+        # yeah, like genewise is really going to run on Windows...
+        $commandstring .= ' 2> /dev/null';
     }
     my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
     $self->debug("genewise command = $commandstring");
     my $status = system("$commandstring > $outfile1");
-    $self->throw("Genewies call $commandstring crashed: $? \n") unless $status==0;
+    $self->throw("Genewise call $commandstring crashed: $? \n") unless $status == 0;
     
     my $genewiseParser = Bio::Tools::Genewise->new(-file=> $outfile1);
     my @genes;
@@ -378,7 +378,7 @@ sub _setinput {
     else {
     	($tfh2,$outfile2) = $self->io->tempfile(-dir=>$self->tempdir);
 	my $out2 = Bio::SeqIO->new('-fh'     => $tfh2,
-                                   '-format' => 'fasta');
+                                '-format' => 'fasta');
     	$out2->write_seq($seq2);
 
         $self->_subject_dna_seq($seq2);
