@@ -466,7 +466,11 @@ sub model_file {
 =cut
 
 sub program_dir {
-    return Bio::Root::IO->catfile($ENV{INFERNALDIR}) if $ENV{INFERNALDIR};
+    my ($self, $dir) = @_;
+    if ($dir) {
+        $self->{_program_dir} = $dir;
+    }
+    return Bio::Root::IO->catfile($ENV{INFERNALDIR}) || '';
 }
 
 =head2  version
@@ -483,7 +487,8 @@ sub program_dir {
 sub version {
     my ($self) = @_;
     return unless $self->executable;
-    my $string = `cmsearch -h 2>&1`;
+    my $exe = $self->executable;
+    my $string = `$exe -h 2>&1`;
     my $v;
     if ($string =~ m{Infernal\s([\d.]+)}) {
         $v = $1;
@@ -1002,7 +1007,7 @@ sub _run {
             my $io;
             while(<$fh>) {$io .= $_;}
             close($fh);
-            $self->debug($io);
+            $self->debug($io) if $io;
             return 1;
         }
     }
