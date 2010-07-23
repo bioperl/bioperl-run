@@ -1,0 +1,17 @@
+***************
+*** 708,714 ****
+              $command = '';
+          }
+          else { 
+-             $instring = " -infile=$infile1";
+          }
+          $param_string .= " $infile2";
+      }
+--- 708,714 ----
+              $command = '';
+          }
+          else { 
++             $instring = " -infile=". '"' . $infile1 . '"';
+          }
+          $param_string .= " $infile2";
+      }
