@@ -271,7 +271,16 @@ sub new {
 	}
 	if ($args{'-outfile'}) {$self->{_outfilename}=$args{'-outfile'}}
 	if ($args{'-path'}) {
+	  
 		my (undef,$path,$prog) = File::Spec->splitpath($args{'-path'});
+	  
+    # For Windows system, $path better (Letter disk not truncated)
+    if ( $^O =~ m{mswin}i ) {
+      require File::Basename;
+      $path = File::Basename::dirname( $args{'-path'} );
+      $prog = File::Basename::basename( $args{'-path'} );
+    }
+    
 		$self->program_dir($path);
 		$self->program_name($prog);
 	}
@@ -456,8 +465,13 @@ sub run {
 	my ($temphandle, $tempfile) = $self->io->tempfile;
 	print $temphandle join "\n", @{$self->{'primer3_input'}}, "=\n";
 	close($temphandle);
-	open (RESULTS, "$executable < $tempfile|") || 
-	  $self->throw("Can't open RESULTS");
+
+  my $executable_command = $executable;
+  if ( $executable =~ m{^[^\'\"]+(.+)[^\'\"]+$} ) { 
+    $executable_command = "\"$executable\" < \"$tempfile\"|";
+  }
+
+	open (RESULTS, $executable_command) || $self->throw("Can't open RESULTS");
 	if ($self->{'_outfilename'}) {
 		# I can't figure out how to use either of these to write the results out.
 		# neither work, what am I doing wrong or missing in the docs?

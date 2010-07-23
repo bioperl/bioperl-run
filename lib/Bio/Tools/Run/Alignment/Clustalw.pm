@@ -921,7 +921,7 @@ sub _setparams {
         close($tfh);
         undef $tfh;
         $self->outfile($outfile);
-        $param_string .= " -outfile=$outfile" ;
+        $param_string .= " -outfile=\"$outfile\"" ;
     }
     
     $param_string .= ' 2>&1';
