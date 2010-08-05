@@ -441,7 +441,7 @@ sub version {
 
     return undef unless $self->executable;
     my $prog = $self->executable;
-    my $string = `$prog --` ;
+    my $string = `$prog -- 2>&1` ;
     $string =~ /\(?([\d.]+)\)?/xms;
     return $1 || undef;
 }
