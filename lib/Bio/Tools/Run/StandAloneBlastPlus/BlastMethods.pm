@@ -248,7 +248,13 @@ sub run {
 	}
     }
 
-    $blast_args{-db} = $self->db_path;
+    # remove a leading ./ on remote databases. Something adds that in the
+    # factory, easier to remove here.
+    my $db = $self->db_path;
+    if ($self->is_remote) {
+        $db =~ s#^\./##;
+    }
+    $blast_args{-db} = $db;
     $blast_args{-query} = $self->_fastize($query);
     $blast_args{-out} = $outfile;
     # user arg override
