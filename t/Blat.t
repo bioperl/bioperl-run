@@ -5,7 +5,7 @@ use strict;
 
 BEGIN { 
   use Bio::Root::Test;
-  test_begin(-tests => 20);
+  test_begin(-tests => 33);
   
   use_ok('Bio::Tools::Run::Alignment::Blat');
   use_ok('Bio::SeqIO');
@@ -23,31 +23,65 @@ ok $factory->isa('Bio::Tools::Run::Alignment::Blat');
 my $blat_present = $factory->executable();
 
 SKIP: {
-   test_skip(-requires_executable => $factory,
-             -tests => 10);
-   
-   my $searchio = $factory->align($query);
-   my $result = $searchio->next_result;
-   my $hit    = $result->next_hit;
-   my $hsp    = $hit->next_hsp;
-   isa_ok($hsp, "Bio::Search::HSP::HSPI");
-   is($hsp->query->start,1);
-   is($hsp->query->end,1775);
-   is($hsp->hit->start,1);
-   is($hsp->hit->end,1775);
-   my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
-   
-   my $seq  = $sio->next_seq ;
-   
-   $searchio = $factory->align($seq);
-   $result = $searchio->next_result;
-   $hit    = $result->next_hit;
-   $hsp    = $hit->next_hsp;
-   isa_ok($hsp, "Bio::Search::HSP::HSPI");
-   is($hsp->query->start,1);
-   is($hsp->query->end,1775);
-   is($hsp->hit->start,1);
-   is($hsp->hit->end,1775);
+    test_skip(-requires_executable => $factory,
+              -tests => 10);
+    
+    my $searchio = $factory->align($query);
+    my $result = $searchio->next_result;
+    my $hit    = $result->next_hit;
+    my $hsp    = $hit->next_hsp;
+    isa_ok($hsp, "Bio::Search::HSP::HSPI");
+    is($hsp->query->start,1);
+    is($hsp->query->end,1775);
+    is($hsp->hit->start,1);
+    is($hsp->hit->end,1775);
+    my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
+    
+    my $seq  = $sio->next_seq ;
+    
+    $searchio = $factory->align($seq);
+    like($searchio, qr/psl/, 'PSL parser (default)');
+    $result = $searchio->next_result;
+    $hit    = $result->next_hit;
+    $hsp    = $hit->next_hsp;
+    isa_ok($hsp, "Bio::Search::HSP::HSPI");
+    is($hsp->query->start,1);
+    is($hsp->query->end,1775);
+    is($hsp->hit->start,1);
+    is($hsp->hit->end,1775);
+    
+    # test alternate formats (not all of these work!)
+    $factory->reset_parameters('quiet'  => 1,
+                             "DB"     => $db,
+                             out => 'blast');
+    $searchio = $factory->align($query);
+    
+    like($searchio, qr/blast/, 'BLAST parser');
+    
+    $result = $searchio->next_result;
+    $hit    = $result->next_hit;
+    $hsp    = $hit->next_hsp;
+    isa_ok($hsp, "Bio::Search::HSP::HSPI");
+    is($hsp->query->start,1);
+    is($hsp->query->end,1775);
+    is($hsp->hit->start,1);
+    is($hsp->hit->end,1775);
+    
+    $factory->reset_parameters('quiet'  => 1,
+                             "DB"     => $db,
+                             out => 'blast9');
+    $searchio = $factory->align($query);
+    
+    like($searchio, qr/blasttable/, 'Tabuar BLAST parser');
+    
+    $result = $searchio->next_result;
+    $hit    = $result->next_hit;
+    $hsp    = $hit->next_hsp;
+    isa_ok($hsp, "Bio::Search::HSP::HSPI");
+    is($hsp->query->start,1);
+    is($hsp->query->end,1775);
+    is($hsp->hit->start,1);
+    is($hsp->hit->end,1775);
 }
 
 # new wrapper; regions

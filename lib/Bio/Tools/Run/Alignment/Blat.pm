@@ -42,17 +42,8 @@ changes within code.
 =item * No .2bit or .nib conversions yet
 
 These require callouts to faToNib or faTwoTwoBit, which may or may not be
-installed on a user's machine.
-
-=item * Optional parsing of other L<Bio::SearchIO> formats.
-
-The default is PSL; no built-in checks are being performed yet for other
-formats.
-
-Blat can output other formats potentially parsable via BioPerl, including
-BLAST, WU-BLAST, AXT, etc. Not to mention, we should have the ability to
-pass on additional arguments to any parser instance (optional flags, such as
-parsing PSL for distinct hit-based contiguous regions)
+installed on a user's machine.  We can possibly add functionality to
+check for faToTwoBit/faToNib and other UCSC tools in the future.
 
 =back
 
@@ -118,7 +109,29 @@ our %BLAT_SWITCHES = map {$_ => 1} qw(prot noHead trimT noTrimA trimHardA
                                     fastMap fine extendThroughN);
 
 our %LOCAL_ATTRIBUTES = map {$_ => 1} qw(db DB qsegment hsegment
-                                        outfile_name searchio quiet);
+                                        outfile_name quiet);
+
+                   #psl - Default.  Tab separated format, no sequence
+                   #pslx - Tab separated format with sequence
+                   #axt - blastz-associated axt format
+                   #maf - multiz-associated maf format
+                   #sim4 - similar to sim4 format
+                   #wublast - similar to wublast format
+                   #blast - similar to NCBI blast format
+                   #blast8- NCBI blast tabular format
+                   #blast9 - NCBI blast tabular format with comments
+
+
+our %searchio_map = (
+    'psl'   => 'psl',
+    'pslx'  => 'psl', # I don't think there is support for this yet
+    'axt'   => 'axt',
+    'blast' => 'blast',
+    'sim4'  => 'sim4',
+    'wublast'   => 'blast',
+    'blast8'    => 'blasttable',
+    'blast9'    => 'blasttable'
+);
 
 =head2 new
 
@@ -172,7 +185,7 @@ sub program_dir {
  Usage   :   $obj->run($query)
  Function:   Runs Blat and creates an array of featrues
  Returns :   An array of Bio::SeqFeature::Generic objects
- Args    :   A Bio::PrimarySeqI
+ Args    :   A Bio::PrimarySeqI or a file name
 
 =cut
 
@@ -218,11 +231,47 @@ sub db {
 
 *DB = \&db;
 
+=head2 qsegment
+
+ Title    : qsegment
+ Usage    : $obj->qsegment('sequence_a:0-1000')
+ Function : pass in a B<UCSC-compliant> string for the query sequence(s)
+ Returns  : string
+ Args     : string
+ Status   : New
+ Note     : Requires the sequence(s) in question be 2bit or nib format
+ Reminder : UCSC segment/regions coordinates are 0-based half-open (sequence
+            begins at 0, but start isn't counted with length), whereas BioPerl
+            coordinates are 1-based closed (sequence begins with 1, both start
+            and end are counted in the length of the segment). For example, a
+            segment that is 'sequence_a:0-1000' will have BioPerl coordinates of
+            'sequence_a:1-1000', both with the same length (1000).
+ 
+=cut
+
 sub qsegment {
     my $self = shift;
     return $self->{blat_qsegment} = shift if @_;
     return $self->{blat_qsegment};
 }
+
+=head2 tsegment
+
+ Title    : tsegment
+ Usage    : $obj->tsegment('sequence_a:0-1000')
+ Function : pass in a B<UCSC-compliant> string for the target sequence(s)
+ Returns  : string
+ Args     : string
+ Status   : New
+ Note     : Requires the sequence(s) in question be 2bit or nib format
+ Reminder : UCSC segment/regions coordinates are 0-based half-open (sequence
+            begins at 0, but start isn't counted with length), whereas BioPerl
+            coordinates are 1-based closed (sequence begins with 1, both start
+            and end are counted in the length of the segment). For example, a
+            segment that is 'sequence_a:0-1000' will have BioPerl coordinates of
+            'sequence_a:1-1000', both with the same length (1000).
+ 
+=cut
 
 sub tsegment {
     my $self = shift;
@@ -237,12 +286,36 @@ sub outfile_name {
     return $self->{blat_outfile};
 }
 
+=head2 searchio
+
+ Title    : searchio
+ Usage    : $obj->searchio{-writer => $writer}
+ Function : Pass in additional parameters to the returned Bio::SearchIO parser
+ Returns  : Hash reference with Bio::SearchIO parameters
+ Args     : Hash reference
+ Status   : New
+ Note     : Currently, this implementation overrides any passed -format
+            parameter based on whether the output is changed ('out').  This
+            may change if requested, but we can't see the utility of doing so,
+            as requesting mismatched output/parser combinations is just a recipe
+            for disaster
+ 
+=cut
+
 sub searchio {
-    my $self = shift;
-    $self->{blat_searchio} = shift if @_;
+    my ($self, $params) = @_;
+    if ($params && ref $params eq 'HASH') {
+        if ($self->{parameters}->{out} && exists $searchio_map{$self->{parameters}->{out}}) {
+            $params->{-format} = $searchio_map{$self->{parameters}->{out}};
+        } else {
+            $params->{-format} = 'psl';
+        }
+        $self->{blat_searchio} = $params;
+    }
     
-    # TODO: This needs to check for
-    return $self->{blat_searchio} || 'psl';
+    return $self->{blat_searchio} ||
+        {-format => exists($self->{parameters}->{out}) ?
+                $searchio_map{$self->{parameters}->{out}} : 'psl'};
 }
 
 =head1 Bio::ParameterBaseI-specific methods
@@ -391,20 +464,19 @@ sub to_exe_string {
     $self->throw("Must provide a seq_file") unless defined $seq;
     my %params = $self->get_parameters();
     
-    my ($exe, $prog, $db, $qseg, $tseg) = ($self->executable,
-                                   $self->program_name,
+    my ($exe, $db, $qseg, $tseg) = ($self->executable,
                                    $self->db,
                                    $self->qsegment,
                                    $self->tsegment);
     
     $self->throw("Executable not found") unless defined($exe);
 
-    if ($qseg) {
-        $db .= ":$qseg";
+    if ($tseg) {
+        $db .= ":$tseg";
     }
     
-    if ($tseg) {
-        $seq .= ":$tseg";
+    if ($qseg) {
+        $seq .= ":$qseg";
     }
     
     my @params;
@@ -491,10 +563,10 @@ sub _run {
 	
 	my $blat_obj;
 	if (ref ($out) !~ /GLOB/) {
-		$blat_obj = Bio::SearchIO->new(-format  => $self->searchio,
+		$blat_obj = Bio::SearchIO->new(%{$self->searchio},
                                         -file    => $out);
 	} else {
-		$blat_obj = Bio::SearchIO->new(-format  => $self->searchio,
+		$blat_obj = Bio::SearchIO->new(%{$self->searchio},
 									   -fh    => $out);
 	}
 	return $blat_obj;
