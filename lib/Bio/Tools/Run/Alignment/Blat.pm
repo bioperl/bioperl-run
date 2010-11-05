@@ -296,16 +296,10 @@ sub outfile_name {
 sub searchio {
     my ($self, $params) = @_;
     if ($params && ref $params eq 'HASH') {
-        if ($self->{parameters}->{out} && exists $searchio_map{$self->{parameters}->{out}}) {
-            $params->{-format} = $searchio_map{$self->{parameters}->{out}};
-        } else {
-            $params->{-format} = 'psl';
-        }
+        delete $params->{-format}; 
         $self->{blat_searchio} = $params;
     }
-    return $self->{blat_searchio} ||
-        {-format => exists($self->{parameters}->{out}) ?
-                $searchio_map{$self->{parameters}->{out}} : 'psl'};
+    return $self->{blat_searchio} || {};
 }
 
 =head1 Bio::ParameterBaseI-specific methods
@@ -548,17 +542,22 @@ sub _run {
     $str .= " $out".$self->_quiet;
 	$self->debug($str."\n") if( $self->verbose > 0 );
 
+    my %params = $self->get_parameters;
+
 	my $status = system($str);
 	$self->throw( "Blat call ($str) crashed: $? \n") unless $status==0;
 	
-	my $blat_obj;
-	if (ref ($out) !~ /GLOB/) {
-		$blat_obj = Bio::SearchIO->new(%{$self->searchio},
-                                        -file    => $out);
-	} else {
-		$blat_obj = Bio::SearchIO->new(%{$self->searchio},
-									   -fh    => $out);
-	}
+    my $format = exists($params{out}) ?
+                $searchio_map{$params{out}} : 'psl';
+    
+	my @io = ref ($out) !~ /GLOB/ ? (-file    => $out,) : (-fh    => $out,);
+	my $blat_obj = Bio::SearchIO->new(%{$self->searchio},
+                                    @io,
+                                    -query_type => $params{prot} ? 'protein' :
+                                                    $params{q} || 'dna',
+                                    -hit_type   => $params{prot} ? 'protein' :
+                                                    $params{t} || 'dna',
+                                    -format => $format);
 	return $blat_obj;
 }
 
