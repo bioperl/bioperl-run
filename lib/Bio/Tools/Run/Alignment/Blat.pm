@@ -181,6 +181,11 @@ sub db {
     return $self->{blat_db};
 }
 
+# this is a kludge for tests (so one might expect this to be used elsewhere).
+# None of the other parameters worked in the past, so not replacing them
+
+*DB = \&db;
+
 sub segment {
     my $self = shift;
     return $self->{blat_segment} = shift if @_;
@@ -465,7 +470,6 @@ sub _run {
 
 sub _writeSeqFile {
     my ($self,$seq) = @_;
-    #my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
     my ($tfh,$inputfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
     my $in  = Bio::SeqIO->new(-fh => $tfh , '-format' => 'fasta');
     $in->write_seq($seq);
