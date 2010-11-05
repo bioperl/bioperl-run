@@ -77,9 +77,11 @@ web:
 
   http://bugzilla.open-bio.org/
 
-=head1 AUTHOR - Bala
+=head1 AUTHOR
 
- Email bala@tll.org.sg
+ Chris Fields - cjfields at bioperl dot org
+
+ Original author- Bala Email bala@tll.org.sg
 
 =head1 APPENDIX
 
@@ -108,19 +110,8 @@ our %BLAT_PARAMS = map {$_ => 1} qw(ooc t q tileSize stepSize oneOff
 our %BLAT_SWITCHES = map {$_ => 1} qw(prot noHead trimT noTrimA trimHardA
                                     fastMap fine extendThroughN);
 
-our %LOCAL_ATTRIBUTES = map {$_ => 1} qw(db DB qsegment hsegment
-                                        outfile_name quiet);
-
-                   #psl - Default.  Tab separated format, no sequence
-                   #pslx - Tab separated format with sequence
-                   #axt - blastz-associated axt format
-                   #maf - multiz-associated maf format
-                   #sim4 - similar to sim4 format
-                   #wublast - similar to wublast format
-                   #blast - similar to NCBI blast format
-                   #blast8- NCBI blast tabular format
-                   #blast9 - NCBI blast tabular format with comments
-
+our %LOCAL_ATTRIBUTES = map {$_ => 1} qw(db DB qsegment hsegment searchio
+                                    outfile_name quiet);
 
 our %searchio_map = (
     'psl'   => 'psl',
@@ -312,7 +303,6 @@ sub searchio {
         }
         $self->{blat_searchio} = $params;
     }
-    
     return $self->{blat_searchio} ||
         {-format => exists($self->{parameters}->{out}) ?
                 $searchio_map{$self->{parameters}->{out}} : 'psl'};
