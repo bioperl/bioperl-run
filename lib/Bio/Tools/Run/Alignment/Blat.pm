@@ -23,7 +23,38 @@ Build a Blat factory.
 
 =head1 DESCRIPTION
 
-Wrapper module for Blat program
+Wrapper module for Blat program.  This newer version allows for all
+parameters to be set.
+
+Key bits not implemented yet (TODO):
+
+=over 3
+
+=item * Implement all needed L<Bio::Tools::Run::WrapperBase> methods
+
+Missing are a few, including version().
+
+=item * Re-implement using L<IPC::Run>
+
+Would like to get this running under something less reliant on OS-dependent
+changes within code.
+
+=item * No .2bit or .nib conversions yet
+
+These require callouts to faToNib or faTwoTwoBit, which may or may not be
+installed on a user's machine.
+
+=item * Optional parsing of other L<Bio::SearchIO> formats.
+
+The default is PSL; no built-in checks are being performed yet for other
+formats.
+
+Blat can output other formats potentially parsable via BioPerl, including
+BLAST, WU-BLAST, AXT, etc. Not to mention, we should have the ability to
+pass on additional arguments to any parser instance (optional flags, such as
+parsing PSL for distinct hit-based contiguous regions)
+
+=back
 
 =head1 FEEDBACK
 
@@ -86,7 +117,8 @@ our %BLAT_PARAMS = map {$_ => 1} qw(ooc t q tileSize stepSize oneOff
 our %BLAT_SWITCHES = map {$_ => 1} qw(prot noHead trimT noTrimA trimHardA
                                     fastMap fine extendThroughN);
 
-our %LOCAL_ATTRIBUTES = map {$_ => 1} qw(db segment outfile_name searchio);
+our %LOCAL_ATTRIBUTES = map {$_ => 1} qw(db DB qsegment hsegment
+                                        outfile_name searchio quiet);
 
 =head2 new
 
@@ -186,10 +218,16 @@ sub db {
 
 *DB = \&db;
 
-sub segment {
+sub qsegment {
     my $self = shift;
-    return $self->{blat_segment} = shift if @_;
-    return $self->{blat_segment};
+    return $self->{blat_qsegment} = shift if @_;
+    return $self->{blat_qsegment};
+}
+
+sub tsegment {
+    my $self = shift;
+    return $self->{blat_tsegment} = shift if @_;
+    return $self->{blat_tsegment};
 }
 
 # override this, otherwise one gets a default of 'mlc'
@@ -241,9 +279,9 @@ sub set_parameters {
             $self->{parameters}->{$key} = $val;
         } elsif (exists $BLAT_SWITCHES{$key}) {
             $self->{parameters}->{$key} = $BLAT_SWITCHES{$key} ? 1 : 0;
-        } elsif ($self->can($key)) {
+        } elsif ($LOCAL_ATTRIBUTES{$key} && $self->can($key)) {
             $self->$key($val);
-        } 
+        }
     }
 }
 
@@ -353,15 +391,20 @@ sub to_exe_string {
     $self->throw("Must provide a seq_file") unless defined $seq;
     my %params = $self->get_parameters();
     
-    my ($exe, $prog, $db, $segment) = ($self->executable,
+    my ($exe, $prog, $db, $qseg, $tseg) = ($self->executable,
                                    $self->program_name,
                                    $self->db,
-                                   $self->segment);
+                                   $self->qsegment,
+                                   $self->tsegment);
     
     $self->throw("Executable not found") unless defined($exe);
 
-    if ($segment) {
-        $db .= ":$segment";
+    if ($qseg) {
+        $db .= ":$qseg";
+    }
+    
+    if ($tseg) {
+        $seq .= ":$tseg";
     }
     
     my @params;
