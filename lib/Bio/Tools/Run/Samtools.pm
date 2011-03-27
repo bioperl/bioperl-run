@@ -143,8 +143,6 @@ Internal methods are usually preceded with a _
 package Bio::Tools::Run::Samtools;
 use strict;
 use warnings;
- use lib '../../../../live';
- use lib '../../..';
 use Bio::Root::Root;
 use Bio::Tools::Run::Samtools::Config;
 
