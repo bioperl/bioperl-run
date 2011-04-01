@@ -13,7 +13,7 @@ BEGIN {
 			# '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 305,
+    test_begin(-tests => 423,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BEDTools)]);
 }
 
@@ -27,52 +27,73 @@ ok my $bedtoolsfac = Bio::Tools::Run::BEDTools->new, "make a default factory";
 is $bedtoolsfac->command, 'bam_to_bed', "default to command 'bam_to_bed'";
 
 my @commands = qw(
-    bam_to_bed       fasta_from_bed       mask_fasta_from_bed  shuffle              window
-    closest          genome_coverage      merge                slop
-    complement       intersect            pair_to_bed          sort
-    coverage         links                pair_to_pair         subtract
+    annotate         fasta_from_bed       overlap              
+    bam_to_bed       genome_coverage      pair_to_pair         
+    bed_to_bam       graph_union          pair_to_bed          
+    bed_to_IGV       group_by             shuffle              
+    b12_to_b6        intersect            slop                 
+    closest          links                sort                 
+    complement       mask_fasta_from_bed  subtract             
+    coverage         merge                window               
 );
 
+
 my %p = (
-    'bam_to_bed'           => 0,
-    'fasta_from_bed'       => 0,
-    'mask_fasta_from_bed'  => 0,
-    'shuffle'              => 2,
-    'window'               => 3,
+    'annotate'             => 0,
+    'bam_to_bed'           => 2,
+    'bed_to_bam'           => 1,
+    'bed_to_IGV'           => 5,
+    'b12_to_b6'            => 0,
     'closest'              => 1,
-    'genome_coverage'      => 1,
-    'merge'                => 1,
-    'slop'                 => 3,
     'complement'           => 0,
-    'intersect'            => 1,
-    'pair_to_bed'          => 2,
-    'sort'                 => 0,
     'coverage'             => 0,
+    'fasta_from_bed'       => 0,
+    'genome_coverage'      => 2,
+    'graph_union'          => 2,
+    'group_by'             => 3,
+    'intersect'            => 1,
     'links'                => 3,
-    'pair_to_pair'         => 2,
-    'subtract'             => 1
-    );
+    'mask_fasta_from_bed'  => 0,
+    'merge'                => 1,
+    'overlap'              => 1,
+    'pair_to_bed'          => 2,
+    'pair_to_pair'         => 3,
+    'shuffle'              => 2,
+    'slop'                 => 3,
+    'sort'                 => 0,
+    'subtract'             => 1,
+    'window'               => 3
+     );
 
 my %s = (
-    'bam_to_bed'           => 2,
-    'fasta_from_bed'       => 2,
-    'mask_fasta_from_bed'  => 1,
-    'shuffle'              => 1,
-    'window'               => 5,
-    'closest'              => 1,
-    'genome_coverage'      => 1,
-    'merge'                => 3,
-    'slop'                 => 1,
+    'annotate'             => 4,
+    'bam_to_bed'           => 6,
+    'bed_to_bam'           => 2,
+    'bed_to_IGV'           => 2,
+    'b12_to_b6'            => 0,
+    'closest'              => 2,
     'complement'           => 0,
-    'intersect'            => 8,
-    'pair_to_bed'          => 2,
-    'sort'                 => 6,
-    'coverage'             => 1,
+    'coverage'             => 4,
+    'fasta_from_bed'       => 3,
+    'genome_coverage'      => 4,
+    'graph_union'          => 2,
+    'group_by'             => 0,
+    'intersect'            => 11,
     'links'                => 0,
-    'pair_to_pair'         => 1,
-    'subtract'             => 1
+    'mask_fasta_from_bed'  => 1,
+    'merge'                => 3,
+    'overlap'              => 0,
+    'pair_to_bed'          => 4,
+    'pair_to_pair'         => 3,
+    'shuffle'              => 1,
+    'slop'                 => 1,
+    'sort'                 => 6,
+    'subtract'             => 1,
+    'window'               => 5
     );
 
+# Sorry to all those out there who don't have a find command
+# - perhaps someone can add an alternative
 my ($rmsk_bed) = `find /usr -name 'rmsk.hg18.chr21.bed' 2>/dev/null`;
 chomp $rmsk_bed if $rmsk_bed;
 my ($gene_bed) = `find /usr -name 'knownGene.hg18.chr21.bed' 2>/dev/null`;
@@ -89,32 +110,44 @@ chomp $hg19_genome if $hg19_genome;
 
 my $bam_file = test_input_file('Ft.bam');
 my $bed_file = test_input_file('Ft.bed');
+my $bed12_file = test_input_file('Ft.bed12');
 my $fas_file = test_input_file('Ft.frag.fas');
 my $bedpe1_file = test_input_file('e_coli_1.bedpe');
 my $bedpe2_file = test_input_file('e_coli_2.bedpe');
 my $bed3_file = test_input_file('e_coli.bed3');
+my $bg1_file = test_input_file('1.bg');
+my $bg2_file = test_input_file('2.bg');
+my $bg3_file = test_input_file('3.bg');
  
 my %format_lookup = (
+    'annotate'             => 'bed',
     'bam_to_bed'           => 'bed',
-    'fasta_from_bed'       => 'fasta',
-    'mask_fasta_from_bed'  => 'fasta',
-    'shuffle'              => 'bed',
-    'window'               => 'bedpe',
+    'bed_to_bam'           => 'bam',
+    'bed_to_IGV'           => 'igv',
+    'b12_to_b6'            => 'bed',
     'closest'              => 'bedpe',
-    'genome_coverage'      => 'tab',
-    'merge'                => 'bed',
-    'slop'                 => 'bed',
     'complement'           => 'bed',
-    'intersect'            => 'bed|bam',
-    'pair_to_bed'          => 'bedpe|bam',
-    'sort'                 => 'bed',
     'coverage'             => 'bed',
+    'fasta_from_bed'       => 'fasta',
+    'genome_coverage'      => 'tab',
+    'graph_union'          => 'bg',
+    'group_by'             => 'bed',
+    'intersect'            => 'bed|bam',
     'links'                => 'html',
+    'mask_fasta_from_bed'  => 'fasta',
+    'merge'                => 'bed',
+    'overlap'              => 'bed',
+    'pair_to_bed'          => 'bedpe|bam',
     'pair_to_pair'         => 'bedpe',
-    'subtract'             => 'bed'
+    'slop'                 => 'bed',
+    'shuffle'              => 'bed',
+    'sort'                 => 'bed',
+    'subtract'             => 'bed',
+    'window'               => 'bedpe'
     );
 
 my %result_lookup = (
+    'annotate'             => 1385,  # OK
     'bam_to_bed'           => 1385,  # OK
     'fasta_from_bed'       => 1385,  # OK
     'mask_fasta_from_bed'  => 1,     # OK
@@ -124,14 +157,17 @@ my %result_lookup = (
     'genome_coverage'      => 38,    # OK
     'merge'                => 242,   # OK
     'slop'                 => 828,   # OK
-    'complement'           => 243,   # OK
+    'complement'           => 291,   # OK - change in data provided by BEDTools or behaviour of complementBed? was 243
     'intersect'            => 72534, # OK
     'pair_to_bed'          => 2,     # OK
     'sort'                 => 828,   # OK
     'coverage'             => 57261, # OK
     'links'                => 11603, # OK
     'pair_to_pair'         => 497,   # OK
-    'subtract'             => 57959  # OK
+    'subtract'             => 57959, # OK
+    'group_by'             => 1,     # OK
+    'b12_to_b6'            => 1385,  # OK
+    'overlap'              => 500    # OK
     );
 
 SKIP : {
@@ -154,6 +190,12 @@ SKIP : {
 
         for ($command) {
             $v && diag(" run command as default");
+            m/^annotate$/ && do {
+                ok( my $result = $bedtoolsfac->run( -bgv => $bed_file,
+                                                    -ann => [$bed3_file] ),
+                    "can run command '$command'" );
+                last;
+            };
             m/^bam_to_bed$/ && do {
                 ok( my $result = $bedtoolsfac->run( -bam => $bam_file ),
                     "can run command '$command'" );
@@ -161,26 +203,32 @@ SKIP : {
             };
             m/^(?:fasta_from_bed|mask_fasta_from_bed)$/ && do {
                 ok( my $result = $bedtoolsfac->run( -seq => $fas_file,
-                                                    -bed => $bed_file ),
+                                                    -bgv => $bed_file ),
                     "can run command '$command'" );
                 last;
             };
-            m/^(?:merge|sort|links)$/ && do {
-                ok( my $result = $bedtoolsfac->run( -bed => $gene_bed ),
+            m/^(?:bed_to_IGV|merge|sort|links)$/ && do {
+                ok( my $result = $bedtoolsfac->run( -bgv => $gene_bed ),
                     "can run command '$command'" );
                 last;
             };
-            m/^(?:shuffle|slop|complement|genome_coverage)$/ && do {
+            m/^(?:bed_to_bam|shuffle|slop|complement)$/ && do {
                 is( $bedtoolsfac->add_bidirectional(100), 100,
                     "can set parameter -add_bidirectional => 100 " ) if $command eq 'slop';
+                ok( my $result = $bedtoolsfac->run( -bgv    => $gene_bed,
+                                                    -genome => $hg18_genome ),
+                    "can run command '$command'" );
+                last;
+            };
+            m/^genome_coverage$/ && do {
                 ok( my $result = $bedtoolsfac->run( -bed    => $gene_bed,
                                                     -genome => $hg18_genome ),
                     "can run command '$command'" );
                 last;
             };
             m/^(?:window|closest|coverage|subtract|intersect)$/ && do {
-                ok( my $result = $bedtoolsfac->run( -bed1 => $gene_bed,
-                                                    -bed2 => $rmsk_bed ),
+                ok( my $result = $bedtoolsfac->run( -bgv1 => $gene_bed,
+                                                    -bgv2 => $rmsk_bed ),
                     "can run command '$command'" );
                 last;
             };
@@ -194,10 +242,38 @@ SKIP : {
             };
             m/^pair_to_bed$/ && do {
                 ok( my $result = $bedtoolsfac->run( -bedpe => $bedpe1_file,
-                                                    -bed => $bed3_file ),
+                                                    -bgv => $bed3_file ),
                     "can run command '$command'" );
                 last;
             };
+            m/^overlap$/ && do {
+            	is( $bedtoolsfac->columns('2,3,5,6'), '2,3,5,6',
+                    "can set parameter -columns => '2,3,5,6' " );
+                ok( my $result = $bedtoolsfac->run( -bed => $bedpe1_file, ),
+                    "can run command '$command'" );
+                last;
+            };
+            m/^b12_to_b6$/ && do {
+                ok( my $result = $bedtoolsfac->run( -bed => $bed12_file, ),
+                    "can run command '$command'" );
+                last;
+            };
+            m/^group_by$/ && do {
+            	is( $bedtoolsfac->group(1), 1,
+                    "can set parameter -group => 1 " );
+            	is( $bedtoolsfac->columns('2,2,3,3'), '2,2,3,3',
+                    "can set parameter -columns => '2,2,3,3' " );
+            	is( $bedtoolsfac->operations('min,max,min,max'), 'min,max,min,max',
+                    "can set parameter -operations => 'min,max,min,max' " );
+                ok( my $result = $bedtoolsfac->run( -bed => $bed3_file ),
+                    "can run command '$command'" );
+                last;
+            };
+			m/^graph_union$/ && do {
+                ok( my $result = $bedtoolsfac->run( -bg => [$bg1_file, $bg2_file, $bg2_file] ),
+                    "can run command '$command'" );
+                last;
+			};
             do {
                 # we should never get here - internal test
                 fail( "all commands tested - missed '$_'");

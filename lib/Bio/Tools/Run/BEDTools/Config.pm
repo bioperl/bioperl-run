@@ -101,15 +101,23 @@ push @ISA, 'Exporter';
 
 
 our @program_commands = qw(
-    bam_to_bed       fasta_from_bed       mask_fasta_from_bed  shuffle              window
-    closest          genome_coverage      merge                slop
-    complement       intersect            pair_to_bed          sort
-    coverage         links                pair_to_pair         subtract
+    annotate         fasta_from_bed       overlap              
+    bam_to_bed       genome_coverage      pair_to_pair         
+    bed_to_bam       graph_union          pair_to_bed          
+    bed_to_IGV       group_by             shuffle              
+    b12_to_b6        intersect            slop                 
+    closest          links                sort                 
+    complement       mask_fasta_from_bed  subtract             
+    coverage         merge                window               
 );
 
 
 our %command_executables = (
+    'annotate'             => 'annotateBed',
     'bam_to_bed'           => 'bamToBed',
+    'bed_to_bam'           => 'bedToBam',
+    'bed_to_IGV'           => 'bedToIgv',
+    'b12_to_b6'            => 'bed12ToBed6',
     'fasta_from_bed'       => 'fastaFromBed',
     'mask_fasta_from_bed'  => 'maskFastaFromBed',
     'shuffle'              => 'shuffleBed',
@@ -125,27 +133,37 @@ our %command_executables = (
     'coverage'             => 'coverageBed',
     'links'                => 'linksBed',
     'pair_to_pair'         => 'pairToPair',
-    'subtract'             => 'subtractBed'
+    'subtract'             => 'subtractBed',
+    'overlap'              => 'overlap',
+    'group_by'             => 'groupBy',
+    'graph_union'          => 'unionBedGraphs'
     );
 
 our %format_lookup = (
+    'annotate'             => 'bed',
     'bam_to_bed'           => 'bed',
-    'fasta_from_bed'       => 'fasta',
-    'mask_fasta_from_bed'  => 'fasta',
-    'shuffle'              => 'bed',
-    'window'               => 'bedpe',
+    'bed_to_bam'           => 'bam',
+    'bed_to_IGV'           => 'igv',
+    'b12_to_b6'            => 'bed',
     'closest'              => 'bedpe',
-    'genome_coverage'      => 'tab',
-    'merge'                => 'bed',
-    'slop'                 => 'bed',
     'complement'           => 'bed',
-    'intersect'            => 'bed|bam',
-    'pair_to_bed'          => 'bedpe|bam',
-    'sort'                 => 'bed',
     'coverage'             => 'bed',
+    'fasta_from_bed'       => 'fasta',
+    'genome_coverage'      => 'tab',
+    'graph_union'          => 'bg',
+    'group_by'             => 'bed',
+    'intersect'            => 'bed|bam',
     'links'                => 'html',
+    'mask_fasta_from_bed'  => 'fasta',
+    'merge'                => 'bed',
+    'overlap'              => 'bed',
+    'pair_to_bed'          => 'bedpe|bam',
     'pair_to_pair'         => 'bedpe',
-    'subtract'             => 'bed'
+    'slop'                 => 'bed',
+    'shuffle'              => 'bed',
+    'sort'                 => 'bed',
+    'subtract'             => 'bed',
+    'window'               => 'bedpe'
     );
 
 
@@ -160,7 +178,11 @@ our %composite_commands = (
 
 # prefixes only for commands that take params/switches...
 our %command_prefixes = (
-    'bam_to_bed'           => 'btb',
+    'annotate'             => 'ann',
+    'bam_to_bed'           => 'ate',
+    'bed_to_bam'           => 'eta',
+    'bed_to_IGV'           => 'eti',
+    'b12_to_b6'            => '126',
     'fasta_from_bed'       => 'ffb',
     'mask_fasta_from_bed'  => 'mfb',
     'shuffle'              => 'shb',
@@ -176,11 +198,25 @@ our %command_prefixes = (
     'coverage'             => 'cvb',
     'links'                => 'lib',
     'pair_to_pair'         => 'ptp',
-    'subtract'             => 'sub'
+    'subtract'             => 'sub',
+    'overlap'              => 'ove',
+    'group_by'             => 'grp',
+    'graph_union'          => 'ubg'
     );
 
 our @program_params = qw(
     command
+    
+    ate|tag
+    ate|color
+    
+    eta|quality
+    
+    eti|path
+    eti|session
+    eti|sort
+    eti|slop
+    eti|image
     
     shb|exclude
     shb|seed
@@ -192,6 +228,7 @@ our @program_params = qw(
     clb|ties_policy
     
     gcb|max_depth
+    gcb|strand
     
     meb|max_distance
     
@@ -206,20 +243,50 @@ our @program_params = qw(
     
     ptp|minimum_overlap
     ptp|type
+    ptp|slop
     
     sub|minimum_overlap
-
+    
     lib|basename
     lib|organism
     lib|genome_build
+    
+    ove|columns
+    
+    grp|group
+    grp|columns
+    grp|operations
+    
+    ubg|names
+    ubg|filler
     );
 
 our @program_switches = qw(
-    btb|write_bedpe
-    btb|use_edit_distance
+    ann|names
+    ann|count
+    ann|both
+    ann|strandedness
+    
+    ate|write_bedpe
+    ate|use_edit_distance
+    ate|bam12
+    ate|split
+    ate|use_edit_distance
+    ate|cigar
+    
+    eta|uncompressed
+    eta|bed12
+    
+    eti|collapse
+    eti|name
     
     ffb|use_bed_name
     ffb|output_tab_format
+    ffb|strandedness
+    
+    gcb|bedgraph
+    gcb|bedgraph_all
+    gcb|split
     
     mfb|soft_mask
     
@@ -232,6 +299,7 @@ our @program_switches = qw(
     wib|invert
     
     clb|strandedness
+    clb|report_distance
     
     gcb|report_pos_depth
     
@@ -249,9 +317,14 @@ our @program_switches = qw(
     inb|invert_match
     inb|reciprocal
     inb|strandedness
+    inb|write_overlap
+    inb|write_overlap_all
+    inb|split
     
     ptb|write_bedpe
     ptb|strandedness
+    ptb|use_edit_distance
+    ptb|write_uncompressed
     
     sob|size_asc
     sob|size_desc
@@ -261,18 +334,50 @@ our @program_switches = qw(
     sob|chr_score_desc
     
     cvb|strandedness
+    cvb|histogram
+    cvb|depth
+    cvb|split
     
     ptp|ignore_strand
+    ptp|slop_strandedness
+    ptp|no_self_hits
     
     sub|strandedness
+    
+    ubg|header
+    ubg|empty
     );
 
 our %param_translation = (
-    'btb|write_bedpe'              => 'bedpe',
-    'btb|use_edit_distance'        => 'ed',
+    'ann|names'                    => 'names',
+    'ann|counts'                   => 'counts',
+    'ann|both'                     => 'both',
+    'ann|strandedness'             => 's',
+    
+    'ate|write_bedpe'              => 'bedpe',
+    'ate|use_edit_distance'        => 'ed',
+    'ate|bam12'                    => 'bam12',
+    'ate|split'                    => 'split',
+    'ate|use_edit_distance'        => 'ed',
+    'ate|tag'                      => 'tag',
+    'ate|color'                    => 'color',
+    'ate|cigar'                    => 'cigar',
+    
+    'eta|quality'                  => 'maqp',
+    'eta|uncompressed'             => 'ubam',
+    'eta|bed12'                    => 'bed12',
+    
+    'eti|path'                     => 'path',
+    'eti|session'                  => 'sess',
+    'eti|sort'                     => 'sort',
+    'eti|collapse'                 => 'clps',
+    'eti|name'                     => 'name',
+    'eti|slop'                     => 'slop',
+    'eti|image'                    => 'img',
     
     'ffb|use_bed_name'             => 'names',
     'ffb|output_tab_format'        => 'tab',
+    'ffb|strandedness'             => 's',
     
     'mfb|soft_mask'                => 'soft',
     
@@ -290,10 +395,15 @@ our %param_translation = (
     'wib|right_window_size'        => 'r',
     
     'clb|strandedness'             => 's',
+    'clb|report_distance'          => 'd',
     'clb|ties_policy'              => 't',
     
     'gcb|report_pos_depth'         => 'd',
     'gcb|max_depth'                => 'max',
+    'gcb|bedgraph'                 => 'bg',
+    'gcb|bedgraph_all'             => 'bga',
+    'gcb|split'                    => 'split',
+    'gcb|strand'                   => 'strand',
     
     'meb|strandedness'             => 's',
     'meb|report_n_merged'          => 'n',
@@ -308,17 +418,22 @@ our %param_translation = (
     'inb|write_bed'                => 'bed',
     'inb|write_entry_1'            => 'wa',
     'inb|write_entry_2'            => 'wb',
+    'inb|write_overlap'            => 'wo',
+    'inb|write_overlap_all'        => 'woa',
     'inb|report_once_only'         => 'u',
     'inb|report_n_hits'            => 'c',
     'inb|invert_match'             => 'v',
     'inb|reciprocal'               => 'r',
     'inb|strandedness'             => 's',
     'inb|minimum_overlap'          => 'f',
+    'inb|split'                    => 'split',
     
     'ptb|write_bedpe'              => 'bedpe',
     'ptb|strandedness'             => 's',
     'ptb|minimum_overlap'          => 'f',
     'ptb|type'                     => 'type',
+    'ptb|use_edit_distance'        => 'ed',
+    'ptb|write_uncompressed'       => 'ubam',
     
     'sob|size_asc'                 => 'sizeA',
     'sob|size_desc'                => 'sizeD',
@@ -328,17 +443,34 @@ our %param_translation = (
     'sob|chr_score_desc'           => 'chrThenScoreD',
     
     'cvb|strandedness'             => 's',
+    'cvb|histogram'                => 'hist',
+    'cvb|depth'                    => 'd',
+    'cvb|split'                    => 'split',
     
     'ptp|ignore_strand'            => 'is',
+    'ptp|slop_strandedness'        => 'ss',
     'ptp|minimum_overlap'          => 'f',
     'ptp|type'                     => 'type',
+    'ptp|slop'                     => 'slop',
+    'ptp|no_self_hits'             => 'rdn',
     
     'sub|strandedness'             => 's',
     'sub|minimum_overlap'          => 'f',
 
     'lib|basename'                 => 'base',
     'lib|organism'                 => 'org',
-    'lib|genome_build'             => 'db'
+    'lib|genome_build'             => 'db',
+    
+    'ove|columns'                  => 'cols',
+    
+    'grp|group'                    => 'grp',
+    'grp|columns'                  => 'opCols',
+    'grp|operations'               => 'ops',
+    
+    'ubg|header'                   => 'header',
+    'ubg|names'                    => 'names',
+    'ubg|empty'                    => 'empty',
+    'ubg|filler'                   => 'filler'
     );
 
 #
@@ -356,35 +488,45 @@ our %param_translation = (
 #
 
 our %command_files = (
+    'annotate'             => [qw( -i|bgv -files|*ann >#out )],
     'bam_to_bed'           => [qw( -i|bam >#out )],
-    'fasta_from_bed'       => [qw( -fi|seq -bed|bed -fo|#out )],
-    'mask_fasta_from_bed'  => [qw( -fi|seq -bed|bed -fo|#out )],
-    'shuffle'              => [qw( -i|bed -g|genome >#out )],
-    'window'               => [qw( -a|bed1 -b|bed2 >#out )],
-    'closest'              => [qw( -a|bed1 -b|bed2 >#out )],
+    'bed_to_bam'           => [qw( -i|bgv -g|genome >#out )],
+    'bed_to_IGV'           => [qw( -i|bgv >#out )],
+    'b12_to_b6'            => [qw( -i|bed >#out )],
+    'fasta_from_bed'       => [qw( -fi|seq -bed|bgv -fo|#out )],
+    'mask_fasta_from_bed'  => [qw( -fi|seq -bed|bgv -fo|#out )],
+    'shuffle'              => [qw( -i|bgv -g|genome >#out )],
+    'window'               => [qw( -a|bgv1 -b|bgv2 >#out )],
+    'closest'              => [qw( -a|bgv1 -b|bgv2 >#out )],
     'genome_coverage'      => [qw( -i|bed -g|genome >#out )],
-    'merge'                => [qw( -i|bed >#out )],
-    'slop'                 => [qw( -i|bed -g|genome >#out )],
-    'complement'           => [qw( -i|bed -g|genome >#out )],
-    'intersect'            => [qw( -a|#bed1 -abam|#bam -b|bed2 >#out )], # (bed1|bam) required
-    'pair_to_bed'          => [qw( -a|#bedpe -abam|#bam -b|bed >#out )], # (bedpe|bam) required
-    'sort'                 => [qw( -i|bed >#out )],
-    'coverage'             => [qw( -a|bed1 -b|bed2 >#out )],
-    'links'                => [qw( -i|bed >#out )],
+    'merge'                => [qw( -i|bgv >#out )],
+    'slop'                 => [qw( -i|bgv -g|genome >#out )],
+    'complement'           => [qw( -i|bgv -g|genome >#out )],
+    'intersect'            => [qw( -a|#bgv1 -abam|#bam -b|bgv2 >#out )], # (bgv1|bam) required
+    'pair_to_bed'          => [qw( -a|#bedpe -abam|#bam -b|bgv >#out )], # (bedpe|bam) required
+    'sort'                 => [qw( -i|bgv >#out )],
+    'coverage'             => [qw( -a|bgv1 -b|bgv2 >#out )],
+    'links'                => [qw( -i|bgv >#out )],
     'pair_to_pair'         => [qw( -a|bedpe1 -b|bedpe2 >#out )],
-    'subtract'             => [qw( -a|bed1 -b|bed2 >#out )]
+    'subtract'             => [qw( -a|bgv1 -b|bgv2 >#out )],
+    'group_by'             => [qw( -i|bed >#out )],
+    'graph_union'          => [qw( -i|*bg -g|#genome >#out )],
+    'overlap'              => [qw( -i|bed >#out )]
     );
 
 our %accepted_types = (
-    'bam'        => [qw()],       # we need a test for this
+    'ann'        => [qw( tab vcf gff )], # BEDTools now has multiple accepted input formats: bed/gff/vcf
+    'bam'        => [qw()],              # we need a test for this
     'bed'        => [qw( tab )],
-    'bed1'       => [qw( tab )],
-    'bed2'       => [qw( tab )],
+    'bgv'        => [qw( tab vcf gff )], # BEDTools now has multiple accepted input formats: bed/gff/vcf
+    'bgv1'       => [qw( tab vcf gff )], # BEDTools now has multiple accepted input formats: bed/gff/vcf
+    'bgv2'       => [qw( tab vcf gff )], # BEDTools now has multiple accepted input formats: bed/gff/vcf
     'bedpe'      => [qw( tab )],
     'bedpe1'     => [qw( tab )],
     'bedpe2'     => [qw( tab )],
     'seq'        => [qw( fasta )],
-    'genome'     => [qw( tab )]
+    'genome'     => [qw( tab )],
+    'bg'         => [qw( tab )]
     );
 
 1;

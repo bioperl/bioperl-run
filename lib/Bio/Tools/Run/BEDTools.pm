@@ -34,6 +34,15 @@ Bio::Tools::Run::BEDTools - Run wrapper for the BEDTools suite of programs *BETA
  # create a Bio::SeqFeature::Collection object
  $features = $bedtools_fac->result( -want => 'Bio::SeqFeature::Collection' );
  
+=head1 DEPRECATION WARNING
+
+Most executables from BEDTools v>=2.10.1 can read GFF and VCF formats
+in addition to BED format. This requires the use of a new input file param,
+shown in the following documentation, '-bgv', in place of '-bed' for the
+executables that can do this.
+
+This behaviour breaks existing scripts.
+
 =head1 DESCRIPTION
 
 This module provides a wrapper interface for Aaron R. Quinlan and Ira M. Hall's
@@ -105,7 +114,7 @@ MUST provide ONE of bedpe OR bam, the module at this stage does not allow
 this information to be queried). Use these in the C<run> call like so:
 
  $bedtools_fac->run( -bedpe => 'paired.bedpe',
-                     -bed => 'genes.bed',
+                     -bgv => 'genes.bed',
                      -out => 'overlap' );
 
 The object will store the programs STDERR output for you in the C<stderr()> 
@@ -246,13 +255,13 @@ sub new {
 sub run {
 	my $self = shift;
 
-	my ($bed, $bed1, $bed2, $bam, $bedpe, $bedpe1, $bedpe2, $seq, $genome, $out);
+	my ($ann, $bed, $bg, $bgv, $bgv1, $bgv2, $bam, $bedpe, $bedpe1, $bedpe2, $seq, $genome, $out);
 	
 	if (!(@_ % 2)) {
 		my %args = @_;
 		if ((grep /^-\w+/, keys %args) == keys %args) {
-			($bed, $bed1, $bed2, $bam, $bedpe, $bedpe1, $bedpe2, $seq, $genome, $out) =
-				$self->_rearrange([qw( BED BED1 BED2 BAM 
+			($ann, $bed, $bg, $bgv, $bgv1, $bgv2, $bam, $bedpe, $bedpe1, $bedpe2, $seq, $genome, $out) =
+				$self->_rearrange([qw( ANN BED BG BGV BGV1 BGV2 BAM 
 				                       BEDPE BEDPE1 BEDPE2
 				                       SEQ GENOME OUT )], @_);
 		} else {
@@ -276,9 +285,41 @@ sub run {
 
            Command              	<in>			<out>
 
-           fasta_from_bed       seq		bed		#out
+           annotate             bgv		ann(s)		#out
 
-           mask_fasta_from_bed  seq		bed		#out
+=cut
+		m/^annotate$/ && do {
+			$bgv = $self->_uncompress($bgv);
+			$self->_validate_file_input(-bgv => $bgv) || $self->throw("File '$bgv' not BED/GFF/VCF format.");
+			@$ann = map {
+				my $a = $_;
+	            $a = $self->_uncompress($a);
+				$self->_validate_file_input(-ann => $a) || $self->throw("File '$a' not BED/GFF/VCF format.");
+				$a;
+			} @$ann;
+			last;
+		};
+		
+=pod
+
+           graph_union	        bg_files			#out
+
+=cut
+		m/^graph_union$/ && do {
+			@$bg = map {
+				my $g = $_;
+	            $g = $self->_uncompress($g);
+				$self->_validate_file_input(-bg => $g) || $self->throw("File '$a' not BedGraph format.");
+				$g;
+			} @$bg;
+			last;
+		};
+		
+=pod
+
+           fasta_from_bed       seq		bgv		#out
+
+           mask_fasta_from_bed  seq		bgv		#out
 
 =cut
 		m/fasta_from_bed$/ && do {
@@ -286,8 +327,8 @@ sub run {
 				$self->throw("Cannot capture results in STDOUT with sequence commands.");
 			$seq = $self->_uncompress($seq);
 			$self->_validate_file_input(-seq => $seq) || $self->throw("File '$seq' not fasta format.");
-			$bed = $self->_uncompress($bed);
-			$self->_validate_file_input(-bed => $bed) || $self->throw("File '$bed' not BED format.");
+			$bgv = $self->_uncompress($bgv);
+			$self->_validate_file_input(-bgv => $bgv) || $self->throw("File '$bgv' not BED/GFF/VCF format.");
 			last;
 		};
 		
@@ -306,43 +347,62 @@ sub run {
 
 =pod
 
-           merge                bed 				#out
+           bed_to_IGV           bgv 				#out
 
-           sort                 bed 				#out
+           merge                bgv 				#out
 
-           links                bed 				#out
+           sort                 bgv 				#out
+
+           links                bgv 				#out
 
 =cut
 
-		m/^(?:merge|sort|link)$/ && do {
-			$bed = $self->_uncompress($bed);
-			$self->_validate_file_input(-bed => $bed) || $self->throw("File '$bed' not BED format.");
+		m/^(?:bed_to_IGV|merge|sort|links)$/ && do {
+			$bgv = $self->_uncompress($bgv);
+			$self->_validate_file_input(-bgv => $bgv) || $self->throw("File '$bgv' not BED/GFF/VCF format.");
 		};
 
 =pod
 
-           shuffle              bed 		genome		#out
+           b12_to_b6            bed 				#out
 
-           slop                 bed 		genome		#out
+           overlap              bed 				#out
 
-           complement           bed 		genome		#out
-
-           genome_covergage     bed 		genome		#out
+           group_by             bed 				#out
 
 =cut
 
-		m/^(?:shuffle|slop|complement|genome_coverage)$/ && do {
+		m/^(?:b12_to_b6|overlap|group_by)$/ && do {
 			$bed = $self->_uncompress($bed);
-			$self->_validate_file_input(-bed => $bed) || $self->throw("File '$bed' not BED format.");
+			$self->_validate_file_input(-bed => $bed) || $self->throw("File '$bgv' not BED format.");
+			if ($cmd eq 'group_by') {
+				my $c =(my @c)= split(",",$self->columns);
+				my $o =(my @o)= split(",",$self->operations);
+				unless ($c > 0 && $o == $c) {
+					$self->throw("The command 'group_by' requires "."paired "x($o == $c)."'-columns' and '-operations' parameters");
+				}
+			}
+			last;
+		};
+
+=pod
+
+           bed_to_bam           bgv 				#out
+
+           shuffle              bgv 		genome		#out
+
+           slop                 bgv 		genome		#out
+
+           complement           bgv 		genome		#out
+
+=cut
+
+		m/^(?:bed_to_bam|shuffle|slop|complement)$/ && do {
+			$bgv = $self->_uncompress($bgv);
+			$self->_validate_file_input(-bgv => $bgv) || $self->throw("File '$bgv' not BED/GFF/VCF format.");
 			$genome = $self->_uncompress($genome);
 			$self->_validate_file_input(-genome => $genome) || $self->throw("File '$genome' not genome format.");
-			#for genome_coverage must sort input bed file by chromosome first `sort -k1,1` or Bio::Tools::Run::BEDTools(-sort)
-			if ($cmd eq 'genome_coverage') {
-				my ($th, $tf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bed' );
-				$th->close;
-				sort_file({k => 1, I => $bed, o => $tf});
-				$bed = $tf;
-			} elsif ($cmd eq 'slop') {
+			if ($cmd eq 'slop') {
 				my $l = defined $self->add_to_left;
 				my $r = defined $self->add_to_right;
 				my $b = defined $self->add_bidirectional;
@@ -356,21 +416,39 @@ sub run {
 
 =pod
 
-           window               bed1		bed2		#out
+           genome_coverage      bed 		genome		#out
 
-           closest              bed1		bed2		#out
+=cut
 
-           coverage             bed1		bed2		#out
+		m/^genome_coverage$/ && do {
+			$bed = $self->_uncompress($bed);
+			$self->_validate_file_input(-bed => $bed) || $self->throw("File '$bed' not BED format.");
+			$genome = $self->_uncompress($genome);
+			$self->_validate_file_input(-genome => $genome) || $self->throw("File '$genome' not genome format.");
+			my ($th, $tf) = $self->io->tempfile( -dir => $self->tempdir(), -suffix => '.bed' );
+			$th->close;
+			sort_file({k => 1, I => $bed, o => $tf});
+			$bed = $tf;
+			last;
+		};
 
-           subtract             bed1		bed2		#out
+=pod
+
+           window               bgv1		bgv2		#out
+
+           closest              bgv1		bgv2		#out
+
+           coverage             bgv1		bgv2		#out
+
+           subtract             bgv1		bgv2		#out
 
 =cut
 
 		m/^(?:window|closest|coverage|subtract)$/ && do {
-			$bed1 = $self->_uncompress($bed1);
-			$self->_validate_file_input(-bed1 => $bed1) || $self->throw("File '$bed1' not BED format.");
-			$bed2 = $self->_uncompress($bed2);
-			$self->_validate_file_input(-bed2 => $bed2) || $self->throw("File '$bed2' not BED format.");
+			$bgv1 = $self->_uncompress($bgv1);
+			$self->_validate_file_input(-bgv1 => $bgv1) || $self->throw("File '$bgv1' not BED/GFF/VCF format.");
+			$bgv2 = $self->_uncompress($bgv2);
+			$self->_validate_file_input(-bgv2 => $bgv2) || $self->throw("File '$bgv2' not BED/GFF/VCF format.");
 		};
 
 =pod
@@ -388,22 +466,27 @@ sub run {
 
 =pod
 
-           intersect            bed1|bam	bed2		#out
+           intersect            bgv1|bam	bgv2		#out
 
 =cut
 		m/^intersect$/ && do {
-			$bed1 = $self->_uncompress($bed1);
+			$bgv1 = $self->_uncompress($bgv1);
 			$bam = $self->_uncompress($bam);
-			($bam && $self->_validate_file_input(-bam => $bam)) || ($bed1 && $self->_validate_file_input(-bed1 => $bed1)) ||
+			($bam && $self->_validate_file_input(-bam => $bam)) || ($bgv1 && $self->_validate_file_input(-bgv1 => $bgv1)) ||
 				$self->throw("File in position 1. not correct format.");
-			$bed2 = $self->_uncompress($bed2);
-			$self->_validate_file_input(-bed2 => $bed2) || $self->throw("File '$bed2' not BED format.");			
+			$bgv2 = $self->_uncompress($bgv2);
+			$self->_validate_file_input(-bgv2 => $bgv2) || $self->throw("File '$bgv2' not BED/GFF/VCF format.");			
 			last;
 		};
 
 =pod
 
-           pair_to_bed          bedpe|bam	bed		#out
+           pair_to_bed          bedpe|bam	bgv		#out
+
+           bgv* signifies any of BED, GFF or VCF. ann is a bgv.
+           
+           NOTE: Replace 'bgv' with 'bed' unless $use_bgv is set.
+
 
 =cut
 
@@ -412,17 +495,21 @@ sub run {
 			$bam = $self->_uncompress($bam);
 			($bam && $self->_validate_file_input(-bam => $bam)) || ($bedpe && $self->_validate_file_input(-bedpe => $bedpe)) ||
 				$self->throw("File in position 1. not correct format.");
-			$bed = $self->_uncompress($bed);
-			$self->_validate_file_input(-bed => $bed) || $self->throw("File '$bed' not BED format.");			
+			$bgv = $self->_uncompress($bgv);
+			$self->_validate_file_input(-bgv => $bgv) || $self->throw("File '$bed' not BED/GFF/VCF format.");
+			last;
 		}
 	}
 	
 	my %params = (    
+		'-ann'        => $ann,
 		'-bam'        => $bam,
 		'-bed'        => $bed,
-		'-bed1'       => $bed1,
-		'-bed2'       => $bed2,
-		'-bedpe'     => $bedpe,
+		'-bgv'        => $bgv,
+		'-bg'         => $bg,
+		'-bgv1'       => $bgv1,
+		'-bgv2'       => $bgv2,
+		'-bedpe'      => $bedpe,
 		'-bedpe1'     => $bedpe1,
 		'-bedpe2'     => $bedpe2,
 		'-seq'        => $seq,
@@ -572,6 +659,10 @@ sub result {
 			last;
 		};
 		m/tab/ && do {
+			$self->warn("Cannot make '$_' for $format.");
+			return;
+		};
+		m/igv/ && do {
 			$self->warn("Cannot make '$_' for $format.");
 			return;
 		};
@@ -782,6 +873,11 @@ sub version{
 
 	defined $cmd or $self->throw("No command defined - cannot determine program executable");
 
+	# new bahaviour for some BEDTools executables - breaks previous approach to getting version
+	# $dummy can be any non-recognised parameter - '-version' works for most
+	my $dummy = '-version';
+	$dummy = '-examples' if $cmd =~ /graph_union/;
+
 	my ($in, $out, $err);
 	my $dum;
 	$in = \$dum;
@@ -791,7 +887,7 @@ sub version{
 	# Get program executable
 	my $exe = $self->executable;
 
-	my @ipc_args = ( $exe );
+	my @ipc_args = ( $exe, $dummy );
 	
 	eval {
 		IPC::Run::run(\@ipc_args, $in, $out, $err) or
