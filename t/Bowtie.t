@@ -52,11 +52,11 @@ is ($bowtiefac->min_insert_size, 100, "parameter really changed");
 ok $bowtiefac->reset_parameters( -min_insert_size => 200 ), "reset parameters with arg";
 ok !$bowtiefac->max_mismatches, "original parameters undefined";
 is ($bowtiefac->min_insert_size, 200, "parameter really reset via arg");
-ok $bowtiefac->set_parameters( -sam_format => 1 ), "set an exclusive group parameter";
-ok $bowtiefac->sam_format, "parameter really set";
-ok $bowtiefac->set_parameters( -concise => 1 ), "set an incompatible parameter";
-ok $bowtiefac->concise, "parameter really set";
-ok !$bowtiefac->sam_format, "original exclusive parameter really unset";
+ok $bowtiefac->set_parameters( -raw => 1 ), "set an exclusive group parameter";
+ok $bowtiefac->raw, "parameter really set";
+ok $bowtiefac->set_parameters( -fastq => 1 ), "set an incompatible parameter";
+ok $bowtiefac->fastq, "parameter really set";
+ok !$bowtiefac->raw, "original exclusive parameter really unset";
 
 $bowtiefac->set_parameters(
     -command            => 'paired',
@@ -66,8 +66,8 @@ $bowtiefac->set_parameters(
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
 
-is( scalar $bowtiefac->available_parameters, 65, "all available options");
-is( scalar $bowtiefac->available_parameters('params'), 30, "available parameters" );
+is( scalar $bowtiefac->available_parameters, 68, "all available options");
+is( scalar $bowtiefac->available_parameters('params'), 33, "available parameters" );
 is( scalar $bowtiefac->available_parameters('switches'), 35, "available switches" );
 #back to beginning - but with single
 $bowtiefac = Bio::Tools::Run::Bowtie->new(
@@ -79,8 +79,8 @@ $bowtiefac = Bio::Tools::Run::Bowtie->new(
     );
 ok $bowtiefac->parameters_changed, "parameters changed";
 
-is( scalar $bowtiefac->available_parameters, 59, "all available options");
-is( scalar $bowtiefac->available_parameters('params'), 27, "available parameters" );
+is( scalar $bowtiefac->available_parameters, 60, "all available options");
+is( scalar $bowtiefac->available_parameters('params'), 28, "available parameters" );
 is( scalar $bowtiefac->available_parameters('switches'), 32, "available switches" );
 my %pms = $bowtiefac->get_parameters;
 is_deeply( \%pms, 
@@ -101,7 +101,7 @@ is_deeply( $bowtiefac->{_options}->{_prefixes},
 	   "internal prefix hash set");
 
 is_deeply( $bowtiefac->{_options}->{_params}, 
-	   [qw( command skip upto trim5 trim3 max_seed_mismatches
+	   [qw( command qualities skip upto trim5 trim3 max_seed_mismatches
 	        max_qual_mismatch max_quality_sum snp_penalty snp_frac
 	        seed_length max_mismatches max_backtracks max_search_ram
 	        report_n_alignments supress supress_random offset_base

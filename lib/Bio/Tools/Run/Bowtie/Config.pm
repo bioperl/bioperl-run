@@ -151,6 +151,7 @@ our %command_prefixes = (
 
 our @program_params = qw(
     command
+    one|qualities
     one|skip
     one|upto
     one|trim5
@@ -178,6 +179,8 @@ our @program_params = qw(
     one|offrate
     one|random_seed
 
+    par|qualities1
+    par|qualities2
     par|min_insert_size
     par|max_insert_size
     par|max_mate_attempts
@@ -247,10 +250,14 @@ our @program_switches = qw(
 
     ins|names_only
     ins|summary
+    ins|reconstruct
 );
 
 # be careful of collisions here - this could do with command specification
 our %incompat_params = (
+    qualities                => [qw( qualities1 qualities2 )],
+    qualities1               => [qw( qualities )],
+    qualities2               => [qw( qualities )],
     max_seed_mismatches      => [qw( max_mismatches )],
     max_mismatches           => [qw( max_seed_mismatches )],
     fastq                    => [qw( fasta raw inline )],
@@ -266,9 +273,6 @@ our %incompat_params = (
     no_reverse_alignment     => [qw( no_forward_alignment )],
     all                      => [qw( report_n_alignments )],
     report_n_alignments      => [qw( all )],
-    sam_format               => [qw( concise  )],
-    concise                  => [qw( sam_format suppress_columns )],
-    suppress_columns         => [qw( concise )],
     forward_reverse          => [qw( reverse_reverse forward_forward )],
     reverse_reverse          => [qw( forward_reverse forward_forward )],
     forward_forward          => [qw( reverse_reverse forward_forward )],
@@ -277,6 +281,8 @@ our %incompat_params = (
 );
 
 our %corequisite_switches = (
+    qualities1               => [qw( qualities2 )],
+    qualities2               => [qw( qualities1 )],
     strata                   => [qw( best )],
     suppress_random          => [qw( best )],
     snp_penalty              => [qw( color_space )],
@@ -298,6 +304,7 @@ our %param_translation = (
     'one|raw'                      => 'r',
     'one|inline'                   => 'c',
     'one|color_space'              => 'C',
+    'one|qualities'                => 'Q',
     'one|skip'                     => 's',
     'one|upto'                     => 'u',
     'one|trim5'                    => '5',
@@ -309,7 +316,6 @@ our %param_translation = (
     'one|integer_qual'             => 'integer-quals',
     'one|max_seed_mismatches'      => 'n',
     'one|max_qual_mismatch'        => 'e',
-    'one|max_quality_sum'          => 'Q',
     'one|seed_length'              => 'l',
     'one|no_maq_rounding'          => 'nomaqround',
     'one|max_mismatches'           => 'v',
@@ -324,7 +330,6 @@ our %param_translation = (
     'one|supress_random'           => 'M',
     'one|best'                     => 'best',
     'one|strata'                   => 'strata',
-    'one|fix_strand_bias'          => 'strandfix',
     'one|snp_penalty'              => 'snpphred',
     'one|snp_frac'                 => 'snpfrac',
     'one|print_color'              => 'col-cseq',
@@ -335,7 +340,6 @@ our %param_translation = (
     'one|sam_no_head'              => 'sam_nohead',
     'one|sam_no_sq'                => 'sam_nosq',
     'one|sam_rg'                   => 'sam-RG',
-    'one|concise'                  => 'concise',
     'one|suppress_columns'         => 'suppress',
     'one|time'                     => 't',
     'one|offset_base'              => 'B',
@@ -358,6 +362,9 @@ our %param_translation = (
     'par|raw'                      => 'r',
     'par|inline'                   => 'c',
     'par|color_space'              => 'C',
+    'par|qualities'                => 'Q', # Don't know if bowtie will accept this - won't break if left in
+    'par|qualities1'               => 'Q1',
+    'par|qualities2'               => 'Q2',
     'par|skip'                     => 's',
     'par|upto'                     => 'u',
     'par|trim5'                    => '5',
@@ -369,7 +376,6 @@ our %param_translation = (
     'par|integer_qual'             => 'integer-quals',
     'par|max_seed_mismatches'      => 'n',
     'par|max_qual_mismatch'        => 'e',
-    'par|max_quality_sum'          => 'Q',
     'par|seed_length'              => 'l',
     'par|no_maq_rounding'          => 'nomaqround',
     'par|max_mismatches'           => 'v',
@@ -390,7 +396,6 @@ our %param_translation = (
     'par|suppress_random'          => 'M',
     'par|best'                     => 'best',
     'par|strata'                   => 'strata',
-    'par|fix_strand_bias'          => 'strandfix',
     'par|snp_penalty'              => 'snpphred',
     'par|snp_frac'                 => 'snpfrac',
     'par|print_color'              => 'col-cseq',
@@ -401,7 +406,6 @@ our %param_translation = (
     'par|sam_no_head'              => 'sam_nohead',
     'par|sam_no_sq'                => 'sam_nosq',
     'par|sam_rg'                   => 'sam-RG',
-    'par|concise'                  => 'concise',
     'par|suppress_columns'         => 'suppress',
     'par|time'                     => 't',
     'par|offset_base'              => 'B',
@@ -424,6 +428,7 @@ our %param_translation = (
     'crb|raw'                      => 'r',
     'crb|inline'                   => 'c',
     'crb|color_space'              => 'C',
+    'crb|qualities'                => 'Q',
     'crb|skip'                     => 's',
     'crb|upto'                     => 'u',
     'crb|trim5'                    => '5',
@@ -435,7 +440,6 @@ our %param_translation = (
     'crb|integer_qual'             => 'integer-quals',
     'crb|max_seed_mismatches'      => 'n',
     'crb|max_qual_mismatch'        => 'e',
-    'crb|max_quality_sum'          => 'Q',
     'crb|seed_length'              => 'l',
     'crb|no_maq_rounding'          => 'nomaqround',
     'crb|max_mismatches'           => 'v',
@@ -456,7 +460,6 @@ our %param_translation = (
     'crb|suppress_random'          => 'M',
     'crb|best'                     => 'best',
     'crb|strata'                   => 'strata',
-    'crb|fix_strand_bias'          => 'strandfix',
     'crb|snp_penalty'              => 'snpphred',
     'crb|snp_frac'                 => 'snpfrac',
     'crb|print_color'              => 'col-cseq',
@@ -467,7 +470,6 @@ our %param_translation = (
     'crb|sam_no_head'              => 'sam_nohead',
     'crb|sam_no_sq'                => 'sam_nosq',
     'crb|sam_rg'                   => 'sam-RG',
-    'crb|concise'                  => 'concise',
     'crb|suppress_columns'         => 'suppress',
     'crb|time'                     => 't',
     'crb|offset_base'              => 'B',
@@ -509,6 +511,7 @@ our %param_translation = (
     'ins|seq_width'                => 'a',
     'ins|names_only'               => 'n',
     'ins|summary'                  => 's',
+    'ins|reconstruct'              => 'e',
     'ins|version'                  => 'version'
     );
 
@@ -542,7 +545,7 @@ our %accepted_types = ( # ind is not a single file, so not included here
 
 foreach (@program_params) {
         push @program_params, "par\|".$1 if (m/^one\|(.*)/);
-        push @program_params, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw)/);
+        push @program_params, "crb\|".$1 if (m/^par\|(.*)/) && !(m/^par\|(?:fasta|fastq|raw|qualities[12])/);
 }
 foreach (@program_switches) {
         push @program_switches, "par\|".$1 if (m/^one\|(.*)/);
