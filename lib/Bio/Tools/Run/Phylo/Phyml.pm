@@ -234,7 +234,7 @@ sub new {
     $self->data_format($data_format) if $data_format;
     $self->dataset_count($dataset_count) if $dataset_count;
     $self->model($model) if $model;
-    $self->freq($kappa) if $freq;
+    $self->freq($freq) if $freq;
     $self->kappa($kappa) if $kappa;
     $self->invar($invar) if $invar;
     $self->category_number($category_number) if $category_number;
