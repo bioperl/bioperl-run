@@ -131,10 +131,10 @@ SKIP: {
 	is $acd->qualifier('-ppppppp'), 0;
 	ok $acd->qualifier('-reverse');
 	is $acd->category('-reverse'), 'optional';
-	like $acd->values('-reverse'), qr/Yes\/No/;
-	is $acd->descr('-reverse'), 'Set this to be true if you also wish to also count words in the reverse complement of a nucleic sequence.';
+	like $acd->values('-reverse'), qr/(?:Yes\/No|true)/;
+	like $acd->descr('-reverse'), qr/(?:boolean|true)/;
 	is $acd->unnamed('-reverse'), 0;
-	is $acd->default('-reverse'), 'No';
+	like $acd->default('-reverse'), qr/(?:Yes\/No|true)/;
 }
 
 __END__
