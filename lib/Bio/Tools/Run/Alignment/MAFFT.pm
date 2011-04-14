@@ -77,11 +77,8 @@ use Bio::Seq;
 use Bio::SeqIO;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
-use Bio::Root::Root;
-use Bio::Root::IO;
-use Bio::Factory::ApplicationFactoryI;
-use  Bio::Tools::Run::WrapperBase;
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
+
+use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
           Bio::Factory::ApplicationFactoryI);
 
 BEGIN {
@@ -109,7 +106,7 @@ BEGIN {
 =cut
 
 sub program_name {
-        return 'mafft';
+    return 'mafft';
 }
 
 =head2 executable
@@ -125,29 +122,29 @@ sub program_name {
 =cut
 
 sub executable {
-   my ($self, $exename, $exe,$warn) = @_;
-   $exename = $self->program_name unless (defined $exename );
-
-   if( defined $exe && -x $exe ) {
-     $self->{'_pathtoexe'}->{$exename} = $exe;
-   }
-   unless( defined $self->{'_pathtoexe'}->{$exename} ) {
-       my $f = $self->program_path($exename);	    
-       $exe = $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
-        
-       #  This is how I meant to split up these conditionals --jason
-       # if exe is null we will execute this (handle the case where
-       # PROGRAMDIR pointed to something invalid)
-       unless( $exe )  {  # we didn't find it in that last conditional
-	   if( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
-	       $self->{'_pathtoexe'}->{$exename} = $exe;
-	   } else { 
-	       $self->warn("Cannot find executable for $exename") if $warn;
-	       $self->{'_pathtoexe'}->{$exename} = undef;
-	   }
-       }
-   }
-   return $self->{'_pathtoexe'}->{$exename};
+    my ($self, $exename, $exe,$warn) = @_;
+    $exename = $self->program_name unless (defined $exename );
+ 
+    if( defined $exe && -x $exe ) {
+        $self->{'_pathtoexe'}->{$exename} = $exe;
+    }
+    unless( defined $self->{'_pathtoexe'}->{$exename} ) {
+        my $f = $self->program_path($exename);	    
+        $exe = $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
+         
+        #  This is how I meant to split up these conditionals --jason
+        # if exe is null we will execute this (handle the case where
+        # PROGRAMDIR pointed to something invalid)
+        unless( $exe )  {  # we didn't find it in that last conditional
+        if( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
+            $self->{'_pathtoexe'}->{$exename} = $exe;
+        } else { 
+            $self->warn("Cannot find executable for $exename") if $warn;
+            $self->{'_pathtoexe'}->{$exename} = undef;
+        }
+        }
+    }
+    return $self->{'_pathtoexe'}->{$exename};
 }
 
 
@@ -322,7 +319,7 @@ sub align {
     my ($param_string,$outstr) = $self->_setparams();
 
     # run mafft
-    return &_run($self, $infilename, $param_string,$outstr);
+    return $self->_run($infilename, $param_string,$outstr);
 }
 
 =head2  _run
@@ -341,15 +338,15 @@ sub align {
 
 sub _run {
     my ($self,$infilename,$paramstr,$outstr) = @_;
-     my $commandstring = $self->executable($self->method)." $paramstr $infilename $outstr";
+     my $commandstring = $self->executable()." $paramstr $infilename $outstr";
     
     $self->debug( "mafft command = $commandstring \n");
 
     my $status = system($commandstring);
     my $outfile = $self->outfile(); 
     if( !-e $outfile || -z $outfile ) {
-	$self->warn( "MAFFT call crashed: $? [command $commandstring]\n");
-	return;
+        $self->warn( "MAFFT call crashed: $? [command $commandstring]\n");
+        return;
     }
     
     my $in  = Bio::AlignIO->new('-file' => $outfile, 

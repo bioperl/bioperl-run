@@ -30,7 +30,7 @@ SKIP: {
 	$factory->executable($factory->method);
 
 	test_skip(-requires_executable => $factory,
-			  -tests => 13);	
+			  -tests => 13);
 	
 	my $version = $factory->version;
 	ok($version);
@@ -60,6 +60,5 @@ SKIP: {
 		is $aln->num_sequences, 7;
 		my $s1_perid = $aln->average_percentage_identity;
 		ok($s1_perid);
-		
 	}
 }
