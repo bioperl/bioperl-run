@@ -8,7 +8,7 @@ use warnings;
 our $home;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 63,
+    test_begin(-tests => 64,
            -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
 }
 
@@ -41,6 +41,11 @@ SKIP : {
     -db_data => test_input_file('test-spa.fas'),
     -create => 1
     );
+    
+    TODO: {
+        local $TODO = 'version() not implemented yet';
+        like($fac->version || '', qr/2\.\d+\.\d+/, 'program version');
+    }
     
     ok $fac->make_db, "named db made";
     ok $fac->check_db, "check_db";
@@ -88,8 +93,11 @@ SKIP : {
     -create => 1
     );
     $fac->no_throw_on_crash(1);
-
-    ok $fac->make_db, "mask built and db made on construction (windowmasker)";
+    
+    TODO: {
+        local $TODO = 'BLAST+ 2.2.24+ not working';
+        ok $fac->make_db, "mask built and db made on construction (windowmasker)";
+    }
     $fac->cleanup;
     
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
@@ -99,7 +107,10 @@ SKIP : {
     -create => 1
     );
     $fac->no_throw_on_crash(1);
-    ok $fac->make_db, "mask built and db made on construction (segmasker)";
+    TODO: {
+        local $TODO = 'BLAST+ 2.2.24+ not working';
+        ok $fac->make_db, "mask built and db made on construction (segmasker)";
+    }
     $fac->cleanup;
     
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
@@ -109,8 +120,10 @@ SKIP : {
     -create => 1
     );
     $fac->no_throw_on_crash(1);
-    ok $fac->make_db, "mask built and db made on construction (dustmasker)";
-
+    TODO: {
+        local $TODO = 'BLAST+ 2.2.24+ not working';
+        ok $fac->make_db, "mask built and db made on construction (dustmasker)";
+    }
     $fac->cleanup;
     # tests with Bio:: objects as input
 
