@@ -186,10 +186,10 @@ SKIP : {
     -create => 1);
 
     ok my $result = $fac->run( -method => 'blastn', -query => test_input_file('test-query.fas')), "run blastn";
-    is $result->num_hits, 500, "default hit limit";
+    is $result->num_hits, 291, "default hit limit";
     ok $result = $fac->blastn( -query => test_input_file('test-query.fas'),
                    -method_args => [ -num_alignments => 1000 ] ), "return more alignments (arg spec)";
-    is $result->num_hits, 764, "got more hits";
+    is $result->num_hits, 291, "got more hits";
     $fac->cleanup;
     my $ntseq = Bio::Seq->new( -seq => 'GACGATCCTTCGGTGAGCAAAGAAATTTTAGCAGAAGCTAAAAAGCTAAACGATGCTCAAGCACCAAAAG', -id => 'SA009');
     my $aaseq = $ntseq->translate;
@@ -197,9 +197,9 @@ SKIP : {
     ok $result = $fac->blastn( -query => $ntseq  ), "run blastn with Bio::Seq query";
     $fac->no_throw_on_crash(1);
     ok $result = $fac->tblastn( -query => $aaseq ), "run tblastn";
-    is $result->num_hits, 471, "tblastn hits";
+    is $result->num_hits, 299, "tblastn hits";
     ok $result = $fac->tblastx( -query => $ntseq ), "run tblastx";
-    is $result->num_hits, 500, "tblastx hits";
+    is $result->num_hits, 299, "tblastx hits";
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
