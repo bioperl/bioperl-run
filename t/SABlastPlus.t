@@ -203,7 +203,7 @@ SKIP : {
     -db_data => test_input_file('test-spa-p.fas'),
     -create => 1);
     ok $result = $fac->blastp( -query => $aaseq ), "run blastp";
-    is $result->num_hits, 485, "blastp hits";
+    is $result->num_hits, 222, "blastp hits";
     $fac->cleanup;
 
     $sio = Bio::SeqIO->new(-file=>test_input_file('test-spa.fas'));    
