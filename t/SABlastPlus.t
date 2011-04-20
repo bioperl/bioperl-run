@@ -1,3 +1,4 @@
+
 #-*-perl-*-
 #$Id$
 # testing StandAloneBlastPlus.pm
@@ -7,51 +8,42 @@ use warnings;
 our $home;
 BEGIN {
     use Bio::Root::Test;
-    $home = '.'; # set to '.' for Build use,
-                     # '../lib' for debugging from .t file
-    unshift @INC, $home;
-#    unshift @INC, "../run-lib";
-#    unshift @INC, "../live";
     test_begin(-tests => 63,
-	       -requires_modules => [qw( 
-                                      Bio::Tools::Run::BlastPlus
-                                      )]);
+           -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
 }
 
-$ENV{BLASTPLUSDIR} = "/usr/local/bin";
 use_ok( 'Bio::Tools::Run::StandAloneBlastPlus' );
 use_ok( 'Bio::Tools::Run::WrapperBase' );
 use_ok( 'Bio::Tools::Run::WrapperBase::CommandExts' );
 use Bio::SeqIO;
 use Bio::AlignIO;
 
-
 ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'), 
     "BlastPlus factory";
 
 SKIP : {
+    #test_skip( -tests => 59,
+    #       -requires_env => 'BLASTPLUSDIR');
     test_skip( -tests => 59,
-	       -requires_env => 'BLASTPLUSDIR');
-    test_skip( -tests => 59,
-	       -requires_executable => $bpfac);
+           -requires_executable => $bpfac);
     diag('DB and mask make tests');
-# exceptions/warnings
-
-# testing using fasta files as input...
+    # exceptions/warnings
+    
+    # testing using fasta files as input...
     ok my $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa.fas'),
-	-create => 1
-	), "make factory";
+    -db_data => test_input_file('test-spa.fas'),
+    -create => 1
+    ), "make factory";
     ok $fac->make_db, "test db made with fasta";
     like $fac->db, qr/DB.{5}/, "temp db";
     is ($fac->db_type, 'nucl', "right type");
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_name => 'test', 
-	-db_data => test_input_file('test-spa.fas'),
-	-create => 1
-	);
+    -db_name => 'test', 
+    -db_data => test_input_file('test-spa.fas'),
+    -create => 1
+    );
     
     ok $fac->make_db, "named db made";
     ok $fac->check_db, "check_db";
@@ -60,32 +52,32 @@ SKIP : {
     is $fac->db_type, 'nucl', "correct type";
 
     ok $fac->make_mask(
-	-data=>test_input_file('test-spa.fas'), 
-	-masker=>'windowmasker'), "windowmasker mask made";
+    -data=>test_input_file('test-spa.fas'), 
+    -masker=>'windowmasker'), "windowmasker mask made";
     ok $fac->make_mask(
-	-data=>test_input_file('test-spa.fas'), 
-	-masker=>'dustmasker'), "dustmasker mask made";
+    -data=>test_input_file('test-spa.fas'), 
+    -masker=>'dustmasker'), "dustmasker mask made";
 
     $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa-p.fas'),
-	-create => 1
-	);
+    -db_data => test_input_file('test-spa-p.fas'),
+    -create => 1
+    );
     ok $fac->check_db('test'), "check_db with arg";
     is $fac->db_info('test')->{_db_type}, 'nucl', "db_info with arg";
     ok $fac->make_db, "protein db made";
     is $fac->db_type, 'prot', "correct type";
     ok $fac->make_mask(-data=>$fac->db, -masker=>'segmasker'), "segmasker mask made";
     ok $fac->make_mask(
-	-data=>$fac->db, 
-	-masker=>'segmasker'), "segmasker mask made; blastdb as data";
+    -data=>$fac->db, 
+    -masker=>'segmasker'), "segmasker mask made; blastdb as data";
     $fac->_register_temp_for_cleanup('test');
     $fac->cleanup;
     
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa-p.fas'),
-	-mask_file => test_input_file('segmask_data.asn'),
-	-create => 1
-	);
+    -db_data => test_input_file('test-spa-p.fas'),
+    -mask_file => test_input_file('segmask_data.asn'),
+    -create => 1
+    );
     ok $fac->make_db, "protein db made with pre-built mask";
     is $fac->db_filter_algorithms->[0]{algorithm_name}, 'seg', "db_info records mask info";
 
@@ -93,32 +85,32 @@ SKIP : {
     
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa.fas'),
-	-masker=>'windowmasker',
-	-mask_data => test_input_file('test-spa.fas'),
-	-create => 1
-	);
+    -db_data => test_input_file('test-spa.fas'),
+    -masker=>'windowmasker',
+    -mask_data => test_input_file('test-spa.fas'),
+    -create => 1
+    );
     $fac->no_throw_on_crash(1);
 
     ok $fac->make_db, "mask built and db made on construction (windowmasker)";
     $fac->cleanup;
     
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa-p.fas'),
-	-masker=>'segmasker',
-	-mask_data => test_input_file('test-spa-p.fas'),
-	-create => 1
-	);
+    -db_data => test_input_file('test-spa-p.fas'),
+    -masker=>'segmasker',
+    -mask_data => test_input_file('test-spa-p.fas'),
+    -create => 1
+    );
     $fac->no_throw_on_crash(1);
     ok $fac->make_db, "mask built and db made on construction (segmasker)";
     $fac->cleanup;
     
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa.fas'),
-	-masker=>'dustmasker',
-	-mask_data => test_input_file('test-spa.fas'),
-	-create => 1
-	);
+    -db_data => test_input_file('test-spa.fas'),
+    -masker=>'dustmasker',
+    -mask_data => test_input_file('test-spa.fas'),
+    -create => 1
+    );
     $fac->no_throw_on_crash(1);
     ok $fac->make_db, "mask built and db made on construction (dustmasker)";
 
@@ -129,17 +121,17 @@ SKIP : {
     ok my $aio = Bio::AlignIO->new(-file => test_input_file('test-spa-p.fas'));
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_name => 'siodb',
-	-db_data => $sio,
-	-create => 1
-	);
+    -db_name => 'siodb',
+    -db_data => $sio,
+    -create => 1
+    );
     ok $fac->make_db, "make db from Bio::SeqIO";
     $fac->cleanup;
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_name => 'aiodb',
-	-db_data => $aio,
-	-create => 1
-	);
+    -db_name => 'aiodb',
+    -db_data => $aio,
+    -create => 1
+    );
     ok $fac->make_db, "make db from Bio::AlignIO";
 
     $fac->cleanup;
@@ -147,39 +139,39 @@ SKIP : {
     $aio = Bio::AlignIO->new(-file=>test_input_file('test-aln.msf'));
     my @seqs = $aio->next_aln->each_seq;
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_name => 'aiodb',
-	-db_data => \@seqs,
-	-create => 1
-	);
+    -db_name => 'aiodb',
+    -db_data => \@seqs,
+    -create => 1
+    );
     ok $fac->make_db, 'make db from \@seqs';
 
     $fac->_register_temp_for_cleanup( 'aiodb', 'siodb' );
     $fac->cleanup;
 
-# bug#3003 :
-    $DB::single=1;
+    # bug#3003 :
+    #$DB::single=1;
     mkdir "./a"; mkdir "./a/b";
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_dir => "./a/b",
-	-db_name => "test",
-	-db_data => test_input_file('test-spa.fas'),
-	-create => 1
-	), "dbdir : ./a/b; dbname : test; create";
+    -db_dir => "./a/b",
+    -db_name => "test",
+    -db_data => test_input_file('test-spa.fas'),
+    -create => 1
+    ), "dbdir : ./a/b; dbname : test; create";
     ok $fac->make_db, "make db";
     lives_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
-		   -db_dir => "./a",
-		   -db_name => "b/test"
-		   ) };
+           -db_dir => "./a",
+           -db_name => "b/test"
+           ) };
     lives_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
-		   -db_dir => ".",
-		   -db_name => "a/b/test"
-		   ) };
+           -db_dir => ".",
+           -db_name => "a/b/test"
+           ) };
     lives_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
-		   -db_name => "a/b/test"
-		   ) };
+           -db_name => "a/b/test"
+           ) };
     dies_ok { Bio::Tools::Run::StandAloneBlastPlus->new(
-		   -db_name => "/a/b/test"
-		   ) };
+           -db_name => "/a/b/test"
+           ) };
     $fac->_register_temp_for_cleanup('a/b/test');
     $fac->cleanup;
     rmdir 'a/b';
@@ -190,13 +182,13 @@ SKIP : {
     diag("run BLAST methods");
 
     $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa.fas'),
-	-create => 1);
+    -db_data => test_input_file('test-spa.fas'),
+    -create => 1);
 
     ok my $result = $fac->run( -method => 'blastn', -query => test_input_file('test-query.fas')), "run blastn";
     is $result->num_hits, 500, "default hit limit";
     ok $result = $fac->blastn( -query => test_input_file('test-query.fas'),
-			       -method_args => [ -num_alignments => 1000 ] ), "return more alignments (arg spec)";
+                   -method_args => [ -num_alignments => 1000 ] ), "return more alignments (arg spec)";
     is $result->num_hits, 764, "got more hits";
     $fac->cleanup;
     my $ntseq = Bio::Seq->new( -seq => 'GACGATCCTTCGGTGAGCAAAGAAATTTTAGCAGAAGCTAAAAAGCTAAACGATGCTCAAGCACCAAAAG', -id => 'SA009');
@@ -211,8 +203,8 @@ SKIP : {
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
-	-db_data => test_input_file('test-spa-p.fas'),
-	-create => 1);
+    -db_data => test_input_file('test-spa-p.fas'),
+    -create => 1);
     ok $result = $fac->blastp( -query => $aaseq ), "run blastp";
     is $result->num_hits, 485, "blastp hits";
     $fac->cleanup;
@@ -223,23 +215,20 @@ SKIP : {
     my $seq2 = $sio->next_seq;
 
     ok $result = $fac->bl2seq( -method => 'blastn',
-			       -query => $seq1,
-			       -subject => $seq2 ), "bl2seq (blastn)";
+                   -query => $seq1,
+                   -subject => $seq2 ), "bl2seq (blastn)";
     is $result->num_hits, 1, "got hit";
     ok $result = $fac->bl2seq( -method => 'blastx',
-			       -query => $seq1,
-			       -subject => $seq2 ), "bl2seq (blastx)";
+                   -query => $seq1,
+                   -subject => $seq2 ), "bl2seq (blastx)";
     is $result->num_hits, 1, "got hit";
     $seq1 = $seq1->translate;
     $seq2 = $seq2->translate;
     ok $result = $fac->bl2seq( -method => 'blastp',
-			       -query => $seq1, 
-			       -subject => $seq2 ), "bl2seq (blastp)";
+                   -query => $seq1, 
+                   -subject => $seq2 ), "bl2seq (blastp)";
     is $result->num_hits, 1, "got hit";
     $fac->cleanup;
-    
-    
 } # SKIP to here
 
-#sub test_input_file { "./data/".shift };
 1;

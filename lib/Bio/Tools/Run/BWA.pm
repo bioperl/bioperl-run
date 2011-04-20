@@ -118,7 +118,8 @@ This example returns the following array:
  >sai
 
 This indicates that the FASTA database (faq) and the FASTQ reads (faq)
-MUST be specified, and the STDOUT of this program (SA coordinates) MAY be slurped into a file specified in the C<run_bwa> argument list:
+MUST be specified, and the STDOUT of this program (SA coordinates) MAY be
+slurped into a file specified in the C<run_bwa> argument list:
 
  $bwafac->run_bwa( -fas => 'my.db.fas', -faq => 'reads.faq',
                    -sai => 'out.sai' );
@@ -181,7 +182,6 @@ BEGIN {
 
 # Object preamble - inherits from Bio::Root::Root
 
-use lib '../../..';
 use Bio::Root::Root;
 use Bio::Tools::Run::BWA::Config;
 use Bio::Tools::GuessSeqFormat;
