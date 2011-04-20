@@ -394,7 +394,6 @@ wms|ustat
 wms|in
 wms|out
 wms|checkdup
-wms|mk_counts
 wms|window
 wms|t_extend
 wms|t_thres
@@ -520,6 +519,7 @@ wms|help
 wms|xmlhelp
 wms|parse_seqids
 wms|version-full
+wms|mk_counts
 );
 
 #each pair : pfx|wrapper_opt_name => command_line_name (without dashes)

@@ -22,12 +22,9 @@ ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'),
     "BlastPlus factory";
 
 SKIP : {
-    #test_skip( -tests => 59,
-    #       -requires_env => 'BLASTPLUSDIR');
     test_skip( -tests => 59,
            -requires_executable => $bpfac);
     diag('DB and mask make tests');
-    # exceptions/warnings
     
     # testing using fasta files as input...
     ok my $fac = Bio::Tools::Run::StandAloneBlastPlus->new(

@@ -819,7 +819,7 @@ sub make_mask {
     %mask_args = (
 	-in => $data,
 	-parse_seqids => 1,
-	-outfmt => $MASKER_ENCODING{$masker}
+	#-outfmt => $MASKER_ENCODING{$masker}
 	);
     # usr arg override
     if (%usr_args) {
