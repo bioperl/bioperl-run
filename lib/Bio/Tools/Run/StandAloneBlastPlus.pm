@@ -77,6 +77,9 @@ only. You must use this module directly.
 
 =head1 DESCRIPTION
 
+B<NOTE:> This module requires BLAST+ v. 2.2.24+ and higher.  Until the API
+stabilizes for BLAST+, consider this module highly experimental.
+
 This module along with
 L<Bio::Tools::Run::StandAloneBlastPlus::BlastMethods> allows the user
 to perform BLAST functions using the external program suite C<blast+>
