@@ -172,7 +172,7 @@ my %result_lookup = (
 
 SKIP : {
     test_skip( -requires_executable => $bedtoolsfac,
-	       -tests => 303 );
+	       -tests => 421 );
 
     COMMAND : for (@commands) {
 
