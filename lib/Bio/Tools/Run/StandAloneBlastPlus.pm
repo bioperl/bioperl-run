@@ -662,6 +662,39 @@ sub create { shift->{_create} }
 sub overwrite { shift->{_overwrite} }
 sub is_remote { shift->{_is_remote} }
 
+=head2 program_version()
+
+ Title   : program_version
+ Usage   : $version = $bedtools_fac->program_version()
+ Function: Returns the program version (if available)
+ Returns : string representing location and version of the program
+ Note    : this works around the WrapperBase::version() method conflicting with
+           the -version parameter for SABlast (good argument for not having
+           getter/setters for these)
+
+=cut
+
+=head2 package_version()
+
+ Title   : package_version
+ Usage   : $version = $bedtools_fac->package_version()
+ Function: Returns the BLAST+ package version (if available)
+ Returns : string representing BLAST+ package version (may differ from version())
+
+=cut
+
+sub program_version {
+    my $self = shift;
+    my $fac = $self->factory;
+    $fac->program_version(@_) if $fac;
+}
+
+sub package_version {
+    my $self = shift;
+    my $fac = $self->factory;
+    $fac->package_version(@_) if $fac;
+}
+
 =head1 DB methods
 
 =head2 make_db()

@@ -103,5 +103,61 @@ sub new {
     return $self;
 }
 
+=head2 program_version()
+
+ Title   : program_version
+ Usage   : $version = $bedtools_fac->program_version()
+ Function: Returns the program version (if available)
+ Returns : string representing location and version of the program
+ Note    : this works around the WrapperBase::version() method conflicting with
+           the -version parameter for SABlast (good argument for not having
+           getter/setters for these)
+
+=cut
+
+=head2 package_version()
+
+ Title   : package_version
+ Usage   : $version = $bedtools_fac->version()
+ Function: Returns the BLAST+ package version (if available)
+ Returns : string representing BLAST+ package version (may differ from version())
+
+=cut
+
+sub program_version {
+	my ($self) = @_;
+    if (!defined $self->{program_version}) {
+        $self->_version;
+    }
+    $self->{program_version} || '';
+}
+
+sub package_version {
+	my ($self) = @_;
+    if (!defined $self->{package_version}) {
+        $self->_version;
+    }
+    $self->{package_version} || '';
+}
+
+sub _version {
+    my $self = shift;
+    my ($in, $out, $err);
+
+	# Get program executable
+	my $exe = $self->executable;
+	my @ipc_args = ( $exe, '-version');
+	
+	eval {
+		IPC::Run::run(\@ipc_args, \$in, \$out, \$err) or
+			die ("There was a problem running $exe : $!");
+	};
+	
+    if ($out =~ /blastdbcmd\:\s+(\S+)\nPackage\:\s+([^,]+)/xms) {
+        @{$self}{qw(program_version package_version)} = ($1, $2);
+    } else {
+        $self->throw("Unknown version output: $out");
+    }
+}
 
 1;

@@ -8,7 +8,7 @@ use warnings;
 our $home;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 64,
+    test_begin(-tests => 65,
            -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
 }
 
@@ -42,10 +42,8 @@ SKIP : {
     -create => 1
     );
     
-    TODO: {
-        local $TODO = 'version() not implemented yet';
-        like($fac->version || '', qr/2\.\d+\.\d+/, 'program version');
-    }
+    like($fac->program_version, qr/2\.\d+\.\d+/, 'program version');
+    like($fac->package_version, qr/2\.\d+\.\d+/, 'package version');
     
     ok $fac->make_db, "named db made";
     ok $fac->check_db, "check_db";
