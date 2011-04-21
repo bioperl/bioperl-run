@@ -6,14 +6,16 @@ http://www.bioperl.org/wiki/Change_log
 
 1.6.900
 
-* PAML codeml wrapper updated to work with PAML 4.4d [DaveMessina]
-* Initial BLAST+ modules (Bio::Tools::Run::BlastPlus/StandAloneBlastPlus) [maj]
 * Bowtie and BWA wrappers for NGS [maj, Ben Bimber, Dan Kortschak]
-* Improved Bio::Tools::Run::AssemblerBase module and update of the wrappers
-  that use it [fangly, maj]
 * ClustalW v2 support [cjfields]
 * tRNAscanSE support [Mark Johnson, cjfields]
 * Glimmer v2 updates [Mark Johnson, cjfields]
+* PAML codeml wrapper updated to work with PAML 4.4d [DaveMessina]
+* Phyml updates [hyphaltip]
+* Repeatmasker updates [cjfields]
+* Initial BLAST+ modules (Bio::Tools::Run::BlastPlus/StandAloneBlastPlus) [maj]
+* Improved Bio::Tools::Run::AssemblerBase module and update of the wrappers
+  that use it [fangly, maj]
 * Support for running new de novo and comparative assemblers: 454 Newbler
   [fangly], Minimo [fangly], Maq [maj], Samtools [maj], Bowtie [maj]
 * [bug 2728] add support to Bio::Tools::Run::Alignment::ClustalW for ClustalW2
