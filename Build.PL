@@ -22,7 +22,8 @@ my $build = Module::Build->new(
                             'Algorithm::Diff'    => 0, # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
                             'IPC::Run'           => 0, # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
                             'IO::String'         => 0, # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
-                            'XML::Twig'          => 0  # processing XML data: Bio::Tools::Run::EMBOSSacd
+                            'XML::Twig'          => 0,  # processing XML data: Bio::Tools::Run::EMBOSSacd
+                            'File::Sort'         => 0  # BEDTools
                            },
     get_options         => {
                             accept  => { },
@@ -35,7 +36,7 @@ my $build = Module::Build->new(
                                        }
                            },
     dynamic_config      => 1,
-    create_makefile_pl  => 'passthrough'
+    #create_makefile_pl  => 'passthrough'
 );
 
 my $accept = $build->args->{accept};
