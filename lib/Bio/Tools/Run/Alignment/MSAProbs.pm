@@ -4,9 +4,9 @@
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org> 
 #
-# Cared for by ???
+# Cared for by Jessen Bredeson
 #
-# Copyright ???
+# Copyright Jessen Bredeson
 #
 # You may distribute this module under the same terms as perl itself
 #
