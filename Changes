@@ -4,6 +4,11 @@ Revision history for bioperl-run modules
 Full details of changes between all versions are available online at:
 http://www.bioperl.org/wiki/Change_log
 
+1.6.901
+
+* added run support for MSAProbs [Jessen Bredeson]
+
+
 1.6.900
 
 * Bowtie and BWA wrappers for NGS [maj, Ben Bimber, Dan Kortschak]
