@@ -12,7 +12,7 @@ BEGIN {
     unshift @INC, '../..';
     use Bio::Root::Test;
     test_begin(-tests => 36,
-	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BWA Bio::Tools::Run::Samtools)]);
+	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BWA Bio::Tools::Run::Samtools Bio::DB::Sam)]);
 }
 
 use File::Copy;
