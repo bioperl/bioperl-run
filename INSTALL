@@ -1,11 +1,9 @@
-# $Id$
-
 bioperl-run INSTALLATION
 
 INSTALL THE RIGHT BIOPERL
 
 You need at least the corresponding version of Bioperl. Since this
-is BioPerl-run 1.6.1, you should use BioPerl 1.6.
+is BioPerl-run 1.6.9, you should use BioPerl 1.6.9.
 
 
 INSTALLATION
@@ -30,11 +28,11 @@ Find the name of the bioperl-run version you want:
   >cpan
   cpan>d /bioperl-run/
   Database was generated on Mon, 20 Nov 2006 05:24:36 GMT
-  Distribution C/CJ/CJFIELDS/BioPerl-run-1.6.1.tar.gz
+  Distribution C/CJ/CJFIELDS/BioPerl-run-1.6.9.tar.gz
   
 Now install:
 
- cpan>install C/CJ/CJFIELDS/BioPerl-run-1.6.1.tar.gz
+ cpan>install C/CJ/CJFIELDS/BioPerl-run-1.6.9.tar.gz
 
 If you've installed everything perfectly then you may pass all the tests
 run in the './Build test' phase.
@@ -47,7 +45,7 @@ your usage of bioperl-run.
 If you decide that the failed tests will not affect how you intend to use
 bioperl-run and you'd like to install anyway do:
 
- cpan>force install C/CJ/CJFIELDS/BioPerl-run-1.6.1.tar.gz
+ cpan>force install C/CJ/CJFIELDS/BioPerl-run-1.6.9.tar.gz
 
 This is what most experienced Bioperl users would do. However, if you're
 concerned about a failed test and need assistance or advice then contact
