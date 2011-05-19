@@ -24,7 +24,7 @@ my $build = Module::Build->new(
                             'IO::String'         => 0, # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
                             'XML::Twig'          => 0, # processing XML data: Bio::Tools::Run::EMBOSSacd
                             'File::Sort'         => 0, # BEDTools
-                            'Config::Any'        => 0  # MCS
+                            'Config::Any'        => 0  # MCS, Match
                            },
     get_options         => {
                             accept  => { },
