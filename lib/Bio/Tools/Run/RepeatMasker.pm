@@ -1,7 +1,7 @@
 # $Id$
 # BioPerl module for RepeatMasker
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Shawn Hoon <shawnh@fugu-sg.org>
 #
@@ -26,7 +26,7 @@ Bio::Tools::Run::RepeatMasker - Wrapper for RepeatMasker Program
   my $seq = $in->next_seq();
 
   #return an array of Bio::SeqFeature::FeaturePair objects
-  my @feats = $factory->run($seq); 
+  my @feats = $factory->run($seq);
 
   # or
 
@@ -48,7 +48,7 @@ Having installed RepeatMasker, you must let Bioperl know where it is.
 This can be done in (at least) three ways:
 
  1. Make sure the RepeatMasker executable is in your path.
- 2. Define an environmental variable REPEATMASKERDIR which is a 
+ 2. Define an environmental variable REPEATMASKERDIR which is a
     directory which contains the RepeatMasker executable:
     In bash:
 
@@ -75,15 +75,15 @@ of the Bioperl mailing lists. Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -129,13 +129,13 @@ use Bio::Tools::RepeatMasker;
 BEGIN {
     @RM_PARAMS = qw(DIR DIV LIB CUTOFF PARALLEL GC FRAG SPECIES MAXSIZE );
 
-    @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD 
-		      RODENT MAM MAMMAL COW AR 
-		      ARABIDOPSIS DR DROSOPHILA EL ELEGANS 
-		      IS_ONLY IS_CLIP NO_IS RODSPEC E EXCLN 
+    @RM_SWITCHES = qw(NOLOW LOW L NOINT INT NORNA ALU M MUS ROD
+		      RODENT MAM MAMMAL COW AR
+		      ARABIDOPSIS DR DROSOPHILA EL ELEGANS
+		      IS_ONLY IS_CLIP NO_IS RODSPEC E EXCLN
                       NO_ID FIXED XM U GFF ACE POLY X XSMALL SMALL
-                      INV A ALIGNMENTS 
-		      PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT); 
+                      INV A ALIGNMENTS
+		      PRIMSPEC W WUBLAST S Q QQ GCCALC NOCUT);
     @OTHER_SWITCHES = qw(NOISY QUIET SILENT);
 
     # Authorize attribute fields
@@ -198,25 +198,25 @@ sub new {
 
   my ($attr, $value);
   # Need to check that filehandle is not left open here...
-  while (@args) { 
+  while (@args) {
     $attr =   shift @args;
     $value =  shift @args;
     next if( $attr =~ /^-/ ); # don't want named parameters
     $self->$attr($value);
   }
-  unless ($self->executable()) {
-    if( $self->verbose >= 0 ) {
-      warn "RepeatMasker program not found as ".($self->executable||'').
-	  " or not executable. \n"; 
-    }
-  }  
+#  unless ($self->executable()) {
+#    if( $self->verbose >= 0 ) {
+#      warn "RepeatMasker program not found as ".($self->executable||'').
+#	  " or not executable. \n";
+#    }
+#  }
   return $self;
 }
 
 =head2  version
 
  Title   : version
- Usage   : 
+ Usage   :
  Function: Determine the version number of the program
  Example :
  Returns : float or undef
@@ -229,14 +229,14 @@ sub version {
     return $self->{'_version'} if( defined $self->{'_version'} );
     my $exe = $self->executable;
     return undef unless $exe;
-    my $string = `$exe -- ` ;    
+    my $string = `$exe -- ` ;
     if( $string =~ /\(([\d.]+)\)/ ||
-	$string =~ /RepeatMasker\s+version\s+(\S+)/ ) { 
+	$string =~ /RepeatMasker\s+version\s+(\S+)/ ) {
 	return $self->{'_version'} = $1;
     } else {
 	return $self->{'_version'} = undef;
     }
-    
+
 }
 
 =head2 run
@@ -303,7 +303,7 @@ sub _run {
       $cmd_str.=" 2> /dev/null 1>/dev/null";
   }
   my $status = system($cmd_str);
-  $self->throw("Repeat Masker Call($cmd_str) crashed: $?\n") 
+  $self->throw("Repeat Masker Call($cmd_str) crashed: $?\n")
       unless $status == 0;
   unless (open (RM, $outfile)) {
       $self->throw("Cannot open RepeatMasker outfile for parsing");
@@ -349,7 +349,7 @@ sub masked_seq {
  Function: get/set for repeat features array
  Example :
  Returns : the array of repeat features
- Args    : 
+ Args    :
 
 =cut
 
@@ -407,14 +407,14 @@ sub _setparams {
  Usage   : Internal function, not to be called directly
  Function: writes input sequence to file and return the file name
  Example :
- Returns : string 
+ Returns : string
  Args    : a Bio::PrimarySeqI compliant object
 
 =cut
 
 sub _setinput {
   my ($self,$seq) = @_;
-  $seq->isa("Bio::PrimarySeqI") || 
+  $seq->isa("Bio::PrimarySeqI") ||
       $self->throw("Need a Bio::PrimarySeq compliant object for RepeatMasker");
 #  my  $in  = Bio::SeqIO->new(-file => $infilename , '-format' => 'Fasta');
   my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
@@ -436,7 +436,7 @@ sub _setinput {
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -447,7 +447,7 @@ sub _setinput {
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 
@@ -501,5 +501,3 @@ sub _setinput {
 =cut
 
 1;
-
-
