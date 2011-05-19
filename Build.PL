@@ -22,8 +22,9 @@ my $build = Module::Build->new(
                             'Algorithm::Diff'    => 0, # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
                             'IPC::Run'           => 0, # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
                             'IO::String'         => 0, # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
-                            'XML::Twig'          => 0,  # processing XML data: Bio::Tools::Run::EMBOSSacd
-                            'File::Sort'         => 0  # BEDTools
+                            'XML::Twig'          => 0, # processing XML data: Bio::Tools::Run::EMBOSSacd
+                            'File::Sort'         => 0, # BEDTools
+                            'Config::Any'        => 0  # MCS
                            },
     get_options         => {
                             accept  => { },
@@ -44,9 +45,9 @@ my $accept = $build->args->{accept};
 # Optionally have script files installed.
 if ($accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {
     my $files = $build->_find_file_by_type('PLS', 'scripts');
-    
+
     my $script_build = File::Spec->catdir($build->blib, 'script');
-    
+
     my @tobp;
     while (my ($file, $dest) = each %$files) {
         $dest = 'bp_'.File::Basename::basename($dest);
@@ -55,7 +56,7 @@ if ($accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {
         $build->copy_if_modified(from => $file, to => $dest);
         push @tobp, $dest;
     }
-    
+
     $build->script_files(\@tobp);
 }
 
