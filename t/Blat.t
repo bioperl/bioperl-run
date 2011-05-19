@@ -24,7 +24,7 @@ my $blat_present = $factory->executable();
 
 SKIP: {
     test_skip(-requires_executable => $factory,
-              -tests => 10);
+              -tests => 23);
     
     my $searchio = $factory->align($query);
     my $result = $searchio->next_result;
