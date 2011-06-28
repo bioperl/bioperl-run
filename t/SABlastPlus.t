@@ -22,7 +22,7 @@ ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'),
     "BlastPlus factory";
 
 SKIP : {
-    test_skip( -tests => 59,
+    test_skip( -tests => 61,
            -requires_executable => $bpfac);
     diag('DB and mask make tests');
     
