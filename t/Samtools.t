@@ -68,20 +68,22 @@ is_deeply( $samt->{_options}->{_params},
 is( join(' ', @{$samt->_translate_params}),
     "pileup -T 0.05 -f my.fas", "translate params" );
 
-my $new_bam = Bio::Tools::Run::Samtools->new(
-                       -command => 'merge',
-                       )->run(
-                       -obm => 'output_file.bam',
-                       -ibm => ['t/data/Ft.bam', 't/data/Ft.bam'],
-                       );
-# test run
-ok($new_bam, 'merge bam factory instantiated');
-ok(-f 'output_file.bam', 'merged bam file created');
-unlink('output_file.bam');
 
 SKIP : {
     test_skip( -requires_executable => $samt,
-	       -tests => 12 );
+	       -tests => 16 );
+
+    my $new_bam = Bio::Tools::Run::Samtools->new(
+                           -command => 'merge',
+                           )->run(
+                           -obm => 'output_file.bam',
+                           -ibm => ['t/data/Ft.bam', 't/data/Ft.bam'],
+                           );
+    # test run
+    ok($new_bam, 'merge bam factory instantiated');
+    ok(-f 'output_file.bam', 'merged bam file created');
+    unlink('output_file.bam');
+	       
     my %tmpfiles;
     for (qw(refseq bamfile samfile rtbamfile sorted_bamfile fai bai)) {
         $tmpfiles{$_} = test_output_file();
