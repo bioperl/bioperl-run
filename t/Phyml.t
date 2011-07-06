@@ -5,7 +5,7 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 47);
+    test_begin(-tests => 46);
     use_ok('Bio::Tools::Run::Phylo::Phyml');
     use_ok('Bio::AlignIO');
 }
@@ -27,8 +27,6 @@ is ($factory->data_format('i'), 'i', 'data_format, interleaved');
 
 is ($factory->dataset_count, 1, 'dataset_count, default');
 is ($factory->dataset_count(2), 2, 'data_count, 2');
-
-is ($factory->model('WAG'), 'WAG', 'model');
 
 is ($factory->kappa, 'e', 'kappa, default');
 is ($factory->kappa(4), '4.0', 'kappa');
@@ -60,45 +58,44 @@ SKIP: {
         is ($factory->data_type, 'aa', 'data_type, default');
         is ($factory->data_type('nt'), 'nt', 'data_type, dna');
         is ($factory->data_type('aa'), 'aa', 'data_type, aa');
-    
-        is ($factory->model, 'WAG', 'model, default');
-    
+
+        is ($factory->model, 'LG', 'model, default');
+
         is ($factory->opt, 'n', 'opt, default');
         is ($factory->opt('tl'), 'tl', 'opt_topology');
-    
+
         is ($factory->freq, undef, 'freq, default');
         is ($factory->freq('d'), 'd', 'freq');
-    
+
         is ($factory->search, 'NNI', 'search, default');
         is ($factory->search('SPR'), 'SPR', 'search');
-    
+
         is ($factory->rand_start, 0, 'rand_start, default');
         is ($factory->rand_start(1), 1, 'rand_start');
-    
+
         is ($factory->rand_starts, 1, 'rand_starts, default');
         is ($factory->rand_starts(10), 10, 'rand_starts');
-    
+
         cmp_ok $factory->rand_seed, '>=', 1, 'rand_seed, default';
         is ($factory->rand_seed(10), 10, 'rand_seed');
         $factory->search('NNI'); #to take the fastest option for running
-    
+
     } else { # version 2.4.4
-    
+
         is ($factory->data_type, '1', 'data_type, default');
         is ($factory->data_type('dna'), '0', 'data_type, dna');
         is ($factory->data_type('protein'), '1', 'data_type, protein');
-    
+
         is ($factory->model, 'JTT', 'model, default');
-    
-    
+
         is ($factory->opt_topology, 'y', 'opt_topology, default');
         is ($factory->opt_topology('0'), 'n', 'opt_topology');
         is ($factory->opt_topology('1'), 'y', 'opt_topology');
-    
+
         is ($factory->opt_lengths, 'y', 'opt_lengths, default');
         is ($factory->opt_lengths('0'), 'n', 'opt_lengths');
         is ($factory->opt_lengths('1'), 'y', 'opt_lengths');
-    
+
         for (1..6) {ok 1;} # to have same number of tests for all versions
     }
 #    $factory->save_tempfiles(1);
@@ -123,7 +120,7 @@ SKIP: {
     # using AlignIO on a DNA MSA
     $inputfilename = test_input_file("dna_seqs1.phy");
     ok (-e $inputfilename, 'Found DNA input file');
-    
+
     my $alignio = Bio::AlignIO->new(-file => $inputfilename);
     my $aln = $alignio->next_aln;
 
@@ -152,4 +149,3 @@ SKIP: {
     @leaves = $tree->get_leaf_nodes;
     is (@leaves, 5, 'Result tree from DNA SimpleAlign input had correct number of leaves');
 }
-

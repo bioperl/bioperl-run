@@ -93,7 +93,10 @@ every script that will use this Phyml wrapper module, e.g.:
 
 =head2 Running
 
-This wrapper has been tested with PHYML v2.4.4 and v.3.0
+This wrapper has been tested with PHYML v2.4.4 and v.3.0.  It may work with
+recent Phyml releases using a date format for the format, but the wrapper
+hasn't been extensively tested in these cases, so for the moment only the
+simpler numbered versions are supported.
 
 In its current state, the wrapper supports only input of one MSA and
 output of one tree. It can easily be extended to support more advanced
@@ -299,7 +302,7 @@ sub version {
 
     return $self->{'_version'} if defined $self->{'_version'};
     my $exe = $self->executable || return;
-    my $string = substr `$exe --help`, 0, 40 ;
+    my $string = substr `$exe -h`, 0, 40 ;
     my ($version) = $string =~ /PhyML v([\d+\.]+)/;
     $self->{'_version'} = $version;
     $version ? (return $version) : return '2.44'
@@ -488,23 +491,22 @@ sub model {
 	$self->{_model} = $value;
     }
 
-
     if ($self->{_model}) {
 	return $self->{_model};
     }
 
     if ($self->version && $self->version >= 3 ) {
-	if ($self->data_type eq 'aa') {
-	    return 'LG'; # protein
-	} else {
-	    return 'HKY85'; # DNA
-	}
+        if ($self->data_type eq 'aa') {
+            return 'LG'; # protein
+        } else {
+            return 'HKY85'; # DNA
+        }
     } else {
-	if ($self->data_type) {
-	    return 'JTT'; # protein
-	} else {
-	    return 'HKY'; # DNA
-	}
+        if ($self->data_type) {
+            return 'JTT'; # protein
+        } else {
+            return 'HKY'; # DNA
+        }
     }
 }
 
