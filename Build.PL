@@ -28,7 +28,8 @@ my $build = Module::Build->new(
                            },
     get_options         => {
                             accept  => { },
-                            network => { }
+                            network => { },
+                            install_scripts => { }
                            },
     auto_features       => {
                             Network => {
@@ -43,7 +44,7 @@ my $build = Module::Build->new(
 my $accept = $build->args->{accept};
 
 # Optionally have script files installed.
-if ($accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {
+if ($build->args('install_scripts') or $accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {
     my $files = $build->_find_file_by_type('PLS', 'scripts');
 
     my $script_build = File::Spec->catdir($build->blib, 'script');
