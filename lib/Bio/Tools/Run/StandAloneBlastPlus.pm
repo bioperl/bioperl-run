@@ -210,7 +210,7 @@ To get the tempfile basename, do:
 
 =item * Specify data post-construction
 
-Use the explict attribute setters:
+Use the explicit attribute setters:
 
  $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
    -create => 1

@@ -323,7 +323,7 @@ will function normally and cause success/errors for B<Test::Harness>.
 
 sub test_test
 {
-   # decode the arguements as described in the pod
+   # decode the arguments as described in the pod
    my $mess;
    my %args;
    if (@_ == 1)

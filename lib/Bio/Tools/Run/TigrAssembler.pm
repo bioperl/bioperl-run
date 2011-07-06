@@ -179,7 +179,7 @@ TIGR Assembler options available in this module:
   ignore_tandem_32mers: a flag which causes tandem 32mers (a tandem 32mer is a
     32mer which occurs more than once in at least one sequence read) to be
     ignored (this is now the default behavior and this flag is for backward
-    compatability)
+    compatibility)
   use_tandem_32mers: a flag which causes tandem 32mers to be used for pairwise
     comparison opposite of the -t flag which is now the default).
   safe_merging_stop: a flag which causes merging to stop when only sequences

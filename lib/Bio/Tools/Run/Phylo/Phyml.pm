@@ -315,7 +315,7 @@ sub version {
  Returns : Bio::Tree::Tree object
  Args    : file name for your input alignment in a format 
            recognised by AlignIO, OR  Bio::Align::AlignI
-           complient object (eg. Bio::SimpleAlign).
+           compliant object (eg. Bio::SimpleAlign).
 
 =cut
 
@@ -358,7 +358,7 @@ sub stats {
  Title   : tree_string
  Usage   : $factory->tree_string;
            $factory->run($align_object);
- Function: Returns the contents of the phyml '_phyml_tree.txt' ouput file
+ Function: Returns the contents of the phyml '_phyml_tree.txt' output file
  Returns : string with tree in Newick format, undef before run()
  Args    : none
 

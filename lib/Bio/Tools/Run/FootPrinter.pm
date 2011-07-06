@@ -67,7 +67,7 @@ Written by Mathieu Blanchette and Martin Tompa. Available here:
 
 =head2 Running Footprinter
 
-To run FootPrinter, you will need to set the enviroment variable
+To run FootPrinter, you will need to set the environment variable
 FOOTPRINTER_DIR to where the binary is located (even if the executable
 is in your path). For example:
 

@@ -97,7 +97,7 @@ this is still experimental as v3.6 is still under alpha release and not all func
 
 Title		: TYPE 
 Description	: (optional)
-             Only avaliable in phylip v3.6
+             Only available in phylip v3.6
 
                   This program supports 3 types of consensus generation 
 

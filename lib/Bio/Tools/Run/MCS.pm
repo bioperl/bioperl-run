@@ -216,7 +216,7 @@ sub new {
            third argument represents annotation of the exons in the alignment.
 
            The alignment can be provided as a multi-fasta format alignment
-           filename, or a Bio::Align::AlignI complient object (eg. a
+           filename, or a Bio::Align::AlignI compliant object (eg. a
            Bio::SimpleAlign).
 
            The position in the genome can be provided as a Bio::Location::Atomic

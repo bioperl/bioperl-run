@@ -240,7 +240,7 @@ sub boot {
  Function: Runs QuickTree to generate a tree 
  Returns : Bio::Tree::Tree object
  Args    : file name for your input alignment in stockholm format, OR
-           Bio::Align::AlignI complient object (eg. Bio::SimpleAlign).
+           Bio::Align::AlignI compliant object (eg. Bio::SimpleAlign).
 
 =cut
 

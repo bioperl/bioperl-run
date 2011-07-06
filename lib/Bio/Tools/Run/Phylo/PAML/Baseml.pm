@@ -554,7 +554,7 @@ sub set_parameter{
  Returns : none
  Args    : boolean: keep existing parameter values
  NB      : using this isn't an especially good idea! You don't need to do
-           anything to end up using default paramters: hence 'default'!
+           anything to end up using default parameters: hence 'default'!
 
 =cut
 

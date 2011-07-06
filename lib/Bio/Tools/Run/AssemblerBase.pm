@@ -865,7 +865,7 @@ sub parameters_changed {
  Usage   : @params = $pobj->available_parameters()
  Function: Returns a list of the available parameters
  Returns : Array of parameters
- Args    : 'params' for settable program paramters
+ Args    : 'params' for settable program parameters
            'switches' for boolean program switches
            default: all 
 

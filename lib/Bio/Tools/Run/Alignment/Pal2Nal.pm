@@ -192,7 +192,7 @@ sub new {
  Args    : The first argument represents a protein alignment, the second
            argument a set of nucleotide sequences.
            The alignment can be provided as an alignment file readable by
-           Bio::AlignIO, or a Bio::Align::AlignI complient object (eg. a
+           Bio::AlignIO, or a Bio::Align::AlignI compliant object (eg. a
            Bio::SimpleAlign).
            The nucleotide sequences can be provided as a single filename of a
            fasta file containing multiple nucleotide sequences, or an array ref

@@ -117,7 +117,7 @@ Email tqzhang1973@yahoo.com
 =head1 Appendix
 
 The rest of the documendation details each of the object
-methods. Internal methods are preceeded with a underscore
+methods. Internal methods are preceded with a underscore
 
 =cut
 

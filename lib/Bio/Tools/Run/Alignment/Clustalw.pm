@@ -205,7 +205,7 @@ clustalw program have not yet been implemented.  If you would like
 that a specific clustalw feature be added to this perl contact
 bioperl-l@bioperl.org.
 
-These can be specified as paramters when instantiating a new Clustalw
+These can be specified as parameters when instantiating a new Clustalw
 object, or through get/set methods of the same name (lowercase).
 
 =head1 PARAMETER FOR ALIGNMENT COMPUTATION

@@ -211,10 +211,10 @@ sub new {
  Args    : The first argument represents an alignment, the second argument
            a phylogenetic tree with branch lengths.
            The alignment can be provided as a MAF format alignment
-           filename, or a Bio::Align::AlignI complient object (eg. a
+           filename, or a Bio::Align::AlignI compliant object (eg. a
            Bio::SimpleAlign).
            The species tree can be provided as a newick format tree filename
-           or a Bio::Tree::TreeI complient object.
+           or a Bio::Tree::TreeI compliant object.
 
            In all cases, the alignment sequence names must correspond to node
            ids in the tree. Multi-word species names should have the

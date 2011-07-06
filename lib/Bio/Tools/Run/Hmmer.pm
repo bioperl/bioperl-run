@@ -172,7 +172,7 @@ our @UNSUPPORTED        = qw(h verbose a compat pvm);
            -o is synonymous with -outfile
 
            # may be specified here, allowing run() to be used, or
-           # it can be ommitted and the corresponding method (eg.
+           # it can be omitted and the corresponding method (eg.
            # hmmalign()) used later.
            -program => hmmalign|hmmbuild|hmmcalibrate|hmmemit|hmmpfam|hmmsearch
 
