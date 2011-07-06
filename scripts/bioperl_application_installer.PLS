@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 # BioPerl script for Bio::Installer
 #
 # Cared for by Albert Vilella
