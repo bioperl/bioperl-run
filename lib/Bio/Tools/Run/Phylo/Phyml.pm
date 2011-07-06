@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Phyml
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Heikki Lehvaslaiho
 #
@@ -115,15 +115,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -132,7 +132,7 @@ Report bugs to the Bioperl bug tracking system to help us keep track
 of the bugs and their resolution. Bug reports can be submitted via
 the web:
 
-  http://redmine.open-bio.org/projects/bioperl/
+  http://bugzilla.open-bio.org/
 
 =head1 AUTHOR - Heikki Lehvaslaiho
 
@@ -173,7 +173,7 @@ our $models3;
 map { $models3->{'nt'}->{$_} = 1 } qw(HKY85 JC69 K80 F81 F84 TN93 GTR );
 # protein
 map { $models3->{'aa'}->{$_} = 1 }
-    qw(WAG JTT MtREV Dayhoff DCMut RtREV CpREV VT Blosum62 MtMam MtArt HIVw  HIVb );
+    qw(LG WAG JTT MtREV Dayhoff DCMut RtREV CpREV VT Blosum62 MtMam MtArt HIVw  HIVb );
 
 =head2 new
 
@@ -311,9 +311,9 @@ sub version {
  Title   : run
  Usage   : $factory->run($aln_file);
            $factory->run($align_object);
- Function: Runs Phyml to generate a tree 
+ Function: Runs Phyml to generate a tree
  Returns : Bio::Tree::Tree object
- Args    : file name for your input alignment in a format 
+ Args    : file name for your input alignment in a format
            recognised by AlignIO, OR  Bio::Align::AlignI
            compliant object (eg. Bio::SimpleAlign).
 
@@ -464,11 +464,11 @@ sub dataset_count {
            v3.0:
            HKY85 (default) | JC69 | K80 | F81 | F84 |
            TN93 | GTR (DNA)
-           WAG (default) | JTT | MtREV | Dayhoff | DCMut |
+           LG (default) | WAG | JTT | MtREV | Dayhoff | DCMut |
            RtREV | CpREV | VT | Blosum62 | MtMam | MtArt |
            HIVw |  HIVb (amino acids)
 
- Returns : Name of the model, defaults to {HKY|JTT}
+ Returns : Name of the model, v2.4.4 defaults to {HKY|JTT}
  Args    : None to get, string to set.
 
 =cut
@@ -495,7 +495,7 @@ sub model {
 
     if ($self->version && $self->version >= 3 ) {
 	if ($self->data_type eq 'aa') {
-	    return 'WAG'; # protein
+	    return 'LG'; # protein
 	} else {
 	    return 'HKY85'; # DNA
 	}
@@ -522,7 +522,7 @@ sub model {
 sub kappa {
     my ($self, $value) = @_;
     if (defined $value) {
-	die "Invalid number [$value]" 
+	die "Invalid number [$value]"
 	    unless $value =~ /^[-+]?\d*\.?\d*$/ or $value eq 'e';
 	$self->{_kappa} = $value;
     }
@@ -545,7 +545,7 @@ sub kappa {
 sub invar {
     my ($self, $value) = @_;
     if (defined $value) {
-	die "Invalid number [$value]" 
+	die "Invalid number [$value]"
 	    unless $value =~ /^[-+]?\d*\.\d*$/ or $value eq 'e';
 	$self->{_invar} = $value;
     }
@@ -568,7 +568,7 @@ sub invar {
 sub category_number {
     my ($self, $value) = @_;
     if (defined $value) {
-	die "Invalid postive integer [$value]" 
+	die "Invalid postive integer [$value]"
 	    unless $value =~ /^[+]?\d*$/ and $value > 0;
 	$self->{_category_number} = $value;
     }
@@ -613,7 +613,7 @@ sub alpha {
 sub tree {
     my ($self, $value) = @_;
     if (defined $value) {
-	die "Invalid number [$value]" 
+	die "Invalid number [$value]"
 	    unless -e $value or $value eq 'BIONJ';
 	$self->{_tree} = $value;
     }
@@ -653,7 +653,7 @@ sub opt_topology {
 
  Title   : opt_lengths
  Usage   : $factory->opt_lengths(0);
- Function: Choose to  optimise branch lengths and rate parameters 
+ Function: Choose to  optimise branch lengths and rate parameters
  Returns : {y|n} (default y)
  Args    : None to get, boolean to set.
 
@@ -882,7 +882,7 @@ sub _run {
  Usage   : Internal function, not to be called directly
  Function: Creates a string of params to be used in the command string
  Returns : string of params
- Args    : none 
+ Args    : none
 
 =cut
 
@@ -951,7 +951,7 @@ sub _setparams {
  Usage   : obj->__write_phylip_align_file($aln)
  Function: Internal (not to be used directly)
 
-           Writes the alignment into the tmp directory 
+           Writes the alignment into the tmp directory
            in PHYLIP interlieved format
 
  Returns : filename
@@ -961,10 +961,10 @@ sub _setparams {
 
 sub _write_phylip_align_file {
     my ($self, $align) = @_;
-    
+
     my $tempfile = File::Spec->catfile($self->tempdir, "aln$$.phylip");
     $self->data_format('i');
-    my $out = Bio::AlignIO->new('-file'     => ">$tempfile", 
+    my $out = Bio::AlignIO->new('-file'     => ">$tempfile",
 				'-format' => 'phylip',
 				'-interleaved' => 0,
 				'-longid' => 1 );
