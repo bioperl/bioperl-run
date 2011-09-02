@@ -295,6 +295,9 @@ sub program_dir {
 Phyml before 3.0 did not display the version. Assume 2.44 when can not
 determine it.
 
+Some releases do not state version number, only date, so the
+version has to be inferred from this date.
+
 =cut
 
 sub version {
@@ -304,6 +307,11 @@ sub version {
     my $exe = $self->executable || return;
     my $string = substr `$exe -h`, 0, 40 ;
     my ($version) = $string =~ /PhyML v([\d+\.]+)/;
+    if ( ! $version ) {
+      $string =~ /PhyML\s+(\d{8})/;
+      # 3 was released May 2009
+      $version = 3 if ( $1 && $1 >= 20090501 );
+    }
     $self->{'_version'} = $version;
     $version ? (return $version) : return '2.44'
 }
