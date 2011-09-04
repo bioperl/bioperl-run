@@ -296,7 +296,7 @@ Phyml before 3.0 did not display the version. Assume 2.44 when can not
 determine it.
 
 Some releases do not state version number, only date, so the
-version has to be inferred from this date.
+version might have to be inferred from this date.
 
 =cut
 
@@ -309,8 +309,8 @@ sub version {
     my ($version) = $string =~ /PhyML v([\d+\.]+)/;
     if ( ! $version ) {
       $string =~ /PhyML\s+(\d{8})/;
-      # 3 was released May 2009
-      $version = 3 if ( $1 && $1 >= 20090501 );
+      # 3 was released August 2008
+      $version = 3 if ( $1 && $1 >= 20080801 );
     }
     $self->{'_version'} = $version;
     $version ? (return $version) : return '2.44'
