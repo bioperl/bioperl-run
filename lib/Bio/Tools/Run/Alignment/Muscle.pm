@@ -119,7 +119,7 @@ use Bio::AlignIO;
 use Bio::Root::Root;
 use Bio::Root::IO;
 use Bio::Factory::ApplicationFactoryI;
-use  Bio::Tools::Run::WrapperBase;
+use Bio::Tools::Run::WrapperBase;
 @ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
           Bio::Factory::ApplicationFactoryI);
 
@@ -127,7 +127,7 @@ use  Bio::Tools::Run::WrapperBase;
 BEGIN {
     %DEFAULTS = ( 'AFORMAT' => 'fasta' );
     @MUSCLE_PARAMS = qw(IN OUT TREE1 LOG LOGA SCOREFILE GAPOPEN 
-			MAXMB MAXHOURS MAXITERS KBAND IN1 IN2);
+			MAXMB MAXHOURS MAXITERS KBAND IN1 IN2 USETREE USETREE_NOWARN);
     @MUSCLE_SWITCHES = qw(QUIET DIAGS REFINE STABLE GROUP 
 			  CLW CLWSTRICT MSF);
 

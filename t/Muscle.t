@@ -60,7 +60,6 @@ SKIP: {
 	@params = ('quiet'    => 1,
 		   '-outfile_name'      => $outfile,
 		   'diags'    => 1,
-		   'stable'   => 1,
 		   'maxmb'    => 50,
 		   'maxhours' => 1,
 		   'maxiters' => 20,
