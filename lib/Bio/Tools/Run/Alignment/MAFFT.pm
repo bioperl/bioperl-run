@@ -18,13 +18,29 @@ Bio::Tools::Run::Alignment::MAFFT - run the MAFFT alignment tools
 
 =head1 SYNOPSIS
 
-  use Bio::Tools::Run::Alignment::MAFFT;
+  # Build a MAFFT alignment factory
+  $factory = Bio::Tools::Run::Alignment::MAFFT->new(@params);
+
+  # Pass the factory a list of sequences to be aligned.
+  $inputfilename = 't/cysprot.fa';
+  # $aln is a SimpleAlign object.
+  $aln = $factory->align($inputfilename);
+
+  # or where @seq_array is an array of Bio::Seq objects
+  $seq_array_ref = \@seq_array;
+  $aln = $factory->align($seq_array_ref);
+
+  #There are various additional options available.
 
 =head1 DESCRIPTION
 
-You can get MAFFT from 
-L<http://www.biophys.kyoto-u.ac.jp/~katoh/programs/align/mafft4/>.
-"fftnsi" is the default in this implementation.
+You can get MAFFT from L<http://mafft.cbrc.jp/alignment/software/>.
+"fftnsi" is the default method for Mafft version 4 in this
+implementation.
+
+See Bio::Tools::Run::Alignment::Clustalw for a description on how to
+specify parameters to the underlying alignment program. See the MAFFT
+manual page for a description of the MAFFT parameters.
 
 =head1 FEEDBACK
 
@@ -69,8 +85,8 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Alignment::MAFFT;
 
 use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
-            @MAFFT_PARAMS @MAFFT_SWITCHES @OTHER_SWITCHES %OK_FIELD
-	    @MAFFT_ALN_METHODS
+            @MAFFT4_PARAMS @MAFFT4_SWITCHES @OTHER_SWITCHES %OK_FIELD
+	    @MAFFT_ALN_METHODS @MAFFT6_PARAMS @MAFFT6_SWITCHES %OK_FIELD6
             );
 use strict;
 use Bio::Seq;
@@ -85,13 +101,26 @@ BEGIN {
     %DEFAULTS = ( 'OUTPUT' => 'fasta',
 		  'METHOD' => 'fftnsi',
 		  'CYCLES' => 2);
-    @MAFFT_PARAMS =qw( METHOD CYCLES );
-    @MAFFT_SWITCHES = qw( NJ ALL_POSITIVE);
+    @MAFFT4_PARAMS =qw( METHOD CYCLES );
+    @MAFFT4_SWITCHES = qw( NJ ALL_POSITIVE);
+
+    # NB: Mafft6 options are case-sensitive (eg. --lop and --LOP is different)
+    @MAFFT6_PARAMS   = qw( weighti retree maxiterate partsize groupsize
+        op ep lop lep lexp LOP LEXP bl jtt tm aamatrix fmodel seed );
+    @MAFFT6_SWITCHES = qw( auto 6merpair globalpair localpair genafpair
+        fastapair fft nofft noscore memsave parttree dpparttree fastaparttree
+        clustalout inputorder reorder treeout nuc amino
+        );
+
     @OTHER_SWITCHES = qw(QUIET ALIGN OUTPUT OUTFILE);
     @MAFFT_ALN_METHODS = qw(fftnsi fftns nwnsi nwns fftnsrough nwnsrough);
+    #@MAFFT6_ALN_METHODS = qw(linsi ginsi einsi fftnsi fftns nwnsi nwns)
     # Authorize attribute fields
-    foreach my $attr ( @MAFFT_SWITCHES,@MAFFT_PARAMS,@OTHER_SWITCHES ) {
+    foreach my $attr ( @MAFFT4_SWITCHES,@MAFFT4_PARAMS,@OTHER_SWITCHES ) {
 	$OK_FIELD{$attr}++; 
+    }
+    foreach my $attr ( @MAFFT6_PARAMS, @MAFFT6_SWITCHES ) {
+        $OK_FIELD6{$attr}++
     }
 }
 
@@ -194,7 +223,9 @@ sub new {
     }
 
     $self->output($DEFAULTS{'OUTPUT'}) unless( $self->output );
-    $self->method($DEFAULTS{'METHOD'}) unless( $self->method );
+    if ( ! $self->_version6 ) {
+        $self->method($DEFAULTS{'METHOD'}) unless( $self->method );
+    }
     return $self;
 }
 
@@ -202,6 +233,15 @@ sub AUTOLOAD {
     my $self = shift;
     my $attr = $AUTOLOAD;
     $attr =~ s/.*:://;
+
+    # NB: Mafft6 options are case-sensitive
+    if ( $self->_version6 ) {
+        if ( $OK_FIELD6{ $attr } ) {
+            # Don't want the attrs to clash with bioperl attributes
+            $self->{version6attrs}{$attr} = shift if @_;
+            return $self->{version6attrs}{$attr};
+        }
+    }
     $attr = uc $attr;
     # aliasing
     $attr = 'OUTFILE' if $attr eq 'OUTFILE_NAME';
@@ -325,7 +365,7 @@ sub align {
 =head2  _run
 
  Title   :  _run
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly
  Function:  makes actual system call to tcoffee program
  Example :
  Returns : nothing; tcoffee output is written to a
@@ -439,19 +479,47 @@ sub _setparams {
     } 
     my ($attr,$value);
     
-    for  $attr ( @MAFFT_SWITCHES) {
-	$value = $self->$attr();
-	next unless ($value);
-	my $attr_key = lc $attr; #put switches in format expected by mafft
-	$attr_key = ' --'.$attr_key;
-	$param_string .= $attr_key ;
+    if ( $self->_version6 ) {
+        for  $attr ( @MAFFT6_SWITCHES) {
+            $value = $self->$attr();
+            next unless defined $value;
+            my $attr_key = lc $attr; #put switches in format expected by mafft
+            $attr_key = ' --'.$attr_key;
+            $param_string .= $attr_key ;
+        }
+        for  $attr ( @MAFFT6_PARAMS ) {
+            $value = $self->$attr();
+            next unless (defined $value);
+            my $attr_key = lc $attr;
+            $attr_key = ' --'.$attr_key;
+            $param_string .= $attr_key .' '.$value;
+        }
+        if ( ! $self->no_param_checks ) {
+            my @incompatible = qw/auto 6merpair globalpair localpair genafpair
+                fastapair/;
+            my @set = grep { $self->$_ } @incompatible;
+            if ( @set > 1 ) {
+                $self->throw("You can't specify more than one of @set");
+            }
+        }
     }
-    my $method = $self->method;
-    $self->throw("no method ") unless defined $method;
-    if( $method !~ /(rough|nsi)$/ && 
-	defined $self->cycles) {
-	$param_string .= " ".$self->cycles;
+    else {
+        for  $attr ( @MAFFT4_SWITCHES) {
+            $value = $self->$attr();
+            next unless defined $value;
+            my $attr_key = lc $attr; #put switches in format expected by mafft
+            $attr_key = ' --'.$attr_key;
+            $param_string .= $attr_key ;
+        }
+        # Method is a version 4 option
+        my $method = $self->method;
+        $self->throw("no method ") unless defined $method;
+        if( $method !~ /(rough|nsi)$/ &&
+            defined $self->cycles) {
+            $param_string .= " ".$self->cycles;
+        }
     }
+
     my $outputstr = " 1>$outfile" ;
 
     if ($self->quiet() || $self->verbose < 0) { 
@@ -475,6 +543,31 @@ sub _setparams {
 sub methods {
    my ($self) = shift;
    return @MAFFT_ALN_METHODS;
+}
+
+
+=head2  _version6
+
+ Title   : _version6
+ Usage   : Internal function, not to be called directly	
+ Function: Check if the version of MAFFT is 6
+ Example :
+ Returns : Boolean
+ Args    : None
+
+=cut
+
+sub _version6 {
+    my $self = shift;
+    if ( ! defined $self->{_version6} ) {
+        if ( $self->version =~ /^v6/ ) {
+            $self->{_version6} = 1;
+        }
+        else {
+            $self->{_version6} = '';
+        }
+    }
+    return $self->{_version6};
 }
 
 
