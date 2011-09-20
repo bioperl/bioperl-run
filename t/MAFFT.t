@@ -7,7 +7,7 @@ use vars qw($DEBUG);
 $DEBUG = test_debug();
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 17);
+    test_begin(-tests => 23);
 	use_ok(' Bio::Tools::Run::Alignment::MAFFT');
 	use_ok(' Bio::AlignIO');
 	use_ok(' Bio::SeqIO');	
@@ -61,4 +61,26 @@ SKIP: {
 		my $s1_perid = $aln->average_percentage_identity;
 		ok($s1_perid);
 	}
+
+    SKIP: {
+        skip("Tests require version 6 of MAFFT", 6) unless $factory->_version6;
+        $factory->localpair(1);
+        $aln = $factory->align( $inputfilename );
+        is $aln->num_sequences, 7;
+        $s1_perid = $aln->average_percentage_identity;
+        ok($s1_perid);
+
+        $factory->globalpair(1);
+        throws_ok { $aln = $factory->align( $inputfilename ) }
+                  qr/You can't specify more than one of/,
+                  'More than one alignment method throws';
+
+        my @extra_params = qw/ localpair 1 maxiterate 10000 /;
+        $factory = Bio::Tools::Run::Alignment::MAFFT->new(@params, @extra_params);
+        isa_ok $factory,'Bio::Tools::Run::Alignment::MAFFT';
+        $aln = $factory->align( $inputfilename );
+        is $aln->num_sequences, 7;
+        $s1_perid = $aln->average_percentage_identity;
+        ok($s1_perid);
+    }
 }
