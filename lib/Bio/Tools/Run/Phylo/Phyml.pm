@@ -213,7 +213,8 @@ sub new {
 
     my ($data_type, $data_format, $dataset_count, $model, $freq, $kappa, $invar,
 	$category_number, $alpha, $tree, $opt_topology,
-	$opt_lengths, $opt, $search, $rand_start, $rand_starts, $rand_seed)
+	$opt_lengths, $opt, $search, $rand_start, $rand_starts, $rand_seed,
+  $no_memory_check, $bootstrap )
         = $self->_rearrange([qw( DATA_TYPE
 				 DATA_FORMAT
 				 DATASET_COUNT
@@ -231,6 +232,8 @@ sub new {
 				 RAND_START
 				 RAND_STARTS
 				 RAND_SEED
+         NO_MEMORY_CHECK
+         BOOTSTRAP
 			      )], %args);
 
     $self->data_type($data_type) if $data_type;
@@ -250,7 +253,8 @@ sub new {
     $self->rand_start($rand_start) if $rand_start;
     $self->rand_starts($rand_starts) if $rand_starts;
     $self->rand_seed($rand_seed) if $rand_seed;
-
+    $self->no_memory_check($no_memory_check) if $no_memory_check;
+    $self->bootstrap($bootstrap) if $bootstrap;
 
     return $self;
 }
@@ -831,6 +835,45 @@ sub rand_seed {
     return $self->{_rand_seed} || int rand 1000000;
 }
 
+=head2 no_memory_check
+
+ Title   : no_memory_check
+ Usage   : $factory->no_memory_check(1);
+ Function: 
+ Returns : 
+ Args    : None to get, integer to set.
+
+=cut
+
+sub no_memory_check {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter [no_memory_check] prior to PhyML v3") if $self->version < 3;
+    if (defined $value) {
+  die "Invalid number [$value]" unless $value =~ /^\d+$/;
+  $self->{_no_memory_check} = $value;
+    }
+    return $self->{_no_memory_check};
+}
+
+=head2 bootstrap
+
+ Title   : bootstrap
+ Usage   : $factory->bootstrap(100);
+ Function: Set number of bootstraps
+ Returns : 
+ Args    : None to get, integer to set.
+
+=cut
+
+sub bootstrap {
+    my ($self, $value) = @_;
+    $self->throw("Not a valid parameter [bootstrap] prior to PhyML v3") if $self->version < 3;
+    if (defined $value) {
+  die "Invalid number [$value]" unless $value =~ /^\d+$/;
+  $self->{_bootstrap} = $value;
+    }
+    return $self->{_bootstrap};
+}
 
 =head2 Internal methods
 
@@ -900,56 +943,61 @@ sub _setparams {
     my $self = shift;
     my $param_string;
 
-    if ($self->version >= 3 ) {
+    if ( $self->version >= 3 ) {
 
-	$param_string = ' -d '.  $self->data_type;
-	$param_string .= ' -q' if $self->data_format eq 's';
-	$param_string .= ' -n '. $self->dataset_count if $self->dataset_count > 1;
+        $param_string = ' -d ' . $self->data_type;
 
-	#$param_string .= ' 0';	# no bootstap sets
+        $param_string .= ' -q ' if $self->data_format eq 's';
+        $param_string .= ' -n ' . $self->dataset_count
+          if $self->dataset_count > 1;
+        $param_string .= ' -b ' . $self->bootstrap if $self->bootstrap;
 
-	$param_string .= ' -m '. $self->model;
-	$param_string .= ' -f '. $self->freq if $self->freq;
+        # $param_string .= ' 0';  # no bootstrap sets
+        $param_string .= ' -m ' . $self->model;
+        $param_string .= ' -f ' . $self->freq if $self->freq;
 
-	if ($self->data_type eq 'dna') {
-	    $param_string .= ' -t '. $self->kappa;
-	}
+        if ( $self->data_type eq 'dna' ) {
+            $param_string .= ' -t ' . $self->kappa;
+        }
 
-	$param_string .= ' -v '. $self->invar;
-	$param_string .= ' -c '. $self->category_number;
-	$param_string .= ' -a '. $self->alpha;
-	$param_string .= ' -u '. $self->tree if $self->tree ne 'BIONJ';
-	$param_string .= ' -o '. $self->opt if $self->opt;
-	$param_string .= ' -s '. $self->search;
+        $param_string .= ' -v ' . $self->invar;
+        $param_string .= ' -c ' . $self->category_number;
+        $param_string .= ' -a ' . $self->alpha;
+        $param_string .= ' -u ' . $self->tree if $self->tree ne 'BIONJ';
+        $param_string .= ' -o ' . $self->opt if $self->opt;
+        $param_string .= ' -s ' . $self->search;
 
-	if ($self->search eq 'SPR' ) {
-	    $param_string .= ' --rand_start ' if $self->rand_start;
-	    $param_string .= ' --n_rand_starts '. $self->rand_starts
-	        if $self->rand_starts;
-	    $param_string .= ' --r_seed '. $self->rand_seed;
-	}
+        if ( $self->search eq 'SPR' ) {
+            $param_string .= ' --rand_start ' if $self->rand_start;
+            $param_string .= ' --n_rand_starts ' . $self->rand_starts
+              if $self->rand_starts;
+            $param_string .= ' --r_seed ' . $self->rand_seed;
+        }
 
-    } else {
+        $param_string .= ' --no_memory_check ' if $self->no_memory_check;
 
-	$param_string = ' ' .  $self->data_type;
+    }
+    else {
 
-	$param_string .= ' '. $self->data_format;
-	$param_string .= ' '. $self->dataset_count;
+        $param_string = ' ' . $self->data_type;
 
-	$param_string .= ' 0';	# no bootstap sets
+        $param_string .= ' ' . $self->data_format;
+        $param_string .= ' ' . $self->dataset_count;
 
-	$param_string .= ' '. $self->model;
+        $param_string .= ' 0';    # no bootstap sets
 
-	unless ($self->data_type) { # only for DNA
-	    $param_string .= ' '. $self->kappa;
-	}
+        $param_string .= ' ' . $self->model;
 
-	$param_string .= ' '. $self->invar;
-	$param_string .= ' '. $self->category_number;
-	$param_string .= ' '. $self->alpha;
-	$param_string .= ' '. $self->tree;
-	$param_string .= ' '. $self->opt_topology;
-	$param_string .= ' '. $self->opt_lengths;
+        unless ( $self->data_type ) {    # only for DNA
+            $param_string .= ' ' . $self->kappa;
+        }
+
+        $param_string .= ' ' . $self->invar;
+        $param_string .= ' ' . $self->category_number;
+        $param_string .= ' ' . $self->alpha;
+        $param_string .= ' ' . $self->tree;
+        $param_string .= ' ' . $self->opt_topology;
+        $param_string .= ' ' . $self->opt_lengths;
 
     }
     return $param_string;
