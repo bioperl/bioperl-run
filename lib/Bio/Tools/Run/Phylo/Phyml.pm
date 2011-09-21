@@ -186,7 +186,7 @@ map { $models3->{'aa'}->{$_} = 1 }
  Returns : Bio::Tools::Run::Phylo::Phyml
  Args    : Optionally, provide any of the following (default in []):
            -data_type       => 'dna' or 'protein',   [protein]
-           -dataset_count   => 'integer,             [1]
+           -dataset_count   => integer,             [1]
            -model           => 'HKY'... ,            [HKY|JTT]
            -kappa           => 'e' or float,         [e]
            -invar           => 'e' or float,         [e]
@@ -195,6 +195,8 @@ map { $models3->{'aa'}->{$_} = 1 }
            -tree            => 'BIONJ' or your own,  [BION]
            -opt_topology    => boolean               [y]
            -opt_lengths     => boolean               [y]
+           -no_memory_check => boolean               [y]
+           -bootstrap       => integer               [123]
 
 =cut
 
@@ -849,7 +851,7 @@ sub no_memory_check {
     my ($self, $value) = @_;
     $self->throw("Not a valid parameter [no_memory_check] prior to PhyML v3") if $self->version < 3;
     if (defined $value) {
-  die "Invalid number [$value]" unless $value =~ /^\d+$/;
+  die "Invalid boolean [$value]" unless $value =~ /^[yn]$/i;
   $self->{_no_memory_check} = $value;
     }
     return $self->{_no_memory_check};
@@ -974,18 +976,15 @@ sub _setparams {
             $param_string .= ' --r_seed ' . $self->rand_seed;
         }
 
-        $param_string .= ' --no_memory_check ' if $self->no_memory_check;
+        $param_string .= ' --no_memory_check ' if $self->no_memory_check =~ /y/i;
 
     }
     else {
 
         $param_string = ' ' . $self->data_type;
-
         $param_string .= ' ' . $self->data_format;
         $param_string .= ' ' . $self->dataset_count;
-
-        $param_string .= ' 0';    # no bootstap sets
-
+        $param_string .= ' 0';    # no bootstrap sets
         $param_string .= ' ' . $self->model;
 
         unless ( $self->data_type ) {    # only for DNA
