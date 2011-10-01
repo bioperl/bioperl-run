@@ -1,9 +1,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Alignment::Muscle
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
-#
-# Cared for by Jason Stajich
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Copyright Jason Stajich <jason-at-bioperl-dot-org>
 #
@@ -56,7 +54,7 @@ done in (at least) three ways:
   2. define an environmental variable MUSCLEDIR which points to a 
      directory containing the 'muscle' app:
    In bash 
-	export MUSCLEDIR=/home/progs/muscle   or
+    export MUSCLEDIR=/home/progs/muscle   or
    In csh/tcsh
         setenv MUSCLEDIR /home/progs/muscle
 
@@ -107,32 +105,57 @@ methods. Internal methods are usually preceded with a _
 
 package Bio::Tools::Run::Alignment::Muscle;
 
-use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
-            @MUSCLE_PARAMS @MUSCLE_SWITCHES %OK_FIELD
-            );
 use strict;
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
-use Bio::Root::Root;
 use Bio::Root::IO;
-use Bio::Factory::ApplicationFactoryI;
-use Bio::Tools::Run::WrapperBase;
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
-          Bio::Factory::ApplicationFactoryI);
 
+use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-BEGIN {
-    %DEFAULTS = ( 'AFORMAT' => 'fasta' );
-    @MUSCLE_PARAMS = qw(IN OUT TREE1 LOG LOGA SCOREFILE GAPOPEN SEQTYPE
-			MAXMB MAXHOURS MAXITERS KBAND IN1 IN2 USETREE USETREE_NOWARN);
-    @MUSCLE_SWITCHES = qw(QUIET DIAGS REFINE STABLE GROUP 
-			  CLW CLWSTRICT MSF);
+our %DEFAULTS = ( 'AFORMAT' => 'fasta' );
+our @MUSCLE_PARAMS = qw(in out tree1 log loga scorefile gapopen seqtype
+  maxmb maxhours maxiters kband in1 in2 usetree usetree_nowarn);
+our @MUSCLE_SWITCHES = qw(quiet verbose diags refine stable group
+  clw clwstrict msf);
+our $PROGRAM_NAME = 'muscle';
+our $PROGRAM_DIR = Bio::Root::IO->catfile($ENV{MUSCLEDIR}) if $ENV{MUSCLEDIR};
 
-# Authorize attribute fields
-    foreach my $attr ( @MUSCLE_PARAMS, @MUSCLE_SWITCHES ) {
-	$OK_FIELD{$attr}++; }
+=head2 new
+
+ Title   : new
+ Usage   : my $muscle = Bio::Tools::Run::Alignment::Muscle->new();
+ Function: Constructor
+ Returns : Bio::Tools::Run::Alignment::Muscle
+ Args    : -outfile_name => $outname
+
+=cut
+
+sub new {
+    my ( $class, @args ) = @_;
+    my $self = $class->SUPER::new(@args);
+
+    $self->aformat( $DEFAULTS{'AFORMAT'} );
+
+    $self->_set_from_args(
+        \@args,
+        -methods => [ @MUSCLE_PARAMS, @MUSCLE_SWITCHES ],
+        -create  => 1
+    );
+
+    my ($out) = $self->SUPER::_rearrange( [qw(OUTFILE_NAME)], @args );
+
+    $self->outfile_name( $out || '' );
+
+    $self->aformat('msf') if $self->msf;
+    $self->aformat('clustalw') if $self->clw || $self->clwstrict;
+
+    if ( defined $self->out ) {
+        $self->outfile_name( $self->out );
+    }
+
+    return $self;
 }
 
 =head2 program_name
@@ -146,7 +169,7 @@ BEGIN {
 =cut
 
 sub program_name {
-        return 'muscle';
+    return $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -160,63 +183,7 @@ sub program_name {
 =cut
 
 sub program_dir {
-        return Bio::Root::IO->catfile($ENV{MUSCLEDIR}) if $ENV{MUSCLEDIR};
-}
-
-=head2 new
-
- Title   : new
- Usage   : my $muscle = Bio::Tools::Run::Alignment::Muscle->new();
- Function: Constructor
- Returns : Bio::Tools::Run::Alignment::Muscle
- Args    : -outfile_name => $outname
-
-
-=cut
-
-sub new {
-    my ($class,@args) = @_;
-    my( @muscle_args, @obj_args);
-    while( my $arg = shift @args ) {
-	if( $arg =~ /^-/ ) {
-	    push @obj_args, $arg, shift @args;
-	} else {
-	    push @muscle_args,$arg, shift @args;
-	}
-    }
-    my $self = $class->SUPER::new(@obj_args);
-    
-    my ($on) = $self->_rearrange([qw(OUTFILE_NAME)],@obj_args);
-    
-    $self->outfile_name($on || '');
-    my ($attr, $value);    
-    $self->aformat($DEFAULTS{'AFORMAT'});
-
-    while ( @muscle_args)  {
-	$attr =   shift @muscle_args;
-	$value =  shift @muscle_args;
-	next if( $attr =~ /^-/); # don't want named parameters
-	$self->$attr($value);
-    }
-    $self->aformat('msf') if $self->msf;
-    $self->aformat('clustalw') if $self->clw || $self->clwstrict;
-    
-    if( defined $self->out ) {
-	$self->outfile_name($self->out);
-    }
-    return $self;
-}
-
-sub AUTOLOAD {
-    my $self = shift;
-    my $attr = $AUTOLOAD;
-    $attr =~ s/.*:://;
-    $attr = uc $attr;
-    # aliasing
-    $self->throw("Unallowed parameter: $attr !") unless $OK_FIELD{$attr};
-
-    $self->{$attr} = shift if @_;
-    return $self->{$attr};
+    return $PROGRAM_DIR;
 }
 
 =head2 error_string
@@ -227,16 +194,14 @@ sub AUTOLOAD {
  Returns : value of error_string
  Args    : newvalue (optional)
 
-
 =cut
 
-sub error_string{
-   my ($self,$value) = @_;
-   if( defined $value) {
-      $self->{'error_string'} = $value;
+sub error_string {
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        $self->{'error_string'} = $value;
     }
     return $self->{'error_string'};
-
 }
 
 =head2  version
@@ -254,7 +219,7 @@ sub version {
     my ($self) = @_;
     my $exe;
     return undef unless $exe = $self->executable;
-    my $string = `$exe 2>&1` ;
+    my $string = `$exe 2>&1`;
 
     $string =~ /MUSCLE\s+v(\d+\.\d+)/m;
     return $1 || undef;
@@ -279,20 +244,18 @@ sub run {
 =head2  align
 
  Title   : align
- Usage   :
-	$inputfilename = 't/data/cysprot.fa';
-	$aln = $factory->align($inputfilename);
-or
-	$seq_array_ref = \@seq_array; 
-        # @seq_array is array of Seq objs
-	$aln = $factory->align($seq_array_ref);
+ Usage   : $inputfilename = 't/data/cysprot.fa';
+           $aln = $factory->align($inputfilename);
+             or
+           $seq_array_ref = \@seq_array;
+           $aln = $factory->align($seq_array_ref);
  Function: Perform a multiple sequence alignment
  Returns : Reference to a SimpleAlign object containing the
            sequence alignment.
  Args    : Name of a file containing a set of unaligned fasta sequences
            or else an array of references to Bio::Seq objects.
 
- Throws an exception if argument is not either a string (eg a
+ Throws an exception if argument is not either a string (e.g. a
  filename) or a reference to an array of Bio::Seq objects.  If
  argument is string, throws exception if file corresponding to string
  name can not be found. If argument is Bio::Seq array, throws
@@ -301,111 +264,140 @@ or
 =cut
 
 sub align {
-    my ($self,$input) = @_;
+    my ( $self, $input ) = @_;
+
     # Create input file pointer
     $self->io->_io_cleanup();
     my $infilename;
-    if( defined $input ) {
-	$infilename = $self->_setinput($input);
-    } elsif( defined $self->in ) {
-	$infilename = $self->_setinput($self->in);
-    } else {
-	$self->throw("No inputdata provided\n");
+    if ( defined $input ) {
+        $infilename = $self->_setinput($input);
     }
-    if (! $infilename) {
-	$self->throw("Bad input data or less than 2 sequences in $input !");
+    elsif ( defined $self->in ) {
+        $infilename = $self->_setinput( $self->in );
+    }
+    else {
+        $self->throw("No inputdata provided\n");
+    }
+    if ( !$infilename ) {
+        $self->throw("Bad input data or less than 2 sequences in $input !");
     }
 
     my $param_string = $self->_setparams();
 
     # run muscle
-    return &_run($self, $infilename, $param_string);
+    return &_run( $self, $infilename, $param_string );
 }
 
 =head2  profile
 
  Title   : profile
- Usage   :
-        $alnfilename = /t/data/cysprot.msa';
-	$seqsfilename = 't/data/cysprot.fa';
-	$aln = $factory->profile($alnfilename,$seqsfilename);
+ Usage   : $alnfilename = /t/data/cysprot.msa';
+           $seqsfilename = 't/data/cysprot.fa';
+           $aln = $factory->profile($alnfilename,$seqsfilename);
 
  Function: Perform a profile alignment on a MSA to include more seqs
  Returns : Reference to a SimpleAlign object containing the
            sequence alignment.
- Args : Name of a file containing the fasta MSA and name of a file
-        containing a set of unaligned fasta sequences
- Comments : This only works for muscle version 3.52.
-            Some early versions of the 3.6 sources had a bug that
-            caused a segfault with -profile. The attached should fix
-            it, if not let Bob Edgar know.
+ Args    : Name of a file containing the fasta MSA and name of a file
+           containing a set of unaligned fasta sequences
+ Comments: This only works for muscle version 3.52.
+           Some early versions of the 3.6 sources had a bug that
+           caused a segfault with -profile. The attached should fix
+           it, if not let Bob Edgar know.
 
 =cut
 
 sub profile {
-    my ($self,$alnfilename,$seqsfilename) = @_;
+    my ( $self, $alnfilename, $seqsfilename ) = @_;
+
     # Create input file pointer
     $self->io->_io_cleanup();
-    if ($self->version ne '3.52') {
-	$self->throw("profile does not work for this version of muscle\n");
+    if ( $self->version ne '3.52' ) {
+        $self->throw("profile does not work for this version of muscle\n");
     }
     my $infilename;
-    if( defined $alnfilename ) {
-        if (! ref $alnfilename) {
+    if ( defined $alnfilename ) {
+        if ( !ref $alnfilename ) {
+
             # check that file exists or throw
             $infilename = $alnfilename;
-            unless (-e $infilename) {return 0;}
+            unless ( -e $infilename ) { return 0; }
+
             # let's peek and guess
-            open(IN,$infilename) || $self->throw("Cannot open $infilename");
+            open( IN, $infilename ) || $self->throw("Cannot open $infilename");
             my $header;
-            while( defined ($header = <IN>) ) {
+            while ( defined( $header = <IN> ) ) {
                 last if $header !~ /^\s+$/;
             }
             close(IN);
-            if ( $header !~ /^>\s*\S+/ ){
-                $self->throw("Need to provide a FASTA format file to muscle profile!");
-            } 
+            if ( $header !~ /^>\s*\S+/ ) {
+                $self->throw(
+                    "Need to provide a FASTA format file to muscle profile!");
+            }
         }
-    } else {
-	$self->throw("No inputdata provided\n");
     }
-    if (! $infilename) {
-	$self->throw("Bad input data or less than 2 sequences in $infilename !");
+    else {
+        $self->throw("No inputdata provided\n");
     }
-    if( defined $seqsfilename ) {
-        if (! ref $seqsfilename) {
+    if ( !$infilename ) {
+        $self->throw(
+            "Bad input data or less than 2 sequences in $infilename !");
+    }
+    if ( defined $seqsfilename ) {
+        if ( !ref $seqsfilename ) {
+
             # check that file exists or throw
             $infilename = $seqsfilename;
-            unless (-e $infilename) {return 0;}
+            unless ( -e $infilename ) { return 0; }
+
             # let's peek and guess
-            open(IN,$infilename) || $self->throw("Cannot open $infilename");
+            open( IN, $infilename ) || $self->throw("Cannot open $infilename");
             my $header;
-            while( defined ($header = <IN>) ) {
+            while ( defined( $header = <IN> ) ) {
                 last if $header !~ /^\s+$/;
             }
             close(IN);
-            if ( $header !~ /^>\s*\S+/ ){
-                $self->throw("Need to provide a FASTA format file to muscle profile!");
-            } 
+            if ( $header !~ /^>\s*\S+/ ) {
+                $self->throw(
+                    "Need to provide a FASTA format file to muscle profile!");
+            }
         }
-    } else {
-	$self->throw("No inputdata provided\n");
     }
-    if (! $infilename) {
-	$self->throw("Bad input data or less than 2 sequences in $infilename !");
+    else {
+        $self->throw("No inputdata provided\n");
+    }
+    if ( !$infilename ) {
+        $self->throw(
+            "Bad input data or less than 2 sequences in $infilename !");
     }
 
     my $param_string = $self->_setparams();
 
     # run muscle
     $self->{_profile} = 1;
-    return &_run($self, "$alnfilename -in2 $seqsfilename", $param_string);
+    return &_run( $self, "$alnfilename -in2 $seqsfilename", $param_string );
+}
+
+=head2 aformat
+
+ Title   : aformat
+ Usage   : my $alignmentformat = $self->aformat();
+ Function: Get/Set alignment format
+ Returns : string
+ Args    : string
+
+=cut
+
+sub aformat {
+    my $self = shift;
+    $self->{'_aformat'} = shift if @_;
+    return $self->{'_aformat'};
 }
 
 =head2  _run
 
  Title   :  _run
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly    
  Function:  makes actual system call to muscle program
  Example :
  Returns : nothing; muscle output is written to a
@@ -417,102 +409,115 @@ sub profile {
 =cut
 
 sub _run {
-    my ($self,$infilename,$params) = @_;
+    my ( $self, $infilename, $params ) = @_;
     my $commandstring;
-    if ($self->{_profile}) {
-        $commandstring = $self->executable." -profile -in1 $infilename $params";
+    if ( $self->{_profile} ) {
+        $commandstring =
+          $self->executable . " -profile -in1 $infilename $params";
         $self->{_profile} = 0;
-    } else {
-        $commandstring = $self->executable." -in $infilename $params";
+    }
+    else {
+        $commandstring = $self->executable . " -in $infilename $params";
     }
 
-    $self->debug( "muscle command = $commandstring \n");
+    $self->debug("muscle command = $commandstring \n");
 
-    my $status = system($commandstring);
-    my $outfile = $self->outfile_name(); 
-    if( !-e $outfile || -z $outfile ) {
-	$self->warn( "Muscle call crashed: $? [command $commandstring]\n");
-	return undef;
+    my $status  = system($commandstring);
+    my $outfile = $self->outfile_name();
+    if ( !-e $outfile || -z $outfile ) {
+        $self->warn("Muscle call crashed: $? [command $commandstring]\n");
+        return undef;
     }
 
-    my $in  = Bio::AlignIO->new('-file'   => $outfile, 
-				'-format' => $self->aformat);
+    my $in = Bio::AlignIO->new(
+        '-file'   => $outfile,
+        '-format' => $self->aformat
+    );
     my $aln = $in->next_aln();
     return $aln;
 }
 
-
 =head2  _setinput
 
  Title   :  _setinput
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly    
  Function:  Create input file for muscle program
  Example :
  Returns : name of file containing muscle data input AND
  Args    : Arrayref of Seqs or input file name
 
-
 =cut
 
 sub _setinput {
-    my ($self,$input) = @_;
-    my ($infilename, $seq, $temp, $tfh);
-    if (! ref $input) {
-	# check that file exists or throw
-	$infilename = $input;
-	unless (-e $input) {return 0;}
-	# let's peek and guess
-	open(IN,$infilename) || $self->throw("Cannot open $infilename");
-	my $header;
-	while( defined ($header = <IN>) ) {
-	    last if $header !~ /^\s+$/;
-	}
-	close(IN);
-	if ( $header !~ /^>\s*\S+/ ){
-	    $self->throw("Need to provide a FASTA format file to muscle!");
-	} 
-	return ($infilename);
-    } elsif (ref($input) =~ /ARRAY/i ) { #  $input may be an
-	#  array of BioSeq objects...
-        #  Open temporary file for both reading & writing of array
-	($tfh,$infilename) = $self->io->tempfile();
-	if( ! ref($input->[0]) ) {
-	    $self->warn("passed an array ref which did not contain objects to _setinput");
-	    return undef;
-	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
-	    $temp =  Bio::SeqIO->new('-fh' => $tfh,
-				     '-format' => 'fasta');
-	    my $ct = 1;
-	    foreach $seq (@$input) {
-		return 0 unless ( ref($seq) && 
-				  $seq->isa("Bio::PrimarySeqI") );
-		if( ! defined $seq->display_id ||
-		    $seq->display_id =~ /^\s+$/) {
-		    $seq->display_id( "Seq".$ct++);
-		} 
-		$temp->write_seq($seq);
-	    }
-	    $temp->close();
-	    undef $temp;
-	    close($tfh);
-	    $tfh = undef;
-	} else { 
-	    $self->warn( "got an array ref with 1st entry ".
-			 $input->[0].
-			 " and don't know what to do with it\n");
-	}
-	return ($infilename);
-    } else { 
-	$self->warn("Got $input and don't know what to do with it\n");
+    my ( $self, $input ) = @_;
+    my ( $infilename, $seq, $temp, $tfh );
+    if ( !ref $input ) {
+
+        # check that file exists or throw
+        $infilename = $input;
+        unless ( -e $input ) { return 0; }
+
+        # let's peek and guess
+        open( IN, $infilename ) || $self->throw("Cannot open $infilename");
+        my $header;
+        while ( defined( $header = <IN> ) ) {
+            last if $header !~ /^\s+$/;
+        }
+        close(IN);
+        if ( $header !~ /^>\s*\S+/ ) {
+            $self->throw("Need to provide a FASTA format file to muscle!");
+        }
+        return ($infilename);
+    }
+    elsif ( ref($input) =~ /ARRAY/i ) {
+
+        # $input may be an array of BioSeq objects...
+        # Open temporary file for both reading & writing of array
+        ( $tfh, $infilename ) = $self->io->tempfile();
+        if ( !ref( $input->[0] ) ) {
+            $self->warn(
+                "passed an array ref which did not contain objects to _setinput"
+            );
+            return undef;
+        }
+        elsif ( $input->[0]->isa('Bio::PrimarySeqI') ) {
+            $temp = Bio::SeqIO->new(
+                '-fh'     => $tfh,
+                '-format' => 'fasta'
+            );
+            my $ct = 1;
+            foreach $seq (@$input) {
+                return 0 unless ( ref($seq)
+                    && $seq->isa("Bio::PrimarySeqI") );
+                if ( !defined $seq->display_id
+                    || $seq->display_id =~ /^\s+$/ )
+                {
+                    $seq->display_id( "Seq" . $ct++ );
+                }
+                $temp->write_seq($seq);
+            }
+            $temp->close();
+            undef $temp;
+            close($tfh);
+            $tfh = undef;
+        }
+        else {
+            $self->warn( "got an array ref with 1st entry "
+                  . $input->[0]
+                  . " and don't know what to do with it\n" );
+        }
+        return ($infilename);
+    }
+    else {
+        $self->warn("Got $input and don't know what to do with it\n");
     }
     return 0;
 }
 
-
 =head2  _setparams
 
  Title   :  _setparams
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly    
  Function:  Create parameter inputs for muscle program
  Example :
  Returns : parameter string to be passed to muscle
@@ -557,23 +562,6 @@ sub _setparams {
     return $param_string;
 }
 
-=head2 aformat
-
- Title   : aformat
- Usage   : my $alignmentformat = $self->aformat();
- Function: Get/Set alignment format
- Returns : string
- Args    : string
-
-
-=cut
-
-sub aformat{
-    my $self = shift;
-    $self->{'_aformat'} = shift if @_;
-    return $self->{'_aformat'};
-}
-
 =head1 Bio::Tools::Run::BaseWrapper methods
 
 =cut
@@ -587,7 +575,6 @@ sub aformat{
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
-
 =cut
 
 =head2 save_tempfiles
@@ -597,7 +584,6 @@ sub aformat{
  Function: 
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
-
 
 =cut
 
@@ -610,9 +596,7 @@ sub aformat{
  Returns : string
  Args    : [optional] string to set value to
 
-
 =cut
-
 
 =head2 tempdir
 
@@ -621,7 +605,6 @@ sub aformat{
  Function: Retrieve a temporary directory name (which is created)
  Returns : string which is the name of the temporary directory
  Args    : none
-
 
 =cut
 
@@ -633,7 +616,6 @@ sub aformat{
  Returns : none
  Args    : none
 
-
 =cut
 
 =head2 io
@@ -644,7 +626,8 @@ sub aformat{
  Returns : L<Bio::Root::IO>
  Args    : none
 
-
 =cut
 
-1; # Needed to keep compiler happy
+1;    # Needed to keep compiler happy
+
+__END__
