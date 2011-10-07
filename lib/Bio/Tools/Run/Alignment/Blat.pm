@@ -1,4 +1,3 @@
-# $Id$
 #
 # Copyright Balamurugan Kumarasamy
 #
@@ -11,15 +10,11 @@ Bio::Tools::Run::Alignment::Blat
 
 =head1 SYNOPSIS
 
-Build a Blat factory.
+ use Bio::Tools::Run::Alignment::Blat;
 
-  use Bio::Tools::Run::Alignment::Blat;
-
-  my $factory = Bio::Tools::Run::Alignment::Blat->new();
-
-  # Pass the factory a Bio::Seq object
-  # @feats is an array of Bio::SeqFeature::Generic objects
-  my @feats = $factory->run($seq,$DB);
+ my $factory = Bio::Tools::Run::Alignment::Blat->new(-db => $database);
+ # $report is a SearchIO-compliant object
+ my $report = $factory->align($seqobj);
 
 =head1 DESCRIPTION
 
@@ -107,6 +102,7 @@ our ($PROGRAM, $PROGRAMDIR, $PROGRAMNAME);
 our %BLAT_PARAMS = map {$_ => 1} qw(ooc t q tileSize stepSize oneOff
     minMatch minScore minIdentity maxGap makeOoc repmatch mask qMask repeats
     minRepeatsDivergence dots out maxIntron);
+
 our %BLAT_SWITCHES = map {$_ => 1} qw(prot noHead trimT noTrimA trimHardA
                                     fastMap fine extendThroughN);
 
