@@ -5,7 +5,7 @@ use strict;
 
 BEGIN { 
   use Bio::Root::Test;
-  test_begin(-tests => 38);
+  test_begin(-tests => 39);
   
   use_ok('Bio::Tools::Run::Alignment::Blat');
   use_ok('Bio::SeqIO');
@@ -22,7 +22,7 @@ my $blat_present = $factory->executable();
 
 SKIP: {
     test_skip(-requires_executable => $factory,
-              -tests => 23);
+              -tests => 24);
     
     my $searchio = $factory->align($query);
     my $result = $searchio->next_result;
@@ -33,8 +33,9 @@ SKIP: {
     is($hsp->query->end,1775);
     is($hsp->hit->start,1);
     is($hsp->hit->end,1775);
-    my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');
-    
+    is($hsp->hsp_length,1775);
+
+    my $sio = Bio::SeqIO->new(-file=>$query,-format=>'fasta');    
     my $seq  = $sio->next_seq ;
     
     $searchio = $factory->align($seq);
