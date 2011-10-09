@@ -1,13 +1,12 @@
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
-## $Id$
 
 use strict;
 use vars qw($DEBUG);
 $DEBUG = test_debug();
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 17);
+    test_begin(-tests => 19);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::ProtDist');
 	use_ok('Bio::Tools::Run::Phylo::Phylip::Neighbor');
 }
@@ -99,14 +98,14 @@ SKIP: {
 	$protdist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new();
 	($matrix) = $protdist_factory->create_distance_matrix($aln_safe);
 	$tree_factory->outgroup(undef);
-	($tree) = $tree_factory->create_tree($matrix);
+	my ($tree2) = $tree_factory->create_tree($matrix);
 	@nodes = sort { defined $a->id && 
 				defined $b->id &&
-				$a->id cmp $b->id } $tree->get_nodes();
-	is ($nodes[12]->id, 'S01',"failed to assign serial names");
+				$a->id cmp $b->id } $tree2->get_nodes();
+	is ($nodes[2]->id, 'S01',"failed to assign serial names");
 	foreach my $nd (@nodes){
 	  $nd->id($ref_name->{$nd->id_output}) if $nd->is_Leaf;
 	}
-	is ($nodes[12]->id, 'Spar_21273',"failed to restore original names");
+	is ($nodes[2]->id, 'Spar_21273',"failed to restore original names");
 	
 }
