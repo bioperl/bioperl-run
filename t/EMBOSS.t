@@ -1,9 +1,8 @@
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
-## $Id$
 
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.t'
+# Before `./Build install' is performed this script should be runnable with
+# `./Build test'. After `./Build install' it should work as `perl test.t'
 
 use strict;
 BEGIN {
