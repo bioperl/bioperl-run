@@ -1,12 +1,11 @@
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
-## $Id$
 
 use strict;
 
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 9,
+    test_begin(-tests => 8,
 			   -requires_module => 'IO::String');
 	use_ok('Bio::Tools::Run::Phylo::Phylip::Consense');
 	use_ok('Bio::AlignIO');
@@ -18,13 +17,13 @@ my $sb_factory = Bio::Tools::Run::Phylo::Phylip::Consense->new(-verbose => $verb
 
 SKIP: {
 	test_skip(-requires_executable => $sb_factory,
-             -tests => 7);
+             -tests => 6);
 
 	isa_ok($sb_factory,'Bio::Tools::Run::Phylo::Phylip::Consense');
 	
 	$sb_factory->rooted(1);
 	
-	is $sb_factory->rooted, 1, "coludn't set rooted option";
+	is $sb_factory->rooted, 1, "could not set rooted option";
 
 	$sb_factory->quiet($verbose);  # Suppress protpars messages to terminal 
 	
