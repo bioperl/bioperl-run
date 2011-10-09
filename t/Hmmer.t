@@ -86,7 +86,7 @@ SKIP: {
    @params = ('HMM'=>$hmmout,'program'=>'hmmbuild', -verbose => $verbose, -quiet => $quiet);
    $factory = Bio::Tools::Run::Hmmer->new(@params);
    isa_ok $factory, 'Bio::Tools::Run::Hmmer';
-   is $factory->quiet, 1;
+   is $factory->quiet, $quiet;
    my $aln_file = test_input_file('cysprot.msf');
    my $aio = Bio::AlignIO->new(-file=>$aln_file,-format=>'msf');
    my $aln = $aio->next_aln;
