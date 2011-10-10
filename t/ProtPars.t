@@ -1,6 +1,5 @@
 # -*-Perl-*-
 ## Bioperl Test Harness Script for Modules
-## $Id$
 
 use vars qw($DEBUG );
 $DEBUG = test_debug();
@@ -32,7 +31,6 @@ SKIP: {
 	
 	my $new_outgroup= $tree_factory->outgroup();
 	is $new_outgroup, 3, "set factory parameter";
-	
 	
 	my $jumble = "7,5";
 	$tree_factory->jumble($jumble);
@@ -67,18 +65,17 @@ SKIP: {
 		$tree = $tree_factory->create_tree($aln);
 		
 		@nodes = sort { defined $a->id && defined $b->id && $a->id cmp $b->id } $tree->get_nodes();
-		is (scalar(@nodes),5,
-			"creating tree by protpars");
+		is (scalar(@nodes),5, "creating tree by protpars");
 		
 		# test name preservation and restoration:
 		@params = ('threshold'=>10,'jumble'=>'7,5',outgroup=>2,'idlength'=>10);
 		$tree_factory = Bio::Tools::Run::Phylo::Phylip::ProtPars->new(@params);
 		$tree_factory->quiet($bequiet);  # Suppress protpars messages to terminal 
 		$inputfilename = test_input_file("longnames.aln");
-		$aln = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
-		my ($aln_safe, $ref_name) =$aln->set_displayname_safe(3);
-		$tree = $tree_factory->create_tree($aln_safe);
-		@nodes = sort { $a->id cmp $b->id } $tree->get_nodes();
+		my $aln2 = Bio::AlignIO->new(-file=>$inputfilename, -format=>'clustalw')->next_aln;
+		my ($aln_safe, $ref_name) = $aln2->set_displayname_safe(3);
+		my $tree2 = $tree_factory->create_tree($aln_safe);
+		@nodes = sort { $a->id cmp $b->id } $tree2->get_nodes();
 		is (scalar(@nodes),27,
 			"creating tree by protpars");
 		is ($nodes[12]->id, 'S01',"assign serial names");

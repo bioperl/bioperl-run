@@ -1,7 +1,6 @@
 # This is -*-Perl-*- code
 ## Bioperl Test Harness Script for Modules
 ##
-# $Id$
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.t'
@@ -25,13 +24,11 @@ SKIP: {
 			  -tests => 1);
 	
 	my $alignio = Bio::AlignIO->new(-format => 'fasta',
-									-file   => 't/data/njtree_aln2.nucl.mfa');
-	
+									-file   => test_input_file('njtree_aln2.nucl.mfa'));
 	my $aln = $alignio->next_aln;
 	
 	my $treeio = Bio::TreeIO->new(
-		-format => 'nhx', -file => 't/data/species_tree_njtree.nh');
-	
+		-format => 'nhx', -file => test_input_file('species_tree_njtree.nh'));
 	my $tree = $treeio->next_tree;
 	
 	$njtree_best->alignment($aln);
