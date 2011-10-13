@@ -270,6 +270,8 @@ sub new {
     $self->bootstrap($bootstrap)             if $bootstrap;
     $self->mpi($mpi)                         if $mpi;
 
+    $self->program_name('phyml-mpi') if $self->mpi;
+
     return $self;
 }
 
@@ -284,7 +286,18 @@ sub new {
 =cut
 
 sub program_name {
-    return $PROGRAM_NAME;
+    my ( $self, $value ) = @_;
+
+      if ( defined($value) ) {
+        if ($value =~ /^phyml(-mpi)?$/ ) {
+            $self->{_program_name} = $value;
+        }
+        else {
+            $self->throw("$value is not a valid program name");
+        }
+    }
+
+    return $self->{_program_name} || $PROGRAM_NAME;
 }
 
 =head2 program_dir
@@ -662,7 +675,7 @@ These methods can be used with PhyML v2* only.
  Title   : opt_topology
  Usage   : $factory->opt_topology(1);
  Function: Choose to optimise the tree topology
- Returns : {y|n} (default y)
+ Returns : 1 or 0. Default is 1.
  Args    : None to get, boolean to set.
 
 v2.* only
@@ -675,13 +688,13 @@ sub opt_topology {
       if $self->version && $self->version >= 3;
     if ( defined($value) ) {
         if ($value) {
-            $self->{_opt_topology} = 'y';
+            $self->{_opt_topology} = 1;
         }
         else {
-            $self->{_opt_topology} = 'n';
+            $self->{_opt_topology} = 0;
         }
     }
-    return $self->{_opt_topology} || 'y';
+    return $self->{_opt_topology} || 1;
 }
 
 =head2 opt_lengths
@@ -689,7 +702,7 @@ sub opt_topology {
  Title   : opt_lengths
  Usage   : $factory->opt_lengths(0);
  Function: Choose to  optimise branch lengths and rate parameters
- Returns : {y|n} (default y)
+ Returns : 1 or 0. Default is 1.
  Args    : None to get, boolean to set.
 
 
@@ -703,13 +716,13 @@ sub opt_lengths {
       if $self->version && $self->version >= 3;
     if ( defined($value) ) {
         if ($value) {
-            $self->{_opt_lengths} = 'y';
+            $self->{_opt_lengths} = 1;
         }
         else {
-            $self->{_opt_lengths} = 'n';
+            $self->{_opt_lengths} = 0;
         }
     }
-    return $self->{_opt_lengths} || 'y';
+    return $self->{_opt_lengths} || 1;
 }
 
 =head2 v3 options
@@ -1007,6 +1020,7 @@ sub _setparams {
 
     if ( $self->version >= 3 ) {
 
+        # version 3 or higher
         $param_string = ' -d ' . $self->data_type;
 
         $param_string .= ' -q ' if $self->data_format eq 's';
@@ -1037,11 +1051,12 @@ sub _setparams {
         }
 
         $param_string .= ' --no_memory_check '
-          if $self->no_memory_check =~ /y/i;
+          if $self->no_memory_check;
 
     }
     else {
 
+        # version 2
         $param_string = ' ' . $self->data_type;
         $param_string .= ' ' . $self->data_format;
         $param_string .= ' ' . $self->dataset_count;
