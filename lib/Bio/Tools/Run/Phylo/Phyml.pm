@@ -249,7 +249,7 @@ sub new {
         %args
       );
 
-    $self->program_name('phyml-mpi') if $self->mpi;
+    $self->program_name('phyml-mpi')         if $self->mpi;
 
     $self->data_type($data_type)             if $data_type;
     $self->data_format($data_format)         if $data_format;
@@ -288,16 +288,16 @@ sub new {
 sub program_name {
     my ( $self, $value ) = @_;
 
-      if ( defined($value) ) {
-        if ($value =~ /^phyml(-mpi)?$/ ) {
-            $self->{_program_name} = $value;
-        }
-        else {
-            $self->throw("$value is not a valid program name");
-        }
+    if ( defined($value) ) {
+      if ( $value =~ /^phyml(-mpi)?$/ ) {
+        $self->{_program_name} = $value;
+        $PROGRAM_NAME = $value;
+      } else {
+        $self->throw("$value is not a valid program name");
+      }
     }
 
-    return $self->{_program_name} || $PROGRAM_NAME;
+    $PROGRAM_NAME;
 }
 
 =head2 program_dir
