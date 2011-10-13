@@ -249,6 +249,8 @@ sub new {
         %args
       );
 
+    $self->program_name('phyml-mpi') if $self->mpi;
+
     $self->data_type($data_type)             if $data_type;
     $self->data_format($data_format)         if $data_format;
     $self->dataset_count($dataset_count)     if $dataset_count;
@@ -269,8 +271,6 @@ sub new {
     $self->no_memory_check($no_memory_check) if $no_memory_check;
     $self->bootstrap($bootstrap)             if $bootstrap;
     $self->mpi($mpi)                         if $mpi;
-
-    $self->program_name('phyml-mpi') if $self->mpi;
 
     return $self;
 }
