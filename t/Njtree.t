@@ -28,7 +28,8 @@ SKIP: {
 	my $aln = $alignio->next_aln;
 	
 	my $treeio = Bio::TreeIO->new(
-		-format => 'nhx', -file => test_input_file('species_tree_njtree.nh'));
+		-format => 'nhx', 
+		-file => test_input_file('species_tree_njtree.nh'));
 	my $tree = $treeio->next_tree;
 	
 	$njtree_best->alignment($aln);

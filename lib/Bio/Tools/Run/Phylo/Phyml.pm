@@ -154,29 +154,30 @@ use strict;
 use Bio::AlignIO;
 use File::Copy;
 use File::Spec;
-
 use Bio::TreeIO;
 
 use base qw(Bio::Tools::Run::WrapperBase);
 
 our $PROGRAM_NAME = 'phyml';
-our $PROGRAM_DIR = $ENV{'PHYMLDIR'};
-
-
+our $PROGRAM_DIR  = $ENV{'PHYMLDIR'};
 
 # valid substitution model names
 our $models;
+
 # DNA
 map { $models->{0}->{$_} = 1 } qw(JC69 K2P F81 HKY F84 TN93 GTR);
+
 # protein
 map { $models->{1}->{$_} = 1 } qw(JTT MtREV Dayhoff WAG);
 
 our $models3;
+
 # DNA
 map { $models3->{'nt'}->{$_} = 1 } qw(HKY85 JC69 K80 F81 F84 TN93 GTR );
+
 # protein
 map { $models3->{'aa'}->{$_} = 1 }
-    qw(LG WAG JTT MtREV Dayhoff DCMut RtREV CpREV VT Blosum62 MtMam MtArt HIVw  HIVb );
+  qw(LG WAG JTT MtREV Dayhoff DCMut RtREV CpREV VT Blosum62 MtMam MtArt HIVw  HIVb );
 
 =head2 new
 
@@ -193,70 +194,81 @@ map { $models3->{'aa'}->{$_} = 1 }
            -category_number => integer,              [1]
            -alpha           => 'e' or float (int v3),[e]
            -tree            => 'BIONJ' or your own,  [BION]
-           -opt_topology    => boolean               [y]
-           -opt_lengths     => boolean               [y]
-           -no_memory_check => boolean               [y]
            -bootstrap       => integer               [123]
+           -opt_topology    => boolean               [1]
+           -opt_lengths     => boolean               [1]
+           -no_memory_check => boolean               [1]
+           -mpi             => boolean               [1]
 
 =cut
 
 sub new {
-    my ($class, @args) = @_;
+    my ( $class, @args ) = @_;
     my $self = $class->SUPER::new(@args);
 
     # for consistency with other run modules, allow params to be dashless
     my %args = @args;
-    while (my ($key, $val) = each %args) {
-        if ($key !~ /^-/) {
+    while ( my ( $key, $val ) = each %args ) {
+        if ( $key !~ /^-/ ) {
             delete $args{$key};
-            $args{'-'.$key} = $val;
+            $args{ '-' . $key } = $val;
         }
     }
 
-    my ($data_type, $data_format, $dataset_count, $model, $freq, $kappa, $invar,
-	$category_number, $alpha, $tree, $opt_topology,
-	$opt_lengths, $opt, $search, $rand_start, $rand_starts, $rand_seed,
-  $no_memory_check, $bootstrap )
-        = $self->_rearrange([qw( DATA_TYPE
-				 DATA_FORMAT
-				 DATASET_COUNT
-				 MODEL
-				 FREQ
-				 KAPPA
-				 INVAR
-				 CATEGORY_NUMBER
-				 ALPHA
-				 TREE
-				 OPT_TOPOLOGY
-				 OPT_LENGTHS
-				 OPT
-				 SEARCH
-				 RAND_START
-				 RAND_STARTS
-				 RAND_SEED
-         NO_MEMORY_CHECK
-         BOOTSTRAP
-			      )], %args);
+    my (
+        $data_type, $data_format,     $dataset_count, $model,
+        $freq,      $kappa,           $invar,         $category_number,
+        $alpha,     $tree,            $opt_topology,  $opt_lengths,
+        $opt,       $search,          $rand_start,    $rand_starts,
+        $rand_seed, $no_memory_check, $bootstrap,     $mpi
+      )
+      = $self->_rearrange(
+        [
+            qw( DATA_TYPE
+              DATA_FORMAT
+              DATASET_COUNT
+              MODEL
+              FREQ
+              KAPPA
+              INVAR
+              CATEGORY_NUMBER
+              ALPHA
+              TREE
+              OPT_TOPOLOGY
+              OPT_LENGTHS
+              OPT
+              SEARCH
+              RAND_START
+              RAND_STARTS
+              RAND_SEED
+              NO_MEMORY_CHECK
+              BOOTSTRAP
+              MPI
+              )
+        ],
+        %args
+      );
 
-    $self->data_type($data_type) if $data_type;
-    $self->data_format($data_format) if $data_format;
-    $self->dataset_count($dataset_count) if $dataset_count;
-    $self->model($model) if $model;
-    $self->freq($freq) if $freq;
-    $self->kappa($kappa) if $kappa;
-    $self->invar($invar) if $invar;
+    $self->data_type($data_type)             if $data_type;
+    $self->data_format($data_format)         if $data_format;
+    $self->dataset_count($dataset_count)     if $dataset_count;
+    $self->model($model)                     if $model;
+    $self->freq($freq)                       if $freq;
+    $self->kappa($kappa)                     if $kappa;
+    $self->invar($invar)                     if $invar;
     $self->category_number($category_number) if $category_number;
-    $self->alpha($alpha) if $alpha;
-    $self->tree($tree) if $tree;
-    $self->opt_topology($opt_topology) if $opt_topology;
-    $self->opt_lengths($opt_lengths) if $opt_lengths;
-    $self->opt($opt) if $opt;
-    $self->search($search) if $search;
-    $self->rand_start($rand_start) if $rand_start;
-    $self->rand_starts($rand_starts) if $rand_starts;
-    $self->rand_seed($rand_seed) if $rand_seed;
+    $self->alpha($alpha)                     if $alpha;
+    $self->tree($tree)                       if $tree;
+    $self->opt_topology($opt_topology)       if $opt_topology;
+    $self->opt_lengths($opt_lengths)         if $opt_lengths;
+    $self->opt($opt)                         if $opt;
+    $self->search($search)                   if $search;
+    $self->rand_start($rand_start)           if $rand_start;
+    $self->rand_starts($rand_starts)         if $rand_starts;
+    $self->rand_seed($rand_seed)             if $rand_seed;
     $self->no_memory_check($no_memory_check) if $no_memory_check;
-    $self->bootstrap($bootstrap) if $bootstrap;
+    $self->bootstrap($bootstrap)             if $bootstrap;
+    $self->mpi($mpi)                         if $mpi;
 
     return $self;
 }
@@ -311,17 +323,17 @@ sub version {
 
     return $self->{'_version'} if defined $self->{'_version'};
     my $exe = $self->executable || return;
-    my $string = substr `$exe -h`, 0, 40 ;
+    my $string = substr `$exe -h`, 0, 40;
     my ($version) = $string =~ /PhyML v([\d+\.]+)/;
-    if ( ! $version ) {
-      $string =~ /PhyML\s+(\d{8})/;
-      # 3 was released August 2008
-      $version = 3 if ( $1 && $1 >= 20080801 );
+    if ( !$version ) {
+        $string =~ /PhyML\s+(\d{8})/;
+
+        # 3 was released August 2008
+        $version = 3 if ( $1 && $1 >= 20080801 );
     }
     $self->{'_version'} = $version;
-    $version ? (return $version) : return '2.44'
+    $version ? ( return $version ) : return '2.44';
 }
-
 
 =head2 run
 
@@ -337,19 +349,20 @@ sub version {
 =cut
 
 sub run {
-    my ($self, $in) = @_;
+    my ( $self, $in ) = @_;
 
-    if (ref $in && $in->isa("Bio::Align::AlignI")) {
+    if ( ref $in && $in->isa("Bio::Align::AlignI") ) {
         $in = $self->_write_phylip_align_file($in);
     }
-    elsif (! -e $in) {
-        $self->throw("When not supplying a Bio::Align::AlignI object, ".
-		     "you must supply a readable filename");
+    elsif ( !-e $in ) {
+        $self->throw( "When not supplying a Bio::Align::AlignI object, "
+              . "you must supply a readable filename" );
     }
-    elsif (-e $in) {
-	copy ($in, $self->tempdir);
-	my $name = File::Spec->splitpath($in); # name is the last item in the array
-	$in = File::Spec->catfile($self->tempdir, $name);
+    elsif ( -e $in ) {
+        copy( $in, $self->tempdir );
+        my $name =
+          File::Spec->splitpath($in);    # name is the last item in the array
+        $in = File::Spec->catfile( $self->tempdir, $name );
     }
 
     return $self->_run($in);
@@ -366,7 +379,7 @@ sub run {
 =cut
 
 sub stats {
-    my $self = shift;;
+    my $self = shift;
     return $self->{_stats};
 }
 
@@ -382,7 +395,7 @@ sub stats {
 =cut
 
 sub tree_string {
-    my $self = shift;;
+    my $self = shift;
     return $self->{_tree};
 }
 
@@ -402,29 +415,31 @@ These methods are used to set and get program parameters before running.
 =cut
 
 sub data_type {
-    my ($self, $value) = @_;
-    if ($self->version && $self->version >= 3 ) {
-	if (defined $value) {
-	    if ($value eq 'nt') {
-		$self->{_data_type} = 'nt';
-	    } else {
-		$self->{_data_type} = 'aa';
-	    }
-	}
-	return 'aa' unless defined $self->{_data_type};
-    } else {
-	if (defined $value) {
-	    if ($value eq 'dna') {
-		$self->{_data_type} = '0';
-	    } else {
-		$self->{_data_type} = '1';
-	    }
-	}
-	return '1' unless defined $self->{_data_type};
+    my ( $self, $value ) = @_;
+    if ( $self->version && $self->version >= 3 ) {
+        if ( defined $value ) {
+            if ( $value eq 'nt' ) {
+                $self->{_data_type} = 'nt';
+            }
+            else {
+                $self->{_data_type} = 'aa';
+            }
+        }
+        return 'aa' unless defined $self->{_data_type};
+    }
+    else {
+        if ( defined $value ) {
+            if ( $value eq 'dna' ) {
+                $self->{_data_type} = '0';
+            }
+            else {
+                $self->{_data_type} = '1';
+            }
+        }
+        return '1' unless defined $self->{_data_type};
     }
     return $self->{_data_type};
 }
-
 
 =head2 data_format
 
@@ -438,11 +453,12 @@ sub data_type {
 =cut
 
 sub data_format {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	$self->throw("PHYLIP format must be 'i' or 's'")
-	    unless $value eq 'i' or $value eq 's';
-	$self->{_data_format} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        $self->throw("PHYLIP format must be 'i' or 's'")
+          unless $value eq 'i'
+              or $value eq 's';
+        $self->{_data_format} = $value;
     }
     return $self->{_data_format} || 'i';
 }
@@ -458,16 +474,14 @@ sub data_format {
 =cut
 
 sub dataset_count {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	die "Invalid positive integer [$value]"
-	    unless $value =~ /^[-+]?\d*$/ and $value > 0;
-	$self->{_dataset_count} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        die "Invalid positive integer [$value]"
+          unless $value =~ /^[-+]?\d*$/ and $value > 0;
+        $self->{_dataset_count} = $value;
     }
     return $self->{_dataset_count} || 1;
 }
-
-
 
 =head2 model
 
@@ -491,39 +505,44 @@ sub dataset_count {
 =cut
 
 sub model {
-    my ($self, $value) = @_;
-    if (defined ($value)) {
-	if ($self->version && $self->version >= 3 ) {
-	    unless ($value =~ /\d{6}/) {
-		$self->throw("Not a valid model name [$value] for current data type (alphabet)")
-		unless $models3->{$self->data_type}->{$value};
-	    }
-	} else {
-	    $self->throw("Not a valid model name [$value] for current data type (alphabet)")
-	    unless $models->{$self->data_type}->{$value};
-	}
-	$self->{_model} = $value;
-    }
-
-    if ($self->{_model}) {
-	return $self->{_model};
-    }
-
-    if ($self->version && $self->version >= 3 ) {
-        if ($self->data_type eq 'aa') {
-            return 'LG'; # protein
-        } else {
-            return 'HKY85'; # DNA
+    my ( $self, $value ) = @_;
+    if ( defined($value) ) {
+        if ( $self->version && $self->version >= 3 ) {
+            unless ( $value =~ /\d{6}/ ) {
+                $self->throw(
+"Not a valid model name [$value] for current data type (alphabet)"
+                ) unless $models3->{ $self->data_type }->{$value};
+            }
         }
-    } else {
-        if ($self->data_type) {
-            return 'JTT'; # protein
-        } else {
-            return 'HKY'; # DNA
+        else {
+            $self->throw(
+"Not a valid model name [$value] for current data type (alphabet)"
+            ) unless $models->{ $self->data_type }->{$value};
+        }
+        $self->{_model} = $value;
+    }
+
+    if ( $self->{_model} ) {
+        return $self->{_model};
+    }
+
+    if ( $self->version && $self->version >= 3 ) {
+        if ( $self->data_type eq 'aa' ) {
+            return 'LG';    # protein
+        }
+        else {
+            return 'HKY85';    # DNA
+        }
+    }
+    else {
+        if ( $self->data_type ) {
+            return 'JTT';      # protein
+        }
+        else {
+            return 'HKY';      # DNA
         }
     }
 }
-
 
 =head2 kappa
 
@@ -536,17 +555,17 @@ sub model {
 =cut
 
 sub kappa {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	die "Invalid number [$value]"
-	    unless $value =~ /^[-+]?\d*\.?\d*$/ or $value eq 'e';
-	$self->{_kappa} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        die "Invalid number [$value]"
+          unless $value =~ /^[-+]?\d*\.?\d*$/
+              or $value eq 'e';
+        $self->{_kappa} = $value;
     }
     return 'e' unless defined $self->{_kappa};
     return 'e' if $self->{_kappa} eq 'e';
-    return sprintf("%.1f", $self->{_kappa});
+    return sprintf( "%.1f", $self->{_kappa} );
 }
-
 
 =head2 invar
 
@@ -559,17 +578,17 @@ sub kappa {
 =cut
 
 sub invar {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	die "Invalid number [$value]"
-	    unless $value =~ /^[-+]?\d*\.\d*$/ or $value eq 'e';
-	$self->{_invar} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        die "Invalid number [$value]"
+          unless $value =~ /^[-+]?\d*\.\d*$/
+              or $value eq 'e';
+        $self->{_invar} = $value;
     }
     return 'e' unless defined $self->{_invar};
     return 'e' if $self->{_invar} eq 'e';
-    return sprintf("%.1f", $self->{_invar});
+    return sprintf( "%.1f", $self->{_invar} );
 }
-
 
 =head2 category_number
 
@@ -582,16 +601,14 @@ sub invar {
 =cut
 
 sub category_number {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	die "Invalid postive integer [$value]"
-	    unless $value =~ /^[+]?\d*$/ and $value > 0;
-	$self->{_category_number} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        die "Invalid postive integer [$value]"
+          unless $value =~ /^[+]?\d*$/ and $value > 0;
+        $self->{_category_number} = $value;
     }
     return $self->{_category_number} || 1;
 }
-
-
 
 =head2 alpha
 
@@ -604,15 +621,16 @@ sub category_number {
 =cut
 
 sub alpha {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	die "Invalid number [$value]"
-	    unless $value =~ /^[-+]?\d*\.?\d*$/ or $value eq 'e';
-	$self->{_alpha} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        die "Invalid number [$value]"
+          unless $value =~ /^[-+]?\d*\.?\d*$/
+              or $value eq 'e';
+        $self->{_alpha} = $value;
     }
     return 'e' unless defined $self->{_alpha};
     return 'e' if $self->{_alpha} eq 'e';
-    return sprintf("%.1f", $self->{_alpha}) || 'e';
+    return sprintf( "%.1f", $self->{_alpha} ) || 'e';
 }
 
 =head2 tree
@@ -625,13 +643,12 @@ sub alpha {
 
 =cut
 
-
 sub tree {
-    my ($self, $value) = @_;
-    if (defined $value) {
-	die "Invalid number [$value]"
-	    unless -e $value or $value eq 'BIONJ';
-	$self->{_tree} = $value;
+    my ( $self, $value ) = @_;
+    if ( defined $value ) {
+        die "Invalid number [$value]"
+          unless -e $value or $value eq 'BIONJ';
+        $self->{_tree} = $value;
     }
     return $self->{_tree} || 'BIONJ';
 }
@@ -653,14 +670,16 @@ v2.* only
 =cut
 
 sub opt_topology {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [opt_topology] for to PhyML v3") if $self->version && $self->version >= 3;
-    if (defined ($value)) {
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [opt_topology] for to PhyML v3")
+      if $self->version && $self->version >= 3;
+    if ( defined($value) ) {
         if ($value) {
-	    $self->{_opt_topology} = 'y';
-	} else {
-	    $self->{_opt_topology} = 'n';
-	}
+            $self->{_opt_topology} = 'y';
+        }
+        else {
+            $self->{_opt_topology} = 'n';
+        }
     }
     return $self->{_opt_topology} || 'y';
 }
@@ -679,14 +698,16 @@ v2.* only
 =cut
 
 sub opt_lengths {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [opt_lengths] for PhyML v3") if $self->version && $self->version >= 3;
-    if (defined ($value)) {
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [opt_lengths] for PhyML v3")
+      if $self->version && $self->version >= 3;
+    if ( defined($value) ) {
         if ($value) {
-	    $self->{_opt_lengths} = 'y';
-	} else {
-	    $self->{_opt_lengths} = 'n';
-	}
+            $self->{_opt_lengths} = 'y';
+        }
+        else {
+            $self->{_opt_lengths} = 'n';
+        }
     }
     return $self->{_opt_lengths} || 'y';
 }
@@ -709,12 +730,15 @@ v3 only.
 =cut
 
 sub freq {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [freq] prior to PhyML v3") if $self->version < 3;
-    if (defined $value) {
-	die "Invalid value [$value]"
-	    unless $value =~ /^[\d\. ]$/ or $value eq 'e' or $value eq 'd';
-	$self->{_freq} = $value;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [freq] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined $value ) {
+        die "Invalid value [$value]"
+          unless $value =~ /^[\d\. ]$/
+              or $value eq 'e'
+              or $value eq 'd';
+        $self->{_freq} = $value;
     }
     return $self->{_freq};
 }
@@ -732,10 +756,11 @@ v3.* only
 =cut
 
 sub opt {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [opt] prior to PhyML v3") if $self->version < 3;
-    if (defined ($value)) {
-	$self->{_opt} = $value if $value =~ /tlr|tl|tr|l|n/;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [opt] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined($value) ) {
+        $self->{_opt} = $value if $value =~ /tlr|tl|tr|l|n/;
     }
     return $self->{_opt} || 'n';
 }
@@ -753,10 +778,11 @@ v3.* only
 =cut
 
 sub search {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [search] prior to PhyML v3") if $self->version < 3;
-    if (defined ($value)) {
-	$self->{_search} = $value if $value =~ /NNI|SPR|BEST/;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [search] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined($value) ) {
+        $self->{_search} = $value if $value =~ /NNI|SPR|BEST/;
     }
     return $self->{_search} || 'NNI';
 }
@@ -773,20 +799,20 @@ v3.* only; only meaningful if $prog-E<gt>search is 'SPR'
 
 =cut
 
-
 sub rand_start {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [rand_start] prior to PhyML v3") if $self->version < 3;
-    if (defined ($value)) {
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [rand_start] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined($value) ) {
         if ($value) {
-	    $self->{_rand_start} = 1;
-	} else {
-	    $self->{_rand_start} = 0;
-	}
+            $self->{_rand_start} = 1;
+        }
+        else {
+            $self->{_rand_start} = 0;
+        }
     }
     return $self->{_rand_start} || 0;
 }
-
 
 =head2 rand_starts
 
@@ -801,16 +827,16 @@ v3.* only; only valid if $prog-E<gt>search is 'SPR'
 =cut
 
 sub rand_starts {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [rand_starts] prior to PhyML v3") if $self->version < 3;
-    if (defined $value) {
-	die "Invalid number [$value]"
-	    unless $value =~ /^[-+]?\d+$/;
-	$self->{_rand_starts} = $value;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [rand_starts] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined $value ) {
+        die "Invalid number [$value]"
+          unless $value =~ /^[-+]?\d+$/;
+        $self->{_rand_starts} = $value;
     }
     return $self->{_rand_starts} || 1;
 }
-
 
 =head2 rand_seed
 
@@ -827,12 +853,13 @@ Uses perl rand() to initialize if not explicitely set.
 =cut
 
 sub rand_seed {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [rand_seed] prior to PhyML v3") if $self->version < 3;
-    if (defined $value) {
-	die "Invalid number [$value]"
-	    unless $value =~ /^[-+]?\d+$/;
-	$self->{_rand_seed} = $value;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [rand_seed] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined $value ) {
+        die "Invalid number [$value]"
+          unless $value =~ /^[-+]?\d+$/;
+        $self->{_rand_seed} = $value;
     }
     return $self->{_rand_seed} || int rand 1000000;
 }
@@ -842,19 +869,47 @@ sub rand_seed {
  Title   : no_memory_check
  Usage   : $factory->no_memory_check(1);
  Function: 
- Returns : 
+ Returns : boolean (defaults to false)
  Args    : None to get, integer to set.
 
 =cut
 
 sub no_memory_check {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [no_memory_check] prior to PhyML v3") if $self->version < 3;
-    if (defined $value) {
-  die "Invalid boolean [$value]" unless $value =~ /^[yn]$/i;
-  $self->{_no_memory_check} = $value;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [no_memory_check] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined($value) ) {
+        if ($value) {
+            $self->{_rand_start} = 1;
+        }
+        else {
+            $self->{_rand_start} = 0;
+        }
     }
-    return $self->{_no_memory_check};
+    return $self->{_no_memory_check} || 0;
+}
+
+=head2 mpi
+
+ Title   : mpi
+ Usage   : $factory->mpi(1);
+ Function: 
+ Returns : boolean (defaults to false)
+ Args    : None to get, integer to set. 
+
+=cut
+
+sub mpi {
+    my ( $self, $value ) = @_;
+    if ( defined($value) ) {
+        if ($value) {
+            $self->{_mpi} = 1;
+        }
+        else {
+            $self->{_mpi} = 0;
+        }
+    }
+    return $self->{_mpi} || 0;
 }
 
 =head2 bootstrap
@@ -868,11 +923,12 @@ sub no_memory_check {
 =cut
 
 sub bootstrap {
-    my ($self, $value) = @_;
-    $self->throw("Not a valid parameter [bootstrap] prior to PhyML v3") if $self->version < 3;
-    if (defined $value) {
-  die "Invalid number [$value]" unless $value =~ /^\d+$/;
-  $self->{_bootstrap} = $value;
+    my ( $self, $value ) = @_;
+    $self->throw("Not a valid parameter [bootstrap] prior to PhyML v3")
+      if $self->version < 3;
+    if ( defined $value ) {
+        die "Invalid number [$value]" unless $value =~ /^\d+$/;
+        $self->{_bootstrap} = $value;
     }
     return $self->{_bootstrap};
 }
@@ -884,17 +940,20 @@ These methods are private and should not be called outside this class.
 =cut
 
 sub _run {
-    my ($self, $file)= @_;
+    my ( $self, $file ) = @_;
 
     my $exe = $self->executable || return;
+    $exe .= '-mpi' if $self->mpi;
+
     my $command;
     my $output_stat_file;
-    if ($self->version >= 3 ) {
-	$command = $exe. " -i $file". $self->_setparams;
-	$output_stat_file = '_phyml_stats.txt';
-    } else {
-	$command = $exe. " $file ". $self->arguments. $self->_setparams;
-	$output_stat_file = '_phyml_stat.txt';
+    if ( $self->version >= 3 ) {
+        $command          = $exe . " -i $file" . $self->_setparams;
+        $output_stat_file = '_phyml_stats.txt';
+    }
+    else {
+        $command = $exe . " $file " . $self->arguments . $self->_setparams;
+        $output_stat_file = '_phyml_stat.txt';
     }
 
     $self->debug("Phyml command = $command\n");
@@ -902,34 +961,35 @@ sub _run {
 
     # stats
     {
-	my $stat_file =  $file. $output_stat_file;
-	open(my $FH_STAT, "<", $stat_file)
-	    || $self->throw("Phyml call ($command) did not give an output [$stat_file]: $?");
-	local $/;
-	$self->{_stats} .= <$FH_STAT>;
+        my $stat_file = $file . $output_stat_file;
+        open( my $FH_STAT, "<", $stat_file )
+          || $self->throw(
+            "Phyml call ($command) did not give an output [$stat_file]: $?");
+        local $/;
+        $self->{_stats} .= <$FH_STAT>;
     }
+
     #print $self->{stats};
 
     # tree
-    my $tree_file =  $file. '_phyml_tree.txt';
+    my $tree_file = $file . '_phyml_tree.txt';
     {
-	open(my $FH_TREE, "<", $tree_file)
-	    || $self->throw("Phyml call ($command) did not give an output: $?");
-	local $/;
-	$self->{_tree} .= <$FH_TREE>;
+        open( my $FH_TREE, "<", $tree_file )
+          || $self->throw("Phyml call ($command) did not give an output: $?");
+        local $/;
+        $self->{_tree} .= <$FH_TREE>;
     }
 
-    open(my $FH_TREE, "<", $tree_file)
-	|| $self->throw("Phyml call ($command) did not give an output: $?");
+    open( my $FH_TREE, "<", $tree_file )
+      || $self->throw("Phyml call ($command) did not give an output: $?");
 
-    my $treeio = Bio::TreeIO->new(-format => 'nhx', -fh => $FH_TREE);
+    my $treeio = Bio::TreeIO->new( -format => 'nhx', -fh => $FH_TREE );
     my $tree = $treeio->next_tree;
 
     # could be faster to parse the tree only if needed?
 
     return $tree;
 }
-
 
 =head2 _setparams
 
@@ -976,7 +1036,8 @@ sub _setparams {
             $param_string .= ' --r_seed ' . $self->rand_seed;
         }
 
-        $param_string .= ' --no_memory_check ' if $self->no_memory_check =~ /y/i;
+        $param_string .= ' --no_memory_check '
+          if $self->no_memory_check =~ /y/i;
 
     }
     else {
@@ -984,10 +1045,10 @@ sub _setparams {
         $param_string = ' ' . $self->data_type;
         $param_string .= ' ' . $self->data_format;
         $param_string .= ' ' . $self->dataset_count;
-        $param_string .= ' 0';    # no bootstrap sets
+        $param_string .= ' 0';                         # no bootstrap sets
         $param_string .= ' ' . $self->model;
 
-        unless ( $self->data_type ) {    # only for DNA
+        unless ( $self->data_type ) {                  # only for DNA
             $param_string .= ' ' . $self->kappa;
         }
 
@@ -1017,14 +1078,16 @@ sub _setparams {
 =cut
 
 sub _write_phylip_align_file {
-    my ($self, $align) = @_;
+    my ( $self, $align ) = @_;
 
-    my $tempfile = File::Spec->catfile($self->tempdir, "aln$$.phylip");
+    my $tempfile = File::Spec->catfile( $self->tempdir, "aln$$.phylip" );
     $self->data_format('i');
-    my $out = Bio::AlignIO->new('-file'     => ">$tempfile",
-				'-format' => 'phylip',
-				'-interleaved' => 0,
-				'-longid' => 1 );
+    my $out = Bio::AlignIO->new(
+        '-file'        => ">$tempfile",
+        '-format'      => 'phylip',
+        '-interleaved' => 0,
+        '-longid'      => 1
+    );
     $out->write_aln($align);
     $out->close();
     $out = undef;
