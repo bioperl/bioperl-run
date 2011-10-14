@@ -249,8 +249,6 @@ sub new {
         %args
       );
 
-    $self->program_name('phyml-mpi')         if $self->mpi;
-
     $self->data_type($data_type)             if $data_type;
     $self->data_format($data_format)         if $data_format;
     $self->dataset_count($dataset_count)     if $dataset_count;
@@ -289,8 +287,7 @@ sub program_name {
     my ( $self, $value ) = @_;
 
     if ( defined($value) ) {
-      if ( $value =~ /^phyml(-mpi)?$/ ) {
-        $self->{_program_name} = $value;
+      if ( $value =~ /^$PROGRAM_NAME[-a-z]*$/ ) {
         $PROGRAM_NAME = $value;
       } else {
         $self->throw("$value is not a valid program name");
