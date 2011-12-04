@@ -37,7 +37,8 @@ SKIP: {
 
     # The input could be an alignment file (fasta or phylip interleaved)
     my $alignfile = test_input_file("sample_dataset_1_aligned.fa");
-    $tree = $ft->run($alignfile);
+    my $fastft = Bio::Tools::Run::Phylo::FastTree->new( -quiet => 1, -fastest => 1 );
+    $tree = $fastft->run($alignfile);
     ok defined($tree);
 
     # Input is protein sequence alignment

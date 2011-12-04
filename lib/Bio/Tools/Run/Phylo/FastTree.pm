@@ -16,10 +16,21 @@ Bio::Tools::Run::Phylo::FastTree
 =head1 SYNOPSIS
 
   # Build a FastTree factory
-  $factory = Bio::Tools::Run::Phylo::FastTree->new();
+  $factory = Bio::Tools::Run::Phylo::FastTree->new(-quiet => 1,
+                                                   -fastest => 1);
+
+  # Get an alignment
+  my $alignio = Bio::AlignIO->new(
+        -format => 'fasta',
+        -file   => '219877.cdna.fasta');
+  my $alnobj = $alignio->next_aln;
+
+  # Analzye the aligment and get a Tree
+  my $tree = $factory->run($alnobj);
 
 =head1 DESCRIPTION
 
+Get a Bio::Tree object given a protein or DNA alignment.
 
 =head1 FEEDBACK
 
@@ -72,7 +83,6 @@ use Bio::Root::IO;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-our %DEFAULTS = ( 'AFORMAT' => 'phylip' );
 our @FastTree_PARAMS = qw(log cat n intree intree1 constraints sprlength topm close 
     refresh constraintWeight);
 our @FastTree_SWITCHES = qw(quiet nopr nt fastest slow nosupport pseudo gtr wag quote noml 
@@ -94,8 +104,6 @@ our $PROGRAM_NAME = 'FastTree';
 sub new {
     my ( $class, @args ) = @_;
     my $self = $class->SUPER::new(@args);
-
-    $self->aformat( $DEFAULTS{'AFORMAT'} );
 
     $self->_set_from_args(
         \@args,
@@ -277,22 +285,6 @@ sub _write_alignfile {
     $tempfile;
 }
     
-=head2 aformat
-
- Title   : aformat
- Usage   : my $treeformat = $self->aformat();
- Function: Get/Set tree format
- Returns : string
- Args    : string
-
-=cut
-
-sub aformat {
-    my $self = shift;
-    $self->{'_aformat'} = shift if @_;
-    $self->{'_aformat'};
-}
-
 =head2 _alphabet
 
  Title   : _alphabet
