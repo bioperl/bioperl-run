@@ -1,4 +1,4 @@
-#
+me#
 # BioPerl module for Bio::Tools::Run::Phylo::Phyml
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
@@ -894,10 +894,10 @@ sub no_memory_check {
       if $self->version < 3;
     if ( defined($value) ) {
         if ($value) {
-            $self->{_memory_check} = 1;
+            $self->{_no_memory_check} = 1;
         }
         else {
-            $self->{_memory_check} = 0;
+            $self->{_no_memory_check} = 0;
         }
     }
     return $self->{_no_memory_check} || 0;

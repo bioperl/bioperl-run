@@ -1,4 +1,4 @@
-# $Id$
+#
 # BioPerl module for Bio::Tools::Run::Phylo::LVB
 #
 # Created by Daniel Barker, based on ProtPars.pm by Shawn Hoon 
