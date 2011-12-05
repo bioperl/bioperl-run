@@ -894,10 +894,10 @@ sub no_memory_check {
       if $self->version < 3;
     if ( defined($value) ) {
         if ($value) {
-            $self->{_rand_start} = 1;
+            $self->{_memory_check} = 1;
         }
         else {
-            $self->{_rand_start} = 0;
+            $self->{_memory_check} = 0;
         }
     }
     return $self->{_no_memory_check} || 0;
