@@ -198,7 +198,6 @@ map { $models3->{'aa'}->{$_} = 1 }
            -opt_topology    => boolean               [1]
            -opt_lengths     => boolean               [1]
            -no_memory_check => boolean               [1]
-           -mpi             => boolean               [1]
            -program_name    => string
 
 =cut
@@ -221,8 +220,7 @@ sub new {
         $freq,      $kappa,           $invar,         $category_number,
         $alpha,     $tree,            $opt_topology,  $opt_lengths,
         $opt,       $search,          $rand_start,    $rand_starts,
-        $rand_seed, $no_memory_check, $bootstrap,     $mpi,
-        $program_name
+        $rand_seed, $no_memory_check, $bootstrap,     $program_name
       )
       = $self->_rearrange(
         [
@@ -245,7 +243,6 @@ sub new {
               RAND_SEED
               NO_MEMORY_CHECK
               BOOTSTRAP
-              MPI
               PROGRAM_NAME
               )
         ],
@@ -271,7 +268,6 @@ sub new {
     $self->rand_seed($rand_seed)             if $rand_seed;
     $self->no_memory_check($no_memory_check) if $no_memory_check;
     $self->bootstrap($bootstrap)             if $bootstrap;
-    $self->mpi($mpi)                         if $mpi;
     $self->program_name($program_name)       if $program_name;
 
     return $self;
@@ -903,29 +899,6 @@ sub no_memory_check {
     return $self->{_no_memory_check} || 0;
 }
 
-=head2 mpi
-
- Title   : mpi
- Usage   : $factory->mpi(1);
- Function: 
- Returns : boolean (defaults to false)
- Args    : None to get, integer to set. 
-
-=cut
-
-sub mpi {
-    my ( $self, $value ) = @_;
-    if ( defined($value) ) {
-        if ($value) {
-            $self->{_mpi} = 1;
-        }
-        else {
-            $self->{_mpi} = 0;
-        }
-    }
-    return $self->{_mpi} || 0;
-}
-
 =head2 bootstrap
 
  Title   : bootstrap
@@ -957,7 +930,6 @@ sub _run {
     my ( $self, $file ) = @_;
 
     my $exe = $self->executable || return;
-    $exe .= '-mpi' if $self->mpi;
 
     my $command;
     my $output_stat_file;
