@@ -1,4 +1,4 @@
-me#
+#
 # BioPerl module for Bio::Tools::Run::Phylo::Phyml
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
