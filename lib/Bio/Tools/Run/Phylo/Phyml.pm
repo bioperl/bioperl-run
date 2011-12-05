@@ -199,6 +199,7 @@ map { $models3->{'aa'}->{$_} = 1 }
            -opt_lengths     => boolean               [1]
            -no_memory_check => boolean               [1]
            -mpi             => boolean               [1]
+           -program_name    => string
 
 =cut
 
@@ -220,7 +221,8 @@ sub new {
         $freq,      $kappa,           $invar,         $category_number,
         $alpha,     $tree,            $opt_topology,  $opt_lengths,
         $opt,       $search,          $rand_start,    $rand_starts,
-        $rand_seed, $no_memory_check, $bootstrap,     $mpi
+        $rand_seed, $no_memory_check, $bootstrap,     $mpi,
+        $program_name
       )
       = $self->_rearrange(
         [
@@ -244,6 +246,7 @@ sub new {
               NO_MEMORY_CHECK
               BOOTSTRAP
               MPI
+              PROGRAM_NAME
               )
         ],
         %args
@@ -269,6 +272,7 @@ sub new {
     $self->no_memory_check($no_memory_check) if $no_memory_check;
     $self->bootstrap($bootstrap)             if $bootstrap;
     $self->mpi($mpi)                         if $mpi;
+    $self->program_name($program_name)       if $program_name;
 
     return $self;
 }

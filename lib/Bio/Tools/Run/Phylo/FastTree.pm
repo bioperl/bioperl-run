@@ -18,14 +18,13 @@ Bio::Tools::Run::Phylo::FastTree
   # Build a FastTree factory
   $factory = Bio::Tools::Run::Phylo::FastTree->new(-quiet => 1,
                                                    -fastest => 1);
-
   # Get an alignment
   my $alignio = Bio::AlignIO->new(
         -format => 'fasta',
         -file   => '219877.cdna.fasta');
   my $alnobj = $alignio->next_aln;
 
-  # Analzye the aligment and get a Tree
+  # Analyze the aligment and get a Tree
   my $tree = $factory->run($alnobj);
 
 =head1 DESCRIPTION
