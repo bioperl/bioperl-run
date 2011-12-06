@@ -224,7 +224,6 @@ sub _run {
 
     # If -nt is not set check the alphabet of the input
     $self->_alphabet($file) if ( ! $self->nt );
-    $self->nt(1) if ( $self->_alphabet eq 'dna' );
 
     my $exe       = $self->executable || return;
     my $param_str = $self->arguments . " " . $self->_setparams($file);
@@ -275,11 +274,15 @@ sub _write_alignfile {
 
     my $out = Bio::AlignIO->new(
         -file   => ">$tempfile",
-        -format => 'fasta'
+        -format => 'phylip'
     );
     $out->write_aln($align);
     $out->close();
+    undef($out);
     close($tfh);
+    undef($tfh);
+
+    die "Alignment file $tempfile was not created" if ( ! -e $tempfile );
 
     $tempfile;
 }
@@ -288,24 +291,32 @@ sub _write_alignfile {
 
  Title   : _alphabet
  Usage   : my $alphabet = $self->_alphabet;
- Function: Get the alphabet of the input
+ Function: Get the alphabet of the input alignment, defaults to 'dna'
  Returns : 'dna' or 'protein'
- Args    : 
+ Args    : Alignment file
 
 =cut
 
 sub _alphabet {
     my ($self,$file) = @_;
+    
+    if ( $file ) {
+	if ( -e $file ) {
+	    my $in = Bio::AlignIO->new(-file => $file);
+	    my $aln = $in->next_aln;
+	    # arbitrary, the first one
+	    my $seq = $aln->get_seq_by_pos(1);
+	    my $alphabet = $seq->alphabet;
+	    $self->{_alphabet} = $alphabet;
 
-    return $self->{_alphabet} if $self->{_alphabet};
+	    $self->nt(1) if ( $alphabet eq 'dna' );
+	} else {
+	    die "File $file can not be found";
+	}
+    }
 
-    my $in = Bio::AlignIO->new(-file => $file);
-    my $aln = $in->next_aln;
-    # arbitrary, the first one
-    my $seq = $aln->get_seq_by_pos(1);
-    $self->{_alphabet} = $seq->alphabet;
-
-    $self->{'_alphabet'};
+    # default is 'dna'    
+    return $self->{'_alphabet'} || 'dna';
 }
 
 =head2  _setparams

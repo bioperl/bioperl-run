@@ -920,6 +920,29 @@ sub bootstrap {
     return $self->{_bootstrap};
 }
 
+=head2 command
+
+ Title   : command
+ Usage   : $factory->command(...);
+ Function: 
+ Returns : string
+ Args    : None to get, integer to set. 
+
+=cut
+
+sub command {
+    my ( $self, $value ) = @_;
+    if ( defined($value) ) {
+        if ($value =~ /$PROGRAM_NAME/ ) {
+            $self->{_command} = $value;
+        }
+        else {
+            $self->throw("$value is not a $PROGRAM_NAME command");
+        }
+    }
+    return $self->{_command} || '';
+}
+
 =head2 Internal methods
 
 These methods are private and should not be called outside this class.
@@ -942,6 +965,7 @@ sub _run {
         $output_stat_file = '_phyml_stat.txt';
     }
 
+    $self->command($command);
     $self->debug("Phyml command = $command\n");
     `$command`;
 
