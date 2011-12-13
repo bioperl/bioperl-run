@@ -15,7 +15,7 @@ BEGIN {
     use_ok('Bio::AlignIO');
 }
 
-ok my $ft = Bio::Tools::Run::Phylo::FastTree->new( -quiet => 1 );
+ok (my $ft = Bio::Tools::Run::Phylo::FastTree->new( -quiet => 1 ),"Make the object");
 
 SKIP: {
     test_skip(
@@ -31,15 +31,15 @@ SKIP: {
     my $alnobj = $alignio->next_aln;
 
     my $tree = $ft->run($alnobj);
-    ok defined($tree);
+    ok( defined($tree), "Tree is defined" );
     my @nodes = $tree->get_nodes;
-    is($#nodes,3);
+    is($#nodes,3,"Number of nodes is correct");
 
     # The input could be an alignment file (fasta or phylip interleaved)
     my $alignfile = test_input_file("sample_dataset_1_aligned.fa");
     my $fastft = Bio::Tools::Run::Phylo::FastTree->new( -quiet => 1, -fastest => 1 );
     $tree = $fastft->run($alignfile);
-    ok defined($tree);
+    ok( defined($tree), "Tree is defined" );
 
     # Input is protein sequence alignment
     $alignio = Bio::AlignIO->new(
@@ -49,5 +49,5 @@ SKIP: {
     $alnobj = $alignio->next_aln;
 
     my $ptree = $ft->run($alnobj);
-    ok defined($ptree);
+    ok( defined($tree), "Tree is defined" );
 }
