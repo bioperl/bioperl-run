@@ -80,6 +80,7 @@ use Bio::SeqIO;
 use Bio::TreeIO;
 use Bio::AlignIO;
 use Bio::Root::IO;
+use Cwd;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
@@ -255,7 +256,7 @@ sub _run {
     my $status  = system($command);
 
     # raxml creates tree files with names like "RAxML_bestTree.ABDBxjjdfg3"
-    my $outfile = $self->tempdir . '/RAxML_bestTree.' . $self->outfile_name;
+    my $outfile = 'RAxML_bestTree.' . $self->outfile_name;
 
     if ( !-e $outfile || -z $outfile ) {
         $self->warn("Raxml call had status of $status: $? [command $command]\n");
@@ -372,9 +373,10 @@ sub _setparams {
     # Raxml insists that the output file name not contain '/' and its
     # output directory is set using the '-w' argument.
     if ( !$self->outfile_name ) {
-        $self->w($self->tempdir);
+        my $dir = getcwd();
+        $self->w($dir);
 
-        my ( $tfh, $outfile ) = $self->io->tempfile( -dir => $self->tempdir );
+        my ( $tfh, $outfile ) = $self->io->tempfile( -dir => $dir );
         close($tfh);
         undef $tfh;
         $outfile = basename($outfile);

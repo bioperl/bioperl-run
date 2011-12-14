@@ -15,6 +15,8 @@ BEGIN {
     use_ok('Bio::AlignIO');
 }
 
+END { unlink glob "RAxML_*.*"; }
+
 ok(my $raxml = Bio::Tools::Run::Phylo::Raxml->new(-p => 100, -quiet => 1), "Make the object");
 isa_ok( $raxml, 'Bio::Tools::Run::Phylo::Raxml');
 
