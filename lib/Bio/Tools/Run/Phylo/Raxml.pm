@@ -294,7 +294,7 @@ sub _run {
 sub _write_alignfile {
     my ( $self, $align ) = @_;
 
-    my ( $tfh, $tempfile ) = $self->io->tempfile( -dir => $self->tempdir );
+    my ( $tfh, $tempfile ) = $self->io->tempfile( -dir => '.' );
 
     my $out = Bio::AlignIO->new(
         -file   => ">$tempfile",
