@@ -8,7 +8,7 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
     test_begin(
-        -tests => 8,
+        -tests => 9,
     );
     use_ok('Bio::Root::IO');
     use_ok('Bio::Tools::Run::Phylo::FastTree');
@@ -39,6 +39,15 @@ SKIP: {
     my $alignfile = test_input_file("sample_dataset_1_aligned.fa");
     my $fastft = Bio::Tools::Run::Phylo::FastTree->new( -quiet => 1, -fastest => 1 );
     $tree = $fastft->run($alignfile);
+    ok( defined($tree), "Tree is defined" );
+
+    my $slowft = Bio::Tools::Run::Phylo::FastTree->new(
+        -quiet   => 1,
+        -mlacc   => 2,
+        -slownni => 1,
+        -spr     => 4
+    );
+    $tree = $slowft->run($alignfile);
     ok( defined($tree), "Tree is defined" );
 
     # Input is protein sequence alignment

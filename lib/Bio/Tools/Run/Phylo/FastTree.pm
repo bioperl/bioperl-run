@@ -82,13 +82,14 @@ use Bio::Root::IO;
 
 use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
-our @FastTree_PARAMS = qw(log cat n intree intree1 constraints sprlength topm close 
-    refresh constraintWeight);
-our @FastTree_SWITCHES = qw(quiet nopr nt fastest slow nosupport pseudo gtr wag quote noml 
-    nome mllen gamma spr nni sprlength mlnni mllen slownni nocat notoo 2nd no2nd nj bionj
-);
+our @FastTree_PARAMS =
+  qw(log cat n intree intree1 constraints sprlength topm close
+  refresh constraintWeight spr mlacc nni mlnni seed matrix gtrrates gtrfreq makematrix );
+our @FastTree_SWITCHES =
+  qw(quiet nopr nt fastest slow nosupport pseudo gtr wag quote noml
+  nome mllen gamma sprlength mllen slownni nocat notoo 2nd no2nd nj bionj top notop
+  nomatrix rawdist );
 our $PROGRAM_NAME = 'FastTree';
-#our $PROGRAM_DIR = Bio::Root::IO->catfile($ENV{FastTreeDIR}) if $ENV{FastTreeDIR};
 
 =head2 new
 
