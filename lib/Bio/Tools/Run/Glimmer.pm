@@ -4,7 +4,7 @@
 #
 # Cared for by Bioperl
 #
-# Copyright Bioperl, Mark Johnson <mjohnson-at-watson-dot-wustl-dot-edu>
+# Copyright Bioperl, Mark Johnson <johnsonm-at-gmail-dot-com>
 #
 # Special thanks to Chris Fields, Sendu Bala
 #
@@ -95,7 +95,7 @@ web:
 
 =head1 AUTHOR - Mark Johnson 
 
- Email: mjohnson-at-watson-dot-wustl-dot-edu
+ Email: johnsonm-at-gmail-dot-com
 
 =head1 APPENDIX
 
