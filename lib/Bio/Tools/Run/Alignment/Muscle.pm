@@ -116,9 +116,14 @@ use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase);
 
 our %DEFAULTS = ( 'AFORMAT' => 'fasta' );
 our @MUSCLE_PARAMS = qw(in out tree1 log loga scorefile gapopen seqtype
-  maxmb maxhours maxiters kband in1 in2 usetree usetree_nowarn);
+  maxmb maxhours maxiters kband in1 in2 usetree usetree_nowarn
+  weight1 weight2 smoothwindow SUEFF smoothscoreceil root1 root2
+  refinewindow physout phyiout objscore minsmoothscore minbestcolscore
+  hydrofactor hydro anchorspacing center cluster1 cluster2 clwout diagbreak
+  diaglength diagmargin distance1 distance2);
 our @MUSCLE_SWITCHES = qw(quiet verbose diags refine stable group
-  clw clwstrict msf);
+  clw clwstrict msf brenner cluster dimer fasta html le anchors noanchors
+  phyi phys profile refinew sp spscore spn sv);
 our $PROGRAM_NAME = 'muscle';
 our $PROGRAM_DIR = Bio::Root::IO->catfile($ENV{MUSCLEDIR}) if $ENV{MUSCLEDIR};
 
