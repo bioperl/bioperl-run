@@ -1,4 +1,3 @@
-# $Id$
 # BioPerl module for Profile
 # Copyright Balamurugan Kumarasamy
 #

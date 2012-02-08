@@ -1,3 +1,4 @@
+#
 # BioPerl module for Bio::Tools::Run::Alignment::Amap
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org> 

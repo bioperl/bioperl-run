@@ -1,4 +1,3 @@
-# $Id$
 #StandAloneFasta.pm v1.00 2002/11/01 
 #
 #Bioperl module for Bio::Tools::Run::Alignment::StandAloneFasta

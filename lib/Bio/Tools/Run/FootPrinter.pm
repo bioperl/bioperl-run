@@ -1,4 +1,3 @@
-# $Id$
 # BioPerl module for FootPrinter
 #
 # Copyright Shawn Hoon

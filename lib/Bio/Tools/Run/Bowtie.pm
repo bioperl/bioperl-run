@@ -1,4 +1,3 @@
-# $Id: Bowtie.pm kortsch $
 #
 # BioPerl module for Bio::Tools::Run::Bowtie
 #

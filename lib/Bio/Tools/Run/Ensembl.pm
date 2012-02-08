@@ -1,4 +1,3 @@
-# $Id: Ensembl.pm,v 1.6 2006/07/17 14:16:53 sendu Exp $
 #
 # BioPerl module for Bio::Tools::Run::Ensembl
 #

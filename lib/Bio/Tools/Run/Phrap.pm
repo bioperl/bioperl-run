@@ -1,4 +1,3 @@
-# $Id$
 #
 # Phrap wraper module
 #

@@ -1,4 +1,3 @@
-# $Id: Pal2Nal.pm,v 1.3 2007/05/25 10:14:55 sendu Exp $
 #
 # BioPerl module for Bio::Tools::Run::Alignment::Pal2Nal
 #

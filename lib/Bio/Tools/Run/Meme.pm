@@ -1,4 +1,3 @@
-# $Id: Meme.pm,v 1.25 2006/07/04 22:23:31 mauricio Exp $
 # BioPerl module for Meme
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org> 

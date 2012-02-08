@@ -1,4 +1,3 @@
-# $Id: BEDTools.pm kortsch $
 #
 # BioPerl module for Bio::Tools::Run::BEDTools
 #

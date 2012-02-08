@@ -1,6 +1,3 @@
-# $Id$
-package Bio::Tools::Run::BWA;
-use strict;
 #
 # BioPerl module for Bio::Tools::Run::BWA
 #
@@ -171,6 +168,8 @@ Internal methods are usually preceded with a _
 
 # Let the code begin...
 
+package Bio::Tools::Run::BWA;
+use strict;
 
 use IPC::Run;
 our $HAVE_IO_UNCOMPRESS;
