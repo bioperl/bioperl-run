@@ -86,8 +86,8 @@ our @FastTree_PARAMS =
   qw(log cat n intree intree1 constraints sprlength topm close
   refresh constraintWeight spr mlacc nni mlnni seed matrix gtrrates gtrfreq makematrix );
 our @FastTree_SWITCHES =
-  qw(quiet nopr nt fastest slow nosupport pseudo gtr wag quote noml
-  nome mllen gamma sprlength mllen slownni nocat notoo 2nd no2nd nj bionj top notop
+  qw(quiet nopr nt fastest slow nosupport gtr wag quote noml
+  nome gamma mllen slownni nocat notoo 2nd no2nd nj bionj top notop
   nomatrix rawdist );
 our $PROGRAM_NAME = 'FastTree';
 
