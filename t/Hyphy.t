@@ -9,6 +9,7 @@ BEGIN {
     use Bio::Root::Test;
     test_begin(-tests => 8, -requires_module =>'IO::String');
 
+
 	use_ok('Bio::Tools::Run::Phylo::Hyphy::SLAC');
 	use_ok('Bio::Tools::Run::Phylo::Hyphy::FEL');
 	use_ok('Bio::Tools::Run::Phylo::Hyphy::REL');
@@ -28,12 +29,13 @@ SKIP: {
 
 	my $aln = $alignio->next_aln;
 	my $tree = $treeio->next_tree;
+	my $debug = test_debug();
 
 	$slac->alignment($aln);
 	$slac->tree($tree);
 	my ($rc,$results) = $slac->run();
-	if ($rc == 0) {
-		self->warn("ERROR in SLAC module $rc:" . $slac->error_string() . "\n");
+	if (($rc == 0) && ($debug == 1)){
+		warn("ERROR in SLAC module $rc:" . $slac->error_string() . "\n");
 	}
 	ok ($rc != 0, "SLAC module");
 
@@ -41,8 +43,8 @@ SKIP: {
 	$rel->alignment($aln);
 	$rel->tree($tree);
 	($rc,$results) = $rel->run();
-	if ($rc == 0) {
-		self->warn(print "ERROR in REL module $rc:" . $rel->error_string() . "\n");
+	if (($rc == 0) && ($debug == 1)){
+		warn(print "ERROR in REL module $rc:" . $rel->error_string() . "\n");
 	}
 	ok ($rc != 0, "REL module");
 
@@ -50,8 +52,8 @@ SKIP: {
 	$fel->alignment($aln);
 	$fel->tree($tree);
 	($rc,$results) = $fel->run();
-	if ($rc == 0) {
-		self->warn("ERROR in FEL module $rc:" . $fel->error_string() . "\n");
+	if (($rc == 0) && ($debug == 1)){
+		warn("ERROR in FEL module $rc:" . $fel->error_string() . "\n");
 	}
 	ok ($rc != 0, "FEL module");
 
@@ -59,8 +61,8 @@ SKIP: {
 	$modeltest->alignment($aln);
 	$modeltest->tree($tree);
 	($rc,$results) = $modeltest->run();
-	if ($rc == 0) {
-		self->warn("ERROR in Modeltest module $rc:" . print $modeltest->error_string() . "\n");
+	if (($rc == 0) && ($debug == 1)){
+		warn("ERROR in Modeltest module $rc:" . print $modeltest->error_string() . "\n");
 	}
 	ok ($rc != 0, "Modeltest module");
 
