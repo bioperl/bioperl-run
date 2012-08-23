@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Hyphy::REL
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Albert Vilella <avilella-at-gmail-dot-com>
 #
@@ -56,15 +56,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -115,8 +115,8 @@ INCOMPLETE DOCUMENTATION OF ALL METHODS
 
 =cut
 
-BEGIN { 
-    @VALIDVALUES = 
+BEGIN {
+    @VALIDVALUES =
         (
          {'geneticCode' => [ "Universal","VertebratemtDNA","YeastmtDNA","Mold/ProtozoanmtDNA",
                              "InvertebratemtDNA","CiliateNuclear","EchinodermmtDNA","EuplotidNuclear",
@@ -124,6 +124,7 @@ BEGIN {
          {'tempalnfile' => undef }, # aln file goes here
          {'temptreefile' => undef }, # tree file goes here
          {'Model' => [ "Null for Test 1", "Null for Test 2", "Alternative"]},
+         {'temptsvfile' => undef } # site-by-site conditional probabilities go to this file
         );
 }
 
@@ -131,7 +132,7 @@ BEGIN {
 
  Title   : new
  Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy::REL->new();
- Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::REL object 
+ Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::REL object
  Returns : Bio::Tools::Run::Phylo::Hyphy::REL
  Args    : -alignment => the Bio::Align::AlignI object
            -save_tempfiles => boolean to save the generated tempfiles and
@@ -147,20 +148,22 @@ See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
 sub new {
   my($class,@args) = @_;
 
-  my $self = $class->SUPER::new(@args);
-  my ($aln, $tree, $st, $params, $exe, 
-      $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES 
-				    PARAMS EXECUTABLE)],
-				    @args);
-  defined $aln && $self->alignment($aln);
-  defined $tree && $self->tree($tree);
-  defined $st  && $self->save_tempfiles($st);
-  defined $exe && $self->executable($exe);
+   my $self = $class->SUPER::new(@args);
+   my ($aln, $tree, $st, $params, $exe,
+   $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES PARAMS EXECUTABLE)], @args);
+   defined $aln && $self->alignment($aln);
+   defined $tree && $self->tree($tree);
+   defined $st  && $self->save_tempfiles($st);
+   defined $exe && $self->executable($exe);
 
-  $self->set_default_parameters();
-  if( defined $params ) {
-      if( ref($params) !~ /HASH/i ) { 
-	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
+   my $tsvfile = $self->tempdir() . "/results.tsv";
+   $self->{'_params'}{'temptsvfile'} = $tsvfile;
+
+
+   $self->set_default_parameters();
+   if( defined $params ) {
+      if( ref($params) !~ /HASH/i ) {
+         $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
 	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
       }
@@ -188,33 +191,33 @@ sub run {
    $self->prepare($aln,$tree) unless (defined($self->{'_prepared'}));
    my ($rc,$results) = (1);
    {
-       my $commandstring;
-       my $exit_status;
-       my $tempdir = $self->tempdir;
-       my $relexe = $self->executable();
-       $self->throw("unable to find or run executable for 'HYPHY'") unless $relexe && -e $relexe && -x _;
-       $commandstring = $relexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_wrapper'};
-       open(RUN, "$commandstring |") or $self->throw("Cannot open exe $relexe");
-       my @output = <RUN>;
-       $exit_status = close(RUN);
-       $self->error_string(join('',@output));
-       if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
-	   $self->warn("There was an error - see error_string for the program output");
-	   $rc = 0;
-       }
-       my $outfile = $self->outfile_name;
-       eval {
-	   open(OUTFILE, ">$outfile") or $self->throw("cannot open $outfile for writing");
-           # FIXME -- needs output parsing -- ask hyphy to clean that up into a tsv?
-           foreach my $output (@output) {
-               print OUTFILE $output;
-               $results .= sprintf($output);
-           }
-           close(OUTFILE);
-       };
-       if( $@ ) {
-	   $self->warn($self->error_string);
-       }
+      my $commandstring;
+      my $exit_status;
+      my $tempdir = $self->tempdir;
+
+      my $relexe = $self->executable();
+      $self->throw("unable to find or run executable for 'HYPHY'") unless $relexe && -e $relexe && -x _;
+      $commandstring = $relexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_wrapper'};
+      open(RUN, "$commandstring |") or $self->throw("Cannot open exe $relexe");
+      my @output = <RUN>;
+      $exit_status = close(RUN);
+      $self->error_string(join('',@output));
+      if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
+         $self->warn("There was an error - see error_string for the program output");
+         $rc = 0;
+      }
+      my $outfile = $self->outfile_name;
+      eval {
+         open(OUTFILE, ">$outfile") or $self->throw("cannot open $outfile for writing");
+         foreach my $output (@output) {
+            print OUTFILE $output;
+            $results .= sprintf($output);
+         }
+         close(OUTFILE);
+      };
+      if( $@ ) {
+         $self->warn($self->error_string);
+      }
    }
    unless ( $self->save_tempfiles ) {
        unlink($self->{'_wrapper'});
@@ -230,7 +233,7 @@ sub run {
  Usage   : $self->create_wrapper
  Function: It will create the wrapper file that interfaces with the analysis bf file
  Example :
- Returns : 
+ Returns :
  Args    :
 
 
@@ -249,7 +252,7 @@ sub create_wrapper {
  Title   : set_default_parameters
  Usage   : $rel->set_default_parameters(0);
  Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
+           (the first value in each array in the
 	    %VALIDVALUES class variable)
  Returns : none
  Args    : boolean: keep existing parameter values
@@ -261,28 +264,29 @@ sub set_default_parameters {
    my ($self,$keepold) = @_;
    $keepold = 0 unless defined $keepold;
    foreach my $elem (@VALIDVALUES) {
-       my ($param,$val) = each %$elem;
-       # skip if we want to keep old values and it is already set
-       if (ref($val)=~/ARRAY/i ) {
-           unless (ref($val->[0])=~/HASH/i) {
-               push @{ $self->{'_orderedparams'} }, {$param, $val->[0]};
-           } else {
-               $val = $val->[0];
-           }
-       } 
-       if ( ref($val) =~ /HASH/i ) { 
-           my $prevparam;
-           while (defined($val)) {
-               last unless (ref($val) =~ /HASH/i);
-               last unless (defined($param));
-               $prevparam = $param;
-               ($param,$val) = each %{$val};
-               push @{ $self->{'_orderedparams'} }, {$prevparam, $param};
-               push @{ $self->{'_orderedparams'} }, {$param, $val} if (defined($val));
-           }
-       } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) { 
-           push @{ $self->{'_orderedparams'} }, {$param, $val};
-       }
+      keys %$elem; #reset hash iterator
+      my ($param,$val) = each %$elem;
+      # skip if we want to keep old values and it is already set
+      if (ref($val)=~/ARRAY/i ) {
+         unless (ref($val->[0])=~/HASH/i) {
+            push @{ $self->{'_orderedparams'} }, {$param, $val->[0]};
+         } else {
+            $val = $val->[0];
+         }
+      }
+      if ( ref($val) =~ /HASH/i ) {
+         my $prevparam;
+         while (defined($val)) {
+            last unless (ref($val) =~ /HASH/i);
+            last unless (defined($param));
+            $prevparam = $param;
+            ($param,$val) = each %{$val};
+            push @{ $self->{'_orderedparams'} }, {$prevparam, $param};
+            push @{ $self->{'_orderedparams'} }, {$param, $val} if (defined($val));
+         }
+      } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) {
+         push @{ $self->{'_orderedparams'} }, {$param, $val};
+      }
    }
 }
 
@@ -296,7 +300,7 @@ sub set_default_parameters {
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -307,7 +311,7 @@ sub set_default_parameters {
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 
