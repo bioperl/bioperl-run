@@ -1,0 +1,39 @@
+{
+   "abstract" : "BioPerl-Run - wrapper toolkit",
+   "author" : [
+      "BioPerl Team <bioperl-l@bioperl.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.4, CPAN::Meta::Converter version 2.112150",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "BioPerl-Run",
+   "prereqs" : {
+      "runtime" : {
+         "recommends" : {
+            "Algorithm::Diff" : 0,
+            "Config::Any" : 0,
+            "File::Sort" : 0,
+            "IO::String" : 0,
+            "IPC::Run" : 0,
+            "XML::Twig" : 0
+         },
+         "requires" : {
+            "Bio::Root::Version" : "1.006900",
+            "perl" : "v5.6.1"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "1.006900"
+}
