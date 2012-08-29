@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Hyphy::Base
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Albert Vilella <avilella-at-gmail-dot-com>
 #
@@ -36,15 +36,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -94,7 +94,7 @@ INCOMPLETE DOCUMENTATION OF ALL METHODS
 
 =cut
 
-BEGIN { 
+BEGIN {
     $PROGRAMNAME = 'HYPHYMP' . ($^O =~ /mswin/i ?'.exe':'');
     if( defined $ENV{'HYPHYDIR'} ) {
 	$PROGRAM = Bio::Root::IO->catfile($ENV{'HYPHYDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
@@ -134,7 +134,7 @@ sub program_dir {
 
  Title   : new
  Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy->new();
- Function: Builds a new Bio::Tools::Run::Phylo::Hyphy object 
+ Function: Builds a new Bio::Tools::Run::Phylo::Hyphy object
  Returns : Bio::Tools::Run::Phylo::Hyphy
  Args    : -alignment => the Bio::Align::AlignI object
            -save_tempfiles => boolean to save the generated tempfiles and
@@ -151,6 +151,7 @@ sub new {
   my($class,@args) = @_;
 
   my $self = $class->SUPER::new(@args);
+    my $versionstring = $self->version();
 
   return $self;
 }
@@ -176,17 +177,17 @@ sub prepare {
    }
    $tree = $self->tree unless $tree;
    $aln  = $self->alignment unless $aln;
-   if( ! $aln ) { 
+   if( ! $aln ) {
        $self->warn("must have supplied a valid alignment file in order to run hyphy");
        return 0;
    }
    my ($tempdir) = $self->tempdir();
    my ($tempseqFH,$tempalnfile);
-   if( ! ref($aln) && -e $aln ) { 
+   if( ! ref($aln) && -e $aln ) {
        $tempalnfile = $aln;
-   } else { 
+   } else {
        ($tempseqFH,$tempalnfile) = $self->io->tempfile
-	   ('-dir' => $tempdir, 
+	   ('-dir' => $tempdir,
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
        $aln->set_displayname_flat(1);
        my $alnout = Bio::AlignIO->new('-format'      => 'fasta',
@@ -202,11 +203,11 @@ sub prepare {
    $self->{'_params'}{'outfile'} = $outfile;
 
    my ($temptreeFH,$temptreefile);
-   if( ! ref($tree) && -e $tree ) { 
+   if( ! ref($tree) && -e $tree ) {
        $temptreefile = $tree;
-   } else { 
+   } else {
        ($temptreeFH,$temptreefile) = $self->io->tempfile
-	   ('-dir' => $tempdir, 
+	   ('-dir' => $tempdir,
 	    UNLINK => ($self->save_tempfiles ? 0 : 1));
 
        my $treeout = Bio::TreeIO->new('-format' => 'newick',
@@ -228,7 +229,7 @@ sub prepare {
  Usage   : $self->create_wrapper
  Function: It will create the wrapper file that interfaces with the analysis bf file
  Example :
- Returns : 
+ Returns :
  Args    :
 
 
@@ -239,6 +240,12 @@ sub create_wrapper {
 
    my $tempdir = $self->tempdir;
    $self->update_ordered_parameters;
+
+   #check version of HYPHY:
+   my $versionstring = $self->version();
+   $versionstring =~ /.*?(\d+\.\d+).*/;
+   my $version = $1;
+
    my $wrapper = "$tempdir/wrapper.bf";
    open(WRAPPER, ">$wrapper") or $self->throw("cannot open $wrapper for writing");
 
@@ -253,8 +260,14 @@ sub create_wrapper {
        print WRAPPER '"',";\n";
        $counter = sprintf("%02d",$counter+1);
    }
-   print WRAPPER "\n",'ExecuteAFile (HYPHY_BASE_DIRECTORY + "TemplateBatchFiles" + DIRECTORY_SEPARATOR  + "', $batchfile ,'", stdinRedirect);', "\n";
-
+   # not exactly sure what version of HYPHY caused this change,
+   # but Github source changes suggest that it was sometime
+   # after version 0.9920060501 was required.
+   if ($version >= 0.9920060501) {
+       print WRAPPER qq{\nExecuteAFile (HYPHY_LIB_DIRECTORY + "TemplateBatchFiles" + DIRECTORY_SEPARATOR  + "$batchfile", stdinRedirect);\n};
+    } else {
+       print WRAPPER qq{\nExecuteAFile (HYPHY_BASE_DIRECTORY + "TemplateBatchFiles" + DIRECTORY_SEPARATOR  + "$batchfile", stdinRedirect);\n};
+    }
    close(WRAPPER);
    $self->{'_wrapper'} = $wrapper;
 }
@@ -296,10 +309,10 @@ sub error_string {
 sub alignment {
    my ($self,$aln) = @_;
 
-   if( defined $aln ) { 
-       if( -e $aln ) { 
+   if( defined $aln ) {
+       if( -e $aln ) {
 	   $self->{'_alignment'} = $aln;
-       } elsif( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) { 
+       } elsif( !ref($aln) || ! $aln->isa('Bio::Align::AlignI') ) {
 	   $self->warn("Must specify a valid Bio::Align::AlignI object to the alignment function not $aln");
 	   return undef;
        } else {
@@ -314,7 +327,7 @@ sub alignment {
  Title   : tree
  Usage   : $hyphy->tree($tree, %params);
  Function: Get/Set the L<Bio::Tree::TreeI> object
- Returns : L<Bio::Tree::TreeI> 
+ Returns : L<Bio::Tree::TreeI>
  Args    : [optional] $tree => L<Bio::Tree::TreeI>,
            [optional] %parameters => hash of tree-specific parameters:
 
@@ -326,8 +339,8 @@ sub alignment {
 
 sub tree {
    my ($self, $tree, %params) = @_;
-   if( defined $tree ) { 
-       if( ! ref($tree) || ! $tree->isa('Bio::Tree::TreeI') ) { 
+   if( defined $tree ) {
+       if( ! ref($tree) || ! $tree->isa('Bio::Tree::TreeI') ) {
 	   $self->warn("Must specify a valid Bio::Tree::TreeI object to the alignment function");
        }
        $self->{'_tree'} = $tree;
@@ -358,7 +371,7 @@ sub get_parameters {
  Title   : set_parameter
  Usage   : $hyphy->set_parameter($param,$val);
  Function: Sets a hyphy parameter, will be validated against
-           the valid values as set in the %VALIDVALUES class variable.  
+           the valid values as set in the %VALIDVALUES class variable.
            The checks can be ignored if one turns off param checks like this:
              $hyphy->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
@@ -384,7 +397,7 @@ sub set_parameter {
  Title   : update_ordered_parameters
  Usage   : $hyphy->update_ordered_parameters(0);
  Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
+           (the first value in each array in the
 	    %VALIDVALUES class variable)
  Returns : none
  Args    : boolean: keep existing parameter values
@@ -401,14 +414,14 @@ sub update_ordered_parameters {
        # skip if we want to keep old values and it is already set
        if (ref($param) =~ /ARRAY/i ) {
            push @{ $self->{'_updatedorderedsparams'} }, {$param, $self->{_params}{$param} || $val};
-       } elsif ( ref($val) =~ /HASH/i ) { 
+       } elsif ( ref($val) =~ /HASH/i ) {
            while (defined($val)) {
                last unless (ref($val) =~ /HASH/i);
                my ($param,$val) = each %{$val};
                $composite_param .= $param;
            }
            push @{ $self->{'_updatedorderedparams'} }, {$param, $self->{_params}{$composite_param} || $val};
-       } else { 
+       } else {
            push @{ $self->{'_updatedorderedparams'} }, {$param, $self->{_params}{$param} || $val};
        }
    }
@@ -424,7 +437,7 @@ sub update_ordered_parameters {
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -444,7 +457,7 @@ sub no_param_checks {
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 
@@ -476,7 +489,7 @@ sub outfile_name {
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -513,16 +526,35 @@ sub outfile_name {
 
 =cut
 
-=head2 io
+=head2 version
 
- Title   : io
- Usage   : $obj->io($newval)
- Function:  Gets a L<Bio::Root::IO> object
- Returns : L<Bio::Root::IO>
+ Title   : version
+ Usage   : $obj->version()
+ Function:  Returns the version string from HYPHY
+ Returns : string
  Args    : none
 
 
 =cut
+
+sub version {
+    my $self = shift;
+    my $tempdir = $self->tempdir;
+    my $wrapper = "$tempdir/version.bf";
+    open(WRAPPER, ">$wrapper") or $self->throw("cannot open $wrapper for writing");
+    print WRAPPER qq{GetString (versionString, HYPHY_VERSION, 2);\nfprintf (stdout, versionString);};
+    close(WRAPPER);
+    my $exe = $self->executable();
+    unless ($exe && -e $exe && -x _) {
+        $self->throw("unable to find or run executable for 'HYPHY'");
+    }
+    my $commandstring = $exe . " BASEPATH=" . $self->program_dir . " " . $wrapper;
+    open(RUN, "$commandstring |") or $self->throw("Cannot open exe $exe");
+    my $output = <RUN>;
+    close(RUN);
+    $self->{'_version'} = $output;
+    return $output;
+}
 
 sub DESTROY {
     my $self= shift;
