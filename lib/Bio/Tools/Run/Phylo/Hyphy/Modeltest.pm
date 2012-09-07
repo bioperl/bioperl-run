@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Hyphy::Modeltest
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Albert Vilella <avilella-at-gmail-dot-com>
 #
@@ -42,7 +42,7 @@ Spencer V. Muse, Simon D.W. Frost and Art Poon.  See
 http://www.hyphy.org for more information.
 
 This module will generate the correct list of options for interfacing
-with TemplateBatchFiles/Ghostrides/Modeltestwrapper.bf.
+with TemplateBatchFiles/Modeltest.bf.
 
 =head1 FEEDBACK
 
@@ -55,15 +55,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -94,7 +94,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::Tools::Run::Phylo::Hyphy::Modeltest;
-use vars qw(@ISA @VALIDVALUES $PROGRAMNAME $PROGRAM);
+use vars qw(@ISA);
 use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
@@ -102,7 +102,7 @@ use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Hyphy::Base;
 use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::Phylo::Hyphy::Base);
+use base qw(Bio::Root::Root Bio::Tools::Run::Phylo::Hyphy::Base);
 
 =head2 Default Values
 
@@ -110,34 +110,41 @@ Valid and default values for Modeltest are listed below.  The default
 values are always the first one listed.  These descriptions are
 essentially lifted from the python wrapper or provided by the author.
 
-INCOMPLETE DOCUMENTATION OF ALL METHODS
+=cut
+
+=head2 valid_values
+
+ Title   : valid_values
+ Usage   : $factory->valid_values()
+ Function: returns the possible parameters
+ Returns:  an array holding all possible parameters. The default
+values are always the first one listed.  These descriptions are
+essentially lifted from the python wrapper or provided by the author.
+ Args    : None
 
 =cut
 
-BEGIN { 
-    $PROGRAMNAME = 'HYPHYMP' . ($^O =~ /mswin/i ?'.exe':'');
-    if( defined $ENV{'HYPHYDIR'} ) {
-	$PROGRAM = Bio::Root::IO->catfile($ENV{'HYPHYDIR'},$PROGRAMNAME). ($^O =~ /mswin/i ?'.exe':'');;
-    }
 
-    @VALIDVALUES = 
+sub valid_values {
+    return
         (
          {'tempalnfile' => undef }, # aln file goes here
          {'temptreefile' => undef }, # tree file goes here
          {'Number of Rate Classes' => [ '4' ] },
-         {'Model Selection Method' => [ 'Both', 
-                                        'Hierarchical Test', 
+         {'Model Selection Method' => [ 'Both',
+                                        'Hierarchical Test',
                                         'AIC Test'] },
          {'Model rejection level' => '0.05' },
+         {'hieoutfile' => undef },
+         {'aicoutfile' => undef }
         );
 }
-
 
 =head2 new
 
  Title   : new
  Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy::Modeltest->new();
- Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::Modeltest object 
+ Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::Modeltest object
  Returns : Bio::Tools::Run::Phylo::Hyphy::Modeltest
  Args    : -alignment => the Bio::Align::AlignI object
            -save_tempfiles => boolean to save the generated tempfiles and
@@ -154,8 +161,8 @@ sub new {
   my($class,@args) = @_;
 
   my $self = $class->SUPER::new(@args);
-  my ($aln, $tree, $st, $params, $exe, 
-      $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES 
+  my ($aln, $tree, $st, $params, $exe,
+      $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES
 				    PARAMS EXECUTABLE)],
 				    @args);
   defined $aln && $self->alignment($aln);
@@ -165,7 +172,7 @@ sub new {
 
   $self->set_default_parameters();
   if( defined $params ) {
-      if( ref($params) !~ /HASH/i ) { 
+      if( ref($params) !~ /HASH/i ) {
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
 	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
@@ -181,52 +188,36 @@ sub new {
  Usage   : my ($rc,$results) = $modeltest->run($aln);
  Function: run the modeltest analysis using the default or updated parameters
            the alignment parameter must have been set
- Returns : Return code, Hash
+ Returns : Return code, hash containing the "Hierarchical Testing" and "AIC" results, both as hashes.
  Args    : L<Bio::Align::AlignI> object,
 	   L<Bio::Tree::TreeI> object [optional]
-
 
 =cut
 
 sub run {
-   my ($self,$aln,$tree) = @_;
-
-   $self->prepare($aln,$tree) unless (defined($self->{'_prepared'}));
-   my ($rc,$results) = (1);
-   {
-       my $commandstring;
-       my $exit_status;
-       my $tempdir = $self->tempdir;
-       my $modeltestexe = $self->executable();
-       $self->throw("unable to find or run executable for 'HYPHY'") unless $modeltestexe && -e $modeltestexe && -x _;
-       $commandstring = $modeltestexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_wrapper'};
-       open(RUN, "$commandstring |") or $self->throw("Cannot open exe $modeltestexe");
-       my @output = <RUN>;
-       $exit_status = close(RUN);
-       $self->error_string(join('',@output));
-       if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
-	   $self->warn("There was an error - see error_string for the program output");
-	   $rc = 0;
-       }
-       my $outfile = $self->outfile_name;
-       eval {
-	   open(OUTFILE, ">$outfile") or $self->throw("cannot open $outfile for writing");
-           # FIXME -- needs output parsing -- ask hyphy to clean that up into a tsv?
-           foreach my $output (@output) {
-               print OUTFILE $output;
-               $results .= sprintf($output);
-           }
-           close(OUTFILE);
-       };
-       if( $@ ) {
-	   $self->warn($self->error_string);
-       }
-   }
-   unless ( $self->save_tempfiles ) {
-       unlink($self->{'_wrapper'});
-      $self->cleanup();
-   }
-   return ($rc,$results);
+    my $self = shift;
+    my ($rc, $run_results) = $self->SUPER::run();
+    my $results = {};
+    my @run_result_array = split (/\n/, $run_results);
+    my $line = shift @run_result_array;
+    my $current_model = "error"; # if this stays "error" when you're trying to add results for a model, something's wrong.
+    while (defined $line) {
+        if ($line =~ m/Hierarchical Testing based model \((.*)\)/) {
+            $current_model = "Hierarchical Testing";
+            $results->{$current_model}{'model_name'} = $1;
+        } elsif ($line =~ m/AIC based model \((.*)\)/) {
+            $current_model = "AIC";
+            $results->{$current_model}{'model_name'} = $1;
+        } elsif ($line =~ m/Model String:(\d+)/) {
+            $results->{$current_model}{'model_string'} = $1;
+        } elsif ($line =~ m/Model Options: (.+)/) {
+            $results->{$current_model}{'model_options'} = $1;
+        } elsif ($line =~ m/Equilibrium Frequencies Option: (.+)/) {
+            $results->{$current_model}{'eq_freq_option'} = $1;
+        }
+        $line = shift @run_result_array;
+    }
+    return ($rc,$results);
 }
 
 
@@ -236,7 +227,7 @@ sub run {
  Usage   : $self->create_wrapper
  Function: It will create the wrapper file that interfaces with the analysis bf file
  Example :
- Returns : 
+ Returns :
  Args    :
 
 
@@ -245,109 +236,8 @@ sub run {
 sub create_wrapper {
    my $self = shift;
 
-   my $batchfile = 'ModelTest.bf';
+   my $batchfile = "ModelTest.bf";
    $self->SUPER::create_wrapper($batchfile);
-}
-
-
-=head2 set_default_parameters
-
- Title   : set_default_parameters
- Usage   : $modeltest->set_default_parameters(0);
- Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
-	    %VALIDVALUES class variable)
- Returns : none
- Args    : boolean: keep existing parameter values
-
-
-=cut
-
-sub set_default_parameters {
-   my ($self,$keepold) = @_;
-   $keepold = 0 unless defined $keepold;
-   foreach my $elem (@VALIDVALUES) {
-       my ($param,$val) = each %$elem;
-       # skip if we want to keep old values and it is already set
-       if (ref($val)=~/ARRAY/i ) {
-           unless (ref($val->[0])=~/HASH/i) {
-               push @{ $self->{'_orderedparams'} }, {$param, $val->[0]};
-           } else {
-               $val = $val->[0];
-           }
-       } 
-       if ( ref($val) =~ /HASH/i ) { 
-           my $prevparam;
-           while (defined($val)) {
-               last unless (ref($val) =~ /HASH/i);
-               last unless (defined($param));
-               $prevparam = $param;
-               ($param,$val) = each %{$val};
-               push @{ $self->{'_orderedparams'} }, {$prevparam, $param};
-               push @{ $self->{'_orderedparams'} }, {$param, $val} if (defined($val));
-           }
-       } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) { 
-           push @{ $self->{'_orderedparams'} }, {$param, $val};
-       }
-   }
-}
-
-
-=head1 Bio::Tools::Run::WrapperBase methods
-
-=cut
-
-=head2 save_tempfiles
-
- Title   : save_tempfiles
- Usage   : $obj->save_tempfiles($newval)
- Function: 
- Returns : value of save_tempfiles
- Args    : newvalue (optional)
-
-
-=cut
-
-
-=head2 tempdir
-
- Title   : tempdir
- Usage   : my $tmpdir = $self->tempdir();
- Function: Retrieve a temporary directory name (which is created)
- Returns : string which is the name of the temporary directory
- Args    : none
-
-
-=cut
-
-=head2 cleanup
-
- Title   : cleanup
- Usage   : $modeltest->cleanup();
- Function: Will cleanup the tempdir directory after a run
- Returns : none
- Args    : none
-
-
-=cut
-
-=head2 io
-
- Title   : io
- Usage   : $obj->io($newval)
- Function:  Gets a L<Bio::Root::IO> object
- Returns : L<Bio::Root::IO>
- Args    : none
-
-
-=cut
-
-sub DESTROY {
-    my $self= shift;
-    unless ( $self->save_tempfiles ) {
-	$self->cleanup();
-    }
-    $self->SUPER::DESTROY();
 }
 
 1;
