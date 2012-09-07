@@ -2,7 +2,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Phylo::Hyphy::SLAC
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Albert Vilella <avilella-at-gmail-dot-com>
 #
@@ -54,15 +54,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -113,8 +113,8 @@ INCOMPLETE DOCUMENTATION OF ALL METHODS
 
 =cut
 
-BEGIN { 
-    @VALIDVALUES = 
+BEGIN {
+    @VALIDVALUES =
         (
          {'geneticCode' => [ "Universal","VertebratemtDNA","YeastmtDNA","Mold/ProtozoanmtDNA",
                              "InvertebratemtDNA","CiliateNuclear","EchinodermmtDNA","EuplotidNuclear",
@@ -122,7 +122,7 @@ BEGIN {
          {'New/Restore' => [ "New Analysis", "Restore"]},
          {'tempalnfile' => undef }, # aln file goes here
          {'Model Options' => [ { "Custom" => '010010' },
-                               { "Default" => undef } ] 
+                               { "Default" => undef } ]
          },
          {'temptreefile' => undef }, # tree file goes here
          {'Model Fit Results' => [ '/dev/null'] }, # this will not work under Windows
@@ -149,7 +149,7 @@ BEGIN {
 
  Title   : new
  Usage   : my $obj = Bio::Tools::Run::Phylo::Hyphy::SLAC->new();
- Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::SLAC object 
+ Function: Builds a new Bio::Tools::Run::Phylo::Hyphy::SLAC object
  Returns : Bio::Tools::Run::Phylo::Hyphy::SLAC
  Args    : -alignment => the Bio::Align::AlignI object
            -save_tempfiles => boolean to save the generated tempfiles and
@@ -166,8 +166,8 @@ sub new {
   my($class,@args) = @_;
 
   my $self = $class->SUPER::new(@args);
-  my ($aln, $tree, $st, $params, $exe, 
-      $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES 
+  my ($aln, $tree, $st, $params, $exe,
+      $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES
 				    PARAMS EXECUTABLE)],
 				    @args);
   defined $aln && $self->alignment($aln);
@@ -176,7 +176,7 @@ sub new {
   defined $exe && $self->executable($exe);
   $self->set_default_parameters();
   if( defined $params ) {
-      if( ref($params) !~ /HASH/i ) { 
+      if( ref($params) !~ /HASH/i ) {
 	  $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
 	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
@@ -256,7 +256,7 @@ sub run {
  Usage   : $self->create_wrapper
  Function: It will create the wrapper file that interfaces with the analysis bf file
  Example :
- Returns : 
+ Returns :
  Args    :
 
 
@@ -274,7 +274,7 @@ sub create_wrapper {
  Title   : set_default_parameters
  Usage   : $hyphy->set_default_parameters(0);
  Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
+           (the first value in each array in the
 	    %VALIDVALUES class variable)
  Returns : none
  Args    : boolean: keep existing parameter values
@@ -294,8 +294,8 @@ sub set_default_parameters {
            } else {
                $val = $val->[0];
            }
-       } 
-       if ( ref($val) =~ /HASH/i ) { 
+       }
+       if ( ref($val) =~ /HASH/i ) {
            my $prevparam;
            while (defined($val)) {
                last unless (ref($val) =~ /HASH/i);
@@ -305,7 +305,7 @@ sub set_default_parameters {
                push @{ $self->{'_orderedparams'} }, {$prevparam, $param};
                push @{ $self->{'_orderedparams'} }, {$param, $val} if (defined($val));
            }
-       } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) { 
+       } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) {
            push @{ $self->{'_orderedparams'} }, {$param, $val};
        }
    }
@@ -377,7 +377,7 @@ sub set_default_parameters {
  Title   : tree
  Usage   : $slac->tree($tree, %params);
  Function: Get/Set the L<Bio::Tree::TreeI> object
- Returns : L<Bio::Tree::TreeI> 
+ Returns : L<Bio::Tree::TreeI>
  Args    : [optional] $tree => L<Bio::Tree::TreeI>,
            [optional] %parameters => hash of tree-specific parameters:
 
@@ -403,7 +403,7 @@ sub set_default_parameters {
  Title   : set_parameter
  Usage   : $slac->set_parameter($param,$val);
  Function: Sets a slac parameter, will be validated against
-           the valid values as set in the %VALIDVALUES class variable.  
+           the valid values as set in the %VALIDVALUES class variable.
            The checks can be ignored if one turns off param checks like this:
              $slac->no_param_checks(1)
  Returns : boolean if set was success, if verbose is set to -1
@@ -419,7 +419,7 @@ sub set_default_parameters {
  Title   : set_default_parameters
  Usage   : $slac->set_default_parameters(0);
  Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
+           (the first value in each array in the
 	    %VALIDVALUES class variable)
  Returns : none
  Args    : boolean: keep existing parameter values
@@ -432,7 +432,7 @@ sub set_default_parameters {
  Title   : update_ordered_parameters
  Usage   : $slac->update_ordered_parameters(0);
  Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the 
+           (the first value in each array in the
 	    %VALIDVALUES class variable)
  Returns : none
  Args    : boolean: keep existing parameter values
@@ -449,7 +449,7 @@ sub set_default_parameters {
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 
