@@ -23,7 +23,7 @@ Bio::Tools::Run::Phylo::Hyphy::REL - Wrapper around the Hyphy REL analysis
   use Bio::TreeIO;
 
   my $alignio = Bio::AlignIO->new(-format => 'fasta',
-  			         -file   => 't/data/hyphy1.fasta');
+                                  -file   => 't/data/hyphy1.fasta');
 
   my $aln = $alignio->next_aln;
 
@@ -95,7 +95,6 @@ Internal methods are usually preceded with a _
 
 
 package Bio::Tools::Run::Phylo::Hyphy::REL;
-use vars qw(@ISA @VALIDVALUES $PROGRAMNAME $PROGRAM);
 use strict;
 use Bio::Root::Root;
 use Bio::AlignIO;
@@ -103,20 +102,23 @@ use Bio::TreeIO;
 use Bio::Tools::Run::Phylo::Hyphy::Base;
 use Bio::Tools::Run::WrapperBase;
 
-@ISA = qw(Bio::Root::Root Bio::Tools::Run::Phylo::Hyphy::Base);
+use base qw(Bio::Root::Root Bio::Tools::Run::Phylo::Hyphy::Base);
 
-=head2 Default Values
 
-Valid and default values for REL are listed below.  The default
+=head2 valid_values
+
+ Title   : valid_values
+ Usage   : $factory->valid_values()
+ Function: returns the possible parameters
+ Returns:  an array holding all possible parameters. The default
 values are always the first one listed.  These descriptions are
 essentially lifted from the python wrapper or provided by the author.
-
-INCOMPLETE DOCUMENTATION OF ALL METHODS
+ Args    : None
 
 =cut
 
-BEGIN {
-    @VALIDVALUES =
+sub valid_values {
+    return
         (
          {'geneticCode' => [ "Universal","VertebratemtDNA","YeastmtDNA","Mold/ProtozoanmtDNA",
                              "InvertebratemtDNA","CiliateNuclear","EchinodermmtDNA","EuplotidNuclear",
@@ -124,7 +126,7 @@ BEGIN {
          {'tempalnfile' => undef }, # aln file goes here
          {'temptreefile' => undef }, # tree file goes here
          {'Model' => [ "Null for Test 1", "Null for Test 2", "Alternative"]},
-         {'temptsvfile' => undef } # site-by-site conditional probabilities go to this file
+         {'outfile' => undef } # site-by-site conditional probabilities go to this file
         );
 }
 
@@ -146,8 +148,7 @@ See also: L<Bio::Tree::TreeI>, L<Bio::Align::AlignI>
 =cut
 
 sub new {
-  my($class,@args) = @_;
-
+   my($class,@args) = @_;
    my $self = $class->SUPER::new(@args);
    my ($aln, $tree, $st, $params, $exe,
    $ubl) = $self->_rearrange([qw(ALIGNMENT TREE SAVE_TEMPFILES PARAMS EXECUTABLE)], @args);
@@ -156,19 +157,15 @@ sub new {
    defined $st  && $self->save_tempfiles($st);
    defined $exe && $self->executable($exe);
 
-   my $tsvfile = $self->tempdir() . "/results.tsv";
-   $self->{'_params'}{'temptsvfile'} = $tsvfile;
-
-
    $self->set_default_parameters();
    if( defined $params ) {
       if( ref($params) !~ /HASH/i ) {
          $self->warn("Must provide a valid hash ref for parameter -FLAGS");
       } else {
-	  map { $self->set_parameter($_, $$params{$_}) } keys %$params;
+         map { $self->set_parameter($_, $$params{$_}) } keys %$params;
       }
-  }
-  return $self;
+   }
+   return $self;
 }
 
 
@@ -180,52 +177,34 @@ sub new {
            the alignment parameter must have been set
  Returns : Return code, Hash
  Args    : L<Bio::Align::AlignI> object,
-	   L<Bio::Tree::TreeI> object [optional]
+         L<Bio::Tree::TreeI> object [optional]
 
 
 =cut
 
 sub run {
-   my ($self,$aln,$tree) = @_;
-
-   $self->prepare($aln,$tree) unless (defined($self->{'_prepared'}));
-   my ($rc,$results) = (1);
-   {
-      my $commandstring;
-      my $exit_status;
-      my $tempdir = $self->tempdir;
-
-      my $relexe = $self->executable();
-      $self->throw("unable to find or run executable for 'HYPHY'") unless $relexe && -e $relexe && -x _;
-      $commandstring = $relexe . " BASEPATH=" . $self->program_dir . " " . $self->{'_wrapper'};
-      open(RUN, "$commandstring |") or $self->throw("Cannot open exe $relexe");
-      my @output = <RUN>;
-      $exit_status = close(RUN);
-      $self->error_string(join('',@output));
-      if( (grep { /\berr(or)?: /io } @output)  || !$exit_status) {
-         $self->warn("There was an error - see error_string for the program output");
-         $rc = 0;
-      }
-      my $outfile = $self->outfile_name;
-      eval {
-         open(OUTFILE, ">$outfile") or $self->throw("cannot open $outfile for writing");
-         foreach my $output (@output) {
-            print OUTFILE $output;
-            $results .= sprintf($output);
-         }
-         close(OUTFILE);
-      };
-      if( $@ ) {
-         $self->warn($self->error_string);
-      }
-   }
-   unless ( $self->save_tempfiles ) {
-       unlink($self->{'_wrapper'});
-      $self->cleanup();
-   }
-   return ($rc,$results);
+    my $self = shift;
+    my ($rc,$run_results) = $self->SUPER::run();
+    my $results = {};
+    my $outfile = $self->outfile_name();
+    open(OUTFILE, "$outfile") or $self->throw("cannot open $outfile for reading");
+    my $readed_header = 0;
+    my @elems;
+    while (<OUTFILE>) {
+        if ($readed_header) {
+           # REL results are csv
+           my @values = split("\,",$_);
+           for my $i (0 .. (scalar(@values)-1)) {
+               $elems[$i] =~ s/\n//g;
+               push @{$results->{$elems[$i]}}, $values[$i];
+           }
+        } else {
+           @elems = split("\,",$_);
+           $readed_header = 1;
+        }
+    }
+    return ($rc,$results);
 }
-
 
 =head2 create_wrapper
 
@@ -242,121 +221,8 @@ sub run {
 sub create_wrapper {
    my $self = shift;
 
-   my $batchfile = 'YangNielsenBranchSite2005.bf';
+   my $batchfile = "YangNielsenBranchSite2005.bf";
    $self->SUPER::create_wrapper($batchfile);
-}
-
-
-=head2 set_default_parameters
-
- Title   : set_default_parameters
- Usage   : $rel->set_default_parameters(0);
- Function: (Re)set the default parameters from the defaults
-           (the first value in each array in the
-	    %VALIDVALUES class variable)
- Returns : none
- Args    : boolean: keep existing parameter values
-
-
-=cut
-
-sub set_default_parameters {
-   my ($self,$keepold) = @_;
-   $keepold = 0 unless defined $keepold;
-   foreach my $elem (@VALIDVALUES) {
-      keys %$elem; #reset hash iterator
-      my ($param,$val) = each %$elem;
-      # skip if we want to keep old values and it is already set
-      if (ref($val)=~/ARRAY/i ) {
-         unless (ref($val->[0])=~/HASH/i) {
-            push @{ $self->{'_orderedparams'} }, {$param, $val->[0]};
-         } else {
-            $val = $val->[0];
-         }
-      }
-      if ( ref($val) =~ /HASH/i ) {
-         my $prevparam;
-         while (defined($val)) {
-            last unless (ref($val) =~ /HASH/i);
-            last unless (defined($param));
-            $prevparam = $param;
-            ($param,$val) = each %{$val};
-            push @{ $self->{'_orderedparams'} }, {$prevparam, $param};
-            push @{ $self->{'_orderedparams'} }, {$param, $val} if (defined($val));
-         }
-      } elsif (ref($val) !~ /HASH/i && ref($val) !~ /ARRAY/i) {
-         push @{ $self->{'_orderedparams'} }, {$param, $val};
-      }
-   }
-}
-
-
-=head1 Bio::Tools::Run::WrapperBase methods
-
-=cut
-
-=head2 no_param_checks
-
- Title   : no_param_checks
- Usage   : $obj->no_param_checks($newval)
- Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values
- Returns : value of no_param_checks
- Args    : newvalue (optional)
-
-
-=cut
-
-=head2 save_tempfiles
-
- Title   : save_tempfiles
- Usage   : $obj->save_tempfiles($newval)
- Function:
- Returns : value of save_tempfiles
- Args    : newvalue (optional)
-
-
-=cut
-
-=head2 tempdir
-
- Title   : tempdir
- Usage   : my $tmpdir = $self->tempdir();
- Function: Retrieve a temporary directory name (which is created)
- Returns : string which is the name of the temporary directory
- Args    : none
-
-
-=cut
-
-=head2 cleanup
-
- Title   : cleanup
- Usage   : $rel->cleanup();
- Function: Will cleanup the tempdir directory after a run
- Returns : none
- Args    : none
-
-
-=cut
-
-=head2 io
-
- Title   : io
- Usage   : $obj->io($newval)
- Function:  Gets a L<Bio::Root::IO> object
- Returns : L<Bio::Root::IO>
- Args    : none
-
-
-=cut
-
-sub DESTROY {
-    my $self= shift;
-    unless ( $self->save_tempfiles ) {
-	$self->cleanup();
-    }
-    $self->SUPER::DESTROY();
 }
 
 1;
