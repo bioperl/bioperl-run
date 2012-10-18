@@ -14,12 +14,12 @@ Bio::Tools::Run::Alignment::Blat
 
  my $factory = Bio::Tools::Run::Alignment::Blat->new(-db => $database);
  # $report is a SearchIO-compliant object
- my $report = $factory->align($seqobj);
+ my $report = $factory->run($seqobj);
 
 =head1 DESCRIPTION
 
-Wrapper module for Blat program.  This newer version allows for all
-parameters to be set.
+Wrapper module for Blat program. This newer version allows for all parameters to
+be set by passing them as an option to new().
 
 Key bits not implemented yet (TODO):
 
@@ -76,7 +76,7 @@ web:
 
  Chris Fields - cjfields at bioperl dot org
 
- Original author- Bala Email bala@tll.org.sg
+ Original author - Bala Email bala@tll.org.sg
 
 =head1 APPENDIX
 
@@ -111,25 +111,29 @@ our %LOCAL_ATTRIBUTES = map {$_ => 1} qw(db DB qsegment hsegment searchio
                                     outfile_name quiet);
 
 our %searchio_map = (
-    'psl'   => 'psl',
-    'pslx'  => 'psl', # I don't think there is support for this yet
-    'axt'   => 'axt',
-    'blast' => 'blast',
-    'sim4'  => 'sim4',
-    'wublast'   => 'blast',
-    'blast8'    => 'blasttable',
-    'blast9'    => 'blasttable'
+    'psl'     => 'psl',
+    'pslx'    => 'psl', # I don't think there is support for this yet
+    'axt'     => 'axt',
+    'blast'   => 'blast',
+    'sim4'    => 'sim4',
+    'wublast' => 'blast',
+    'blast8'  => 'blasttable',
+    'blast9'  => 'blasttable'
 );
+
 
 =head2 new
 
  Title   : new
- Usage   : $blat->new(@params)
- Function: creates a new Blat factory
- Returns : Bio::Tools::Run::Alignment::Blat
- Args    : -db       : see db()
+ Usage   : $blat->new( -db => '' )
+ Function: Create a new Blat factory
+ Returns : A new Bio::Tools::Run::Alignment::Blat object
+ Args    : -db       : Mandatory parameter. See db()
            -qsegment : see qsegment()
            -tsegment : see tsegment()
+           Also, Blat parameters and flags are accepted: -t, -q, -minIdentity,
+              -minScore, -out, -trimT, ...
+           See Blat's manual for details.
 
 =cut
 
@@ -146,7 +150,7 @@ sub new {
 
  Title   : program_name
  Usage   : $factory->program_name()
- Function: holds the program name
+ Function: Get the program name
  Returns : string
  Args    : None
 
@@ -176,8 +180,8 @@ sub program_dir {
 
  Title   : run()
  Usage   : $obj->run($query)
- Function: Runs Blat and creates an array of featrues
- Returns : An array of Bio::SeqFeature::Generic objects
+ Function: Run Blat.
+ Returns : A Bio::SearchIO object that holds the results
  Args    : A Bio::PrimarySeqI object or a file of query sequences
 
 =cut
@@ -544,7 +548,7 @@ sub _database() {
 # Title   : _run
 # Usage   : $obj->_run()
 # Function: Internal (not to be used directly)
-# Returns : An array of Bio::SeqFeature::Generic objects
+# Returns : A Bio::SearchIO object that contains the results
 # Args    : File of sequences
 #
 #=cut
