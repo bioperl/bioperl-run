@@ -85,6 +85,7 @@ methods. Internal methods are usually preceded with a _
 
 =cut
 
+
 package Bio::Tools::Run::Alignment::Blat;
 
 use strict;
@@ -138,6 +139,7 @@ sub new {
     return $self;
 }
 
+
 =head2 program_name
 
  Title   : program_name
@@ -149,8 +151,9 @@ sub new {
 =cut
 
 sub program_name {
-  return 'blat';
+    return 'blat';
 }
+
 
 =head2 program_dir
 
@@ -163,8 +166,9 @@ sub program_name {
 =cut
 
 sub program_dir {
-  return Bio::Root::IO->catfile($ENV{BLATDIR}) if $ENV{BLATDIR};
+    return Bio::Root::IO->catfile($ENV{BLATDIR}) if $ENV{BLATDIR};
 }
+
 
 =head2 run
 
@@ -177,19 +181,20 @@ sub program_dir {
 =cut
 
 sub run {
-	my ($self,$query) = @_;
-	my @feats;
+    my ($self,$query) = @_;
+    my @feats;
 
-	if  (ref($query) ) {	# it is an object
-    	if (ref($query) =~ /GLOB/) {
-	      $self->throw("Cannot use filehandle as argument to run()");
-    	}
-    	my $infile = $self->_writeSeqFile($query);
+    if  (ref($query) ) {  # it is an object
+        if (ref($query) =~ /GLOB/) {
+            $self->throw("Cannot use filehandle as argument to run()");
+        }
+        my $infile = $self->_writeSeqFile($query);
         return  $self->_run($infile);
-	} else {
-		return $self->_run($query);
-	}
+    } else {
+        return $self->_run($query);
+    }
 }
+
 
 =head2 align
 
@@ -200,12 +205,14 @@ sub run {
 =cut
 
 sub align {
-  return shift->run(@_);
+    return shift->run(@_);
 }
+
 
 =head2 db
 
 =cut
+
 
 sub db {
     my $self = shift;
@@ -217,6 +224,7 @@ sub db {
 # None of the other parameters worked in the past, so not replacing them
 
 *DB = \&db;
+
 
 =head2 qsegment
 
@@ -242,6 +250,7 @@ sub qsegment {
     return $self->{blat_qsegment};
 }
 
+
 =head2 tsegment
 
  Title    : tsegment
@@ -266,12 +275,14 @@ sub tsegment {
     return $self->{blat_tsegment};
 }
 
+
 # override this, otherwise one gets a default of 'mlc'
 sub outfile_name {
     my $self = shift;
     return $self->{blat_outfile} = shift if @_;
     return $self->{blat_outfile};
 }
+
 
 =head2 searchio
 
@@ -298,11 +309,10 @@ sub searchio {
     return $self->{blat_searchio} || {};
 }
 
+
 =head1 Bio::ParameterBaseI-specific methods
 
 These methods are part of the Bio::ParameterBaseI interface
-
-=cut
 
 =head2 set_parameters
 
@@ -313,6 +323,7 @@ These methods are part of the Bio::ParameterBaseI interface
  Args    : [optional] hash or array of parameter/values.  These can optionally
            be hash or array references
  Note    : This only sets parameters; to set methods use the method name
+
 =cut
 
 sub set_parameters {
@@ -338,6 +349,7 @@ sub set_parameters {
     }
 }
 
+
 =head2 reset_parameters
 
  Title   : reset_parameters
@@ -356,6 +368,7 @@ sub reset_parameters {
     }
 }
 
+
 =head2 validate_parameters
 
  Title   : validate_parameters
@@ -370,6 +383,7 @@ sub reset_parameters {
 
 sub validate_parameters { 0 }
 
+
 =head2 parameters_changed
 
  Title   : parameters_changed
@@ -382,6 +396,7 @@ sub validate_parameters { 0 }
 =cut
 
 sub parameters_changed { 1 }
+
 
 =head2 available_parameters
 
@@ -399,6 +414,7 @@ sub available_parameters {
     my @params = (sort keys %BLAT_PARAMS, sort keys %BLAT_SWITCHES);
     return @params;
 }
+
 
 =head2 get_parameters
 
@@ -422,11 +438,10 @@ sub get_parameters {
     return %params;
 }
 
+
 =head1 to_* methods
 
 All to_* methods are implementation-specific
-
-=cut
 
 =head2 to_exe_string
 
@@ -484,6 +499,7 @@ sub to_exe_string {
     $string;
 }
 
+
 #=head2 _input
 #
 # Title   :   _input
@@ -496,11 +512,12 @@ sub to_exe_string {
 
 sub _input() {
     my ($self,$infile1) = @_;
-    if(defined $infile1){
-        $self->{'input'}=$infile1;
-     }   
-     return $self->{'input'};
+    if (defined $infile1) {
+        $self->{'input'} = $infile1;
+    }
+    return $self->{'input'};
 }
+
 
 #=head2 _database
 #
@@ -530,31 +547,31 @@ sub _database() {
 #=cut
 
 sub _run {
-	my ($self)= shift;
-	my $str = $self->to_exe_string(-seq_file => shift);
+    my ($self)= shift;
+    my $str = $self->to_exe_string(-seq_file => shift);
     
     my $out = $self->outfile_name || $self->_tempfile;
     
     $str .= " $out".$self->_quiet;
-	$self->debug($str."\n") if( $self->verbose > 0 );
+    $self->debug($str."\n") if( $self->verbose > 0 );
 
     my %params = $self->get_parameters;
 
-	my $status = system($str);
-	$self->throw( "Blat call ($str) crashed: $? \n") unless $status==0;
-	
+    my $status = system($str);
+    $self->throw( "Blat call ($str) crashed: $? \n") unless $status==0;
+
     my $format = exists($params{out}) ?
                 $searchio_map{$params{out}} : 'psl';
     
-	my @io = ref ($out) !~ /GLOB/ ? (-file    => $out,) : (-fh    => $out,);
-	my $blat_obj = Bio::SearchIO->new(%{$self->searchio},
+    my @io = ref ($out) !~ /GLOB/ ? (-file    => $out,) : (-fh    => $out,);
+    my $blat_obj = Bio::SearchIO->new(%{$self->searchio},
                                     @io,
                                     -query_type => $params{prot} ? 'protein' :
                                                     $params{q} || 'dna',
                                     -hit_type   => $params{prot} ? 'protein' :
                                                     $params{t} || 'dna',
                                     -format => $format);
-	return $blat_obj;
+    return $blat_obj;
 }
 
 
@@ -577,13 +594,15 @@ sub _writeSeqFile {
     return $inputfile;
 }
 
+
 sub _tempfile {
     my $self = shift;
     my ($tfh,$outfile) = $self->io->tempfile(-dir=>$Bio::Root::IO::TEMPDIR);
-	# this is because we only want a unique filename
-	close($tfh);
+    # this is because we only want a unique filename
+    close($tfh);
     return $outfile;
 }
+
 
 sub _quiet {
     my $self = shift;
