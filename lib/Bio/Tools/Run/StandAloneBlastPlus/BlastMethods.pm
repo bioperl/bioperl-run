@@ -25,7 +25,7 @@ Bio::Tools::Run::StandAloneBlastPlus::BlastMethods - Provides BLAST methods to S
  # get your results
  $result = $fac->blastn( -query => 'query_seqs.fas',
                          -outfile => 'query.bls',
-                         -method_args => [ '-num_alignments' => 10 ,
+                         -method_args => [ '-num_alignments' => 10 ] );
 
  $result = $fac->tblastx( -query => $an_alignment_object,
                           -outfile => 'query.bls',
