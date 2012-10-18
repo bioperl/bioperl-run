@@ -127,12 +127,14 @@ our %searchio_map = (
  Usage   : $blat->new(@params)
  Function: creates a new Blat factory
  Returns : Bio::Tools::Run::Alignment::Blat
- Args    :
+ Args    : -db       : see db()
+           -qsegment : see qsegment()
+           -tsegment : see tsegment()
 
 =cut
 
 sub new {
-    my ($class,@args) = @_;
+    my ($class, @args) = @_;
     my $self = $class->SUPER::new(@args);
     $self->io->_initialize_io();
     $self->set_parameters(@args);
@@ -172,35 +174,31 @@ sub program_dir {
 
 =head2 run
 
- Title   :   run()
- Usage   :   $obj->run($query)
- Function:   Runs Blat and creates an array of featrues
- Returns :   An array of Bio::SeqFeature::Generic objects
- Args    :   A Bio::PrimarySeqI or a file name
+ Title   : run()
+ Usage   : $obj->run($query)
+ Function: Runs Blat and creates an array of featrues
+ Returns : An array of Bio::SeqFeature::Generic objects
+ Args    : A Bio::PrimarySeqI object or a file of query sequences
 
 =cut
 
 sub run {
-    my ($self,$query) = @_;
-    my @feats;
-
+    my ($self, $query) = @_;
     if  (ref($query) ) {  # it is an object
         if (ref($query) =~ /GLOB/) {
             $self->throw("Cannot use filehandle as argument to run()");
         }
-        my $infile = $self->_writeSeqFile($query);
-        return  $self->_run($infile);
-    } else {
-        return $self->_run($query);
+        $query = $self->_writeSeqFile($query);
     }
+    return $self->_run($query);
 }
 
 
 =head2 align
 
- Title   :   align
- Usage   :   $obj->align($query)
- Function:   Alias to run()
+ Title   : align
+ Usage   : $obj->align($query)
+ Function: Alias to run()
 
 =cut
 
@@ -211,8 +209,13 @@ sub align {
 
 =head2 db
 
-=cut
+ Title   : db
+ Usage   : $obj->db()
+ Function: Get or set the file of database sequences (.fa , .nib or .2bit)
+ Returns : Database filename
+ Args    : Database filename
 
+=cut
 
 sub db {
     my $self = shift;
@@ -502,9 +505,9 @@ sub to_exe_string {
 
 #=head2 _input
 #
-# Title   :   _input
-# Usage   :   obj->_input($seqFile)
-# Function:   Internal (not to be used directly)
+# Title   : _input
+# Usage   : obj->_input($seqFile)
+# Function: Internal (not to be used directly)
 # Returns :
 # Args    :
 #
@@ -521,9 +524,9 @@ sub _input() {
 
 #=head2 _database
 #
-# Title   :   _database
-# Usage   :   obj->_database($seqFile)
-# Function:   Internal (not to be used directly)
+# Title   : _database
+# Usage   : obj->_database($seqFile)
+# Function: Internal (not to be used directly)
 # Returns :
 # Args    :
 #
@@ -538,17 +541,17 @@ sub _database() {
 
 #=head2 _run
 #
-# Title   :   _run
-# Usage   :   $obj->_run()
-# Function:   Internal (not to be used directly)
-# Returns :   An array of Bio::SeqFeature::Generic objects
-# Args    :
+# Title   : _run
+# Usage   : $obj->_run()
+# Function: Internal (not to be used directly)
+# Returns : An array of Bio::SeqFeature::Generic objects
+# Args    : File of sequences
 #
 #=cut
 
 sub _run {
-    my ($self)= shift;
-    my $str = $self->to_exe_string(-seq_file => shift);
+    my ($self, $seq_file) = @_;
+    my $str = $self->to_exe_string(-seq_file => $seq_file);
     
     my $out = $self->outfile_name || $self->_tempfile;
     
@@ -577,9 +580,9 @@ sub _run {
 
 #=head2 _writeSeqFile
 #
-# Title   :   _writeSeqFile
-# Usage   :   obj->_writeSeqFile($seq)
-# Function:   Internal (not to be used directly)
+# Title   : _writeSeqFile
+# Usage   : obj->_writeSeqFile($seq)
+# Function: Internal (not to be used directly)
 # Returns :
 # Args    :
 #
@@ -611,7 +614,7 @@ sub _quiet {
     if ($self->quiet) {
         $q =  $^O =~ /Win/i ? ' 2>&1 NUL' : ' > /dev/null 2>&1';
     }
-    $q;
+    return $q;
 }
 
 1;
