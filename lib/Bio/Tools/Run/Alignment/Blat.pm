@@ -11,9 +11,8 @@ Bio::Tools::Run::Alignment::Blat
 =head1 SYNOPSIS
 
  use Bio::Tools::Run::Alignment::Blat;
-
  my $factory = Bio::Tools::Run::Alignment::Blat->new(-db => $database);
- # $report is a SearchIO-compliant object
+ # $report is a Bio::SearchIO-compliant object
  my $report = $factory->run($seqobj);
 
 =head1 DESCRIPTION
@@ -240,7 +239,6 @@ sub db {
  Function : pass in a B<UCSC-compliant> string for the query sequence(s)
  Returns  : string
  Args     : string
- Status   : New
  Note     : Requires the sequence(s) in question be 2bit or nib format
  Reminder : UCSC segment/regions coordinates are 0-based half-open (sequence
             begins at 0, but start isn't counted with length), whereas BioPerl
@@ -265,7 +263,6 @@ sub qsegment {
  Function : pass in a B<UCSC-compliant> string for the target sequence(s)
  Returns  : string
  Args     : string
- Status   : New
  Note     : Requires the sequence(s) in question be 2bit or nib format
  Reminder : UCSC segment/regions coordinates are 0-based half-open (sequence
             begins at 0, but start isn't counted with length), whereas BioPerl
@@ -283,6 +280,16 @@ sub tsegment {
 }
 
 
+=head2 outfile_name
+
+ Title    : outfile_name
+ Usage    : $obj->outfile_name('out.blat')
+ Function : Get or set the name for the BLAT output file
+ Returns  : string
+ Args     : string
+
+=cut
+
 # override this, otherwise one gets a default of 'mlc'
 sub outfile_name {
     my $self = shift;
@@ -298,7 +305,6 @@ sub outfile_name {
  Function : Pass in additional parameters to the returned Bio::SearchIO parser
  Returns  : Hash reference with Bio::SearchIO parameters
  Args     : Hash reference
- Status   : New
  Note     : Currently, this implementation overrides any passed -format
             parameter based on whether the output is changed ('out').  This
             may change if requested, but we can't see the utility of doing so,
@@ -503,7 +509,7 @@ sub to_exe_string {
     
     my $string = "$exe ".join(' ',@params);
 
-    $string;
+    return $string;
 }
 
 
