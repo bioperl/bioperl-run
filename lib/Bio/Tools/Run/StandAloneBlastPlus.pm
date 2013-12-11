@@ -1279,7 +1279,18 @@ sub _register_temp_for_cleanup {
 sub cleanup {
     my $self = shift;
     return unless $self->{_cleanup_list};
+
+    my $self_file = '';
+    if (exists $self->{_results}->{_file}) {
+        $self_file = $self->{_results}->{_file};
+    }
     for (@{$self->{_cleanup_list}}) {
+        # Close $self_file filehandle if it appears on the cleanup list,
+        # to avoid 'permission denied' errors when unlinking
+        if ($self_file ne '' and $_ =~ m/$self_file$/) {
+            close $self->{_results}->_fh;
+        }
+
 	m/(\.[a-z0-9_]+)+$/i && do {
 	    unlink $_;
 	    next;
