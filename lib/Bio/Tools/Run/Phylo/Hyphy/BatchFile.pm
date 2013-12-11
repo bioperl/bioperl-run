@@ -304,7 +304,7 @@ sub set_default_parameters {
     }
     my @validvals = $self->valid_values();
     for (my $i=0; $i< scalar (@validvals); $i++) {
-        my $elem = @validvals[$i];
+        my $elem = $validvals[$i];
         keys %$elem; #reset hash iterator
         my ($param,$val) = each %$elem;
         # skip if we want to keep old values and it is already set
