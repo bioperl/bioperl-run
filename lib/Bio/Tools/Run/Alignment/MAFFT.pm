@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::Tools::Run::Alignment::MAFFT
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich
 #
@@ -52,15 +52,15 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/MailList.html - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -85,7 +85,7 @@ package Bio::Tools::Run::Alignment::MAFFT;
 
 use vars qw($AUTOLOAD @ISA $PROGRAMNAME $PROGRAM %DEFAULTS
             @MAFFT4_PARAMS @MAFFT4_SWITCHES @OTHER_SWITCHES %OK_FIELD
-	    @MAFFT_ALN_METHODS @MAFFT6_PARAMS @MAFFT6_SWITCHES %OK_FIELD6
+            @MAFFT_ALN_METHODS @MAFFT6_PARAMS @MAFFT6_SWITCHES %OK_FIELD6
             );
 use strict;
 use Bio::Seq;
@@ -93,13 +93,13 @@ use Bio::SeqIO;
 use Bio::SimpleAlign;
 use Bio::AlignIO;
 
-use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase 
+use base qw(Bio::Root::Root Bio::Tools::Run::WrapperBase
           Bio::Factory::ApplicationFactoryI);
 
 BEGIN {
     %DEFAULTS = ( 'OUTPUT' => 'fasta',
-		  'METHOD' => 'fftnsi',
-		  'CYCLES' => 2);
+                  'METHOD' => 'fftnsi',
+                  'CYCLES' => 2);
     @MAFFT4_PARAMS =qw( METHOD CYCLES );
     @MAFFT4_SWITCHES = qw( NJ ALL_POSITIVE);
 
@@ -116,7 +116,7 @@ BEGIN {
     #@MAFFT6_ALN_METHODS = qw(linsi ginsi einsi fftnsi fftns nwnsi nwns)
     # Authorize attribute fields
     foreach my $attr ( @MAFFT4_SWITCHES,@MAFFT4_PARAMS,@OTHER_SWITCHES ) {
-	$OK_FIELD{$attr}++; 
+        $OK_FIELD{$attr}++;
     }
     foreach my $attr ( @MAFFT6_PARAMS, @MAFFT6_SWITCHES ) {
         $OK_FIELD6{$attr}++
@@ -143,7 +143,7 @@ sub program_name {
  Usage   : my $exe = $blastfactory->executable('blastall');
  Function: Finds the full path to the 'codeml' executable
  Returns : string representing the full path to the exe
- Args    : [optional] name of executable to set path to 
+ Args    : [optional] name of executable to set path to
            [optional] boolean flag whether or not warn when exe is not found
 
 
@@ -152,21 +152,21 @@ sub program_name {
 sub executable {
     my ($self, $exename, $exe,$warn) = @_;
     $exename = $self->program_name unless (defined $exename );
- 
+
     if( defined $exe && -x $exe ) {
         $self->{'_pathtoexe'}->{$exename} = $exe;
     }
     unless( defined $self->{'_pathtoexe'}->{$exename} ) {
-        my $f = $self->program_path($exename);	    
+        my $f = $self->program_path($exename);
         $exe = $self->{'_pathtoexe'}->{$exename} = $f if(-e $f && -x $f );
-         
+
         #  This is how I meant to split up these conditionals --jason
         # if exe is null we will execute this (handle the case where
         # PROGRAMDIR pointed to something invalid)
         unless( $exe )  {  # we didn't find it in that last conditional
         if( ($exe = $self->io->exists_exe($exename)) && -x $exe ) {
             $self->{'_pathtoexe'}->{$exename} = $exe;
-        } else { 
+        } else {
             $self->warn("Cannot find executable for $exename") if $warn;
             $self->{'_pathtoexe'}->{$exename} = undef;
         }
@@ -180,7 +180,7 @@ sub executable {
 
  Title   : program_path
  Usage   : my $path = $factory->program_path();
- Function: Builds path for executable 
+ Function: Builds path for executable
  Returns : string representing the full path to the exe
  Args    : none
 
@@ -212,13 +212,13 @@ sub program_dir {
 sub new {
     my ($class,@args) = @_;
     my $self = $class->SUPER::new(@args);
-    my ($attr, $value);    
-    
+    my ($attr, $value);
+
     while (@args)  {
-	$attr =   shift @args;
-	$value =  shift @args;
-	next if( $attr =~ /^-/); # don't want named parameters
-	$self->$attr($value);	
+        $attr =   shift @args;
+        $value =  shift @args;
+        next if( $attr =~ /^-/); # don't want named parameters
+        $self->$attr($value);
     }
 
     $self->output($DEFAULTS{'OUTPUT'}) unless( $self->output );
@@ -291,17 +291,17 @@ sub version {
     # it now seems to be a 'sh' script and the format has changed
     # slightly. i've tried to make the change compatible with both...
     # version="v5.860 (2006/06/12)"; export version
-    
+
     if( open(my $NAME, "grep 'export version' $exe | ") ) {
-		while(<$NAME>) {
-			if( /version.*?([\d.a-z]+)\s+/ ) {
-				return $1;
-			}
-		}
-		$self->warn("No version found");
-		close($NAME);
+        while(<$NAME>) {
+            if( /version.*?([\d.a-z]+)\s+/ ) {
+                return $1;
+            }
+        }
+        $self->warn("No version found");
+        close($NAME);
     } else {
-		$self->warn("$!");
+        $self->warn("$!");
     }
     return;
 }
@@ -326,12 +326,12 @@ sub run {
 
  Title   : align
  Usage   :
-	$inputfilename = 't/data/cysprot.fa';
-	$aln = $factory->align($inputfilename);
+    $inputfilename = 't/data/cysprot.fa';
+    $aln = $factory->align($inputfilename);
 or
-	$seq_array_ref = \@seq_array; 
-        # @seq_array is an array of Seq objs
-	$aln = $factory->align($seq_array_ref);
+    $seq_array_ref = \@seq_array;
+    # @seq_array is an array of Seq objs
+    $aln = $factory->align($seq_array_ref);
  Function: Perform a multiple sequence alignment
  Returns : Reference to a SimpleAlign object containing the
            sequence alignment.
@@ -352,7 +352,7 @@ sub align {
     $self->io->_io_cleanup();
     my ($infilename,$type) = $self->_setinput($input);
     if (! $infilename) {
-	$self->throw("Bad input data or less than 2 sequences in $input !");
+        $self->throw("Bad input data or less than 2 sequences in $input !");
     }
 
     my ($param_string,$outstr) = $self->_setparams();
@@ -378,18 +378,18 @@ sub align {
 sub _run {
     my ($self,$infilename,$paramstr,$outstr) = @_;
      my $commandstring = $self->executable()." $paramstr $infilename $outstr";
-    
+
     $self->debug( "mafft command = $commandstring \n");
 
     my $status = system($commandstring);
-    my $outfile = $self->outfile(); 
+    my $outfile = $self->outfile();
     if( !-e $outfile || -z $outfile ) {
         $self->warn( "MAFFT call crashed: $? [command $commandstring]\n");
         return;
     }
-    
-    my $in  = Bio::AlignIO->new('-file' => $outfile, 
-				'-format' => $self->output);
+
+    my $in  = Bio::AlignIO->new('-file' => $outfile,
+                                '-format' => $self->output);
     my $aln = $in->next_aln();
     return $aln;
 }
@@ -401,7 +401,7 @@ sub _run {
  Usage   :  Internal function, not to be called directly
  Function:  Create input file for mafft programs
  Example :
- Returns : name of file containing mafft data input 
+ Returns : name of file containing mafft data input
  Args    : Seq or Align object reference or input file name
 
 
@@ -411,43 +411,44 @@ sub _setinput {
     my ($self,$input) = @_;
     my ($infilename, $seq, $temp, $tfh);
     if (! ref $input) {
-	# check that file exists or throw
-	$infilename = $input;
-	unless (-e $input) {return 0;}	
-	return ($infilename);
+        # check that file exists or throw
+        $infilename = $input;
+        unless (-e $input) {return 0;}
+        return ($infilename);
     } elsif (ref($input) =~ /ARRAY/i ) { #  $input may be an
-	                                 #  array of BioSeq objects...
+                                         #  array of BioSeq objects...
         #  Open temporary file for both reading & writing of array
-	($tfh,$infilename) = $self->io->tempfile();
-	if( ! ref($input->[0]) ) {
-	    $self->warn("passed an array ref which did not contain objects to _setinput");
-	    return;
-	} elsif( $input->[0]->isa('Bio::PrimarySeqI') ) {		
-	    $temp =  Bio::SeqIO->new('-fh' => $tfh,
-				     '-format' => 'fasta');
-	    my $ct = 1;
-	    foreach $seq (@$input) {
-		return 0 unless ( ref($seq) && 
-				  $seq->isa("Bio::PrimarySeqI") );
-		if( ! defined $seq->display_id ||
-		    $seq->display_id =~ /^\s+$/) {
-		    $seq->display_id( "Seq".$ct++);
-		}
-		$temp->write_seq($seq);
-	    }
-	    $temp->close();
-	    undef $temp;
-	    close($tfh);
-	    $tfh = undef;
-	}  else { 
-	    $self->warn( "got an array ref with 1st entry ".
-			 $input->[0].
-			 " and don't know what to do with it\n");
-	}
+        ($tfh,$infilename) = $self->io->tempfile();
+        if( ! ref($input->[0]) ) {
+            $self->warn("passed an array ref which did not contain objects to _setinput");
+            return;
+        } elsif ( $input->[0]->isa('Bio::PrimarySeqI') ) {
+            $temp =  Bio::SeqIO->new('-fh' => $tfh,
+                                     '-format' => 'fasta');
+            my $ct = 1;
+            foreach $seq (@$input) {
+                return 0 unless ( ref($seq) &&
+                                  $seq->isa("Bio::PrimarySeqI") );
+                if( ! defined $seq->display_id ||
+                    $seq->display_id =~ /^\s+$/
+                    ) {
+                    $seq->display_id( "Seq".$ct++);
+                }
+                $temp->write_seq($seq);
+            }
+            $temp->close();
+            undef $temp;
+            close($tfh);
+            $tfh = undef;
+        }  else {
+            $self->warn( "got an array ref with 1st entry ".
+                         $input->[0].
+                         " and don't know what to do with it\n");
+        }
 
-	return ($infilename);
+        return ($infilename);
     } else {
-	$self->warn("Got $input and don't know what to do with it\n");
+        $self->warn("Got $input and don't know what to do with it\n");
     }
     return 0;
 }
@@ -456,7 +457,7 @@ sub _setinput {
 =head2  _setparams
 
  Title   :  _setparams
- Usage   :  Internal function, not to be called directly	
+ Usage   :  Internal function, not to be called directly
  Function:  Create parameter inputs for mafft program
  Example :
  Returns : parameter string to be passed to mafft program
@@ -469,15 +470,15 @@ sub _setparams {
     my ($outfile,$param_string) = ('','');
 
     # Set default output file if no explicit output file selected
-    unless (defined($outfile = $self->outfile) ) {	
-	my $tfh;
-	($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
-	close($tfh);
-	undef $tfh;
-	$self->outfile($outfile);
-    } 
+    unless (defined($outfile = $self->outfile) ) {
+        my $tfh;
+        ($tfh, $outfile) = $self->io->tempfile(-dir=>$self->tempdir());
+        close($tfh);
+        undef $tfh;
+        $self->outfile($outfile);
+    }
     my ($attr,$value);
-    
+
     if ( $self->_version6 ) {
         for  $attr ( @MAFFT6_SWITCHES) {
             $value = $self->$attr();
@@ -521,9 +522,9 @@ sub _setparams {
 
     my $outputstr = " 1>$outfile" ;
 
-    if ($self->quiet() || $self->verbose < 0) { 
-	$param_string .= " --quiet";
-	$outputstr .= ' 2> /dev/null';
+    if ($self->quiet() || $self->verbose < 0) {
+        $param_string .= " --quiet";
+        $outputstr .= ' 2> /dev/null';
     }
     return ($param_string, $outputstr);
 }
@@ -548,7 +549,7 @@ sub methods {
 =head2  _version6
 
  Title   : _version6
- Usage   : Internal function, not to be called directly	
+ Usage   : Internal function, not to be called directly
  Function: Check if the version of MAFFT is 6
  Example :
  Returns : Boolean
@@ -559,7 +560,8 @@ sub methods {
 sub _version6 {
     my $self = shift;
     if ( ! defined $self->{_version6} ) {
-        if ( $self->version =~ /^v6/ ) {
+        my $version = $self->version || '';
+        if ( $version =~ /^v6/ ) {
             $self->{_version6} = 1;
         }
         else {
@@ -579,7 +581,7 @@ sub _version6 {
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -590,7 +592,7 @@ sub _version6 {
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 
@@ -644,4 +646,3 @@ sub _version6 {
 =cut
 
 1; # Needed to keep compiler happy
-
