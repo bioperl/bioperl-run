@@ -9,12 +9,12 @@ our $home;
 my $v = 0; # private verbosity - this module only
 
 BEGIN {
-    $home = '.';	# set to '.' for Build use, 
-			# '..' for debugging from .t file
+    $home = '.';    # set to '.' for Build use,
+                    # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
     test_begin(-tests => 423,
-	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BEDTools)]);
+               -requires_modules => [qw(IPC::Run Bio::Tools::Run::BEDTools)]);
 }
 
 use Bio::Tools::Run::WrapperBase;
@@ -27,14 +27,14 @@ ok my $bedtoolsfac = Bio::Tools::Run::BEDTools->new, "make a default factory";
 is $bedtoolsfac->command, 'bam_to_bed', "default to command 'bam_to_bed'";
 
 my @commands = qw(
-    annotate         fasta_from_bed       overlap              
-    bam_to_bed       genome_coverage      pair_to_pair         
-    bed_to_bam       graph_union          pair_to_bed          
-    bed_to_IGV       group_by             shuffle              
-    b12_to_b6        intersect            slop                 
-    closest          links                sort                 
-    complement       mask_fasta_from_bed  subtract             
-    coverage         merge                window               
+    annotate         fasta_from_bed       overlap
+    bam_to_bed       genome_coverage      pair_to_pair
+    bed_to_bam       graph_union          pair_to_bed
+    bed_to_IGV       group_by             shuffle
+    b12_to_b6        intersect            slop
+    closest          links                sort
+    complement       mask_fasta_from_bed  subtract
+    coverage         merge                window
 );
 
 
@@ -92,22 +92,6 @@ my %s = (
     'window'               => 5
     );
 
-# Sorry to all those out there who don't have a find command
-# - perhaps someone can add an alternative
-my ($rmsk_bed) = `find /usr -name 'rmsk.hg18.chr21.bed' 2>/dev/null`;
-chomp $rmsk_bed if $rmsk_bed;
-my ($gene_bed) = `find /usr -name 'knownGene.hg18.chr21.bed' 2>/dev/null`;
-chomp $gene_bed if $gene_bed;
-
-my ($mm8_genome) = `find /usr -name 'mouse.mm8.genome' 2>/dev/null`;
-chomp $mm8_genome if $mm8_genome;
-my ($mm9_genome) = `find /usr -name 'mouse.mm9.genome' 2>/dev/null`;
-chomp $mm9_genome if $mm9_genome;
-my ($hg18_genome) = `find /usr -name 'human.hg18.genome' 2>/dev/null`;
-chomp $hg18_genome if $hg18_genome;
-my ($hg19_genome) = `find /usr -name 'human.hg19.genome' 2>/dev/null`;
-chomp $hg19_genome if $hg19_genome;
-
 my $bam_file = test_input_file('Ft.bam');
 my $bed_file = test_input_file('Ft.bed');
 my $bed12_file = test_input_file('Ft.bed12');
@@ -118,7 +102,7 @@ my $bed3_file = test_input_file('e_coli.bed3');
 my $bg1_file = test_input_file('1.bg');
 my $bg2_file = test_input_file('2.bg');
 my $bg3_file = test_input_file('3.bg');
- 
+
 my %format_lookup = (
     'annotate'             => 'bed',
     'bam_to_bed'           => 'bed',
@@ -172,7 +156,23 @@ my %result_lookup = (
 
 SKIP : {
     test_skip( -requires_executable => $bedtoolsfac,
-	       -tests => 421 );
+               -tests => 421 );
+
+    # Sorry to all those out there who don't have a find command
+    # - perhaps someone can add an alternative
+    my ($rmsk_bed) = `find /usr -name 'rmsk.hg18.chr21.bed' 2>/dev/null`;
+    chomp $rmsk_bed if $rmsk_bed;
+    my ($gene_bed) = `find /usr -name 'knownGene.hg18.chr21.bed' 2>/dev/null`;
+    chomp $gene_bed if $gene_bed;
+
+    my ($mm8_genome) = `find /usr -name 'mouse.mm8.genome' 2>/dev/null`;
+    chomp $mm8_genome if $mm8_genome;
+    my ($mm9_genome) = `find /usr -name 'mouse.mm9.genome' 2>/dev/null`;
+    chomp $mm9_genome if $mm9_genome;
+    my ($hg18_genome) = `find /usr -name 'human.hg18.genome' 2>/dev/null`;
+    chomp $hg18_genome if $hg18_genome;
+    my ($hg19_genome) = `find /usr -name 'human.hg19.genome' 2>/dev/null`;
+    chomp $hg19_genome if $hg19_genome;
 
     COMMAND : for (@commands) {
 
@@ -247,7 +247,7 @@ SKIP : {
                 last;
             };
             m/^overlap$/ && do {
-            	is( $bedtoolsfac->columns('2,3,5,6'), '2,3,5,6',
+                is( $bedtoolsfac->columns('2,3,5,6'), '2,3,5,6',
                     "can set parameter -columns => '2,3,5,6' " );
                 ok( my $result = $bedtoolsfac->run( -bed => $bedpe1_file, ),
                     "can run command '$command'" );
@@ -259,21 +259,21 @@ SKIP : {
                 last;
             };
             m/^group_by$/ && do {
-            	is( $bedtoolsfac->group(1), 1,
+                is( $bedtoolsfac->group(1), 1,
                     "can set parameter -group => 1 " );
-            	is( $bedtoolsfac->columns('2,2,3,3'), '2,2,3,3',
+                is( $bedtoolsfac->columns('2,2,3,3'), '2,2,3,3',
                     "can set parameter -columns => '2,2,3,3' " );
-            	is( $bedtoolsfac->operations('min,max,min,max'), 'min,max,min,max',
+                is( $bedtoolsfac->operations('min,max,min,max'), 'min,max,min,max',
                     "can set parameter -operations => 'min,max,min,max' " );
                 ok( my $result = $bedtoolsfac->run( -bed => $bed3_file ),
                     "can run command '$command'" );
                 last;
             };
-			m/^graph_union$/ && do {
+            m/^graph_union$/ && do {
                 ok( my $result = $bedtoolsfac->run( -bg => [$bg1_file, $bg2_file, $bg2_file] ),
                     "can run command '$command'" );
                 last;
-			};
+            };
             do {
                 # we should never get here - internal test
                 fail( "all commands tested - missed '$_'");
@@ -295,7 +295,7 @@ SKIP : {
             ok eval { (-e $file)&&(-r _) }, "make readable output";
             open (FILE, $file);
             my $lines =(my $first_line)= <FILE>;
-            close FILE;         
+            close FILE;
             like( $first_line, qr/\<html\>/, " - html tag line");
             is( $lines, $result_lookup{$command}, " - number of lines");
         } elsif ($command eq 'genome_coverage') {
@@ -303,7 +303,7 @@ SKIP : {
             ok eval { (-e $file)&&(-r _) }, "make readable output";
             open (FILE, $file);
             my $lines =()= <FILE>;
-            close FILE;         
+            close FILE;
             is( $lines, $result_lookup{$command}, " - number of lines");
         } else {
             $v && diag(" check can get internal result format matches result file");
@@ -351,7 +351,7 @@ SKIP : {
                 $v && diag(" - correct number of sequences");
                 is( $seq_count, $result_lookup{$command}, "correct number of sequences for command '$command'" );
             }
-        }            
+        }
     }
 }
 
