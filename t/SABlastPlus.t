@@ -58,6 +58,7 @@ SKIP : {
         -data   => test_input_file('test-spa.fas'),
         -masker => 'dustmasker'
     ), "dustmasker mask made";
+    $fac->cleanup;
 
     $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
         -db_data => test_input_file('test-spa-p.fas'),
@@ -82,7 +83,6 @@ SKIP : {
     );
     ok $fac->make_db, "protein db made with pre-built mask";
     is $fac->db_filter_algorithms->[0]{algorithm_name}, 'seg', "db_info records mask info";
-
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
@@ -124,8 +124,8 @@ SKIP : {
         ok $fac->make_db, "mask built and db made on construction (dustmasker)";
     }
     $fac->cleanup;
-    # tests with Bio:: objects as input
 
+    # tests with Bio:: objects as input
     ok my $sio = Bio::SeqIO->new(-file => test_input_file('test-spa.fas'));
     ok my $aio = Bio::AlignIO->new(-file => test_input_file('test-spa-p.fas'));
 
@@ -136,13 +136,13 @@ SKIP : {
     );
     ok $fac->make_db, "make db from Bio::SeqIO";
     $fac->cleanup;
+
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
         -db_name => 'aiodb',
         -db_data => $aio,
         -create  => 1
     );
     ok $fac->make_db, "make db from Bio::AlignIO";
-
     $fac->cleanup;
 
     $aio = Bio::AlignIO->new(-file => test_input_file('test-aln.msf'));
@@ -204,6 +204,7 @@ SKIP : {
     ), "return more alignments (arg spec)";
     is $result->num_hits, 291, "got more hits";
     $fac->cleanup;
+
     my $ntseq = Bio::Seq->new(-seq => 'GACGATCCTTCGGTGAGCAAAGAAATTTTAGCAGAAGCTAAAAAGCTAAACGATGCTCAAGCACCAAAAG',
                               -id  => 'SA009');
     my $aaseq = $ntseq->translate;
