@@ -20,7 +20,7 @@ ok (my $ft = Bio::Tools::Run::Phylo::FastTree->new( -quiet => 1 ),"Make the obje
 SKIP: {
     test_skip(
         -requires_executable => $ft,
-        -tests               => 4
+        -tests               => 5
     );
 
     # The input could be a SimpleAlign object
