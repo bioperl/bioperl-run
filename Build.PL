@@ -19,12 +19,13 @@ my $build = Module::Build->new(
                             'Bio::Root::Version' => '1.006900'
                            },
     recommends          => {
-                            'Algorithm::Diff'    => 0, # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
-                            'IPC::Run'           => 0, # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
-                            'IO::String'         => 0, # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
-                            'XML::Twig'          => 0, # processing XML data: Bio::Tools::Run::EMBOSSacd
-                            'File::Sort'         => 0, # BEDTools
-                            'Config::Any'        => 0  # MCS, Match
+                            'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
+                            'IPC::Run'        => 0,     # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
+                            'IO::String'      => 0,     # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
+                            'XML::Twig'       => 0,     # processing XML data: Bio::Tools::Run::EMBOSSacd
+                            'File::Sort'      => 0,     # BEDTools
+                            'Config::Any'     => 0,     # MCS, Match
+                            'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
                            },
     get_options         => {
                             accept  => { },

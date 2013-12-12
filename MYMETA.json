@@ -21,6 +21,7 @@
             "File::Sort" : 0,
             "IO::String" : 0,
             "IPC::Run" : 0,
+            "SOAP::Lite" : 0.716,
             "XML::Twig" : 0
          },
          "requires" : {
