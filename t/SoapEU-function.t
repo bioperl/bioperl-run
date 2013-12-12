@@ -10,11 +10,11 @@ our $home;
 BEGIN {
     use Bio::Root::Test;
     use lib '.';
-    $home = '.'; # set to '.' for Build use, 
+    $home = '.'; # set to '.' for Build use,
                       # '..' for debugging from .t file
     unshift @INC, $home;
-    test_begin(-tests => 116,
-	       -requires_modules => [qw(Bio::DB::ESoap
+    test_begin(-tests => 119,
+               -requires_modules => [qw(Bio::DB::ESoap
                                         Bio::DB::ESoap::WSDL
                                         Bio::DB::SoapEUtilities
                                         Bio::DB::SoapEUtilities::Result
@@ -42,8 +42,8 @@ my $nbr_test_id = 1621261;
 my @linkout_test_ids = qw(28864546 53828898 14523048 14336674 1817575);
 
 SKIP : {
-    test_skip(-tests => 116, 
-	      -requires_networking => 1); 
+    test_skip(-tests => 119,
+              -requires_networking => 1);
 ok $fac = Bio::DB::SoapEUtilities->new(-verbose => test_debug), "SoapEUtilities factory";
 
 diag("Retrieve raw data records from GenBank, save raw data to file, then parse via Bio::SeqIO");
@@ -67,8 +67,8 @@ diag("Get accessions (actually accession.versions) for a list of GenBank IDs (GI
 # SOAP server doesn't seem to like 'acc' as a rettype, get in fasta format
 # and use the result accessors
 ok $fac->efetch->set_parameters(-db=>'protein',
-				-id=>\@prot_ids,
-				-rettype => 'fasta' ), "set rettype = fasta";
+                                -id=>\@prot_ids,
+                                -rettype => 'fasta' ), "set rettype = fasta";
 ok $result = $fac->efetch->run, "run query with methods parsing";
 is scalar @{$result->TSeqSet_TSeq_TSeqAccver}, 5, "retrieved all accns via \$result->TSeqSet_TSeq_TSeqAccver";
 diag("Get GIs for a list of accessions");
@@ -78,8 +78,8 @@ is scalar @{$result->TSeqSet_TSeq_TSeqGi}, 5, "retrieved all GIs via \$result->T
 
 diag("Downloading a large contig");
 ok $fac->efetch->reset_parameters( -db => 'nucleotide',
-                                  -email =>$email,
-				   -id => $lg_contig), "set parms for lg contig example";
+                                   -email =>$email,
+                                   -id => $lg_contig), "set parms for lg contig example";
 ok $seqio = $fac->efetch->run( -auto_adapt => 1 ), "run with auto_adapt";
 
 ok $seq = $seqio->next_seq, "iterate adaptor";
@@ -89,7 +89,7 @@ TODO: {
     ok $fac->efetch->set_parameters( -rettype=>'gbwithparts' ), "rettype = gbwithparts";
     dies_ok { $seqio = $fac->efetch->run( -auto_adapt => 1 ) };
     diag("run with auto_adapt (dies not really ok...)");
-    
+
     ok $seq = $seqio->next_seq, "iterate adaptor";
     if ($seq) { ok $seq->seq, "sequence now present"; } else {ok 1;}
 }
@@ -112,14 +112,14 @@ is ($sciname_id, $doc->TaxId, "taxid retrieved and correct");
 diag("Simple database query");
 ok $fac->esearch( -email =>$email, -db=>'protein', -term=> 'BRCA and human', -usehistory=>1 );
 ok $result = $fac->run, "run with method parsing";
-is $result->QueryTranslation, 
+is $result->QueryTranslation,
    'BRCA[All Fields] AND ("Homo sapiens"[Organism] OR human[All Fields])',
 "query translation";
 cmp_ok $result->count, ">=", 73, "result count";
 ok $fac->esearch->reset_parameters(-email =>$email,
-                                   -WebEnv => $result->webenv, 
-				    -QueryKey => $result->query_key,
-				    -RetMax => 100 );
+                                   -WebEnv => $result->webenv,
+                                   -QueryKey => $result->query_key,
+                                   -RetMax => 100 );
 ok my $wresult = $fac->esearch->run, "run web environment query with retmax set";
 cmp_ok $wresult->count, ">=", 73, "all ids retrieved";
 
@@ -148,7 +148,7 @@ cmp_ok scalar($queries->found_in_dbs), "<=", $i, "but not in too many";
 diag("I want the document summaries for a list of IDs from database 'x'.");
 ok  $docs = $fac->esummary(-email =>$email, -db=>'gene', -id=>\@prot_ids_2 )->run(-auto_adapt=>1), "run esummary, autoadapt";
 my @tax = (3702, 9606, 9598);
-my @acc = qw( NC_003075.7 NC_000002.11 NC_006469.2 );
+my @acc = qw( NC_003075.7 NC_000002.11 NC_006469.3 );
 for ($i=0; my $doc = $docs->next_docsum; $i++) {
     is $doc->id, $prot_ids_2[$i], " id retrieved";
     is $doc->TaxID, $tax[$i], " taxid retrieved correctly";
@@ -161,8 +161,8 @@ diag("I want a list of database 'x' UIDs that are linked from a list of database
 
 ok my $links =$fac->elink(-email =>$email,
                           -db => 'nucleotide',
-			 -dbfrom => 'protein',
-			 -id => \@prot_ids )->run( -auto_adapt => 1), 
+                          -dbfrom => 'protein',
+                          -id => \@prot_ids )->run( -auto_adapt => 1),
 "run elink protein->nucleotide, auto adapt";
 my %h;
 for ($i=0; my $linkset = $links->next_linkset; $i++) {
@@ -176,7 +176,7 @@ for (keys %h) {
 }
 is $i, 5, "got all linksets";
 
-1;    
+1;
 }
 
 # remove later
