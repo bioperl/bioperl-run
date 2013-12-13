@@ -7,7 +7,11 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
 
-    test_begin(-tests => 13,
+    # The EMBL-EBI Soaplab server has been decommissioned on 1st February 2013
+    # (https://www.ebi.ac.uk/Tools/webservices/about/news).
+    # Website "http://www.ebi.ac.uk/soaplab/services" dont exists anymore,
+    # so tests will fail with "404 Not Found" if executed
+    test_begin(-tests => 0,
 			   -requires_networking => 1);
     use_ok('Bio::Tools::Run::AnalysisFactory');
 }
