@@ -829,15 +829,23 @@ sub reset_parameters {
     # don't like this, b/c _set_program_args will create a bunch of
     # accessors with undef values, but oh well for now /maj
 
-    for my $p (@$params) {
-	push(@reset_args, $p => undef) unless grep /^$p$/, @args;
+    # Is better to use hashes than arrays, to use their unique keys
+    my %reset_args = @args;
+    foreach my $p (@$params) {
+        if (not exists $reset_args{"-$p"}) {
+            $reset_args{"-$p"} = undef;
+        }
     }
-    for my $s (@$switches) {
-	push(@reset_args, $s => undef) unless grep /^$s$/, @args;
+    foreach my $s (@$switches) {
+        if (not exists $reset_args{"-$s"}) {
+            $reset_args{"-$s"} = undef;
+        }
     }
-    push @args, @reset_args;
+    while (my ($method, $value) = each %reset_args) {
+        push(@reset_args, $method => $value);
+    }
 
-    $self->_set_program_options(\@args, $params, $switches, $translation,
+    $self->_set_program_options(\@reset_args, $params, $switches, $translation,
 				$qual_param, $use_dash, $join);
     $self->parameters_changed(1);
 }
