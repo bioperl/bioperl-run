@@ -7,22 +7,31 @@ no warnings qw(once);
 our $home;
 our $ulimit;
 BEGIN {
-    $home = '.';	# set to '.' for Build use, 
-						# '..' for debugging from .t file
+    $home = '.';    # set to '.' for Build use,
+                    # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    eval { $ulimit = qx/ulimit -n 3>&-/ };
-    if ($@ || !defined($ulimit)) {
-        # skip all run tests, we can't ensure the ulimit is high enough for
-        # these tests (needs ulimit -n of ~1000)
-        $ulimit = 0;
-    } else {
-        chomp $ulimit
+
+    if ($^O =~ m/mswin/i) {
+        # "ulimit" does not exists and "ulimit -n 3>&-" does not work
+        # as expected in Windows, so set $ulimit to a fixed reasonable number
+        $ulimit = 1000;
     }
-    print STDERR $ulimit;
-    
+    else {
+        eval { $ulimit = qx/ulimit -n 3>&-/ };
+        if ($@ || !defined($ulimit)) {
+            # skip all run tests, we can't ensure the ulimit is high enough for
+            # these tests (needs ulimit -n of ~1000)
+            $ulimit = 0;
+        } else {
+            chomp $ulimit
+        }
+    }
+    my $DEBUG = test_debug();
+    print STDERR $ulimit if $DEBUG == 1;
+
     test_begin(-tests => 73,
-	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
+               -requires_modules => [qw(IPC::Run Bio::Tools::Run::Bowtie)]);
     
 }
 
