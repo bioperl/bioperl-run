@@ -736,7 +736,8 @@ sub _run {
         
     	$self->debug( "Program ".$self->executable."\n");
     	my $commandstring = $self->executable."$instring"."$param_string";
-        $commandstring .= ' 1>/dev/null' if $quiet;
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        $commandstring .= " 1>$null" if $quiet;
         $self->debug( "clustal command = $commandstring");
         
         my $status = system($commandstring);

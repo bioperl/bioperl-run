@@ -411,6 +411,7 @@ sub _run {
 sub _setparams {
     my ($self, $aln_file, $tree_file) = @_;
     
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
     my $param_string = ' '.$tree_file;
     $param_string .= ' '.$aln_file;
     $param_string .= $self->SUPER::_setparams(-params => \@PARAMS,
@@ -418,7 +419,7 @@ sub _setparams {
                                               -dash => 1,);
     $param_string .= ' -o out';
     $param_string .= ' 2>&1';
-    $param_string .= ' 1>/dev/null' if $self->quiet;
+    $param_string .= " 1>$null" if $self->quiet;
     
     return $param_string;
 }

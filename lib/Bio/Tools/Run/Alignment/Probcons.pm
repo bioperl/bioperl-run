@@ -485,8 +485,9 @@ sub _setparams {
     #FIXME: This may be only for *nixes. Double check in other OSes
     $param_string .= " $infilename > ".$self->outfile_name;
     
-    if ($self->verbose < 0) { 
-	$param_string .= ' 2> /dev/null';
+    if ($self->verbose < 0) {
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+	$param_string .= " 2> $null";
     }
     return $param_string;
 }

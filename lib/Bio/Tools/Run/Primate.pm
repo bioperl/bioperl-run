@@ -409,7 +409,8 @@ sub _setparams {
     }
 
     if ($self->quiet() || $self->verbose() < 0) {
-      $param_string .= '  >/dev/null ';
+      my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+      $param_string .= "  >$null ";
     }
     return $param_string;
 }
@@ -451,4 +452,3 @@ sub _target_seq {
 }
 
 1; # Needed to keep compiler happy
-

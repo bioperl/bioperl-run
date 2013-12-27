@@ -299,7 +299,9 @@ sub _setparams {
                                               -dash => 1);
     
     $param_string .= " > $outfile";
-    $param_string .= ' 2> /dev/null' if $self->quiet || $self->verbose < 0;
+
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    $param_string .= " 2> $null" if $self->quiet || $self->verbose < 0;
     
     return $param_string;
 }

@@ -199,7 +199,8 @@ sub _run {
        $str.=" -v ";
     }
     if($self->quiet){
-        open(STDERR,">/dev/null");
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        open(STDERR,">$null");
     }
     unless (open(GENSCAN, "$str |")){
 	    $self->warn("Cannot run $str");

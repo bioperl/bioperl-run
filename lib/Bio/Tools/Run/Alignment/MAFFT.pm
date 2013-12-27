@@ -524,7 +524,8 @@ sub _setparams {
 
     if ($self->quiet() || $self->verbose < 0) {
         $param_string .= " --quiet";
-        $outputstr .= ' 2> /dev/null';
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        $outputstr .= " 2> $null";
     }
     return ($param_string, $outputstr);
 }

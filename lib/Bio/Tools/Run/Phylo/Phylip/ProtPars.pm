@@ -355,7 +355,8 @@ sub _run {
     chdir($self->tempdir);
     #open a pipe to run protpars to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-    	open(PROTPARS,"|".$self->executable.">/dev/null");
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    	open(PROTPARS,"|".$self->executable.">$null");
     }
     else {
     	open(PROTPARS,"|".$self->executable);

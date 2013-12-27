@@ -397,7 +397,8 @@ sub _setparams {
 
     $param_string .= "-s $infile -n " . $self->outfile_name;
 
-    $param_string .= ' &> /dev/null'
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    $param_string .= " &> $null"
       if ( $self->quiet() || $self->verbose < 0 );
 
     $param_string;
@@ -472,4 +473,3 @@ Args    : none
 1;    # Needed to keep compiler happy
 
 __END__
-

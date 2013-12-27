@@ -922,7 +922,8 @@ sub to_exe_string {
         if ($prog eq 'cmalign') {
             push @{$args{switch}}, '-q' if !exists $params{q};
         } else {
-            push @{$args{redirect}}, '> /dev/null';
+            my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+            push @{$args{redirect}}, "> $null";
         }
     }
     

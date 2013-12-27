@@ -264,7 +264,8 @@ sub _run {
 				$outfile);
   
     if($self->silent || $self->quiet || ($self->verbose < 1)){
-	$commandstring .= ' 2> /dev/null';
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+	$commandstring .= " 2> $null";
     }
     $self->debug( "pseudowise command = $commandstring\n");
 #    my $status = system($commandstring);

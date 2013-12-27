@@ -128,6 +128,7 @@ essentially lifted from the python wrapper or provided by the author.
 
 
 sub valid_values {
+      my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
       return
         (
          {'geneticCode' => [ "Universal","VertebratemtDNA","YeastmtDNA","Mold/ProtozoanmtDNA",
@@ -139,7 +140,7 @@ sub valid_values {
                                { "Default" => undef } ]
          },
          {'temptreefile' => undef }, # tree file goes here
-         {'Model Fit Results' => [ '/dev/null'] }, # this will not work under Windows
+         {'Model Fit Results' => [ $null] }, # Windows have NUL instead of /dev/null
          {'dN/dS bias parameter' => [ { "Estimate dN/dS only" => undef },
                                       { "Neutral" => undef },
                                       { "Estimate" => undef },

@@ -659,8 +659,9 @@ sub _run_mcl {
   if($self->quiet || 
      ($self->verbose < 0)){
       $cmd .= " -V all";
-      if( $^O !~ /Mac/ && $^O !~ /Win/ ) {
-	  $cmd .= ' 2> /dev/null';
+      if( $^O !~ /Mac/) {
+	  my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+	  $cmd .= " 2> $null";
       }
   }
 
@@ -704,7 +705,8 @@ sub _run_matrix {
       $cmd .= " -$param ".$self->$param;
     }
   }
-  $cmd .= " > /dev/null";
+  my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+  $cmd .= " > $null";
   my $status = system($cmd);
 
   $self->throw( "tribe-matrix call ($cmd) crashed: $? \n") unless $status==0;
@@ -956,5 +958,3 @@ sub _parse_mcl {
 
 
 1;
-
-

@@ -361,7 +361,8 @@ sub _setparams {
     }
     $param_string .= " $infile > " . $self->outfile_name;
 
-    $param_string .= ' 2> /dev/null' if ( $self->quiet() || $self->verbose < 0 );
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    $param_string .= " 2> $null" if ( $self->quiet() || $self->verbose < 0 );
 
     $param_string;
 }

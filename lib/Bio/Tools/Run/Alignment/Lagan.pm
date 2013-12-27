@@ -491,7 +491,8 @@ sub _runlagan {
 
     if (($self->silent ||  $self->quiet) &&
         ($^O !~ /os2|dos|MSWin32|amigaos/)) {
-      $command_string .= ' > /dev/null 2> /dev/null';
+      my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+      $command_string .= " > $null 2> $null";
 
     }
     

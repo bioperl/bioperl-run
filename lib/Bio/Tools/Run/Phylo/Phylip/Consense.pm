@@ -388,7 +388,8 @@ sub _run {
     chdir($self->tempdir);
     # open a pipe to run Consense to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-   	open(Consense,"| ".$self->executable .">/dev/null");
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+   	open(Consense,"| ".$self->executable .">$null");
     }
     else {
     	open(Consense,"| ".$self->executable);

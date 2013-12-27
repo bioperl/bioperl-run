@@ -289,7 +289,8 @@ sub _run {
     my $outfile = $self->outfile(); 
     my $commandstring = $self->executable." $infile1 $infile2 $param_string > $outfile";
     if($self->quiet || $self->silent || ($self->verbose < 0)){
-      $commandstring .= " 2>/dev/null";
+      my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+      $commandstring .= " 2>$null";
     }
     $self->debug( "Sim4 command = $commandstring");
     my $status = system($commandstring);
@@ -391,4 +392,3 @@ sub _setparams {
 }
 
 1; # Needed to keep compiler happy
-  

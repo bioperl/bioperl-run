@@ -397,7 +397,8 @@ sub _run {
   my $options = join ' ', @{$self->_translate_params()};
 
   # Usage: phrap seq_file1 [seq_file2 ...] [-option value] [-option value] ...
-  my $str = "$exe $options $fasta_file 1> $output_file 2> /dev/null";
+  my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+  my $str = "$exe $options $fasta_file 1> $output_file 2> $null";
   if ($self->verbose() >= 0) {
     $self->debug( "$exe command = $str\n" );
   };

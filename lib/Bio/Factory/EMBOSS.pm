@@ -257,9 +257,10 @@ sub _program_list {
     my ($self) = @_;
     if( $^O =~ /Mac/i ) { return; }
     {
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
 	local * SAVERR;
 	open SAVERR, ">&STDERR";
-	open STDERR, ">/dev/null";
+	open STDERR, ">$null";
 	open(WOSSOUT, "wossname -auto |") || return;
 	open STDERR, ">&SAVERR";
 

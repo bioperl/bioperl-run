@@ -562,7 +562,8 @@ sub _setparams {
     $param_string .= " -out " . $self->outfile_name;
 
     if ( $self->quiet() || $self->verbose < 0 ) {
-        $param_string .= ' 2> /dev/null';
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        $param_string .= " 2> $null";
     }
     return $param_string;
 }

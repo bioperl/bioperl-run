@@ -324,11 +324,12 @@ EOM
 sub _run {
   my $self = shift;
 
+  my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
   my $str = $self->executable;
   $str .= ' -d' . ($self->genome_db() || 'NHGD_R36');
   $str .= ' ' . ($self->flags() || '-f 9 -5 -e');
   $str .= ' ' . $self->input_file();
-  $str .= ' 2> /dev/null';
+  $str .= " 2> $null";
   $str .= '; rm -f ' . $self->input_file();
   $self->debug("gmap command = $str\n");
 

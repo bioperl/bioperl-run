@@ -271,7 +271,8 @@ sub _run {
     $self->debug( "Program ".$self->executable." $param_string\n");
     # open a pipe to run drawgram to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-	open(DRAW,"|".$self->executable.">/dev/null");
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+	open(DRAW,"|".$self->executable.">$null");
     }
     else {
 	open(DRAW,"|".$self->executable);

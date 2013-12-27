@@ -681,10 +681,11 @@ sub _setparams {
     }else{
     $self->outfile_name($self->outfile);
     }
-	$param_string .= ' -v' if $self->verbose > 0;
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    $param_string .= ' -v' if $self->verbose > 0;
     $param_string .= ' >'.$self->outfile_name;
-    $param_string .= ' 2>/dev/null' if $self->quiet && 
-                                       $self->verbose < 1;
+    $param_string .= " 2>$null" if $self->quiet &&
+                                   $self->verbose < 1;
     $self->arguments($param_string);
     return $param_string;
 }

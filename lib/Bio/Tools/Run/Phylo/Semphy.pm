@@ -341,7 +341,8 @@ sub _setparams {
                                               -double_dash => 1);
     
     $param_string .= ' 2>&1';
-    $param_string .= ' 1>/dev/null' if $self->quiet;
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    $param_string .= " 1>$null" if $self->quiet;
     
     return $param_string;
 }

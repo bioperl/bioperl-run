@@ -266,7 +266,8 @@ sub _run {
      my ($tfh1,$outfile) = $self->io->tempfile(-dir=>$self->tempdir());
      my $str =$self->executable." -f < ".$self->{'input'}." > ".$outfile;
      if($self->quiet || $self->verbose <=0 || $self->silent){
-         $str.=" 2>/dev/null";
+         my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+         $str.=" 2>$null";
      }
      my $status = system($str);
      $self->throw( "Coil call ($str) crashed: $? \n") unless $status==0;

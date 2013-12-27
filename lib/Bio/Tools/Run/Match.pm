@@ -279,7 +279,8 @@ sub _setparams {
     my $param_string = $self->SUPER::_setparams(-switches => \@SWITCHES,
                                                 -dash => 1);
     
-    $param_string .= ' 1>/dev/null' if $self->quiet;
+    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    $param_string .= " 1>$null" if $self->quiet;
     
     return $param_string;
 }

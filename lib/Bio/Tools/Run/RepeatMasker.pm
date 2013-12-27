@@ -299,7 +299,8 @@ sub _run {
   my $cmd_str = $self->executable." $param_string ". $infile;
   $self->debug("repeat masker command = $cmd_str");
   if ($self->quiet || $self->verbose <=0){
-      $cmd_str.=" 2> /dev/null 1>/dev/null";
+      my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+      $cmd_str.=" 2> $null 1>$null";
   }
   my $status = system($cmd_str);
   $self->throw("Repeat Masker Call($cmd_str) crashed: $?\n")

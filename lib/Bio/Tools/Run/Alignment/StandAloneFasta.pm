@@ -315,7 +315,8 @@ sub run {
 					     -format=>"fasta");
 	    } else {
 		if ( $self->verbose() < 0) { 
-		    $para .= '  >/dev/null 2>/dev/null';
+		    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+		    $para .= "  >$null 2>$null";
 		} else { 
 		    $self->debug("Going to execute: $para");
 		}
@@ -351,7 +352,8 @@ sub run {
 					   -format=>"fasta");
 	    } else {		
 		if ( $self->verbose() < 0) { 
-		    $para .= '  >/dev/null 2>/dev/null';
+		    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+		    $para .= "  >$null 2>$null";
 		} else { 
 		    $self->debug("Going to execute: $para");
 		}
@@ -549,4 +551,3 @@ sub _setparams {
 
 1;
 __END__
-

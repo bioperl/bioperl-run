@@ -375,7 +375,8 @@ sub _run {
     chdir($self->tempdir);
     #open a pipe to run SeqBoot to bypass interactive menus
     if ($self->quiet() || $self->verbose() < 0) {
-    	open(SeqBoot,"|".$self->executable .">/dev/null");
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    	open(SeqBoot,"|".$self->executable .">$null");
     }
     else {
     	open(SeqBoot,"|".$self->executable);
