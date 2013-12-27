@@ -396,8 +396,18 @@ sub _setinput {
 
 sub _run {
     my ($self, $file) = @_;
+
+    # Use double quotes if file path have empty spaces
+    if ($file =~ m/ /) {
+        $file = "\"$file\"";
+    }
     
     my $str = $self->executable;
+    # Use double quotes if executable path have empty spaces
+    if ($str =~ m/ /) {
+        $str = "\"$str\"";
+    }
+
     $str .= $self->_setparams;
     $str .= ' '.$file if $file;
     $self->debug("HMMER command = $str");
@@ -409,7 +419,8 @@ sub _run {
     if ($progname =~ /align|build|emit/) {
         my $outfile = $self->o;
         if ($outfile || $progname eq 'hmmbuild') {
-            $str .= " > /dev/null" if $self->quiet;
+            my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+            $str .= " > $null" if $self->quiet;
             
             if ($progname eq 'hmmbuild') {
                 my $status = system($str);
@@ -444,7 +455,8 @@ sub _run {
                                -format => 'fasta');
     }
     elsif ($progname =~ /calibrate/) {
-        $str .= " > /dev/null 2> /dev/null" if $self->quiet;
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        $str .= " > $null 2> $null" if $self->quiet;
         my $status = system($str);
         return $status ? 0 : 1;
     }
@@ -491,6 +503,10 @@ sub _setparams {
                                                 -mixed_dash => 1);
     
     my $hmm = $self->hmm || $self->throw("Need to specify either HMM file or Database");
+    # Use double quotes if hmm path have empty spaces
+    if ($hmm =~ m/ /) {
+        $hmm = "\"$hmm\"";
+    }
     $param_string .= ' '.$hmm;
     
     return $param_string;

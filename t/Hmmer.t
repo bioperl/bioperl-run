@@ -73,7 +73,7 @@ SKIP: {
         }
       }
       
-      isa_ok $feat[0], 'Bio::SeqFeatureI';
+      isa_ok $feat[0], 'Bio::SeqFeatureI';#Bio::Search::HSP::HMMERHSP
       is ($feat[0]->feature1->start,1);
       is ($feat[0]->feature1->end,124);
       is ($feat[0]->feature2->start,25);
@@ -141,4 +141,6 @@ SKIP: {
       is @seqs, 10; # emits 10 seqs by default
    }
 
+   # Delete temporary file
+   unlink($hmmout);
 }
