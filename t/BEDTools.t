@@ -160,18 +160,40 @@ SKIP : {
 
     # Sorry to all those out there who don't have a find command
     # - perhaps someone can add an alternative
-    my ($rmsk_bed) = `find /usr -name 'rmsk.hg18.chr21.bed' 2>/dev/null`;
-    chomp $rmsk_bed if $rmsk_bed;
-    my ($gene_bed) = `find /usr -name 'knownGene.hg18.chr21.bed' 2>/dev/null`;
-    chomp $gene_bed if $gene_bed;
+    my $rmsk_bed;
+    my $gene_bed;
+    my $mm8_genome;
+    my $mm9_genome;
+    my $hg18_genome;
+    my $hg19_genome;
+    if ($^O =~ m/mswin/i) {
+        use Cwd 'getcwd';
+        my $dir = getcwd;
 
-    my ($mm8_genome) = `find /usr -name 'mouse.mm8.genome' 2>/dev/null`;
-    chomp $mm8_genome if $mm8_genome;
-    my ($mm9_genome) = `find /usr -name 'mouse.mm9.genome' 2>/dev/null`;
-    chomp $mm9_genome if $mm9_genome;
-    my ($hg18_genome) = `find /usr -name 'human.hg18.genome' 2>/dev/null`;
+        # Assume files are in drive C:\, change location if this is not true
+        chdir 'C:\\'; # Search in all C:
+        ($rmsk_bed)    = `cmd.exe /C dir /B /S rmsk.hg18.chr21.bed 2>NUL`;
+        ($gene_bed)    = `cmd.exe /C dir /B /S knownGene.hg18.chr21.bed 2>NUL`;
+        ($mm8_genome)  = `cmd.exe /C dir /B /S mouse.mm8.genome 2>NUL`;
+        ($mm9_genome)  = `cmd.exe /C dir /B /S mouse.mm9.genome 2>NUL`;
+        ($hg18_genome) = `cmd.exe /C dir /B /S human.hg18.genome 2>NUL`;
+        ($hg19_genome) = `cmd.exe /C dir /B /S human.hg19.genome 2>NUL`;
+
+        chdir $dir; # Go back to $dir;
+    }
+    else {
+        ($rmsk_bed)    = `find /usr -name 'rmsk.hg18.chr21.bed' 2>/dev/null`;
+        ($gene_bed)    = `find /usr -name 'knownGene.hg18.chr21.bed' 2>/dev/null`;
+        ($mm8_genome)  = `find /usr -name 'mouse.mm8.genome' 2>/dev/null`;
+        ($mm9_genome)  = `find /usr -name 'mouse.mm9.genome' 2>/dev/null`;
+        ($hg18_genome) = `find /usr -name 'human.hg18.genome' 2>/dev/null`;
+        ($hg19_genome) = `find /usr -name 'human.hg19.genome' 2>/dev/null`;
+    }
+    chomp $rmsk_bed    if $rmsk_bed;
+    chomp $gene_bed    if $gene_bed;
+    chomp $mm8_genome  if $mm8_genome;
+    chomp $mm9_genome  if $mm9_genome;
     chomp $hg18_genome if $hg18_genome;
-    my ($hg19_genome) = `find /usr -name 'human.hg19.genome' 2>/dev/null`;
     chomp $hg19_genome if $hg19_genome;
 
     COMMAND : for (@commands) {
