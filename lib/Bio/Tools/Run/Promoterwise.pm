@@ -260,9 +260,9 @@ sub _run {
     # this is to capture STDERR messages which leak out when you run programs
     # with open(FH, "... |");
     if( ( $self->silent && $self->quiet) &&
-	($^O !~ /os2|dos|MSWin32|amigaos/) ) {
-	# yeah, like promoterwise is really going to run on Windows...
-	$commandstring .= ' -quiet -silent -erroroffstd  2> /dev/null';
+	($^O !~ /os2|dos|amigaos/) ) {
+	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+	$commandstring .= " -quiet -silent -erroroffstd  2> $null";
     }
     $self->debug( "promoterwise command = $commandstring");
     open(PW, "$commandstring |") || 
@@ -395,5 +395,3 @@ sub _query2_seq{
   return $self->{'_query2_seq'};
 }
 1; 
-
-

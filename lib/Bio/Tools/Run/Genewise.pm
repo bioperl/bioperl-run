@@ -295,9 +295,9 @@ sub _run {
     # this is to capture STDERR messages which leak out when you run programs
     # with open(FH, "... |");
     if (($self->silent && $self->quiet) &&
-        ($^O !~ /os2|dos|MSWin32|amigaos/)) {
-        # yeah, like genewise is really going to run on Windows...
-        $commandstring .= ' 2> /dev/null';
+        ($^O !~ /os2|dos|amigaos/)) {
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        $commandstring .= " 2> $null";
     }
     my ($tfh1,$outfile1) = $self->io->tempfile(-dir=>$self->tempdir);
     $self->debug("genewise command = $commandstring");
@@ -460,5 +460,3 @@ sub _subject_dna_seq {
 }
 
 1;
-
-
