@@ -39,7 +39,7 @@ Bio::Factory::EMBOSS - EMBOSS application factory class
   # now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = Bio::AlignIO->new(-format => 'emboss',
-		               	       -file   => $wateroutfile);
+                                -file   => $wateroutfile);
 
   while ( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
@@ -113,24 +113,23 @@ use Bio::Factory::ApplicationFactoryI;
 $EMBOSSVERSION = "2.0.0";
 
 sub new {
-  my($class,@args) = @_;
-  my $self = $class->SUPER::new(@args);
-  # set up defaults
+    my($class,@args) = @_;
+    my $self = $class->SUPER::new(@args);
+    # set up defaults
 
-  my($location) =
-      $self->_rearrange([qw(LOCATION )],
-			@args);
+    my($location) = $self->_rearrange([qw(LOCATION )], @args);
 
-  $self->{ '_programs' } = {};
-  $self->{ '_programgroup' } = {};
-  $self->{ '_groups' } = {};
+    $self->{ '_programs' } = {};
+    $self->{ '_programgroup' } = {};
+    $self->{ '_groups' } = {};
 
-  $self->location($location) if $location;
+    $self->location($location) if $location;
 
-  $self->_program_list; # retrieve info about available programs
+    $self->_program_list; # retrieve info about available programs
 
-  return $self;
+    return $self;
 }
+
 
 =head2 location
 
@@ -146,17 +145,17 @@ sub new {
 sub location {
     my ($self, $value) = @_;
     my %location = ('local' => '1',
-		    'novella' => '1'
-		    );
+                    'novella' => '1'
+                    );
     if (defined $value) {
-	$value = lc $value;
-	if ($location{$value}) {
-	    $self->{'_location'} = $value;
-	} else {
-	    $self->warn("Value [$value] not a valid value for ".
-			"location(). Defaulting to [local]");
-	    $self->{'_location'} = 'local';
-	}
+        $value = lc $value;
+        if ($location{$value}) {
+            $self->{'_location'} = $value;
+        } else {
+            $self->warn("Value [$value] not a valid value for ".
+                        "location(). Defaulting to [local]");
+            $self->{'_location'} = 'local';
+        }
     }
     $self->{'_location'} ||= 'local';
     return $self->{'_location'};
@@ -177,8 +176,8 @@ sub program {
     my ($self, $value) = @_;
 
     unless( $self->{'_programs'}->{$value} ) {
-	$self->warn("Application [$value] is not available!");
-	return undef;
+        $self->warn("Application [$value] is not available!");
+        return undef;
     }
     my $attr = {};
     $attr->{name} = $value;
@@ -187,6 +186,7 @@ sub program {
     my $appl = Bio::Tools::Run::EMBOSSApplication->new($attr);
     return $appl;
 }
+
 
 =head2 version
 
@@ -201,17 +201,13 @@ sub program {
 
 sub version {
     my ($self) = @_;
-    my ($version);
-    eval {
-	$version = `embossversion -auto`;
-    };
-    $self->throw("EMBOSS suite of programs is not available \n\n$@")
-	if $@;
+    my $version = `embossversion -auto`;
+    $self->throw("EMBOSS suite of programs is not available") if $?;
     chop $version;
 
     # compare versions
     $self->throw("EMBOSS has to be at least version $EMBOSSVERSION got $version\n")
-	if $version lt  $EMBOSSVERSION;
+        if $version lt $EMBOSSVERSION;
 
     return $version;
 }
@@ -257,25 +253,25 @@ sub _program_list {
     my ($self) = @_;
     if( $^O =~ /Mac/i ) { return; }
     {
-	my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
-	local * SAVERR;
-	open SAVERR, ">&STDERR";
-	open STDERR, ">$null";
-	open(WOSSOUT, "wossname -auto |") || return;
-	open STDERR, ">&SAVERR";
+        my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+        local * SAVERR;
+        open SAVERR, ">&STDERR";
+        open STDERR, ">$null";
+        open(WOSSOUT, "wossname -auto |") || return;
+        open STDERR, ">&SAVERR";
 
     }
     local $/ = "\n\n";
-    while(<WOSSOUT> ) {	
-	my ($groupname) = (/^([A-Z][A-Z0-9 ]+)$/m);
-	#print $groupname, "\n" if $groupname;
-	$self->{'_groups'}->{$groupname} = [] if $groupname;
-	while ( /^([a-z]\w+) +(.+)$/mg ) {
-	    #print "$1\t$2 \n" if $1;
-	    $self->{'_programs'}->{$1} = $2 if $1; 
-	    $self->{'_programgroup'}->{$1} = $groupname if $1;
-	    push @{$self->{'_groups'}->{$groupname}}, $1 if $1;
-	}
+    while(<WOSSOUT> ) {
+        my ($groupname) = (/^([A-Z][A-Z0-9 ]+)$/m);
+        #print $groupname, "\n" if $groupname;
+        $self->{'_groups'}->{$groupname} = [] if $groupname;
+        while ( /^([a-z]\w+) +(.+)$/mg ) {
+            #print "$1\t$2 \n" if $1;
+            $self->{'_programs'}->{$1} = $2 if $1; 
+            $self->{'_programgroup'}->{$1} = $groupname if $1;
+            push @{$self->{'_groups'}->{$groupname}}, $1 if $1;
+        }
     }
     close(WOSSOUT);
 
