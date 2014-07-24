@@ -22,7 +22,7 @@ Bio::Factory::EMBOSS - EMBOSS application factory class
   use Bio::Factory::EMBOSS;
   $f = Bio::Factory::EMBOSS -> new();
   # get an EMBOSS application  object from the factory
-  $water = $f->program('water');
+  $water = $f->program('water') || die "Program not found!\n";
 
   # here is an example of running the application -
   # water can compare 1 sequence against 1 or more sequences
@@ -166,8 +166,9 @@ sub location {
 
  Title   : program
  Usage   : $embossfactory->program('program_name')
- Function: Creates a representation of a single EMBOSS program
- Returns : Bio::Tools::Run::EMBOSSApplication object
+ Function: Creates a representation of a single EMBOSS program and issues a
+           warning if the program was not found.
+ Returns : Bio::Tools::Run::EMBOSSApplication object or undef
  Args    : string, program name
 
 =cut
