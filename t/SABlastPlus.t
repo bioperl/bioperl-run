@@ -4,11 +4,12 @@
 
 use strict;
 use warnings;
+use lib '../lib';
 our $home;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 69,
-               -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
+    test_begin(-tests => 73);
+#               -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
 }
 
 use_ok( 'Bio::Tools::Run::StandAloneBlastPlus' );
@@ -238,7 +239,7 @@ SKIP : {
 
     ok $result = $fac->bl2seq(-method  => 'tblastx',
                               -query   => $seq1,
-                              -subject => $seq2
+                              -subject => $seq2,
     ), "bl2seq (tblastx)";
     is $result->num_hits, 1, "got hit";
 
@@ -266,6 +267,36 @@ SKIP : {
                               -subject => $seq2
     ), "bl2seq (blastp)";
     is $result->num_hits, 1, "got hit";
+
+    # issue #12 (https://github.com/bioperl/bioperl-run/issues/12) : 4 tests
+    $sio = Bio::SeqIO->new(-file=>test_input_file('test-spa.fas'));
+    $sio->next_seq;
+    $seq1 = $sio->next_seq;
+    $seq2 = $sio->next_seq;
+
+    lives_ok { $fac->bl2seq(-method => 'tblastx',
+                            -query => $seq1,
+                            -subject => $seq2,
+                            -method_args => [ '-outfmt' => '"6 qseqid sseqid"' ]
+                           ) } "bl2seq (tblastx) - multiple outfmt options";
+
+    lives_ok { $fac->bl2seq(-method => 'tblastx',
+                            -query => $seq1,
+                            -subject => $seq2,
+                            -outformat => '"6 qseqid sseqid"',
+                           ) } "bl2seq (tblastx) - multiple outfmt options (use method arg)";
+
+    lives_ok { $fac->bl2seq(-method => 'tblastx',
+                            -query => $seq1,
+                            -subject => $seq2,
+                            -outformat => '6 qseqid sseqid',
+                           ) } "bl2seq (tblastx) - multiple outfmt options (no explict quotes should also work)";
+
+    lives_ok { $fac->bl2seq(-method => 'tblastx',
+                            -query => $seq1,
+                            -subject => $seq2,
+                            -outformat => '"6"'
+                           ) } "bl2seq (tblastx) - multiple outfmt options (a single format number in quotes";
 
     $fac->cleanup;
 } # SKIP to here

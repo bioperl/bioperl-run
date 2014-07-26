@@ -224,8 +224,9 @@ sub run {
 	$fh->close;
 	$self->_register_temp_for_cleanup($outfile);
     }
+
     if ($outformat) { 
-	unless ($outformat =~ /^[0-9]{1,2}$/) {
+	unless ($outformat =~ /^"?[0-9]{1,2}/) {
 	    $self->throw("Blast run: output format code should be integer 0-10");
 	}
 	$blast_args{'-outfmt'} = $outformat;
