@@ -73,8 +73,22 @@ is_deeply( $maqfac->{_options}->{_params},
 
 TODO: {
     local $TODO ='Determine whether the order of the parameters should be set somehow; this sporadically breaks hash randomization introduced in perl 5.17+';
-    is( join(' ', @{$maqfac->_translate_params}),
-	"assemble -m 4 -r 0.005 -s", "translate params" );
+#    is( join(' ', @{$maqfac->_translate_params}),
+#	"assemble -m 4 -r 0.005 -s", "translate params" );
+    # $DB::single=1;
+    my @a = @{$maqfac->_translate_params};
+#    is shift @a, 'assemble';
+    shift @a;
+    my ($k,%h);
+    for (@a) {
+    	if (/^-/) {
+    	    $h{$k = $_} = undef;
+    	}
+    	else {
+    	    $h{$k} = $_;
+    	}
+    }
+    is_deeply( \%h, { '-m' => 4, '-r' => 0.005, '-s' => undef });
 }
 
 # test run_maq filearg parsing
