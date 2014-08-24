@@ -10,7 +10,7 @@ BEGIN {
                       # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 51,
+    test_begin(-tests => 52,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Maq)]);
 }
 
@@ -71,25 +71,14 @@ is_deeply( $maqfac->{_options}->{_params},
 	   [qw( command error_dep_coeff het_fraction max_mismatches max_quality_sum min_map_quality num_haplotypes)], 
 	   "commands filtered by prefix");
 
-TODO: {
-    local $TODO ='Determine whether the order of the parameters should be set somehow; this sporadically breaks hash randomization introduced in perl 5.17+';
-#    is( join(' ', @{$maqfac->_translate_params}),
-#	"assemble -m 4 -r 0.005 -s", "translate params" );
-    # $DB::single=1;
-    my @a = @{$maqfac->_translate_params};
-#    is shift @a, 'assemble';
-    shift @a;
-    my ($k,%h);
-    for (@a) {
-    	if (/^-/) {
-    	    $h{$k = $_} = undef;
-    	}
-    	else {
-    	    $h{$k} = $_;
-    	}
-    }
-    is_deeply( \%h, { '-m' => 4, '-r' => 0.005, '-s' => undef });
+
+my @a = @{$maqfac->_translate_params};
+is shift @a, 'assemble', 'translate_params: command correct';
+my ($k, %h);
+for (@a) {
+    (/^-/) ? ( $h{$k = $_} = undef ) : ( $h{$k} = $_ );
 }
+is_deeply( \%h, { '-m' => 4, '-r' => 0.005, '-s' => undef }, 'translate_params: options correct');
 
 # test run_maq filearg parsing
 # a pipeline...

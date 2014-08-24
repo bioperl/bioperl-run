@@ -118,11 +118,13 @@ is_deeply( $bowtiefac->{_options}->{_params},
 	        unaligned_file excess_file threads offrate random_seed )],
 	   "commands filtered by prefix");
 
-TODO: {
-    local $TODO ='Determine whether the order of the parameters should be set somehow; this sporadically breaks hash randomization introduced in perl 5.17+';
-    is( join(' ', @{$bowtiefac->_translate_params}),
-	"-v 4 --solexa-quals -y -S", "translate params" ); # we default to SAM so '-S' appears
+my @a = @{$bowtiefac->_translate_params};
+my ($k, %h);
+for (@a) {
+    (/^-/) ? ( $h{$k = $_} = undef ) : ( $h{$k} = $_ );
 }
+is_deeply( \%h, { '-v' => 4, '--solexa-quals' => undef, '-y' => undef, '-S' => undef }, 'translate_params: options correct'); # we default to SAM so '-S' appears
+
 
 # test run_bowtie filearg parsing
 

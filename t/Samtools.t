@@ -10,7 +10,7 @@ BEGIN {
                       # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
-    test_begin(-tests => 40,
+    test_begin(-tests => 41,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Samtools)]);
 }
 
@@ -66,11 +66,15 @@ is_deeply( $samt->{_options}->{_params},
 	   [qw( command refseq map_qcap ref_list site_list theta n_haplos exp_hap_diff indel_prob )],
 	   "commands filtered by prefix");
 
-TODO: {
-    local $TODO ='Determine whether the order of the parameters should be set somehow; this sporadically breaks hash randomization introduced in perl 5.17+';
-    is( join(' ', @{$samt->_translate_params}),
-	"pileup -T 0.05 -f my.fas", "translate params" );
+
+my @a = @{$samt->_translate_params};
+is shift @a, 'pileup', 'translate_params: command correct';
+my ($k, %h);
+for (@a) {
+    (/^-/) ? ( $h{$k = $_} = undef ) : ( $h{$k} = $_ );
 }
+is_deeply( \%h, { '-T' => 0.05, '-f' => 'my.fas' }, 'translate_params: options correct');
+
 
 SKIP : {
     test_skip( -requires_executable => $samt,
