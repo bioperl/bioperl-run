@@ -11,7 +11,7 @@ BEGIN {
     unshift @INC, $home;
     unshift @INC, '../..';
     use Bio::Root::Test;
-    test_begin(-tests => 36,
+    test_begin(-tests => 37,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::BWA Bio::Tools::Run::Samtools Bio::DB::Sam)]);
 }
 
@@ -72,11 +72,14 @@ is_deeply( $bwafac->{_options}->{_params},
 	   [qw( command max_edit_dist max_gap_opens max_gap_extns deln_protect_3p deln_protect_ends subseq_seed max_edit_dist_seed n_threads mm_penalty gap_open_penalty gap_extn_penalty subopt_hit_threshold trim_parameter )],
 	   "commands filtered by prefix");
 
-TODO: {
-    local $TODO ='Determine whether the order of the parameters should be set somehow; this sporadically breaks hash randomization introduced in perl 5.17+';
-    is( join(' ', @{$bwafac->_translate_params}),
-	"aln -R 35 -t 1", "translate params" );
+my @a = @{$bwafac->_translate_params};
+is shift @a, 'aln', 'translate_params: command correct';
+my ($k, %h);
+for (@a) {
+    (/^-/) ? ( $h{$k = $_} = undef ) : ( $h{$k} = $_ );
 }
+is_deeply( \%h, { '-R' => 35, '-t' => 1 }, 'translate_params: options correct');
+
 
 # test run_bwa filearg parsing
 # a pipeline...
