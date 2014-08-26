@@ -15,26 +15,16 @@ my $build = Module::Build->new(
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
     license             => 'perl',
     config_requires     => {
-	'Module::Build' => 0
-    },
+ 	                    'Module::Build' => 0,
+			   },
     build_requires      => {
-	'Test::Harness' => 0,
-	'Test::Harness::Iterator' => 0,
-	'Test::Harness::Results' => 0,
-	'Test::Harness::TAP' => 0,
-	'Test::Harness::Assert' => 0,
-	'Test::Harness::Point' => 0,	
-	'Test::Harness::Straps' => 0,	
-	'Test::Harness::Util' => 0,	
-	'Test::Builder' => 0,
-	'Test::Exception' => 0,
-	'Test::Simple' => 0,
-	'Test::Warn' => 0,
-	'Sub::Uplevel' => 0
-    },
+                            'Bio::Root::Version' => '1.006900',
+	                    'Bio::Root::Test' => 0,
+			   },
     requires            => {
                             'perl'               => '5.6.1',
-                            'Bio::Root::Version' => '1.006900'
+                            'Bio::Root::Version' => '1.006900',
+			    'Bio::Root::Root'    => 0,
                            },
     recommends          => {
                             'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
