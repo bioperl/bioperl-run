@@ -2,39 +2,40 @@
 # $Id: dependencies.pl 10084 2006-07-04 22:23:29Z cjfields $
 #
 
-
 use strict;
 use warnings;
 use File::Find;
+use File::Spec;
 use Getopt::Long;
+use JSON;
 use Module::CoreList;
-use CPANPLUS::Backend;
-use CPAN::Meta::Requirements;
 use CPAN::Meta::Prereqs;
+#use CPANPLUS::Backend;
+#use CPAN::Meta::Requirements;
+
 
 #
 # command line options
 #
 
-my ($verbose, $dir, $depfile, $help, $version) = (0, '.', "../DEPENDENCIES.NEW", undef, "5.006001");
+my ($perl,$dir) = ("5.006001",undef);
 GetOptions(
-        'v|verbose' => \$verbose,
         'dir:s' => \$dir,
-        'depfile:s' => \$depfile,
-        'p|perl:s' => \$version,
+        'p|perl:s' => \$perl,
         'h|help|?' => sub{ exec('perldoc',$0); exit(0) }
 	   );
 
-# Directories to check
+$dir ||= File::Spec->catdir(qw/.. lib Bio/);
 my @dirs = qw(lib);
 
 #
 # run
 #
 
+my $features_meta = {};
 my %dependencies;
 my %bp_packages;
-my %core = %{$Module::CoreList::version{$version}};
+my %core = %{$Module::CoreList::version{$perl}};
 
 # pragmas to skip
 my %SKIP = map {$_ => 1} qw(base
@@ -56,17 +57,18 @@ if ($dir) {
 #
 
 for my $mod (sort keys %dependencies) {
-  my $req = $dependencies{$mod};
+  next unless $mod =~ /^Bio::Tools::Run::[^:]+$/; # get meta only for Run
+  my $mod_info = $dependencies{$mod};
+  if (my $tag = $$mod_info{tag}) {
+    $features_meta->{$tag} = {
+      description => $$mod_info{desc},
+      prereqs => $$mod_info{prereqs}->as_string_hash
+     }
+  }
   1;
 }
 
-
-# for my $k (keys %dependencies) {
-#     if (exists $core{$k}) {
-#         delete $dependencies{$k};
-#     }
-# }
-
+print encode_json $features_meta;
 
 # my $b = CPANPLUS::Backend->new();
 
@@ -112,50 +114,71 @@ for my $mod (sort keys %dependencies) {
 # each module file
 
 sub parse_core {
-    my $file = $_;
-    return unless $file =~ /\.PLS$/ || $file =~ /\.p[ml]$/ ;
-    return unless -e $file;
-    open my $F, '<', $file or die "Could not read file '$file': $!\n";
-    my $pod = '';
-    MODULE_LOOP:
-    while (my $line = <$F>) {
-        # skip POD, starting comments
-        next if $line =~ /^\s*\#/xms;
-        if ($line =~ /^=(\w+)/) {
-            $pod = $1;
-        }
-        if ($pod) {
-            if ($pod eq 'cut') {
-                $pod = '';
-            } else {
-                next MODULE_LOOP;
-            }
-        }
-        # strip off end comments
-        $line =~ s/\#[^\n]+//;
-        if ($line =~ /^\bpackage\s+(\S+)\s*;/) {
-            $bp_packages{$1}++;
-        } elsif ($line =~ /(?:['"])?\b(use|require)\s+([A-Za-z0-9:_\.\(\)]+)\s*([^;'"]+)?(?:['"])?\s*;/) {
-            my ($use, $mod, $ver) = ($1, $2, $3);
-            if ($mod eq 'one') {
-                print "$File::Find::name: $. $line";
-            }
-            if (exists $SKIP{$mod} || exists $core{$mod}) {
-	      # skip if in core
-                next MODULE_LOOP;
-            }            
-            if ($ver && $ver !~ /^v?[\d\.]+$/) {
-                next MODULE_LOOP;
-            }
-            my $nm = $File::Find::name;
-            $nm =~ s{.*(Bio.*)\.pm}{$1};
-            $nm =~ s{[\\\/]}{::}g;
-	    my $prereqs = $dependencies{$nm} ||= CPAN::Meta::Prereqs->new();
-	    my $reqs = $prereqs->requirements_for(runtime => 'requires');
-	    $reqs->add_minimum( $mod => $ver );
-	    1;
-        }
+  my $file = $_;
+  return unless $file =~ /\.PLS$/ || $file =~ /\.p[ml]$/ ;
+  return unless -e $file;
+  open my $F, '<', $file or die "Could not read file '$file': $!\n";
+  my $nm = $File::Find::name;
+  $nm =~ s{.*(Bio.*)\.pm}{$1};
+  $nm =~ s{[\\\/]}{::}g;
+  my $prereqs = $dependencies{$nm}{prereqs} ||= CPAN::Meta::Prereqs->new();
+  ($dependencies{$nm}{tag}) = $nm =~ m/.*::(.*)$/;
+  my $pod = '';
+  my $desc='';
+ MODULE_LOOP:
+  while (my $line = <$F>) {
+    # skip POD, starting comments
+    next if $line =~ /^\s*\#/xms;
+    if ($line =~ /^=(\w+)/) {
+      $pod = $1;
     }
-    close $F;
+    if ($pod) {
+      if ($pod eq 'cut') {
+	$pod = '';
+      }
+      elsif ($pod =~ /head/) {
+	my @a = split(/\s+/,$line);
+	if ($a[1] && ($a[1] eq 'NAME')) {
+	  while ($line = <$F>) {
+	    last if $line =~ /^=\w+/;
+	    chomp $line;
+	    $desc .= " $line";
+	  }
+	  $desc =~ s/\s+/ /g;
+	  $desc =~ s/^\s*(?:[A-Za-z0-9_]+::)*[A-Za-z0-9_]+
+		     \s+-*\s*//x;
+	  $desc =~ s/\.?\s+$//;
+	  $dependencies{$nm}{desc} = $desc;
+	}
+      }
+      else {
+	next MODULE_LOOP;
+      }
+    }
+    # strip off end comments
+    $line =~ s/\#[^\n]+//;
+    if ($line =~ /^\bpackage\s+(\S+)\s*;/) {
+      $bp_packages{$1}++;
+    }
+    elsif ($line =~ /(?:['"])?\b(use|require)
+		     \s+([A-Za-z0-9:_\.\(\)]+)
+		     \s*([^;'"]+)?(?:['"])?\s*;/x) {
+      my ($use, $mod, $ver) = ($1, $2, $3);
+      if ($mod eq 'one') {
+	print "$File::Find::name: $. $line";
+      }
+      if (exists $SKIP{$mod} || exists $core{$mod}) {
+	# skip if in core
+	next MODULE_LOOP;
+      }
+      if ($ver && $ver !~ /^v?[\d\.]+$/) {
+	next MODULE_LOOP;
+      }
+      $prereqs->requirements_for(runtime => 'requires')->
+	add_minimum( $mod => $ver );
+      1;
+    }
+  }
+  close $F;
 }
 
