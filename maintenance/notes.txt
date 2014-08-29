@@ -1,0 +1,31 @@
+Solving the prereqs/tests problem for bioperl-run
+
+* Treat each package in Bio/Tools/Run as an optional feature, and
+* Allow user to choose at build time which run packages to install
+
+This makes sense; few users are likely to want to wrap every program
+that is supported; many users are likely to want to wrap one or two
+
+* For _each_ package in Bio/Tools/Run, keep track of the prereqs in 
+  (CPAN::Meta::Spec-compliant) metadata
+
+Must bite this bullet for bioperl-run to act independently
+
+* Associate the BioPerl core modules with their split-out
+  packages
+
+That is, be formal and proactive about describing the split-out
+distributions in (publicly available, CPAN::Meta::Spec-compliant)
+metadata. This metadata should include 'provides' information, and 
+'resources' information, so that bp-run Build can go out and install
+the correct latest distros to fulfil prereqs. (I.e., say goodbye to 1.0069)
+
+* Within each test, use CPAN::Meta classes to query prerequisites
+  directly from the distro's formal META
+
+To make the run distro (and all the splitout distros) behave together
+robustly, we need a common standard for describing within-BioPerl
+dependencies, and a convention for querying those dependencies. The
+CPAN::Meta suite provides exactly this.
+
+
