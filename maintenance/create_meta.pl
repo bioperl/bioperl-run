@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # $Id: dependencies.pl 10084 2006-07-04 22:23:29Z cjfields $
 #
 
@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use File::Find;
 use File::Spec;
+use Pod::Usage;
 use Getopt::Long;
 use JSON;
 use Module::CoreList;
@@ -18,12 +19,17 @@ use CPAN::Meta::Prereqs;
 # command line options
 #
 
-my ($perl,$dir) = ("5.006001",undef);
+my $j = JSON->new->pretty(1);
+my ($perl,$dir,$ns) = ("5.006001",undef,'Bio::Tools::Run');
+my $help;
 GetOptions(
         'dir:s' => \$dir,
         'p|perl:s' => \$perl,
-        'h|help|?' => sub{ exec('perldoc',$0); exit(0) }
+	'n|namespace:s' => \$ns,
+        'h|help|?' => \$help
 	   );
+
+pod2usage(2) if ($help);
 
 $dir ||= File::Spec->catdir(qw/.. lib Bio/);
 my @dirs = qw(lib);
@@ -44,6 +50,8 @@ warnings
 strict
 constant
 overload
+Bio::Tools::Run::WrapperBase
+Bio::Tools::Run::WrapperBase::CommandExts
 );
 
 if ($dir) {
@@ -57,7 +65,8 @@ if ($dir) {
 #
 
 for my $mod (sort keys %dependencies) {
-  next unless $mod =~ /^Bio::Tools::Run::[^:]+$/; # get meta only for Run
+  next unless $mod =~ /^${ns}::[^:]+$/; # get meta only for Run
+  next if $mod =~ /WrapperBase/; # WrapperBase is not optional
   my $mod_info = $dependencies{$mod};
   if (my $tag = $$mod_info{tag}) {
     $features_meta->{$tag} = {
@@ -68,7 +77,7 @@ for my $mod (sort keys %dependencies) {
   1;
 }
 
-print encode_json $features_meta;
+print $j->encode($features_meta);
 
 # my $b = CPANPLUS::Backend->new();
 
@@ -140,7 +149,10 @@ sub parse_core {
 	my @a = split(/\s+/,$line);
 	if ($a[1] && ($a[1] eq 'NAME')) {
 	  while ($line = <$F>) {
-	    last if $line =~ /^=\w+/;
+	    if ($line =~ /^=(\w+)/) {
+	      $pod = $1;
+	      last;
+	    }
 	    chomp $line;
 	    $desc .= " $line";
 	  }
@@ -149,6 +161,7 @@ sub parse_core {
 		     \s+-*\s*//x;
 	  $desc =~ s/\.?\s+$//;
 	  $dependencies{$nm}{desc} = $desc;
+	  next MODULE_LOOP;
 	}
       }
       else {
@@ -174,6 +187,16 @@ sub parse_core {
       if ($ver && $ver !~ /^v?[\d\.]+$/) {
 	next MODULE_LOOP;
       }
+      if ($mod =~ /[0-9._]+/) { # looks like a perl version string
+	next MODULE_LOOP;
+      }
+      if ( $nm =~ /$mod/) { # if $mod is a parent to the current package
+	next MODULE_LOOP;
+      }
+      if ( $mod =~ /$nm/) { # if $mod is a within-namespace requirement
+	                    # (which should be part of this install)
+	next MODULE_LOOP;
+      }
       $prereqs->requirements_for(runtime => 'requires')->
 	add_minimum( $mod => $ver );
       1;
@@ -182,3 +205,33 @@ sub parse_core {
   close $F;
 }
 
+=head1 NAME
+
+create_meta.pl - Build CPAN metadata for optional modules
+
+=head1 USAGE
+
+ create_meta.pl [--dir SEARCHDIR] [--perl VERSION] [--namespace NS] \
+   > feature_meta.json
+
+ SEARCHDIR defaults to '../lib/Bio'
+ VERSION defaults to '5.006001' (determines Perl core modules to ignore)
+ NS defaults to 'Bio::Tools::Run' (create meta only for matching modules)
+
+=head1 DESCRIPTION
+
+create_meta.pl traverses the given directory, identifying module
+dependencies and pulling the abstract from each module. These are cast
+into optional_features objects as described in L<CPAN::Meta::Spec>.
+JSON that may be merged into CPAN metadata is output to stdout.
+
+=head1 AUTHOR
+
+ Mark A. Jensen <maj -at- fortinbras -dot- us>
+
+=head1 LICENSE
+
+This program is free software. It may be used and distributed under
+the same terms as Perl itself.
+
+=cut
