@@ -5,7 +5,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Prints 
+Bio::Tools::Run::Prints - Wrapper for PRINTS fingerprint identification algorithm
 
 =head1 SYNOPSIS
 

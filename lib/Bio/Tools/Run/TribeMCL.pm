@@ -12,7 +12,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::TribeMCL
+Bio::Tools::Run::TribeMCL - Wrapper for TribeMCL protein clustering program
 
 =head1 SYNOPSIS
 

@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Signalp
+Bio::Tools::Run::Signalp - Predict protein cleavage sites with Signalp
 
 =head1 SYNOPSIS
 

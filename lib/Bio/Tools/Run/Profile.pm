@@ -6,7 +6,7 @@
 
 =head1 NAME
 
-Bio::Tools::Run::Profile
+Bio::Tools::Run::Profile - Scan a sequence with a profile library using pfscan
 
 =head1 SYNOPSIS
 
