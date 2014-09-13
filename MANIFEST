@@ -10,6 +10,7 @@ scripts/bioperl_application_installer.PLS
 scripts/run_protdist.PLS
 DEPENDENCIES
 INSTALL.PROGRAMS
+lib/Bio/Tools/Run/Build.pm
 lib/Bio/Tools/Run/Eponine.pm
 lib/Bio/Tools/Run/AnalysisFactory.pm
 lib/Bio/Tools/Run/Analysis/soap.pm
@@ -142,6 +143,7 @@ lib/Bio/Installer/Generic.pm
 lib/Bio/Installer/SLR.pm
 lib/Bio/Installer/Hyphy.pm
 lib/Bio/Installer/Muscle.pm
+meta/feature_meta.json
 INSTALL.SKIP
 INSTALL
 Changes
