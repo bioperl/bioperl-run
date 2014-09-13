@@ -1,13 +1,15 @@
 #!/usr/bin/perl -w
 
 # This is a Module::Build script for BioPerl-Run installation.
-# See http://search.cpan.org/~kwilliams/Module-Build/lib/Module/Build.pm
+# See http://metacpan.org/pod/Module::Build
 
 use strict;
 use warnings;
-use Module::Build;
+use lib 'lib';
+use File::Spec;
+use Bio::Tools::Run::Build;
 
-my $build = Module::Build->new(
+my $build = Bio::Tools::Run::Build->new(
     dist_name           => 'BioPerl-Run',
     dist_version        => '1.006900',
     module_name         => 'Bio::Run',
@@ -16,25 +18,30 @@ my $build = Module::Build->new(
     license             => 'perl',
     config_requires     => {
  	                    'Module::Build' => 0,
+			    'Term::ReadLine' => 0
 			   },
     build_requires      => {
+                            'JSON' => '2.0',
                             'Bio::Root::Version' => '1.006900',
 	                    'Bio::Root::Test' => 0,
+			    'Term::ReadKey' => 0,
+			    'Term::ReadLine' => 0,
+			    'IO::Handle' => 0
 			   },
     requires            => {
                             'perl'               => '5.6.1',
                             'Bio::Root::Version' => '1.006900',
 			    'Bio::Root::Root'    => 0,
                            },
-    recommends          => {
-                            'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
-                            'IPC::Run'        => 0,     # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
-                            'IO::String'      => 0,     # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
-                            'XML::Twig'       => 0,     # processing XML data: Bio::Tools::Run::EMBOSSacd
-                            'File::Sort'      => 0,     # BEDTools
-                            'Config::Any'     => 0,     # MCS, Match
-                            'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
-                           },
+    # recommends          => {
+    #                         'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
+    #                         'IPC::Run'        => 0,     # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
+    #                         'IO::String'      => 0,     # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
+    #                         'XML::Twig'       => 0,     # processing XML data: Bio::Tools::Run::EMBOSSacd
+    #                         'File::Sort'      => 0,     # BEDTools
+    #                         'Config::Any'     => 0,     # MCS, Match
+    #                         'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
+    #                        },
     get_options         => {
                             accept  => { },
                             network => { },
@@ -50,8 +57,37 @@ my $build = Module::Build->new(
     #create_makefile_pl  => 'passthrough'
 );
 
+if (eval "require JSON; 1") {
+    my $j = JSON->new;
+    local $/;
+    open my $fm, File::Spec->catfile('meta','feature_meta.json');
+    my $jtext = <$fm>;
+    $build->meta_merge( {optional_features => $j->decode($jtext),
+			 'meta-spec' => { version => '2',
+					  url => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec' }
+			 } );
+}
+
 my $accept = $build->args->{accept};
 
+# Select tools modules to install
+my ($options, $nummod);
+do {
+  $nummod = 0;
+  $options = $build->select_tools();
+  print "Selected :\n", join("\n", map { $options->{$_} ? $_ : () } sort keys %$options),"\n";
+  $nummod += $_ for values %$options;
+} until $build->y_n
+  (
+  sprintf("Install %s tool module%s? y/n",
+  ($nummod ? ($nummod == 1 ? "this" : "these $nummod") : 'no'),
+  ($nummod==1 ? '' : 's')),'y');
+
+if ($nummod) {
+  while (my ($k,$v) = each %$options) {
+    $build->feature($k => 1) if $v;
+  }
+}
 # Optionally have script files installed.
 if ($build->args('install_scripts') or $accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {
     my $files = $build->_find_file_by_type('PLS', 'scripts');
@@ -92,6 +128,7 @@ else {
     $build->notes(network => 0);
     $build->log_info("  - will not run internet-requiring tests\n");
 }
+
 
 # Create the build script and exit
 $build->create_build_script;
