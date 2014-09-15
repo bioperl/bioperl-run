@@ -1,3 +1,61 @@
+Requirements:
+
+Assumption: any modules in the Bio::Tools::Run namespace are
+potentially optional (chooseable, not instaled by default)
+
+Add a chooser function to Build.PL that lists run tools that may be
+installed, and allows user to choose those to be installed at build
+time
+
+Build should know that all other modules in the package should be
+installed
+
+Build should skip tests (with feedback) for run tools that are not
+selected for install
+
+Build should provide feedback stating which modules are finally
+selected for install
+
+Build should check the prereqs for modules selected for install, and
+know that it should install the missing prereqs when 'installdeps' is
+used. (This means that organizing prereqs is not just a matter of
+adding fields to the build constructor, some assy. is required)
+
+If installdeps is run, installation of BioPerl deps
+should proceed from github repos, and not the 1.006900 monolith
+(in particular, should not install the run tools from CPAN!)
+
+Design:
+
+Add a Module::Build subclass called Bio::Tools::Run::Build
+- provide the chooser method and methods to communicate optional
+  prereqs there
+
+Treat the run tools as 'optional features' as defined in the 
+CPAN::Meta/Module::Build framework
+
+Provide a static file (meta/features_meta.json) with the distro
+that gives the prequisites for each run tool module compliant
+with CPAN::Meta::Spec -- need v2+ for this
+
+Use the $build object to communicate whether a run tool has been
+selected with the object's feature() method
+
+Individual, run tool-specific tests should check the $build object
+for its feature, and skip all tests with feedback if feature is 
+not selected for install.
+- helper function for this in Bio::Root::Run::Build::Test
+
+Problem to solve: Module::Build API does not provide for inhibiting 
+installation of specific files/directories under lib
+- work around this to prevent non-selected tools from being installed
+- obtain the paths of the files from the 'provides' field of the 
+  metadata file
+
+For any run tool selected, install all modules under that run tool's
+namespace
+
+
 Solving the prereqs/tests problem for bioperl-run
 
 * Treat each package in Bio/Tools/Run as an optional feature, and
