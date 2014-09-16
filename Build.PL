@@ -56,38 +56,56 @@ my $build = Bio::Tools::Run::Build->new(
     dynamic_config      => 1,
     #create_makefile_pl  => 'passthrough'
 );
-
 if (eval "require JSON; 1") {
     my $j = JSON->new;
     local $/;
     open my $fm, File::Spec->catfile('meta','feature_meta.json');
     my $jtext = <$fm>;
-    $build->meta_merge( {optional_features => $j->decode($jtext),
-			 'meta-spec' => { version => '2',
-					  url => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec' }
-			 } );
+    $build->meta_merge( 
+      {
+      optional_features => $j->decode($jtext),
+      'meta-spec' => { version => '2',
+		       url => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec' 
+		      }
+      } 
+     );
 }
-
+$build->dispatch('distmeta');
 my $accept = $build->args->{accept};
 
 # Select tools modules to install
-my ($options, $nummod);
+my ($options, $nummod, @selected_tools);
 do {
   $nummod = 0;
   $options = $build->select_tools();
   print "Selected :\n", join("\n", map { $options->{$_} ? $_ : () } sort keys %$options),"\n";
   $nummod += $_ for values %$options;
-} until $build->y_n
-  (
-  sprintf("Install %s tool module%s? y/n",
-  ($nummod ? ($nummod == 1 ? "this" : "these $nummod") : 'no'),
-  ($nummod==1 ? '' : 's')),'y');
+} until $build->y_n(
+    sprintf("Install %s tool module%s? y/n",
+	    ($nummod ? ($nummod == 1 ? "this" : "these $nummod") : 'no'),
+	    ($nummod==1 ? '' : 's')),'y');
 
+$DB::single=1;
 if ($nummod) {
   while (my ($k,$v) = each %$options) {
-    $build->feature($k => 1) if $v;
+    if ($v) {
+      $build->feature($k => 1);
+      push @selected_tools, $k;
+    }
   }
 }
+
+$build->add_tool_deps($_) for (@selected_tools);
+
+# now check with $build->check_prereq() - this will add check and
+# add failures that should then be recorded for install with installdeps
+# (returns false if any failures; true if all good
+
+unless ($build->check_prereq) {
+    $DB::single=1;
+    1;
+}
+
 # Optionally have script files installed.
 if ($build->args('install_scripts') or $accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {
     my $files = $build->_find_file_by_type('PLS', 'scripts');
@@ -128,7 +146,6 @@ else {
     $build->notes(network => 0);
     $build->log_info("  - will not run internet-requiring tests\n");
 }
-
 
 # Create the build script and exit
 $build->create_build_script;

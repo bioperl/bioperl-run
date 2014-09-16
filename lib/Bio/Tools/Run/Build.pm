@@ -6,23 +6,41 @@ use CPAN::Meta;
 use IO::Handle;
 use Term::ReadKey;
 use Term::ReadLine;
+
+my $PAGESZ = 10;
 END {
   ReadMode 0;
 }
 
+sub ACTION_code {
+  my $self = shift;
+  $self->SUPER::ACTION_code(@_);
+  print "HEY I made it\n";
+}
+
 sub select_tools {
     my $self = shift;
-    $DB::single=1;
-    my $meta = CPAN::Meta->load_file($self->mymetafile);
+    my $meta = CPAN::Meta->load_file($self->metafile);
     my ($options, $descs);
     for ($meta->features) {
 	$$options{$_->identifier} = 0;
 	$$descs{$_->identifier} =  $_->description;
     }
     picker($options, $descs);
-    1;
 }
 
+sub add_tool_deps {
+  my $self = shift;
+  my ($feature) = @_;
+  my $meta = CPAN::Meta->load_file($self->metafile);
+  my $prereqs = $meta->feature($feature)->prereqs;
+  my $reqs_h = $prereqs->merged_requirements([qw/runtime build test/],
+					     [qw/requires/])->as_string_hash;
+  for (my ($module, $version) = each %$reqs_h) {
+    $self->_add_prereq('requires', $module, $version);
+  }
+  return 1;
+}
 
 sub picker {
   local $|=1;
@@ -30,6 +48,7 @@ sub picker {
   my $term = Term::ReadLine->new('picker');
   $term->ornaments(0);
   return unless ($options);
+  my $prompt = 'Select (%d/%d) [Enter number, (n)ext (p)rev (q)uit]: ';
   my @options = sort keys %$options;
   my %idx;
   @idx{1..@options} = @options;
@@ -53,8 +72,8 @@ sub picker {
     push @pages, [$i, $end > @options-1 ? @options-1 : $end];
   }
   $display->(@{$pages[0]});
-  print "Select :";
   my $curpg = 0;
+  printf $prompt, $curpg+1, scalar @pages;
   my $c=0;
   ReadMode 3;
   while ($c !~ /q/i) {
@@ -63,14 +82,14 @@ sub picker {
       unless ($curpg == @pages-1) {
 	$curpg++;
 	print "\n";
-	print "Select :";
+	printf $prompt, $curpg+1,scalar @pages;
       }
     }
     elsif ($c =~ /^[pb]$/i) {
       if ($curpg) {
 	$curpg--;
 	print "\n";
-	print "Select :";
+	printf $prompt, $curpg+1, scalar @pages;
       }
     }
     elsif ($c =~ /^q$/i) {
@@ -91,8 +110,9 @@ sub picker {
       ReadMode 3;
     }
     $display->(@{$pages[$curpg]});
-    print "Select :";
+    printf $prompt, $curpg+1, scalar @pages;
   }
+  ReadMode 0;
   return $options;
 }
 
