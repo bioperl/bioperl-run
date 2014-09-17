@@ -1,0 +1,789 @@
+{
+   "Newbler" : {
+      "description" : "Wrapper for local execution of Newbler",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Newbler" : "0",
+               "IPC::Run" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "StandAloneBlastPlus" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::GuessSeqFormat" : "0",
+               "Bio::PrimarySeq" : "0",
+               "Bio::Tools::Run::StandAloneBlastPlus::BlastMethods" : "0",
+               "Bio::Root::Root" : "0",
+               "IO::String" : "0"
+            }
+         }
+      },
+      "description" : "Compute with NCBI's blast+ suite *ALPHA*"
+   },
+   "TCoffee" : {
+      "description" : "DESCRIPTION of Object",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Installer::Generic" : "0"
+            }
+         }
+      }
+   },
+   "Pseudowise" : {
+      "description" : "Object for prediting pseudogenes in a given sequence given a protein and a cdna sequence",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Pseudowise" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "Mdust" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Run::Mdust" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::SeqFeature::Generic" : "0"
+            }
+         }
+      },
+      "description" : "Perl extension for Mdust nucleotide filtering"
+   },
+   "Hyphy" : {
+      "description" : "DESCRIPTION of Object",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Installer::Generic" : "0"
+            }
+         }
+      }
+   },
+   "Profile" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Tools::Profile" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "Scan a sequence with a profile library using pfscan"
+   },
+   "Muscle" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Installer::Generic" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "DESCRIPTION of Object"
+   },
+   "Maq" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Maq::Config" : "0",
+               "Bio::Tools::GuessSeqFormat" : "0",
+               "IO::Uncompress::Gunzip" : "0",
+               "Bio::Root::Root" : "0",
+               "IPC::Run" : "0"
+            }
+         }
+      },
+      "description" : "Run wrapper for the Maq short-read assembler *BETA*"
+   },
+   "tRNAscanSE" : {
+      "description" : "Wrapper for local execution of tRNAscan-SE",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::tRNAscanSE" : "0",
+               "IPC::Run" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "BWA" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "IPC::Run" : "0",
+               "Bio::Tools::Run::BWA::Config" : "0",
+               "IO::Uncompress::Gunzip" : "0",
+               "Bio::Tools::GuessSeqFormat" : "0",
+               "Bio::Tools::Run::Samtools" : "0"
+            }
+         }
+      },
+      "description" : "Run wrapper for the BWA short-read assembler *BETA*"
+   },
+   "StandAloneWUBlast" : {
+      "prereqs" : {},
+      "description" : "Object for the local execution of WU-Blast"
+   },
+   "RepeatMasker" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqFeature::FeaturePair" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::SeqFeature::Generic" : "0",
+               "Bio::Tools::RepeatMasker" : "0",
+               "Bio::Tools::Run::RepeatMasker" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for RepeatMasker Program"
+   },
+   "Seg" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Seg" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0"
+            }
+         }
+      },
+      "description" : "Object for identifying low complexity regions in a given protein seequence"
+   },
+   "MCS" : {
+      "description" : "Wrapper for MCS",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::MCS" : "0",
+               "Bio::FeatureIO" : "0",
+               "Bio::Annotation::SimpleValue" : "0"
+            }
+         }
+      }
+   },
+   "Generic" : {
+      "description" : "DESCRIPTION of Object",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "LWP" : "0",
+               "HTTP::Request::Common" : "0"
+            }
+         }
+      }
+   },
+   "Infernal" : {
+      "description" : "Wrapper for local execution of cmalign, cmbuild, cmsearch, cmscore",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::SearchIO" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "SoapEUtilities" : {
+      "description" : "Interface to the NCBI Entrez web service *BETA*",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::DB::SoapEUtilities::Result" : "0",
+               "Bio::DB::ESoap" : "0",
+               "Bio::DB::SoapEUtilities::FetchAdaptor" : "0",
+               "Bio::DB::SoapEUtilities::LinkAdaptor" : "0",
+               "Bio::DB::SoapEUtilities::DocSumAdaptor" : "0",
+               "Bio::DB::SoapEUtilities::GQueryAdaptor" : "0",
+               "Bio::DB::SoapEUtilities" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   },
+   "RNAMotif" : {
+      "description" : "Wrapper for local execution of rnamotif, rm2ct, rmfmt, rmprune",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::SearchIO" : "0"
+            }
+         }
+      }
+   },
+   "Genewise" : {
+      "description" : "Object for predicting genes in a given sequence given a protein",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::SeqFeature::Gene::Exon" : "0",
+               "Bio::SeqFeature::Generic" : "0",
+               "Bio::SeqFeature::Gene::Transcript" : "0",
+               "Bio::Tools::Genewise" : "0",
+               "Bio::SeqFeature::Gene::GeneStructure" : "0",
+               "Bio::SeqFeature::FeaturePair" : "0",
+               "Bio::Tools::AnalysisResult" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "Genemark" : {
+      "description" : "Wrapper for local execution of the GeneMark family of programs",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "IPC::Run" : "0",
+               "Bio::Tools::Genemark" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "Samtools" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Samtools::Config" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "a run wrapper for the samtools suite *BETA*"
+   },
+   "EMBOSSacd" : {
+      "description" : "class for EMBOSS Application qualifiers",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Factory::EMBOSS" : "0",
+               "Bio::Root::Root" : "0",
+               "XML::Twig" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   },
+   "AnalysisFactory" : {
+      "description" : "A directory of analysis tools",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Factory::AnalysisI" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::AnalysisFactory" : "0"
+            }
+         }
+      }
+   },
+   "Vista" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Run::Vista" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::Alignment::Lagan" : "0",
+               "Bio::Seq" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for Vista"
+   },
+   "Bowtie" : {
+      "description" : "Run wrapper for the Bowtie short-read assembler *BETA*",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Bowtie::Config" : "0",
+               "IPC::Run" : "0",
+               "Bio::Tools::GuessSeqFormat" : "0",
+               "Bio::Tools::Run::Samtools" : "0",
+               "Bio::Seq" : "0",
+               "IO::Uncompress::Gunzip" : "0"
+            }
+         }
+      }
+   },
+   "Signalp" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Signalp" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "Predict protein cleavage sites with Signalp"
+   },
+   "TigrAssembler" : {
+      "description" : "Wrapper for local execution of TIGR Assembler v2",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::TigrAssembler" : "0",
+               "IPC::Run" : "0"
+            }
+         }
+      }
+   },
+   "Hmmer" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::SearchIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for local execution of hmmalign, hmmbuild, hmmcalibrate, hmmemit, hmmpfam, hmmsearch"
+   },
+   "Coil" : {
+      "description" : "wrapper for ncoils program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Coil" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0"
+            }
+         }
+      }
+   },
+   "Meme" : {
+      "description" : "Wrapper for Meme Program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Map::Position" : "0",
+               "Bio::Tools::Run::Meme" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Map::Prediction" : "0"
+            }
+         }
+      }
+   },
+   "PAML" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Installer::Generic" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "DESCRIPTION of Object"
+   },
+   "Clustalw" : {
+      "description" : "DESCRIPTION of Object",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Installer::Generic" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   },
+   "StandAloneBlast" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::SearchIO" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Seq" : "0"
+            }
+         }
+      },
+      "description" : "Object for the local execution of the NCBI BLAST program suite (blastall, blastpgp, bl2seq). There is experimental support for WU-Blast and NCBI rpsblast"
+   },
+   "Simprot" : {
+      "description" : "Wrapper around the Simprot program. Wrapper for the calculation of a multiple sequence alignment from a phylogenetic tree",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::Simprot" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "Promoterwise" : {
+      "description" : "Wrapper for aligning two sequences using promoterwise",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Promoterwise" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   },
+   "Primer3" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "Create input for and work with the output from the program primer3"
+   },
+   "Phrap" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phrap" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "a wrapper for running Phrap"
+   },
+   "ESoap" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "SOAP::Lite" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::DB::ESoap::WSDL" : "0"
+            }
+         }
+      },
+      "description" : "Client for the NCBI Entrez EUtilities SOAP server"
+   },
+   "Eponine" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Eponine" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Eponine" : "0"
+            }
+         }
+      },
+      "description" : "Object for execution of the Eponine which is a mammalian TSS predictor"
+   },
+   "Minimo" : {
+      "description" : "Wrapper for local execution of the Minimo assembler",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Minimo" : "0",
+               "Bio::SeqIO" : "0",
+               "IPC::Run" : "0"
+            }
+         }
+      }
+   },
+   "Prints" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Prints" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Root::IO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for PRINTS fingerprint identification algorithm"
+   },
+   "Probcons" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Installer::Generic" : "0"
+            }
+         }
+      },
+      "description" : "DESCRIPTION of Object"
+   },
+   "Primate" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::SeqFeature::Generic" : "0",
+               "Bio::Tools::Run::Primate" : "0"
+            }
+         }
+      },
+      "description" : "for Primate, Guy Slater's near exact match finder for short sequence tags"
+   },
+   "Match" : {
+      "description" : "Wrapper for Transfac's match(TM)",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Match" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Annotation::SimpleValue" : "0",
+               "Bio::Tools::Run::Match" : "0",
+               "Bio::FeatureIO" : "0"
+            }
+         }
+      }
+   },
+   "BEDTools" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::GuessSeqFormat" : "0",
+               "Bio::Tools::Run::BEDTools::Config" : "0",
+               "IO::Uncompress::Gunzip" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::SeqFeature::Collection" : "0",
+               "Bio::SeqFeature::Generic" : "0",
+               "IPC::Run" : "0"
+            }
+         }
+      },
+      "description" : "Run wrapper for the BEDTools suite of programs *BETA*"
+   },
+   "Glimmer" : {
+      "description" : "Wrapper for local execution of Glimmer, GlimmerM and GlimmerHMM",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Glimmer" : "0",
+               "IPC::Run" : "0"
+            }
+         }
+      }
+   },
+   "ERPIN" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::SearchIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for local execution of the ERPIN suite of programs"
+   },
+   "TribeMCL" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Species" : "0",
+               "Bio::Seq" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Annotation::DBLink" : "0",
+               "Bio::Tools::Run::TribeMCL" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::SearchIO" : "0",
+               "Bio::Cluster::SequenceFamily" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Root::IO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for TribeMCL protein clustering program"
+   },
+   "Genscan" : {
+      "description" : "Object for identifying genes in a given sequence given a matrix(for appropriate organisms)",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Seq" : "0",
+               "Bio::Tools::Genscan" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0"
+            }
+         }
+      }
+   },
+   "Ensembl" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::EnsEMBL::Registry" : "0",
+               "Bio::Tools::Run::Ensembl" : "0",
+               "Bio::WebAgent" : "0",
+               "Bio::DB::EUtilities" : "0"
+            }
+         }
+      },
+      "description" : "A simplified front-end for setting up the registry for, and then using an Ensembl database with the Ensembl Perl API"
+   },
+   "AssemblerBase" : {
+      "description" : "base class for wrapping external assemblers",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Assembly::IO" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "Build" : {
+      "description" : null,
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Term::ReadKey" : "0",
+               "CPAN::Meta" : "0"
+            }
+         }
+      }
+   },
+   "BlastPlus" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::BlastPlus::Config" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "A wrapper for NCBI's blast+ suite"
+   },
+   "StandAloneNCBIBlast" : {
+      "description" : "Object for the local execution of the NCBI BLAST program suite (blastall, blastpgp, bl2seq). With experimental support for NCBI rpsblast",
+      "prereqs" : {}
+   },
+   "FootPrinter" : {
+      "description" : "wrapper for the FootPrinter program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::FootPrinter" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::FootPrinter" : "0"
+            }
+         }
+      }
+   },
+   "Cap3" : {
+      "description" : "wrapper for CAP3",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "EMBOSS" : {
+      "description" : "DESCRIPTION of Object",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Installer::Generic" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   },
+   "SLR" : {
+      "description" : "DESCRIPTION of Object",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Installer::Generic" : "0"
+            }
+         }
+      }
+   },
+   "EMBOSSApplication" : {
+      "description" : "class for EMBOSS Applications",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Factory::EMBOSS" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::EMBOSSacd" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   },
+   "Tmhmm" : {
+      "description" : "Object for identifying transmembrane helixes in a given protein seequence",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Tmhmm" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "Analysis" : {
+      "description" : "Module representing any (remote or local) analysis tool",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Seqret" : "0",
+               "Bio::Tools::Run::Analysis" : "0",
+               "Bio::AnalysisI" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   }
+}

@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# $Id: dependencies.pl 10084 2006-07-04 22:23:29Z cjfields $
 #
 
 use strict;
@@ -11,21 +10,23 @@ use Getopt::Long;
 use JSON;
 use Module::CoreList;
 use CPAN::Meta::Prereqs;
+
 #use CPANPLUS::Backend;
 #use CPAN::Meta::Requirements;
 
-
-#
-# command line options
-#
+my @parse_paths = qw{
+Bio/DB
+Bio/Installer
+Bio/Factory
+Bio/Tools/Run
+};
 
 my $j = JSON->new->pretty(1);
-my ($perl,$dir,$ns) = ("5.006001",undef,'Bio::Tools::Run');
+my ($perl,$dir) = ("5.006001",undef);
 my $help;
 GetOptions(
         'dir:s' => \$dir,
         'p|perl:s' => \$perl,
-	'n|namespace:s' => \$ns,
         'h|help|?' => \$help
 	   );
 
@@ -65,7 +66,7 @@ if ($dir) {
 #
 
 for my $mod (sort keys %dependencies) {
-  next unless $mod =~ /^${ns}::[^:]+$/; # get meta only for Run
+#  next unless $mod =~ /^${ns}::[^:]+$/; # get meta only for Run
   next if $mod =~ /WrapperBase/; # WrapperBase is not optional
   my $mod_info = $dependencies{$mod};
   if (my $tag = $$mod_info{tag}) {
@@ -126,6 +127,8 @@ sub parse_core {
   my $file = $_;
   return unless $file =~ /\.PLS$/ || $file =~ /\.p[ml]$/ ;
   return unless -e $file;
+  # filter for modules occurring only at defined paths
+  return unless grep { $File::Find::dir =~ m|$_/?$| } @parse_paths;
   open my $F, '<', $file or die "Could not read file '$file': $!\n";
   my $nm = $File::Find::name;
   $nm =~ s{.*(Bio.*)\.pm}{$1};
@@ -190,13 +193,13 @@ sub parse_core {
       if ($mod =~ /[0-9._]+/) { # looks like a perl version string
 	next MODULE_LOOP;
       }
-      if ( $nm =~ /$mod/) { # if $mod is a parent to the current package
-	next MODULE_LOOP;
-      }
-      if ( $mod =~ /$nm/) { # if $mod is a within-namespace requirement
-	                    # (which should be part of this install)
-	next MODULE_LOOP;
-      }
+      # if ( $nm =~ /$mod/) { # if $mod is a parent to the current package
+      # 	next MODULE_LOOP;
+      # }
+      # if ( $mod =~ /$nm/) { # if $mod is a within-namespace requirement
+      # 	                    # (which should be part of this install)
+      # 	next MODULE_LOOP;
+      # }
       $prereqs->requirements_for(runtime => 'requires')->
 	add_minimum( $mod => $ver );
       1;
@@ -228,7 +231,7 @@ JSON that may be merged into CPAN metadata is output to stdout.
 =head1 AUTHOR
 
  Mark A. Jensen <maj -at- fortinbras -dot- us>
-
+ 
 =head1 LICENSE
 
 This program is free software. It may be used and distributed under
