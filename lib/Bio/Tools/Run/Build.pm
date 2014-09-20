@@ -62,7 +62,7 @@ sub add_tool_deps {
   my $prereqs = $meta->feature($feature)->prereqs;
   my $reqs_h = $prereqs->merged_requirements([qw/runtime build test/],
 					     [qw/requires/])->as_string_hash;
-  for (my ($module, $version) = each %$reqs_h) {
+  while (my ($module, $version) = each %$reqs_h) {
     $self->_add_prereq('requires', $module, $version);
   }
   return 1;
