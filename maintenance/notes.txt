@@ -25,6 +25,9 @@ If installdeps is run, installation of BioPerl deps
 should proceed from github repos, and not the 1.006900 monolith
 (in particular, should not install the run tools from CPAN!)
 
+Build.PL should allow automated install (skip the interactive picker,
+enter desired features on command line)
+
 Design:
 
 Add a Module::Build subclass called Bio::Tools::Run::Build
@@ -51,9 +54,23 @@ installation of specific files/directories under lib
 - work around this to prevent non-selected tools from being installed
 - obtain the paths of the files from the 'provides' field of the 
   metadata file
+- remove related docs too from blib/libdoc
 
 For any run tool selected, install all modules under that run tool's
 namespace
+
+- Feature requirements objects will include the modules that are
+provided by the Run distro. To avoid fails when requirements are
+checked, make sure that Build.PL has the distro lib dir in @INC.
+
+Merge requirements for features that involve multiple distro modules
+(e.g., EMBOSS) - creating these composite features can be a
+post-process after feature_meta.json is slurped.
+
+composite features:
+- StandAloneBlast + StandAloneBlastPlus + SANCBIBlast + SAWUBlast
+- EMBOSS related modules EMBOSS+EMBOSSacd+EMBOSSApplication+Installer
+- SoapEUtilities+ESoap
 
 
 Solving the prereqs/tests problem for bioperl-run
