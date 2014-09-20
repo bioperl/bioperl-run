@@ -75,24 +75,10 @@ my $accept = $build->args->{accept};
 
 # Select tools modules to install
 my ($options, $nummod, @selected_tools);
-do {
-  $nummod = 0;
-  $options = $build->select_tools();
-  print "Selected :\n", join("\n", map { $options->{$_} ? $_ : () } sort keys %$options),"\n";
-  $nummod += $_ for values %$options;
-} until $build->y_n(
-    sprintf("Install %s tool module%s? y/n",
-	    ($nummod ? ($nummod == 1 ? "this" : "these $nummod") : 'no'),
-	    ($nummod==1 ? '' : 's')),'y');
-
-$DB::single=1;
-if ($nummod) {
-  while (my ($k,$v) = each %$options) {
-    if ($v) {
-      $build->feature($k => 1);
-      push @selected_tools, $k;
-    }
-  }
+if (my $feat = $build->args('features')) {
+}
+else { # interactive
+    @selected_tools = $build->interactive_select();
 }
 
 $build->add_tool_deps($_) for (@selected_tools);
@@ -151,3 +137,4 @@ else {
 $build->create_build_script;
 
 exit;
+
