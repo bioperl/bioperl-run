@@ -16,7 +16,7 @@ my $build = Bio::Tools::Run::Build->new(
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
     license             => 'perl',
-    config_requires     => {
+    configure_requires     => {
  	                    'Module::Build' => 0,
 			    'Term::ReadLine' => 0
 			   },
