@@ -67,30 +67,31 @@ if (eval "require JSON; 1") {
       'meta-spec' => { version => '2',
 		       url => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec' 
 		      }
-      } 
+     }
      );
 }
 $build->dispatch('distmeta');
-my $accept = $build->args->{accept};
+$build->notes('meta' => CPAN::Meta->load_file($build->metafile));
+
+my $accept = $build->args('accept');
 
 # Select tools modules to install
 my ($options, $nummod, @selected_tools);
 if (my $feat = $build->args('features')) {
+    @selected_tools = split /\s*[,;:]\s*/,$feat;
 }
 else { # interactive
     @selected_tools = $build->interactive_select();
 }
+1;
+$build->add_tool_deps(@selected_tools);
 
-$build->add_tool_deps($_) for (@selected_tools);
-
+$DB::single=1;
 # now check with $build->check_prereq() - this will add check and
 # add failures that should then be recorded for install with installdeps
-# (returns false if any failures; true if all good
+# (returns false if any failures; true if all good)
 
-unless ($build->check_prereq) {
-    $DB::single=1;
-    1;
-}
+$build->check_prereq;
 
 # Optionally have script files installed.
 if ($build->args('install_scripts') or $accept ? 0 : $build->y_n("Install scripts? y/n", 'n')) {

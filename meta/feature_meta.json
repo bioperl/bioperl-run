@@ -85,6 +85,7 @@
                "Bio::Root::Root" : "0",
                "Bio::Factory::ApplicationFactoryI" : "0",
                "Bio::Tools::Profile" : "0",
+               "Bio::Tools::Run::Profile" : "0",
                "Bio::SeqIO" : "0"
             }
          }
@@ -212,10 +213,22 @@
                "SOAP::Lite" : "0",
                "Bio::DB::ESoap::WSDL" : "0",
                "Bio::DB::SoapEUtilities::FetchAdaptor" : "0",
+               "Bio::DB::SoapEUtilities::FetchAdaptor::seq" : "0",
+               "Bio::DB::SoapEUtilities::FetchAdaptor::species" : "0",
                "Bio::DB::SoapEUtilities::LinkAdaptor" : "0",
                "Bio::DB::SoapEUtilities::DocSumAdaptor" : "0",
                "Bio::DB::SoapEUtilities::GQueryAdaptor" : "0",
                "Bio::DB::SoapEUtilities" : "0",
+               "Bio::Annotation::Collection" : "0",
+               "Bio::Annotation::Comment" : "0",
+               "Bio::Annotation::DBLink" : "0",
+               "Bio::Annotation::Reference" : "0",
+               "Bio::Annotation::SimpleValue" : "0",
+               "Bio::Factory::FTLocationFactory" : "0",
+               "Bio::SeqFeature::Generic" : "0",
+               "Bio::Seq::SeqBuilder" : "0",
+               "Bio::Seq::SeqFactory" : "0",
+               "Bio::Species" : "0",
                "Bio::Root::Root" : "0"
             }
          }
@@ -411,6 +424,7 @@
                "Bio::SearchIO" : "0",
                "Bio::SeqIO" : "0",
                "Bio::Seq" : "0",
+               "Bio::Tools::Run::StandAloneBlast" : "0",
                "Bio::Tools::Run::StandAloneNCBIBlast" : "0",
                "Bio::Tools::Run::StandAloneWUBlast" : "0"
             }
@@ -624,6 +638,7 @@
             "requires" : {
                "Bio::Seq" : "0",
                "Bio::Tools::Genscan" : "0",
+               "Bio::Tools::Run::Genscan" : "0",
                "Bio::SeqIO" : "0",
                "Bio::Root::IO" : "0",
                "Bio::Root::Root" : "0",
