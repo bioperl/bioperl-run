@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use base 'Module::Build';
 use CPAN::Meta;
+use File::Spec;
+use File::Find;
 use IO::Handle;
 use Term::ReadKey;
 use Term::ReadLine;
@@ -15,11 +17,61 @@ END {
 sub ACTION_code {
   my $self = shift;
   $self->SUPER::ACTION_code(@_);
-  print "HEY I made it\n";
+}
+
+sub ACTION_docs {
+  my $self = shift;
+  $self->SUPER::ACTION_docs(@_);
+  $self->depends_on('deselect');
+}
+
+sub ACTION_deselect {
+  my $self = shift;
+  $self->depends_on('code');
+  $self->depends_on('docs');
+  my %remove_paths;
+  my $meta = $self->notes('meta') or die "metadata not loaded";
+  my $provides = $meta->provides; # contains rel. location of modules in distro
+  my $blib = File::Spec->catdir($self->base_dir, 'blib');
+  my $libdoc = File::Spec->catdir($blib, 'libdoc');
+  opendir my($d), $libdoc;
+  my @docs = grep !/^\.+$/, readdir $d;
+  foreach my $feature ($meta->features) {
+    next if $self->feature($feature->identifier); # selected, do not remove
+    # remove unwanted modules and manpages from blib:
+    my $prereqs = $feature->prereqs->as_string_hash;
+    foreach my $mod (keys %{$prereqs->{runtime}{requires}},
+		     keys %{$prereqs->{runtime}{recommends}}) {
+      if ($provides->{$mod}) {
+	$remove_paths{File::Spec->catfile($blib,$provides->{$mod}->{file})}++;
+	foreach (grep /$mod/,@docs) {
+	  $remove_paths{File::Spec->catfile($libdoc,$_)}++;
+	}
+      }
+    }
+  }
+  # workaround for mixin
+  if (!$self->feature('StandAloneBlastPlus')) {
+    $remove_paths{File::Spec->catfile($blib,
+				      qw/lib Bio Tools Run StandAloneBlastPlus/,
+				      'BlastMethods.pm'
+				     )}++;
+  }
+  $DB::single=1;
+  foreach (keys %remove_paths) {
+    chmod 0666, $_;
+    unlink $_ or warn "Could not unlink $_: $!";
+  }
+  # TODO : remove empty blib subdirs
+  find(
+     {wanted => sub {1},
+      postprocess => sub { rmdir $File::Find::dir }}
+      ,$blib);
+  1;
 }
 
 sub interactive_select {
-    my ($build) = @_;
+    my ($build, $subdist) = @_;
     my @selected_tools;
     my ($nummod,$options);
     do {
@@ -31,8 +83,6 @@ sub interactive_select {
 	sprintf("Install %s tool module%s? y/n",
 		($nummod ? ($nummod == 1 ? "this" : "these $nummod") : 'no'),
 		($nummod==1 ? '' : 's')),'y');
-    
-    $DB::single=1;
     if ($nummod) {
 	while (my ($k,$v) = each %$options) {
 	    if ($v) {
@@ -46,7 +96,7 @@ sub interactive_select {
 
 sub select_tools {
     my $self = shift;
-    my $meta = CPAN::Meta->load_file($self->metafile);
+    my $meta = $self->notes('meta') or die "metadata not loaded";
     my ($options, $descs);
     for ($meta->features) {
 	$$options{$_->identifier} = 0;
@@ -57,13 +107,17 @@ sub select_tools {
 
 sub add_tool_deps {
   my $self = shift;
-  my ($feature) = @_;
-  my $meta = CPAN::Meta->load_file($self->metafile);
-  my $prereqs = $meta->feature($feature)->prereqs;
-  my $reqs_h = $prereqs->merged_requirements([qw/runtime build test/],
-					     [qw/requires/])->as_string_hash;
-  while (my ($module, $version) = each %$reqs_h) {
-    $self->_add_prereq('requires', $module, $version);
+  my (@features) = @_;
+  my $meta = $self->notes('meta') or die "metadata not loaded";
+  foreach my $feature (@features) {
+    next unless $meta->feature($feature);
+    $self->feature($feature => 1); # register feature
+    my $prereqs = $meta->feature($feature)->prereqs;
+    my $reqs_h = $prereqs->merged_requirements([qw/runtime build test/],
+					       [qw/requires/])->as_string_hash;
+    while (my ($module, $version) = each %$reqs_h) {
+      $self->_add_prereq('requires', $module, $version);
+    }
   }
   return 1;
 }
