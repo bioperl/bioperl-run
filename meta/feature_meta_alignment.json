@@ -1,0 +1,294 @@
+{
+   "[Alignment]Kalign" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::Alignment::Kalign" : "0",
+               "Bio::Seq" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      },
+      "description" : "Iterative MSA using the KALIGN program"
+   },
+   "[Alignment]MSAProbs" : {
+      "description" : "MSA using the MSAProbs program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SimpleAlign" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::GuessSeqFormat" : "0",
+               "Bio::Seq" : "0",
+               "Bio::Tools::Run::Alignment::MSAProbs" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]Amap" : {
+      "description" : "Iterative MSA using the Amap (2.0) program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Seq" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::Alignment::Amap" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]Proda" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SimpleAlign" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Seq" : "0",
+               "Bio::Tools::Run::Alignment::Proda" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0"
+            }
+         }
+      },
+      "description" : "Sets of MSA using the Proda program"
+   },
+   "[Alignment]Lagan" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Alignment::Lagan" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Matrix::IO" : "0",
+               "Bio::Seq" : "0",
+               "Bio::Root::IO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for LAGAN suite of tools"
+   },
+   "[Alignment]Clustalw" : {
+      "description" : "MSA using the Clustalw program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Alignment::Clustalw" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Seq" : "0",
+               "Bio::Root::IO" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]Muscle" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SimpleAlign" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Run::Alignment::Muscle" : "0",
+               "Bio::Seq" : "0"
+            }
+         }
+      },
+      "description" : "Iterative MSA using the MUSCLE program"
+   },
+   "[Alignment]MAFFT" : {
+      "description" : "Wrapper for the MAFFT alignment tools",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Seq" : "0",
+               "Bio::Tools::Run::Alignment::MAFFT" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]TCoffee" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::Alignment::TCoffee" : "0",
+               "Bio::Seq" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      },
+      "description" : "MSA using the TCoffee program"
+   },
+   "[Alignment]Blat" : {
+      "description" : "Wrapper for Blat",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Tools::Run::Alignment::Blat" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SearchIO" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]Gmap" : {
+      "description" : "Wrapper for running gmap",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Alignment::Gmap" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]Probcons" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Seq" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Alignment::Probcons" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "Iterative MSA using the Probcons program"
+   },
+   "[Alignment]Exonerate" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SearchIO" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Run::Alignment::Exonerate" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for Exonerate"
+   },
+   "[Alignment]Pal2Nal" : {
+      "description" : "Wrapper for Pal2Nal",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::Alignment::Pal2Nal" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]DBA" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Alignment::DBA" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Search::HSP::GenericHSP" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "Align 2 seqs using the DNA Block Aligner program"
+   },
+   "[Alignment]Probalign" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Seq" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Factory::ApplicationFactoryI" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::Alignment::Probalign" : "0"
+            }
+         }
+      },
+      "description" : "MSA using the Probalign program"
+   },
+   "[Alignment]StandAloneFasta" : {
+      "description" : "Wrapper for the Fasta3 programs",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Alignment::StandAloneFasta" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Seq" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SearchIO" : "0"
+            }
+         }
+      }
+   },
+   "[Alignment]Sim4" : {
+      "description" : "Align cDNA to gDNA using the Sim4 program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::Alignment::Sim4" : "0"
+            }
+         }
+      }
+   }
+}

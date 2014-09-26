@@ -740,7 +740,7 @@
       }
    },
    "Phylo" : {
-      "description" : "Phylogenetic tools",
+      "description" : "Phylogenetic tools (select for further options)",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -748,5 +748,16 @@
             }
          }
       }
-   }  
+   },
+   "Alignment" : {
+      "description" : "Alignment tools (select for further options)",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+   
+            }
+         }
+      }
+   }
+
 }

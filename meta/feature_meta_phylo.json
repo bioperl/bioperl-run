@@ -1,0 +1,448 @@
+{
+   "[Phylo]DrawTree" : {
+      "description" : "use Phylip DrawTree program to draw trees",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::DrawTree" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]PhyloBase" : {
+      "description" : " Bio::Tools::Run::Phylo::PhyloBase- base module for phylo wrappers",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]Best" : {
+      "description" : "Wrapper around the Njtree (Njtree/phyml) best program",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::Njtree::Best" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]PhylipConf" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phylip::PhylipConf" : "0"
+            }
+         }
+      },
+      "description" : "Configuration object for Phylip"
+   },
+   "[Phylo]Base" : {
+      "description" : "Base object for Phylip modules",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::PhylipConf" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]ProtDist" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::SimpleAlign" : "0",
+               "Bio::Tree::Tree" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
+               "Bio::Tools::Phylo::Phylip::ProtDist" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for the phylip program protdist"
+   },
+   "[Phylo]Evolver" : {
+      "description" : "Wrapper aroud the PAML program evolver",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Phylo::PAML" : "0",
+               "Bio::Tools::Run::Phylo::PAML::Evolver" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]Neighbor" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tree::Tree" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for the phylip program neighbor by Joseph Felsenstein for creating a phylogenetic tree(either through Neighbor or UPGMA) based on protein distances based on amino substitution rate. 14 Nov 2002 Shawn Works with Phylip version 3.6"
+   },
+   "[Phylo]Codeml" : {
+      "description" : "Wrapper aroud the PAML program codeml",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Phylo::PAML" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::PAML::Codeml" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]ProtPars" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::IO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Tree::Tree" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      },
+      "description" : "Object for creating a L<Bio::Tree> object from a multiple alignment file or a SimpleAlign object 14 Nov 2002 Shawn Works with Phylip version 3.6"
+   },
+   "[Phylo]Yn00" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Tools::Phylo::PAML" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper aroud the PAML program yn00"
+   },
+   "[Phylo]Consense" : {
+      "description" : "Wrapper for the phylip program Consense",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phylip::Consense" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::DrawTree" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::ProtDist" : "0",
+               "IO::String" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::SeqBoot" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::Neighbor" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]Gumby" : {
+      "description" : "Wrapper for gumby",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::GFF" : "0",
+               "Bio::Tools::Run::Phylo::Gumby" : "0",
+               "Bio::Tools::Phylo::Gumby" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]BatchFile" : {
+      "description" : "Wrapper for custom execution of Hyphy batch files",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]FEL" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Hyphy::FEL" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper around the Hyphy FEL analysis"
+   },
+   "[Phylo]Baseml" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Phylo::PAML" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::PAML::Baseml" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper aroud the PAML program baseml"
+   },
+   "[Phylo]PhastCons" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phast::PhastCons" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::FeatureIO" : "0",
+               "Bio::Annotation::SimpleValue" : "0",
+               "Bio::Tools::Run::Phylo::Phast::PhyloFit" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for footprinting using phastCons"
+   },
+   "[Phylo]FastTree" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::Seq" : "0",
+               "Bio::SeqIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for FastTree"
+   },
+   "[Phylo]SeqBoot" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Matrix::PhylipDist" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for the phylip program SeqBoot"
+   },
+   "[Phylo]Semphy" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Semphy" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for Semphy"
+   },
+   "[Phylo]QuickTree" : {
+      "description" : "Wrapper for rapid reconstruction of phylogenies using QuickTree",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::Tools::Run::Phylo::QuickTree" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]DrawGram" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
+               "Bio::Tools::Run::Phylo::Phylip::DrawGram" : "0"
+            }
+         }
+      },
+      "description" : "use Phylip DrawTree program to draw phylograms or phenograms"
+   },
+   "[Phylo]Modeltest" : {
+      "description" : "Wrapper around the Hyphy Modeltest analysis",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Modeltest" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]ProtML" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Run::Phylo::Molphy::ProtML" : "0",
+               "Bio::Tools::Phylo::Molphy" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "A wrapper for the Molphy pkg app ProtML"
+   },
+   "[Phylo]LVB" : {
+      "description" : "Object for using the LVB program to create an array of L<Bio::Tree> objects from a nucleotide multiple alignment file or a nucleotide SimpleAlign object. Works with LVB version 2.1",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::LVB" : "0",
+               "Bio::Tools::Run::Alignment::Clustalw" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]Gerp" : {
+      "description" : "Wrapper for GERP",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::Tools::Phylo::Gerp" : "0",
+               "Bio::Tools::Run::Phylo::Gerp" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      }
+   },
+   "[Phylo]REL" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Hyphy::REL" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper around the Hyphy REL analysis"
+   },
+   "[Phylo]SLR" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::TreeIO" : "0",
+               "Bio::Tools::Run::Phylo::SLR" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::SimpleAlign" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Root::Root" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper around the SLR program"
+   },
+   "[Phylo]Phyml" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::Tools::Run::Phylo::Phyml" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for rapid reconstruction of phylogenies using Phyml"
+   },
+   "[Phylo]Raxml" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Seq" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::Root::IO" : "0",
+               "Bio::SeqIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper for Raxml"
+   },
+   "[Phylo]SLAC" : {
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Root::Root" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::SLAC" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      },
+      "description" : "Wrapper around the Hyphy SLAC analysis"
+   },
+   "[Phylo]PhyloFit" : {
+      "description" : "Wrapper for phyloFit",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Tools::Run::Phylo::Phast::PhyloFit" : "0",
+               "Bio::TreeIO" : "0",
+               "Bio::AlignIO" : "0"
+            }
+         }
+      }
+   }
+}
