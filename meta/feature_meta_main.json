@@ -28,7 +28,7 @@
       "description" : "Compute with NCBI's blast+ suite"
    },
    "TCoffee" : {
-      "description" : "DESCRIPTION of Object",
+      "description" : "Wrapper for TCoffee",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -40,7 +40,7 @@
       }
    },
    "Pseudowise" : {
-      "description" : "Object for prediting pseudogenes in a given sequence given a protein and a cdna sequence",
+      "description" : "Object for predicting pseudogenes",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -63,7 +63,7 @@
             }
          }
       },
-      "description" : "Perl extension for Mdust nucleotide filtering"
+      "description" : "Wrapper for Mdust nucleotide filtering"
    },
    "Hyphy" : {
       "description" : "Hyphy Installer",
@@ -175,7 +175,7 @@
             }
          }
       },
-      "description" : "Identify low complexity regions in a given protein sequence"
+      "description" : "Identify low complexity regions in a protein sequence"
    },
    "MCS" : {
       "description" : "Wrapper for MCS",
@@ -193,7 +193,7 @@
       }
    },
    "Infernal" : {
-      "description" : "Wrapper for local execution of cmalign, cmbuild, cmsearch, cmscore",
+      "description" : "Wrapper for local execution of Infernal suite",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -237,7 +237,7 @@
       }
    },
    "RNAMotif" : {
-      "description" : "Wrapper for local execution of rnamotif, rm2ct, rmfmt, rmprune",
+      "description" : "Wrapper for local execution of rnamotif and friends",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -251,7 +251,7 @@
       }
    },
    "Genewise" : {
-      "description" : "Object for predicting genes in a given sequence given a protein",
+      "description" : "Object for predicting genes given seq and protein",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -270,7 +270,7 @@
       }
    },
    "Genemark" : {
-      "description" : "Wrapper for local execution of the GeneMark family of programs",
+      "description" : "Wrapper for the GeneMark family of programs",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -293,7 +293,7 @@
             }
          }
       },
-      "description" : "A run wrapper for the samtools suite"
+      "description" : "Wrapper for the samtools suite"
    },
    "Vista" : {
       "prereqs" : {
@@ -364,7 +364,7 @@
             }
          }
       },
-      "description" : "Wrapper for local execution of hmmalign, hmmbuild, hmmcalibrate, hmmemit, hmmpfam, hmmsearch"
+      "description" : "Wrapper for local execution of HMMER suite"
    },
    "Coil" : {
       "description" : "wrapper for ncoils program",
@@ -404,10 +404,10 @@
             }
          }
       },
-      "description" : "DESCRIPTION of Object"
+      "description" : "Wrapper for PAML"
    },
    "Clustalw" : {
-      "description" : "DESCRIPTION of Object",
+      "description" : "Wrapper for ClustalW",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -432,10 +432,10 @@
             }
          }
       },
-      "description" : "Object for the local execution of the NCBI BLAST program suite (blastall, blastpgp, bl2seq)"
+      "description" : "Wrapper for the NCBI BLAST program suite"
    },
    "Simprot" : {
-      "description" : "Wrapper around the Simprot program. Wrapper for the calculation of a multiple sequence alignment from a phylogenetic tree",
+      "description" : "Wrapper around the Simprot program",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -473,7 +473,7 @@
             }
          }
       },
-      "description" : "Create input for and work with the output from the program primer3"
+      "description" : "Wrapper for the program primer3"
    },
    "Phrap" : {
       "prereqs" : {
@@ -497,7 +497,7 @@
             }
          }
       },
-      "description" : "Object for execution of the Eponine which is a mammalian TSS predictor"
+      "description" : "Wrapper for the Eponine mammalian TSS predictor"
    },
    "Minimo" : {
       "description" : "Wrapper for local execution of the Minimo assembler",
@@ -536,7 +536,7 @@
             }
          }
       },
-      "description" : "DESCRIPTION of Object"
+      "description" : "Wrapper for ProbCons"
    },
    "Primate" : {
       "prereqs" : {
@@ -551,7 +551,7 @@
             }
          }
       },
-      "description" : "for Primate, Guy Slater's near exact match finder for short sequence tags"
+      "description" : "Wrapper for Primate, near exact match finder for SSTs"
    },
    "Match" : {
       "description" : "Wrapper for Transfac's match(TM)",
@@ -583,10 +583,10 @@
             }
          }
       },
-      "description" : "Run wrapper for the BEDTools suite of programs *BETA*"
+      "description" : "Run wrapper for the BEDTools suite of programs"
    },
    "Glimmer" : {
-      "description" : "Wrapper for local execution of Glimmer, GlimmerM and GlimmerHMM",
+      "description" : "Wrapper for Glimmer, GlimmerM and GlimmerHMM",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -611,7 +611,7 @@
             }
          }
       },
-      "description" : "Wrapper for local execution of the ERPIN suite of programs"
+      "description" : "Wrapper for the ERPIN suite of programs"
    },
    "TribeMCL" : {
       "prereqs" : {
@@ -634,7 +634,7 @@
       "description" : "Wrapper for TribeMCL protein clustering program"
    },
    "Genscan" : {
-      "description" : "Object for identifying genes in a given sequence given a matrix(for appropriate organisms)",
+      "description" : "Object for identifying genes given a matrix",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -660,7 +660,7 @@
             }
          }
       },
-      "description" : "A simplified front-end for setting up the registry for, and then using an Ensembl database with the Ensembl Perl API"
+      "description" : "A simplified front-end for Ensembl database"
    },
    "BlastPlus" : {
       "prereqs" : {
@@ -716,7 +716,7 @@
       }
    },
    "SLR" : {
-      "description" : "DESCRIPTION of Object",
+      "description" : "Wrapper for SLR",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -728,7 +728,7 @@
       }
    },
    "Tmhmm" : {
-      "description" : "Object for identifying transmembrane helixes in a given protein seequence",
+      "description" : "Object for identifying transmembrane helixes",
       "prereqs" : {
          "runtime" : {
             "requires" : {

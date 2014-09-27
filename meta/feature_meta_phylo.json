@@ -13,18 +13,6 @@
          }
       }
    },
-   "[Phylo]PhyloBase" : {
-      "description" : " Bio::Tools::Run::Phylo::PhyloBase- base module for phylo wrappers",
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::TreeIO" : "0",
-               "Bio::AlignIO" : "0",
-	       "Bio::Tools::Run::Phylo::PhyloBase" : "0"
-            }
-         }
-      }
-   },
    "[Phylo]Best" : {
       "description" : "Wrapper around the Njtree (Njtree/phyml) best program",
       "prereqs" : {
@@ -91,7 +79,7 @@
             }
          }
       },
-      "description" : "Wrapper for the phylip program neighbor by Joseph Felsenstein for creating a phylogenetic tree(either through Neighbor or UPGMA) based on protein distances based on amino substitution rate. 14 Nov 2002 Shawn Works with Phylip version 3.6"
+      "description" : "Wrapper for the phylip program neighbor"
    },
    "[Phylo]Codeml" : {
       "description" : "Wrapper aroud the PAML program codeml",
@@ -125,7 +113,7 @@
             }
          }
       },
-      "description" : "Object for creating a L<Bio::Tree> object from a multiple alignment file or a SimpleAlign object 14 Nov 2002 Shawn Works with Phylip version 3.6"
+      "description" : "Object for creating a Bio::Tree object from a MSA"
    },
    "[Phylo]Yn00" : {
       "prereqs" : {
@@ -285,7 +273,7 @@
       "description" : "Wrapper for Semphy"
    },
    "[Phylo]QuickTree" : {
-      "description" : "Wrapper for rapid reconstruction of phylogenies using QuickTree",
+      "description" : "Wrapper for QuickTree",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -308,7 +296,7 @@
             }
          }
       },
-      "description" : "use Phylip DrawTree program to draw phylograms or phenograms"
+      "description" : "use Phylip DrawTree program to draw phylograms"
    },
    "[Phylo]Modeltest" : {
       "description" : "Wrapper around the Hyphy Modeltest analysis",
@@ -341,7 +329,7 @@
       "description" : "A wrapper for the Molphy pkg app ProtML"
    },
    "[Phylo]LVB" : {
-      "description" : "Object for using the LVB program to create an array of L<Bio::Tree> objects from a nucleotide multiple alignment file or a nucleotide SimpleAlign object. Works with LVB version 2.1",
+      "description" : "Object for using the LVB program to create an array of Bio::Tree objects",
       "prereqs" : {
          "runtime" : {
             "requires" : {
@@ -412,7 +400,7 @@
             }
          }
       },
-      "description" : "Wrapper for rapid reconstruction of phylogenies using Phyml"
+      "description" : "Wrapper for Phyml"
    },
    "[Phylo]Raxml" : {
       "prereqs" : {
