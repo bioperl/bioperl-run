@@ -218,6 +218,8 @@
             "requires" : {
                "Bio::AlignIO" : "0",
                "Bio::SeqIO" : "0",
+               "Bio::TreeIO" : "0",
+	       "Bio::Tools::Run::Phylo::PhyloBase" : "0",
                "Bio::Tools::Run::Alignment::Pal2Nal" : "0"
             }
          }

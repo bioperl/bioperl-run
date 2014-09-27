@@ -184,6 +184,8 @@
             "requires" : {
                "Bio::AlignIO" : "0",
                "Bio::Tools::Run::MCS" : "0",
+               "Bio::TreeIO" : "0",
+	       "Bio::Tools::Run::Phylo::PhyloBase" : "0",
                "Bio::FeatureIO" : "0",
                "Bio::Annotation::SimpleValue" : "0"
             }
