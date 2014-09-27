@@ -2,7 +2,9 @@ package Bio::Tools::Run::Build;
 use strict;
 use warnings;
 use base 'Module::Build';
+use JSON;
 use CPAN::Meta;
+use CPAN::Meta::Merge;
 use File::Spec;
 use File::Find;
 use IO::Handle;
@@ -29,25 +31,26 @@ sub ACTION_deselect {
   my $self = shift;
   $self->depends_on('code');
   $self->depends_on('docs');
-  my %remove_paths;
-  my $meta = $self->notes('meta') or die "metadata not loaded";
+  my (%keep_mods,%remove_paths);
+  my $meta = $self->notes('merged_meta') or die "metadata not loaded";
   my $provides = $meta->provides; # contains rel. location of modules in distro
   my $blib = File::Spec->catdir($self->base_dir, 'blib');
   my $libdoc = File::Spec->catdir($blib, 'libdoc');
   opendir my($d), $libdoc;
   my @docs = grep !/^\.+$/, readdir $d;
   foreach my $feature ($meta->features) {
-    next if $self->feature($feature->identifier); # selected, do not remove
-    # remove unwanted modules and manpages from blib:
+    next unless $self->feature($feature->identifier); # selected
     my $prereqs = $feature->prereqs->as_string_hash;
     foreach my $mod (keys %{$prereqs->{runtime}{requires}},
 		     keys %{$prereqs->{runtime}{recommends}}) {
-      if ($provides->{$mod}) {
-	$remove_paths{File::Spec->catfile($blib,$provides->{$mod}->{file})}++;
-	foreach (grep /$mod/,@docs) {
-	  $remove_paths{File::Spec->catfile($libdoc,$_)}++;
-	}
-      }
+      $keep_mods{$mod}++ if $provides->{$mod};
+    }
+  }
+  for my $mod (keys %$provides) {
+    unless (grep /^$mod$/,keys %keep_mods) {
+      $remove_paths{File::Spec->catfile($blib,$provides->{$mod}->{file})}++;
+      my ($doc) = grep /^$mod\./,@docs;
+      $remove_paths{File::Spec->catfile($libdoc,$doc)}++ if $doc;
     }
   }
   # workaround for mixin
@@ -56,13 +59,16 @@ sub ACTION_deselect {
 				      qw/lib Bio Tools Run StandAloneBlastPlus/,
 				      'BlastMethods.pm'
 				     )}++;
+    $remove_paths{File::Spec->catfile(
+      $libdoc, 'Bio::Tools::Run::StandAloneBlastPlus::BlastMethods.3'
+     )}++;
   }
   $DB::single=1;
   foreach (keys %remove_paths) {
     chmod 0666, $_;
     unlink $_ or warn "Could not unlink $_: $!";
   }
-  # TODO : remove empty blib subdirs
+  # remove dirs now empty
   find(
      {wanted => sub {1},
       postprocess => sub { rmdir $File::Find::dir }}
@@ -71,12 +77,15 @@ sub ACTION_deselect {
 }
 
 sub interactive_select {
-    my ($build, $subdist) = @_;
+    my ($build, $meta) = @_;
+    unless ($meta && ref $meta eq 'CPAN::Meta') {
+      die "Need CPAN::Meta object";
+    }
     my @selected_tools;
     my ($nummod,$options);
     do {
 	$nummod = 0;
-	$options = $build->select_tools();
+	$options = $build->select_tools($meta);
 	print "Selected :\n", join("\n", map { $options->{$_} ? $_ : () } sort keys %$options),"\n";
 	$nummod += $_ for values %$options;
     } until $build->y_n(
@@ -96,7 +105,10 @@ sub interactive_select {
 
 sub select_tools {
     my $self = shift;
-    my $meta = $self->notes('meta') or die "metadata not loaded";
+    my ($meta) = @_;
+    unless ($meta && ref $meta eq 'CPAN::Meta') {
+      die "Need CPAN::Meta object";
+    }
     my ($options, $descs);
     for ($meta->features) {
 	$$options{$_->identifier} = 0;
@@ -107,9 +119,10 @@ sub select_tools {
 
 sub add_tool_deps {
   my $self = shift;
-  my (@features) = @_;
-  my $meta = $self->notes('meta') or die "metadata not loaded";
+  my ($meta,@features) = @_;
+  ref $meta && $meta->isa('CPAN::Meta') or  die "Need metadata object";
   foreach my $feature (@features) {
+    next if grep /^$feature$/i, @{$self->notes('dists')};
     next unless $meta->feature($feature);
     $self->feature($feature => 1); # register feature
     my $prereqs = $meta->feature($feature)->prereqs;
@@ -120,6 +133,29 @@ sub add_tool_deps {
     }
   }
   return 1;
+}
+
+sub load_subdist_meta {
+  my $self = shift;
+  my ($subdist) = @_;
+  $subdist = lc $subdist;
+  $self->notes("meta_$subdist") && return $self->notes("meta_$subdist");
+  my $meta = $self->notes('meta');
+  die "No metadata at notes('meta')" unless $meta;
+  die "Need subdistro name" unless $subdist;
+  my $merger = CPAN::Meta::Merge->new(default_version => '2');
+  local $/;
+  open my $fm, File::Spec->catfile('meta',"feature_meta_$subdist.json") or
+    die "Problem with meta/feature_meta_$subdist.json : ".$!;
+  my $j = JSON->new;
+  my $jtext = <$fm>;
+  my $feat_h = {optional_features => $j->decode($jtext)};
+  $self->notes(
+    merged_meta => CPAN::Meta->new($merger->merge( $self->notes('merged_meta'), $feat_h ))
+   );
+  $self->notes(
+    "meta_$subdist" => CPAN::Meta->new($merger->merge($meta, $feat_h))
+   );
 }
 
 sub picker {
@@ -137,7 +173,7 @@ sub picker {
     $start ||= 0;
     $end ||= @options-1;
     my $i = $start;
-    print "\n";
+    print "\n\n";
     for (@options[$start..$end]) {
       $i++;
       printf "[%s] $i. $_", $$options{$_} ? 'X' : ' ';

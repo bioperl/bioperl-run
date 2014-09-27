@@ -8,6 +8,11 @@ use warnings;
 use lib 'lib';
 use File::Spec;
 use Bio::Tools::Run::Build;
+{
+no warnings qw/once/;
+*CPAN::Meta::as_string_hash = \&CPAN::Meta::as_struct;
+}
+my @feature_dists = qw/main alignment phylo/;
 
 my $build = Bio::Tools::Run::Build->new(
     dist_name           => 'BioPerl-Run',
@@ -56,37 +61,32 @@ my $build = Bio::Tools::Run::Build->new(
     dynamic_config      => 1,
     #create_makefile_pl  => 'passthrough'
 );
-if (eval "require JSON; 1") {
-    my $j = JSON->new;
-    local $/;
-    open my $fm, File::Spec->catfile('meta','feature_meta.json');
-    my $jtext = <$fm>;
-    $build->meta_merge( 
-      {
-      optional_features => $j->decode($jtext),
-      'meta-spec' => { version => '2',
-		       url => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec' 
-		      }
-     }
-     );
-}
-$build->dispatch('distmeta');
-$build->notes('meta' => CPAN::Meta->load_file($build->metafile));
+$build->notes( meta =>  CPAN::Meta->new($build->get_metadata));
+$build->notes( merged_meta => $build->notes('meta') );
+$build->notes( dists => \@feature_dists);
+
+$build->load_subdist_meta($_) foreach @feature_dists;
 
 my $accept = $build->args('accept');
 
 # Select tools modules to install
 my ($options, $nummod, @selected_tools);
-if (my $feat = $build->args('features')) {
+if (my $feat = $build->args('features')) { # pull features from cmdline
     @selected_tools = split /\s*[,;:]\s*/,$feat;
 }
 else { # interactive
-    @selected_tools = $build->interactive_select();
+    @selected_tools = $build->interactive_select($build->notes('meta_main'));
+    for my $subdist (grep !/^main/,@feature_dists) {
+	if (grep /^$subdist$/i, @selected_tools) {
+	    push @selected_tools, $build->interactive_select(
+		$build->notes("meta_$subdist")
+		);
+	}
+    }
 }
-1;
-$build->add_tool_deps(@selected_tools);
 
-$DB::single=1;
+$build->add_tool_deps($build->notes('merged_meta'),@selected_tools);
+
 # now check with $build->check_prereq() - this will add check and
 # add failures that should then be recorded for install with installdeps
 # (returns false if any failures; true if all good)
