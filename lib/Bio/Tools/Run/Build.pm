@@ -164,7 +164,8 @@ sub picker {
   my $term = Term::ReadLine->new('picker');
   $term->ornaments(0);
   return unless ($options);
-  my $prompt = 'Select (%d/%d) [Enter number, (n)ext (p)rev (q)uit]: ';
+  my $pg_prompt = 'Browse (p%d/%d) [(n)ext (p)rev (s)elect (q)uit]: ';
+  my $sel_prompt = 'Toggle item install [enter item numbers]: ';
   my @options = sort keys %$options;
   my %idx;
   @idx{1..@options} = @options;
@@ -181,7 +182,6 @@ sub picker {
       print "\n";
     }
   };
-  my $select = 'x';
   my @pages;
   for (my $i = 0; $i < @options ; $i+=$PAGESZ) {
     my $end = $i+$PAGESZ-1;
@@ -189,24 +189,38 @@ sub picker {
   }
   $display->(@{$pages[0]});
   my $curpg = 0;
-  printf $prompt, $curpg+1, scalar @pages;
+  printf $pg_prompt, $curpg+1, scalar @pages;
   my $c=0;
   ReadMode 3;
   while ($c !~ /q/i) {
     while ( not defined ($c = ReadKey(0)) ) {}
     if ($c =~ /^[n ]$/i) {
-      unless ($curpg == @pages-1) {
-	$curpg++;
+      if ($curpg < @pages-1) {
+	$display->(@{$pages[++$curpg]});
 	print "\n";
-	printf $prompt, $curpg+1,scalar @pages;
+	printf $pg_prompt, $curpg+1,scalar @pages;
       }
+      else { next }
     }
     elsif ($c =~ /^[pb]$/i) {
       if ($curpg) {
-	$curpg--;
+	$display->(@{$pages[--$curpg]});
 	print "\n";
-	printf $prompt, $curpg+1, scalar @pages;
+	printf $pg_prompt, $curpg+1, scalar @pages;
       }
+      else { next }
+    }
+    elsif ($c =~ /^s$/) {
+      ReadMode 0;
+      print "\n";
+      $_ = $term->readline($sel_prompt);
+      my @a = split /\s+|[,;]\s*/;
+      @a = grep { (1 <= $_) && ($_ <= @options) } grep /^[0-9]+$/, @a;
+      $_-- for @a;
+      $options->{$_} ^= 1 for @options[@a];
+      ReadMode 3;
+      $display->(@{$pages[$curpg]});
+      printf $pg_prompt, $curpg+1, scalar @pages;
     }
     elsif ($c =~ /^q$/i) {
       print "\n";
@@ -215,19 +229,8 @@ sub picker {
     elsif ($c =~ /^$/) {
       next;
     }
-    else {
-      ReadMode 0;
-      print $c;
-      $_ = $c.$term->readline('');
-      my @a = split /\s+|[,;]\s*/;
-      @a = grep { (1 <= $_) && ($_ <= @options) } grep /^[0-9]+$/, @a;
-      $_-- for @a;
-      $options->{$_} ^= 1 for @options[@a];
-      ReadMode 3;
-    }
-    $display->(@{$pages[$curpg]});
-    printf $prompt, $curpg+1, scalar @pages;
   }
+
   ReadMode 0;
   return $options;
 }
