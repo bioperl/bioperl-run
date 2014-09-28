@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]Gumby');
     test_begin(-tests => 124);
     
     use_ok('Bio::Tools::Run::Phylo::Gumby');

@@ -8,8 +8,9 @@ use lib '../lib';
 our $home;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('StandAloneBlastPlus');
     test_begin(-tests => 73);
-#               -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
 }
 
 use_ok( 'Bio::Tools::Run::StandAloneBlastPlus' );

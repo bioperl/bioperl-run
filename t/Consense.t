@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]Consense');
     test_begin(-tests => 8,
 			   -requires_module => 'IO::String');
 	use_ok('Bio::Tools::Run::Phylo::Phylip::Consense');

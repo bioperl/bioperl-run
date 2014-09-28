@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]Muscle');
     test_begin( -tests => 16 );
     use_ok('Bio::Tools::Run::Alignment::Muscle');
     use_ok('Bio::AlignIO');

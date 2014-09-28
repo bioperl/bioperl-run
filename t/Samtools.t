@@ -10,6 +10,8 @@ BEGIN {
                       # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Samtools');
     test_begin(-tests => 41,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Samtools)]);
 }

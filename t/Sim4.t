@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]Sim4');
     test_begin(-tests => 23);
     use_ok('Bio::Tools::Run::Alignment::Sim4');
     use_ok('Bio::SimpleAlign');

@@ -6,6 +6,8 @@ use vars qw($NTESTS);
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Glimmer');
     $NTESTS = 217;
     test_begin(-tests => $NTESTS,
 	       -requires_modules => [qw(IPC::Run)]);

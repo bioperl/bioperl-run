@@ -2,6 +2,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('MCS');
 
     test_begin(-tests => 24,
                -requires_modules => [qw(Config::Any)]);

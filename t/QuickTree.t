@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+   use Bio::Tools::Run::Build::Test;
+   skipall_unless_feature('[Phylo]QuickTree');
     test_begin(-tests => 13);
     use_ok('Bio::Tools::Run::Phylo::QuickTree');
     use_ok('Bio::AlignIO');

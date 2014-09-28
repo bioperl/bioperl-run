@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
    use Bio::Root::Test;
+   use Bio::Tools::Run::Build::Test;
+   skipall_unless_feature('Tmhmm');
    test_begin(-tests => 9);
    use_ok('Bio::Tools::Run::Tmhmm');
    use_ok('Bio::SeqIO');

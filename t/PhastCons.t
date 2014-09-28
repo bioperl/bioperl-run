@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]PhastCons');
     test_begin(-tests => 181,
 	       -requires_modules => [qw(Clone)]);
     use_ok('Bio::Tools::Run::Phylo::Phast::PhastCons');

@@ -6,6 +6,8 @@ use vars qw($DEBUG);
 $DEBUG = test_debug();
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]Neighbor');
     test_begin(-tests => 19);
     use_ok('Bio::Tools::Run::Phylo::Phylip::ProtDist');
     use_ok('Bio::Tools::Run::Phylo::Phylip::Neighbor');

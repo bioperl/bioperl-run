@@ -2,6 +2,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Cap3');
     test_begin(-tests => 91,
 	       -requires_modules => [qw(Bio::Tools::Run::Cap3)]);
     use_ok('Bio::SeqIO');

@@ -4,6 +4,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Vista');
     test_begin(-tests => 7);
 
     use_ok('Bio::Tools::Run::Vista');

@@ -10,6 +10,8 @@ BEGIN {
                       # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Maq');
     test_begin(-tests => 52,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::Maq)]);
 }

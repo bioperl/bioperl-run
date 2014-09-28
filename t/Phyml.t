@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]Phyml');
     test_begin(-tests => 46);
     use_ok('Bio::Tools::Run::Phylo::Phyml');
     use_ok('Bio::AlignIO');

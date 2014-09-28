@@ -7,6 +7,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('EMBOSS');
     test_begin(-tests => 32,
 			   -requires_modules => [qw(XML::Twig)]);
 	use_ok('Bio::Root::IO');

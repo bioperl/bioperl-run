@@ -6,6 +6,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]DrawTree');
     test_begin(-tests => 6);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::DrawTree');
 	use_ok('Bio::TreeIO');

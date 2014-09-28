@@ -6,7 +6,8 @@ use strict;
 BEGIN {
     use lib '.';
     use Bio::Root::Test;
-
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('RemoteBlast');
     test_begin(-tests               => 21,
                -requires_modules    => [qw(IO::String
                                            LWP

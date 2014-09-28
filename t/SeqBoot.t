@@ -8,6 +8,8 @@ $DEBUG = test_debug();
 
 BEGIN {
     use Bio::Root::Test;
+  use Bio::Tools::Run::Build::Test;
+  skipall_unless_feature('[Phylo]SeqBoot');
     test_begin(-tests => 9);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::SeqBoot');
 	use_ok('Bio::AlignIO');

@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]MSAProbs');
     test_begin(-tests => 19);
 	use_ok('Bio::Tools::Run::Alignment::MSAProbs');
 	use_ok('Bio::Tools::GuessSeqFormat');	

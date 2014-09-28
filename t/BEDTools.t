@@ -3,6 +3,7 @@
 
 use strict;
 use warnings;
+use lib 'lib';
 no warnings qw(once);
 our $home;
 
@@ -13,6 +14,8 @@ BEGIN {
                     # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('BEDTools');
     test_begin(-tests => 423,
                -requires_modules => [qw(IPC::Run Bio::Tools::Run::BEDTools)]);
 }

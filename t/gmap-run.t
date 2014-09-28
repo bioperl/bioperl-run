@@ -5,6 +5,8 @@ use warnings;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]Gmap');
     test_begin(-tests => 8);
     use_ok( 'Bio::Tools::Run::Alignment::Gmap' );
 }

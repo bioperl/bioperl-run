@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]TCoffee');
     test_begin(-tests => 27);
 	use_ok('Bio::Tools::Run::Alignment::TCoffee');
 	use_ok('Bio::SimpleAlign');

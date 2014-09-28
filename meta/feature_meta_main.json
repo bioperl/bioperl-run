@@ -65,18 +65,6 @@
       },
       "description" : "Wrapper for Mdust nucleotide filtering"
    },
-   "Hyphy" : {
-      "description" : "Hyphy Installer",
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::Root::Root" : "0",
-               "Bio::Installer::Generic" : "0",
-               "Bio::Installer::Hyphy" : "0"
-            }
-         }
-      }
-   },
    "Profile" : {
       "prereqs" : {
          "runtime" : {
@@ -86,7 +74,8 @@
                "Bio::Factory::ApplicationFactoryI" : "0",
                "Bio::Tools::Profile" : "0",
                "Bio::Tools::Run::Profile" : "0",
-               "Bio::SeqIO" : "0"
+               "Bio::SeqIO" : "0",
+	       "Bio::Seq" : "0"
             }
          }
       },
@@ -187,7 +176,10 @@
                "Bio::TreeIO" : "0",
 	       "Bio::Tools::Run::Phylo::PhyloBase" : "0",
                "Bio::FeatureIO" : "0",
-               "Bio::Annotation::SimpleValue" : "0"
+               "Bio::Annotation::SimpleValue" : "0",
+               "Bio::SeqFeature::Annotated" : "0",
+               "Bio::Location::Atomic" : "0",
+	       "Config::Any" : "0"
             }
          }
       }
@@ -213,6 +205,7 @@
                "Bio::DB::SoapEUtilities::Result" : "0",
                "Bio::DB::ESoap" : "0",
                "SOAP::Lite" : "0",
+	       "XML::Twig" : "0",
                "Bio::DB::ESoap::WSDL" : "0",
                "Bio::DB::SoapEUtilities::FetchAdaptor" : "0",
                "Bio::DB::SoapEUtilities::FetchAdaptor::seq" : "0",
@@ -563,7 +556,8 @@
                "Bio::SeqIO" : "0",
                "Bio::Annotation::SimpleValue" : "0",
                "Bio::Tools::Run::Match" : "0",
-               "Bio::FeatureIO" : "0"
+               "Bio::FeatureIO" : "0",
+	       "Config::Any" : "0"
             }
          }
       }
@@ -627,7 +621,8 @@
                "Bio::SearchIO" : "0",
                "Bio::Cluster::SequenceFamily" : "0",
                "Bio::Factory::ApplicationFactoryI" : "0",
-               "Bio::Root::IO" : "0"
+               "Bio::Root::IO" : "0",
+	       "Algorithm::Diff" : "0"
             }
          }
       },
@@ -711,18 +706,6 @@
                "Bio::SeqIO" : "0",
                "Bio::Tools::Run::EMBOSSacd" : "0",
                "Bio::Tools::Run::EMBOSSApplication" : "0"
-            }
-         }
-      }
-   },
-   "SLR" : {
-      "description" : "Wrapper for SLR",
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::Root::Root" : "0",
-               "Bio::Installer::Generic" : "0",
-               "Bio::Installer::SLR" : "0"
             }
          }
       }

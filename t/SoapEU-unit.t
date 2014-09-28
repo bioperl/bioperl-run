@@ -6,6 +6,8 @@ use warnings;
 our $home;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('SoapEUtilities');
     use lib '.';
     $home = '.'; # set to '.' for Build use, 
                       # '..' for debugging from .t file

@@ -2,6 +2,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('TigrAssembler');
     test_begin(-tests => 88,
 	       -requires_modules => [qw(IPC::Run Bio::Tools::Run::TigrAssembler)]);
     use_ok('Bio::SeqIO');

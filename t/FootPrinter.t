@@ -5,6 +5,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('FootPrinter');
     test_begin(-tests => 24);
     use_ok('Bio::Tools::Run::FootPrinter');
     use_ok('Bio::SeqIO');

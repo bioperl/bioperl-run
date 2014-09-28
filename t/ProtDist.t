@@ -8,6 +8,8 @@ $DEBUG = test_debug() || -1;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]ProtDist');
     test_begin(-tests => 14);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::ProtDist');
 	use_ok('Bio::Tools::Run::Alignment::Clustalw');

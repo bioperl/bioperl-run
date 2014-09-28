@@ -8,6 +8,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Primer3');
     test_begin(-tests => 9,
                -requires_module => 'Clone');
     use_ok('Bio::Tools::Run::Primer3');

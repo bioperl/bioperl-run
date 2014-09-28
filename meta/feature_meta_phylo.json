@@ -13,6 +13,27 @@
          }
       }
    },
+   "[Phylo]Hyphy" : {
+      "description" : "Wrapper suite for Hyphy",
+      "prereqs" : {
+         "runtime" : {
+            "requires" : {
+               "Bio::Root::Root" : "0",
+               "Bio::Installer::Generic" : "0",
+               "Bio::Installer::Hyphy" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
+               "Bio::Tools::Run::WrapperBase" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::SLAC" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::FEL" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::REL" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::Modeltest" : "0",
+               "Bio::Tools::Run::Phylo::Hyphy::BatchFile" : "0",	
+               "Bio::AlignIO" : "0",
+               "Bio::TreeIO" : "0"
+            }
+         }
+      }
+   },
    "[Phylo]Best" : {
       "description" : "Wrapper around the Njtree (Njtree/phyml) best program",
       "prereqs" : {
@@ -41,7 +62,8 @@
                "Bio::Root::Root" : "0",
                "Bio::Tools::Run::Phylo::Phylip::PhylipConf" : "0",
                "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
-               "Bio::Tools::Phylo::Phylip::ProtDist" : "0"
+               "Bio::Tools::Phylo::Phylip::ProtDist" : "0",
+	       "Bio::Tools::Run::Alignment::Clustalw" : "0"
             }
          }
       },
@@ -109,6 +131,7 @@
                "Bio::Tools::Run::Phylo::Phylip::PhylipConf" : "0",
                "Bio::Tools::Run::Phylo::Phylip::Base" : "0",
                "Bio::Tools::Run::Phylo::Phylip::ProtPars" : "0",
+               "Bio::Tools::Run::Alignment::Clustalw" : "0",
                "Bio::TreeIO" : "0"
             }
          }
@@ -167,36 +190,6 @@
          }
       }
    },
-   "[Phylo]BatchFile" : {
-      "description" : "Wrapper for custom execution of Hyphy batch files",
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::TreeIO" : "0",
-               "Bio::Root::Root" : "0",
-               "Bio::Tools::Run::WrapperBase" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::BatchFile" : "0",	
-               "Bio::AlignIO" : "0"
-            }
-         }
-      }
-   },
-   "[Phylo]FEL" : {
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::Tools::Run::Phylo::Hyphy::FEL" : "0",
-               "Bio::TreeIO" : "0",
-               "Bio::AlignIO" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
-               "Bio::Root::Root" : "0",
-               "Bio::Tools::Run::WrapperBase" : "0"
-            }
-         }
-      },
-      "description" : "Wrapper around the Hyphy FEL analysis"
-   },
    "[Phylo]Baseml" : {
       "prereqs" : {
          "runtime" : {
@@ -221,7 +214,8 @@
                "Bio::Annotation::SimpleValue" : "0",
                "Bio::Tools::Run::Phylo::Phast::PhyloFit" : "0",
                "Bio::TreeIO" : "0",
-	       "Bio::Tools::Run::Phylo::PhyloBase" : "0"
+	       "Bio::Tools::Run::Phylo::PhyloBase" : "0",
+	       "Bio::DB::Taxonomy" : "0"
             }
          }
       },
@@ -298,21 +292,6 @@
       },
       "description" : "use Phylip DrawTree program to draw phylograms"
    },
-   "[Phylo]Modeltest" : {
-      "description" : "Wrapper around the Hyphy Modeltest analysis",
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::Root::Root" : "0",
-               "Bio::Tools::Run::WrapperBase" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::Modeltest" : "0",
-               "Bio::AlignIO" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
-               "Bio::TreeIO" : "0"
-            }
-         }
-      }
-   },
    "[Phylo]ProtML" : {
       "prereqs" : {
          "runtime" : {
@@ -360,21 +339,6 @@
          }
       }
    },
-   "[Phylo]REL" : {
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::Tools::Run::Phylo::Hyphy::REL" : "0",
-               "Bio::Root::Root" : "0",
-               "Bio::Tools::Run::WrapperBase" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
-               "Bio::AlignIO" : "0",
-               "Bio::TreeIO" : "0"
-            }
-         }
-      },
-      "description" : "Wrapper around the Hyphy REL analysis"
-   },
    "[Phylo]SLR" : {
       "prereqs" : {
          "runtime" : {
@@ -383,6 +347,8 @@
                "Bio::Tools::Run::Phylo::SLR" : "0",
                "Bio::AlignIO" : "0",
                "Bio::SimpleAlign" : "0",
+               "Bio::Installer::Generic" : "0",
+               "Bio::Installer::SLR" : "0",
                "Bio::Tools::Run::WrapperBase" : "0",
                "Bio::Root::Root" : "0"
             }
@@ -416,21 +382,6 @@
          }
       },
       "description" : "Wrapper for Raxml"
-   },
-   "[Phylo]SLAC" : {
-      "prereqs" : {
-         "runtime" : {
-            "requires" : {
-               "Bio::Tools::Run::WrapperBase" : "0",
-               "Bio::Root::Root" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::SLAC" : "0",
-               "Bio::Tools::Run::Phylo::Hyphy::Base" : "0",
-               "Bio::AlignIO" : "0",
-               "Bio::TreeIO" : "0"
-            }
-         }
-      },
-      "description" : "Wrapper around the Hyphy SLAC analysis"
    },
    "[Phylo]PhyloFit" : {
       "description" : "Wrapper for phyloFit",

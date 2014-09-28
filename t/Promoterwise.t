@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Promoterwise');
     test_begin(-tests => 9);
 	use_ok('Bio::Tools::Run::Promoterwise');
 	use_ok('Bio::Seq');

@@ -11,6 +11,8 @@ BEGIN {
                     # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Bowtie');
 
     if ($^O =~ m/mswin/i) {
         # "ulimit" does not exists and "ulimit -n 3>&-" does not work

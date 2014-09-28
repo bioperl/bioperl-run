@@ -14,6 +14,8 @@ my $serror;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]ProtML');
     test_begin(-tests => 10,
 			   -requires_module => 'IO::String');
 	use_ok('Bio::Tools::Phylo::Molphy'); # PAML parser

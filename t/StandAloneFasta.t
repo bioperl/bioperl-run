@@ -6,6 +6,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]StandAloneFasta');
     test_begin(-tests => 15);
 	use_ok('Bio::Tools::Run::Alignment::StandAloneFasta');
 	use_ok('Bio::SeqIO');

@@ -6,6 +6,8 @@ use strict;
 
 BEGIN {
   use Bio::Root::Test;
+  use Bio::Tools::Run::Build::Test;
+  skipall_unless_feature('[Alignment]Clustalw');
   test_begin(-tests => 45);
   
   use_ok('Bio::Tools::Run::Alignment::Clustalw');

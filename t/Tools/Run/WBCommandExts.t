@@ -8,7 +8,7 @@ BEGIN {
     use Bio::Root::Test;
     use lib '.';
     use lib 't/Tools/Run';
-    $home = '../../..'; # set to '.' for Build use, 
+    $home = '.'; # set to '.' for Build use, 
                       # '../../..' for debugging from .t file
     unshift @INC, $home;
     test_begin(-tests => 25,
@@ -16,8 +16,8 @@ BEGIN {
                                         Bio::Tools::Run::WrapperBase::CommandExts)]);
 }
 
-use_ok( 'Dummy::Config' );
-use_ok( 'Dummy' );
+use_ok( 't::Tools::Run::Dummy::Config' );
+use_ok( 't::Tools::Run::Dummy' );
 use_ok('Bio::Tools::Run::WrapperBase');
 use_ok('Bio::Tools::Run::WrapperBase::CommandExts');
 

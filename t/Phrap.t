@@ -8,6 +8,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Phrap');
     test_begin(-tests => 127,
 	       -requires_modules => [qw(Bio::Tools::Run::Phrap)]);
     use_ok('Bio::SeqIO');

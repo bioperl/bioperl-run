@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Alignment]Exonerate');
     test_begin(-tests => 89);
 	use_ok('Bio::Tools::Run::Alignment::Exonerate');
 }

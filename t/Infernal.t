@@ -38,6 +38,8 @@ BEGIN {
     $NUMTESTS += $INFERNAL_TESTS{$_}->{'tests'} for (keys %INFERNAL_TESTS);
 
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Infernal');
     
     test_begin(-tests   => $NUMTESTS );
     use_ok('Bio::Tools::Run::Infernal');

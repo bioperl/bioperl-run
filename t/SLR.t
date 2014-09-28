@@ -10,6 +10,8 @@ use strict;
 
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]SLR');
     test_begin(-tests => 7,
 			   -requires_module => 'IO::String');
 	use_ok('Bio::Root::IO');

@@ -7,9 +7,10 @@ use File::Spec;
 
 BEGIN { 
 	use lib '.';
-    use Bio::Root::Test;
-    
-    test_begin(-tests => 45);
+	use Bio::Root::Test;
+	use Bio::Tools::Run::Build::Test;
+	skipall_unless_feature('StandAloneBlast');
+	test_begin(-tests => 45);
 	
 	use_ok('Bio::Tools::Run::StandAloneBlast');
 	use_ok('Bio::SeqIO');

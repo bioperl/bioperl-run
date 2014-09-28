@@ -2,6 +2,8 @@ use strict;
 use vars qw($NUMTESTS);
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('Mdust');
     test_begin(-tests => 5);
 	use_ok('Bio::Tools::Run::Mdust');
 	use_ok('Bio::SeqIO');

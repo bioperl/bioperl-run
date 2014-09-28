@@ -7,6 +7,8 @@ $DEBUG = test_debug();
 use strict;
 BEGIN {
     use Bio::Root::Test;
+    use Bio::Tools::Run::Build::Test;
+    skipall_unless_feature('[Phylo]ProtPars');
     test_begin(-tests => 11);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::ProtPars');
 	use_ok('Bio::Tools::Run::Alignment::Clustalw');

@@ -5,6 +5,8 @@
 use strict;
 BEGIN {
    use Bio::Root::Test;
+   use Bio::Tools::Run::Build::Test;
+   skipall_unless_feature('Signalp');
    test_begin(-tests => 7);
    use_ok('Bio::Tools::Run::Signalp');
    use_ok('Bio::SeqIO');

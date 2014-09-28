@@ -5,6 +5,9 @@ use strict;
 
 BEGIN { 
   use Bio::Root::Test;
+  use Bio::Tools::Run::Build::Test;
+  skipall_unless_feature('Amap');
+  my $build;
   test_begin(-tests => 18);
   
   use_ok('Bio::Tools::Run::Alignment::Amap');
