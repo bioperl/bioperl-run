@@ -16,6 +16,19 @@ END {
   ReadMode 0;
 }
 
+my @always_install = qw/
+Bio::Tools::Run::AnalysisFactory
+Bio::Tools::Run::AnalysisFactory::soap
+Bio::Tools::Run::Analysis
+Bio::Tools::Run::Analysis::soap
+Bio::Tools::Run::AssemblerBase
+Bio::Tools::Run::Build
+Bio::Tools::Run::Build::Test
+Bio::Tools::Run::WrapperBase
+Bio::Tools::Run::WrapperBase::CommandExts
+/;
+
+
 sub ACTION_code {
   my $self = shift;
   $self->SUPER::ACTION_code(@_);
@@ -32,6 +45,7 @@ sub ACTION_deselect {
   $self->depends_on('code');
   $self->depends_on('docs');
   my (%keep_mods,%remove_paths);
+  @keep_mods{@always_install} = (1) x @always_install;
   my $meta = $self->notes('merged_meta') or die "metadata not loaded";
   my $provides = $meta->provides; # contains rel. location of modules in distro
   my $blib = File::Spec->catdir($self->base_dir, 'blib');
@@ -86,7 +100,8 @@ sub interactive_select {
     do {
 	$nummod = 0;
 	$options = $build->select_tools($meta);
-	print "Selected :\n", join("\n", map { $options->{$_} ? $_ : () } sort keys %$options),"\n";
+	my ($subdist) = $meta->name =~ /.*-([^-]+)/;
+	print "Selected from $subdist:\n", join("\n", map { $options->{$_} ? $_ : () } sort keys %$options),"\n";
 	$nummod += $_ for values %$options;
     } until $build->y_n(
 	sprintf("Install %s tool module%s? y/n",
@@ -149,12 +164,14 @@ sub load_subdist_meta {
     die "Problem with meta/feature_meta_$subdist.json : ".$!;
   my $j = JSON->new;
   my $jtext = <$fm>;
-  my $feat_h = {optional_features => $j->decode($jtext)};
+  my $feat_h = { optional_features => $j->decode($jtext)};
   $self->notes(
     merged_meta => CPAN::Meta->new($merger->merge( $self->notes('merged_meta'), $feat_h ))
    );
+  my $meta_h = $merger->merge($meta, $feat_h);
+  $meta_h->{name} .= "-$subdist";
   $self->notes(
-    "meta_$subdist" => CPAN::Meta->new($merger->merge($meta, $feat_h))
+    "meta_$subdist" => CPAN::Meta->new($meta_h)
    );
 }
 
@@ -165,7 +182,7 @@ sub picker {
   $term->ornaments(0);
   return unless ($options);
   my $pg_prompt = 'Browse (p%d/%d) [(n)ext (p)rev (s)elect (q)uit]: ';
-  my $sel_prompt = 'Toggle item install [enter item numbers]: ';
+  my $sel_prompt = 'Toggle item install [enter item numbers or "all"]: ';
   my @options = sort keys %$options;
   my %idx;
   @idx{1..@options} = @options;
@@ -214,9 +231,15 @@ sub picker {
       ReadMode 0;
       print "\n";
       $_ = $term->readline($sel_prompt);
-      my @a = split /\s+|[,;]\s*/;
-      @a = grep { (1 <= $_) && ($_ <= @options) } grep /^[0-9]+$/, @a;
-      $_-- for @a;
+      my @a; 
+      if (/^all/) {
+	@a = (0..$#options);
+      }
+      else { 
+	@a = split /\s+|[,;]\s*/;
+	@a = grep { (1 <= $_) && ($_ <= @options) } grep /^[0-9]+$/, @a;
+	$_-- for @a;
+      }
       $options->{$_} ^= 1 for @options[@a];
       ReadMode 3;
       $display->(@{$pages[$curpg]});
