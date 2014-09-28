@@ -258,4 +258,47 @@ sub picker {
   return $options;
 }
 
+=head1 NAME
+
+Bio::Tools::Run::Build - Instrument build with features
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 METHODS
+
+=over
+
+=item interactive_select()
+
+=item select_tools()
+
+=item add_tool_deps()
+
+=item load_subdist_meta()
+
+=back
+
+=head1 FUNCTION
+
+=over
+
+=item picker()
+
+=back
+
+=head1 AUTHOR
+
+ Mark A. Jensen
+ CPAN ID: MAJENSEN
+ majensen -at- cpan -dot- org
+
+=head1 LICENSE
+
+This program is free software. It may be used, modified and
+distributed under the same terms as Perl itself.
+
+=cut
+
 1;
