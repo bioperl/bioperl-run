@@ -59,6 +59,7 @@ my $build = Bio::Tools::Run::Build->new(
                                        }
                            },
     dynamic_config      => 1,
+    recursive_test_files => 1
     #create_makefile_pl  => 'passthrough'
 );
 $build->notes( meta =>  CPAN::Meta->new($build->get_metadata));
@@ -84,6 +85,8 @@ else { # interactive
 	}
     }
 }
+
+print "Installing:\n", join("\n",@selected_tools), "\n\n";
 
 $build->add_tool_deps($build->notes('merged_meta'),@selected_tools);
 

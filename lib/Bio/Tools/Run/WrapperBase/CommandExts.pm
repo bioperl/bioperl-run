@@ -415,7 +415,8 @@ no warnings qw(redefine);
 use Bio::Root::Root;
 use File::Spec;
 use IPC::Run;
-use base qw(Bio::Root::Root Bio::ParameterBaseI);
+#use base qw(Bio::Root::Root Bio::ParameterBaseI);
+use base qw/Bio::Root::Root/;
 
 our $AUTOLOAD;
 
