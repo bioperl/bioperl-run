@@ -143,7 +143,9 @@ lib/Bio/Installer/Generic.pm
 lib/Bio/Installer/SLR.pm
 lib/Bio/Installer/Hyphy.pm
 lib/Bio/Installer/Muscle.pm
-meta/feature_meta.json
+meta/feature_meta_main.json
+meta/feature_meta_phylo.json
+meta/feature_meta_alignment.json
 INSTALL.SKIP
 INSTALL
 Changes
@@ -388,3 +390,5 @@ t/Hmmer.t
 t/TCoffee.t
 t/Blat.t
 t/Clustalw.t
+META.yml
+META.json
