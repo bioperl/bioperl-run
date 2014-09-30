@@ -154,7 +154,6 @@ sub load_subdist_meta {
   my $self = shift;
   my ($subdist) = @_;
   $subdist = lc $subdist;
-  $self->notes("meta_$subdist") && return $self->notes("meta_$subdist");
   my $meta = $self->notes('meta');
   die "No metadata at notes('meta')" unless $meta;
   die "Need subdistro name" unless $subdist;
@@ -260,11 +259,102 @@ sub picker {
 
 =head1 NAME
 
-Bio::Tools::Run::Build - Instrument build with features
+Bio::Tools::Run::Build - Instrument the build for features
 
 =head1 SYNOPSIS
 
+ # in Build.PL
+ use Bio::Tools::Run::Build;
+ my @feature_dists = qw/main alignment phylo/;
+ my $build = Bio::Tools::Run::Build->new( {...} );
+
+ # required setup:
+ $build->notes( meta =>  CPAN::Meta->new($build->get_metadata));
+ $build->notes( merged_meta => $build->notes('meta') );
+ $build->notes( dists => \@feature_dists);
+
+ # load optional_features from meta/
+ $build->load_subdist_meta($_) foreach @feature_dists;
+ # Select tools modules to install
+ my ($options, @selected_tools);
+ if (my $feat = $build->args('features')) { # pull features from cmdline
+     @selected_tools = split /\s*[,;:]\s*/,$feat;
+ }
+ else { # interactive select
+     @selected_tools = $build->interactive_select($build->notes('meta_main'));
+     for my $subdist (grep !/^main/,@feature_dists) {
+         if (grep /^$subdist$/i, @selected_tools) {
+            push @selected_tools, $build->interactive_select(
+                $build->notes("meta_$subdist")
+                );
+        }
+    }
+ }
+ print "Installing:\n", join("\n",@selected_tools), "\n\n";
+ $build->add_tool_deps($build->notes('merged_meta'),@selected_tools);
+ $build->check_prereq;
+
 =head1 DESCRIPTION
+
+L<Bio::Tools::Run::Build> is a subclass of L<Module::Build> that
+allows an author to offer users the ability to select and install
+pre-configured subsets of modules that are packaged in a single large
+M::B-based distribution.
+
+Grouping and selection of distro modules is driven by the
+L<CPAN::Meta::Spec/"optional_features"> concept as defined in
+L<CPAN::Meta::Spec> and used by L<Module::Build>.
+
+The subclass provides the following:
+
+=over
+
+=item * Author specification of features and their prereqs
+
+The build author develops metadata files in json that follow
+L<CPAN::Meta::Spec/"optional_features"> to group distribution modules
+and dependencies with selectable features
+
+=item * Interactive user selection of features
+
+The user can be presented with an interactive selector during Build.PL runs.
+
+=item * Prereq checking of user selected features only
+
+M::B only checks for the presence of selected feature dependencies.
+
+=item * Build-persistent recording of user selections
+
+The build object records the selection of features in the
+$build->feature field. This can be used in test files to determine
+whether tests should be skipped (and not failed). See
+L<Bio::Tools::Run::Build::Test>.
+
+=item * Installation only of selected feature modules
+
+Bio::Tools::Run::Build adds a build action, C<deselect>, which runs
+after the C<code> and C<docs> actions. C<deselect> removes unselected
+modules from the blib/lib directory and unneeded documentation from
+the blib/libdoc directory. This keeps the C<install> action from
+installing unwanted files.
+
+=back
+
+=head1 MOTIVATION
+
+The BioPerl-Run distribution contains a large variety of wrappers and
+parsers that handle the execution and output of many different
+bioinformatics tools. It has been provided as a large distro that
+installs and attempts to test all of its modules. Many users need only
+a small fraction of the functionality BioPerl-Run provides, relevant
+only to the tools they have installed. On the other hand, managing
+many different packages is unwieldy and uninviting for volunteer
+maintainers.
+
+The system described here is a compromise that enables a user to
+select, test and install only those modules that meet the need, yet
+reduces the maintenance effort to the management of a set of metadata
+files in a single distribution.
 
 =head1 METHODS
 
@@ -272,11 +362,48 @@ Bio::Tools::Run::Build - Instrument build with features
 
 =item interactive_select()
 
-=item select_tools()
+ @selected_tools = $build->interactive_select($cpan_meta_object);
+
+Provide a L<CPAN::Meta> object with optional features. The user will
+be presented with an interactive ASCII feature L</picker()>. A list of
+feature identifiers will be returned.
 
 =item add_tool_deps()
 
+ $build->add_tool_deps($cpan_meta_object, @features);
+
+Provide a L<CPAN::Meta> object containing all available
+optional_features, and a list of feature identifiers to be
+installed. Extracts the dependencies of the features in the list and
+provides them to M::B for prereq checking. In this way, prereqs for
+non-selected features can be ignored in the build process.
+
 =item load_subdist_meta()
+
+ $cpan_meta_obj = $build->load_subdist_meta($subdist_tag);
+
+Loads optional_features metadata encoded in JSON format from the
+'meta' subdirectory of the distribution directory. The filename should follow the convention
+
+ meta/feature_meta_<subdist_tag>.json
+
+The file
+
+ meta/feature_meta_main.json
+
+should always be present. "Subdistributions" of features can be
+specified in additional files, e.g.
+
+ meta/feature_meta_phylo.json
+ meta/feature_meta_alignment.json
+
+For subdists, the feature identifiers should be of the form
+
+ [<subdist_tag>]<feature_name>
+
+e.g.
+
+ "[Phylo]Gerp"
 
 =back
 
@@ -285,6 +412,9 @@ Bio::Tools::Run::Build - Instrument build with features
 =over
 
 =item picker()
+
+The picker is an ASCII interactive selector that allows paging through
+larger lists of features.
 
 =back
 

@@ -71,7 +71,7 @@ $build->load_subdist_meta($_) foreach @feature_dists;
 my $accept = $build->args('accept');
 
 # Select tools modules to install
-my ($options, $nummod, @selected_tools);
+my ($options, @selected_tools);
 if (my $feat = $build->args('features')) { # pull features from cmdline
     @selected_tools = split /\s*[,;:]\s*/,$feat;
 }
