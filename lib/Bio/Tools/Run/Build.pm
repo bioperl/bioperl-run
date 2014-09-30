@@ -277,11 +277,14 @@ Bio::Tools::Run::Build - Instrument the build for features
  $build->load_subdist_meta($_) foreach @feature_dists;
  # Select tools modules to install
  my ($options, @selected_tools);
- if (my $feat = $build->args('features')) { # pull features from cmdline
+ if (my $feat = $build->args('features')) {
+     # pull features from cmdline
      @selected_tools = split /\s*[,;:]\s*/,$feat;
  }
- else { # interactive select
-     @selected_tools = $build->interactive_select($build->notes('meta_main'));
+ else { 
+     # select features interactively
+     @selected_tools = 
+        $build->interactive_select($build->notes('meta_main'));
      for my $subdist (grep !/^main/,@feature_dists) {
          if (grep /^$subdist$/i, @selected_tools) {
             push @selected_tools, $build->interactive_select(
@@ -301,8 +304,8 @@ allows an author to offer users the ability to select and install
 pre-configured subsets of modules that are packaged in a single large
 M::B-based distribution.
 
-Grouping and selection of distro modules is driven by the
-L<CPAN::Meta::Spec/"optional_features"> concept as defined in
+Grouping and selection of distro modules is driven by the L<optional
+features|CPAN::Meta::Spec/"optional_features"> concept as defined in
 L<CPAN::Meta::Spec> and used by L<Module::Build>.
 
 The subclass provides the following:
@@ -313,7 +316,7 @@ The subclass provides the following:
 
 The build author develops metadata files in json that follow
 L<CPAN::Meta::Spec/"optional_features"> to group distribution modules
-and dependencies with selectable features
+and dependencies as selectable features.
 
 =item * Interactive user selection of features
 
@@ -417,6 +420,11 @@ The picker is an ASCII interactive selector that allows paging through
 larger lists of features.
 
 =back
+
+=head1 SEE ALSO
+
+L<Bio::Tools::Run::Build::Test>, L<Module::Build::Authoring>,
+L<Module::Build::API>.
 
 =head1 AUTHOR
 
