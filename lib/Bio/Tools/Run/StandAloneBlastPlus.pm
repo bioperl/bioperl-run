@@ -439,6 +439,9 @@ my %AVAILABLE_MASKERS = (
     'segmasker'    => 'prot'
     );
 
+# NOTE: After testing all possible output formats, only 'maskinfo_asn1_text'
+# is currently working correctly as input for makeblastdb '-mask_data' argument,
+# the others return an 'Unknown encoding for mask data' error
 my %MASKER_ENCODING = (
     'windowmasker' => 'maskinfo_asn1_text',
     'dustmasker'   => 'maskinfo_asn1_text',
@@ -851,10 +854,11 @@ sub make_mask {
     $mh->close;
     $self->_register_temp_for_cleanup(File::Spec->catfile($self->db_dir,$mask_outfile));
 
+    # NOTE: '-outfmt' argument must not be included in the default args because
+    # it conflicts with windowmasker '-mk_counts' argument
     %mask_args = (
 	-in => $data,
 	-parse_seqids => 1,
-	#-outfmt => $MASKER_ENCODING{$masker}
 	);
     # usr arg override
     if (%usr_args) {
@@ -865,6 +869,7 @@ sub make_mask {
     for ($masker) {
 	m/dustmasker/ && do {
 	    $mask_args{'-out'} = $mask_outfile;
+            $mask_args{'-outfmt'} = $MASKER_ENCODING{$masker};
 	    $self->{_factory} = $bp_class->new(-command => $masker,
 					       %mask_args);
 	    $self->factory->no_throw_on_crash($self->no_throw_on_crash);
@@ -892,6 +897,7 @@ sub make_mask {
 	    delete $mask_args{'-mk_counts'};
 	    $mask_args{'-ustat'} = $ct_file;
 	    $mask_args{'-out'} = $mask_outfile;
+            $mask_args{'-outfmt'} = $MASKER_ENCODING{$masker};
 	    if ($mask_db) {
 		$mask_args{'-in'} = $mask_db;
 		$mask_args{'-infmt'} = 'blastdb';
@@ -904,6 +910,7 @@ sub make_mask {
 	m/segmasker/ && do {
 	    $mask_args{'-infmt'} = $infmt;
 	    $mask_args{'-out'} = $mask_outfile;
+            $mask_args{'-outfmt'} = $MASKER_ENCODING{$masker};
 	    $self->{_factory} = $bp_class->new(-command => $masker,
 					       %mask_args);
 	    $self->factory->no_throw_on_crash($self->no_throw_on_crash);
@@ -979,10 +986,12 @@ sub db_info {
 	/Algorithm ID/ && do {
 	    my $alg = $attr{db_filter_algorithms} = [];
 	    while (<$infh>) {
-		if (/\s+([0-9]+)\s+([a-z0-9_]+)\s+(.*)/i) {
-		    push @$alg, { algorithm_id => $1,
-				  algorithm_name => $2,
-				  algorithm_opts => $3 };
+		if (/\s*([0-9]+)\s+([a-z0-9_]+)\s+(.*)/i) {
+                    my ($alg_id, $alg_name, $alg_opts) = ($1, $2, $3);
+                    $alg_opts =~ s/\s+$//;
+		    push @$alg, { algorithm_id   => $alg_id,
+				  algorithm_name => $alg_name,
+				  algorithm_opts => $alg_opts };
 		}
 		else {
 		    last;
