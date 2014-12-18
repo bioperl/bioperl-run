@@ -93,11 +93,7 @@ SKIP : {
         -create    => 1
     );
     $fac->no_throw_on_crash(1);
-
-    TODO: {
-        local $TODO = 'BLAST+ 2.2.24+ not working';
-        ok $fac->make_db, "mask built and db made on construction (windowmasker)";
-    }
+    ok $fac->make_db, "mask built and db made on construction (windowmasker)";
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
@@ -107,10 +103,7 @@ SKIP : {
         -create    => 1
     );
     $fac->no_throw_on_crash(1);
-    TODO: {
-        local $TODO = 'BLAST+ 2.2.24+ not working';
-        ok $fac->make_db, "mask built and db made on construction (segmasker)";
-    }
+    ok $fac->make_db, "mask built and db made on construction (segmasker)";
     $fac->cleanup;
 
     ok $fac = Bio::Tools::Run::StandAloneBlastPlus->new(
@@ -120,10 +113,7 @@ SKIP : {
         -create    => 1
     );
     $fac->no_throw_on_crash(1);
-    TODO: {
-        local $TODO = 'BLAST+ 2.2.24+ not working';
-        ok $fac->make_db, "mask built and db made on construction (dustmasker)";
-    }
+    ok $fac->make_db, "mask built and db made on construction (dustmasker)";
     $fac->cleanup;
 
     # tests with Bio:: objects as input
