@@ -260,7 +260,7 @@ sub _run {
     my $outfile = 'RAxML_bestTree.' . $self->outfile_name;
     $outfile = File::Spec->catfile( ($self->w), $outfile ) if $self->w;
 
-    if ( ! -e $outfile || -z $outfile ) {
+    if ( !-e $outfile || -z $outfile ) {
         $self->warn("Raxml call had status of $status: $? [command $command] \n");
         return undef;
     }
@@ -400,7 +400,7 @@ sub _setparams {
     $param_string .= "-s $infile -n " . $self->outfile_name;
 
     my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
-    	$param_string .= " > $null 2> $null"
+    $param_string .= " > $null 2> $null"
       if ( $self->quiet() || $self->verbose < 0 );
 
     $param_string;
