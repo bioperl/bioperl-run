@@ -1,25 +1,24 @@
-$Id$
+# Description 
 
-o Version
-
- This is bioperl-run version 1.5.2, a developer release.
-
-o Description 
+This is bioperl-run version 1.6.x, a developer release.
  
- bioperl-run contain modules that provides a PERL interface to various
- bioinformatics applications. This allows various applications to be
- used with common bioperl objects.
+*bioperl-run* contain modules that provides a Perl interface to various
+bioinformatics applications. This allows various applications to be
+used with common BioPerl objects.
 
- See the Changes file for more information about what is contained in
- here.
+See the *Changes* file for more information about what is contained in
+here.
 
-o Installation
+# Installation
 
- See the accompanying INSTALL file for details on installing
- bioperl-run.
+See the accompanying *INSTALL* file for details on installing
+bioperl-run.
  
-o Feedback
+# Feedback
 
 Write down any problems or praise and send them to 
-bioperl-l@bioperl.org  ;-)
+bioperl-l@bioperl.org.
 
+# Bugs
+
+Bug reports can be made using the GitHub Issues tracker for this distribution.
