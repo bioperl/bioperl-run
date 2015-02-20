@@ -8,7 +8,7 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
     test_begin(
-        -tests => 9,
+        -tests => 11,
     );
     use_ok('Bio::Root::IO');
     use_ok('Bio::Tools::Run::Phylo::Raxml');
@@ -17,19 +17,26 @@ BEGIN {
 
 END { unlink glob "RAxML_*.*"; }
 
-ok(my $raxml = Bio::Tools::Run::Phylo::Raxml->new(-p => 100, -quiet => 1), "Make the object");
+ok(my $raxml = Bio::Tools::Run::Phylo::Raxml->new(-p => 100, -quiet => 1, -d => 1), "Make the object");
 isa_ok( $raxml, 'Bio::Tools::Run::Phylo::Raxml');
 
 SKIP: {
     test_skip(
         -requires_executable => $raxml,
-        -tests               => 4
+        -tests               => 6
     );
 
     # The input could be an alignment file in phylip format
     my $alignfile = test_input_file("testaln.phylip");
     my $tree = $raxml->run($alignfile);
     ok( defined($tree), "Tree is defined" );
+
+	# The working directory could be different, i.e. -w set
+	$raxml->w($raxml->tempdir);
+	$tree = $raxml->run($alignfile);
+    ok( defined($tree), "Tree is defined" );
+	my $out = $raxml->w . '/RAxML_bestTree.' . $raxml->outfile_name;
+	ok( -e $out, "File containing best tree exists in tempdir" );
 
     # The input could be a SimpleAlign object
     my $alignio = Bio::AlignIO->new(
@@ -38,7 +45,7 @@ SKIP: {
     );
     my $alnobj = $alignio->next_aln;
 
-    $raxml = Bio::Tools::Run::Phylo::Raxml->new(-p => 100, -quiet => 1);
+    $raxml = Bio::Tools::Run::Phylo::Raxml->new(-p => 100, -quiet => 1, -d => 1);
     $tree = $raxml->run($alnobj);
     ok( defined($tree), "Tree is defined" );
     my @nodes = $tree->get_nodes;

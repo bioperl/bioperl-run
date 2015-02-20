@@ -75,6 +75,7 @@ package Bio::Tools::Run::Phylo::Raxml;
 
 use strict;
 use File::Basename qw(basename);
+use File::Spec qw(catfile);
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::TreeIO;
@@ -231,7 +232,7 @@ sub run {
     elsif (! -e $in) {
         $self->throw("When not supplying a Bio::Align::AlignI object, you must supply a readable filename");
     }
-    
+
     $self->_run($in); 
 }
 
@@ -254,12 +255,13 @@ sub _run {
     $self->debug("Raxml command = $command");
 
     my $status  = system($command);
-
+	
     # raxml creates tree files with names like "RAxML_bestTree.ABDBxjjdfg3"
     my $outfile = 'RAxML_bestTree.' . $self->outfile_name;
+    $outfile = File::Spec->catfile( ($self->w), $outfile ) if $self->w;
 
     if ( !-e $outfile || -z $outfile ) {
-        $self->warn("Raxml call had status of $status: $? [command $command]\n");
+        $self->warn("Raxml call had status of $status: $? [command $command] \n");
         return undef;
     }
 
@@ -398,7 +400,7 @@ sub _setparams {
     $param_string .= "-s $infile -n " . $self->outfile_name;
 
     my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
-    $param_string .= " &> $null"
+    $param_string .= " > $null 2> $null"
       if ( $self->quiet() || $self->verbose < 0 );
 
     $param_string;
