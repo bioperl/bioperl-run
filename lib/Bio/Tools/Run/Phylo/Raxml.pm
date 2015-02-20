@@ -74,8 +74,8 @@ methods. Internal methods are usually preceded with a _
 package Bio::Tools::Run::Phylo::Raxml;
 
 use strict;
-use File::Basename qw(basename);
-use File::Spec qw(catfile);
+use File::Basename;
+use File::Spec;
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::TreeIO;
@@ -381,7 +381,7 @@ sub _setparams {
         my ( $tfh, $outfile ) = $self->io->tempfile( -dir => $dir );
         close($tfh);
         undef $tfh;
-        $outfile = basename($outfile);
+        $outfile = File::Spec->basename($outfile);
         $self->outfile_name($outfile);
     }
 
@@ -399,7 +399,7 @@ sub _setparams {
 
     $param_string .= "-s $infile -n " . $self->outfile_name;
 
-    my $null = ($^O =~ m/mswin/i) ? 'NUL' : '/dev/null';
+    my $null = File::Spec->devnull();
     $param_string .= " > $null 2> $null"
       if ( $self->quiet() || $self->verbose < 0 );
 
