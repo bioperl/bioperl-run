@@ -477,7 +477,7 @@ sub _setinput {
         
 		# $input may be an array of BioSeq objects...
         if (ref($input1) =~ /ARRAY/i ) {
-			($fh,$infilename1) = $self->io->tempfile();
+			($fh,$infilename1) = $self->io->tempfile(TEMPLATE=>'blastquery-XXXXXX', SUFFIX=>'.fasta');
 			$temp =  Bio::SeqIO->new(-fh=> $fh, -format => 'fasta');
 			foreach $seq (@$input1) {
 				unless ($seq->isa("Bio::PrimarySeqI")) {return 0;}
@@ -491,7 +491,7 @@ sub _setinput {
         
 		#  $input may be a single BioSeq object...
         elsif ($input1->isa("Bio::PrimarySeqI")) {
-			($fh,$infilename1) = $self->io->tempfile();
+			($fh,$infilename1) = $self->io->tempfile(TEMPLATE=>'blastquery-XXXXXX', SUFFIX=>'.fasta');
             
 			# just in case $input1 is taken from an alignment and has spaces (ie
 			# deletions) indicated within it, we have to remove them - otherwise
@@ -517,7 +517,7 @@ sub _setinput {
 			last SWITCH2; 
         }
         if ($input2->isa("Bio::PrimarySeqI")  && $executable  eq 'bl2seq' ) {
-			($fh,$infilename2) = $self->io->tempfile();
+			($fh,$infilename2) = $self->io->tempfile(TEMPLATE=>'blastquery-XXXXXX', SUFFIX=>'.fasta');
             
 			$temp =  Bio::SeqIO->new(-fh=> $fh, '-format' => 'Fasta');
 			$temp->write_seq($input2);
@@ -529,7 +529,7 @@ sub _setinput {
 		# Option for using psiblast's pre-alignment "jumpstart" feature
         elsif ($input2->isa("Bio::SimpleAlign") && $executable eq 'blastpgp' ) {
 			# a bit of a lie since it won't be a fasta file
-            ($fh,$infilename2) = $self->io->tempfile(); 
+            ($fh,$infilename2) = $self->io->tempfile(TEMPLATE=>'blastquery-XXXXXX', SUFFIX=>'.fasta'); 
             
             # first we retrieve the "mask" that determines which residues should
             # by scored according to their position and which should be scored
