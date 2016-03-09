@@ -385,7 +385,7 @@ sub _setparams {
         my ( $tfh, $outfile ) = $self->io->tempfile( -dir => $dir );
         close($tfh);
         undef $tfh;
-        $outfile = File::Spec->basename($outfile);
+        $outfile = File::Basename->basename($outfile);
         $self->outfile_name($outfile);
     }
 
