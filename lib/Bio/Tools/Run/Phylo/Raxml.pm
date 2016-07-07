@@ -257,7 +257,11 @@ sub _run {
     my $status  = system($command);
 	
     # raxml creates tree files with names like "RAxML_bestTree.ABDBxjjdfg3"
-    my $outfile = 'RAxML_bestTree.' . $self->outfile_name;
+    # if rapid bootstrapping was enabled, also a tree with RAxML_bipartitions.ABDBxjjdfg3
+    # with support values is created, which then should be returned
+    my $outfile = $self->f() eq 'a' ? 'RAxML_bipartitions.' : 'RAxML_bestTree.';
+    $outfile .= $self->outfile_name;
+
     $outfile = File::Spec->catfile( ($self->w), $outfile ) if $self->w;
 
     if ( !-e $outfile || -z $outfile ) {

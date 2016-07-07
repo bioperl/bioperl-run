@@ -8,7 +8,7 @@ use strict;
 BEGIN {
     use Bio::Root::Test;
     test_begin(
-        -tests => 11,
+        -tests => 12,
     );
     use_ok('Bio::Root::IO');
     use_ok('Bio::Tools::Run::Phylo::Raxml');
@@ -23,7 +23,7 @@ isa_ok( $raxml, 'Bio::Tools::Run::Phylo::Raxml');
 SKIP: {
     test_skip(
         -requires_executable => $raxml,
-        -tests               => 6
+        -tests               => 7
     );
 
     # The input could be an alignment file in phylip format
@@ -37,6 +37,11 @@ SKIP: {
     ok( defined($tree), "Tree is defined" );
 	my $out = $raxml->w . '/RAxML_bestTree.' . $raxml->outfile_name;
 	ok( -e $out, "File containing best tree exists in tempdir" );
+
+	# Test RAxML's rapid bootstrap option ( -f a )
+	$raxml = Bio::Tools::Run::Phylo::Raxml->new(-N => 100, -p => 12345, -quiet => 1, -f => 'a', -x => 1);
+	$tree = $raxml->run($alignfile);
+	ok( defined($tree), "Tree is defined" );
 
     # The input could be a SimpleAlign object
     my $alignio = Bio::AlignIO->new(
