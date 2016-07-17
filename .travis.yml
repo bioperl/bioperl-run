@@ -16,44 +16,27 @@ addons:
       - bedtools
       - bwa
       - ncbi-blast+
+      - ncbi-blast+-legacy
       - muscle
+      - probcons
       - hmmer
-      - infernal
       - mafft
       - emboss
-      - exonerate
+      - samtools
+      - wise
 
 install:
     #These are recommended or required Perl libraries
     - "cpanm CJFIELDS/BioPerl-1.007000_005.tar.gz 2>&1 | tail -n 1"
     - "cpanm Bio::FeatureIO 2>&1 | tail -n 1"
     - "cpanm IPC::Run XML::Twig 2>&1 | tail -n 1"
-    #- "cpanm GD CGI 2>&1 | tail -n 1"
-    #- "cpanm HTML::TableExtract DBI Data::Stag DB_File 2>&1 | tail -n 1"
-    #- "cpanm DBD::mysql DBD::Pg DBD::SQLite 2>&1 | tail -n 1"
-    #- "cpanm Algorithm::Munkres Array::Compare Convert::Binary::C Error 2>&1 | tail -n 1"
-    #- "cpanm Graph SVG SVG::Graph GraphViz 2>&1 | tail -n 1"
-    #- "cpanm XML::DOM::XPath XML::Parser XML::Parser::PerlSAX 2>&1 | tail -n 1"
-    #- "cpanm XML::SAX XML::SAX::Writer XML::Simple XML::LibXML XML::Twig XML::Writer 2>&1 | tail -n 1"
-    #- "cpanm PostScript::TextBlock Set::Scalar Sort::Naturally YAML | tail -n 1"
-    #- "cpanm Math::Random Spreadsheet::ParseExcel | tail -n 1"
-    #- "cpanm Bio::Phylo | tail -n 1"
-    #- "cpanm Test::Weaken | tail -n 1"
-    #- "cpanm Test::Memory::Cycle | tail -n 1"
-    #Test coverage from Coveralls
-    #- cpanm --quiet --notest Devel::Cover::Report::Coveralls
-    #for some reason tests and deps aren't skipped here.  Will have to look into it more...
-    #git repos, seems to only work for simple checkouts, so pure perl only (TODO: look into before_script for more detail)
-    #- "git clone https://github.com/bioperl/Bio-Root.git; export PERL5LIB=$( pwd )/Bio-Root/lib:$PERL5LIB"
+    - "cpanm Bio::DB::Sam 2>&1 | tail -n 1"
+    - "cpanm Config::Any 2>&1 | tail -n 1"
     #This installs BioPerl itself:
     - "perl ./Build.PL --accept"
 
 script:
     - "./Build test"
-    #Devel::Cover coverage options are: statement, branch, condition, path, subroutine, pod, time, all and none
-    #- "./Build build && cover -test -report coveralls" #complete version coverage test
-    #- PERL5OPT=-MDevel::Cover=+ignore,prove,-coverage,statement,subroutine prove -lr t #limited version coverage test
-    #- cover -report coveralls
 
 #after_success:
 #    - ./travis_scripts/trigger-dockerhub.sh
@@ -63,7 +46,7 @@ notifications:
   email:
     recipients:
       #- bioperl-guts-l@lists.open-bio.org
-      #- cjfields1@gmail.com
+      - cjfields1@gmail.com
     on_success: change
     on_failure: change
 
