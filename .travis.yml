@@ -20,7 +20,8 @@ addons:
       - emboss
 
 install:
-    #These are recommended or required Perl libraries:
+    #These are recommended or required Perl libraries
+    - "cpanm CJFIELDS/BioPerl-1.007000_005.tar.gz 2>&1 | tail -n 1"
     #- "cpanm GD 2>&1 CGI | tail -n 1"
     #- "cpanm HTML::TableExtract DBI Data::Stag DB_File 2>&1 | tail -n 1"
     #- "cpanm DBD::mysql DBD::Pg DBD::SQLite 2>&1 | tail -n 1"
