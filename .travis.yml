@@ -13,16 +13,22 @@ addons:
   apt:
     packages:
       - clustalw
-      - blast2
+      - bedtools
+      - bwa
       - ncbi-blast+
       - muscle
-      - phylip
+      - hmmer
+      - infernal
+      - mafft
       - emboss
+      - exonerate
 
 install:
     #These are recommended or required Perl libraries
     - "cpanm CJFIELDS/BioPerl-1.007000_005.tar.gz 2>&1 | tail -n 1"
-    #- "cpanm GD 2>&1 CGI | tail -n 1"
+    - "cpanm Bio::FeatureIO 2>&1 | tail -n 1"
+    - "cpanm IPC::Run XML::Twig 2>&1 | tail -n 1"
+    #- "cpanm GD CGI 2>&1 | tail -n 1"
     #- "cpanm HTML::TableExtract DBI Data::Stag DB_File 2>&1 | tail -n 1"
     #- "cpanm DBD::mysql DBD::Pg DBD::SQLite 2>&1 | tail -n 1"
     #- "cpanm Algorithm::Munkres Array::Compare Convert::Binary::C Error 2>&1 | tail -n 1"
