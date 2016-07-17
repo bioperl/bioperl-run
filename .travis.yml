@@ -30,12 +30,11 @@ install:
     - "cpanm CJFIELDS/BioPerl-1.007000_005.tar.gz 2>&1 | tail -n 1"
     - "cpanm Bio::FeatureIO 2>&1 | tail -n 1"
     - "cpanm IPC::Run XML::Twig 2>&1 | tail -n 1"
-    - "cpanm Bio::DB::Sam 2>&1 | tail -n 1"
+    - "SAMTOOLS=( dirname `which samtools` ) cpanm Bio::DB::Sam 2>&1 | tail -n 1"
     - "cpanm Config::Any 2>&1 | tail -n 1"
-    #This installs BioPerl itself:
-    - "perl ./Build.PL --accept"
 
 script:
+    - "perl ./Build.PL --accept"
     - "./Build test"
 
 #after_success:
