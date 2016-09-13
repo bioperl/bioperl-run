@@ -78,10 +78,10 @@ is $io1, $io2, 'io() always returns the same instance of IO';
     };
 }
 $obj->program_dir('test_dir');
-$obj->program_name('test_name');
+$obj->program_name('test_this_binary_is_imaginary');
 
 # program_path
-is $obj->program_path, File::Spec->catfile('test_dir', 'test_name'.($^O =~ /mswin/i ?'.exe':'')), 'program_path was correct';
+is $obj->program_path, File::Spec->catfile('test_dir', 'test_this_binary_is_imaginary'.($^O =~ /mswin/i ?'.exe':'')), 'program_path was correct';
 
 # executable
 throws_ok { $obj->executable } qr/Cannot find executable/, 'pretend program name not found as executable';
