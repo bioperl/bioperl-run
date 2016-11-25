@@ -821,7 +821,7 @@ sub rand_start {
             $self->{_rand_start} = 0;
         }
     }
-    return $self->{_rand_start} || 0;
+    return $self->{_rand_start};
 }
 
 =head2 rand_starts
@@ -878,7 +878,7 @@ sub rand_seed {
 
  Title   : no_memory_check
  Usage   : $factory->no_memory_check(1);
- Function: 
+ Function:
  Returns : boolean (defaults to false)
  Args    : None to get, integer to set.
 
@@ -904,7 +904,7 @@ sub no_memory_check {
  Title   : bootstrap
  Usage   : $factory->bootstrap(100);
  Function: Set number of bootstraps
- Returns : 
+ Returns :
  Args    : None to get, integer to set.
 
 =cut
@@ -924,9 +924,9 @@ sub bootstrap {
 
  Title   : command
  Usage   : $factory->command(...);
- Function: 
+ Function:
  Returns : string
- Args    : None to get, integer to set. 
+ Args    : None to get, integer to set.
 
 =cut
 
@@ -1095,10 +1095,10 @@ sub _write_phylip_align_file {
     my $tempfile = File::Spec->catfile( $self->tempdir, "aln$$.phylip" );
     $self->data_format('i');
     my $out = Bio::AlignIO->new(
-        '-file'        => ">$tempfile",
-        '-format'      => 'phylip',
-        '-interleaved' => 0,
-        '-longid'      => 1
+        -file        => ">$tempfile",
+        -format      => 'phylip',
+        -interleaved => 1,
+        -longid      => 1
     );
     $out->write_aln($align);
     $out->close();
