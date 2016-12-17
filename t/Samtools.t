@@ -116,4 +116,5 @@ SKIP : {
     ok -B $tmpfiles{bai}, 'bai file present and binary';
 
     unlink('sorted_bam');
+    unlink('sorted_bam.bai');
 }
