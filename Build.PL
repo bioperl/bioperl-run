@@ -33,7 +33,7 @@ my $build = Module::Build->new(
                             'XML::Twig'       => 0,     # processing XML data: Bio::Tools::Run::EMBOSSacd
                             'File::Sort'      => 0,     # BEDTools
                             'Config::Any'     => 0,     # MCS, Match
-                            'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
+                            #'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
                            },
     get_options         => {
                             accept  => { },
