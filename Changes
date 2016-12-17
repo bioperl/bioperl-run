@@ -1,8 +1,10 @@
-$Id$
 Revision history for bioperl-run modules
 
-Full details of changes between all versions are available online at:
-http://www.bioperl.org/wiki/Change_log
+1.7.000
+
+* Bio::Tools::Run::WrapperBase moved from bioperl core to bioperl-run
+* Updaed Samtools wrapper, minimal support for samtools > v.1 added [cjfields]
+* Minor updates to sync with BioPerl v. 1.7.x release series
 
 1.6.901
 
@@ -32,7 +34,7 @@ http://www.bioperl.org/wiki/Change_log
 * [bug 2798] - patch to fix clustalw premature file unlinking error [Wei Zhou]
 
 1.6.0 Release
-   
+
 * All Pise and Pise-related modules and scripts have been moved to the new
   bioperl-pise repository. The Pise service is no longer available and has been
   replaced by Mobyle. They have been retained as one can still install a Pise
@@ -42,7 +44,7 @@ http://www.bioperl.org/wiki/Change_log
 1.5.2 Release in sync with bioperl core
 
 * Several wrappers updated for newer versions of the programs.
-   
+
 1.5.1 Release in sync with bioperl core
 
    o First major release in a while, so lots of things in this release
@@ -60,7 +62,7 @@ http://www.bioperl.org/wiki/Change_log
 
    o Several wrappers updated for newer versions of the programs.
      TribeMCL, Genewise, RepeatMasker
-  
+
 
 1.2.2 Release update in sync with bioperl core
 
@@ -136,7 +138,7 @@ http://www.bioperl.org/wiki/Change_log
     o Support for FootPrinter, Genewise, Hmmpfam, Primate, Prints,
       Profile, Promoterwise, Pseudowise, Seg, Signalp, Tmhmm,TribeMCL,
       Blat,DBA,Lagan,Sim4,Fasta,ProtML,Vista
-    
+
     o Added support for PHYLIP apps: Consense, DrawGram, DrawTree, SeqBoot
 
     o Added INSTALL.PROGRAMS providing references to download the program binaries.
@@ -149,21 +151,19 @@ http://www.bioperl.org/wiki/Change_log
       runnable wrapper modules.
 
     o Support for PAML codeml tested, aaml still waiting
-    
+
     o Support for Molphy protml, nucml to come
 
     o Support for EMBOSS pkg - still need to move component from
-      bioperl-live Bio::Factory::EMBOSS to this package and 
+      bioperl-live Bio::Factory::EMBOSS to this package and
       rename it Bio::Tools::Run::EMBOSSFactory or something
       equivalent.
 
     o Support for Clustalw, TCoffee, Local NCBI BLAST.
-    
+
     o RepeatMasker, Genscan, Pseudowise, TribeMCL, Primate, Eponine.
-    
+
     o Support for remote analysis through Pise and NCBI Web Blast
       queue.
 
     o Select PHYLIP apps: Neighbor, ProtDist, and ProtPars.
-
-
