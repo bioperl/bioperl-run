@@ -100,7 +100,7 @@ our @program_commands = qw(
     fillmd
 );
 
-# composite commands: pseudo-commands that run a 
+# composite commands: pseudo-commands that run a
 # sequence of commands
 # composite command prefix => list of prefixes of commands this
 #  composite command runs
@@ -195,7 +195,7 @@ our %param_translation = (
 #
 # the strings in the arrayrefs (less special chars)
 # become the keys for named parameters to run_maq
-# 
+#
 # special chars:
 #
 # '#' implies optional
@@ -205,7 +205,7 @@ our %param_translation = (
 
 our %command_files = (
     'view' => [qw( bam #*rgn >out )],
-    'sort' => [qw( bam pfx )],
+    'sort' => [qw( bam >pfx )],
     'index' => [qw( bam )],
     'merge' => [qw( obm *ibm )],
     'faidx' => [qw( fas #*rgn )],
