@@ -7,7 +7,7 @@ no warnings qw(once);
 our $home;
 BEGIN {
     $home = '.'; # set to '.' for Build use,
-                      # '..' for debugging from .t file
+                 # '..' for debugging from .t file
     unshift @INC, $home;
     use Bio::Root::Test;
     test_begin(-tests => 41,
@@ -17,10 +17,13 @@ BEGIN {
 use File::Copy;
 use Bio::Tools::Run::WrapperBase;
 
+my $DEBUG = test_debug();
+
 ok my $samt = Bio::Tools::Run::Samtools->new(
     -command            => 'pileup',
     -refseq             => 'my.fas',
-    -theta              => 0.05
+    -theta              => 0.05,
+    -verbose            => $DEBUG
     ), "make a factory using command 'pileup'";
 # ParameterBaseI compliance : really AssemblerBase tests...
 ok $samt->parameters_changed, "parameters changed on construction";
@@ -40,7 +43,8 @@ is ($samt->refseq, 'our.fas', "parameter really reset via arg");
 $samt->set_parameters(
     -command            => 'pileup',
     -refseq             => 'my.fas',
-    -theta              => 0.05
+    -theta              => 0.05,
+    -verbose            => $DEBUG
     );
 ok $samt->parameters_changed, "parameters changed";
 
@@ -81,6 +85,7 @@ SKIP : {
 	       -tests => 16 );
 
     my $new_bam = Bio::Tools::Run::Samtools->new(
+                           -verbose => $DEBUG,
                            -command => 'merge',
                            )->run(
                            -obm => 'output_file.bam',
