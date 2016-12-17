@@ -15,16 +15,16 @@ my $build = Module::Build->new(
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
     license             => 'perl',
     config_requires     => {
- 	                    'Module::Build' => 0,
-			   },
+                        'Module::Build' => 0,
+},
     build_requires      => {
-                            'Bio::Root::Version' => '1.006900',
-	                    'Bio::Root::Test' => 0,
-			   },
+                            'Bio::Root::Version' => '1.007000',
+                            'Bio::Root::Test' => 0,
+               },
     requires            => {
                             'perl'               => '5.6.1',
-                            'Bio::Root::Version' => '1.006900',
-			    'Bio::Root::Root'    => 0,
+                            'Bio::Root::Version' => '1.007000',
+'Bio::Root::Root'    => 0,
                            },
     recommends          => {
                             'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
