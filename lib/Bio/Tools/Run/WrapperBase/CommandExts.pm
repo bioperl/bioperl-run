@@ -120,10 +120,10 @@ The following globals can/should be defined in the C<Config> module:
   $program_dir
   $use_dash
   $join
-  @program_commands 
+  @program_commands
   %command_prefixes
   @program_params
-  @program_switches 
+  @program_switches
   %param_translation
   %composite_commands
   %command_files
@@ -133,7 +133,7 @@ See L</Config Globals> for detailed descriptions.
 The work of creating a run wrapper with C<CommandExts> lies mainly in
 setting up the globals. The key methods for the developer interface are:
 
-=over 
+=over
 
 =item * program_dir($path_to_programs)
 
@@ -212,7 +212,7 @@ Here is an example config file. Further details in prose are below.
  our $program_dir = 'C:\cygwin\usr\local\bin';
  our $use_dash = 'mixed';
  our $join = ' ';
- 
+
  our @program_commands = qw(
   rpsblast
   find
@@ -237,12 +237,12 @@ Here is an example config file. Further details in prose are below.
      b|frelb
      m|trud
  );
- 
+
  our @program_switches = qw(
      g|freen
      b|klep
  );
- 
+
  our %param_translation = (
      'g|narf'     => 'n',
      'g|schlurb'  => 'schlurb',
@@ -250,11 +250,11 @@ Here is an example config file. Further details in prose are below.
      'b|scroob'   => 's',
      'b|frelb'    => 'frelb'
      );
- 
+
  our %command_files = (
      'goob'       => [qw( fas faq )],
      );
- 
+
  our %composite_commands = (
      'multiglob' => [qw( blorb goob )]
      );
@@ -268,15 +268,15 @@ named filespec parameter for the C<_run()> method in the wrapper
 class. Additional symbols surrounding this token indicate how this
 argument should be handled. Some examples:
 
- >out  : stdout is redirected into the file 
+ >out  : stdout is redirected into the file
          specified by (..., -out => $file,... )
- <in   : stdin is accepted from the file 
+ <in   : stdin is accepted from the file
          specified by (..., -in => $file,... )
  2>log : stderr is redirected into the file
          specified by (..., -log => $file,... )
  #opt  : this filespec argument is optional
          (no throw if -opt => $option is missing)
- 2>#log: if -log is not specified in the arguments, the stderr() 
+ 2>#log: if -log is not specified in the arguments, the stderr()
          method will capture stderr
  *lst  : this filespec can take multiple arguments,
          specify using an arrayref (..., -lst => [$file1, $file2], ...)
@@ -288,7 +288,7 @@ The tokens above are examples; they can be anything matching the above regexp.
 
 Using a wrapper created with C<Bio::Tools::Run::WrapperBase::CommandExts>:
 
-=over 
+=over
 
 =item * Getting a list of available commands, parameters, and filespecs:
 
@@ -312,14 +312,14 @@ command, do
 The factory is a handle on the program and command you wish to
 run. Create a factory using C<new> to set command-line parameters:
 
- $factory = Bio::Tools::Run::ThePkg->new( -command => 'glurb', 
+ $factory = Bio::Tools::Run::ThePkg->new( -command => 'glurb',
                                           -freen => 1,
                                           -furschlugginer => 'vreeble' );
 
 A shorthand for this is:
- 
- $factory = Bio::Tools::Run::ThePkg->new_glurb( 
-                                       -freen => 1, 
+
+ $factory = Bio::Tools::Run::ThePkg->new_glurb(
+                                       -freen => 1,
                                        -furschlugginer => 'vreeble' );
 
 =item * Running programs
@@ -327,11 +327,11 @@ A shorthand for this is:
 To run the program, use the C<run> method, providing filespecs as arguments
 
  $factory = Bio::Tools::Run::ThePkg->new_assemble( -min_qual => 63 );
- $factory->run( -faq1 => 'read1.fq', -faq2 => 'read2.fq', 
+ $factory->run( -faq1 => 'read1.fq', -faq2 => 'read2.fq',
                 -ref => 'refseq.fas', -out => 'new.sam' );
  # do another
- $factory->run( -faq1 => 'read-old1.fq', -faq2 => 'read-old2.fq', 
-                -ref => 'refseq.fas', -out => 'old.sam' ); 
+ $factory->run( -faq1 => 'read-old1.fq', -faq2 => 'read-old2.fq',
+                -ref => 'refseq.fas', -out => 'old.sam' );
 
 Messages on STDOUT and STDERR are dumped into their respective attributes:
 
@@ -351,7 +351,7 @@ C<parameters_changed>. See L<Bio::ParameterBaseI> for more details.
 
 Once set, parameters become attributes of the factory. Thus, you can get their values as follows:
 
- if ($factory->freen) { 
+ if ($factory->freen) {
     $furs = $factory->furshlugginer;
     #...
  }
@@ -422,12 +422,12 @@ our $AUTOLOAD;
 =head2 new()
 
  Title   : new
- Usage   : 
- Function: constructor for WrapperBase::CommandExts ; 
+ Usage   :
+ Function: constructor for WrapperBase::CommandExts ;
            correctly binds configuration variables
            to the WrapperBase object
  Returns : Bio::Tools::Run::WrapperBase object with command extensions
- Args    : 
+ Args    :
  Note    : this method subsumes the old _register_program_commands and
            _set_program_options, leaving out the assembler-specific
            parms ($qual_param and out_type())
@@ -440,20 +440,20 @@ sub new {
     # pull in *copies* of the Config variables from the caller namespace:
     my ($pkg, @goob) = caller();
     my ($commands,
-	$prefixes,
-	$params,
-	$switches,
-	$translation,
-	$use_dash,
-	$join,
-	$name,
-	$dir,
-	$composite_commands,
-	$files);
-    for (qw( @program_commands 
+    $prefixes,
+    $params,
+    $switches,
+    $translation,
+    $use_dash,
+    $join,
+    $name,
+    $dir,
+    $composite_commands,
+    $files);
+    for (qw( @program_commands
              %command_prefixes
              @program_params
-             @program_switches 
+             @program_switches
              %param_translation
              $use_dash
              $join
@@ -461,44 +461,44 @@ sub new {
              $program_dir
              %composite_commands
              %command_files ) ) {
-	my ($sigil, $var) = m/(.)(.*)/;
-	my $qualvar = "${sigil}${pkg}::${var}";
-	for ($sigil) {
-	    /\@/ && do { $qualvar = "\[$qualvar\]" };
-	    /\%/ && do { $qualvar = "\{$qualvar\}" };
-	}
-	my $locvar = "\$${var}";
-	$locvar =~ s/program_|command_|param_//g;
-	eval "$locvar = $qualvar";
+    my ($sigil, $var) = m/(.)(.*)/;
+    my $qualvar = "${sigil}${pkg}::${var}";
+    for ($sigil) {
+        /\@/ && do { $qualvar = "\[$qualvar\]" };
+        /\%/ && do { $qualvar = "\{$qualvar\}" };
+    }
+    my $locvar = "\$${var}";
+    $locvar =~ s/program_|command_|param_//g;
+    eval "$locvar = $qualvar";
     }
     # set up the info registry hash
     my %registry;
     if ($composite_commands) {
-	$self->_register_composite_commands($composite_commands,
-					    $params,
-					    $switches,
-					    $prefixes);
+    $self->_register_composite_commands($composite_commands,
+                        $params,
+                        $switches,
+                        $prefixes);
     }
-    @registry{qw( _commands _prefixes _files 
+    @registry{qw( _commands _prefixes _files
                   _params _switches _translation
                   _composite_commands )} =
-	($commands, $prefixes, $files,
-	 $params, $switches, $translation, 
-	 $composite_commands);
+    ($commands, $prefixes, $files,
+     $params, $switches, $translation,
+     $composite_commands);
     $self->{_options} = \%registry;
     if (not defined $use_dash) {
-	$self->{'_options'}->{'_dash'}      = 1;
+    $self->{'_options'}->{'_dash'}      = 1;
     } else {
-	$self->{'_options'}->{'_dash'}      = $use_dash;
+    $self->{'_options'}->{'_dash'}      = $use_dash;
     }
     if (not defined $join) {
-	$self->{'_options'}->{'_join'}      = ' ';
+    $self->{'_options'}->{'_join'}      = ' ';
     } else {
-	$self->{'_options'}->{'_join'}      = $join;
+    $self->{'_options'}->{'_join'}      = $join;
     }
     if ($name =~ /^\*/) {
-	$self->is_pseudo(1);
-	$name =~ s/^\*//;
+    $self->is_pseudo(1);
+    $name =~ s/^\*//;
     }
     $self->program_name($name) if not defined $self->program_name();
     $self->program_dir($dir) if not defined $self->program_dir();
@@ -550,13 +550,13 @@ sub program_dir {
  Args    : arrayref to a list of commands (scalar strings),
            hashref to a translation table of the form
            { $prefix1 => $command1, ... } [optional]
- Note    : To implement a program with this kind of calling structure, 
-           include a parameter called 'command' in the 
+ Note    : To implement a program with this kind of calling structure,
+           include a parameter called 'command' in the
            @program_params global
- Note    : The translation table is used to associate parameters and 
+ Note    : The translation table is used to associate parameters and
            switches specified in _set_program_options with the correct
            program command. In the globals @program_params and
-           @program_switches, specify elements as 'prefix1|param' and 
+           @program_switches, specify elements as 'prefix1|param' and
            'prefix1|switch', etc.
 
 =cut
@@ -599,25 +599,25 @@ sub _translate_params {
   $dash ||= 1; # default as advertised
   for ($dash) {
       $_ eq '1' && do {
-	  @dash_args = ( -dash => 1 );
-	  last;
+      @dash_args = ( -dash => 1 );
+      last;
       };
       /^s/ && do { #single dash only
-	  @dash_args = ( -dash => 1);
-	  last;
+      @dash_args = ( -dash => 1);
+      last;
       };
       /^d/ && do { # double dash only
-	  @dash_args = ( -double_dash => 1);
-	  last;
+      @dash_args = ( -double_dash => 1);
+      last;
       };
       /^m/ && do { # mixed dash: one-letter opts get -,
                   # long opts get --
-	  @dash_args = ( -mixed_dash => 1);
-	  last;
+      @dash_args = ( -mixed_dash => 1);
+      last;
       };
-      do { 
-	  $self->warn( "Dash spec '$dash' not recognized; using 'single'" );
-	  @dash_args = ( -dash => 1 );
+      do {
+      $self->warn( "Dash spec '$dash' not recognized; using 'single'" );
+      @dash_args = ( -dash => 1 );
       };
   }
   my $options  = $self->_setparams(
@@ -647,34 +647,34 @@ sub _translate_params {
     }
     else {
       $in_quotes ? $options[-1] .= $_ :
-	push(@options, $_);
+    push(@options, $_);
     }
   }
   $self->throw("Unmatched quote in option value") if $in_quotes;
   for (my $i = 0; $i < scalar @options; $i++) {
     my ($prefix, $name) = ( $options[$i] =~ m/^(-{0,2})(.+)$/ );
     if (defined $name) {
-	if ($name =~ /command/i) {
-	    $name = $options[$i+2]; # get the command
-	    splice @options, $i, 4;
-	    $i--;
-	    # don't add the command if this is a pseudo-program
-	    unshift @options, $name unless ($self->is_pseudo); # put command first
-	}
-	elsif (defined $$translat{$name}) {
-	    $options[$i] = $prefix.$$translat{$name};
-	}
-    } 
+    if ($name =~ /command/i) {
+        $name = $options[$i+2]; # get the command
+        splice @options, $i, 4;
+        $i--;
+        # don't add the command if this is a pseudo-program
+        unshift @options, $name unless ($self->is_pseudo); # put command first
+    }
+    elsif (defined $$translat{$name}) {
+        $options[$i] = $prefix.$$translat{$name};
+    }
+    }
     else {
-	splice @options, $i, 1;
-	$i--;
+    splice @options, $i, 1;
+    $i--;
     }
   }
 
   @options = grep (!/^\s*$/,@options);
-  # this is a kludge for mixed options: the reason mixed doesn't 
-  # work right on the pass through _setparams is that the 
-  # *aliases* and not the actual params are passed to it. 
+  # this is a kludge for mixed options: the reason mixed doesn't
+  # work right on the pass through _setparams is that the
+  # *aliases* and not the actual params are passed to it.
   # here we just rejigger the dashes
   if ($dash =~ /^m/) {
       s/--([a-z0-9](?:\s|$))/-$1/gi for @options;
@@ -687,7 +687,7 @@ sub _translate_params {
 =head2 executable()
 
  Title   : executable
- Usage   : 
+ Usage   :
  Function: find the full path to the main executable,
            or to the command executable for pseudo-programs
  Returns : full path, if found
@@ -696,22 +696,22 @@ sub _translate_params {
             applicable)
            [optional] boolean flag whether or not to warn when exe no found
  Note    : overrides WrapperBase.pm
-            
+
 =cut
 
 sub executable {
     my $self = shift;
     my ($exe, $warn) = @_;
     if ($self->is_pseudo) {
-	return $self->{_pathtoexe} = $self->executables($self->command,$exe);
+    return $self->{_pathtoexe} = $self->executables($self->command,$exe);
     }
 
     # otherwise
     # setter
     if (defined $exe) {
-	$self->throw("binary '$exe' does not exist") unless -e $exe;
-	$self->throw("'$exe' is not executable") unless -x $exe;
-	return $self->{_pathtoexe} = $exe;
+    $self->throw("binary '$exe' does not exist") unless -e $exe;
+    $self->throw("'$exe' is not executable") unless -x $exe;
+    return $self->{_pathtoexe} = $exe;
     }
 
     # getter
@@ -724,10 +724,10 @@ sub executable {
 =head2 executables()
 
  Title   : executables
- Usage   : 
+ Usage   :
  Function: find the full path to a command's executable
  Returns : full path (scalar string)
- Args    : command (scalar string), 
+ Args    : command (scalar string),
            [optional] explicit path to this command exe
            [optional] boolean flag whether or not to warn when exe no found
 
@@ -743,15 +743,15 @@ sub executables {
 
     # setter
     if (defined $exe) {
-	$self->throw("binary '$exe' does not exist") unless -e $exe;
-	$self->throw("'$exe' is not executable") unless -x $exe;
-	$self->{_pathstoexe} = {} unless defined $self->{_pathstoexe};
-	return $self->{_pathstoexe}->{$cmd} = $exe;
+    $self->throw("binary '$exe' does not exist") unless -e $exe;
+    $self->throw("'$exe' is not executable") unless -x $exe;
+    $self->{_pathstoexe} = {} unless defined $self->{_pathstoexe};
+    return $self->{_pathstoexe}->{$cmd} = $exe;
     }
 
     # getter
     return $self->{_pathstoexe}->{$cmd} if defined $self->{_pathstoexe}->{$cmd};
-    
+
     $exe ||= $cmd;
     # finder
     return $self->{_pathstoexe}->{$cmd} = $self->_find_executable($exe, $warn);
@@ -775,26 +775,26 @@ sub _find_executable {
     my ($exe, $warn) = @_;
 
     if ($self->is_pseudo && !$exe) {
-	if (!$self->command) {
-	    # this throw probably appropriate
-	    # the rest are now warns if $warn.../maj
-	    $self->throw( 
-		"The ".__PACKAGE__." wrapper represents several different programs;".
-		"arg1 to _find_executable must be specified explicitly,".
-		"or the command() attribute set");
-	}
-	else {
-	    $exe = $self->command;
-	}
+    if (!$self->command) {
+        # this throw probably appropriate
+        # the rest are now warns if $warn.../maj
+        $self->throw(
+        "The ".__PACKAGE__." wrapper represents several different programs;".
+        "arg1 to _find_executable must be specified explicitly,".
+        "or the command() attribute set");
+    }
+    else {
+        $exe = $self->command;
+    }
     }
     $exe ||= $self->program_path;
 
     my $path;
     if ($self->program_dir) {
-	$path = File::Spec->catfile($self->program_dir, $exe);
+    $path = File::Spec->catfile($self->program_dir, $exe);
     } else {
-	$path = $exe;
-	$self->warn('Program directory not specified; use program_dir($path).') if $warn;
+    $path = $exe;
+    $self->warn('Program directory not specified; use program_dir($path).') if $warn;
     }
 
     # use provided info - we are allowed to follow symlinks, but refuse directories
@@ -804,17 +804,17 @@ sub _find_executable {
     $path = $path ? " in $path" : undef;
     $self->warn("Executable $exe not found$path, trying system path...") if $warn;
     if ($path = $self->io->exists_exe($exe)) {
-	return $path;
+    return $path;
     } else {
-	$self->warn("Cannot find executable for program '".($self->is_pseudo ? $self->command : $self->program_name)."'") if $warn;
-	return;
+    $self->warn("Cannot find executable for program '".($self->is_pseudo ? $self->command : $self->program_name)."'") if $warn;
+    return;
     }
 }
 
 =head2 _register_composite_commands()
 
  Title   : _register_composite_commands
- Usage   : 
+ Usage   :
  Function: adds subcomand params and switches for composite commands
  Returns : true on success
  Args    : \%composite_commands,
@@ -825,25 +825,25 @@ sub _find_executable {
 
 sub _register_composite_commands {
     my $self = shift;
-    my ($composite_commands, $program_params, 
-	$program_switches, $command_prefixes) = @_;
+    my ($composite_commands, $program_params,
+    $program_switches, $command_prefixes) = @_;
     my @sub_params;
     my @sub_switches;
     foreach my $cmd (keys %$composite_commands) {
-	my $pfx = $command_prefixes->{$cmd} || $cmd;
-	foreach my $subcmd ( @{$$composite_commands{$cmd}} ) {
-	    my $spfx = $command_prefixes->{$subcmd} || $subcmd;
-	    my @sub_program_params = grep /^$spfx\|/, @$program_params;
-	    my @sub_program_switches = grep /^$spfx\|/, @$program_switches;
-	    for (@sub_program_params) {
-		m/^$spfx\|(.*)/;
-		push @sub_params, "$pfx\|${spfx}_".$1;
-	    }
-	    for (@sub_program_switches) {
-		m/^$spfx\|(.*)/;
-		push @sub_switches, "$pfx\|${spfx}_".$1;
-	    }
-	}
+    my $pfx = $command_prefixes->{$cmd} || $cmd;
+    foreach my $subcmd ( @{$$composite_commands{$cmd}} ) {
+        my $spfx = $command_prefixes->{$subcmd} || $subcmd;
+        my @sub_program_params = grep /^$spfx\|/, @$program_params;
+        my @sub_program_switches = grep /^$spfx\|/, @$program_switches;
+        for (@sub_program_params) {
+        m/^$spfx\|(.*)/;
+        push @sub_params, "$pfx\|${spfx}_".$1;
+        }
+        for (@sub_program_switches) {
+        m/^$spfx\|(.*)/;
+        push @sub_switches, "$pfx\|${spfx}_".$1;
+        }
+    }
     }
     push @$program_params, @sub_params;
     push @$program_switches, @sub_switches;
@@ -868,13 +868,13 @@ sub _create_factory_set {
     my $self = shift;
     $self->throw('command not set') unless $self->command;
     my $cmd = $self->command;
-    $self->throw('_create_factory_set only works on composite commands') 
-	unless grep /^$cmd$/, keys %{$self->{_options}->{_composite_commands}};
+    $self->throw('_create_factory_set only works on composite commands')
+    unless grep /^$cmd$/, keys %{$self->{_options}->{_composite_commands}};
     my %ret;
     my $class = ref $self;
     my $subargs_hash = $self->_collate_subcmd_args($cmd);
     for (keys %$subargs_hash) {
-	$ret{$_} = $class->new( -command => $_,  @{$$subargs_hash{$_}} );
+    $ret{$_} = $class->new( -command => $_,  @{$$subargs_hash{$_}} );
     }
     return %ret;
 }
@@ -886,7 +886,7 @@ sub _create_factory_set {
  Function: collate parameters and switches into command-specific
            arg lists for passing to new()
  Returns : hash of named argument lists
- Args    : [optional] composite cmd prefix (scalar string) 
+ Args    : [optional] composite cmd prefix (scalar string)
            [default is 'run']
 
 =cut
@@ -904,20 +904,20 @@ sub _collate_subcmd_args {
     my $cur_options = $self->{'_options'};
     # collate
     foreach my $subcmd (@subcmds) {
-	# find the composite cmd form of the argument in 
-	# the current params and switches
-	# e.g., map_max_mismatches
-	my $pfx = $self->{_options}->{_prefixes}->{$subcmd} || $subcmd;
-	my @params = grep /^${pfx}_/, @{$$cur_options{'_params'}};
-	my @switches = grep /^${pfx}_/, @{$$cur_options{'_switches'}};
-	$ret{$subcmd} = [];
-	# create an argument list suitable for passing to new() of
-	# the subcommand factory...
-	foreach my $opt (@params, @switches) {
-	    my $subopt = $opt; 
-	    $subopt =~ s/^${pfx}_//; 
-	    push(@{$ret{$subcmd}}, '-'.$subopt => $self->$opt) if defined $self->$opt;
-	}
+    # find the composite cmd form of the argument in
+    # the current params and switches
+    # e.g., map_max_mismatches
+    my $pfx = $self->{_options}->{_prefixes}->{$subcmd} || $subcmd;
+    my @params = grep /^${pfx}_/, @{$$cur_options{'_params'}};
+    my @switches = grep /^${pfx}_/, @{$$cur_options{'_switches'}};
+    $ret{$subcmd} = [];
+    # create an argument list suitable for passing to new() of
+    # the subcommand factory...
+    foreach my $opt (@params, @switches) {
+        my $subopt = $opt;
+        $subopt =~ s/^${pfx}_//;
+        push(@{$ret{$subcmd}}, '-'.$subopt => $self->$opt) if defined $self->$opt;
+    }
     }
     return \%ret;
 }
@@ -941,7 +941,7 @@ sub _run {
     # -- provide these as arguments to this function
     my $cmd = $self->command if $self->can('command');
     my $opts = $self->{_options};
-    my %args; 
+    my %args;
     $self->throw("No command specified for the object") unless $cmd;
     # setup files necessary for this command
     my $filespec = $opts->{'_files'}->{$cmd};
@@ -949,46 +949,46 @@ sub _run {
     my ($in, $out, $err);
     # some applications rely completely on switches
     if (defined $filespec && @$filespec) {
-	# parse args based on filespec
-	# require named args
-	$self->throw("Named args are required") unless !(@args % 2);
-	s/^-// for @args;
-	%args = @args;
-	# validate
-	my @req = map { 
-	    my $s = $_;
-	    $s =~ s/^-.*\|//;
-	    $s =~ s/^[012]?[<>]//;
-	    $s =~ s/[^a-zA-Z0-9_]//g; 
-	    $s
-	} grep !/[#]/, @$filespec;
-	!defined($args{$_}) && $self->throw("Required filearg '$_' not specified") for @req;
-	# set up redirects and file switches
-	for (@$filespec) {
-	    m/^1?>#?(.*)/ && do {
-		defined($args{$1}) && ( open $out, '>', $args{$1} or $self->throw("Could not write file '$args{$1}': $!") );
-		next;
-	    };
-	    m/^2>#?(.*)/ && do {
-		defined($args{$1}) && ( open $err, '>', $args{$1} or $self->throw("Could not write file '$args{$1}': $!") );
-		next;
-	    };
-	    m/^<#?(.*)/ && do {
-		defined($args{$1}) && ( open $in, '<', $args{$1} or $self->throw("Could not read file '$args{$1}': $!") );
-		next;
-	    };
-	    if (m/^-(.*)\|/) {
-		push @switches, $self->_dash_switch($1);
-	    } else {
-		push @switches, undef;
+        # parse args based on filespec
+        # require named args
+        $self->throw("Named args are required") unless !(@args % 2);
+        s/^-// for @args;
+        %args = @args;
+        # validate
+        my @req = map {
+            my $s = $_;
+            $s =~ s/^-.*\|//;
+            $s =~ s/^[012]?[<>]//;
+            $s =~ s/[^a-zA-Z0-9_]//g;
+            $s
+        } grep !/[#]/, @$filespec;
+        !defined($args{$_}) && $self->throw("Required filearg '$_' not specified") for @req;
+        # set up redirects and file switches
+        for (@$filespec) {
+            m/^1?>#?(.*)/ && do {
+                defined($args{$1}) && ( open $out, '>', $args{$1} or $self->throw("Could not write file '$args{$1}': $!") );
+                next;
+            };
+            m/^2>#?(.*)/ && do {
+                defined($args{$1}) && ( open $err, '>', $args{$1} or $self->throw("Could not write file '$args{$1}': $!") );
+                next;
+            };
+            m/^<#?(.*)/ && do {
+                defined($args{$1}) && ( open $in, '<', $args{$1} or $self->throw("Could not read file '$args{$1}': $!") );
+                next;
+            };
+            if (m/^-(.*)\|/) {
+                push @switches, $self->_dash_switch($1);
+            } else {
+                push @switches, undef;
             }
-	}
+        }
     }
     my $dum;
     $in || ($in = \$dum);
     $out || ($out = \$self->{'stdout'});
     $err || ($err = \$self->{'stderr'});
-    
+
     # Get program executable
     my $exe = $self->executable;
     $self->throw("Can't find executable for '".($self->is_pseudo ? $self->command : $self->program_name)."'; can't continue") unless $exe;
@@ -996,27 +996,26 @@ sub _run {
     # Get command-line options
     my $options = $self->_translate_params();
     # Get file specs sans redirects in correct order
-    my @specs = map { 
-	my $s = $_; 
-	$s =~ s/^-.*\|//;
-	$s =~ s/[^a-zA-Z0-9_]//g; 
-	$s
+    my @specs = map {
+        my $s = $_;
+        $s =~ s/^-.*\|//;
+        $s =~ s/[^a-zA-Z0-9_]//g;
+        $s
     } grep !/[<>]/, @$filespec;
     my @files = @args{@specs};
     # expand arrayrefs
     my $l = $#files;
-    
+
     # Note: below code block may be brittle, see link on this:
     # http://lists.open-bio.org/pipermail/bioperl-l/2010-June/033439.html
-    
+
     for (0..$l) {
-	if (ref($files[$_]) eq 'ARRAY') {
-	    splice(@switches, $_, 1, ($switches[$_]) x @{$files[$_]});
-	    splice(@files, $_, 1, @{$files[$_]});
-	}
+        if (ref($files[$_]) eq 'ARRAY') {
+            splice(@switches, $_, 1, ($switches[$_]) x @{$files[$_]});
+            splice(@files, $_, 1, @{$files[$_]});
+        }
     }
-    
-    
+
     @files = map {
         my $s = shift @switches;
         defined $_ ? ($s, $_): ()
@@ -1025,13 +1024,13 @@ sub _run {
     my @ipc_args = ( $exe, @$options, @files );
     $self->{_last_execution} = join( $self->{'_options'}->{'_join'}, @ipc_args );
     eval {
-	IPC::Run::run(\@ipc_args, $in, $out, $err) or
-	    die ("There was a problem running $exe : ".$$err);
+        IPC::Run::run(\@ipc_args, $in, $out, $err) or
+            die ("There was a problem running $exe : ".$$err);
     };
 
     if ($@) {
-	$self->throw("$exe call crashed: $@") unless $self->no_throw_on_crash;
-	return 0;
+        $self->throw("$exe call crashed: $@") unless $self->no_throw_on_crash;
+        return 0;
     }
 
      return 1;
@@ -1042,9 +1041,9 @@ sub _run {
 =head2 no_throw_on_crash()
 
  Title   : no_throw_on_crash
- Usage   : 
+ Usage   :
  Function: prevent throw on execution error
- Returns : 
+ Returns :
  Args    : [optional] boolean
 
 =cut
@@ -1058,10 +1057,10 @@ sub no_throw_on_crash {
 =head2 last_execution()
 
  Title   : last_execution
- Usage   : 
+ Usage   :
  Function: return the last executed command with options
  Returns : string of command line sent to IPC::Run
- Args    : 
+ Args    :
 
 =cut
 
@@ -1081,43 +1080,43 @@ sub last_execution {
 =cut
 
 sub _dash_switch {
-	my ($self, $switch) = @_;
+    my ($self, $switch) = @_;
 
-	my $dash = $self->{'_options'}->{'_dash'};
-	for ($dash) {
-		$_ eq '1' && do {
-			$switch = '-'.$switch;
-			last;
-		};
-		/^s/ && do { #single dash only
-			$switch = '-'.$switch;
-			last;
-		};
-		/^d/ && do { # double dash only
-			$switch = '--'.$switch;
-			last;
-		};
-		/^m/ && do { # mixed dash: one-letter opts get -,
-			$switch = '-'.$switch;
-			$switch =~ s/^(-[a-z0-9](?:\w+))$/-$1/i;
-			last;
-		};
-		do { 
-			$self->warn( "Dash spec '$dash' not recognized; using 'single'" );
-			$switch = '-'.$switch;
-		};
-	}
+    my $dash = $self->{'_options'}->{'_dash'};
+    for ($dash) {
+        $_ eq '1' && do {
+            $switch = '-'.$switch;
+            last;
+        };
+        /^s/ && do { #single dash only
+            $switch = '-'.$switch;
+            last;
+        };
+        /^d/ && do { # double dash only
+            $switch = '--'.$switch;
+            last;
+        };
+        /^m/ && do { # mixed dash: one-letter opts get -,
+            $switch = '-'.$switch;
+            $switch =~ s/^(-[a-z0-9](?:\w+))$/-$1/i;
+            last;
+        };
+        do {
+            $self->warn( "Dash spec '$dash' not recognized; using 'single'" );
+            $switch = '-'.$switch;
+        };
+    }
 
-	return $switch;
+    return $switch;
 }
 
 =head2 stdout()
 
  Title   : stdout
  Usage   : $fac->stdout()
- Function: store the output from STDOUT for the run, 
+ Function: store the output from STDOUT for the run,
            if no file specified in _run arguments
- Example : 
+ Example :
  Returns : scalar string
  Args    : on set, new value (a scalar or undef, optional)
 
@@ -1133,9 +1132,9 @@ sub stdout {
 
  Title   : stderr
  Usage   : $fac->stderr()
- Function: store the output from STDERR for the run, 
+ Function: store the output from STDERR for the run,
            if no file is specified in _run arguments
- Example : 
+ Example :
  Returns : scalar string
  Args    : on set, new value (a scalar or undef, optional)
 
@@ -1153,7 +1152,7 @@ sub stderr {
  Usage   : $obj->is_pseudo($newval)
  Function: returns true if this factory represents
            a pseudo-program
- Example : 
+ Example :
  Returns : value of is_pseudo (boolean)
  Args    : on set, new value (a scalar or undef, optional)
 
@@ -1161,14 +1160,14 @@ sub stderr {
 
 sub is_pseudo {
     my $self = shift;
-    
+
     return $self->{'is_pseudo'} = shift if @_;
     return $self->{'is_pseudo'};
 }
 
 =head2 AUTOLOAD
 
-AUTOLOAD permits 
+AUTOLOAD permits
 
  $class->new_yourcommand(@args);
 
@@ -1184,7 +1183,7 @@ sub AUTOLOAD {
     my @args = @_;
     $tok =~ s/.*:://;
     unless ($tok =~ /^new_/) {
-	$class->throw("Can't locate object method '$tok' via package '".ref($class)?ref($class):$class); 
+    $class->throw("Can't locate object method '$tok' via package '".ref($class)?ref($class):$class);
     }
     my ($cmd) = $tok =~ m/new_(.*)/;
     return $class->new( -command => $cmd, @args );
@@ -1198,7 +1197,7 @@ sub AUTOLOAD {
  Usage   : $pobj->set_parameters(%params);
  Function: sets the parameters listed in the hash or array
  Returns : true on success
- Args    : [optional] hash or array of parameter/values.  
+ Args    : [optional] hash or array of parameter/values.
 
 =cut
 
@@ -1212,41 +1211,41 @@ sub set_parameters {
     my $translation = $opts->{'_translation'};
     my $use_dash = $opts->{'_dash'};
     my $join = $opts->{'_join'};
-    unless (($self->can('command') && $self->command) 
-	    || (grep /command/, @args)) {
-	push @args, '-command', 'run';
+    unless (($self->can('command') && $self->command)
+        || (grep /command/, @args)) {
+    push @args, '-command', 'run';
     }
     my %args = @args;
     my $cmd = $args{'-command'} || $args{'command'} || ($self->can('command') && $self->command);
     if ($cmd) {
-	my (@p,@s, %x);
-	$self->warn('Command present, but no commands registered') unless $self->{'_options'}->{'_commands'};
-	$self->throw("Command '$cmd' not registered") unless grep /^$cmd$/, @{$self->{'_options'}->{'_commands'}};
-	$cmd = $self->{_options}->{_prefixes}->{$cmd} || $cmd;
-	
-	@p = (grep(!/^.*?\|/, @$params), grep(/^${cmd}\|/, @$params));
-	@s = (grep(!/^.*?\|/, @$switches), grep(/^${cmd}\|/, @$switches));
-	s/.*?\|// for @p;
-	s/.*?\|// for @s;
-	@x{@p, @s} = @{$translation}{
-	    grep( !/^.*?\|/, @$params, @$switches),
-	    grep(/^${cmd}\|/, @$params, @$switches) };
-	$opts->{_translation} = $translation = \%x;
-	$opts->{_params} = $params = \@p;
-	$opts->{_switches} = $switches = \@s;
+    my (@p,@s, %x);
+    $self->warn('Command present, but no commands registered') unless $self->{'_options'}->{'_commands'};
+    $self->throw("Command '$cmd' not registered") unless grep /^$cmd$/, @{$self->{'_options'}->{'_commands'}};
+    $cmd = $self->{_options}->{_prefixes}->{$cmd} || $cmd;
+
+    @p = (grep(!/^.*?\|/, @$params), grep(/^${cmd}\|/, @$params));
+    @s = (grep(!/^.*?\|/, @$switches), grep(/^${cmd}\|/, @$switches));
+    s/.*?\|// for @p;
+    s/.*?\|// for @s;
+    @x{@p, @s} = @{$translation}{
+        grep( !/^.*?\|/, @$params, @$switches),
+        grep(/^${cmd}\|/, @$params, @$switches) };
+    $opts->{_translation} = $translation = \%x;
+    $opts->{_params} = $params = \@p;
+    $opts->{_switches} = $switches = \@s;
     }
     $self->_set_from_args(
-	\@args,
-	-methods => [ @$params, @$switches, 'program_name', 'program_dir', 'out_type' ],
-	-create =>  1,
-	# when our parms are accessed, signal parameters are unchanged for
-	# future reads (until set_parameters is called)
-	-code => 
-	' my $self = shift; 
+    \@args,
+    -methods => [ @$params, @$switches, 'program_name', 'program_dir', 'out_type' ],
+    -create =>  1,
+    # when our parms are accessed, signal parameters are unchanged for
+    # future reads (until set_parameters is called)
+    -code =>
+    ' my $self = shift;
           $self->parameters_changed(0);
           return $self->{\'_\'.$method} = shift if @_;
           return $self->{\'_\'.$method};'
-	);
+    );
     # the question is, are previously-set parameters left alone when
     # not specified in @args?
     $self->parameters_changed(1);
@@ -1286,10 +1285,10 @@ sub reset_parameters {
     # accessors with undef values, but oh well for now /maj
 
     for my $p (@$params) {
-	push(@reset_args, $p => undef) unless grep /^[-]?$p$/, @args;
+    push(@reset_args, $p => undef) unless grep /^[-]?$p$/, @args;
     }
     for my $s (@$switches) {
-	push(@reset_args, $s => undef) unless grep /^[-]?$s$/, @args;
+    push(@reset_args, $s => undef) unless grep /^[-]?$s$/, @args;
     }
     push @args, @reset_args;
     $self->set_parameters(@args);
@@ -1320,7 +1319,7 @@ sub parameters_changed {
  Returns : Array of parameters
  Args    : 'params' for settable program parameters
            'switches' for boolean program switches
-           default: all 
+           default: all
 
 =cut
 
@@ -1330,28 +1329,28 @@ sub available_parameters {
     my $opts = $self->{'_options'};
     my @ret;
     for ($subset) {
-	(!defined || /^a/) && do {
-	    @ret = (@{$opts->{'_params'}}, @{$opts->{'_switches'}});
-	    last;
-	};
-	m/^p/i && do {
-	    @ret = @{$opts->{'_params'}};
-	    last;
-	};
-	m/^s/i && do {
-	    @ret = @{$opts->{'_switches'}};
-	    last;
-	};
-	m/^c/i && do {
-	    @ret = @{$opts->{'_commands'}};
-	    last;
-	};
-	m/^f/i && do { # get file spec
-	    return @{$opts->{'_files'}->{$self->command}};
-	};
-	do { #fail
-	    $self->throw("available_parameters: unrecognized subset");
-	};
+    (!defined || /^a/) && do {
+        @ret = (@{$opts->{'_params'}}, @{$opts->{'_switches'}});
+        last;
+    };
+    m/^p/i && do {
+        @ret = @{$opts->{'_params'}};
+        last;
+    };
+    m/^s/i && do {
+        @ret = @{$opts->{'_switches'}};
+        last;
+    };
+    m/^c/i && do {
+        @ret = @{$opts->{'_commands'}};
+        last;
+    };
+    m/^f/i && do { # get file spec
+        return @{$opts->{'_files'}->{$self->command}};
+    };
+    do { #fail
+        $self->throw("available_parameters: unrecognized subset");
+    };
     }
     return @ret;
 }
@@ -1377,27 +1376,27 @@ sub get_parameters {
     my @ret;
     my $opts = $self->{'_options'};
     for ($subset) {
-	m/^p/i && do { #params only
-	    for (@{$opts->{'_params'}}) {
-		push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
-	    }
-	    last;
-	};
-	m/^s/i && do { #switches only
-	    for (@{$opts->{'_switches'}}) {
-		push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
-	    }
-	    last;
-	};
-	m/^a/i && do { # all
-	    for ((@{$opts->{'_params'}},@{$opts->{'_switches'}})) {
-		push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
-	    }
-	    last;
-	};
-	do {
-	    $self->throw("get_parameters: unrecognized subset");
-	};
+    m/^p/i && do { #params only
+        for (@{$opts->{'_params'}}) {
+        push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
+        }
+        last;
+    };
+    m/^s/i && do { #switches only
+        for (@{$opts->{'_switches'}}) {
+        push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
+        }
+        last;
+    };
+    m/^a/i && do { # all
+        for ((@{$opts->{'_params'}},@{$opts->{'_switches'}})) {
+        push(@ret, $_, $self->$_) if $self->can($_) && defined $self->$_;
+        }
+        last;
+    };
+    do {
+        $self->throw("get_parameters: unrecognized subset");
+    };
     }
     return @ret;
 }
