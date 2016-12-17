@@ -9,7 +9,7 @@ use Module::Build;
 
 my $build = Module::Build->new(
     dist_name           => 'BioPerl-Run',
-    dist_version        => '1.006900',
+    dist_version        => '1.007000',
     module_name         => 'Bio::Run',
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
