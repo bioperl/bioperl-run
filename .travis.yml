@@ -18,9 +18,9 @@ addons:
       - clustalw
       - bwa
       - hmmer
-      - emboss
       - probcons
-      - wise
+      #- emboss
+      #- wise
       #- samtools
       #- muscle
       #- bedtools
