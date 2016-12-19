@@ -1,5 +1,8 @@
 Revision history for bioperl-run modules
 
+1.7.001
+* Minor release to deal with version indexing
+
 1.7.000
 
 * Bio::Tools::Run::WrapperBase moved from bioperl core to bioperl-run
