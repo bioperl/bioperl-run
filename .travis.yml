@@ -27,7 +27,7 @@ addons:
 
 install:
     #These are recommended or required Perl libraries
-    - "cpanm CJFIELDS/BioPerl-1.007000_005.tar.gz 2>&1 | tail -n 1"
+    - "cpanm Bio::Perl 2>&1 | tail -n 1"
     - "cpanm Bio::FeatureIO 2>&1 | tail -n 1"
     - "cpanm IPC::Run XML::Twig 2>&1 | tail -n 1"
     - "cpanm Config::Any 2>&1 | tail -n 1"
