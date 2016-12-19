@@ -7,9 +7,32 @@ use strict;
 use warnings;
 use Module::Build;
 
-my $build = Module::Build->new(
+my $build = Module::Build->subclass(
+    code => q(
+
+        # add dist version to META files
+        sub get_metadata {
+            my ($self, %args) = @_;
+            my $metadata = $self->SUPER::get_metadata(%args);
+
+            if (exists $metadata->{provides}) {
+                my $ver = $self->dist_version;
+                my $pkgs = $metadata->{provides};
+                for my $p (keys %{$pkgs}) {
+                    if (!exists($pkgs->{$p}->{'version'})) {
+                        $pkgs->{$p}->{'version'} = $ver;
+                    } else {
+                        $self->log_warn("Note: Module $p has a set version: ".$pkgs->{$p}->{'version'}."\n")
+                            if $pkgs->{$p}->{'version'} ne $ver;
+                    }
+                }
+            }
+            return $metadata;
+        }
+    )
+    )->new(
     dist_name           => 'BioPerl-Run',
-    dist_version        => '1.007000',
+    dist_version        => '1.007001',
     module_name         => 'Bio::Run',
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
@@ -24,7 +47,7 @@ my $build = Module::Build->new(
     requires            => {
                             'perl'               => '5.6.1',
                             'Bio::Root::Version' => '1.007000',
-'Bio::Root::Root'    => 0,
+                            'Bio::Root::Root'    => 0,
                            },
     recommends          => {
                             'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
@@ -96,4 +119,3 @@ else {
 # Create the build script and exit
 $build->create_build_script;
 
-exit;
