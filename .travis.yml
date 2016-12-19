@@ -7,7 +7,7 @@ perl:
   #- "5.16"
   #- "5.14"
 
-sudo: required
+sudo: false
 env: PERL_CPANM_OPT="--notest --force --skip-satisfied"
 
 addons:
@@ -32,10 +32,13 @@ install:
     - "cpanm Bio::FeatureIO 2>&1 | tail -n 1"
     - "cpanm IPC::Run XML::Twig 2>&1 | tail -n 1"
     - "cpanm Config::Any 2>&1 | tail -n 1"
+    - "cpanm File::Sort 2>&1 | tail -n 1"
     #- "SAMTOOLS=( dirname `which samtools` ) cpanm Bio::DB::Sam 2>&1 | tail -n 1"
 
-before_script:
-    - ./packages/install-samtools.sh
+# Install non-apt dependencies
+before_install:
+    - bash ./packages/install-samtools.sh
+    - export PATH=$PATH:$HOME/local/bin/
 
 script:
     - "perl ./Build.PL --accept"
