@@ -12,7 +12,6 @@ env: PERL_CPANM_OPT="--notest --force --skip-satisfied"
 addons:
   apt:
     packages:
-      - samtools
       - ncbi-blast+
       - ncbi-blast+-legacy
       - clustalw
@@ -21,6 +20,7 @@ addons:
       - emboss
       - probcons
       - wise
+      #- samtools
       #- muscle
       #- bedtools
       #- mafft
@@ -34,7 +34,7 @@ install:
     #- "SAMTOOLS=( dirname `which samtools` ) cpanm Bio::DB::Sam 2>&1 | tail -n 1"
 
 before_script:
-    - ./install/install-samtools.sh
+    - ./packages/install-samtools.sh
 
 script:
     - "perl ./Build.PL --accept"
