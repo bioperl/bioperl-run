@@ -33,6 +33,9 @@ install:
     - "cpanm Config::Any 2>&1 | tail -n 1"
     #- "SAMTOOLS=( dirname `which samtools` ) cpanm Bio::DB::Sam 2>&1 | tail -n 1"
 
+before_script:
+    - ./install/install-samtools.sh
+
 script:
     - "perl ./Build.PL --accept"
     - "./Build test"
