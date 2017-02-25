@@ -1,8 +1,6 @@
-# $Id$
-#
 # BioPerl module for Bio::Factory::EMBOSS
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Heikki Lehvaslaiho <heikki-at-bioperl-dot-org>
 #
@@ -18,25 +16,23 @@ Bio::Factory::EMBOSS - EMBOSS application factory class
 
 =head1 SYNOPSIS
 
-  # get an EMBOSS factory
+  # Get an EMBOSS factory
   use Bio::Factory::EMBOSS;
   $f = Bio::Factory::EMBOSS -> new();
-  # get an EMBOSS application  object from the factory
+  # Get an EMBOSS application  object from the factory
   $water = $f->program('water') || die "Program not found!\n";
 
-  # here is an example of running the application -
-  # water can compare 1 sequence against 1 or more sequences
-  # in a database using Smith-Waterman
-  my $seq_to_test; # this would have a seq here
-  my @seqs_to_check; # this would be a list of seqs to compare 
-                       # (could be just 1)
+  # Here is an example of running the application - water can
+  # compare 1 sequence against 1 or more sequences using Smith-Waterman
+
   my $wateroutfile = 'out.water';
-  $water->run({-sequences => $seq_to_test,
-               -seqall    => \@seqs_to_check,
+  $water->run({-sequences => $seq_object,
+               -seqall    => \@seq_objects,
                -gapopen   => '10.0',
                -gapextend => '0.5',
                -outfile   => $wateroutfile});
-  # now you might want to get the alignment
+
+  # Now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = Bio::AlignIO->new(-format => 'emboss',
                                 -file   => $wateroutfile);
@@ -69,15 +65,15 @@ Bioperl mailing lists  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -138,7 +134,7 @@ sub new {
  Function: get/set the location of EMBOSS programs.
            Valid values are 'local' and 'novella'.
  Returns : string, defaults to 'local'
- Args    : string 
+ Args    : string
 
 =cut
 
@@ -269,7 +265,7 @@ sub _program_list {
         $self->{'_groups'}->{$groupname} = [] if $groupname;
         while ( /^([a-z]\w+) +(.+)$/mg ) {
             #print "$1\t$2 \n" if $1;
-            $self->{'_programs'}->{$1} = $2 if $1; 
+            $self->{'_programs'}->{$1} = $2 if $1;
             $self->{'_programgroup'}->{$1} = $groupname if $1;
             push @{$self->{'_groups'}->{$groupname}}, $1 if $1;
         }

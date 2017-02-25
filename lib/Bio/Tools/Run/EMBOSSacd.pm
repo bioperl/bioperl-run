@@ -2,7 +2,7 @@
 # BioPerl module for Bio::Tools::Run::EMBOSSacd
 #
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Heikki Lehvaslaiho <heikki-at-bioperl-dot-org>
 #
@@ -18,34 +18,28 @@ Bio::Tools::Run::EMBOSSacd - class for EMBOSS Application qualifiers
 
 =head1 SYNOPSIS
 
+  # Get an EMBOSS factory
   use Bio::Factory::EMBOSS;
-  # get an EMBOSS application object from the EMBOSS factory
-  $factory = Bio::Factory::EMBOSS->new();
-  $application = $factory->program('embossversion');
-  # run the application with an optional hash containing parameters
-  $result = $application->run(); # returns a string or creates a file
-  print $result . "\n";
+  $f = Bio::Factory::EMBOSS -> new();
+  # Get an EMBOSS application  object from the factory
+  $water = $f->program('water') || die "Program not found!\n";
 
-  $water = $factory->program('water');
+  # Here is an example of running the application - water can
+  # compare 1 sequence against 1 or more sequences using Smith-Waterman
 
-  # here is an example of running the application
-  # water can compare 1 seq against 1->many sequences
-  # in a database using Smith-Waterman
-  my $seq_to_test; # this would have a seq here
-  my @seqs_to_check; # this would be a list of seqs to compare 
-                     # (could be just 1)
   my $wateroutfile = 'out.water';
-  $water->run({ -sequencea => $seq_to_test,
-                -seqall    => \@seqs_to_check,
-                -gapopen   => '10.0',
-                -gapextend => '0.5',
-                -outfile   => $wateroutfile});
-  # now you might want to get the alignment
+  $water->run({-sequences => $seq_object,
+               -seqall    => \@seq_objects,
+               -gapopen   => '10.0',
+               -gapextend => '0.5',
+               -outfile   => $wateroutfile});
+
+  # Now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = Bio::AlignIO->new(-format => 'emboss',
-			                      -file   => $wateroutfile);
+                                -file   => $wateroutfile);
 
-  while( my $aln = $alnin->next_aln ) {
+  while ( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
   }
 
@@ -78,15 +72,15 @@ Bioperl mailing lists  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -126,7 +120,7 @@ use Bio::Root::Root;
 
 BEGIN {
 
-    %QUALIFIER_CATEGORIES = 
+    %QUALIFIER_CATEGORIES =
 	(
 	 'Mandatory qualifiers'            => 'mandatory',
 	 'Standard (Mandatory) qualifiers' => 'mandatory',
@@ -148,7 +142,7 @@ BEGIN {
  Usage   : $emboss_prog->acd($prog_name);
  Function: Constructor for the class.
            Calls EMBOSS program 'acdc', converts the
-           HTML output into XML and uses XML::Twig XML 
+           HTML output into XML and uses XML::Twig XML
            parser to write out a hash of qualifiers which is
            then blessed.
  Throws  : without program name
@@ -179,7 +173,7 @@ sub new {
 	# reading from EMBOSS program acdtable stdout (version 2.8.0 or greater)
 	$file = `acdtable $prog -help -verbose 2>&1`;
     }
-    
+
     # converting HTML -> XHTML for XML parsing
     $file =~ s/border/border="1"/;
     $file =~ s/=(\d+)/="$1"/g;
@@ -190,11 +184,11 @@ sub new {
 			   {
 			       '/table/tr' => \&_row  }
 			   );
-    
+
     $t->safe_parse( $file);
-    
+
     #Bio::Root::Root->throw("XML parsing error: $@");
-    
+
     my %acd = %OPT; # copy to a private hash
     $acd{'_name'} = $prog;
     bless \%acd, $class;
@@ -210,7 +204,7 @@ sub _row {
     my $namet = $name->text;
     if ($namet =~ /qualifiers$/) { # set category
 	$QUAL = $QUALIFIER_CATEGORIES{$namet};
-	if( ! defined $QUAL ) { 
+	if( ! defined $QUAL ) {
 	    warn("-- namet is $namet\n");
 	}
 	return;
@@ -242,7 +236,7 @@ sub _row {
  Function: sets/gets the name of the EMBOSS program
            Setting is done by the EMBOSSApplication object,
            you should only get it.
- Throws  : 
+ Throws  :
  Returns : name string
  Args    : None
 
@@ -264,7 +258,7 @@ sub name {
  Function: Print out the qualifiers.
            Uses Data::Dumper to print the qualifiers into STDOUT.
            A valid qualifier name given as an argment limits the output.
- Throws  : 
+ Throws  :
  Returns : print string
  Args    : optional qualifier name
 
@@ -284,7 +278,7 @@ sub print {
  Title   : mandatory
  Usage   : $acd->mandatory
  Function: gets a  mandatory subset of qualifiers
- Throws  : 
+ Throws  :
  Returns : Bio::Tools::Run::EMBOSSacd object
  Args    : none
 
@@ -313,7 +307,7 @@ These methods can be used test qualifier names and read values.
  Title   : qualifier
  Usage   : $acd->qualifier($string)
  Function: tests for the existence of the qualifier
- Throws  : 
+ Throws  :
  Returns : boolean
  Args    : string, name of the qualifier
 
@@ -322,7 +316,7 @@ These methods can be used test qualifier names and read values.
 sub qualifier {
     my ($self, $value) = @_;
 
-    $self->throw("Qualifier has to start with '-'") 
+    $self->throw("Qualifier has to start with '-'")
 	unless $value =~ /^-/;
     $self->{$value} ? 1 : 0
 }
@@ -332,8 +326,8 @@ sub qualifier {
  Title   : category
  Usage   : $acd->category($qual_name)
  Function: Return the category of the qualifier
- Throws  : 
- Returns : 'mandatory' or 'optional' or 'advanced' or 
+ Throws  :
+ Returns : 'mandatory' or 'optional' or 'advanced' or
             'associated' or 'general'
  Args    : string, name of the qualifier
 
@@ -352,7 +346,7 @@ sub category {
  Title   : values
  Usage   : $acd->values($qual_name)
  Function: Return the possible values for the qualifier
- Throws  : 
+ Throws  :
  Returns : string
  Args    : string, name of the qualifier
 
@@ -372,7 +366,7 @@ sub values {
  Title   : descr
  Usage   : $acd->descr($qual_name)
  Function: Return the description of the qualifier
- Throws  : 
+ Throws  :
  Returns : boolean
  Args    : string, name of the qualifier
 
@@ -392,7 +386,7 @@ sub descr {
  Title   : unnamed
  Usage   : $acd->unnamed($qual_name)
  Function: Find if the qualifier can be left unnamed
- Throws  : 
+ Throws  :
  Returns : 0 if needs to be named, order number otherwise
  Args    : string, name of the qualifier
 
@@ -412,7 +406,7 @@ sub unnamed {
  Title   : default
  Usage   : $acd->default($qual_name)
  Function: Return the default value for the qualifier
- Throws  : 
+ Throws  :
  Returns : scalar
  Args    : string, name of the qualifier
 

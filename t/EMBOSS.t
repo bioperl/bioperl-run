@@ -5,20 +5,23 @@
 # `./Build test'. After `./Build install' it should work as `perl test.t'
 
 use strict;
+
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 32,
-			   -requires_modules => [qw(XML::Twig)]);
-	use_ok('Bio::Root::IO');
-	use_ok('Bio::SeqIO');
-	use_ok('Bio::AlignIO');
-	use_ok('Bio::Factory::EMBOSS');
+    test_begin(
+        -tests            => 31,
+        -requires_modules => [qw(XML::Twig)]
+    );
+    use_ok('Bio::Root::IO');
+    use_ok('Bio::SeqIO');
+    use_ok('Bio::AlignIO');
+    use_ok('Bio::Factory::EMBOSS');
 }
 
 my $compseqoutfile = test_output_file();
 my $wateroutfile   = test_output_file();
 my $consoutfile    = test_output_file();
-my $verbose = test_debug();
+my $verbose        = test_debug();
 
 ## End of black magic.
 ##
@@ -30,110 +33,136 @@ my $factory = Bio::Factory::EMBOSS->new();
 ok($factory);
 
 SKIP: {
-	my $compseqapp = $factory->program('compseq');
-	
+    my $compseqapp = $factory->program('compseq');
+
     $factory->verbose($verbose);
-    
-	skip('EMBOSS not installed',27) if !$compseqapp;
-	
-	my $version = $factory->version;
-	
-	my %input = ( '-word' => 4,
-			  '-sequence' => test_input_file('dna1.fa'),
-			  '-outfile' => $compseqoutfile);
-	$compseqapp->run(\%input);
-	ok(-e $compseqoutfile);
-	
-	my $water = $factory->program('water');
-	
-	ok ($water);
-	
-	# testing in-memory use of 
-	my $in = Bio::SeqIO->new(-format => 'fasta',
-				-file =>  test_input_file('cysprot1a.fa'));
-	my $seq = $in->next_seq();
-	ok($seq);
-	my @amino;
-	$in = Bio::SeqIO->new(-format => 'fasta',
-				 -file =>  test_input_file('amino.fa'));
-	while( my $s = $in->next_seq) {
-		push @amino, $s;
-	}
-	
-	my %expected;
-	if( $version ge '2.8.0' ) {
-		$water->run({ '-asequence' => $seq,
-			  '-bsequence'    => \@amino,
-			  '-gapopen'   => '10.0',
-			  '-gapextend' => '0.5',
-			  '-outfile'   => $wateroutfile});
-		%expected = ( 'alnlen' => 394,
-			  'opid'    => '30.71',
-			  'apid'    => '40.20');
-			  
-	} else {
-		$water->run({ '-sequencea' => $seq,
-			  '-seqall'    => \@amino,
-			  '-gapopen'   => '10.0',
-			  '-gapextend' => '0.5',
-			  '-outfile'   => $wateroutfile});
-		%expected = ( 'alnlen' => 339,
-			  'opid'    => '33.04',
-			  'apid'    => '40.58');
-	
-	}
-	ok(-e $wateroutfile);
-	
-	my $alnin = Bio::AlignIO->new(-format => 'emboss',
-					-file   => $wateroutfile);
-	
-	ok( $alnin);
-	my $aln = $alnin->next_aln;
-	ok($aln);
-	is($aln->length, 43);
-	is($aln->overall_percentage_identity, 100);
-	is($aln->average_percentage_identity, 100);
-	
-	my ($first) = $aln->each_seq();
-	ok($first->seq(), 'SCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGE');
-	$aln = $alnin->next_aln;
-	ok($aln);
-	
-	is($aln->length, $expected{'alnlen'});
-	is(sprintf("%.2f",$aln->overall_percentage_identity), $expected{'opid'});
-	is(sprintf("%.2f",$aln->average_percentage_identity), $expected{'apid'});
-	
-	
-	my $cons = $factory->program('cons');
-	$cons->verbose(0);
-	$in = Bio::AlignIO->new(-format => 'msf',
-				   -file   => test_input_file('cysprot.msf'));
-	my $aln2 = $in->next_aln;
-	if( $version ge '2.8.0' ) {
-		$cons->run({ '-sequence' => $aln2,
-			 '-outseq'   => $consoutfile});
-	} else {
-		$cons->run({ '-msf'   => $aln2,
-			 '-outseq'=> $consoutfile});
-	}
-	ok(-e $consoutfile);
-	
-	# testing acd parsing and EMBOSSacd methods
-	
-	$compseqapp = $factory->program('compseq');
-	
-	ok my $acd = $compseqapp->acd;
-	is $compseqapp->acd->name, 'compseq';
-	ok my $compseq_mand_acd = $compseqapp->acd->mandatory;
-	ok $compseq_mand_acd->mandatory->qualifier('-word');
-	is $compseq_mand_acd->mandatory->qualifier('-supper1'), 0;
-	is $acd->qualifier('-ppppppp'), 0;
-	ok $acd->qualifier('-reverse');
-	is $acd->category('-reverse'), 'optional';
-	like $acd->values('-reverse'), qr/(?:Yes\/No|true)/;
-	like $acd->descr('-reverse'), qr/(?:boolean|true)/;
-	is $acd->unnamed('-reverse'), 0;
-	like $acd->default('-reverse'), qr/(?:Yes\/No|true)/;
+
+    skip( 'EMBOSS not installed', 27 ) if ! $compseqapp;
+
+    my $version = $factory->version;
+
+    my %input = (
+        -word     => 4,
+        -sequence => test_input_file('dna1.fa'),
+        -outfile  => $compseqoutfile
+    );
+    $compseqapp->run( \%input );
+    ok( -e $compseqoutfile );
+
+    my $water = $factory->program('water');
+    ok($water);
+
+    # testing in-memory use of
+    my $in = Bio::SeqIO->new(
+        -format => 'fasta',
+        -file   => test_input_file('cysprot1a.fa')
+    );
+    my $seq = $in->next_seq();
+
+    my @amino;
+    $in = Bio::SeqIO->new(
+        -format => 'fasta',
+        -file   => test_input_file('amino.fa')
+    );
+    while ( my $s = $in->next_seq ) {
+        push @amino, $s;
+    }
+
+    my %expected;
+    if ( $version ge '2.8.0' ) {
+        $water->run(
+            {   -asequence => $seq,
+                -bsequence => \@amino,
+                -gapopen   => '10.0',
+                -gapextend => '0.5',
+                -outfile   => $wateroutfile
+            }
+        );
+        %expected = (
+            'alnlen' => 394,
+            'opid'   => '30.71',
+            'apid'   => '40.20'
+        );
+
+    } else {
+        $water->run(
+            {   -sequencea => $seq,
+                -seqall    => \@amino,
+                -gapopen   => '10.0',
+                -gapextend => '0.5',
+                -outfile   => $wateroutfile
+            }
+        );
+        %expected = (
+            'alnlen' => 339,
+            'opid'   => '33.04',
+            'apid'   => '40.58'
+        );
+
+    }
+    ok( -e $wateroutfile );
+
+    my $alnin = Bio::AlignIO->new(
+        -format => 'emboss',
+        -file   => $wateroutfile
+    );
+
+    ok($alnin);
+    my $aln = $alnin->next_aln;
+    ok($aln);
+    is( $aln->length,                      43 );
+    is( $aln->overall_percentage_identity, 100 );
+    is( $aln->average_percentage_identity, 100 );
+
+    my ($first) = $aln->each_seq();
+    ok( $first->seq(), 'SCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGE' );
+    $aln = $alnin->next_aln;
+    ok($aln);
+
+    is( $aln->length, $expected{'alnlen'} );
+    is( sprintf( "%.2f", $aln->overall_percentage_identity ),
+        $expected{'opid'} );
+    is( sprintf( "%.2f", $aln->average_percentage_identity ),
+        $expected{'apid'} );
+
+    my $cons = $factory->program('cons');
+    $cons->verbose(0);
+    $in = Bio::AlignIO->new(
+        -format => 'msf',
+        -file   => test_input_file('cysprot.msf')
+    );
+    my $aln2 = $in->next_aln;
+    if ( $version ge '2.8.0' ) {
+        $cons->run(
+            {   -sequence => $aln2,
+                -outseq   => $consoutfile
+            }
+        );
+    } else {
+        $cons->run(
+            {   -msf    => $aln2,
+                -outseq => $consoutfile
+            }
+        );
+    }
+    ok( -e $consoutfile );
+
+    # testing acd parsing and EMBOSSacd methods
+
+    $compseqapp = $factory->program('compseq');
+
+    ok my $acd = $compseqapp->acd;
+    is $compseqapp->acd->name, 'compseq';
+    ok my $compseq_mand_acd = $compseqapp->acd->mandatory;
+    ok $compseq_mand_acd->mandatory->qualifier('-word');
+    is $compseq_mand_acd->mandatory->qualifier('-supper1'), 0;
+    is $acd->qualifier('-ppppppp'), 0;
+    ok $acd->qualifier('-reverse');
+    is $acd->category('-reverse'),  'optional';
+    like $acd->values('-reverse'),  qr/(?:Yes\/No|true)/;
+    like $acd->descr('-reverse'),   qr/(?:boolean|true)/;
+    is $acd->unnamed('-reverse'),   0;
+    like $acd->default('-reverse'), qr/(?:Yes\/No|true)/;
 }
 
 __END__
@@ -157,4 +186,4 @@ ok 1 if $@; # '-sequence' missing
 eval {
     $compseqapp->run(\%input);
 };
-ok 1 if $@; # -incorrect_option is incorrect	
+ok 1 if $@; # -incorrect_option is incorrect

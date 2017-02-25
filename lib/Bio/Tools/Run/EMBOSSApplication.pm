@@ -13,32 +13,26 @@ Bio::Tools::Run::EMBOSSApplication - class for EMBOSS Applications
 
 =head1 SYNOPSIS
 
+  # Get an EMBOSS factory
   use Bio::Factory::EMBOSS;
-  # get an EMBOSS application object from the EMBOSS factory
-  $factory = Bio::Factory::EMBOSS->new();
-  $application = $factory->program('embossversion');
-  # run the application with an optional hash containing parameters
-  $result = $application->run(); # returns a string or creates a file
-  print $result . "\n";
+  $f = Bio::Factory::EMBOSS -> new();
+  # Get an EMBOSS application  object from the factory
+  $water = $f->program('water') || die "Program not found!\n";
 
-  $water = $factory->program('water');
-
-  # here is an example of running the application
-  # water can compare 1 seq against 1->many sequences
-  # in a database using Smith-Waterman
-  my $seq_to_test;     # this would have a seq here
-  my @seqs_to_check; # this would be a list of seqs to compare 
+  # Here is an example of running the application - water can
+  # compare 1 sequence against 1 or more sequences using Smith-Waterman
 
   my $wateroutfile = 'out.water';
-  $water->run({-sequencea => $seq_to_test,
-               -seqall    => \@seqs_to_check,
+  $water->run({-sequences => $seq_object,
+               -seqall    => \@seq_objects,
                -gapopen   => '10.0',
                -gapextend => '0.5',
                -outfile   => $wateroutfile});
-  # now you might want to get the alignment
+
+  # Now you might want to get the alignment
   use Bio::AlignIO;
   my $alnin = Bio::AlignIO->new(-format => 'emboss',
-			                      -file   => $wateroutfile);
+                                -file   => $wateroutfile);
 
   while ( my $aln = $alnin->next_aln ) {
       # process the alignment -- these will be Bio::SimpleAlign objects
@@ -46,7 +40,7 @@ Bio::Tools::Run::EMBOSSApplication - class for EMBOSS Applications
 
 =head1 DESCRIPTION
 
-The EMBOSSApplication class can represent EMBOSS any program. It is
+The EMBOSSApplication class can represent any EMBOSS program. It is
 created by a L<Bio::Factory::EMBOSS> object.
 
 If you want to check command line options before sending them to the
@@ -67,15 +61,15 @@ Bioperl mailing lists  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -165,7 +159,7 @@ sub run {
 				$input->{$attr} = undef;
 				return;
 			} elsif( $pieces[0]->isa('Bio::PrimarySeqI') ) {
-				unless(  $SEQIOLOADED ) { 
+				unless(  $SEQIOLOADED ) {
 					require Bio::SeqIO;
 					$SEQIOLOADED = 1;
 				}
@@ -180,7 +174,7 @@ sub run {
 				close($tfh);
 				undef $tfh;
 			} elsif( $pieces[0]->isa('Bio::Align::AlignI') ) {
-				unless(  $ALIGNIOLOADED ) { 
+				unless(  $ALIGNIOLOADED ) {
 					require Bio::AlignIO;
 					$ALIGNIOLOADED = 1;
 				}
@@ -223,7 +217,7 @@ sub run {
 		foreach my $attr (keys %{$self->acd->mandatory} ) {
 			last unless defined $self->acd; # might not have the parser
 			unless (defined $input->{$attr}) {
-				print "-" x 38, "\n", "MISSING MANDATORY ATTRIBUTE: $attr\n", 
+				print "-" x 38, "\n", "MISSING MANDATORY ATTRIBUTE: $attr\n",
 				  "-" x 38, "\n";
 				$self->acd->print($attr) and
 				  $self->throw("Program ". $self->name.
@@ -232,7 +226,7 @@ sub run {
 		}
 	}
 	my $runstring = join (' ', $self->name, $option_string, '-auto');
-	$self->debug( "Command line: ", $runstring, "\n"); 
+	$self->debug( "Command line: ", $runstring, "\n");
 	return `$runstring`;
 }
 
@@ -243,9 +237,9 @@ sub run {
  Function: finds out all the possible qualifiers for this
            EMBOSS application. They can be used to debug the
            options given.
- Throws  : 
+ Throws  :
  Returns : boolean
- Args    : 
+ Args    :
 
 =cut
 
@@ -265,7 +259,7 @@ sub acd {
  Function: sets/gets the name of the EMBOSS program
            Setting is done by the EMBOSSFactory object,
            you should only get it.
- Throws  : 
+ Throws  :
  Returns : name string
  Args    : None
 
@@ -287,7 +281,7 @@ sub name {
  Function: sets/gets the descr of the EMBOSS program
            Setting is done by the EMBOSSFactory object,
            you should only get it.
- Throws  : 
+ Throws  :
  Returns : description string
  Args    : None
 
@@ -312,7 +306,7 @@ sub descr {
 
            If the application is assigned into a subgroup
            use l<subgroup> to get it.
- Throws  : 
+ Throws  :
  Returns : string, group name
  Args    : group string
 
@@ -336,7 +330,7 @@ sub group {
  Function: sets/gets the subgroup of the EMBOSS program
            Setting is done by the EMBOSSFactory object,
            you should only get it.
- Throws  : 
+ Throws  :
  Returns : string, subgroup name; undef if not defined
  Args    : None
 
