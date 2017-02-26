@@ -3,13 +3,13 @@ bioperl-run INSTALLATION
 INSTALL THE RIGHT BIOPERL
 
 You need at least the corresponding version of Bioperl. Since this
-is BioPerl-run 1.6.9, you should use BioPerl 1.6.9.
+is BioPerl-run 1.007001, you should use BioPerl 1.007001.
 
 
 INSTALLATION
 
 Installation instructions at the following address apply here:
-http://www.bioperl.org/wiki/Installing_Bioperl_for_Unix
+http://bioperl.org/INSTALL.html
 The next 2 sections summarize the essential points from there.
 
 
@@ -28,11 +28,11 @@ Find the name of the bioperl-run version you want:
   >cpan
   cpan>d /bioperl-run/
   Database was generated on Mon, 20 Nov 2006 05:24:36 GMT
-  Distribution C/CJ/CJFIELDS/BioPerl-run-1.6.9.tar.gz
-  
+  Distribution CJFIELDS/BioPerl-Run-1.007001.tar.gz
+
 Now install:
 
- cpan>install C/CJ/CJFIELDS/BioPerl-run-1.6.9.tar.gz
+ cpan>install CJFIELDS/BioPerl-Run-1.007001.tar.gz
 
 If you've installed everything perfectly then you may pass all the tests
 run in the './Build test' phase.
@@ -45,7 +45,7 @@ your usage of bioperl-run.
 If you decide that the failed tests will not affect how you intend to use
 bioperl-run and you'd like to install anyway do:
 
- cpan>force install C/CJ/CJFIELDS/BioPerl-run-1.6.9.tar.gz
+ cpan>force install CJFIELDS/BioPerl-Run-1.007001.tar.gz
 
 This is what most experienced Bioperl users would do. However, if you're
 concerned about a failed test and need assistance or advice then contact
@@ -68,7 +68,7 @@ Issue the following command from within bioperl-run/:
 You can run regression tests and install bioperl-run using the
 following commands:
 
-  >./Build test  
+  >./Build test
   >./Build install
 
 NOTE: many tests will be skipped without the necessary environment
@@ -83,36 +83,3 @@ http://www.bioperl.org/wiki/Installing_Bioperl_on_Windows
 
 (the instructions are aimed at bioperl-core, but apply
 equally to bioperl-run)
-
-
-ENVIRONMENT VARIABLES
-
- Some important environment variables you need to be aware of.
-
- Variable		Values     Comment
- --------------------------------------------------------------------
- PHYLIPVERSION	3.5, 3.6   If you want to run Phylip3.6 you 
-                           need to set this env variable to 3.6
-
- BLASTDIR		DIR PATH   Point to the directory where BLAST 
- 	                       is installed
-
- GENSCAN_DIR	DIR PATH   Point to the directory where 
-                           HumanIso.smat file is installed
-
- EPONINEDIR     DIR PATH   Point to the directory where 
-                           eponine_scan.jar is installed
-                           
- PAMLDIR        DIR PATH   Point to directory where PAML is 
-                           installed
-
-Generally the all-caps program name concatenated to 'DIR' patten for
-environment variable names is followed for most programs. However
-there are some exceptions (some require an underscore between the
-program name and 'DIR'), so check the documentation for the module
-you're interested in using.
-
-Note that for some programs, having the executables in your path is
-not enough - the correct environment variable still needs to be set,
-and sometimes it shouldn't point to the executable location, but
-somewhere else - again, check the documentation.
