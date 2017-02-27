@@ -1,6 +1,6 @@
 # BioPerl module for Bio::Tools::Run::tRNAscanSE
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Bioperl
 #
@@ -18,9 +18,9 @@ Bio::Tools::Run::tRNAscanSE - Wrapper for local execution of tRNAscan-SE
 
 =head1 SYNOPSIS
 
-  my $factory = Bio::Tools::Run::tRNAscanSE->new('-program' => 'tRNAscan-SE');
+  my $factory = Bio::Tools::Run::tRNAscanSE->new(-program => 'tRNAscan-SE');
 
-  # Pass the factory Bio::Seq objects
+  # Pass the factory Bio::Seq objects,
   # returns a Bio::Tools::tRNAscanSE object
   my $factory = $factory->run($seq);
   or
@@ -31,7 +31,7 @@ Bio::Tools::Run::tRNAscanSE - Wrapper for local execution of tRNAscan-SE
 Wrapper module for tRNAscan-SE.
 
 tRNAscan-SE is open source and available at
-L<http://selab.wustl.edu/cgi-bin/selab.pl?mode=software#trnascan/>.
+L<http://lowelab.ucsc.edu/software/>.
 
 =head1 FEEDBACK
 
@@ -44,15 +44,15 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -63,7 +63,7 @@ web:
 
   http://redmine.open-bio.org/projects/bioperl/
 
-=head1 AUTHOR - Mark Johnson 
+=head1 AUTHOR - Mark Johnson
 
  Email: johnsonm-at-gmail-dot-com
 
@@ -102,11 +102,11 @@ our @tRNAscanSE_switches = (qw(A B C G O P));
 =cut
 
 sub program_name {
-    
+
     my ($self, $val) = @_;
-    
+
     $self->program($val) if $val;
-    
+
     return $self->program();
 
 }
@@ -122,13 +122,13 @@ sub program_name {
 =cut
 
 sub program_dir {
-    
+
     my ($self, $val) = @_;
-    
+
     $self->{'_program_dir'} = $val if $val;
-    
+
     return $self->{'_program_dir'};
-    
+
 }
 
 =head2 new
@@ -137,15 +137,15 @@ sub program_dir {
  Usage   : $tRNAscanSE->new(@params)
  Function: creates a new tRNAscanSE factory
  Returns:  Bio::Tools::Run::tRNAscanSE
- Args    : 
+ Args    :
 
 =cut
 
 sub new {
-    
+
        my ($class,@args) = @_;
        my $self = $class->SUPER::new(@args);
-       
+
        $self->io->_initialize_io();
 
        $self->_set_from_args(
@@ -162,7 +162,7 @@ sub new {
        }
 
        return $self;
-       
+
 }
 
 =head2 run
@@ -176,26 +176,26 @@ sub new {
 =cut
 
 sub run{
-    
+
     my ($self, @seq) = @_;
 
     unless (@seq) {
         $self->throw("Must supply at least one Bio::PrimarySeqI");
     }
-    
+
     foreach my $seq (@seq) {
-        
+
         unless ($seq->isa('Bio::PrimarySeqI')) {
             $self->throw("Object does not implement Bio::PrimarySeqI");
         }
-        
+
     }
 
     my $program_name = $self->program_name();
     my $file_name    = $self->_write_seq_file(@seq);
 
     return $self->_run($file_name);
-    
+
 }
 
 =head2 _run
@@ -203,15 +203,15 @@ sub run{
  Title   :   _run
  Usage   :   $obj->_run()
  Function:   Internal(not to be used directly)
- Returns :   An instance of Bio::Tools::tRNAscanSE 
+ Returns :   An instance of Bio::Tools::tRNAscanSE
  Args    :   file name
 
 =cut
 
 sub _run {
-    
+
     my ($self, $seq_file_name) = @_;
-    
+
     my @cmd = (
                $self->executable(),
                split(/\s+/, $self->_setparams()),
@@ -220,33 +220,33 @@ sub _run {
 
     my $cmd = join(' ', @cmd);
     $self->debug("tRNAscan-SE Command = $cmd");
-    
+
     my $program_name = $self->program_name();
     my ($program_stderr);
 
     my ($output_fh, $output_file_name) = $self->io->tempfile(-dir=> $self->tempdir());
-    
-    
+
+
     my @ipc_args = (\@cmd, \undef, '>', $output_file_name, '2>', \$program_stderr);
 
     # Run the program via IPC::Run so:
     # 1) The console doesn't get cluttered up with the program's STDERR/STDOUT
     # 2) We don't have to embed STDERR/STDOUT redirection in $cmd
     # 3) We don't have to deal with signal handling (IPC::Run should take care
-    #    of everything automagically. 
+    #    of everything automagically.
 
     eval {
         IPC::Run::run(@ipc_args) || die $CHILD_ERROR;;
     };
 
     if ($EVAL_ERROR) {
-        $self->throw("tRNAscan-SE call crashed: $EVAL_ERROR"); 
+        $self->throw("tRNAscan-SE call crashed: $EVAL_ERROR");
     }
 
     $self->debug(join("\n", 'tRNAscanSE STDERR:', $program_stderr)) if $program_stderr;
-        
+
     return Bio::Tools::tRNAscanSE->new(-file => $output_file_name);
-    
+
 }
 
 sub _setparams {
@@ -261,7 +261,7 @@ sub _setparams {
                                                 -dash     => 1
 
                                             );
-    
+
     # Kill leading and trailing whitespace
     $param_string =~ s/^\s+//g;
     $param_string =~ s/\s+$//g;
@@ -283,7 +283,7 @@ sub _setparams {
 sub _write_seq_file {
 
     my ($self, @seq) = @_;
-    
+
     my ($fh, $file_name) = $self->io->tempfile(-dir=>$self->tempdir());
     my $out              = Bio::SeqIO->new(-fh => $fh , '-format' => 'Fasta');
 
@@ -293,7 +293,7 @@ sub _write_seq_file {
 
     close($fh);
     $out->close();
-    
+
     return $file_name;
 
 }

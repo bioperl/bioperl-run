@@ -20,7 +20,8 @@ Bio::Tools::Run::EMBOSSApplication - class for EMBOSS Applications
   $water = $f->program('water') || die "Program not found!\n";
 
   # Here is an example of running the application - water can
-  # compare 1 sequence against 1 or more sequences using Smith-Waterman
+  # compare 1 sequence against 1 or more sequences using Smith-Waterman.
+  # Pass a Sequence object and a reference to an array of objects.
 
   my $wateroutfile = 'out.water';
   $water->run({-sequences => $seq_object,
