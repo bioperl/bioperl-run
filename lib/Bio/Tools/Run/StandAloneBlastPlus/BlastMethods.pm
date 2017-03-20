@@ -1,4 +1,3 @@
-# $Id$
 #
 # BioPerl module for Bio::Tools::Run::StandAloneBlastPlus::BlastMethods
 #
@@ -84,7 +83,13 @@ Other details:
                          -method_args => [ '-num_alignments' => 10 ,
                                            '-evalue' => 100 ]);
 
-=item * To get the name of the blast output file, do 
+=item * HTML output can be created using this workaround:
+
+ $result = $fac->blastn( -query => 'query_seqs.fas',
+                         -outfile => 'query.bls',
+                         -method_args => [ -html => ' ' );
+
+=item * To get the name of the blast output file, do
 
  $file = $fac->blast_out;
 
@@ -104,7 +109,7 @@ be specified explicitly with the C<-method> parameter:
                -query => $seq_object_1,
                -subject => $seq_object_2 );
 
-Other parameters ( C<-method_args>, C<-outfile>, and C<-outformat> ) are valid. 
+Other parameters ( C<-method_args>, C<-outfile>, and C<-outformat> ) are valid.
 
 =head2 Return values
 
@@ -124,7 +129,7 @@ Bioperl modules. Send your comments and suggestions preferably to
 the Bioperl mailing list.  Your participation is much appreciated.
 
   bioperl-l@bioperl.org                  - General discussion
-http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
 =head2 Support
 
@@ -175,13 +180,13 @@ use Bio::Tools::Run::BlastPlus;
 use File::Temp;
 use File::Copy;
 use File::Spec;
-our @BlastMethods = qw( blastp blastn blastx tblastn tblastx 
-                       psiblast rpsblast rpstblastn );
+our @BlastMethods = qw( blastp blastn blastx tblastn tblastx
+    psiblast rpsblast rpstblastn );
 
 =head2 run()
 
  Title   : run
- Usage   : 
+ Usage   :
  Function: Query the attached database using a specified blast
            method
  Returns : Bio::Search::Result::BlastResult object
@@ -200,106 +205,128 @@ our @BlastMethods = qw( blastp blastn blastx tblastn tblastx
 sub run {
     my $self = shift;
     my @args = @_;
-    my ($method, $query, $outfile, $outformat, $method_args) = $self->_rearrange( [qw( 
-                                         METHOD
-                                         QUERY
-                                         OUTFILE
-                                         OUTFORMAT
-                                         METHOD_ARGS
-                                         )], @args);
+    my ( $method, $query, $outfile, $outformat, $method_args )
+        = $self->_rearrange(
+        [   qw(
+                METHOD
+                QUERY
+                OUTFILE
+                OUTFORMAT
+                METHOD_ARGS
+                )
+        ],
+        @args
+        );
     my $ret;
-    my (%blast_args, %usr_args);
-    
+    my ( %blast_args, %usr_args );
+
     unless ($method) {
-	$self->throw("Blast run: method not specified, use -method");
+        $self->throw("Blast run: method not specified, use -method");
     }
     unless ($query) {
-	$self->throw("Blast run: query data required, use -query");
+        $self->throw("Blast run: query data required, use -query");
     }
-    unless ($outfile) { # create a tempfile name
-	my $fh = File::Temp->new(TEMPLATE => 'BLOXXXXX',
-				 DIR => $self->db_dir,
-				 UNLINK => 0);
-	$outfile = $fh->filename;
-	$fh->close;
-	$self->_register_temp_for_cleanup($outfile);
+    unless ($outfile) {    # create a tempfile name
+        my $fh = File::Temp->new(
+            TEMPLATE => 'BLOXXXXX',
+            DIR      => $self->db_dir,
+            UNLINK   => 0
+        );
+        $outfile = $fh->filename;
+        $fh->close;
+        $self->_register_temp_for_cleanup($outfile);
     }
 
-    if ($outformat) { 
-	unless ($outformat =~ /^"?[0-9]{1,2}/) {
-	    $self->throw("Blast run: output format code should be integer 0-10");
-	}
-	$blast_args{'-outfmt'} = $outformat;
+    if ($outformat) {
+        unless ( $outformat =~ /^"?[0-9]{1,2}/ ) {
+            $self->throw(
+                "Blast run: output format code should be integer 0-10");
+        }
+        $blast_args{'-outfmt'} = $outformat;
     }
 
     if ($method_args) {
-	$self->throw("Blast run: method arguments must be name => value pairs") unless !(@$method_args % 2);
-	%usr_args = @$method_args;
+        $self->throw(
+            "Blast run: method arguments must be name => value pairs")
+            unless ! ( @$method_args % 2 );
+        %usr_args = @$method_args;
     }
+
     # make db if necessary
-    $self->make_db unless $self->check_db or $self->is_remote or $usr_args{'-subject'} or $usr_args{'-SUBJECT'}; # no db nec if this is bl2seq...
-    $self->{_factory} = Bio::Tools::Run::BlastPlus->new( -command => $method );
+    $self->make_db
+        unless $self->check_db
+        or $self->is_remote
+        or $usr_args{'-subject'}
+        or $usr_args{'-SUBJECT'};    # no db nec if this is bl2seq...
+    $self->{_factory}
+        = Bio::Tools::Run::BlastPlus->new( -command => $method );
     if (%usr_args) {
-	my @avail_parms = $self->factory->available_parameters('all');
-	while ( my( $key, $value ) = each %usr_args ) {
-	    $key =~ s/^-//;
-	    unless (grep /^$key$/, @avail_parms) {
-		$self->throw("Blast run: parameter '$key' is not available for method '$method'");
-	    }
-	}
+        my @avail_parms = $self->factory->available_parameters('all');
+        while ( my ( $key, $value ) = each %usr_args ) {
+            $key =~ s/^-//;
+            unless ( grep /^$key$/, @avail_parms ) {
+                $self->throw(
+                    "Blast run: parameter '$key' is not available for method '$method'"
+                );
+            }
+        }
     }
 
     # remove a leading ./ on remote databases. Something adds that in the
     # factory, easier to remove here.
     my $db = $self->db_path;
-    if ($self->is_remote) {
+    if ( $self->is_remote ) {
         $db =~ s#^\./##;
     }
-    $blast_args{-db} = $db;
+    $blast_args{-db}    = $db;
     $blast_args{-query} = $self->_fastize($query);
-    $blast_args{-out} = $outfile;
+    $blast_args{-out}   = $outfile;
+
     # user arg override
     if (%usr_args) {
-	$blast_args{$_} = $usr_args{$_} for keys %usr_args;
+        $blast_args{$_} = $usr_args{$_} for keys %usr_args;
     }
+
     # override for bl2seq;
-    if ($blast_args{'-db'} && $blast_args{'-subject'}) {
-	delete $blast_args{'-db'};
+    if ( $blast_args{'-db'} && $blast_args{'-subject'} ) {
+        delete $blast_args{'-db'};
     }
-    $self->factory->set_parameters( %blast_args );
+
+    $self->factory->set_parameters(%blast_args);
     $self->factory->no_throw_on_crash( $self->no_throw_on_crash );
     my $status = $self->_run;
 
     return $status unless $status;
+
     # kludge to demodernize the bl2seq output
-    if ($blast_args{'-subject'}) {
-	unless (_demodernize($outfile)) {
-	    $self->throw("Ack! demodernization failed!");
-	}
+    if ( $blast_args{'-subject'} ) {
+        unless ( _demodernize($outfile) ) {
+            $self->throw("Demodernization failed!");
+        }
     }
 
-    # if here, success 
+    # if here, success
     for ($method) {
-	m/^(t|psi|rps|rpst)?blast[npx]?/ && do { 
-	    $ret = Bio::SearchIO->new(-file => $outfile);
+        m/^(t|psi|rps|rpst)?blast[npx]?/ && do {
+            $ret = Bio::SearchIO->new( -file => $outfile );
 
-	    $self->{_blastout} = $outfile;
-	    $self->{_results} = $ret;
-	    $ret = $ret->next_result;
-	    last;
-	};
-	do {
-	    1; # huh?
-	};
+            $self->{_blastout} = $outfile;
+            $self->{_results}  = $ret;
+            $ret               = $ret->next_result;
+            last;
+        };
+        do {
+            1;    # huh?
+        };
     }
-    
+
     return $ret;
 }
 
 =head2 bl2seq()
 
  Title   : bl2seq
- Usage   : 
+ Usage   :
  Function: emulate bl2seq using blast+ programs
  Returns : Bio::Search::Result::BlastResult object
  Args    : key => value
@@ -308,7 +335,7 @@ sub run {
            -query => $query (fasta file or BioPerl sequence object
            -subject => $subject (fasta file or BioPerl sequence object)
            -outfile => $blast_report_file
-           -method_args => [ $key1 => $value1, ... ] (additional method 
+           -method_args => [ $key1 => $value1, ... ] (additional method
                         parameters)
 
 =cut
@@ -316,36 +343,42 @@ sub run {
 sub bl2seq {
     my $self = shift;
     my @args = @_;
-    my ($method, $query, $subject, $outfile, $outformat, $method_args) = $self->_rearrange( [qw( 
-                                         METHOD
-                                         QUERY
-                                         SUBJECT
-                                         OUTFILE
-                                         OUTFORMAT
-                                         METHOD_ARGS
-                                         )], @args);
+    my ( $method, $query, $subject, $outfile, $outformat, $method_args )
+        = $self->_rearrange(
+        [   qw(
+                METHOD
+                QUERY
+                SUBJECT
+                OUTFILE
+                OUTFORMAT
+                METHOD_ARGS
+                )
+        ],
+        @args
+        );
 
     unless ($method) {
-	$self->throw("bl2seq: blast method not specified, use -method");
+        $self->throw("bl2seq: blast method not specified, use -method");
     }
     unless ($query) {
-	$self->throw("bl2seq: query data required, use -query");
+        $self->throw("bl2seq: query data required, use -query");
     }
     unless ($subject) {
-	$self->throw("bl2seq: subject data required, use -subject");
+        $self->throw("bl2seq: subject data required, use -subject");
     }
     $subject = $self->_fastize($subject);
 
     my @run_args;
     if ($method_args) {
-	@run_args = @$method_args;
+        @run_args = @$method_args;
     }
-    return $self->run( -method => $method,
-		       -query => $query,
-		       -outfile => $outfile, 
-		       -outformat => $outformat,
-		       -method_args => [ @run_args, '-subject' => $subject ]
-	);
+    return $self->run(
+        -method      => $method,
+        -query       => $query,
+        -outfile     => $outfile,
+        -outformat   => $outformat,
+        -method_args => [ @run_args, '-subject' => $subject ]
+    );
 
 }
 
@@ -371,7 +404,7 @@ sub next_result() {
  Usage   : $fac->rewind_results;
  Function: rewind BLAST results
  Returns : true on success
- Args    : 
+ Args    :
 
 =cut
 
@@ -381,7 +414,6 @@ sub rewind_results {
     $self->{_results} = Bio::SearchIO->new( -file => $self->blast_out );
     return 1;
 }
-
 
 =head2 blast_out()
 
@@ -398,22 +430,23 @@ sub blast_out { shift->{_blastout} }
 # =head2 _demodernize()
 
 #  Title   : _demodernize
-#  Usage   : 
-#  Function: Ha! Wouldn't you like to know!
-#  Returns : 
-#  Args    : 
+#  Usage   :
+#  Function:
+#  Returns :
+#  Args    :
 
 # =cut
 
 sub _demodernize {
     my $file = shift;
-    my $tf = File::Temp->new();
-    open (my $f, $file);
+    my $tf   = File::Temp->new();
+    open( my $f, $file );
     while (<$f>) {
-	s/^Subject=\s+/>/;
-	print $tf $_;
+        s/^Subject=\s+/>/;
+        print $tf $_;
     }
     $tf->close;
-    copy($tf->filename, $file);
+    copy( $tf->filename, $file );
 }
+
 1;
