@@ -731,7 +731,7 @@ These methods can be used with PhyML v3* only.
  Title   : freq
  Usage   : $phyml->freq(e); $phyml->freq("0.2, 0.6, 0.6, 0.2");
  Function: Sets nucleotide frequences or asks residue to be estimated
-            according to two models: e or d
+            according to two models: e or m
  Returns : set value,
  Args    : None to get, string to set.
 
@@ -747,7 +747,7 @@ sub freq {
         die "Invalid value [$value]"
           unless $value =~ /^[\d\. ]$/
               or $value eq 'e'
-              or $value eq 'd';
+              or $value eq 'm';
         $self->{_freq} = $value;
     }
     return $self->{_freq};
@@ -1035,7 +1035,7 @@ sub _setparams {
         $param_string .= ' -m ' . $self->model;
         $param_string .= ' -f ' . $self->freq if $self->freq;
 
-        if ( $self->data_type eq 'dna' ) {
+        if ( $self->data_type eq 'nt' ) {
             $param_string .= ' -t ' . $self->kappa;
         }
 
@@ -1088,7 +1088,7 @@ sub _setparams {
  Function: Internal (not to be used directly)
 
            Writes the alignment into the tmp directory
-           in PHYLIP interlieved format
+           in PHYLIP format
 
  Returns : filename
  Args    : Bio::Align::AlignI
