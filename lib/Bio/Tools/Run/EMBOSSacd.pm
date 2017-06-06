@@ -29,8 +29,8 @@ Bio::Tools::Run::EMBOSSacd - class for EMBOSS Application qualifiers
   # Pass a Sequence object and a reference to an array of objects.
 
   my $wateroutfile = 'out.water';
-  $water->run({-sequences => $seq_object,
-               -seqall    => \@seq_objects,
+  $water->run({-asequence => $seq_object,
+               -bsequence => \@seq_objects,
                -gapopen   => '10.0',
                -gapextend => '0.5',
                -outfile   => $wateroutfile});
