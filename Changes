@@ -1,5 +1,9 @@
 Revision history for bioperl-run modules
 
+{{$NEXT}}
+* The Bio::Tools::Run::Phylo::PAML::* modules have been removed and are now
+  part of the new Bio-Tools-Phylo-PAML distribution.
+
 1.7.001
 * Minor release to deal with version indexing
 

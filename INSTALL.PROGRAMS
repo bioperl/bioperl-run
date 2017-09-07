@@ -71,10 +71,6 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 	Bio::Tools::Run::TribeMCL
 	http://www.ebi.ac.uk/research/cgg/tribe/
 
-18.	PAML - Phylogenetic Analysis by Maximum Likelihood package
-	Bio::Tools::Run::PAML
-	http://abacus.gene.ucl.ac.uk/software/paml.html
-
 19.	Molphy - MOLecular PHYlogenetics Package
 	Bio::Tools::Run::Molphy
 	http://www.ism.ac.jp/software/ismlib/softother.e.html
