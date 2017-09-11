@@ -27,6 +27,7 @@ is ($factory->program_name(), 'match', 'Correct exe default name');
 # test the program itself
 SKIP: {
     test_skip(-tests => 2,
+              -requires_module => 'Bio::FeatureIO',
 			  -requires_executable => $factory);
 
 	use_ok('Bio::SeqIO');
