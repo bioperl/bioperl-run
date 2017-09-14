@@ -1,12 +1,11 @@
 Revision history for bioperl-run modules
 
-{{$NEXT}}
-* The Bio::Tools::Run::Phylo::PAML::* modules have been removed and are now
-  part of the new Bio-Tools-Phylo-PAML distribution.
-
 1.7.2
 
-* Minor release - PAML code now resides in separate repository [carandraug]
+* Minor release - PAML, Clustalw, and TCoffee related modules are all
+  separate distributions, one for each set.  These are Bio-Tools-Phylo-PAML,
+  Bio-Tools-Run-Alignment-TCoffee and Bio-Tools-Run-Alignment-Clustalw
+  [carandraug]
 * Fix EMBOSS and SABlastPlus test count, which was failing when EMBOSS wasn't installed [cjfields]
 * Fix various tests to skip if Bio::FeatureIO isn't installed [cjfields]
 * Various documentation fixes, including INSTALL updates [bosborne]
