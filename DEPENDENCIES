@@ -57,7 +57,6 @@ NB: This list of packages is not authoritative. See the 'requires',
 | * Bio::Tools::Run::TribeMCL - Bio::Seq                                       |
 | * Bio::Tools::Run::Vista - Bio::Seq                                          |
 | * Bio::Tools::Run::Alignment::Amap - Bio::Seq                                |
-| * Bio::Tools::Run::Alignment::Clustalw - Bio::Seq                            |
 | * Bio::Tools::Run::Alignment::Kalign - Bio::Seq                              |
 | * Bio::Tools::Run::Alignment::Lagan - Bio::Seq                               |
 | * Bio::Tools::Run::Alignment::MAFFT - Bio::Seq                               |
@@ -66,7 +65,6 @@ NB: This list of packages is not authoritative. See the 'requires',
 | * Bio::Tools::Run::Alignment::Probcons - Bio::Seq                            |
 | * Bio::Tools::Run::Alignment::Proda - Bio::Seq                               |
 | * Bio::Tools::Run::Alignment::StandAloneFasta - Bio::Seq                     |
-| * Bio::Tools::Run::Alignment::TCoffee - Bio::Seq                             |
  ==============================================================================
  ==============================================================================
 | Distribution              | Module used - Description            | Min. ver. |
