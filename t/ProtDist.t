@@ -9,8 +9,7 @@ $DEBUG = test_debug() || -1;
 BEGIN {
     use Bio::Root::Test;
     test_begin(-tests => 14);
-	use_ok('Bio::Tools::Run::Phylo::Phylip::ProtDist');
-	use_ok('Bio::Tools::Run::Alignment::Clustalw');
+    use_ok('Bio::Tools::Run::Phylo::Phylip::ProtDist');
 }
 
 my $verbose = $DEBUG;
@@ -27,8 +26,10 @@ my $dist_factory = Bio::Tools::Run::Phylo::Phylip::ProtDist->new(@params);
 
 SKIP: {
 	test_skip(-requires_executable => $dist_factory,
-		  -tests => 12);
+              -requires_module => 'Bio::Tools::Run::Alignment::Clustalw',
+		  -tests => 13);
 
+	use_ok('Bio::Tools::Run::Alignment::Clustalw');
 	isa_ok $dist_factory,'Bio::Tools::Run::Phylo::Phylip::ProtDist';
 	
 	my $model = 'KIMURA';

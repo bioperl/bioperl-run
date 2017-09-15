@@ -9,7 +9,6 @@ BEGIN {
     use Bio::Root::Test;
     test_begin(-tests => 11);
 	use_ok('Bio::Tools::Run::Phylo::Phylip::ProtPars');
-	use_ok('Bio::Tools::Run::Alignment::Clustalw');
 }
 
 my @params = ('threshold'=>10,'jumble'=>'17,10',outgroup=>2,'idlength'=>10);
@@ -18,7 +17,9 @@ isa_ok $tree_factory,'Bio::Tools::Run::Phylo::Phylip::ProtPars';
 
 SKIP: {
 	test_skip(-requires_executable => $tree_factory,
-			  -tests => 8);
+              -requires_module => 'Bio::Tools::Run::Alignment::Clustalw',
+			  -tests => 9);
+	use_ok('Bio::Tools::Run::Alignment::Clustalw');
 	
 	my $threshold = 5;
 	$tree_factory->threshold($threshold);
