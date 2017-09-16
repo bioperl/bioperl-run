@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+
 # testing StandAloneBlastPlus.pm
 
 use strict;
