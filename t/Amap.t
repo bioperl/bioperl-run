@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id$
+
 
 use strict;
 

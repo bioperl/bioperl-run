@@ -1,5 +1,5 @@
 #-*-Perl-*-
-## $Id$
+#
 
 # test for Bio::Tools::Run::Primer3
 # written by Rob Edwards

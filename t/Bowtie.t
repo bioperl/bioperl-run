@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: Bowtie.t kortsch $
+
 
 use strict;
 use warnings;
