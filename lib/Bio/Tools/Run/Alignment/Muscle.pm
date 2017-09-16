@@ -44,21 +44,21 @@ http://www.drive5.com/muscle
 It is recommended you use at least version 3.6. Behaviour with earlier versions
 is questionable.
 
-=head2 Helping the module find your executable 
+=head2 Helping the module find your executable
 
 You will need to enable Muscle to find the muscle program. This can be
 done in (at least) three ways:
 
-  1. Make sure the muscle executable is in your path (i.e. 
+  1. Make sure the muscle executable is in your path (i.e.
      'which muscle' returns a valid program
-  2. define an environmental variable MUSCLEDIR which points to a 
+  2. define an environmental variable MUSCLEDIR which points to a
      directory containing the 'muscle' app:
-   In bash 
+   In bash
     export MUSCLEDIR=/home/progs/muscle   or
    In csh/tcsh
         setenv MUSCLEDIR /home/progs/muscle
 
-  3. include a definition of an environmental variable MUSCLEDIR 
+  3. include a definition of an environmental variable MUSCLEDIR
       in every script that will
      BEGIN {$ENV{MUSCLEDIR} = '/home/progs/muscle'; }
      use Bio::Tools::Run::Alignment::Muscle;
@@ -74,15 +74,15 @@ of the Bioperl mailing lists.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -293,12 +293,12 @@ sub align {
     return &_run( $self, $infilename, $param_string );
 }
 
-=head2  profile
+=head2  run_profile
 
- Title   : profile
+ Title   : run_profile
  Usage   : $alnfilename = /t/data/cysprot.msa';
            $seqsfilename = 't/data/cysprot.fa';
-           $aln = $factory->profile($alnfilename,$seqsfilename);
+           $aln = $factory->run_profile($alnfilename,$seqsfilename);
 
  Function: Perform a profile alignment on a MSA to include more seqs
  Returns : Reference to a SimpleAlign object containing the
@@ -312,7 +312,7 @@ sub align {
 
 =cut
 
-sub profile {
+sub run_profile {
     my ( $self, $alnfilename, $seqsfilename ) = @_;
 
     # Create input file pointer
@@ -402,7 +402,7 @@ sub aformat {
 =head2  _run
 
  Title   :  _run
- Usage   :  Internal function, not to be called directly    
+ Usage   :  Internal function, not to be called directly
  Function:  makes actual system call to muscle program
  Example :
  Returns : nothing; muscle output is written to a
@@ -445,7 +445,7 @@ sub _run {
 =head2  _setinput
 
  Title   :  _setinput
- Usage   :  Internal function, not to be called directly    
+ Usage   :  Internal function, not to be called directly
  Function:  Create input file for muscle program
  Example :
  Returns : name of file containing muscle data input AND
@@ -522,7 +522,7 @@ sub _setinput {
 =head2  _setparams
 
  Title   :  _setparams
- Usage   :  Internal function, not to be called directly    
+ Usage   :  Internal function, not to be called directly
  Function:  Create parameter inputs for muscle program
  Example :
  Returns : parameter string to be passed to muscle
@@ -577,7 +577,7 @@ sub _setparams {
  Title   : no_param_checks
  Usage   : $obj->no_param_checks($newval)
  Function: Boolean flag as to whether or not we should
-           trust the sanity checks for parameter values  
+           trust the sanity checks for parameter values
  Returns : value of no_param_checks
  Args    : newvalue (optional)
 
@@ -587,7 +587,7 @@ sub _setparams {
 
  Title   : save_tempfiles
  Usage   : $obj->save_tempfiles($newval)
- Function: 
+ Function:
  Returns : value of save_tempfiles
  Args    : newvalue (optional)
 
