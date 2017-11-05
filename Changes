@@ -1,6 +1,18 @@
 Revision history for bioperl-run modules
 
+1.7.2
+
+* Minor release - PAML, Clustalw, and TCoffee related modules are all
+  separate distributions, one for each set.  These are Bio-Tools-Phylo-PAML,
+  Bio-Tools-Run-Alignment-TCoffee and Bio-Tools-Run-Alignment-Clustalw
+  [carandraug]
+* Fix EMBOSS and SABlastPlus test count, which was failing when EMBOSS wasn't installed [cjfields]
+* Fix various tests to skip if Bio::FeatureIO isn't installed [cjfields]
+* Various documentation fixes, including INSTALL updates [bosborne]
+* Add Bio::FeatureIO as a 'recommends' (needed for Gumby, MCS, Match, Phastcons)
+
 1.7.001
+
 * Minor release to deal with version indexing
 
 1.7.000

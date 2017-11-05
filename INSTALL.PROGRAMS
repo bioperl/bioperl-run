@@ -71,10 +71,6 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 	Bio::Tools::Run::TribeMCL
 	http://www.ebi.ac.uk/research/cgg/tribe/
 
-18.	PAML - Phylogenetic Analysis by Maximum Likelihood package
-	Bio::Tools::Run::PAML
-	http://abacus.gene.ucl.ac.uk/software/paml.html
-
 19.	Molphy - MOLecular PHYlogenetics Package
 	Bio::Tools::Run::Molphy
 	http://www.ism.ac.jp/software/ismlib/softother.e.html
@@ -83,10 +79,6 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 	Bio::Tools::Run::Phylip
 	http://evolution.genetics.washington.edu/phylip.html
 
-21.	Clustalw -  general purpose multiple sequence alignment program for DNA or proteins
-	Bio::Tools::Run::Alignment::Clustalw
-	http://www.ebi.ac.uk/clustalw/
-
 22.	DBA - DNA Block Aligner 
 	Bio::Tools::Run::Alignment::DBA
 	http://www.sanger.ac.uk/software/wise2
@@ -94,10 +86,6 @@ The Bioperl-run package has (Bio)perl wrappers written for the following applica
 23.	Sim4 - Align CDNA to genomic sequences
 	Bio::Tools::Run::Alignment::Sim4
 	http://globin.cse.psu.edu/
-
-24.	Tcoffee - Multiple Sequence Alignment Package
-	Bio::Tools::Run::Alignment::Tcoffee
-	http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.html
 
 25.     BLAST - Basic Local Alignment Search Tool
         Bio::Tools::Run::StandAloneBlast (in bioperl-live CVS repository)

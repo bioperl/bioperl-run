@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+
 #testing SoapEUtilities with network queries
 # idea: reproduce the examples at
 # http://www.bioperl.org/wiki/HOWTO:EUtilities_Cookbook

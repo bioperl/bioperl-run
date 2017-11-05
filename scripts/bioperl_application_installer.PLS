@@ -49,10 +49,7 @@ use vars qw($DEFAULT $CONFIG $INSTALLERLIST);
 BEGIN {
     $DEFAULT = 'bioperl-runnables';
     $INSTALLERLIST = [
-                      'Clustalw',
                       'EMBOSS',
-                      'TCoffee',
-                      'PAML',
                       'Hyphy',
                       'SLR',
                       'Probcons',

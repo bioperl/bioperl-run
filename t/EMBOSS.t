@@ -37,7 +37,7 @@ SKIP: {
 
     $factory->verbose($verbose);
 
-    skip( 'EMBOSS not installed', 27 ) if ! $compseqapp;
+    skip( 'EMBOSS not installed', 26 ) if ! $compseqapp;
 
     my $version = $factory->version;
 

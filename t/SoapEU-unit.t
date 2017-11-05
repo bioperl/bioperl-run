@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+
 #testing SoapEUtilities and components
 use strict;
 use warnings;

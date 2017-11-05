@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: BEDTools.t kortsch $
+
 
 use strict;
 use warnings;

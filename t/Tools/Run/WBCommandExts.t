@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+
 # testing CommandExts
 use strict;
 use warnings;

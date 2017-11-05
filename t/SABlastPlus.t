@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+
 # testing StandAloneBlastPlus.pm
 
 use strict;
@@ -8,13 +8,13 @@ use lib '../lib';
 our $home;
 BEGIN {
     use Bio::Root::Test;
-    test_begin(-tests => 73);
-#               -requires_modules => [qw( Bio::Tools::Run::BlastPlus)]);
+    test_begin(-tests => 73,
+               -requires_module => "IPC::Run");
+    use_ok( 'Bio::Tools::Run::StandAloneBlastPlus' );
+    use_ok( 'Bio::Tools::Run::WrapperBase' );
+    use_ok( 'Bio::Tools::Run::WrapperBase::CommandExts' );
 }
 
-use_ok( 'Bio::Tools::Run::StandAloneBlastPlus' );
-use_ok( 'Bio::Tools::Run::WrapperBase' );
-use_ok( 'Bio::Tools::Run::WrapperBase::CommandExts' );
 use Bio::SeqIO;
 use Bio::AlignIO;
 
@@ -22,8 +22,9 @@ ok my $bpfac = Bio::Tools::Run::BlastPlus->new(-command => 'makeblastdb'),
     "BlastPlus factory";
 
 SKIP : {
-    test_skip( -tests => 65,
+    test_skip( -tests => 69,
                -requires_executable => $bpfac);
+
     diag('DB and mask make tests');
 
     # testing using fasta files as input...

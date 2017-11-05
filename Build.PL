@@ -32,7 +32,7 @@ my $build = Module::Build->subclass(
     )
     )->new(
     dist_name           => 'BioPerl-Run',
-    dist_version        => '1.007001',
+    dist_version        => '1.007002',
     module_name         => 'Bio::Run',
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
@@ -56,6 +56,7 @@ my $build = Module::Build->subclass(
                             'XML::Twig'       => 0,     # processing XML data: Bio::Tools::Run::EMBOSSacd
                             'File::Sort'      => 0,     # BEDTools
                             'Config::Any'     => 0,     # MCS, Match
+                            'Bio::FeatureIO'  => 0,     # MCS, Match, Phastcons, Gumby
                             #'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
                            },
     get_options         => {

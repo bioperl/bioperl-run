@@ -131,7 +131,7 @@ our %format_lookup = (
     );
 
 
-# composite commands: pseudo-commands that run a 
+# composite commands: pseudo-commands that run a
 # sequence of commands
 # composite command prefix => list of prefixes of commands this
 #  composite command runs
@@ -337,8 +337,8 @@ our %param_translation = (
     'one|color_keep_ends'          => 'col-keepends',
     'one|sam_format'               => 'S',
     'one|defaul_mapq'              => 'mapq',
-    'one|sam_no_head'              => 'sam_nohead',
-    'one|sam_no_sq'                => 'sam_nosq',
+    'one|sam_no_head'              => 'sam-nohead',
+    'one|sam_no_sq'                => 'sam-nosq',
     'one|sam_rg'                   => 'sam-RG',
     'one|suppress_columns'         => 'suppress',
     'one|time'                     => 't',
@@ -521,7 +521,7 @@ our %param_translation = (
 #
 # the strings in the arrayrefs (less special chars)
 # become the keys for named parameters to run_bowtie
-# 
+#
 # special chars:
 #
 # '#' implies optional
