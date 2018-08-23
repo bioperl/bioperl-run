@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 #   A client showing how to use Bio::Tools::Run::Analysis module,
 #   a module for executing and controlling local or remote analysis tools.
@@ -19,6 +19,7 @@
 #-----------------------------------------------------------------------------
 
 use strict;
+use warnings;
 
 sub get_usage {
     return <<"END_OF_USAGE";

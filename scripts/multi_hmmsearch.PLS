@@ -1,7 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # $Id: multi_hmmsearch.PLS,v 1.3 2006-07-04 22:23:36 mauricio Exp $
 
 use strict;
+use warnings;
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 #   Usage: ./papplmaker -h
 #   or: perldoc papplmaker
@@ -10,6 +10,7 @@
 #-----------------------------------------------------------------------------
 
 use strict;
+use warnings;
 
 sub get_usage {
     return <<"END_OF_USAGE";
