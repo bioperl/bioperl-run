@@ -1,5 +1,9 @@
 Revision history for bioperl-run modules
 
+1.7.3
+
+* New script bp_blast2tree imported from BioPerl.
+
 1.7.2
 
 * Minor release - PAML, Clustalw, and TCoffee related modules are all
