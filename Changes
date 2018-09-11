@@ -3,6 +3,8 @@ Revision history for bioperl-run modules
 1.7.3
 
 * New script bp_blast2tree imported from BioPerl.
+* Bio::Tools::Run::AssemblerBase moved into a new Bio-Assembly distribution
+  together with the Bio::Assembly::* modules from BioPerl.
 
 1.7.2
 
