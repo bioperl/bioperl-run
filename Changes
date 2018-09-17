@@ -7,6 +7,9 @@ Revision history for bioperl-run modules
 * Bio::Tools::Run::AssemblerBase moved into a new Bio-Assembly distribution
   together with the Bio::Assembly::* modules from BioPerl.
 
+* Bio::Tools::Run::Phylo::Gumby moved into a new module distribution
+  together with Bio::Tools::Phylo::Gumby module from BioPerl.
+
 * The following modules have been moved to the BioPerl distribution
   so that new BioPerl run tools can be developed in separate
   distributions without being dependent on the whole BioPerl-Run:
