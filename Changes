@@ -16,6 +16,7 @@ Revision history for bioperl-run modules
 
       Bio::Tools::Run::Analysis
       Bio::Tools::Run::AnalysisFactory
+      Bio::Tools::Run::Phylo::PhyloBase
       Bio::Tools::Run::WrapperBase
       Bio::Tools::Run::WrapperBase::CommandExts
 
