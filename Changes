@@ -1,24 +1,29 @@
-Revision history for bioperl-run modules
+Summary of important user-visible changes for BioPerl-Run
+---------------------------------------------------------
 
-1.7.3
+{{$NEXT}}
 
-* New script bp_blast2tree imported from BioPerl.
+    * The following modules have been moved to the BioPerl
+      distribution so that new BioPerl Run tools can be developed
+      without being dependent on the whole BioPerl-Run distribution:
 
-* Bio::Tools::Run::AssemblerBase moved into a new Bio-Assembly distribution
-  together with the Bio::Assembly::* modules from BioPerl.
+          Bio::Tools::Run::Analysis
+          Bio::Tools::Run::AnalysisFactory
+          Bio::Tools::Run::Phylo::PhyloBase
+          Bio::Tools::Run::WrapperBase
+          Bio::Tools::Run::WrapperBase::CommandExts
 
-* Bio::Tools::Run::Phylo::Gumby moved into a new module distribution
-  together with Bio::Tools::Phylo::Gumby module from BioPerl.
+    * The following modules have been removed from BioPerl-Run to be
+      part of separate distributions and have independent development:
 
-* The following modules have been moved to the BioPerl distribution
-  so that new BioPerl run tools can be developed in separate
-  distributions without being dependent on the whole BioPerl-Run:
+          Bio::Tools::Phylo::Gumby
+          Bio::Tools::Run::AssemblerBase
+          Bio::Tools::Run::Phylo::Gumby
 
-      Bio::Tools::Run::Analysis
-      Bio::Tools::Run::AnalysisFactory
-      Bio::Tools::Run::Phylo::PhyloBase
-      Bio::Tools::Run::WrapperBase
-      Bio::Tools::Run::WrapperBase::CommandExts
+    * New program previously part of the BioPerl distribution:
+
+          bp_blast2tree
+
 
 1.7.2
 
