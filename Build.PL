@@ -33,7 +33,6 @@ my $build = Module::Build->subclass(
     )->new(
     dist_name           => 'BioPerl-Run',
     dist_version        => '1.007002',
-    module_name         => 'Bio::Run',
     dist_author         => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract       => 'BioPerl-Run - wrapper toolkit',
     license             => 'perl',
