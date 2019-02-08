@@ -152,7 +152,7 @@ sub _version {
 			die ("There was a problem running $exe : $!");
 	};
 	
-    if ($out =~ /blastdbcmd\:\s+(\S+)\nPackage\:\s+([^,]+)/xms) {
+    if ($out =~ /blastdbcmd\:\s+(\S+)\n\s*Package\:\s+([^,]+)/xms) {
         @{$self}{qw(program_version package_version)} = ($1, $2);
     } else {
         $self->throw("Unknown version output: $out");
