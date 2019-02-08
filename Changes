@@ -18,6 +18,7 @@ Summary of important user-visible changes for BioPerl-Run
 
           Bio::Tools::Phylo::Gumby
           Bio::Tools::Run::AssemblerBase
+          Bio::Tools::Run::Meme
           Bio::Tools::Run::Phylo::Gumby
 
     * New program previously part of the BioPerl distribution:
