@@ -22,6 +22,7 @@ Summary of important user-visible changes for BioPerl-Run
           Bio::Tools::Run::BWA::Config
           Bio::Tools::Run::Cap3
           Bio::Tools::Run::Meme
+          Bio::Tools::Run::Minimo
           Bio::Tools::Run::Phrap
           Bio::Tools::Run::Phylo::Gumby
 
