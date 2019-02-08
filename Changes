@@ -1,7 +1,7 @@
 Summary of important user-visible changes for BioPerl-Run
 ---------------------------------------------------------
 
-{{$NEXT}}
+1.7.3
 
     * The following modules have been moved to the BioPerl
       distribution so that new BioPerl Run tools can be developed
