@@ -26,6 +26,7 @@ Summary of important user-visible changes for BioPerl-Run
           Bio::Tools::Run::Newbler
           Bio::Tools::Run::Phrap
           Bio::Tools::Run::Phylo::Gumby
+          Bio::Tools::Run::TigrAssembler
 
     * New program previously part of the BioPerl distribution:
 
