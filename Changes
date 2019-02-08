@@ -36,6 +36,11 @@ Summary of important user-visible changes for BioPerl-Run
 
           bp_blast2tree
 
+    * All Bio::Installer modules and the bioperl_application_installer
+      script have been removed.  These were unsafe and out of date.
+      Use a package manager of your choice to install external
+      programs.
+
 
 1.7.2
 
