@@ -20,6 +20,8 @@ Summary of important user-visible changes for BioPerl-Run
           Bio::Tools::Run::AssemblerBase
           Bio::Tools::Run::BWA
           Bio::Tools::Run::BWA::Config
+          Bio::Tools::Run::Bowtie
+          Bio::Tools::Run::Bowtie::Config
           Bio::Tools::Run::Cap3
           Bio::Tools::Run::Maq
           Bio::Tools::Run::Maq::Config
