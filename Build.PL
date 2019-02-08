@@ -50,13 +50,14 @@ my $build = Module::Build->subclass(
                             'Bio::Root::Root'    => 0,
                            },
     recommends          => {
+                            'Bio::Cluster::SequenceFamily'   => 0, # Bio::Tools::Run::TribeMCL
                             'Algorithm::Diff' => 0,     # generating consensus protein family descriptions: Bio::Tools::Run::TribeMCL
                             'IPC::Run'        => 0,     # Glimmer and Genemark application wrappers: Bio::Tools::Run::Glimmer Bio::Tools::Run::Genemark
                             'IO::String'      => 0,     # generating Bio::Tree::Tree from strings: Bio::Tools::Run::Phylo::Phylip::Consense
                             'XML::Twig'       => 0,     # processing XML data: Bio::Tools::Run::EMBOSSacd
                             'File::Sort'      => 0,     # BEDTools
                             'Config::Any'     => 0,     # MCS, Match
-                            'Bio::FeatureIO'  => 0,     # MCS, Match, Phastcons, Gumby
+                            'Bio::FeatureIO'  => 0,     # MCS, Match, Phastcons
                             #'SOAP::Lite'      => 0.716, # A bug that affects SoapEU-unit.t tests was fixed in this version (many levels deep object throws error)
                            },
     get_options         => {
@@ -119,4 +120,3 @@ else {
 
 # Create the build script and exit
 $build->create_build_script;
-
