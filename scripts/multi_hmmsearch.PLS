@@ -52,7 +52,7 @@ web:
 
 =head1 AUTHOR
 
-  Mauricio Herrera Cuadra <mauricio-at-open-bio.org>
+  Mauricio Herrera Cuadra <mauricio-at-intelligenomes.com>
 
 =cut
 
