@@ -333,10 +333,10 @@ sub version {
 
     return $self->{'_version'} if defined $self->{'_version'};
     my $exe = $self->executable || return;
-    my $string = substr `$exe -h`, 0, 40;
+    my $string = substr `$exe -h`, 0, 80;
     my ($version) = $string =~ /PhyML v([\d+\.]+)/;
     if ( !$version ) {
-        $string =~ /PhyML\s+(\d{8})/;
+        $string =~ /PhyML\s+\d+\.\d+\.(\d{8})/;
 
         # 3 was released August 2008
         $version = 3 if ( $1 && $1 >= 20080801 );
