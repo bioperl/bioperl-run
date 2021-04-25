@@ -249,26 +249,26 @@ sub new {
         %args
       );
 
-    $self->data_type($data_type)             if $data_type;
-    $self->data_format($data_format)         if $data_format;
-    $self->dataset_count($dataset_count)     if $dataset_count;
-    $self->model($model)                     if $model;
-    $self->freq($freq)                       if $freq;
-    $self->kappa($kappa)                     if $kappa;
-    $self->invar($invar)                     if $invar;
-    $self->category_number($category_number) if $category_number;
-    $self->alpha($alpha)                     if $alpha;
-    $self->tree($tree)                       if $tree;
-    $self->opt_topology($opt_topology)       if $opt_topology;
-    $self->opt_lengths($opt_lengths)         if $opt_lengths;
-    $self->opt($opt)                         if $opt;
-    $self->search($search)                   if $search;
-    $self->rand_start($rand_start)           if $rand_start;
-    $self->rand_starts($rand_starts)         if $rand_starts;
-    $self->rand_seed($rand_seed)             if $rand_seed;
-    $self->no_memory_check($no_memory_check) if $no_memory_check;
-    $self->bootstrap($bootstrap)             if $bootstrap;
-    $self->program_name($program_name)       if $program_name;
+    $self->data_type($data_type)             if defined $data_type;
+    $self->data_format($data_format)         if defined $data_format;
+    $self->dataset_count($dataset_count)     if defined $dataset_count;
+    $self->model($model)                     if defined $model;
+    $self->freq($freq)                       if defined $freq;
+    $self->kappa($kappa)                     if defined $kappa;
+    $self->invar($invar)                     if defined $invar;
+    $self->category_number($category_number) if defined $category_number;
+    $self->alpha($alpha)                     if defined $alpha;
+    $self->tree($tree)                       if defined $tree;
+    $self->opt_topology($opt_topology)       if defined $opt_topology;
+    $self->opt_lengths($opt_lengths)         if defined $opt_lengths;
+    $self->opt($opt)                         if defined $opt;
+    $self->search($search)                   if defined $search;
+    $self->rand_start($rand_start)           if defined $rand_start;
+    $self->rand_starts($rand_starts)         if defined $rand_starts;
+    $self->rand_seed($rand_seed)             if defined $rand_seed;
+    $self->no_memory_check($no_memory_check) if defined $no_memory_check;
+    $self->bootstrap($bootstrap)             if defined $bootstrap;
+    $self->program_name($program_name)       if defined $program_name;
 
     return $self;
 }
@@ -333,10 +333,10 @@ sub version {
 
     return $self->{'_version'} if defined $self->{'_version'};
     my $exe = $self->executable || return;
-    my $string = substr `$exe -h`, 0, 40;
+    my $string = substr `$exe -h`, 0, 80;
     my ($version) = $string =~ /PhyML v([\d+\.]+)/;
     if ( !$version ) {
-        $string =~ /PhyML\s+(\d{8})/;
+        $string =~ /PhyML\s+\d+\.\d+\.(\d{8})/;
 
         # 3 was released August 2008
         $version = 3 if ( $1 && $1 >= 20080801 );
@@ -731,7 +731,7 @@ These methods can be used with PhyML v3* only.
  Title   : freq
  Usage   : $phyml->freq(e); $phyml->freq("0.2, 0.6, 0.6, 0.2");
  Function: Sets nucleotide frequences or asks residue to be estimated
-            according to two models: e or d
+            according to two models: e or m
  Returns : set value,
  Args    : None to get, string to set.
 
@@ -747,7 +747,7 @@ sub freq {
         die "Invalid value [$value]"
           unless $value =~ /^[\d\. ]$/
               or $value eq 'e'
-              or $value eq 'd';
+              or $value eq 'm';
         $self->{_freq} = $value;
     }
     return $self->{_freq};
@@ -821,7 +821,7 @@ sub rand_start {
             $self->{_rand_start} = 0;
         }
     }
-    return $self->{_rand_start};
+    return $self->{_rand_start} || 0;
 }
 
 =head2 rand_starts
@@ -845,7 +845,11 @@ sub rand_starts {
           unless $value =~ /^[-+]?\d+$/;
         $self->{_rand_starts} = $value;
     }
-    return $self->{_rand_starts} || 1;
+    if ($self->{_rand_starts} != 1){
+        return $self->{_rand_starts};
+    }else{
+        return 1;
+    }
 }
 
 =head2 rand_seed
@@ -903,7 +907,7 @@ sub no_memory_check {
 
  Title   : bootstrap
  Usage   : $factory->bootstrap(100);
- Function: Set number of bootstraps
+ Function: Set number of bootstraps or type of fast likehood-based method
  Returns :
  Args    : None to get, integer to set.
 
@@ -914,7 +918,9 @@ sub bootstrap {
     $self->throw("Not a valid parameter [bootstrap] prior to PhyML v3")
       if $self->version < 3;
     if ( defined $value ) {
-        die "Invalid number [$value]" unless $value =~ /^\d+$/;
+        die "Invalid number [$value]"
+            unless $value =~ /^\d+$/
+                or $value =~ /^-[1, 2, 4, 5]$/;
         $self->{_bootstrap} = $value;
     }
     return $self->{_bootstrap};
@@ -1023,13 +1029,13 @@ sub _setparams {
         $param_string .= ' -q ' if $self->data_format eq 's';
         $param_string .= ' -n ' . $self->dataset_count
           if $self->dataset_count > 1;
-        $param_string .= ' -b ' . $self->bootstrap if $self->bootstrap;
+        $param_string .= ' -b ' . $self->bootstrap if defined $self->bootstrap;
 
         # $param_string .= ' 0';  # no bootstrap sets
         $param_string .= ' -m ' . $self->model;
         $param_string .= ' -f ' . $self->freq if $self->freq;
 
-        if ( $self->data_type eq 'dna' ) {
+        if ( $self->data_type eq 'nt' ) {
             $param_string .= ' -t ' . $self->kappa;
         }
 
@@ -1082,7 +1088,7 @@ sub _setparams {
  Function: Internal (not to be used directly)
 
            Writes the alignment into the tmp directory
-           in PHYLIP interlieved format
+           in PHYLIP format
 
  Returns : filename
  Args    : Bio::Align::AlignI
@@ -1093,11 +1099,14 @@ sub _write_phylip_align_file {
     my ( $self, $align ) = @_;
 
     my $tempfile = File::Spec->catfile( $self->tempdir, "aln$$.phylip" );
-    $self->data_format('i');
+    my $interleaved = 1;
+    if($self->data_format eq 's'){
+        $interleaved = 0;
+    }
     my $out = Bio::AlignIO->new(
         -file        => ">$tempfile",
         -format      => 'phylip',
-        -interleaved => 1,
+        -interleaved => $interleaved,
         -longid      => 1
     );
     $out->write_aln($align);
